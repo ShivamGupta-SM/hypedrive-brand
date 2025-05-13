@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+.expo/
+npm-debug.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+
+# macOS
+.DS_Store
+
+# Build outputs
+build/
+dist/
+coverage/
+
+# Cache
+.eslintcache
+.cache/
+
+# Environment variables
+.env*
+!.env.example
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Debug logs
+yarn-debug.log*
+yarn-error.log*
+npm-debug.log*
+
+# Generated files
+*.generated.*

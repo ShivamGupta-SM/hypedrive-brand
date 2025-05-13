@@ -1,0 +1,26 @@
+module.exports = {
+    arrowParens: 'avoid',
+    bracketSameLine: true,
+    bracketSpacing: true,
+    singleQuote: true,
+    trailingComma: 'all',
+    semi: true,
+    tabWidth: 2,
+    useTabs: false,
+    printWidth: 100,
+    jsxSingleQuote: false,
+    quoteProps: 'as-needed',
+    endOfLine: 'lf',
+    // React Native specific
+    importOrder: [
+      '^react$',
+      '^react-native$',
+      '^@react-navigation/(.*)$',
+      '^expo(.*)$',
+      '<THIRD_PARTY_MODULES>',
+      '^@/(.*)$',
+      '^[./]',
+    ],
+    importOrderSeparation: true,
+    importOrderSortSpecifiers: true,
+  };
