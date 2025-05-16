@@ -12,6 +12,8 @@ import {
   ViewStyle,
 } from 'react-native';
 
+type ButtonSize = 'sm' | 'md' | 'lg';
+
 type GradientButtonProps = {
   title: string;
   onPress: () => void;
@@ -27,6 +29,7 @@ type GradientButtonProps = {
   loadingText?: string;
   loadingIndicatorColor?: ColorValue;
   loadingIndicatorSize?: number | 'small' | 'large';
+  size?: ButtonSize;
 };
 
 export const GradientButton: React.FC<GradientButtonProps> = ({
@@ -44,12 +47,17 @@ export const GradientButton: React.FC<GradientButtonProps> = ({
   loadingText,
   loadingIndicatorColor = colors.white,
   loadingIndicatorSize = 'small',
+  size = 'md',
 }) => {
   // Define the disabled colors with the correct type
   const disabledColors: readonly [ColorValue, ColorValue] = [colors.gray[300], colors.gray[400]];
 
   // Get the primary color for the shadow (first color in the gradient)
   const shadowColor = disabled ? colors.gray[300] : gradientColors[0];
+
+  // Get button size styles
+  const buttonSizeStyle = getButtonSizeStyle(size);
+  const textSizeStyle = getTextSizeStyle(size);
 
   return (
     <TouchableOpacity
@@ -58,6 +66,7 @@ export const GradientButton: React.FC<GradientButtonProps> = ({
       disabled={disabled || loading}
       style={[
         styles.buttonContainer,
+        buttonSizeStyle,
         {
           shadowColor: shadowColor as string,
           elevation: 5,
@@ -68,12 +77,13 @@ export const GradientButton: React.FC<GradientButtonProps> = ({
         colors={disabled ? disabledColors : gradientColors}
         start={startPoint}
         end={endPoint}
-        style={styles.gradient}>
+        style={[styles.gradient, { height: '100%' }]}>
         {loading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator color={loadingIndicatorColor} size={loadingIndicatorSize} />
             {loadingText && (
-              <Text style={[styles.buttonText, textStyle, { marginLeft: spacing.sm }]}>
+              <Text
+                style={[styles.buttonText, textSizeStyle, textStyle, { marginLeft: spacing.sm }]}>
                 {loadingText}
               </Text>
             )}
@@ -83,7 +93,13 @@ export const GradientButton: React.FC<GradientButtonProps> = ({
             {icon && iconPosition === 'left' && (
               <View style={styles.iconContainerLeft}>{icon}</View>
             )}
-            <Text style={[styles.buttonText, textStyle, disabled && styles.disabledText]}>
+            <Text
+              style={[
+                styles.buttonText,
+                textSizeStyle,
+                textStyle,
+                disabled && styles.disabledText,
+              ]}>
               {title}
             </Text>
             {icon && iconPosition === 'right' && (
@@ -96,23 +112,60 @@ export const GradientButton: React.FC<GradientButtonProps> = ({
   );
 };
 
+// Helper functions for size styles
+const getButtonSizeStyle = (size: ButtonSize): ViewStyle => {
+  switch (size) {
+    case 'sm':
+      return {
+        height: 42,
+        borderRadius: borderRadius.md,
+      };
+    case 'lg':
+      return {
+        height: 64,
+        borderRadius: borderRadius.lg,
+      };
+    case 'md':
+    default:
+      return {
+        height: 52,
+        borderRadius: borderRadius.lg,
+      };
+  }
+};
+
+const getTextSizeStyle = (size: ButtonSize): TextStyle => {
+  switch (size) {
+    case 'sm':
+      return {
+        fontSize: typography.sizes.sm,
+      };
+    case 'lg':
+      return {
+        fontSize: typography.sizes.lg,
+      };
+    case 'md':
+    default:
+      return {
+        fontSize: typography.sizes.md,
+      };
+  }
+};
+
 const styles = StyleSheet.create({
   buttonContainer: {
-    borderRadius: borderRadius.lg,
     overflow: 'hidden',
-    height: 60,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 10,
     elevation: 5,
   },
   gradient: {
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
-    height: '100%',
   },
   contentContainer: {
     flexDirection: 'row',
@@ -126,7 +179,6 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: colors.white,
-    fontSize: typography.sizes.md,
     fontWeight: typography.weights.bold,
     textAlign: 'center',
   },

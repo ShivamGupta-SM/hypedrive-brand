@@ -6,12 +6,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import {
+  BuildingOffice,
   Buildings,
+  ChartPieSlice,
   Check,
   Hash,
-  Info,
   MagnifyingGlass,
   PaperPlaneTilt,
+  Plant,
+  Receipt,
 } from 'phosphor-react-native';
 import React, { useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -41,19 +44,19 @@ const companySizeOptions = [
     id: 'startup',
     name: 'Startup',
     range: '1-10',
-    icon: '🌱',
+    icon: <Plant size={22} color={colors.blue[400]} weight="fill" />,
   },
   {
     id: 'growing',
     name: 'Growing',
     range: '11-50',
-    icon: '🏢',
+    icon: <BuildingOffice size={22} color={colors.blue[400]} weight="fill" />,
   },
   {
     id: 'enterprise',
     name: 'Enterprise',
     range: '50+',
-    icon: '🏛️',
+    icon: <Buildings size={22} color={colors.blue[400]} weight="fill" />,
   },
 ];
 
@@ -77,12 +80,6 @@ const mockGSTDatabase: MockGSTDatabaseType = {
   '29AAACR4849R1ZX': {
     name: 'Reliance Industries Limited',
     address: 'Maker Chambers IV, 222 Nariman Point, Mumbai, 400021',
-    type: 'Regular',
-    status: 'Active',
-  },
-  '06AAACT2727Q1ZX': {
-    name: 'Tata Consultancy Services Ltd',
-    address: 'TCS House, Raveline Street, Fort, Mumbai, 400001',
     type: 'Regular',
     status: 'Active',
   },
@@ -151,8 +148,8 @@ export default function CompleteKYCDetailsScreen() {
       return new Promise(resolve => setTimeout(() => resolve(data), 1000));
     },
     onSuccess: () => {
-      // Navigate to next step or complete the setup
-      router.push('/(tabs)');
+      // Navigate to the under review screen instead of tabs
+      router.replace('/(brand)/under-review');
     },
   });
 
@@ -176,7 +173,7 @@ export default function CompleteKYCDetailsScreen() {
           {/* GST Number Input */}
           <View style={styles.inputGroup}>
             <View style={styles.labelContainer}>
-              <Info size={18} weight="fill" color={colors.text.muted} />
+              <Receipt size={18} weight="fill" color={colors.text.muted} />
               <Label style={styles.sectionLabel}>GST Number</Label>
             </View>
 
@@ -230,9 +227,20 @@ export default function CompleteKYCDetailsScreen() {
 
                 <View style={styles.gstExamples}>
                   <Text style={styles.gstExampleTitle}>Try these sample GST numbers:</Text>
-                  <Text style={styles.gstExampleItem}>• 27AADCB2230M1ZT</Text>
-                  <Text style={styles.gstExampleItem}>• 29AAACR4849R1ZX</Text>
-                  <Text style={styles.gstExampleItem}>• 06AAACT2727Q1ZX</Text>
+                  <Pressable
+                    onPress={() => {
+                      setValue('gstNumber', '27AADCB2230M1ZT');
+                      verifyGST('27AADCB2230M1ZT');
+                    }}>
+                    <Text style={styles.gstExampleItem}>• 27AADCB2230M1ZT</Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => {
+                      setValue('gstNumber', '29AAACR4849R1ZX');
+                      verifyGST('29AAACR4849R1ZX');
+                    }}>
+                    <Text style={styles.gstExampleItem}>• 29AAACR4849R1ZX</Text>
+                  </Pressable>
                 </View>
               </View>
             ) : (
@@ -296,7 +304,7 @@ export default function CompleteKYCDetailsScreen() {
           {/* Company Size Selection */}
           <View style={styles.inputGroup}>
             <View style={styles.labelContainer}>
-              <Buildings size={18} weight="fill" color={colors.text.muted} />
+              <ChartPieSlice size={18} weight="fill" color={colors.text.muted} />
               <Label style={styles.sectionLabel}>Company Size</Label>
             </View>
 

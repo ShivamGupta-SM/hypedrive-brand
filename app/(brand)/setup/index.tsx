@@ -255,6 +255,13 @@ export default function BrandSetupScreen() {
             <Text style={styles.helperText}>Brief description about your brand and products</Text>
           </View>
         </View>
+
+        {/* Dev shortcut link */}
+        <Text style={styles.subtitle}>
+          <Text style={{ color: colors.blue[500] }} onPress={() => router.push('/(tabs)')}>
+            Skip for now
+          </Text>
+        </Text>
       </ScrollView>
 
       {/* Continue Button */}
