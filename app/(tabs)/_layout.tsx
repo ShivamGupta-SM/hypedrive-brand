@@ -7,7 +7,7 @@ import TabBarBackground from '@/components/ui/TabBarBackground.ios';
 import { borderRadius, colors, spacing } from '@/constants/Design';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { BlurView } from 'expo-blur';
-import { DotsThree, House, MegaphoneSimple, PlusCircle, Receipt } from 'phosphor-react-native';
+import { DotsThree, House, MegaphoneSimple, Receipt, ShoppingBag } from 'phosphor-react-native';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -55,9 +55,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="new"
         options={{
-          title: 'New',
+          title: 'Products',
           tabBarIcon: ({ color, focused }) => (
-            <PlusCircle color={color} size={28} weight={focused ? 'fill' : 'regular'} />
+            <ShoppingBag color={color} size={28} weight={focused ? 'fill' : 'regular'} />
           ),
         }}
       />
