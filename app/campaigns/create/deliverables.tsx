@@ -1,9 +1,14 @@
-import { GradientButton } from '@/components/GradientButton';
+import { BottomButton } from '@/components/BottomButton';
+import {
+  AddDeliverableBottomSheet,
+  AddDeliverableBottomSheetHandle,
+} from '@/components/campaigns/AddDeliverableBottomSheet';
 import { borderRadius, colors, spacing, typography } from '@/constants/Design';
+import { TouchableOpacity } from '@gorhom/bottom-sheet';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { ArrowLeft, ArrowRight, Info, Plus, Trash } from 'phosphor-react-native';
-import React, { useState } from 'react';
+import { ArrowRight, Info, Plus, Trash } from 'phosphor-react-native';
+import React, { useCallback, useRef, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -32,6 +37,7 @@ type Deliverable = {
 
 export default function DeliverableRequirementsScreen() {
   const router = useRouter();
+  const bottomSheetRef = useRef<AddDeliverableBottomSheetHandle>(null);
   const [deliverables, setDeliverables] = useState<Deliverable[]>([
     {
       id: '1',
@@ -52,11 +58,6 @@ export default function DeliverableRequirementsScreen() {
     },
   ]);
 
-  // Handle back navigation
-  const handleBack = () => {
-    router.back();
-  };
-
   // Handle continue to next step
   const handleContinue = () => {
     // Navigate to next step or validate form
@@ -64,13 +65,12 @@ export default function DeliverableRequirementsScreen() {
   };
 
   // Add new deliverable
-  const handleAddDeliverable = () => {
-    const newDeliverable: Deliverable = {
-      id: `${deliverables.length + 1}`,
-      name: '',
-      description: '',
-      requirements: [],
-    };
+  const handleAddDeliverable = useCallback(() => {
+    bottomSheetRef.current?.present();
+  }, []);
+
+  // Handle adding a new deliverable from the bottom sheet
+  const onAddDeliverable = (newDeliverable: Deliverable) => {
     setDeliverables([...deliverables, newDeliverable]);
   };
 
@@ -82,26 +82,6 @@ export default function DeliverableRequirementsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="dark" />
-
-      {/* Header */}
-      <View style={styles.header}>
-        <Pressable onPress={handleBack} style={styles.backButton}>
-          <ArrowLeft size={22} color={colors.text.primary} weight="bold" />
-        </Pressable>
-        <Text style={styles.headerTitle}>Create Campaign</Text>
-        <View style={styles.placeholder} />
-      </View>
-
-      {/* Progress Indicator */}
-      <View style={styles.progressContainer}>
-        <View style={styles.progressTextContainer}>
-          <Text style={styles.stepText}>Step 2 of 4</Text>
-          <Text style={styles.stepLabel}>Deliverable Requirements</Text>
-        </View>
-        <View style={styles.progressBar}>
-          <View style={[styles.progressFill, { width: '50%' }]} />
-        </View>
-      </View>
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -129,10 +109,10 @@ export default function DeliverableRequirementsScreen() {
           </View>
 
           {/* Add New Deliverable Button */}
-          <Pressable style={styles.addDeliverableButton} onPress={handleAddDeliverable}>
+          <TouchableOpacity style={styles.addDeliverableButton} onPress={handleAddDeliverable}>
             <Plus size={18} color={colors.orange[500]} weight="bold" />
             <Text style={styles.addDeliverableText}>Add New Deliverable</Text>
-          </Pressable>
+          </TouchableOpacity>
 
           {/* Deliverable Cards */}
           {deliverables.map(deliverable => (
@@ -165,18 +145,12 @@ export default function DeliverableRequirementsScreen() {
                 <View style={styles.requirements}>
                   <Text style={styles.requirementsTitle}>Review Requirements</Text>
                   <View style={styles.requirementsContainer}>
-                    <View style={styles.requirementItem}>
-                      <Text style={styles.requirementCount}>100</Text>
-                      <Text style={styles.requirementType}>Words</Text>
-                    </View>
-                    <View style={styles.requirementItem}>
-                      <Text style={styles.requirementCount}>2</Text>
-                      <Text style={styles.requirementType}>Photos</Text>
-                    </View>
-                    <View style={styles.requirementItem}>
-                      <Text style={styles.requirementCount}>1</Text>
-                      <Text style={styles.requirementType}>Video</Text>
-                    </View>
+                    {deliverable.requirements.map(requirement => (
+                      <View key={requirement.id} style={styles.requirementItem}>
+                        <Text style={styles.requirementCount}>{requirement.count}</Text>
+                        <Text style={styles.requirementType}>{requirement.type}</Text>
+                      </View>
+                    ))}
                   </View>
                 </View>
               ) : (
@@ -199,16 +173,15 @@ export default function DeliverableRequirementsScreen() {
         </ScrollView>
       </KeyboardAvoidingView>
 
+      {/* Bottom Sheet for Adding Deliverables */}
+      <AddDeliverableBottomSheet ref={bottomSheetRef} onAddDeliverable={onAddDeliverable} />
+
       {/* Continue Button - Fixed at bottom */}
-      <View style={styles.bottomButtonContainer}>
-        <GradientButton
-          title="Continue to Budget"
-          onPress={handleContinue}
-          gradientColors={[colors.orange[500], colors.orange[600]]}
-          icon={<ArrowRight size={20} color={colors.white} weight="bold" />}
-          iconPosition="right"
-        />
-      </View>
+      <BottomButton
+        title="Continue to Budget"
+        onPress={handleContinue}
+        icon={<ArrowRight size={20} color={colors.white} weight="bold" />}
+      />
     </SafeAreaView>
   );
 }

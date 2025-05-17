@@ -1,12 +1,13 @@
+import { CampaignCard } from '@/components/campaigns/CampaignCard';
+import { CampaignFilterTabs } from '@/components/campaigns/CampaignFilterTabs';
 import { GradientButton } from '@/components/GradientButton';
 import { borderRadius, colors, spacing, typography } from '@/constants/Design';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { Clock, MagnifyingGlass, Plus, Star, UsersThree } from 'phosphor-react-native';
+import { MagnifyingGlass, Plus } from 'phosphor-react-native';
 import React, { useCallback, useRef, useState } from 'react';
 import {
   Animated,
-  Image,
   Pressable,
   RefreshControl,
   SafeAreaView,
@@ -35,7 +36,7 @@ type Campaign = {
 const MOCK_CAMPAIGNS: Campaign[] = [
   {
     id: '1',
-    name: 'Nike Air Max 2025',
+    name: 'Nike Air Max 2025 - A very long name',
     daysAgo: '2 days ago',
     status: 'Active',
     enrolled: {
@@ -114,34 +115,6 @@ export default function CampaignsScreen() {
     extrapolate: 'clamp',
   });
 
-  // Get status color based on campaign status
-  const getStatusColor = (status: Campaign['status']) => {
-    switch (status) {
-      case 'Active':
-        return colors.green[500];
-      case 'Draft':
-        return colors.gray[500];
-      case 'Complete':
-        return colors.blue[500];
-      default:
-        return colors.gray[500];
-    }
-  };
-
-  // Get status background color based on campaign status
-  const getStatusBgColor = (status: Campaign['status']) => {
-    switch (status) {
-      case 'Active':
-        return colors.green[100];
-      case 'Draft':
-        return colors.gray[200];
-      case 'Complete':
-        return colors.blue[100];
-      default:
-        return colors.gray[200];
-    }
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="dark" />
@@ -155,7 +128,7 @@ export default function CampaignsScreen() {
           </View>
           <GradientButton
             title="Create"
-            onPress={() => router.push('/campaigns/new')}
+            onPress={() => router.push('/campaigns/create/new')}
             icon={<Plus size={16} color={colors.white} weight="bold" />}
             iconPosition="left"
             style={styles.createButton}
@@ -167,44 +140,14 @@ export default function CampaignsScreen() {
 
       {/* Search Bar */}
       <View style={styles.searchContainer}>
-        <Pressable style={styles.searchBar} onPress={() => router.push('/campaigns/new')}>
+        <Pressable style={styles.searchBar} onPress={() => router.push('/campaigns/create/new')}>
           <MagnifyingGlass size={20} color={colors.text.muted} weight="bold" />
           <Text style={styles.searchPlaceholder}>Search campaigns</Text>
         </Pressable>
       </View>
 
-      {/* Category Tabs - Sticky */}
-      <Animated.View
-        style={[
-          styles.tabsContainer,
-          {
-            transform: [{ translateY: tabsTranslateY }],
-          },
-        ]}>
-        <View style={styles.tabsWrapper}>
-          <Pressable
-            style={[styles.tab, activeCategory === 'all' && styles.activeTab]}
-            onPress={() => setActiveCategory('all')}>
-            <Text style={[styles.tabText, activeCategory === 'all' && styles.activeTabText]}>
-              All (24)
-            </Text>
-          </Pressable>
-          <Pressable
-            style={[styles.tab, activeCategory === 'active' && styles.activeTab]}
-            onPress={() => setActiveCategory('active')}>
-            <Text style={[styles.tabText, activeCategory === 'active' && styles.activeTabText]}>
-              Active (18)
-            </Text>
-          </Pressable>
-          <Pressable
-            style={[styles.tab, activeCategory === 'draft' && styles.activeTab]}
-            onPress={() => setActiveCategory('draft')}>
-            <Text style={[styles.tabText, activeCategory === 'draft' && styles.activeTabText]}>
-              Draft (3)
-            </Text>
-          </Pressable>
-        </View>
-      </Animated.View>
+      {/* Category Tabs - Horizontally Scrollable */}
+      <CampaignFilterTabs activeCategory={activeCategory} setActiveCategory={setActiveCategory} />
 
       {/* Campaign List */}
       <Animated.ScrollView
@@ -224,95 +167,7 @@ export default function CampaignsScreen() {
           />
         }>
         {MOCK_CAMPAIGNS.map(campaign => (
-          <Pressable
-            key={campaign.id}
-            style={styles.campaignCard}
-            onPress={() => router.push(`/campaigns/${campaign.id}`)}>
-            {/* Campaign Header */}
-            <View style={styles.campaignHeader}>
-              <View style={styles.campaignImageContainer}>
-                <Image source={campaign.image} style={styles.campaignImage} />
-                {/* Status Dot */}
-                <View
-                  style={[styles.statusDot, { backgroundColor: getStatusColor(campaign.status) }]}
-                />
-              </View>
-              <View style={styles.campaignInfo}>
-                <View style={styles.campaignTitleRow}>
-                  <Text style={styles.campaignName}>{campaign.name}</Text>
-                </View>
-                <View style={styles.timeContainer}>
-                  <Clock size={14} color={colors.text.secondary} />
-                  <Text style={styles.timeText}>{campaign.daysAgo}</Text>
-                  <View
-                    style={[
-                      styles.statusBadge,
-                      {
-                        backgroundColor: getStatusBgColor(campaign.status),
-                        borderColor: `${getStatusColor(campaign.status)}20`,
-                      },
-                    ]}>
-                    <Text style={[styles.statusText, { color: getStatusColor(campaign.status) }]}>
-                      {campaign.status}
-                    </Text>
-                  </View>
-                </View>
-              </View>
-
-              {/* progress bar */}
-              <View style={styles.progressContainer}>
-                <Text
-                  style={[
-                    styles.progressText,
-                    {
-                      color: colors.blue[700],
-                    },
-                  ]}>
-                  {campaign.progress}%
-                </Text>
-                <View style={styles.progressBarBackground}>
-                  <View
-                    style={[
-                      styles.progressBarFill,
-                      {
-                        width: `${campaign.progress}%`,
-                        backgroundColor: colors.blue[700],
-                      },
-                    ]}
-                  />
-                </View>
-              </View>
-            </View>
-
-            {/* Campaign Stats */}
-            <View style={styles.statsContainer}>
-              <View style={styles.statItem}>
-                <View style={styles.statLabelHeader}>
-                  <Text style={styles.statLabel}>Enrolled</Text>
-                  <UsersThree size={14} color={colors.text.secondary} weight="fill" />
-                </View>
-                <Text style={styles.statValue}>
-                  {campaign.enrolled.current}/{campaign.enrolled.total}
-                </Text>
-              </View>
-
-              <View style={styles.statItem}>
-                <View style={styles.statLabelHeader}>
-                  <Text style={styles.statLabel}>Reviews</Text>
-                  <Star size={14} color={colors.text.secondary} weight="fill" />
-                </View>
-                <Text style={styles.statValue}>{campaign.reviews}</Text>
-              </View>
-
-              <View style={styles.statItem}>
-                <View style={styles.statLabelHeader}>
-                  <Text style={styles.statLabel}>Value</Text>
-                  <Text style={styles.currencyIcon}>₹</Text>
-                </View>
-                <Text style={styles.statValue}>{campaign.value}</Text>
-              </View>
-            </View>
-          </Pressable>
+          <CampaignCard key={'campaign' + campaign.id} campaign={campaign} />
         ))}
         <View style={{ height: 100 }} />
       </Animated.ScrollView>
@@ -327,7 +182,7 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: colors.white,
-    paddingHorizontal: spacing.mg,
+    paddingHorizontal: spacing.md,
     paddingTop: spacing.md,
     paddingBottom: spacing.sm,
     shadowColor: colors.black,
@@ -412,150 +267,5 @@ const styles = StyleSheet.create({
     // backgroundColor: colors.gray[50],
     padding: spacing.md,
     paddingTop: spacing.md,
-  },
-  campaignCard: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
-    marginBottom: spacing.md,
-    padding: spacing.xm,
-    position: 'relative',
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: colors.gray[200],
-  },
-  statusIndicator: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    bottom: 0,
-    width: 4,
-  },
-  campaignHeader: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-  },
-  campaignImageContainer: {
-    position: 'relative',
-    marginRight: spacing.sm,
-    shadowColor: colors.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  campaignImage: {
-    width: 52,
-    height: 52,
-    borderRadius: borderRadius.md,
-    borderWidth: 1,
-    tintColor: colors.gray[300],
-    borderColor: colors.gray[100],
-  },
-  statusDot: {
-    position: 'absolute',
-    top: 0.5,
-    right: 0.5,
-    width: 8,
-    height: 8,
-    borderRadius: borderRadius.full,
-  },
-  campaignInfo: {
-    flex: 1,
-  },
-  campaignTitleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  campaignName: {
-    fontSize: typography.sizes.sm,
-    fontWeight: typography.weights.bold,
-    color: colors.text.black,
-    flex: 1,
-    marginRight: spacing.sm,
-  },
-  timeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 2,
-  },
-  timeText: {
-    fontSize: typography.sizes.xxs,
-    color: colors.text.secondary,
-    fontWeight: typography.weights.medium,
-    marginLeft: spacing.xs,
-  },
-  statusBadge: {
-    marginLeft: spacing.sm,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2.5,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    borderWidth: 1,
-    borderRadius: borderRadius.full,
-  },
-  statusBadgeIcon: {},
-  statusText: {
-    fontSize: typography.sizes.xxs,
-    fontWeight: typography.weights.semibold,
-  },
-  progressContainer: {
-    alignSelf: 'center',
-  },
-  progressBarBackground: {
-    height: 4,
-    width: 50,
-    backgroundColor: colors.gray[200],
-    borderRadius: 2,
-    marginTop: 2,
-  },
-  progressBarFill: {
-    height: '100%',
-    borderRadius: 2,
-  },
-  progressText: {
-    letterSpacing: -0.5,
-    fontSize: typography.sizes.xs,
-    fontWeight: typography.weights.bold,
-    textAlign: 'right',
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    marginTop: spacing.xs,
-    paddingTop: spacing.sm,
-    gap: spacing.sm,
-  },
-  statItem: {
-    flex: 1,
-    alignItems: 'flex-start',
-    backgroundColor: colors.gray[100],
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.sm,
-    borderRadius: borderRadius.md,
-  },
-  statLabelHeader: {
-    width: '100%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: spacing.xs,
-  },
-  statLabel: {
-    fontSize: typography.sizes.xs,
-    fontWeight: typography.weights.medium,
-    color: colors.text.secondary,
-    marginBottom: 2,
-  },
-  statValue: {
-    fontSize: typography.sizes.sm,
-    fontWeight: typography.weights.bold,
-    color: colors.text.black,
-  },
-  currencyIcon: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: colors.text.secondary,
   },
 });

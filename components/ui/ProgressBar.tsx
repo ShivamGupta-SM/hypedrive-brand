@@ -11,20 +11,22 @@ interface ProgressBarProps {
   barColor?: string;
   backgroundColor?: string;
   title?: string;
+  stepText?: string;
 }
 
 export const ProgressBar: React.FC<ProgressBarProps> = ({
   currentStep,
   totalSteps,
   style,
+  stepText,
   showText = true,
   barColor = colors.blue[500],
   backgroundColor = colors.blue[100],
-  title = "Setup Your Brand",
+  title = 'Setup Your Brand',
 }) => {
   // Calculate progress percentage
   const progress = currentStep / totalSteps;
-  
+
   // Animated style for the progress fill
   const animatedStyle = useAnimatedStyle(() => {
     return {
@@ -38,17 +40,13 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
         <View style={styles.progressTextContainer}>
           <Text style={styles.progressText}>{title}</Text>
           <Text style={[styles.progressCounter, { color: barColor }]}>
-            {currentStep} of {totalSteps}
+            {stepText} {currentStep} of {totalSteps}
           </Text>
         </View>
       )}
       <View style={[styles.progressBarBackground, { backgroundColor }]}>
         <Animated.View
-          style={[
-            styles.progressBarFill,
-            { backgroundColor: barColor },
-            animatedStyle,
-          ]}
+          style={[styles.progressBarFill, { backgroundColor: barColor }, animatedStyle]}
         />
       </View>
     </View>

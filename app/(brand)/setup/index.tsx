@@ -153,7 +153,7 @@ export default function BrandSetupScreen() {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
         automaticallyAdjustKeyboardInsets={true}
-        keyboardDismissMode="interactive">
+        keyboardDismissMode="on-drag">
         <Text style={styles.title}>Tell us about your brand</Text>
         <Text style={styles.subtitle}>
           This helps us customize your experience and provide relevant recommendations.

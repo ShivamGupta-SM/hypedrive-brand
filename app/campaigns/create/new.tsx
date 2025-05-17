@@ -5,10 +5,14 @@ import { TextArea } from '@/components/TextArea';
 import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/Label';
 import { borderRadius, colors, spacing, typography } from '@/constants/Design';
+import { Ionicons } from '@expo/vector-icons';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { ArrowLeft, ArrowRight, CaretDown, MagnifyingGlass, Plus } from 'phosphor-react-native';
-import React, { useState } from 'react';
+import { ArrowRight, CaretDown, Plus } from 'phosphor-react-native';
+import React, { useRef, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -19,6 +23,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { z } from 'zod';
 
 // Types
 type Product = {
@@ -68,6 +73,17 @@ const CAMPAIGN_TYPES: CampaignType[] = [
   { id: '4', name: 'Comparison' },
 ];
 
+// Define the schema for campaign setup form
+const campaignCreateSchema = z.object({
+  campaignName: z.string().min(10, 'Campaign name must be at least 10 characters'),
+  product: z.string().min(1, 'Please select a product'),
+  campaignType: z.string().min(1, 'please select a campaign type'),
+  campaignInstructions: z.string().optional(),
+  maxEnrollments: z.number().min(1, 'Max enrollments must be at least 1'),
+});
+
+type CampaignCreateFormData = z.infer<typeof campaignCreateSchema>;
+
 export default function CreateCampaignScreen() {
   const router = useRouter();
   const [campaignName, setCampaignName] = useState('');
@@ -77,6 +93,25 @@ export default function CreateCampaignScreen() {
   const [maxEnrollments, setMaxEnrollments] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const scrollViewRef = useRef<ScrollView>(null);
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    watch,
+  } = useForm<CampaignCreateFormData>({
+    resolver: zodResolver(campaignCreateSchema),
+    defaultValues: {
+      campaignName: '',
+      product: '',
+      campaignType: '',
+      campaignInstructions: '',
+      maxEnrollments: 1,
+    },
+  });
 
   // Handle back navigation
   const handleBack = () => {
@@ -94,45 +129,62 @@ export default function CreateCampaignScreen() {
     product.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
+  // Mock mutation for saving brand data
+  const continueToReviewGuidelinesMutation = useMutation({
+    mutationFn: async (data: CampaignCreateFormData) => {
+      // In a real app, this would be an API call to save the brand data
+      console.log('Saving brand data:', data);
+      return new Promise(resolve => setTimeout(() => resolve(data), 1000));
+    },
+    onSuccess: () => {
+      // Navigate to next step
+      router.push('/(brand)/setup/presence');
+    },
+  });
+
+  const onSubmit = (data: CampaignCreateFormData) => {
+    continueToReviewGuidelinesMutation.mutate(data);
+  };
+
+  // Function to scroll to a specific input
+  const scrollToInput = (y: number) => {
+    scrollViewRef.current?.scrollTo({
+      y: y,
+      animated: true,
+    });
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="dark" />
-
-      {/* Header */}
-      <View style={styles.header}>
-        <Pressable onPress={handleBack} style={styles.backButton}>
-          <ArrowLeft size={22} color={colors.text.primary} weight="bold" />
-        </Pressable>
-        <Text style={styles.headerTitle}>Create Campaign</Text>
-        <View style={styles.placeholder} />
-      </View>
-
-      {/* Progress Indicator */}
-      <View style={styles.progressContainer}>
-        <View style={styles.progressTextContainer}>
-          <Text style={styles.stepText}>Step 1 of 4</Text>
-          <Text style={styles.stepLabel}>Campaign Details</Text>
-        </View>
-        <View style={styles.progressBar}>
-          <View style={styles.progressFill} />
-        </View>
-      </View>
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidingView}>
         <ScrollView
+          ref={scrollViewRef}
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
+          contentInsetAdjustmentBehavior="automatic"
+          keyboardDismissMode="on-drag"
           keyboardShouldPersistTaps="handled">
           {/* Campaign Name Input */}
           <View style={styles.inputGroup}>
             <Label>Campaign Name</Label>
-            <Input
-              placeholder="Enter campaign name"
-              value={campaignName}
-              onChangeText={setCampaignName}
+            <Controller
+              control={control}
+              name="campaignName"
+              render={({ field: { onChange, value } }) => (
+                <Input
+                  placeholder="Enter campaign name"
+                  value={value}
+                  onChangeText={onChange}
+                  keyboardType="default"
+                  onFocus={() => scrollToInput(0)}
+                  error={!!errors.campaignName}
+                />
+              )}
             />
           </View>
 
@@ -141,30 +193,24 @@ export default function CreateCampaignScreen() {
             <Label>Select Product</Label>
 
             <View style={styles.selectProductContainer}>
-              {isSearching ? (
-                <View style={styles.searchContainer}>
-                  <View>
+              {/* {isSearching ? ( */}
+              <View style={styles.searchContainer}>
+                <Controller
+                  control={control}
+                  name="product"
+                  render={({ field: { onChange, value } }) => (
                     <Input
                       placeholder="Search products"
-                      value={searchQuery}
+                      value={value}
                       onChangeText={setSearchQuery}
                       leftIcon={
-                        <MagnifyingGlass size={20} color={colors.text.muted} weight="bold" />
+                        <Ionicons name="search-outline" size={20} color={colors.text.muted} />
                       }
-                      style={styles.searchInput}
                       autoFocus
                     />
-                  </View>
-                  <Pressable style={styles.cancelButton} onPress={() => setIsSearching(false)}>
-                    <Text style={styles.cancelText}>Cancel</Text>
-                  </Pressable>
-                </View>
-              ) : (
-                <Pressable style={styles.productSearchButton} onPress={() => setIsSearching(true)}>
-                  <MagnifyingGlass size={20} color={colors.text.muted} weight="bold" />
-                  <Text style={styles.productSearchText}>Search products</Text>
-                </Pressable>
-              )}
+                  )}
+                />
+              </View>
 
               {/* Add New Product Button */}
               <Pressable
@@ -243,54 +289,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.white,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-  },
-  backButton: {
-    padding: spacing.xs,
-  },
-  headerTitle: {
-    fontSize: typography.sizes.lg,
-    fontWeight: typography.weights.bold,
-    color: colors.text.black,
-  },
-  placeholder: {
-    width: 24,
-  },
-  progressContainer: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-  },
-  progressTextContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: spacing.sm,
-  },
-  stepText: {
-    fontSize: typography.sizes.xs,
-    fontWeight: typography.weights.semibold,
-    color: colors.text.secondary,
-  },
-  stepLabel: {
-    fontSize: typography.sizes.xs,
-    fontWeight: typography.weights.medium,
-    color: colors.text.secondary,
-  },
-  progressBar: {
-    height: 6,
-    backgroundColor: colors.gray[200],
-    borderRadius: borderRadius.full,
-  },
-  progressFill: {
-    width: '25%', // 1 of 4 steps
-    height: '100%',
-    backgroundColor: colors.orange[500],
-    borderRadius: borderRadius.full,
-  },
   keyboardAvoidingView: {
     flex: 1,
   },
@@ -299,6 +297,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.gray[50],
   },
   scrollContent: {
+    flexGrow: 1,
     padding: spacing.md,
   },
   inputGroup: {
@@ -335,8 +334,8 @@ const styles = StyleSheet.create({
     padding: spacing.xm,
   },
   searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    // flexDirection: 'row',
+    // alignItems: 'center',
     marginBottom: spacing.sm,
   },
   searchInputContainer: {
@@ -394,7 +393,7 @@ const styles = StyleSheet.create({
     right: 0,
     padding: spacing.mg,
     paddingBottom: spacing.xl,
-    backgroundColor: colors.white,
+    backgroundColor: colors.black,
     borderTopWidth: 1,
     borderTopColor: colors.gray[100],
     shadowColor: colors.black,

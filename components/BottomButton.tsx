@@ -30,6 +30,7 @@ export function BottomButton({
         loading={loading}
         gradientColors={gradientColors}
         icon={icon}
+        endPoint={{ x: 0, y: 1 }}
         iconPosition={iconPosition}
       />
     </View>
@@ -42,7 +43,8 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    padding: spacing.mg,
+    padding: spacing.md,
+    paddingTop: spacing.xm,
     paddingBottom: spacing.xl,
     backgroundColor: colors.white,
     borderTopWidth: 1,
