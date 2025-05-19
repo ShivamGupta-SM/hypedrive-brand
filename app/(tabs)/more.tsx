@@ -1,15 +1,16 @@
+import { SettingsSection, SettingsSectionItemType } from '@/components/ui/SettingsSection';
 import { borderRadius, colors, spacing, typography } from '@/constants/Design';
-import { Link, LinkProps, router } from 'expo-router';
+import { router } from 'expo-router';
 import {
   Bank,
   Bell,
-  Bell as BellIcon,
   CaretRight,
   ClockCounterClockwise,
   FileText,
   Question,
   Shield,
   ShoppingBag,
+  SignOut,
   User,
   Users,
 } from 'phosphor-react-native';
@@ -24,36 +25,24 @@ import {
   View,
 } from 'react-native';
 
-// Section type for our settings
-type SettingsSectionItem = {
-  id: string;
-  title: string;
-  icon: React.ReactNode;
-  route: LinkProps['href'];
-};
-
-// Group settings by section
-type SettingsSection = {
-  title: string;
-  items: SettingsSectionItem[];
-};
-
 export default function MoreScreen() {
   // Define all settings sections
-  const settingsSections: SettingsSection[] = [
+  const settingsSections = [
     {
       title: 'ACCOUNT SETTINGS',
       items: [
         {
           id: 'profile',
-          title: 'Profile',
+          label: 'Profile',
           icon: <User size={22} color={colors.orange[500]} weight="fill" />,
+          iconBg: colors.orange[50],
           route: '/(brand)/profile',
         },
         {
           id: 'notifications',
-          title: 'Notifications',
-          icon: <BellIcon size={22} color={colors.green[500]} weight="fill" />,
+          label: 'Notifications',
+          icon: <Bell size={22} color={colors.green[500]} weight="fill" />,
+          iconBg: colors.green[50],
           route: '/(brand)/notifications',
         },
       ],
@@ -63,14 +52,16 @@ export default function MoreScreen() {
       items: [
         {
           id: 'team-members',
-          title: 'Team Members',
+          label: 'Team Members',
           icon: <Users size={22} color={colors.green[500]} weight="fill" />,
+          iconBg: colors.green[50],
           route: '/team-members',
         },
         {
           id: 'products',
-          title: 'Products',
+          label: 'Products',
           icon: <ShoppingBag size={22} color={colors.blue[500]} weight="fill" />,
+          iconBg: colors.blue[50],
           route: '/product/all',
         },
       ],
@@ -80,14 +71,16 @@ export default function MoreScreen() {
       items: [
         {
           id: 'virtual-account',
-          title: 'Virtual Account',
+          label: 'Virtual Account',
           icon: <Bank size={22} color={colors.orange[500]} weight="fill" />,
+          iconBg: colors.orange[50],
           route: '/(brand)/virtual-account',
         },
         {
           id: 'payment-history',
-          title: 'Payment History',
+          label: 'Payment History',
           icon: <ClockCounterClockwise size={22} color={colors.orange[500]} weight="fill" />,
+          iconBg: colors.orange[50],
           route: '/(brand)/payment-history',
         },
       ],
@@ -97,34 +90,45 @@ export default function MoreScreen() {
       items: [
         {
           id: 'help-center',
-          title: 'Help Center',
+          label: 'Help Center',
           icon: <Question size={22} color={colors.green[500]} weight="fill" />,
+          iconBg: colors.green[50],
           route: '/help-center',
         },
         {
           id: 'privacy-policy',
-          title: 'Privacy Policy',
+          label: 'Privacy Policy',
           icon: <Shield size={22} color={colors.orange[500]} weight="fill" />,
+          iconBg: colors.orange[50],
           route: '/privacy-policy',
         },
         {
           id: 'terms-of-service',
-          title: 'Terms of Service',
+          label: 'Terms of Service',
           icon: <FileText size={22} color={colors.green[500]} weight="fill" />,
+          iconBg: colors.green[50],
           route: '/terms-of-service',
         },
       ],
     },
   ];
 
+  const handleItemPress = (item: SettingsSectionItemType) => {
+    router.push(item.route);
+  };
+
+  const handleSignOut = () => {
+    // Handle sign out logic here
+    router.replace('/(auth)/login');
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>More</Text>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.notificationButton}
-          onPress={() => router.push('/(brand)/notifications')}
-        >
+          onPress={() => router.push('/(brand)/notifications')}>
           <Bell size={24} color={colors.text.primary} weight="regular" />
           <View style={styles.notificationBadge} />
         </TouchableOpacity>
@@ -132,7 +136,6 @@ export default function MoreScreen() {
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Brand/Account Card */}
-
         <TouchableOpacity style={styles.brandCard} onPress={() => router.push('/(brand)/profile')}>
           <View style={styles.brandInfo}>
             <Image source={require('@/assets/icons/apple-icon.png')} style={styles.brandLogo} />
@@ -149,35 +152,23 @@ export default function MoreScreen() {
 
         {/* Settings Sections */}
         {settingsSections.map(section => (
-          <View key={section.title} style={styles.section}>
-            <Text style={styles.sectionTitle}>{section.title}</Text>
-            <View style={styles.sectionContent}>
-              {section.items.map((item, index) => (
-                <Link href={item.route} key={item.id} asChild>
-                  <TouchableOpacity
-                    style={[
-                      styles.settingItem,
-                      index !== section.items.length - 1 && styles.settingItemBorder,
-                    ]}>
-                    <View style={styles.settingItemLeft}>
-                      {item.icon}
-                      <Text style={styles.settingItemText}>{item.title}</Text>
-                    </View>
-                    <CaretRight size={20} color={colors.gray[400]} />
-                  </TouchableOpacity>
-                </Link>
-              ))}
-            </View>
-          </View>
+          <SettingsSection
+            key={section.title}
+            title={section.title}
+            items={section.items}
+            onItemPress={handleItemPress}
+          />
         ))}
 
         {/* Sign Out Button */}
-        <TouchableOpacity style={styles.signOutButton}>
+        <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+          <SignOut size={22} color={colors.white} weight="bold" />
           <Text style={styles.signOutText}>Sign Out</Text>
         </TouchableOpacity>
 
         {/* Version Info */}
         <Text style={styles.versionText}>Version 1.0.0</Text>
+        <View style={{ height: 80 }} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -186,7 +177,7 @@ export default function MoreScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.gray[50],
+    backgroundColor: colors.white,
   },
   header: {
     flexDirection: 'row',
@@ -194,9 +185,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: spacing.mg,
     paddingVertical: spacing.md,
+    backgroundColor: colors.white,
   },
   headerTitle: {
-    fontSize: typography.sizes.xl,
+    fontSize: typography.sizes.lg,
     fontWeight: typography.weights.bold,
     color: colors.text.black,
   },
@@ -210,23 +202,26 @@ const styles = StyleSheet.create({
     right: spacing.xs,
     width: 10,
     height: 10,
-    borderRadius: 5,
-    backgroundColor: colors.orange[500],
-    borderWidth: 2,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.rose[400],
+    borderWidth: 1,
     borderColor: colors.white,
   },
   scrollView: {
     flex: 1,
-    paddingHorizontal: spacing.mg,
+    backgroundColor: colors.gray[50],
   },
   brandCard: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
+    marginHorizontal: spacing.md,
+    marginVertical: spacing.md,
     padding: spacing.md,
-    marginBottom: spacing.md,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: colors.gray[100],
   },
   brandInfo: {
     flexDirection: 'row',
@@ -234,8 +229,8 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   brandLogo: {
-    width: 44,
-    height: 44,
+    width: 50,
+    height: 50,
     borderRadius: borderRadius.full,
     backgroundColor: colors.black,
   },
@@ -250,59 +245,27 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   verifiedBadge: {
-    backgroundColor: colors.green[50],
+    backgroundColor: colors.green[100],
     paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs / 2,
-    borderRadius: borderRadius.sm,
-    alignSelf: 'flex-start',
+    paddingVertical: 2,
+    borderRadius: borderRadius.full,
   },
   verifiedText: {
-    fontSize: typography.sizes.xs,
-    color: colors.green[600],
+    fontSize: typography.sizes.xxs,
+    color: colors.green[700],
     fontWeight: typography.weights.semibold,
-  },
-  section: {
-    marginBottom: spacing.md,
-  },
-  sectionTitle: {
-    fontSize: typography.sizes.xs,
-    fontWeight: typography.weights.semibold,
-    color: colors.text.secondary,
-    marginBottom: spacing.xs,
-    letterSpacing: 0.5,
-  },
-  sectionContent: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
-    overflow: 'hidden',
-  },
-  settingItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: spacing.md,
-  },
-  settingItemBorder: {
-    borderBottomWidth: 1,
-    borderBottomColor: colors.gray[100],
-  },
-  settingItemLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  settingItemText: {
-    fontSize: typography.sizes.md,
-    fontWeight: typography.weights.medium,
-    color: colors.text.primary,
   },
   signOutButton: {
-    backgroundColor: colors.red[500],
-    borderRadius: borderRadius.lg,
-    padding: spacing.md,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.rose[600],
+    marginHorizontal: spacing.md,
     marginTop: spacing.md,
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
+    padding: spacing.md,
+    borderRadius: borderRadius.lg,
+    gap: spacing.sm,
   },
   signOutText: {
     fontSize: typography.sizes.md,
@@ -310,9 +273,11 @@ const styles = StyleSheet.create({
     color: colors.white,
   },
   versionText: {
-    fontSize: typography.sizes.xs,
-    color: colors.text.secondary,
     textAlign: 'center',
-    marginBottom: spacing.xxl,
+    fontSize: typography.sizes.xs,
+    color: colors.text.muted,
+    marginTop: spacing.md,
+    marginBottom: spacing.xl,
+    fontWeight: typography.weights.semibold,
   },
 });

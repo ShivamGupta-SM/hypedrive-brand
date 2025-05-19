@@ -272,7 +272,7 @@ export default function BrandSetupScreen() {
           loading={saveBrandMutation.isPending}
           icon={<ArrowRight size={18} color={colors.white} weight="bold" />}
           iconPosition="right"
-          gradientColors={[colors.blue[600], colors.blue[600], colors.blue[800]]}
+          gradientColors={[colors.blue[500], colors.blue[700]]}
         />
       </View>
     </KeyboardAvoidingView>

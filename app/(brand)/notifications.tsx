@@ -1,7 +1,14 @@
 import { borderRadius, colors, spacing, typography } from '@/constants/Design';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { ArrowLeft, Bell, CheckCircle, ClockCounterClockwise, FileText, UserPlus, WarningCircle } from 'phosphor-react-native';
+import {
+  Bell,
+  CaretLeft,
+  CheckCircle,
+  FileText,
+  UserPlus,
+  WarningCircle,
+} from 'phosphor-react-native';
 import React from 'react';
 import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -122,16 +129,16 @@ export default function NotificationsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="dark" />
-      
+
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <ArrowLeft size={24} color={colors.text.primary} weight="regular" />
+          <CaretLeft size={24} color={colors.text.primary} weight="regular" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Notifications</Text>
         <View style={{ width: 24 }} />
       </View>
-      
+
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Today's Notifications */}
         {todayNotifications.length > 0 && (
@@ -142,7 +149,7 @@ export default function NotificationsScreen() {
             </View>
           </View>
         )}
-        
+
         {/* Yesterday's Notifications */}
         {yesterdayNotifications.length > 0 && (
           <View style={styles.section}>
@@ -152,7 +159,7 @@ export default function NotificationsScreen() {
             </View>
           </View>
         )}
-        
+
         {/* Earlier Notifications */}
         {earlierNotifications.length > 0 && (
           <View style={styles.section}>
@@ -170,20 +177,20 @@ export default function NotificationsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.gray[50],
+    backgroundColor: colors.white,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: spacing.mg,
+    paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
     backgroundColor: colors.white,
     borderBottomWidth: 1,
     borderBottomColor: colors.gray[100],
   },
   headerTitle: {
-    fontSize: typography.sizes.lg,
+    fontSize: typography.sizes.md,
     fontWeight: typography.weights.bold,
     color: colors.text.black,
   },
@@ -192,6 +199,7 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+    backgroundColor: colors.gray[50],
   },
   section: {
     marginBottom: spacing.md,

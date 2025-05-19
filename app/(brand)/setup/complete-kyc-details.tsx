@@ -348,8 +348,8 @@ export default function CompleteKYCDetailsScreen() {
             iconPosition="right"
             gradientColors={
               isVerified && companySize
-                ? [colors.blue[600], colors.blue[600], colors.blue[800]]
-                : [colors.gray[400], colors.gray[400], colors.gray[500]]
+                ? [colors.blue[500], colors.blue[700]]
+                : [colors.gray[400], colors.gray[500]]
             }
             disabled={!isVerified || !companySize}
             style={{ opacity: isVerified && companySize ? 1 : 0.6 }}

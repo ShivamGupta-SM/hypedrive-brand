@@ -1,5 +1,5 @@
 import { borderRadius, colors, spacing, typography } from '@/constants/Design';
-import { MaterialIcons } from '@expo/vector-icons';
+import { CaretRight } from 'phosphor-react-native';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 type SectionItemProps = {
@@ -18,14 +18,18 @@ export const SectionItem = ({
   onPress = () => {},
 }: SectionItemProps) => {
   return (
-    <Pressable style={styles.button} onPress={onPress}>
+    <Pressable 
+      style={styles.button} 
+      onPress={onPress}
+      android_ripple={{ color: colors.gray[100] }}
+    >
       <View style={styles.content}>
         <View style={[styles.iconContainer, { backgroundColor: iconBg || colors.gray[50] }]}>
           {icon}
         </View>
         <Text style={styles.label}>{label}</Text>
       </View>
-      <MaterialIcons name="chevron-right" size={24} color={iconColor || colors.gray[400]} />
+      <CaretRight size={20} color={iconColor || colors.gray[400]} />
     </Pressable>
   );
 };

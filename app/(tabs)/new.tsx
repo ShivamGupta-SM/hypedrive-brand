@@ -326,8 +326,8 @@ const styles = StyleSheet.create({
   },
   addButton: {
     position: 'absolute',
-    bottom: spacing.xl,
-    right: spacing.mg,
+    bottom: spacing.xl * 3,
+    right: spacing.md,
     width: 56,
     height: 56,
     borderRadius: borderRadius.full,

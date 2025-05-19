@@ -39,7 +39,7 @@ export const GradientButton: React.FC<GradientButtonProps> = ({
   textStyle,
   gradientColors = [colors.primary, colors.secondary] as readonly [ColorValue, ColorValue],
   startPoint = { x: 0, y: 0 },
-  endPoint = { x: 1, y: 1 },
+  endPoint = { x: 0, y: 1 },
   disabled = false,
   loading = false,
   icon,
