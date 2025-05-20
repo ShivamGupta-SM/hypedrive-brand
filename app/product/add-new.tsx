@@ -1,12 +1,11 @@
-import { Button } from '@/components/ui/Button';
+import { BottomButton } from '@/components/BottomButton';
+import { AppHeader } from '@/components/ui/AppHeader';
 import { CategorySelector } from '@/components/ui/CategorySelector';
 import { borderRadius, colors, spacing, typography } from '@/constants/Design';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
 import {
-  ArrowLeft,
   Camera,
   CurrencyInr,
   Globe,
@@ -21,7 +20,6 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -173,17 +171,8 @@ export default function AddNewProductScreen() {
     requiredPhotosSelected;
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="dark" />
-
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <ArrowLeft size={24} color={colors.text.primary} weight="bold" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Add New Product</Text>
-        <View style={styles.headerRight} />
-      </View>
+    <View style={styles.container}>
+      <AppHeader title="Add New Product" titleAlign="left" showBackButton />
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -358,7 +347,7 @@ export default function AddNewProductScreen() {
       </KeyboardAvoidingView>
 
       {/* Add Product Button - Fixed at bottom */}
-      <View style={styles.bottomButtonContainer}>
+      {/* <View style={styles.bottomButtonContainer}>
         <Button
           title="Add Product"
           variant="gradient"
@@ -370,8 +359,15 @@ export default function AddNewProductScreen() {
           disabled={!isFormValid || isSubmitting}
           onPress={handleSubmit}
         />
-      </View>
-    </SafeAreaView>
+      </View> */}
+      <BottomButton
+        title="Add Product"
+        onPress={handleSubmit}
+        iconPosition="left"
+        loading={isSubmitting}
+        icon={<Plus size={20} color={colors.white} weight="bold" />}
+      />
+    </View>
   );
 }
 

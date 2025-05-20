@@ -900,8 +900,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 2,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: colors.white,
   },
   actionBadgeText: {
     color: colors.white,
@@ -1156,7 +1154,7 @@ const ActionCardWithSkeleton = ({
         })}
         {action.count > 0 && (
           <View style={styles.actionBadge}>
-            <Text style={styles.actionBadgeText}>{action.count}</Text>
+            <Text style={styles.actionBadgeText}>{action.count > 9 ? '9+' : action.count}</Text>
           </View>
         )}
       </View>

@@ -1,13 +1,14 @@
+import { AppHeader } from '@/components/ui/AppHeader';
 import { SettingsSection, SettingsSectionItemType } from '@/components/ui/SettingsSection';
 import { borderRadius, colors, spacing, typography } from '@/constants/Design';
 import { router } from 'expo-router';
 import {
   Bank,
   Bell,
-  CaretRight,
   ClockCounterClockwise,
   FileText,
   Question,
+  SealCheck,
   Shield,
   ShoppingBag,
   SignOut,
@@ -15,19 +16,16 @@ import {
   Users,
 } from 'phosphor-react-native';
 import React from 'react';
-import {
-  Image,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+type SettingsSectionType = {
+  title: string;
+  items: SettingsSectionItemType[];
+};
 
 export default function MoreScreen() {
   // Define all settings sections
-  const settingsSections = [
+  const settingsSections: SettingsSectionType[] = [
     {
       title: 'ACCOUNT SETTINGS',
       items: [
@@ -43,7 +41,7 @@ export default function MoreScreen() {
           label: 'Notifications',
           icon: <Bell size={22} color={colors.green[500]} weight="fill" />,
           iconBg: colors.green[50],
-          route: '/(brand)/notifications',
+          route: '/(brand)/notification-settings',
         },
       ],
     },
@@ -55,14 +53,14 @@ export default function MoreScreen() {
           label: 'Team Members',
           icon: <Users size={22} color={colors.green[500]} weight="fill" />,
           iconBg: colors.green[50],
-          route: '/team-members',
+          route: '/(brand)/team-members',
         },
         {
           id: 'products',
           label: 'Products',
           icon: <ShoppingBag size={22} color={colors.blue[500]} weight="fill" />,
           iconBg: colors.blue[50],
-          route: '/product/all',
+          route: '/products',
         },
       ],
     },
@@ -93,7 +91,7 @@ export default function MoreScreen() {
           label: 'Help Center',
           icon: <Question size={22} color={colors.green[500]} weight="fill" />,
           iconBg: colors.green[50],
-          route: '/help-center',
+          route: '/(brand)/contact-support',
         },
         {
           id: 'privacy-policy',
@@ -123,31 +121,31 @@ export default function MoreScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>More</Text>
-        <TouchableOpacity
-          style={styles.notificationButton}
-          onPress={() => router.push('/(brand)/notifications')}>
-          <Bell size={24} color={colors.text.primary} weight="regular" />
-          <View style={styles.notificationBadge} />
-        </TouchableOpacity>
-      </View>
+    <View style={styles.container}>
+      <AppHeader
+        title="More"
+        showNotification
+        notificationCount={12}
+        onNotificationPress={() => router.push('/(brand)/notifications')}
+      />
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Brand/Account Card */}
         <TouchableOpacity style={styles.brandCard} onPress={() => router.push('/(brand)/profile')}>
           <View style={styles.brandInfo}>
-            <Image source={require('@/assets/icons/apple-icon.png')} style={styles.brandLogo} />
+            <Image
+              source={require('@/assets/icons/google-color-icon.png')}
+              style={styles.brandLogo}
+            />
             <View>
-              <Text style={styles.brandName}>Apple</Text>
+              <Text style={styles.brandName}>Apple Brand</Text>
               <Text style={styles.brandEmail}>Brand@apple.com</Text>
               <View style={styles.verifiedBadge}>
+                <SealCheck size={18} color={colors.green[500]} weight="fill" />
                 <Text style={styles.verifiedText}>Verified Account</Text>
               </View>
             </View>
           </View>
-          <CaretRight size={20} color={colors.gray[400]} />
         </TouchableOpacity>
 
         {/* Settings Sections */}
@@ -170,7 +168,7 @@ export default function MoreScreen() {
         <Text style={styles.versionText}>Version 1.0.0</Text>
         <View style={{ height: 80 }} />
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -214,11 +212,11 @@ const styles = StyleSheet.create({
   brandCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     backgroundColor: colors.white,
     marginHorizontal: spacing.md,
     marginVertical: spacing.md,
     padding: spacing.md,
+    paddingVertical: spacing.lg,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
     borderColor: colors.gray[100],
@@ -229,10 +227,14 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   brandLogo: {
-    width: 50,
-    height: 50,
+    width: 62,
+    height: 62,
     borderRadius: borderRadius.full,
     backgroundColor: colors.black,
+    padding: spacing.sm,
+    objectFit: 'cover',
+    borderWidth: 2.5,
+    borderColor: colors.orange[600],
   },
   brandName: {
     fontSize: typography.sizes.md,
@@ -240,19 +242,24 @@ const styles = StyleSheet.create({
     color: colors.text.black,
   },
   brandEmail: {
-    fontSize: typography.sizes.sm,
+    fontSize: typography.sizes.xs,
     color: colors.text.secondary,
+    fontWeight: typography.weights.medium,
     marginBottom: spacing.xs,
   },
   verifiedBadge: {
-    backgroundColor: colors.green[100],
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    backgroundColor: colors.green[50],
+    paddingHorizontal: spacing.xs,
+    paddingVertical: spacing.xs,
     borderRadius: borderRadius.full,
   },
   verifiedText: {
     fontSize: typography.sizes.xxs,
     color: colors.green[700],
+    textAlign: 'center',
     fontWeight: typography.weights.semibold,
   },
   signOutButton: {

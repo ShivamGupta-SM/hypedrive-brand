@@ -1,14 +1,13 @@
+import { AppHeader } from '@/components/ui/AppHeader';
 import { borderRadius, colors, spacing, typography } from '@/constants/Design';
 import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { DotsThree, MagnifyingGlass, Plus } from 'phosphor-react-native';
+import { DotsThreeVertical, MagnifyingGlass, Plus } from 'phosphor-react-native';
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
   Dimensions,
   Image,
-  SafeAreaView,
   StyleSheet,
   Text,
   TextInput,
@@ -120,7 +119,7 @@ const ProductCard = ({ product }: { product: Product }) => {
       <View style={styles.productImageContainer}>
         <Image source={{ uri: product.image }} style={styles.productImage} />
         <TouchableOpacity style={styles.optionsButton}>
-          <DotsThree size={24} color={colors.gray[700]} weight="bold" />
+          <DotsThreeVertical size={22} color={colors.gray[700]} weight="bold" />
         </TouchableOpacity>
       </View>
       <View style={styles.productInfo}>
@@ -173,12 +172,8 @@ export default function ProductsScreen() {
   const renderItem = ({ item }: { item: Product }) => <ProductCard product={item} />;
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="dark" />
-
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Products</Text>
-      </View>
+    <View style={styles.container}>
+      <AppHeader title="Products" titleAlign="left" />
 
       <View style={styles.searchContainer}>
         <MagnifyingGlass
@@ -225,7 +220,7 @@ export default function ProductsScreen() {
         onPress={() => router.push('../product/add-new')}>
         <Plus size={24} color={colors.white} weight="bold" />
       </TouchableOpacity>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -247,7 +242,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginHorizontal: spacing.mg,
+    marginHorizontal: spacing.md,
     marginBottom: spacing.md,
     paddingHorizontal: spacing.md,
     height: 48,
@@ -270,7 +265,7 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     flex: 1,
-    paddingHorizontal: spacing.mg,
+    paddingHorizontal: spacing.sm,
   },
   productList: {
     paddingTop: spacing.sm,
@@ -280,7 +275,7 @@ const styles = StyleSheet.create({
     margin: spacing.xs,
     marginBottom: spacing.md,
     backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
+    borderRadius: borderRadius.xl,
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: colors.gray[200],
@@ -288,39 +283,45 @@ const styles = StyleSheet.create({
   productImageContainer: {
     position: 'relative',
     height: 140,
-    backgroundColor: colors.gray[100],
+    padding: spacing.sm,
+    backgroundColor: colors.white,
   },
   productImage: {
     width: '100%',
     height: '100%',
     resizeMode: 'cover',
+    borderRadius: borderRadius.lg,
   },
   optionsButton: {
     position: 'absolute',
-    top: spacing.xs,
-    right: spacing.xs,
-    width: 32,
-    height: 32,
+    top: spacing.md,
+    right: spacing.md,
+    width: 30,
+    height: 30,
     borderRadius: borderRadius.full,
+    backgroundColor: colors.white,
     justifyContent: 'center',
     alignItems: 'center',
+    opacity: 0.8,
   },
   productInfo: {
     padding: spacing.md,
+    paddingTop: spacing.xs,
   },
   productName: {
-    fontSize: typography.sizes.md,
+    fontSize: typography.sizes.sm,
     fontWeight: typography.weights.semibold,
     color: colors.text.black,
     marginBottom: spacing.xs,
   },
   productSku: {
-    fontSize: typography.sizes.sm,
+    fontSize: typography.sizes.xs,
+    fontWeight: typography.weights.medium,
     color: colors.text.secondary,
     marginBottom: spacing.xs,
   },
   productPrice: {
-    fontSize: typography.sizes.md,
+    fontSize: typography.sizes.sm,
     fontWeight: typography.weights.bold,
     color: colors.orange[500],
   },

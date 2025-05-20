@@ -1,4 +1,5 @@
 import { borderRadius, colors, spacing, typography } from '@/constants/Design';
+import { Route } from 'expo-router';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { SectionItem } from './SectionItem';
@@ -9,7 +10,7 @@ export type SettingsSectionItemType = {
   icon: React.ReactNode;
   iconColor?: string;
   iconBg?: string;
-  route: string;
+  route: Route;
   onPress?: () => void;
 };
 

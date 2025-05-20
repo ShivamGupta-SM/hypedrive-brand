@@ -1,8 +1,10 @@
+import { AppHeader } from '@/components/ui/AppHeader';
 import { borderRadius, colors, spacing, typography } from '@/constants/Design';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Bell, FileText } from 'phosphor-react-native';
+import { router } from 'expo-router';
+import { FileText } from 'phosphor-react-native';
 import React, { useState } from 'react';
-import { ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Invoice type definition
@@ -60,18 +62,13 @@ const Invoices = () => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
-
       {/* Custom Header with Safe Area handling */}
-      <View style={[styles.header, { paddingTop: Math.max(insets.top, 20) }]}>
-        <Text style={styles.headerTitle}>Invoices</Text>
-        <TouchableOpacity style={styles.notificationButton}>
-          <Bell size={24} color={colors.black} />
-          <View style={styles.notificationBadge}>
-            <Text style={styles.notificationBadgeText}>1</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
+      <AppHeader
+        title="Invoices"
+        showNotification
+        notificationCount={1}
+        onNotificationPress={() => router.push('/(brand)/notifications')}
+      />
 
       <ScrollView
         style={styles.scrollView}
@@ -229,43 +226,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.gray[50],
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
-    paddingBottom: spacing.md,
-    backgroundColor: colors.white,
-    zIndex: 10,
-  },
-  headerTitle: {
-    fontSize: typography.sizes.xl,
-    fontWeight: typography.weights.bold,
-    color: colors.text.black,
-  },
-  notificationButton: {
-    position: 'relative',
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  notificationBadge: {
-    position: 'absolute',
-    top: 5,
-    right: 5,
-    width: 16,
-    height: 16,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.rose[500],
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  notificationBadgeText: {
-    fontSize: typography.sizes.xxs,
-    fontWeight: typography.weights.bold,
-    color: colors.white,
   },
   scrollView: {
     flex: 1,

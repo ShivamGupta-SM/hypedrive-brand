@@ -1,16 +1,8 @@
+import { AppHeader } from '@/components/ui/AppHeader';
 import { borderRadius, colors, spacing, typography } from '@/constants/Design';
-import { router } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import {
-  Bell,
-  CaretLeft,
-  CheckCircle,
-  FileText,
-  UserPlus,
-  WarningCircle,
-} from 'phosphor-react-native';
+import { Bell, CheckCircle, FileText, UserPlus, WarningCircle } from 'phosphor-react-native';
 import React from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 // Define notification types
 type NotificationType = 'payment' | 'campaign' | 'invoice' | 'team' | 'update';
@@ -127,17 +119,13 @@ export default function NotificationsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="dark" />
-
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <CaretLeft size={24} color={colors.text.primary} weight="regular" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Notifications</Text>
-        <View style={{ width: 24 }} />
-      </View>
+    <View style={styles.container}>
+      <AppHeader
+        title="Notifications"
+        titleAlign="left"
+        titleStyle={styles.headerTitle}
+        showBackButton
+      />
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Today's Notifications */}
@@ -169,8 +157,10 @@ export default function NotificationsScreen() {
             </View>
           </View>
         )}
+
+        <View style={{ height: 80 }} />
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -190,9 +180,7 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.gray[100],
   },
   headerTitle: {
-    fontSize: typography.sizes.md,
-    fontWeight: typography.weights.bold,
-    color: colors.text.black,
+    fontSize: typography.sizes.lg,
   },
   backButton: {
     padding: spacing.xs,
@@ -202,7 +190,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.gray[50],
   },
   section: {
-    marginBottom: spacing.md,
+    // marginBottom: spacing.md,
   },
   sectionTitle: {
     fontSize: typography.sizes.sm,
@@ -211,18 +199,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.mg,
     paddingVertical: spacing.sm,
   },
-  sectionContent: {
-    backgroundColor: colors.white,
-  },
+  sectionContent: {},
   notificationItem: {
     flexDirection: 'row',
+    backgroundColor: colors.white,
     padding: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.gray[100],
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.sm,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.gray[100],
   },
   iconContainer: {
-    width: 48,
-    height: 48,
+    width: 44,
+    height: 44,
     borderRadius: borderRadius.md,
     justifyContent: 'center',
     alignItems: 'center',
@@ -232,19 +222,21 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   notificationTitle: {
-    fontSize: typography.sizes.md,
+    fontSize: typography.sizes.sm,
     fontWeight: typography.weights.semibold,
     color: colors.text.black,
     marginBottom: spacing.xs,
   },
   notificationDescription: {
-    fontSize: typography.sizes.sm,
+    fontSize: typography.sizes.xs,
+    fontWeight: typography.weights.medium,
     color: colors.text.secondary,
     marginBottom: spacing.xs,
     lineHeight: 20,
   },
   notificationTime: {
     fontSize: typography.sizes.xs,
+    fontWeight: typography.weights.medium,
     color: colors.text.muted,
   },
 });
