@@ -1,7 +1,7 @@
 import { AppHeader } from '@/components/ui/AppHeader';
 import { SectionItem } from '@/components/ui/SectionItem';
 import { borderRadius, colors, spacing, typography } from '@/constants/Design';
-import { router } from 'expo-router';
+import { Route, router } from 'expo-router';
 import { CaretRight, Clock, Envelope, Question, WhatsappLogo } from 'phosphor-react-native';
 import React from 'react';
 import { Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -9,7 +9,7 @@ import { Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'r
 type FAQItemType = {
   id: string;
   question: string;
-  route: string;
+  route: Route;
 };
 
 export default function ContactSupportScreen() {

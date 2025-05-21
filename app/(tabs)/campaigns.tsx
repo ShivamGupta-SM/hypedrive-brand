@@ -1,20 +1,12 @@
 import { CampaignCard } from '@/components/campaigns/CampaignCard';
 import { CampaignFilterTabs } from '@/components/campaigns/CampaignFilterTabs';
 import { GradientButton } from '@/components/GradientButton';
+import { AppHeader } from '@/components/ui/AppHeader';
 import { borderRadius, colors, spacing, typography } from '@/constants/Design';
 import { useRouter } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
 import { MagnifyingGlass, Plus } from 'phosphor-react-native';
 import React, { useCallback, useRef, useState } from 'react';
-import {
-  Animated,
-  Pressable,
-  RefreshControl,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Animated, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 
 // Types for our data
 type Campaign = {
@@ -116,16 +108,17 @@ export default function CampaignsScreen() {
   });
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="dark" />
-
-      {/* Fixed Header */}
-      <View style={[styles.header]}>
-        <View style={styles.headerContent}>
+    <View style={styles.container}>
+      <AppHeader
+        title="Campaigns"
+        hideTitle
+        leftContent={
           <View>
             <Text style={styles.headerTitle}>Campaigns</Text>
             <Text style={styles.headerSubtitle}>Manage your brand campaigns</Text>
           </View>
+        }
+        rightContent={
           <GradientButton
             title="Create"
             onPress={() => router.push('/campaigns/create/new')}
@@ -135,8 +128,8 @@ export default function CampaignsScreen() {
             gradientColors={[colors.blue[500], colors.blue[700]]}
             size="sm"
           />
-        </View>
-      </View>
+        }
+      />
 
       {/* Search Bar */}
       <View style={styles.searchContainer}>
@@ -171,7 +164,7 @@ export default function CampaignsScreen() {
         ))}
         <View style={{ height: 100 }} />
       </Animated.ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 

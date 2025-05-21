@@ -1,27 +1,20 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-  TouchableOpacity,
-  ScrollView,
-  Image,
-  Clipboard,
-  ToastAndroid,
-  Platform,
-  Alert,
-} from 'react-native';
-import { StatusBar } from 'expo-status-bar';
+import { AppHeader } from '@/components/ui/AppHeader';
 import { borderRadius, colors, spacing, typography } from '@/constants/Design';
 import { router } from 'expo-router';
+import { ArrowRight, CheckCircle, ClockCounterClockwise, Copy, Info } from 'phosphor-react-native';
+import React from 'react';
 import {
-  ArrowLeft,
-  ArrowRight,
-  CheckCircle,
-  ClockCounterClockwise,
-  Copy,
-} from 'phosphor-react-native';
+  Alert,
+  Clipboard,
+  Image,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  ToastAndroid,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 // Payment type definition
 type Payment = {
@@ -57,7 +50,7 @@ export default function VirtualAccountScreen() {
   // Function to copy text to clipboard
   const copyToClipboard = (text: string, label: string) => {
     Clipboard.setString(text);
-    
+
     // Show toast or alert based on platform
     if (Platform.OS === 'android') {
       ToastAndroid.show(`${label} copied to clipboard`, ToastAndroid.SHORT);
@@ -67,18 +60,9 @@ export default function VirtualAccountScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="dark" />
-      
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <ArrowLeft size={24} color={colors.text.primary} weight="regular" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Virtual Account</Text>
-        <View style={{ width: 24 }} />
-      </View>
-      
+    <View style={styles.container}>
+      <AppHeader title="Virtual Account" showBackButton titleAlign="left" />
+
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Virtual Account Card */}
         <View style={styles.accountCard}>
@@ -87,86 +71,80 @@ export default function VirtualAccountScreen() {
               <Text style={styles.accountLabel}>Virtual Account</Text>
               <Text style={styles.bankName}>Axis Bank</Text>
             </View>
-            <Image 
-              source={require('@/assets/images/axis-bank-logo.png')} 
+            <Image
+              source={require('@/assets/images/axis-bank-logo.png')}
               style={styles.bankLogo}
               resizeMode="contain"
             />
           </View>
-          
+
           {/* Account Holder */}
           <View style={styles.accountDetailSection}>
             <Text style={styles.detailLabel}>Account Holder</Text>
             <View style={styles.detailValueContainer}>
               <Text style={styles.detailValue}>SHARKS MARKETING</Text>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.copyButton}
-                onPress={() => copyToClipboard('SHARKS MARKETING', 'Account holder name')}
-              >
-                <Copy size={18} color={colors.orange[500]} weight="bold" />
+                onPress={() => copyToClipboard('SHARKS MARKETING', 'Account holder name')}>
+                <Copy size={18} color={colors.orange[500]} weight="fill" />
               </TouchableOpacity>
             </View>
           </View>
-          
+
           {/* Account Number */}
           <View style={styles.accountDetailSection}>
             <Text style={styles.detailLabel}>Account Number</Text>
             <View style={styles.detailValueContainer}>
               <Text style={styles.detailValue}>9190200530056789</Text>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.copyButton}
-                onPress={() => copyToClipboard('9190200530056789', 'Account number')}
-              >
-                <Copy size={18} color={colors.orange[500]} weight="bold" />
+                onPress={() => copyToClipboard('9190200530056789', 'Account number')}>
+                <Copy size={18} color={colors.orange[500]} weight="fill" />
               </TouchableOpacity>
             </View>
           </View>
-          
+
           {/* IFSC Code */}
           <View style={styles.accountDetailSection}>
             <Text style={styles.detailLabel}>IFSC Code</Text>
             <View style={styles.detailValueContainer}>
               <Text style={styles.detailValue}>UTIB0000001</Text>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.copyButton}
-                onPress={() => copyToClipboard('UTIB0000001', 'IFSC code')}
-              >
-                <Copy size={18} color={colors.orange[500]} weight="bold" />
+                onPress={() => copyToClipboard('UTIB0000001', 'IFSC code')}>
+                <Copy size={18} color={colors.orange[500]} weight="fill" />
               </TouchableOpacity>
             </View>
           </View>
         </View>
-        
+
         {/* Information Note */}
         <View style={styles.infoNote}>
-          <View style={styles.infoIconContainer}>
-            <ClockCounterClockwise size={20} color={colors.white} weight="fill" />
-          </View>
+          <Info size={20} color={colors.orange[500]} weight="fill" />
           <Text style={styles.infoText}>
-            Use this virtual account to make invoice payments. Payments typically reflect within 30 minutes during banking hours.
+            Use this virtual account to make invoice payments. Payments typically reflect within 30
+            minutes during banking hours.
           </Text>
         </View>
-        
+
         {/* Payment History Section */}
         <View style={styles.paymentHistoryHeader}>
           <Text style={styles.sectionTitle}>Payment History</Text>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.viewAllButton}
-            onPress={() => router.push('/(brand)/payment-history')}
-          >
+            onPress={() => router.push('/(brand)/payment-history')}>
             <Text style={styles.viewAllText}>View All</Text>
           </TouchableOpacity>
         </View>
-        
+
         <View style={styles.paymentHistoryCard}>
           {recentPayments.map((payment, index) => (
-            <View 
-              key={payment.id} 
+            <View
+              key={payment.id}
               style={[
                 styles.paymentItem,
-                index !== recentPayments.length - 1 && styles.paymentItemBorder
-              ]}
-            >
+                index !== recentPayments.length - 1 && styles.paymentItemBorder,
+              ]}>
               <View style={styles.paymentLeft}>
                 {payment.status === 'success' ? (
                   <CheckCircle size={20} color={colors.green[500]} weight="fill" />
@@ -178,34 +156,33 @@ export default function VirtualAccountScreen() {
                   <Text style={styles.paymentDate}>{payment.date}</Text>
                 </View>
               </View>
-              <Text 
+              <Text
                 style={[
                   styles.paymentStatus,
-                  payment.status === 'success' ? styles.successStatus : styles.pendingStatus
-                ]}
-              >
+                  payment.status === 'success' ? styles.successStatus : styles.pendingStatus,
+                ]}>
                 {payment.status === 'success' ? 'Success' : 'Pending'}
               </Text>
             </View>
           ))}
         </View>
-        
+
         {/* Additional Information */}
         <View style={styles.additionalInfo}>
           <Text style={styles.additionalInfoTitle}>Need Help?</Text>
           <Text style={styles.additionalInfoText}>
-            If you have any questions about payments or your virtual account, please contact our support team.
+            If you have any questions about payments or your virtual account, please contact our
+            support team.
           </Text>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.supportButton}
-            onPress={() => router.push('/help-center')}
-          >
+            onPress={() => router.push('/contact-support')}>
             <Text style={styles.supportButtonText}>Contact Support</Text>
             <ArrowRight size={16} color={colors.blue[500]} weight="bold" />
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -234,6 +211,7 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+    backgroundColor: colors.gray[50],
   },
   accountCard: {
     backgroundColor: colors.white,
@@ -257,9 +235,10 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.xs,
     color: colors.text.secondary,
     marginBottom: spacing.xs / 2,
+    fontWeight: typography.weights.medium,
   },
   bankName: {
-    fontSize: typography.sizes.lg,
+    fontSize: typography.sizes.md,
     fontWeight: typography.weights.bold,
     color: colors.text.black,
   },
@@ -269,11 +248,15 @@ const styles = StyleSheet.create({
   },
   accountDetailSection: {
     marginBottom: spacing.md,
+    borderRadius: borderRadius.lg,
+    padding: spacing.xm,
+    backgroundColor: colors.gray[50],
   },
   detailLabel: {
     fontSize: typography.sizes.xs,
+    fontWeight: typography.weights.medium,
     color: colors.text.secondary,
-    marginBottom: spacing.xs / 2,
+    marginBottom: spacing.xs,
   },
   detailValueContainer: {
     flexDirection: 'row',
@@ -281,8 +264,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   detailValue: {
-    fontSize: typography.sizes.md,
-    fontWeight: typography.weights.semibold,
+    fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.bold,
     color: colors.text.black,
   },
   copyButton: {
@@ -295,22 +278,16 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
     borderRadius: borderRadius.md,
     padding: spacing.md,
-    alignItems: 'center',
-  },
-  infoIconContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.orange[500],
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: spacing.md,
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.orange[100],
   },
   infoText: {
     flex: 1,
-    fontSize: typography.sizes.sm,
+    fontSize: typography.sizes.xs,
     color: colors.text.primary,
-    lineHeight: 20,
+    fontWeight: typography.weights.medium,
   },
   paymentHistoryHeader: {
     flexDirection: 'row',
@@ -408,17 +385,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.md,
-    paddingVertical: spacing.sm,
+    backgroundColor: colors.blue[100],
+    borderRadius: borderRadius.lg,
+    paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.blue[100],
+    borderWidth: 1.5,
+    borderColor: colors.blue[200],
     gap: spacing.xs,
   },
   supportButtonText: {
     fontSize: typography.sizes.sm,
     fontWeight: typography.weights.medium,
-    color: colors.blue[500],
+    color: colors.gray[700],
   },
 });

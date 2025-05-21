@@ -183,8 +183,8 @@ export default function NotificationSettingsScreen() {
           {notificationTypes
             .filter(type => type.channel === 'push')
             .map((type, index) => (
-              <>
-                <View key={type.id} style={styles.notificationItem}>
+              <View key={'push-notification-types-' + type.id}>
+                <View style={styles.notificationItem}>
                   <View style={styles.notificationInfo}>
                     <Text style={styles.notificationName}>{type.name}</Text>
                     <Text style={styles.notificationDescription}>{type.description}</Text>
@@ -199,7 +199,7 @@ export default function NotificationSettingsScreen() {
                   />
                 </View>
                 {index !== 2 && <Divider />}
-              </>
+              </View>
             ))}
         </View>
 
@@ -211,8 +211,8 @@ export default function NotificationSettingsScreen() {
           {notificationTypes
             .filter(type => type.channel === 'email')
             .map((type, index) => (
-              <>
-                <View key={type.id} style={styles.notificationItem}>
+              <View key={'notification-types-' + type.id}>
+                <View style={styles.notificationItem}>
                   <View style={styles.notificationInfo}>
                     <Text style={styles.notificationName}>{type.name}</Text>
                     <Text style={styles.notificationDescription}>{type.description}</Text>
@@ -227,7 +227,7 @@ export default function NotificationSettingsScreen() {
                   />
                 </View>
                 {index !== 1 && <Divider />}
-              </>
+              </View>
             ))}
         </View>
 

@@ -1,9 +1,11 @@
+import { BrandHeader } from '@/components/brand/BrandHeader';
 import GradientCard from '@/components/GradientCard';
+import { AppHeader } from '@/components/ui/AppHeader';
 import { borderRadius, colors, spacing, typography } from '@/constants/Design';
-import { StatusBar } from 'expo-status-bar';
+import { useBrandSwitcher } from '@/hooks/useBrandSwitcher';
+import { router } from 'expo-router';
 import {
   Bell,
-  CaretDown,
   CaretRight,
   ChartLineUp,
   CheckCircle,
@@ -450,66 +452,33 @@ export default function BrandHomeScreen() {
     }, 2000);
   }, []);
 
-  // Animation for the header
-  const headerTranslateY = scrollY.interpolate({
-    inputRange: [0, 10],
-    outputRange: [0, 0],
-    extrapolate: 'clamp',
-  });
-
-  const headerOpacity = scrollY.interpolate({
-    inputRange: [0, 10, 20],
-    outputRange: [1, 0.8, 1],
-    extrapolate: 'clamp',
-  });
-
-  // if (loading) {
-  //   return (
-  //     <SafeAreaView style={styles.container}>
-  //       <StatusBar style="dark" />
-  //       {/* <HomeScreenSkeleton /> */}
-  //     </SafeAreaView>
-  //   );
-  // }
+  const notificationCount = 13;
+  const { BrandSwitcherComponent, openBrandSwitcher } = useBrandSwitcher();
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="dark" />
-
-      {/* Fixed Header */}
-      <RNAnimated.View
-        style={[
-          styles.fixedHeader,
-          {
-            transform: [{ translateY: headerTranslateY }],
-            opacity: headerOpacity,
-          },
-        ]}>
-        <View style={styles.header}>
-          <View style={styles.brandContainer}>
-            <View style={styles.logoContainer}>
-              <Image source={data.brand.logo} style={styles.logo} />
-            </View>
-            <View>
-              <Text style={styles.welcomeText}>Welcome back</Text>
-              <Text style={styles.brandName}>
-                {data.brand.name} <CaretDown size={16} weight="bold" color={colors.text.muted} />
-              </Text>
-            </View>
-          </View>
+    <View style={styles.container}>
+      <AppHeader
+        title="Home"
+        hideTitle
+        leftContent={<BrandHeader onPress={openBrandSwitcher} />}
+        rightContent={
           <View style={styles.headerActions}>
             <TouchableOpacity style={styles.iconButton}>
               <MagnifyingGlass size={22} color={colors.text.primary} weight="bold" />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.iconButton}>
+            <TouchableOpacity
+              onPress={() => router.push('/notifications')}
+              style={styles.iconButton}>
               <Bell size={22} color={colors.text.primary} weight="bold" />
               <View style={styles.notificationBadge}>
-                <Text style={styles.notificationText}>3</Text>
+                <Text style={styles.notificationText}>
+                  {notificationCount > 9 ? '9+' : notificationCount}
+                </Text>
               </View>
             </TouchableOpacity>
           </View>
-        </View>
-      </RNAnimated.View>
+        }
+      />
 
       <RNAnimated.ScrollView
         showsVerticalScrollIndicator={false}
@@ -627,14 +596,9 @@ export default function BrandHomeScreen() {
         </Animated.View>
       </RNAnimated.ScrollView>
 
-      {/* Floating Action Button */}
-      {/* <View style={styles.fabContainer}>
-        <TouchableOpacity style={styles.fab}>
-          <Plus size={28} weight="bold" color={colors.white} />
-        </TouchableOpacity>
-        <Text style={styles.fabLabel}>New</Text>
-      </View> */}
-    </SafeAreaView>
+      {/* Brand Switcher Bottom Sheet */}
+      {BrandSwitcherComponent}
+    </View>
   );
 }
 
@@ -713,7 +677,7 @@ const styles = StyleSheet.create({
   },
   headerActions: {
     flexDirection: 'row',
-    gap: spacing.md,
+    gap: spacing.sm,
   },
   iconButton: {
     width: 40,
@@ -736,16 +700,15 @@ const styles = StyleSheet.create({
     right: -2,
     backgroundColor: colors.rose[500],
     borderRadius: borderRadius.full,
-    width: 18,
-    height: 18,
+    minWidth: 18,
+    minHeight: 18,
+    padding: 2,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: colors.white,
   },
   notificationText: {
     color: colors.white,
-    fontSize: typography.sizes.xs,
+    fontSize: typography.sizes.xxs,
     fontWeight: typography.weights.bold,
   },
   greetingCardContainer: {

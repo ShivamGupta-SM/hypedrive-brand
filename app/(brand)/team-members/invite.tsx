@@ -6,7 +6,15 @@ import { borderRadius, colors, spacing, typography } from '@/constants/Design';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import { ArrowRight, EnvelopeSimple, Info, User } from 'phosphor-react-native';
+import {
+  Envelope,
+  EnvelopeSimple,
+  Info,
+  Key,
+  PaperPlaneTilt,
+  ShieldCheck,
+  UserList,
+} from 'phosphor-react-native';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
@@ -60,9 +68,17 @@ export default function InviteTeamMemberScreen() {
     sendInviteMutation.mutate(data);
   };
 
+  const RightHeaderContent = () => {
+    return (
+      <TouchableOpacity onPress={() => router.back()}>
+        <Text style={styles.rightHeaderText}>Cancel</Text>
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <View style={styles.container}>
-      <AppHeader title="Invite Team Member" showBackButton />
+      <AppHeader title="Add Team Member" showBackButton rightContent={<RightHeaderContent />} />
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -86,28 +102,14 @@ export default function InviteTeamMemberScreen() {
 
           {/* Form */}
           <View style={styles.form}>
-            {/* Name Input */}
-            <View style={styles.inputGroup}>
-              <Label>Team Member Name</Label>
-              <Controller
-                control={control}
-                name="name"
-                render={({ field: { onChange, value } }) => (
-                  <Input
-                    placeholder="Enter full name"
-                    value={value}
-                    onChangeText={onChange}
-                    leftIcon={<User size={20} color={colors.text.muted} />}
-                    error={!!errors.name}
-                    errorMessage={errors.name?.message}
-                  />
-                )}
-              />
-            </View>
-
             {/* Email Input */}
             <View style={styles.inputGroup}>
-              <Label>Email Address</Label>
+              <View style={styles.inviteLabelWithIcon}>
+                <View style={styles.inviteLabelIcon}>
+                  <Envelope size={20} color={colors.orange[500]} />
+                </View>
+                <Label>Invite via Email</Label>
+              </View>
               <Controller
                 control={control}
                 name="email"
@@ -128,7 +130,7 @@ export default function InviteTeamMemberScreen() {
 
             {/* Role Selection */}
             <View style={styles.inputGroup}>
-              <Label>Role</Label>
+              <Label>Select Role Acess</Label>
               <Controller
                 control={control}
                 name="role"
@@ -136,69 +138,81 @@ export default function InviteTeamMemberScreen() {
                   <View>
                     <View style={styles.rolesContainer}>
                       <TouchableOpacity
-                        style={[styles.roleOption, value === 'Admin' && styles.roleOptionSelected]}
+                        style={[
+                          styles.roleOption,
+                          styles.adminRoleOption,
+                          value === 'Admin' && styles.adminRoleOptionSelected,
+                        ]}
                         onPress={() => onChange('Admin')}>
-                        <Text
-                          style={[
-                            styles.roleOptionText,
-                            value === 'Admin' && styles.roleOptionTextSelected,
-                          ]}>
-                          Admin
-                        </Text>
+                        <View style={[styles.roleOptionIcon, styles.adminRoleOptionIcon]}>
+                          <Key size={20} color={colors.white} weight="fill" />
+                        </View>
+                        <View>
+                          <Text
+                            style={[
+                              styles.roleOptionText,
+                              value === 'Admin' && styles.roleOptionTextSelected,
+                            ]}>
+                            Admin
+                          </Text>
+                          <Text style={styles.roleDescriptionText}>
+                            Full access to manage campaigns, team members, and billing.
+                          </Text>
+                        </View>
                       </TouchableOpacity>
 
                       <TouchableOpacity
-                        style={[styles.roleOption, value === 'Editor' && styles.roleOptionSelected]}
+                        style={[
+                          styles.roleOption,
+                          styles.editorRoleOption,
+                          value === 'Editor' && styles.editorRoleOptionSelected,
+                        ]}
                         onPress={() => onChange('Editor')}>
-                        <Text
-                          style={[
-                            styles.roleOptionText,
-                            value === 'Editor' && styles.roleOptionTextSelected,
-                          ]}>
-                          Editor
-                        </Text>
+                        <View style={[styles.roleOptionIcon, styles.editorRoleOptionIcon]}>
+                          <ShieldCheck size={20} color={colors.white} weight="fill" />
+                        </View>
+                        <View>
+                          <Text
+                            style={[
+                              styles.roleOptionText,
+                              value === 'Editor' && styles.roleOptionTextSelected,
+                            ]}>
+                            Editor
+                          </Text>
+                          <Text style={styles.roleDescriptionText}>
+                            Can create and edit campaigns, but cannot manage team or billing.
+                          </Text>
+                        </View>
                       </TouchableOpacity>
 
                       <TouchableOpacity
-                        style={[styles.roleOption, value === 'Viewer' && styles.roleOptionSelected]}
+                        style={[
+                          styles.roleOption,
+                          styles.viewerRoleOption,
+                          value === 'Viewer' && styles.viewerRoleOptionSelected,
+                        ]}
                         onPress={() => onChange('Viewer')}>
-                        <Text
-                          style={[
-                            styles.roleOptionText,
-                            value === 'Viewer' && styles.roleOptionTextSelected,
-                          ]}>
-                          Viewer
-                        </Text>
+                        <View style={[styles.roleOptionIcon, styles.viewerRoleOptionIcon]}>
+                          <UserList size={20} color={colors.white} weight="fill" />
+                        </View>
+                        <View>
+                          <Text
+                            style={[
+                              styles.roleOptionText,
+                              value === 'Viewer' && styles.roleOptionTextSelected,
+                            ]}>
+                            Viewer
+                          </Text>
+                          <Text style={styles.roleDescriptionText}>
+                            Read-only access to view campaigns and reports.
+                          </Text>
+                        </View>
                       </TouchableOpacity>
                     </View>
                     {errors.role && <Text style={styles.errorText}>{errors.role.message}</Text>}
                   </View>
                 )}
               />
-            </View>
-
-            {/* Role Descriptions */}
-            <View style={styles.roleDescriptions}>
-              <View style={styles.roleDescriptionItem}>
-                <Text style={styles.roleDescriptionTitle}>Admin</Text>
-                <Text style={styles.roleDescriptionText}>
-                  Full access to manage campaigns, team members, and billing.
-                </Text>
-              </View>
-
-              <View style={styles.roleDescriptionItem}>
-                <Text style={styles.roleDescriptionTitle}>Editor</Text>
-                <Text style={styles.roleDescriptionText}>
-                  Can create and edit campaigns, but cannot manage team or billing.
-                </Text>
-              </View>
-
-              <View style={styles.roleDescriptionItem}>
-                <Text style={styles.roleDescriptionTitle}>Viewer</Text>
-                <Text style={styles.roleDescriptionText}>
-                  Read-only access to view campaigns and reports.
-                </Text>
-              </View>
             </View>
           </View>
 
@@ -219,7 +233,8 @@ export default function InviteTeamMemberScreen() {
         <BottomButton
           title="Send Invitation"
           onPress={handleSubmit(onSubmit)}
-          icon={<ArrowRight size={20} color={colors.white} weight="bold" />}
+          icon={<PaperPlaneTilt size={20} color={colors.white} weight="bold" />}
+          iconPosition="left"
         />
       </KeyboardAvoidingView>
     </View>
@@ -234,11 +249,17 @@ const styles = StyleSheet.create({
   keyboardAvoidingView: {
     flex: 1,
   },
+  rightHeaderText: {
+    color: colors.orange[500],
+    fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.semibold,
+  },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
     padding: spacing.md,
+    backgroundColor: colors.gray[50],
   },
   instructionContainer: {
     flexDirection: 'row',
@@ -257,25 +278,108 @@ const styles = StyleSheet.create({
   },
   form: {
     marginBottom: spacing.xl,
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.xl,
+    padding: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.gray[100],
   },
   inputGroup: {
     marginBottom: spacing.lg,
   },
-  rolesContainer: {
+  inviteLabelWithIcon: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: spacing.xs,
+    alignItems: 'center',
     gap: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  inviteLabelIcon: {
+    height: 36,
+    width: 36,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.orange[50],
+    borderWidth: 1,
+    borderColor: colors.orange[100],
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: spacing.xs,
+    shadowColor: colors.orange[400],
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 1,
+  },
+  rolesContainer: {
+    marginTop: spacing.xs,
+    gap: spacing.xm,
   },
   roleOption: {
     flex: 1,
     backgroundColor: colors.gray[50],
-    borderRadius: borderRadius.md,
-    paddingVertical: spacing.md,
-    alignItems: 'center',
-    marginHorizontal: spacing.xs / 2,
+    borderRadius: borderRadius.xl,
+    paddingVertical: spacing.mg,
+    paddingHorizontal: spacing.md,
     borderWidth: 1,
     borderColor: colors.gray[200],
+    gap: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  adminRoleOption: {
+    borderColor: colors.orange[100],
+    backgroundColor: colors.orange[50],
+  },
+  roleOptionIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: borderRadius.full,
+    padding: spacing.xs,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  adminRoleOptionIcon: {
+    backgroundColor: colors.orange[500],
+  },
+  adminRoleOptionText: {
+    color: colors.orange[500],
+  },
+  adminRoleOptionSelected: {
+    borderWidth: 1.5,
+    backgroundColor: colors.orange[50],
+    borderColor: colors.orange[500],
+  },
+  editorRoleOption: {
+    borderColor: colors.green[100],
+    backgroundColor: colors.green[50],
+  },
+  editorRoleOptionIcon: {
+    backgroundColor: colors.green[500],
+  },
+  editorRoleOptionText: {
+    color: colors.green[500],
+  },
+  editorRoleOptionSelected: {
+    borderWidth: 1.5,
+    backgroundColor: colors.green[50],
+    borderColor: colors.green[500],
+  },
+  viewerRoleOption: {
+    borderColor: colors.gray[100],
+    backgroundColor: colors.gray[50],
+  },
+  viewerRoleOptionIcon: {
+    backgroundColor: colors.gray[500],
+  },
+  viewerRoleOptionText: {
+    color: colors.text.primary,
+  },
+  viewerRoleOptionSelected: {
+    borderWidth: 1.5,
+    backgroundColor: colors.gray[50],
+    borderColor: colors.gray[500],
   },
   roleOptionSelected: {
     borderWidth: 1.5,
@@ -284,11 +388,11 @@ const styles = StyleSheet.create({
   },
   roleOptionText: {
     fontSize: typography.sizes.sm,
-    fontWeight: typography.weights.medium,
+    fontWeight: typography.weights.bold,
     color: colors.text.primary,
+    marginBottom: spacing.xs,
   },
   roleOptionTextSelected: {
-    color: colors.orange[700],
     fontWeight: typography.weights.semibold,
   },
   errorText: {
@@ -314,7 +418,8 @@ const styles = StyleSheet.create({
   roleDescriptionText: {
     fontSize: typography.sizes.xs,
     color: colors.text.secondary,
-    lineHeight: 18,
+    fontWeight: typography.weights.medium,
+    maxWidth: '90%',
   },
   submitButton: {
     marginTop: spacing.xl,

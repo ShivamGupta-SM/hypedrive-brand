@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type AppHeaderProps = {
   title: string;
+  hideTitle?: boolean;
   showBackButton?: boolean;
   showNotification?: boolean;
   notificationCount?: number;
@@ -37,6 +38,7 @@ type AppHeaderProps = {
 
 export const AppHeader: React.FC<AppHeaderProps> = ({
   title,
+  hideTitle = false,
   showBackButton = false,
   showNotification = false,
   notificationCount = 0,
@@ -108,7 +110,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               </TouchableOpacity>
             ) : null}
 
-            {titleAlign === 'left' && (
+            {!hideTitle && titleAlign === 'left' && (
               <Text
                 style={[
                   styles.title,
@@ -121,7 +123,9 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           </View>
 
           {/* Center Section - Only used when title is centered */}
-          {titleAlign === 'center' && <Text style={[styles.titleCenter, titleStyle]}>{title}</Text>}
+          {!hideTitle && titleAlign === 'center' && (
+            <Text style={[styles.titleCenter, titleStyle]}>{title}</Text>
+          )}
 
           {/* Right Section */}
           <View style={styles.rightSection}>
