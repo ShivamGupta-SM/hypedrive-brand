@@ -193,9 +193,16 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
     padding: spacing.xm,
     position: 'relative',
-    overflow: 'hidden',
     borderWidth: 1,
-    borderColor: colors.gray[200],
+    borderColor: colors.gray[100],
+    shadowColor: colors.black,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
   },
   statusIndicator: {
     position: 'absolute',

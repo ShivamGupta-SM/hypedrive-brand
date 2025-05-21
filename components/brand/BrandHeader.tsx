@@ -28,7 +28,7 @@ export const BrandHeader: React.FC<BrandHeaderProps> = ({ onPress }) => {
       </View>
       <View>
         <Text style={styles.welcomeText}>Welcome back</Text>
-        <Text style={styles.brandName}>
+        <Text style={styles.brandName} numberOfLines={1} ellipsizeMode="tail">
           {brand.name} <CaretDown size={16} weight="bold" color={colors.text.muted} />
         </Text>
       </View>
@@ -68,5 +68,6 @@ const styles = StyleSheet.create({
     color: colors.text.black,
     alignItems: 'center',
     flexDirection: 'row',
+    maxWidth: 250,
   },
 });

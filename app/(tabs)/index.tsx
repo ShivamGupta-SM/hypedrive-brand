@@ -23,7 +23,6 @@ import {
   Pressable,
   Animated as RNAnimated,
   RefreshControl,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -173,254 +172,6 @@ const MOCK_DATA = {
     },
   ],
 };
-
-// Skeleton loader components
-const SkeletonBox = ({
-  width,
-  height,
-  style,
-}: {
-  width: number | string;
-  height: number;
-  style?: any;
-}) => (
-  <View
-    style={[
-      {
-        width,
-        height,
-        backgroundColor: colors.gray[200],
-        borderRadius: borderRadius.md,
-      },
-      style,
-    ]}
-  />
-);
-
-// Skeleton components
-const StatCardSkeleton = () => (
-  <View style={styles.statCardSkeleton}>
-    <View
-      style={{
-        width: 40,
-        height: 40,
-        borderRadius: borderRadius.md,
-        backgroundColor: colors.gray[200],
-      }}
-    />
-    <View style={{ marginLeft: spacing.sm }}>
-      <View
-        style={{
-          width: 60,
-          height: 24,
-          backgroundColor: colors.gray[200],
-          borderRadius: borderRadius.sm,
-          marginBottom: spacing.xs,
-        }}
-      />
-      <View
-        style={{
-          width: 40,
-          height: 16,
-          backgroundColor: colors.gray[200],
-          borderRadius: borderRadius.sm,
-        }}
-      />
-    </View>
-  </View>
-);
-
-const ActionCardSkeleton = () => (
-  <View style={styles.actionCardSkeleton}>
-    <View
-      style={{
-        width: 60,
-        height: 60,
-        borderRadius: borderRadius.full,
-        backgroundColor: colors.gray[200],
-        marginBottom: spacing.sm,
-      }}
-    />
-    <View
-      style={{
-        width: 60,
-        height: 16,
-        backgroundColor: colors.gray[200],
-        borderRadius: borderRadius.sm,
-      }}
-    />
-  </View>
-);
-
-const HomeScreenSkeleton = () => (
-  <SafeAreaView style={{ flex: 1 }}>
-    {/* Fixed Header skeleton */}
-    <View style={styles.fixedHeaderSkeleton}>
-      <View style={styles.headerSkeleton}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-          {/* Logo */}
-          <View
-            style={{
-              width: 42,
-              height: 42,
-              borderRadius: borderRadius.md,
-              backgroundColor: colors.gray[200],
-            }}
-          />
-          <View>
-            {/* Welcome text */}
-            <View
-              style={{
-                width: 80,
-                height: 14,
-                backgroundColor: colors.gray[200],
-                borderRadius: borderRadius.sm,
-                marginBottom: spacing.xs,
-              }}
-            />
-            {/* Brand name */}
-            <View
-              style={{
-                width: 120,
-                height: 20,
-                backgroundColor: colors.gray[200],
-                borderRadius: borderRadius.sm,
-              }}
-            />
-          </View>
-        </View>
-        <View style={{ flexDirection: 'row', gap: spacing.md }}>
-          <View style={styles.skeletonIconButton} />
-          <View style={styles.skeletonIconButton} />
-        </View>
-      </View>
-    </View>
-
-    <ScrollView style={{ marginTop: 40 }} showsVerticalScrollIndicator={false}>
-      <View style={{}}>
-        {/* Greeting skeleton */}
-        <View style={styles.greetingCardContainer}>
-          <View
-            style={{
-              width: '100%',
-              height: 80,
-              borderRadius: borderRadius.lg,
-              backgroundColor: colors.gray[200],
-            }}
-          />
-        </View>
-
-        {/* Stats skeleton - horizontal scrollable */}
-        <View style={{ marginBottom: spacing.xl, paddingHorizontal: spacing.md }}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View style={{ flexDirection: 'row', gap: spacing.md }}>
-              {[1, 2, 3, 4].map(i => (
-                <StatCardSkeleton key={i} />
-              ))}
-            </View>
-          </ScrollView>
-        </View>
-
-        {/* Quick actions skeleton */}
-        <View style={{ marginBottom: spacing.md, marginLeft: spacing.md }}>
-          <View style={styles.skeletonTitle} />
-        </View>
-        <View style={styles.quickActionsContainerSkeleton}>
-          <View style={styles.quickActionsGridSkeleton}>
-            {[1, 2, 3, 4].map(i => (
-              <ActionCardSkeleton key={i} />
-            ))}
-          </View>
-        </View>
-
-        {/* Active campaigns skeleton */}
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            marginTop: spacing.sm,
-            marginBottom: spacing.md,
-            paddingHorizontal: spacing.md,
-          }}>
-          <View style={[styles.skeletonTitle, { width: 150 }]} />
-          <View style={[styles.skeletonTitle, { width: 70 }]} />
-        </View>
-        {[1, 2].map(i => (
-          <View key={i} style={styles.campaignCardSkeleton}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing.md }}>
-              {/* Campaign logo */}
-              <View
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: borderRadius.md,
-                  backgroundColor: colors.gray[200],
-                  marginRight: spacing.md,
-                }}
-              />
-              <View style={{ flex: 1 }}>
-                {/* Campaign title */}
-                <View
-                  style={{
-                    width: 200,
-                    height: 20,
-                    backgroundColor: colors.gray[200],
-                    borderRadius: borderRadius.sm,
-                    marginBottom: spacing.xs,
-                  }}
-                />
-                {/* Campaign subtitle */}
-                <View
-                  style={{
-                    width: 150,
-                    height: 14,
-                    backgroundColor: colors.gray[200],
-                    borderRadius: borderRadius.sm,
-                  }}
-                />
-              </View>
-              <View style={styles.statusBadgeSkeleton} />
-            </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                marginTop: spacing.lg,
-              }}>
-              {/* Campaign stats */}
-              <View
-                style={{
-                  width: 80,
-                  height: 40,
-                  backgroundColor: colors.gray[200],
-                  borderRadius: borderRadius.md,
-                }}
-              />
-              <View
-                style={{
-                  width: 80,
-                  height: 40,
-                  backgroundColor: colors.gray[200],
-                  borderRadius: borderRadius.md,
-                  marginLeft: spacing.md,
-                }}
-              />
-              <View
-                style={{
-                  width: 80,
-                  height: 40,
-                  backgroundColor: colors.gray[200],
-                  borderRadius: borderRadius.md,
-                  marginLeft: spacing.md,
-                }}
-              />
-            </View>
-          </View>
-        ))}
-      </View>
-    </ScrollView>
-  </SafeAreaView>
-);
 
 export default function BrandHomeScreen() {
   const [loading, setLoading] = useState(true);
@@ -608,7 +359,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
   },
   content: {
-    paddingTop: spacing.lg,
+    paddingTop: spacing.md,
     paddingBottom: spacing.xxl * 3,
   },
   fixedHeader: {
@@ -743,7 +494,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   sectionTitle: {
-    fontSize: typography.sizes.lg,
+    fontSize: typography.sizes.md,
     fontWeight: typography.weights.bold,
     color: colors.text.black,
     marginBottom: spacing.md,
@@ -755,24 +506,33 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
   },
   statCardContainer: {
-    marginBottom: spacing.md,
+    // marginBottom: spacing.md,
   },
   statCardsScroll: {
     gap: spacing.sm,
     paddingHorizontal: spacing.md,
+    paddingBottom: spacing.md,
   },
   statCard: {
     flexDirection: 'row',
     backgroundColor: colors.white,
     borderRadius: borderRadius.lg,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.xm,
     paddingVertical: spacing.mg,
     gap: spacing.sm,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: colors.gray[200],
+    borderColor: colors.gray[100],
     width: 160,
-    overflow: 'hidden',
+    shadowColor: colors.black,
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
+    // overflow: 'hidden',
   },
   statCardSkeleton: {
     flexDirection: 'row',
@@ -794,7 +554,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   statValue: {
-    fontSize: typography.sizes.lg,
+    fontSize: typography.sizes.md,
     fontWeight: typography.weights.bold,
     color: colors.text.black,
   },
@@ -818,11 +578,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '23%', // Exactly 4 columns with equal width
     borderWidth: 1,
-    borderColor: colors.gray[200],
+    borderColor: colors.gray[100],
     padding: spacing.sm,
     paddingVertical: spacing.sm,
     backgroundColor: colors.white,
     borderRadius: borderRadius.lg,
+    shadowColor: colors.orange[400],
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
   },
   quickActionsContainerSkeleton: {
     paddingHorizontal: spacing.md,
@@ -902,7 +670,14 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     marginBottom: spacing.md,
     borderWidth: 1,
-    borderColor: colors.gray[200],
+    borderColor: colors.gray[100],
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
   },
   campaignCardSkeleton: {
     backgroundColor: colors.white,
@@ -1068,7 +843,9 @@ const StatCardWithSkeleton = ({ stat, isLoading }: { stat: Stat; isLoading: bool
       </View>
       <View>
         <Text style={styles.statValue}>{stat.value}</Text>
-        <Text style={styles.statLabel}>{stat.title}</Text>
+        <Text style={styles.statLabel} numberOfLines={1} ellipsizeMode="tail">
+          {stat.title}
+        </Text>
       </View>
     </View>
   );
