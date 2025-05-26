@@ -133,24 +133,7 @@ export default function QuickApprovalsScreen() {
 
   return (
     <View style={styles.container}>
-      <AppHeader
-        title="Quick Approvals"
-        showBackButton
-        // leftContent={
-        //   <TouchableOpacity onPress={() => router.back()}>
-        //     <ArrowLeft size={24} color={colors.text.primary} />
-        //   </TouchableOpacity>
-        // }
-        // rightContent={
-        //   <TouchableOpacity>
-        //     <View style={styles.filterButton}>
-        //       <View style={styles.filterDot} />
-        //       <View style={styles.filterDot} />
-        //       <View style={styles.filterDot} />
-        //     </View>
-        //   </TouchableOpacity>
-        // }
-      />
+      <AppHeader title="Quick Approvals" showBackButton />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -330,5 +313,96 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.sm,
     backgroundColor: colors.gray[200],
   },
-  //   sk
+  approvalsContainer: {
+    // padding: spacing.md,
+    // gap: spacing.md,
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    padding: spacing.xl,
+    marginTop: spacing.xl,
+  },
+  emptyIconContainer: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
+  },
+  emptyIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: borderRadius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyTitle: {
+    fontSize: typography.sizes.lg,
+    fontWeight: typography.weights.semibold,
+    color: colors.gray[900],
+    marginBottom: spacing.xs,
+  },
+  emptySubtitle: {
+    fontSize: typography.sizes.sm,
+    color: colors.gray[600],
+    textAlign: 'center',
+    marginBottom: spacing.lg,
+  },
+  refreshButton: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.full,
+    borderWidth: 1,
+    borderColor: colors.gray[200],
+  },
+  refreshButtonText: {
+    fontSize: typography.sizes.sm,
+    color: colors.gray[900],
+    fontWeight: typography.weights.medium,
+  },
+  downloadButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: spacing.sm,
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: colors.gray[200],
+    marginBottom: spacing.md,
+  },
+  downloadIconContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.gray[200],
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  downloadTextContainer: {
+    flex: 1,
+    marginLeft: spacing.sm,
+  },
+  downloadTitle: {
+    fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.medium,
+    color: colors.gray[900],
+  },
+  downloadSubtitle: {
+    fontSize: typography.sizes.xs,
+    color: colors.gray[600],
+  },
+  downloadFormat: {
+    fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.medium,
+    color: colors.gray[900],
+  },
+  skeletonBody: {
+    gap: spacing.sm,
+  },
+  skeletonLine: {
+    width: '100%',
+    height: 16,
+    borderRadius: borderRadius.sm,
+    backgroundColor: colors.gray[200],
+  },
 });
