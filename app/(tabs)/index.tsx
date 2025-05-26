@@ -20,6 +20,7 @@ import {
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Image,
+  ImageURISource,
   Pressable,
   Animated as RNAnimated,
   RefreshControl,
@@ -51,6 +52,7 @@ type QuickAction = {
   name: string;
   count: number;
   icon: React.ReactNode;
+  iconImage?: ImageURISource;
   color: string;
   backgroundColor: string;
 };
@@ -69,7 +71,7 @@ const MOCK_DATA = {
   brand: {
     name: 'Nike Brand',
     logo: require('@/assets/logo/logomark.png'), // Replace with actual logo path
-    color: colors.orange[500], // This would come from the server
+    color: colors.blue[600], // This would come from the server
   },
   user: {
     firstName: 'Alex',
@@ -115,6 +117,7 @@ const MOCK_DATA = {
       name: 'Approvals',
       count: 12,
       icon: <CheckCircle weight="bold" />,
+      iconImage: require('@/assets/icons/3dicons-star-iso-gradient.png'),
       color: colors.orange[500],
       backgroundColor: colors.orange[50],
     },
@@ -123,6 +126,7 @@ const MOCK_DATA = {
       name: 'Invoices',
       count: 8,
       icon: <FileText weight="bold" />,
+      iconImage: require('@/assets/icons/file-update_18753931.png'),
       color: colors.blue[500],
       backgroundColor: colors.blue[50],
     },
@@ -131,6 +135,7 @@ const MOCK_DATA = {
       name: 'Analytics',
       count: 4,
       icon: <LineSegments weight="bold" />,
+      iconImage: require('@/assets/icons/3dicons-computer-iso-gradient.png'),
       color: colors.green[500],
       backgroundColor: colors.green[50],
     },
@@ -139,6 +144,7 @@ const MOCK_DATA = {
       name: 'Team',
       count: 3,
       icon: <Users weight="bold" />,
+      iconImage: require('@/assets/icons/3dicons-girl-iso-color.png'),
       color: colors.purple[500],
       backgroundColor: colors.purple[50],
     },
@@ -233,7 +239,7 @@ export default function BrandHomeScreen() {
 
       <RNAnimated.ScrollView
         showsVerticalScrollIndicator={false}
-        style={{ backgroundColor: colors.gray[50] }}
+        style={{ backgroundColor: colors.white }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -886,12 +892,13 @@ const ActionCardWithSkeleton = ({
   }
 
   return (
-    <Pressable style={styles.actionCard}>
+    <Pressable onPress={() => router.push('/campaigns/quick-approvals')} style={styles.actionCard}>
       <View style={[styles.actionIconContainer, { backgroundColor: action.backgroundColor }]}>
         {React.cloneElement(action.icon as React.ReactElement<any, string>, {
           size: 20,
           color: action.color,
         })}
+        {/* <Image source={action.iconImage} style={{ height: 44, width: 44, objectFit: 'contain' }} /> */}
         {action.count > 0 && (
           <View style={styles.actionBadge}>
             <Text style={styles.actionBadgeText}>{action.count > 9 ? '9+' : action.count}</Text>
