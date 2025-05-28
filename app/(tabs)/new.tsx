@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Dimensions,
   Image,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
@@ -115,7 +116,7 @@ const sampleProducts: Product[] = [
 // Product Card Component
 const ProductCard = ({ product }: { product: Product }) => {
   return (
-    <View style={styles.productCard}>
+    <Pressable onPress={() => router.push(`/product/${product.id}`)} style={styles.productCard}>
       <View style={styles.productImageContainer}>
         <Image source={{ uri: product.image }} style={styles.productImage} />
         <TouchableOpacity style={styles.optionsButton}>
@@ -127,7 +128,7 @@ const ProductCard = ({ product }: { product: Product }) => {
         <Text style={styles.productSku}>SKU: {product.sku}</Text>
         <Text style={styles.productPrice}>₹{product.price.toLocaleString()}</Text>
       </View>
-    </View>
+    </Pressable>
   );
 };
 

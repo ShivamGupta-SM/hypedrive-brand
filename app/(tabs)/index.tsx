@@ -3,7 +3,7 @@ import GradientCard from '@/components/GradientCard';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { borderRadius, colors, spacing, typography } from '@/constants/Design';
 import { useBrandSwitcher } from '@/hooks/useBrandSwitcher';
-import { router } from 'expo-router';
+import { LinkProps, router } from 'expo-router';
 import {
   Bell,
   CaretRight,
@@ -55,6 +55,7 @@ type QuickAction = {
   iconImage?: ImageURISource;
   color: string;
   backgroundColor: string;
+  link: LinkProps['href'];
 };
 
 type Stat = {
@@ -66,8 +67,23 @@ type Stat = {
   bgColor: string;
 };
 
+type MockData = {
+  brand: {
+    name: string;
+    logo: ImageURISource;
+    color: string;
+  };
+  user: {
+    firstName: string;
+    pendingTasks: number;
+  };
+  stats: Stat[];
+  quickActions: QuickAction[];
+  activeCampaigns: Campaign[];
+};  
+
 // Mock data for the home screen
-const MOCK_DATA = {
+const MOCK_DATA: MockData = {
   brand: {
     name: 'Nike Brand',
     logo: require('@/assets/logo/logomark.png'), // Replace with actual logo path
@@ -116,6 +132,7 @@ const MOCK_DATA = {
       id: 'approvals',
       name: 'Approvals',
       count: 12,
+      link: '/campaigns/approvals/quick-approvals',
       icon: <CheckCircle weight="bold" />,
       iconImage: require('@/assets/icons/3dicons-star-iso-gradient.png'),
       color: colors.orange[500],
@@ -125,6 +142,7 @@ const MOCK_DATA = {
       id: 'invoices',
       name: 'Invoices',
       count: 8,
+      link: '/analytics',
       icon: <FileText weight="bold" />,
       iconImage: require('@/assets/icons/file-update_18753931.png'),
       color: colors.blue[500],
@@ -134,6 +152,7 @@ const MOCK_DATA = {
       id: 'analytics',
       name: 'Analytics',
       count: 4,
+      link: '/analytics',
       icon: <LineSegments weight="bold" />,
       iconImage: require('@/assets/icons/3dicons-computer-iso-gradient.png'),
       color: colors.green[500],
@@ -143,6 +162,7 @@ const MOCK_DATA = {
       id: 'team',
       name: 'Team',
       count: 3,
+      link: '/analytics',
       icon: <Users weight="bold" />,
       iconImage: require('@/assets/icons/3dicons-girl-iso-color.png'),
       color: colors.purple[500],
@@ -892,7 +912,9 @@ const ActionCardWithSkeleton = ({
   }
 
   return (
-    <Pressable onPress={() => router.push('/campaigns/quick-approvals')} style={styles.actionCard}>
+    <Pressable
+      onPress={() => router.push(action.link)}
+      style={styles.actionCard}>
       <View style={[styles.actionIconContainer, { backgroundColor: action.backgroundColor }]}>
         {React.cloneElement(action.icon as React.ReactElement<any, string>, {
           size: 20,
