@@ -128,7 +128,7 @@ export default function QuickApprovalsScreen() {
   // Handle approval card press
   const handleApprovalPress = (item: ApprovalItem) => {
     // Navigate to approval details
-    router.push(`/approvals/${item.id}`);
+    router.push(`/campaigns/approvals/${item.id}`);
   };
 
   return (

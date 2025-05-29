@@ -5,7 +5,7 @@ import { StyleSheet, Text, View, ViewStyle } from 'react-native';
 
 type ApprovalStatsCardProps = {
   title: string;
-  value: number;
+  value: string | number;
   subtitle: string;
   color: 'orange' | 'green';
   style?: ViewStyle;

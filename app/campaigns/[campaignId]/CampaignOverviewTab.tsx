@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   campaignImageContainer: {
-    width: 72,
+    width: 56,
     height: 56,
     borderRadius: borderRadius.md,
     backgroundColor: colors.white,

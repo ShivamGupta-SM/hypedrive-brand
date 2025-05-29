@@ -4,10 +4,10 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import CampaignAnalyticsTab from './CampaignAnalyticsTab';
-import CampaignDetailsTabs from './CampaignDetailsTabs';
-import CampaignEnrollmentsTab from './CampaignEnrollmentsTab';
-import CampaignOverViewTab from './CampaignOverviewTab';
+// import CampaignAnalyticsTab from './CampaignAnalyticsTab';
+// import CampaignDetailsTabs from './CampaignDetailsTabs';
+// import CampaignEnrollmentsTab from './CampaignEnrollmentsTab';
+// import CampaignOverViewTab from './CampaignOverviewTab';
 
 // Tab type
 type TabType = {
@@ -47,49 +47,34 @@ const CampaignDetails = () => {
   };
 
   // Render tab content based on active tab
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case 'overview':
-        return <CampaignOverViewTab campaignId={campaignId as string} />;
-      case 'enrollments':
-        return <CampaignEnrollmentsTab campaignId={campaignId as string} />;
-      case 'settings':
-        return <CampaignAnalyticsTab campaignId={campaignId as string} />;
-      default:
-        return <CampaignOverViewTab campaignId={campaignId as string} />;
-    }
-  };
+  // const renderTabContent = () => {
+  //   switch (activeTab) {
+  //     case 'overview':
+  //       return <CampaignOverViewTab campaignId={campaignId as string} />;
+  //     case 'enrollments':
+  //       return <CampaignEnrollmentsTab campaignId={campaignId as string} />;
+  //     case 'settings':
+  //       return <CampaignAnalyticsTab campaignId={campaignId as string} />;
+  //     default:
+  //       return <CampaignOverViewTab campaignId={campaignId as string} />;
+  //   }
+  // };
 
   return (
     <SafeAreaView style={styles.container} edges={['right', 'left']}>
       <AppHeader title="Campaign Details" showBackButton titleAlign="left" />
-      {/* Horizontal Tabs */}
-      {/* <View style={styles.tabsContainer}>
-        <ScrollView
-          ref={scrollViewRef}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.tabsScrollContent}>
-          {tabs.map(tab => (
-            <TabItem
-              key={tab.id}
-              tab={tab}
-              isActive={activeTab === tab.id}
-              onPress={() => handleTabPress(tab.id)}
-            />
-          ))}
-        </ScrollView>
-      </View> */}
-      <CampaignDetailsTabs
+
+      {/* Campaign Details Tabs */}
+      {/* <CampaignDetailsTabs
         tabs={tabs}
         activeTab={activeTab}
         onTabPress={handleTabPress}
         scrollViewRef={scrollViewRef}
-      />
+      /> */}
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Tab Content */}
-        {renderTabContent()}
+        {/* {renderTabContent()} */}
 
         {/* Bottom spacing */}
         <View style={{ height: 100 }} />
