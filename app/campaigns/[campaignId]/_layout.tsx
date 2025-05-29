@@ -111,7 +111,12 @@ export default function CampaignDetailsLayout() {
     <PortalProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <SafeAreaView style={styles.container} edges={['right', 'left']}>
-          <AppHeader title="Campaign Details" showBackButton titleAlign="left" />
+          <AppHeader 
+            title="Campaign Details" 
+            showBackButton 
+            titleAlign="left" 
+            onBackPress={() => router.back()} 
+          />
 
           {/* Campaign Details Tabs */}
           <CampaignDetailsTabs

@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { FileText } from 'phosphor-react-native';
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Invoice type definition
@@ -23,20 +23,20 @@ const Invoices = () => {
   // Sample invoice data
   const invoices: Invoice[] = [
     {
-      id: 'INV-2025001',
+      id: 'INV-2025-04-001',
       amount: 12500,
       dueDate: 'Mar 15, 2025',
       status: 'pending',
     },
     {
-      id: 'INV-2025002',
+      id: 'INV-2025-04-002',
       amount: 8900,
       dueDate: 'Mar 10, 2025',
       status: 'paid',
       paidDate: 'Mar 10, 2025',
     },
     {
-      id: 'INV-2025003',
+      id: 'INV-2025-04-003',
       amount: 15800,
       dueDate: 'Mar 20, 2025',
       status: 'overdue',
@@ -150,7 +150,10 @@ const Invoices = () => {
         {/* Invoice List */}
         <View style={styles.invoiceList}>
           {filteredInvoices.map(invoice => (
-            <View key={invoice.id} style={styles.invoiceItem}>
+            <Pressable
+              onPress={() => router.push(`/(brand)/invoices/${invoice.id}`)}
+              key={invoice.id}
+              style={styles.invoiceItem}>
               <View style={styles.invoiceIconContainer}>
                 <View
                   style={[
@@ -164,10 +167,10 @@ const Invoices = () => {
                       invoice.status === 'pending'
                         ? colors.orange[500]
                         : invoice.status === 'paid'
-                          ? colors.green[500]
-                          : invoice.status === 'overdue'
-                            ? colors.rose[500]
-                            : colors.text.primary
+                        ? colors.green[500]
+                        : invoice.status === 'overdue'
+                        ? colors.rose[500]
+                        : colors.text.primary
                     }
                     weight="fill"
                   />
@@ -194,8 +197,8 @@ const Invoices = () => {
                       {invoice.status === 'pending'
                         ? 'Pending'
                         : invoice.status === 'paid'
-                          ? 'Paid'
-                          : 'Overdue'}
+                        ? 'Paid'
+                        : 'Overdue'}
                     </Text>
                   </View>
                 </View>
@@ -212,7 +215,7 @@ const Invoices = () => {
                   <Text style={styles.invoiceAmount}>₹{invoice.amount.toLocaleString()}</Text>
                 </View>
               </View>
-            </View>
+            </Pressable>
           ))}
         </View>
       </ScrollView>
