@@ -1,6 +1,13 @@
 import { borderRadius, colors, spacing, typography } from '@/constants/Design';
 import { useLocalSearchParams } from 'expo-router';
-import { CaretDown, Clock, CurrencyCircleDollar, Star, Users } from 'phosphor-react-native';
+import {
+  ArrowUp,
+  CaretDown,
+  Clock,
+  CurrencyCircleDollar,
+  Star,
+  Users,
+} from 'phosphor-react-native';
 import React, { useCallback, useState } from 'react';
 import {
   Dimensions,
@@ -11,7 +18,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { LineChart } from 'react-native-chart-kit';
+import { BarChart, LineChart, PieChart } from 'react-native-chart-kit';
 
 // Reusable component for period selector dropdown
 const PeriodSelector = ({
@@ -217,6 +224,49 @@ export default function CampaignAnalytics() {
     ],
   };
 
+  // Bar Chart data for enrollment trend
+  const barChartData = {
+    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    datasets: [
+      {
+        data: [35, 45, 37, 55, 40, 43, 50],
+        color: () => colors.orange[500],
+      },
+    ],
+  };
+
+  // Pie Chart data for distribution by status
+  const pieChartData = [
+    {
+      name: 'Approved',
+      population: 156,
+      color: colors.gray[800],
+      legendFontColor: colors.text.secondary,
+      legendFontSize: 12,
+    },
+    {
+      name: 'Pending',
+      population: 85,
+      color: colors.blue[500],
+      legendFontColor: colors.text.secondary,
+      legendFontSize: 12,
+    },
+    {
+      name: 'Rejected',
+      population: 45,
+      color: colors.rose[500],
+      legendFontColor: colors.text.secondary,
+      legendFontSize: 12,
+    },
+    {
+      name: 'Awaiting',
+      population: 56,
+      color: colors.gray[300],
+      legendFontColor: colors.text.secondary,
+      legendFontSize: 12,
+    },
+  ];
+
   // Chart configuration
   const chartConfig = {
     backgroundGradientFrom: colors.white,
@@ -262,6 +312,41 @@ export default function CampaignAnalytics() {
       style={styles.container}
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+      {/* Order Value and Enrollment Cards */}
+      <View style={styles.wideStatsGrid}>
+        <View style={styles.statCardWide}>
+          <View style={styles.statCardContent}>
+            <Text style={styles.statLabel}>Total Order Value</Text>
+            <View style={styles.statValueRow}>
+              <Text style={[styles.statValue, { color: colors.text.primary }]}>₹24.2L</Text>
+              <View style={styles.percentageContainer}>
+                <ArrowUp size={12} weight="bold" color={colors.green[500]} />
+                <Text style={styles.percentageText}>18.4% vs last month</Text>
+              </View>
+            </View>
+          </View>
+          <View style={styles.statCardIcon}>
+            <CurrencyCircleDollar size={24} weight="fill" color={colors.orange[500]} />
+          </View>
+        </View>
+
+        <View style={styles.statCardWide}>
+          <View style={styles.statCardContent}>
+            <Text style={styles.statLabel}>Total Enrollments</Text>
+            <View style={styles.statValueRow}>
+              <Text style={[styles.statValue, { color: colors.text.primary }]}>342</Text>
+              <View style={styles.percentageContainer}>
+                <ArrowUp size={12} weight="bold" color={colors.green[500]} />
+                <Text style={styles.percentageText}>12.8% vs last month</Text>
+              </View>
+            </View>
+          </View>
+          <View style={styles.statCardIcon}>
+            <Users size={24} weight="fill" color={colors.orange[500]} />
+          </View>
+        </View>
+      </View>
+
       {/* Stats Cards */}
       <View style={styles.statsGrid}>
         <StatCard
@@ -355,6 +440,88 @@ export default function CampaignAnalytics() {
         <FinancialRow label="Total Amount" value="₹1,21,350" />
       </View>
 
+      {/* Enrollment Trend Section */}
+      <View style={styles.sectionCard}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Enrollment Trend</Text>
+          <PeriodSelector period={period} setPeriod={setPeriod} />
+        </View>
+
+        <BarChart
+          data={barChartData}
+          width={screenWidth - spacing.md * 2}
+          height={220}
+          chartConfig={{
+            ...chartConfig,
+            color: () => colors.orange[500],
+            barPercentage: 0.7,
+            fillShadowGradientFrom: colors.orange[500],
+            fillShadowGradientTo: colors.orange[500],
+            fillShadowGradientOpacity: 1,
+          }}
+          style={styles.chart}
+          fromZero
+          yAxisLabel=""
+          yAxisSuffix=""
+        />
+      </View>
+
+      {/* Distribution by Status Section */}
+      <View style={styles.sectionCard}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Distribution by Status</Text>
+          <Text style={styles.totalText}>342 Total</Text>
+        </View>
+
+        <View style={styles.pieChartContainer}>
+          <View style={styles.pieChartWrapper}>
+            <PieChart
+              data={pieChartData}
+              width={screenWidth - spacing.md * 2}
+              height={220}
+              chartConfig={chartConfig}
+              accessor="population"
+              backgroundColor="transparent"
+              paddingLeft="0"
+              absolute
+              hasLegend={false}
+              center={[screenWidth / 4, 0]}
+            />
+            <View style={styles.pieChartCenter}>
+              <Text style={styles.pieChartCenterValue}>45.6%</Text>
+              <Text style={styles.pieChartCenterLabel}>Approved</Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.statusLegendContainer}>
+          <View style={styles.statusLegendRow}>
+            <View style={styles.statusLegendItem}>
+              <View style={[styles.statusDot, { backgroundColor: colors.gray[800] }]} />
+              <Text style={styles.statusLabel}>Approved</Text>
+              <Text style={styles.statusValue}>156 (45.6%)</Text>
+            </View>
+            <View style={styles.statusLegendItem}>
+              <View style={[styles.statusDot, { backgroundColor: colors.blue[500] }]} />
+              <Text style={styles.statusLabel}>Pending</Text>
+              <Text style={styles.statusValue}>85 (24.9%)</Text>
+            </View>
+          </View>
+          <View style={styles.statusLegendRow}>
+            <View style={styles.statusLegendItem}>
+              <View style={[styles.statusDot, { backgroundColor: colors.rose[500] }]} />
+              <Text style={styles.statusLabel}>Rejected</Text>
+              <Text style={styles.statusValue}>45 (13.2%)</Text>
+            </View>
+            <View style={styles.statusLegendItem}>
+              <View style={[styles.statusDot, { backgroundColor: colors.gray[300] }]} />
+              <Text style={styles.statusLabel}>Awaiting</Text>
+              <Text style={styles.statusValue}>56 (16.3%)</Text>
+            </View>
+          </View>
+        </View>
+      </View>
+
       {/* Quality Score Section */}
       <View style={styles.sectionCard}>
         <Text style={styles.sectionTitle}>Quality Score</Text>
@@ -428,6 +595,50 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.xs,
     color: colors.text.secondary,
   },
+  wideStatsGrid: {
+    flexDirection: 'column',
+    marginBottom: spacing.md,
+    gap: spacing.md,
+  },
+  statCardWide: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+    shadowColor: colors.black,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  statCardContent: {
+    flex: 1,
+  },
+  statCardIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.gray[100],
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  statValueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: spacing.xs,
+  },
+  percentageContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: spacing.sm,
+  },
+  percentageText: {
+    fontSize: typography.sizes.xs,
+    color: colors.green[500],
+    marginLeft: 2,
+  },
   sectionCard: {
     backgroundColor: colors.white,
     borderRadius: borderRadius.lg,
@@ -492,6 +703,67 @@ const styles = StyleSheet.create({
   chart: {
     marginVertical: spacing.sm,
     borderRadius: borderRadius.md,
+  },
+  totalText: {
+    fontSize: typography.sizes.xs,
+    color: colors.text.secondary,
+  },
+  pieChartContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 220,
+  },
+  pieChartWrapper: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  },
+  pieChartCenter: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+    top: '50%',
+    left: '50%',
+    transform: [{ translateX: -40 }, { translateY: -20 }],
+  },
+  pieChartCenterValue: {
+    fontSize: typography.sizes.xl,
+    fontWeight: typography.weights.bold,
+    color: colors.white,
+  },
+  pieChartCenterLabel: {
+    fontSize: typography.sizes.xs,
+    color: colors.white,
+  },
+  statusLegendContainer: {
+    marginTop: spacing.md,
+  },
+  statusLegendRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: spacing.sm,
+  },
+  statusLegendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '48%',
+  },
+  statusDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: spacing.xs,
+  },
+  statusLabel: {
+    fontSize: typography.sizes.xs,
+    color: colors.text.secondary,
+    marginRight: spacing.xs,
+  },
+  statusValue: {
+    fontSize: typography.sizes.xs,
+    color: colors.text.primary,
+    fontWeight: typography.weights.medium,
   },
   seeAllText: {
     fontSize: typography.sizes.xs,
