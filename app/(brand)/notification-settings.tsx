@@ -148,13 +148,13 @@ export default function NotificationSettingsScreen() {
         </View>
 
         {/* Notification Channels Section */}
-        <View style={styles.section}>
+        <View style={styles.section} key="notification-channels">
           <Text style={styles.sectionTitle}>Notification Channels</Text>
           <Divider />
 
           {channels.map((channel, index) => (
             <>
-              <View key={channel.id} style={styles.channelItem}>
+              <View key={'channel-item-' + channel.id} style={styles.channelItem}>
                 <View style={styles.channelInfo}>
                   <View
                     style={[styles.iconContainer, { backgroundColor: getIconBgColor(channel.id) }]}>
@@ -176,7 +176,7 @@ export default function NotificationSettingsScreen() {
         </View>
 
         {/* Push Notifications Section */}
-        <View style={styles.section}>
+        <View style={styles.section} key="push-notifications">
           <Text style={styles.sectionTitle}>Push Notifications</Text>
           <Divider />
 
@@ -204,7 +204,7 @@ export default function NotificationSettingsScreen() {
         </View>
 
         {/* Email Notifications Section */}
-        <View style={styles.section}>
+        <View style={styles.section} key="email-notifications">
           <Text style={styles.sectionTitle}>Email Notifications</Text>
           <Divider />
 
@@ -232,7 +232,7 @@ export default function NotificationSettingsScreen() {
         </View>
 
         {/* Additional Settings */}
-        <View style={styles.section}>
+        <View style={styles.section} key="additional-settings">
           <Text style={styles.sectionTitle}>Additional Settings</Text>
           <Divider />
 

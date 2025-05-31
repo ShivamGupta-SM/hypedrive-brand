@@ -3,8 +3,8 @@ import { borderRadius, colors, spacing, typography } from '@/constants/Design';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { ArrowRight, CheckCircle, Wallet } from 'phosphor-react-native';
-import React from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 // Payment type definition
 type Payment = {
@@ -85,6 +85,15 @@ const PaymentHistory = () => {
     </TouchableOpacity>
   );
 
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 1500);
+  }, []);
+
   return (
     <View style={styles.container}>
       {/* Custom Header */}
@@ -99,7 +108,8 @@ const PaymentHistory = () => {
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         {/* Total Payments Card */}
         <LinearGradient
           colors={['#F97316', '#FDBA74']}

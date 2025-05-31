@@ -4,11 +4,13 @@ import { Ionicons } from '@expo/vector-icons';
 import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from '@gorhom/bottom-sheet';
 import { Portal } from '@gorhom/portal';
 import { FlashList } from '@shopify/flash-list';
+import { router } from 'expo-router';
 import { Check, Clock, SlidersHorizontal } from 'phosphor-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
+  Pressable,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -58,7 +60,7 @@ const StatCard = ({ label, value, valueStyle }: StatCardProps) => {
 
 // EnrollmentItem Component
 const EnrollmentItem = ({ item }: { item: Enrollment }) => (
-  <View style={styles.enrollmentItem}>
+  <Pressable style={styles.enrollmentItem} onPress={() => router.push(`/enrollment/${item.id}`)}>
     <View style={styles.productContainer}>
       <View style={styles.productInfoWithStatusPrice}>
         <View style={styles.productImageAndInfoContainer}>
@@ -115,7 +117,7 @@ const EnrollmentItem = ({ item }: { item: Enrollment }) => (
         </View>
       </View>
     </View>
-  </View>
+  </Pressable>
 );
 
 // FilterBottomSheet Component
@@ -256,7 +258,7 @@ const CampaignEnrollmentsTab = ({ campaignId }: CampaignEnrollmentsTabProps) => 
   // Mock data for enrollments
   const enrollments: Enrollment[] = [
     {
-      id: '1',
+      id: 'ENR123456',
       productName:
         'Apple AirPods Pro 2 Wireless Earbuds, Bluetooth Headphones, Active Noise Cancellation, Hearing Aid Feature, Transparency, Personalized Spatial Audio, High-Fidelity Sound, H2 Chip, USB-C Charging: Buy Online at Best Price in UAE - Amazon.ae',
       productId: '112-7447943-3785296',
@@ -273,7 +275,7 @@ const CampaignEnrollmentsTab = ({ campaignId }: CampaignEnrollmentsTabProps) => 
       },
     },
     {
-      id: '2',
+      id: 'ENR789012',
       productName: 'iPad Pro Series Ultra Hybrid Pro',
       productId: '45892',
       price: '₹8,999',
@@ -289,7 +291,7 @@ const CampaignEnrollmentsTab = ({ campaignId }: CampaignEnrollmentsTabProps) => 
       },
     },
     {
-      id: '3',
+      id: 'ENR789012',
       productName: 'Apple Watch SE GPS 40mm Starlight Aluminium Case with Sport Band - S/M',
       productId: '12934',
       price: '₹51,499',
@@ -305,7 +307,7 @@ const CampaignEnrollmentsTab = ({ campaignId }: CampaignEnrollmentsTabProps) => 
       },
     },
     {
-      id: '4',
+      id: 'ENR123456',
       productName: 'Introducing the next generation of Mac - Apple (CA)',
       productId: '86231',
       price: '₹1,29,299',
@@ -321,7 +323,7 @@ const CampaignEnrollmentsTab = ({ campaignId }: CampaignEnrollmentsTabProps) => 
       },
     },
     {
-      id: '5',
+      id: 'ENR123456',
       productName:
         'Amazon.in: Buy Pink iPad Pencil for Apple iPad 2018-2023,Faster Charge,Palm Rejection,Tilt Sensitivity for Apple Pen, for iPad 10th /9/8/7/6th Gen, ...',
       productId: '77923-112-3785296',
@@ -435,7 +437,7 @@ const CampaignEnrollmentsTab = ({ campaignId }: CampaignEnrollmentsTabProps) => 
         <FlashList
           data={filteredEnrollments}
           renderItem={({ item }) => <EnrollmentItem item={item} />}
-          keyExtractor={item => item.id}
+          keyExtractor={(item, index) => `enrollment-${item.id}-${index}`}
           contentContainerStyle={styles.enrollmentsList}
           showsVerticalScrollIndicator={false}
           estimatedItemSize={200}

@@ -147,18 +147,11 @@ export default function CampaignsScreen() {
         ref={scrollViewRef}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
-        onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
-          useNativeDriver: true,
-        })}
-        scrollEventThrottle={16}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.blue[500]}
-            colors={[colors.blue[500]]}
-          />
-        }>
+        // onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
+        //   useNativeDriver: true,
+        // })}
+        // scrollEventThrottle={16}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         {MOCK_CAMPAIGNS.map(campaign => (
           <CampaignCard key={'campaign' + campaign.id} campaign={campaign} />
         ))}

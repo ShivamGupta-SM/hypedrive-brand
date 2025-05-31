@@ -4,82 +4,105 @@ import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from '@gorhom/botto
 import { Portal } from '@gorhom/portal';
 import * as Haptics from 'expo-haptics';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { StyleSheet } from 'react-native';
+import { Keyboard, Platform, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export function useBrandSwitcher() {
+  // State to control visibility of the brand switcher
   const [isBrandSwitcherVisible, setIsBrandSwitcherVisible] = useState(false);
+  // Reference to the bottom sheet component
   const bottomSheetRef = useRef<BottomSheet>(null);
+  // Get safe area insets for proper positioning
   const insets = useSafeAreaInsets();
 
+  // Function to open the brand switcher
   const openBrandSwitcher = useCallback(() => {
-    if (process.env.EXPO_OS === 'ios') {
+    console.log('Opening brand switcher');
+    // Dismiss keyboard if it's open
+    Keyboard.dismiss();
+
+    // Provide haptic feedback on iOS
+    if (Platform.OS === 'ios') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
 
-    // First set the visibility to true
+    // Set visibility to true to render the component
     setIsBrandSwitcherVisible(true);
-
-    // Remove the timeout and directly present the sheet
-    // The component will be mounted in the next render cycle
-    requestAnimationFrame(() => {
-      if (bottomSheetRef.current) {
-        bottomSheetRef.current.expand();
-      }
-    });
+    bottomSheetRef.current?.expand();
   }, []);
 
+  // Function to close the brand switcher
   const closeBrandSwitcher = useCallback(() => {
-    if (bottomSheetRef.current) {
-      bottomSheetRef.current.close();
-    }
-
-    // Use a shorter timeout for hiding the component
-    setTimeout(() => {
-      setIsBrandSwitcherVisible(false);
-    }, 100);
+    // Simply hide the component
+    setIsBrandSwitcherVisible(false);
+    bottomSheetRef.current?.close();
   }, []);
 
-  // Define snap points
-  const snapPoints = useMemo(() => ['60%'], []);
+  // Define snap points - adjust height for better UX
+  const snapPoints = useMemo(() => ['65%'], []);
 
-  // Render backdrop component
+  // Handle changes in the bottom sheet state
+  const handleSheetChanges = useCallback((index: number) => {
+    if (index === -1) {
+      // Sheet was closed by gesture, ensure we clean up
+      setIsBrandSwitcherVisible(false);
+      bottomSheetRef.current?.close();
+    }
+  }, []);
+
+  // Render backdrop component with improved styling
+  // const renderBackdrop = useCallback(
+  //   (props: any) => (
+  //     <BottomSheetBackdrop
+  //       {...props}
+  //       disappearsOnIndex={-1}
+  //       appearsOnIndex={0}
+  //       opacity={0.5}
+  //       pressBehavior="close"
+  //       enableTouchThrough={false}
+  //       style={{ maxHeight: '100%' }}
+  //     />
+  //   ),
+  //   [],
+  // );
+
   const renderBackdrop = useCallback(
     (props: any) => (
-      <BottomSheetBackdrop
-        {...props}
-        disappearsOnIndex={-1}
-        appearsOnIndex={0}
-        opacity={0.2}
-        style={{ maxHeight: '80%' }}
-      />
+      <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.5} />
     ),
     [],
   );
 
-  const BrandSwitcherComponent = isBrandSwitcherVisible ? (
-    <Portal>
-      <BottomSheet
-        ref={bottomSheetRef}
-        index={0}
-        snapPoints={snapPoints}
-        enablePanDownToClose
-        onClose={closeBrandSwitcher}
-        handleIndicatorStyle={{ backgroundColor: colors.gray[300], width: 40 }}
-        backgroundStyle={styles.backgroundStyle}
-        backdropComponent={renderBackdrop}
-        bottomInset={insets.bottom}
-        style={styles.bottomSheet}>
-        <BottomSheetView style={styles.contentContainer}>
-          <BrandSwitcher
-            isVisible={isBrandSwitcherVisible}
-            onClose={closeBrandSwitcher}
-            bottomSheetRef={bottomSheetRef}
-          />
-        </BottomSheetView>
-      </BottomSheet>
-    </Portal>
-  ) : null;
+  // Create the brand switcher component
+  const BrandSwitcherComponent = useMemo(() => {
+    // if (!isBrandSwitcherVisible) return null;
+
+    return (
+      <Portal>
+        <BottomSheet
+          ref={bottomSheetRef}
+          index={0}
+          snapPoints={snapPoints}
+          enablePanDownToClose
+          onClose={closeBrandSwitcher}
+          onChange={handleSheetChanges}
+          animateOnMount
+          handleIndicatorStyle={{ backgroundColor: colors.gray[300], width: 40 }}
+          backgroundStyle={styles.backgroundStyle}
+          backdropComponent={renderBackdrop}
+          // bottomInset={insets.bottom}
+          style={styles.bottomSheet}>
+          <BottomSheetView style={styles.contentContainer}>
+            <BrandSwitcher
+              isVisible={isBrandSwitcherVisible}
+              onClose={closeBrandSwitcher}
+              bottomSheetRef={bottomSheetRef}
+            />
+          </BottomSheetView>
+        </BottomSheet>
+      </Portal>
+    );
+  }, [isBrandSwitcherVisible, snapPoints, closeBrandSwitcher, handleSheetChanges, insets.bottom]);
 
   return {
     BrandSwitcherComponent,
@@ -99,6 +122,7 @@ const styles = StyleSheet.create({
     elevation: 5,
     borderTopLeftRadius: borderRadius.xxxl,
     borderTopRightRadius: borderRadius.xxxl,
+    zIndex: 9999, // Ensure the bottom sheet appears above other content
   },
   backgroundStyle: {
     backgroundColor: colors.white,

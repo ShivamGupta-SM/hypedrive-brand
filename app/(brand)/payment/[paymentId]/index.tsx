@@ -18,19 +18,19 @@ const paymentData = {
     method: 'Virtual Account Transfer',
     invoices: [
       {
-        id: 'INV/2025/04/001',
+        id: 'INV-2025-04-001',
         amount: 25000,
         date: 'Apr 15, 2025',
         status: 'fully-paid',
       },
       {
-        id: 'INV/2025/04/002',
+        id: 'INV-2025-04-002',
         amount: 30000,
         date: 'Apr 16, 2025',
         status: 'fully-paid',
       },
       {
-        id: 'INV/2025/04/003',
+        id: 'INV-2025-04-003',
         amount: 20000,
         date: 'Apr 17, 2025',
         status: 'partially-paid',
@@ -123,6 +123,7 @@ const PaymentDetails = () => {
             icon={<Bank size={20} color={colors.text.secondary} />}
             label="Payment Method"
             value={payment.method}
+            containerStyle={{ borderBottomWidth: 0 }}
           />
         </View>
 
@@ -133,10 +134,13 @@ const PaymentDetails = () => {
             <Text style={styles.sectionTitle}>Applied to Invoices</Text>
           </View>
 
-          {payment.invoices.map(invoice => (
+          {payment.invoices.map((invoice, index) => (
             <TouchableOpacity
               key={invoice.id}
-              style={styles.invoiceItem}
+              style={[
+                styles.invoiceItem,
+                index === payment.invoices.length - 1 ? { borderBottomWidth: 0 } : null,
+              ]}
               onPress={() => router.push(`/(brand)/invoices/${invoice.id}`)}>
               <View style={styles.invoiceDetails}>
                 <View style={styles.invoiceHeader}>

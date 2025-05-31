@@ -4,7 +4,15 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { FileText } from 'phosphor-react-native';
 import React, { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Invoice type definition
@@ -60,6 +68,15 @@ const Invoices = () => {
     .filter(inv => inv.status === 'overdue')
     .reduce((sum, inv) => sum + inv.amount, 0);
 
+  const [loading, setLoading] = useState(false);
+
+  const handleRefresh = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+  };
+
   return (
     <View style={styles.container}>
       {/* Custom Header with Safe Area handling */}
@@ -73,6 +90,7 @@ const Invoices = () => {
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={handleRefresh} />}
         showsVerticalScrollIndicator={false}>
         {/* Total Outstanding Card */}
         <LinearGradient

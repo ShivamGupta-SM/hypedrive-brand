@@ -2,16 +2,12 @@ import { colors, spacing, typography } from '@/constants/Design';
 import React, { ReactNode } from 'react';
 import { StyleSheet, Text, TextStyle, View, ViewStyle } from 'react-native';
 
-type InfoRowProps = {
+type InfoColumnProps = {
   icon?: ReactNode;
   label: string;
   value: string;
   valueColor?: string;
-  rightComponent?: ReactNode;
   containerStyle?: ViewStyle;
-  leftContentStyle?: ViewStyle;
-  rightContentStyle?: ViewStyle;
-  iconContainerStyle?: ViewStyle;
   labelStyle?: TextStyle;
   valueStyle?: TextStyle;
 };
@@ -19,29 +15,27 @@ type InfoRowProps = {
 /**
  * A reusable component for displaying a row with an icon, label, and value
  */
-const InfoRow = ({
+const InfoColumn = ({
   icon,
   label,
   value,
   valueColor,
-  rightComponent,
+
   containerStyle,
-  leftContentStyle,
-  rightContentStyle,
-  iconContainerStyle,
+
   labelStyle,
   valueStyle,
-}: InfoRowProps) => {
+}: InfoColumnProps) => {
   return (
     <View style={[styles.container, containerStyle]}>
-      <View style={[styles.leftContent, leftContentStyle]}>
-        {icon && <View style={[styles.iconContainer, iconContainerStyle]}>{icon}</View>}
-        <Text style={[styles.label, labelStyle]}>{label}</Text>
-      </View>
-      <View style={[styles.rightContent, rightContentStyle]}>
-        {rightComponent || (
-          <Text style={[styles.value, valueColor ? { color: valueColor } : null]}>{value}</Text>
-        )}
+      <View style={[styles.content]}>
+        <View style={[styles.labelContent]}>
+          {icon && <View style={[styles.iconContainer]}>{icon}</View>}
+          <Text style={[styles.label, labelStyle]}>{label}</Text>
+        </View>
+        <Text style={[styles.value, valueColor ? { color: valueColor } : null, valueStyle]}>
+          {value}
+        </Text>
       </View>
     </View>
   );
@@ -49,19 +43,17 @@ const InfoRow = ({
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.gray[100],
+    flex: 1,
   },
-  leftContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  content: {
+    gap: spacing.xs,
   },
   iconContainer: {
     marginRight: spacing.sm,
+  },
+  labelContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   label: {
     fontSize: typography.sizes.sm,
@@ -76,4 +68,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default InfoRow;
+export default InfoColumn;

@@ -2,11 +2,13 @@ import { borderRadius, colors, spacing, typography } from '@/constants/Design';
 import { useBrandStore } from '@/store/brandStore';
 import BottomSheet from '@gorhom/bottom-sheet';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { Check, MegaphoneSimple, Plus, X } from 'phosphor-react-native';
 import React, { useEffect, useState } from 'react';
 import {
   Image,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -88,9 +90,20 @@ export const BrandSwitcher: React.FC<BrandSwitcherProps> = ({
     loadSelectedBrand();
   }, []);
 
-  // Handle brand selection
+  // Handle brand selection with smooth transition
   const handleSelectBrand = async (selectedBrand: Brand) => {
     try {
+      // Skip if already selected
+      if (selectedBrand.isSelected) {
+        onClose();
+        return;
+      }
+
+      // Provide haptic feedback on selection
+      if (Platform.OS === 'ios') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      }
+
       // Update brands array with selection state
       const updatedBrands = brands.map(brand => ({
         ...brand,
@@ -105,13 +118,18 @@ export const BrandSwitcher: React.FC<BrandSwitcherProps> = ({
       // Save to AsyncStorage
       await AsyncStorage.setItem('selectedBrandId', selectedBrand.id);
 
-      // Close the bottom sheet after selection
-      // setTimeout(() => {
-      //   onClose();
-      // }, 300);
+      // Close the bottom sheet immediately after selection
+      onClose();
+      // bottomSheetRef.current?.close();
     } catch (error) {
       console.error('Error saving selected brand:', error);
     }
+  };
+
+  // Handle new brand creation
+  const handleNewBrandPress = () => {
+    router.push('/(brand)/setup');
+    onClose();
   };
 
   return (
@@ -119,7 +137,7 @@ export const BrandSwitcher: React.FC<BrandSwitcherProps> = ({
       <View style={styles.header}>
         <Text style={styles.title}>Switch Brand</Text>
         <Text style={styles.subtitle}>Select a brand to manage campaigns</Text>
-        <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+        <TouchableOpacity style={styles.closeButton} onPress={onClose} activeOpacity={0.7}>
           <X size={18} color={colors.gray[700]} weight="bold" />
         </TouchableOpacity>
       </View>
@@ -132,7 +150,8 @@ export const BrandSwitcher: React.FC<BrandSwitcherProps> = ({
           <Pressable
             key={brand.id}
             style={[styles.brandItem, brand.isSelected && styles.selectedBrandContainer]}
-            onPress={() => handleSelectBrand(brand)}>
+            onPress={() => handleSelectBrand(brand)}
+            android_ripple={{ color: colors.gray[200], borderless: false }}>
             <View style={styles.brandInfo}>
               <View style={styles.logoContainer}>
                 <Image source={brand.logo} style={styles.brandLogo} />
@@ -159,7 +178,7 @@ export const BrandSwitcher: React.FC<BrandSwitcherProps> = ({
         <GradientButton
           title="Add New Brand"
           onPress={() => {
-            router.push('/(brand)/setup');
+            handleNewBrandPress();
           }}
           icon={<Plus size={20} color={colors.white} weight="bold" />}
           iconPosition="left"

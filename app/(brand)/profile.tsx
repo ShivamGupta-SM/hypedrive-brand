@@ -2,6 +2,7 @@ import { AppHeader } from '@/components/ui/AppHeader';
 import { ProfileInfoItem } from '@/components/ui/ProfileInfoItem';
 import { borderRadius, colors, spacing, typography } from '@/constants/Design';
 import * as Linking from 'expo-linking';
+import { router } from 'expo-router';
 import {
   Buildings,
   CaretRight,
@@ -151,7 +152,7 @@ export default function ProfileScreen() {
         </View>
 
         {/* Edit Profile Button */}
-        <TouchableOpacity style={styles.editButton}>
+        <TouchableOpacity onPress={() => router.push('/edit-profile')} style={styles.editButton}>
           <View style={styles.editButtonIcon}>
             <Pencil size={20} color={colors.orange[500]} weight="bold" />
           </View>
@@ -310,8 +311,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   editButtonText: {
+    flex: 1,
     color: colors.black,
-    fontSize: typography.sizes.md,
+    fontSize: typography.sizes.sm,
     fontWeight: typography.weights.semibold,
   },
 });

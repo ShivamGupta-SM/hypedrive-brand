@@ -40,7 +40,7 @@ const InfoRow = ({
       </View>
       <View style={[styles.rightContent, rightContentStyle]}>
         {rightComponent || (
-          <Text style={[styles.value, valueColor ? { color: valueColor } : null]}>{value}</Text>
+          <Text style={[styles.value, valueColor ? { color: valueColor } : null, valueStyle]}>{value}</Text>
         )}
       </View>
     </View>

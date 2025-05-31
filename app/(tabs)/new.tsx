@@ -5,10 +5,10 @@ import { router } from 'expo-router';
 import { DotsThreeVertical, MagnifyingGlass, Plus } from 'phosphor-react-native';
 import React, { useState } from 'react';
 import {
-  ActivityIndicator,
   Dimensions,
   Image,
   Pressable,
+  RefreshControl,
   StyleSheet,
   Text,
   TextInput,
@@ -172,6 +172,13 @@ export default function ProductsScreen() {
   // Render item for FlashList
   const renderItem = ({ item }: { item: Product }) => <ProductCard product={item} />;
 
+  const handleRefresh = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+  };
+
   return (
     <View style={styles.container}>
       <AppHeader title="Products" titleAlign="left" />
@@ -192,11 +199,7 @@ export default function ProductsScreen() {
         />
       </View>
 
-      {loading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.blue[500]} />
-        </View>
-      ) : showEmptyState || filteredProducts.length === 0 ? (
+      {showEmptyState || filteredProducts.length === 0 ? (
         <EmptyState />
       ) : (
         <View style={styles.listContainer}>
@@ -209,8 +212,10 @@ export default function ProductsScreen() {
             showsVerticalScrollIndicator={false}
             keyExtractor={item => item.id}
             extraData={searchQuery}
+            refreshControl={<RefreshControl refreshing={loading} onRefresh={handleRefresh} />}
             ListFooterComponent={<View style={styles.listFooter} />}
           />
+          <View style={{ height: 50 }} />
         </View>
       )}
 
@@ -274,7 +279,7 @@ const styles = StyleSheet.create({
   productCard: {
     flex: 1,
     margin: spacing.xs,
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
     backgroundColor: colors.white,
     borderRadius: borderRadius.xl,
     overflow: 'hidden',

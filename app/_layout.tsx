@@ -9,10 +9,10 @@ import 'react-native-reanimated';
 
 import { colors } from '@/constants/Design';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { PortalProvider } from '@gorhom/portal';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { useEffect } from 'react';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -55,11 +55,11 @@ export default function RootLayout() {
   }
 
   return (
-    <PortalProvider>
-      <QueryClientProvider client={queryClient}>
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <ThemeProvider value={LightTheme}>
-            <BottomSheetModalProvider>
+    <QueryClientProvider client={queryClient}>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <BottomSheetModalProvider>
+          <PortalProvider>
+            <ThemeProvider value={LightTheme}>
               <View style={{ flex: 1, backgroundColor: colors.white }}>
                 <StatusBar style="dark" />
                 <Stack
@@ -87,10 +87,10 @@ export default function RootLayout() {
                   />
                 </Stack>
               </View>
-            </BottomSheetModalProvider>
-          </ThemeProvider>
-        </GestureHandlerRootView>
-      </QueryClientProvider>
-    </PortalProvider>
+            </ThemeProvider>
+          </PortalProvider>
+        </BottomSheetModalProvider>
+      </GestureHandlerRootView>
+    </QueryClientProvider>
   );
 }

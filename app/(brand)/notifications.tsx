@@ -1,8 +1,8 @@
 import { AppHeader } from '@/components/ui/AppHeader';
 import { borderRadius, colors, spacing, typography } from '@/constants/Design';
 import { Bell, CheckCircle, FileText, UserPlus, WarningCircle } from 'phosphor-react-native';
-import React from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 // Define notification types
 type NotificationType = 'payment' | 'campaign' | 'invoice' | 'team' | 'update';
@@ -118,6 +118,15 @@ export default function NotificationsScreen() {
     }
   };
 
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 1500);
+  }, []);
+
   return (
     <View style={styles.container}>
       <AppHeader
@@ -127,7 +136,10 @@ export default function NotificationsScreen() {
         showBackButton
       />
 
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         {/* Today's Notifications */}
         {todayNotifications.length > 0 && (
           <View style={styles.section}>

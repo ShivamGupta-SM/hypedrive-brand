@@ -30,6 +30,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
 // Types for our data
@@ -80,7 +81,7 @@ type MockData = {
   stats: Stat[];
   quickActions: QuickAction[];
   activeCampaigns: Campaign[];
-};  
+};
 
 // Mock data for the home screen
 const MOCK_DATA: MockData = {
@@ -142,7 +143,7 @@ const MOCK_DATA: MockData = {
       id: 'invoices',
       name: 'Invoices',
       count: 8,
-      link: '/analytics',
+      link: '/invoices',
       icon: <FileText weight="bold" />,
       iconImage: require('@/assets/icons/file-update_18753931.png'),
       color: colors.blue[500],
@@ -162,7 +163,7 @@ const MOCK_DATA: MockData = {
       id: 'team',
       name: 'Team',
       count: 3,
-      link: '/analytics',
+      link: '/(brand)/team-members',
       icon: <Users weight="bold" />,
       iconImage: require('@/assets/icons/3dicons-girl-iso-color.png'),
       color: colors.purple[500],
@@ -233,7 +234,7 @@ export default function BrandHomeScreen() {
   const { BrandSwitcherComponent, openBrandSwitcher } = useBrandSwitcher();
 
   return (
-    <View style={styles.container}>
+    <GestureHandlerRootView style={styles.container}>
       <AppHeader
         title="Home"
         hideTitle
@@ -260,14 +261,7 @@ export default function BrandHomeScreen() {
       <RNAnimated.ScrollView
         showsVerticalScrollIndicator={false}
         style={{ backgroundColor: colors.white }}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.orange[500]}
-            colors={[colors.orange[500]]}
-          />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         onScroll={RNAnimated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
           useNativeDriver: true,
         })}
@@ -282,7 +276,9 @@ export default function BrandHomeScreen() {
               <Text style={styles.tasksText}>
                 You have {data.user.pendingTasks} tasks pending today
               </Text>
-              <TouchableOpacity style={styles.settingsButton}>
+              <TouchableOpacity
+                style={styles.settingsButton}
+                onPress={() => router.push('/notification-settings')}>
                 <Gear size={24} color={colors.white} weight="bold" />
               </TouchableOpacity>
             </GradientCard>
@@ -369,13 +365,13 @@ export default function BrandHomeScreen() {
           </Animated.View>
 
           {/* Add spacing at bottom for the floating action button */}
-          <View style={{ height: 100 }} />
+          <View style={{ height: 50 }} />
         </Animated.View>
       </RNAnimated.ScrollView>
 
       {/* Brand Switcher Bottom Sheet */}
       {BrandSwitcherComponent}
-    </View>
+    </GestureHandlerRootView>
   );
 }
 
@@ -912,9 +908,7 @@ const ActionCardWithSkeleton = ({
   }
 
   return (
-    <Pressable
-      onPress={() => router.push(action.link)}
-      style={styles.actionCard}>
+    <Pressable onPress={() => router.push(action.link)} style={styles.actionCard}>
       <View style={[styles.actionIconContainer, { backgroundColor: action.backgroundColor }]}>
         {React.cloneElement(action.icon as React.ReactElement<any, string>, {
           size: 20,
