@@ -141,16 +141,21 @@ export default function BrandSetupScreen() {
       y: y,
       animated: true,
     });
+    // setTimeout(() => {
+
+    // }, 300);
   };
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{ flex: 1 }}>
+      style={{ flex: 1 }}
+      // keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
+      >
       <ScrollView
         ref={scrollViewRef}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent]}
         keyboardShouldPersistTaps="handled"
         automaticallyAdjustKeyboardInsets={true}
         keyboardDismissMode="on-drag">
@@ -245,7 +250,7 @@ export default function BrandSetupScreen() {
                 error={!!errors.description}
                 autoCapitalize="sentences"
                 keyboardType="default"
-                onFocus={() => scrollToInput(350)}
+                onFocus={() => scrollToInput(200)}
               />
             )}
           />
@@ -284,7 +289,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     padding: spacing.mg,
-    paddingBottom: spacing.xxl * 2,
+    paddingBottom: 2 * spacing.xxl,
   },
   title: {
     fontSize: typography.sizes.xxl,

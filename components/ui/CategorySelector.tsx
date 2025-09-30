@@ -1,5 +1,10 @@
 import { borderRadius, colors, spacing, typography } from '@/constants/Design';
-import { BottomSheetBackdrop, BottomSheetFlatList, BottomSheetModal } from '@gorhom/bottom-sheet';
+import {
+  BottomSheetBackdrop,
+  BottomSheetFlatList,
+  BottomSheetModal,
+  BottomSheetView,
+} from '@gorhom/bottom-sheet';
 import { CaretDown, Check, Storefront, X } from 'phosphor-react-native';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -31,7 +36,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
   const bottomSheetRef = useRef<BottomSheetModal>(null);
 
   // Snap points for the bottom sheet
-  const snapPoints = useMemo(() => ['50%', '80%'], []);
+  const snapPoints = useMemo(() => ['50%', '50%'], []);
 
   // Callbacks
   const openBottomSheet = useCallback(() => {
@@ -75,39 +80,42 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
         ref={bottomSheetRef}
         index={0}
         snapPoints={snapPoints}
+        enableOverDrag={false}
         enablePanDownToClose
         backdropComponent={renderBackdrop}
         handleIndicatorStyle={styles.indicator}
         backgroundStyle={styles.bottomSheetBackground}>
-        <View style={styles.headerContainer}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Select Category</Text>
-            <TouchableOpacity onPress={closeBottomSheet}>
-              <X size={24} weight="bold" color={colors.text.black} />
-            </TouchableOpacity>
+        <BottomSheetView style={styles.bottomSheetContent}>
+          <View style={styles.headerContainer}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Select Category</Text>
+              <TouchableOpacity onPress={closeBottomSheet}>
+                <X size={24} weight="bold" color={colors.text.black} />
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
 
-        <BottomSheetFlatList
-          data={categories}
-          keyExtractor={item => item.id}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.categoryItem}
-              onPress={() => {
-                onChange(item.id);
-                closeBottomSheet();
-              }}>
-              <View style={styles.categoryContent}>
-                {item.icon}
-                <Text style={styles.categoryText}>{item.name}</Text>
-              </View>
-              {item.id === value && <Check size={20} weight="bold" color={colors.blue[500]} />}
-            </TouchableOpacity>
-          )}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
-          contentContainerStyle={styles.listContent}
-        />
+          <BottomSheetFlatList
+            data={categories}
+            keyExtractor={item => item.id}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.categoryItem}
+                onPress={() => {
+                  onChange(item.id);
+                  closeBottomSheet();
+                }}>
+                <View style={styles.categoryContent}>
+                  {item.icon}
+                  <Text style={styles.categoryText}>{item.name}</Text>
+                </View>
+                {item.id === value && <Check size={20} weight="bold" color={colors.blue[500]} />}
+              </TouchableOpacity>
+            )}
+            ItemSeparatorComponent={() => <View style={styles.separator} />}
+            contentContainerStyle={styles.listContent}
+          />
+        </BottomSheetView>
       </BottomSheetModal>
     </View>
   );
@@ -190,7 +198,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.gray[200],
   },
   listContent: {
-    paddingBottom: spacing.xxl,
+    paddingBottom: 2 * spacing.xxl,
   },
   headerContainer: {
     // This ensures the header doesn't scroll with the list

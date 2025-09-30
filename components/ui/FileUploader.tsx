@@ -94,7 +94,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
           </View>
           <Pressable style={styles.chooseFileButton} onPress={pickImage} disabled={loading}>
             <Upload weight="bold" size={16} color={colors.blue[500]} />
-            <Text style={styles.chooseFileText}>{loading ? 'Uploading...' : 'Choose File'}</Text>
+            <Text style={styles.chooseFileText}>{loading ? 'Selecting...' : 'Choose File'}</Text>
           </Pressable>
         </View>
       )}
