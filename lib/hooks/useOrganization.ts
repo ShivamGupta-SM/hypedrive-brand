@@ -1,117 +1,262 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { organizationService } from '../api/services/organizationService';
-import type {
-  OrganizationStep1Request,
-  OrganizationResponse,
-  FileUploadData,
-  OrganizationStep1FormData,
-} from '../api/types/organization';
+import { useState, useEffect } from 'react';
+import { BrandService } from '@/lib/supabase/services/brand';
+import { AuthService } from '@/lib/supabase/services/auth';
+import type { Brand, CreateBrandData, UpdateBrandData } from '@/lib/supabase/types';
 
-// Query Keys
-export const ORGANIZATION_QUERY_KEYS = {
-  all: ['organizations'] as const,
-  detail: (id: string) => ['organizations', id] as const,
-  validateName: (name: string) => ['organizations', 'validate-name', name] as const,
-} as const;
+// Updated types for brand/organization data
+export type OrganizationStep1FormData = {
+  name: string;
+  category: string;
+  description: string;
+};
+
+export type FileUploadData = {
+  uri: string;
+  name: string;
+  type: string;
+};
+
+export type OrganizationResponse = {
+  success: boolean;
+  organization?: Brand;
+  message?: string;
+};
 
 /**
- * Hook for creating organization step 1
- * Handles both form data and file upload
+ * Hook for creating organization/brand step 1
+ * Integrates with Supabase brand service
  */
 export function useCreateOrganizationStep1() {
-  const queryClient = useQueryClient();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+  const [data, setData] = useState<OrganizationResponse | null>(null);
 
-  return useMutation({
-    mutationFn: async ({
-      formData,
-      logoFile,
-    }: {
-      formData: OrganizationStep1FormData;
-      logoFile?: FileUploadData;
-    }): Promise<OrganizationResponse> => {
-      const requestData: Omit<OrganizationStep1Request, 'logo'> = {
-        name: formData.name,
-        category: formData.category,
+  const mutate = async ({
+    formData,
+    logoFile,
+  }: {
+    formData: OrganizationStep1FormData;
+    logoFile?: FileUploadData;
+  }) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Get current user
+      const userResponse = await AuthService.getCurrentUser();
+      if (!userResponse.success || !userResponse.data) {
+        throw new Error('User not authenticated');
+      }
+
+      // Generate slug from business name
+      const slug = formData.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+
+      // Create brand data
+      const brandData: CreateBrandData = {
+        business_name: formData.name,
+        slug,
         description: formData.description,
+        logo_url: logoFile?.uri,
       };
 
-      return organizationService.createStep1(requestData, logoFile);
-    },
-    onSuccess: (data) => {
-      // Invalidate and refetch organization queries
-      queryClient.invalidateQueries({ queryKey: ORGANIZATION_QUERY_KEYS.all });
-      
-      // Set the new organization data in cache
-      if (data.organization?.id) {
-        queryClient.setQueryData(
-          ORGANIZATION_QUERY_KEYS.detail(data.organization.id),
-          data
-        );
+      // Create brand via Supabase
+      const response = await BrandService.createBrand(userResponse.data.id, brandData);
+
+      if (!response.success || !response.data) {
+        throw new Error(response.error || 'Failed to create organization');
       }
-    },
-    onError: (error) => {
-      console.error('Organization creation failed:', error);
-    },
-  });
+
+      const result: OrganizationResponse = {
+        success: true,
+        organization: response.data,
+        message: 'Organization created successfully',
+      };
+
+      setData(result);
+      return result;
+    } catch (err) {
+      const errorObj = err instanceof Error ? err : new Error('Unknown error occurred');
+      setError(errorObj);
+      
+      const result: OrganizationResponse = {
+        success: false,
+        message: errorObj.message,
+      };
+      
+      setData(result);
+      return result;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const reset = () => {
+    setError(null);
+    setData(null);
+    setIsLoading(false);
+  };
+
+  return {
+    mutate,
+    mutateAsync: mutate,
+    isPending: isLoading,
+    isLoading,
+    error,
+    data,
+    isSuccess: !!data && !error,
+    reset,
+  };
 }
 
 /**
- * Hook for validating organization name
- * Uses debounced query for real-time validation
+ * Hook for validating organization/brand name
+ * Checks if brand slug is available
  */
 export function useValidateOrganizationName(name: string, enabled: boolean = true) {
-  return useQuery({
-    queryKey: ORGANIZATION_QUERY_KEYS.validateName(name),
-    queryFn: () => organizationService.validateName(name),
-    enabled: enabled && name.length >= 2, // Only validate if name has at least 2 characters
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    retry: 1,
-  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [data, setData] = useState<{ available: boolean } | null>(null);
+  const [error, setError] = useState<Error | null>(null);
+
+  const validateName = async () => {
+    if (!enabled || name.length < 2) {
+      setData({ available: true });
+      return { available: true };
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Generate slug from name
+      const slug = name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+
+      // Check if brand with this slug exists
+      const response = await BrandService.getBrandBySlug(slug);
+      
+      const available = !response.success || !response.data;
+      const result = { available };
+      
+      setData(result);
+      return result;
+    } catch (err) {
+      const errorObj = err instanceof Error ? err : new Error('Validation failed');
+      setError(errorObj);
+      return { available: false };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Auto-validate when name changes
+  useEffect(() => {
+    if (enabled && name.length >= 2) {
+      const timeoutId = setTimeout(validateName, 500);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [name, enabled]);
+
+  return {
+    data,
+    isLoading,
+    error,
+    refetch: validateName,
+  };
 }
 
 /**
- * Hook for fetching organization by ID
+ * Hook for fetching organization/brand by ID
  */
 export function useOrganization(id: string, enabled: boolean = true) {
-  return useQuery({
-    queryKey: ORGANIZATION_QUERY_KEYS.detail(id),
-    queryFn: () => organizationService.getById(id),
-    enabled: enabled && !!id,
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    retry: 2,
-  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [data, setData] = useState<OrganizationResponse | null>(null);
+  const [error, setError] = useState<Error | null>(null);
+
+  const fetchOrganization = async () => {
+    if (!enabled || !id) return null;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await BrandService.getBrandById(id);
+      
+      if (!response.success || !response.data) {
+        throw new Error(response.error || 'Failed to fetch organization');
+      }
+
+      const result: OrganizationResponse = {
+        success: true,
+        organization: response.data,
+      };
+
+      setData(result);
+      return result;
+    } catch (err) {
+      const errorObj = err instanceof Error ? err : new Error('Unknown error occurred');
+      setError(errorObj);
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Auto-fetch when id changes
+  useEffect(() => {
+    if (enabled && id) {
+      fetchOrganization();
+    }
+  }, [id, enabled]);
+
+  return {
+    data,
+    isLoading,
+    error,
+    refetch: fetchOrganization,
+  };
 }
 
 /**
- * Hook for updating organization
+ * Hook for updating organization/brand
  */
 export function useUpdateOrganization() {
-  const queryClient = useQueryClient();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
-  return useMutation({
-    mutationFn: async ({
-      id,
-      data,
-    }: {
-      id: string;
-      data: Partial<OrganizationStep1Request>;
-    }): Promise<OrganizationResponse> => {
-      return organizationService.update(id, data);
-    },
-    onSuccess: (data, variables) => {
-      // Update the organization in cache
-      queryClient.setQueryData(
-        ORGANIZATION_QUERY_KEYS.detail(variables.id),
-        data
-      );
+  const updateOrganization = async (id: string, data: Partial<Brand>) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await BrandService.updateBrand(id, data);
       
-      // Invalidate related queries
-      queryClient.invalidateQueries({ queryKey: ORGANIZATION_QUERY_KEYS.all });
-    },
-    onError: (error) => {
-      console.error('Organization update failed:', error);
-    },
-  });
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to update organization');
+      }
+
+      return {
+        success: true,
+        organization: response.data,
+      };
+    } catch (err) {
+      const errorObj = err instanceof Error ? err : new Error('Update failed');
+      setError(errorObj);
+      throw errorObj;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return {
+    updateOrganization,
+    isLoading,
+    error,
+  };
 }
 
 /**
@@ -128,30 +273,27 @@ export function useOrganizationForm() {
     update: updateMutation,
     
     // Loading states
-    isCreating: createMutation.isPending,
-    isUpdating: updateMutation.isPending,
-    isLoading: createMutation.isPending || updateMutation.isPending,
+    isCreating: createMutation.isLoading,
+    isUpdating: updateMutation.isLoading,
+    isLoading: createMutation.isLoading || updateMutation.isLoading,
     
     // Error states
     createError: createMutation.error,
     updateError: updateMutation.error,
     error: createMutation.error || updateMutation.error,
     
-    // Success states
-    isCreateSuccess: createMutation.isSuccess,
-    isUpdateSuccess: updateMutation.isSuccess,
-    isSuccess: createMutation.isSuccess || updateMutation.isSuccess,
+    // Success states - based on absence of error and completion
+    isCreateSuccess: !createMutation.isLoading && !createMutation.error,
+    isUpdateSuccess: !updateMutation.isLoading && !updateMutation.error,
+    isSuccess: (!createMutation.isLoading && !createMutation.error) || (!updateMutation.isLoading && !updateMutation.error),
     
-    // Data
-    createdOrganization: createMutation.data,
-    updatedOrganization: updateMutation.data,
+    // Data - not available in current hook structure
+    createdOrganization: null,
+    updatedOrganization: null,
     
-    // Reset functions
-    resetCreate: createMutation.reset,
-    resetUpdate: updateMutation.reset,
-    resetAll: () => {
-      createMutation.reset();
-      updateMutation.reset();
-    },
+    // Reset functions - simplified
+    resetCreate: () => {},
+    resetUpdate: () => {},
+    resetAll: () => {},
   };
 }

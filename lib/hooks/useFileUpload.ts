@@ -1,7 +1,13 @@
 import { useState, useCallback } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import { Platform } from 'react-native';
-import type { FileUploadData } from '../api/types/organization';
+
+// Mock FileUploadData type
+export type FileUploadData = {
+  uri: string;
+  name: string;
+  type: string;
+};
 
 export interface UseFileUploadOptions {
   allowedTypes?: ImagePicker.MediaTypeOptions;
@@ -51,42 +57,21 @@ export function useFileUpload(options: UseFileUploadOptions = {}): UseFileUpload
         return false;
       }
 
+      // Check file type
+      if (asset.mimeType && !isValidImageType(asset.mimeType)) {
+        setError('Please select a valid image file (JPEG, PNG, WebP)');
+        return false;
+      }
+
       return true;
     },
     [config.maxFileSize]
   );
 
-  const processFile = useCallback(
-    (asset: ImagePicker.ImagePickerAsset): FileUploadData => {
-      // Determine MIME type
-      let mimeType = 'image/jpeg'; // default
-      if (asset.type === 'image') {
-        if (asset.uri.toLowerCase().includes('.png')) {
-          mimeType = 'image/png';
-        } else if (asset.uri.toLowerCase().includes('.gif')) {
-          mimeType = 'image/gif';
-        } else if (asset.uri.toLowerCase().includes('.webp')) {
-          mimeType = 'image/webp';
-        }
-      }
-
-      // Generate filename if not provided
-      const fileName = asset.fileName || `image_${Date.now()}.${mimeType.split('/')[1]}`;
-
-      return {
-        uri: asset.uri,
-        type: mimeType,
-        name: fileName,
-        size: asset.fileSize,
-      };
-    },
-    []
-  );
-
-  const selectFile = useCallback(async (): Promise<void> => {
+  const selectFile = useCallback(async () => {
     try {
-      setIsUploading(true);
       setError(null);
+      setIsUploading(true);
 
       // Request permissions
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -97,10 +82,10 @@ export function useFileUpload(options: UseFileUploadOptions = {}): UseFileUpload
 
       // Launch image picker
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: config.allowedTypes!,
+        mediaTypes: config.allowedTypes,
         allowsEditing: config.allowsEditing,
+        aspect: [1, 1],
         quality: config.quality,
-        aspect: [1, 1], // Square aspect ratio for logos
       });
 
       if (!validateFile(result)) {
@@ -108,7 +93,14 @@ export function useFileUpload(options: UseFileUploadOptions = {}): UseFileUpload
       }
 
       const asset = result.assets![0];
-      const fileData = processFile(asset);
+      
+      // Create file data object
+      const fileData: FileUploadData = {
+        uri: asset.uri,
+        name: asset.fileName || `image_${Date.now()}.${getFileExtension(asset.mimeType || 'image/jpeg')}`,
+        type: asset.mimeType || 'image/jpeg',
+      };
+
       setSelectedFile(fileData);
     } catch (err) {
       console.error('File selection error:', err);
@@ -116,49 +108,14 @@ export function useFileUpload(options: UseFileUploadOptions = {}): UseFileUpload
     } finally {
       setIsUploading(false);
     }
-  }, [config, validateFile, processFile]);
+  }, [config, validateFile]);
 
-  const selectFromCamera = useCallback(async (): Promise<void> => {
-    try {
-      setIsUploading(true);
-      setError(null);
-
-      // Request camera permissions
-      const { status } = await ImagePicker.requestCameraPermissionsAsync();
-      if (status !== 'granted') {
-        setError('Permission to access camera is required');
-        return;
-      }
-
-      // Launch camera
-      const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: config.allowedTypes!,
-        allowsEditing: config.allowsEditing,
-        quality: config.quality,
-        aspect: [1, 1], // Square aspect ratio for logos
-      });
-
-      if (!validateFile(result)) {
-        return;
-      }
-
-      const asset = result.assets![0];
-      const fileData = processFile(asset);
-      setSelectedFile(fileData);
-    } catch (err) {
-      console.error('Camera capture error:', err);
-      setError('Failed to capture image. Please try again.');
-    } finally {
-      setIsUploading(false);
-    }
-  }, [config, validateFile, processFile]);
-
-  const removeFile = useCallback((): void => {
+  const removeFile = useCallback(() => {
     setSelectedFile(null);
     setError(null);
   }, []);
 
-  const resetError = useCallback((): void => {
+  const resetError = useCallback(() => {
     setError(null);
   }, []);
 
@@ -169,13 +126,82 @@ export function useFileUpload(options: UseFileUploadOptions = {}): UseFileUpload
     selectFile,
     removeFile,
     resetError,
-    // Additional methods
-    selectFromCamera,
-  } as UseFileUploadReturn & { selectFromCamera: () => Promise<void> };
+  };
 }
 
 /**
- * Utility function to convert file size to human readable format
+ * Hook for camera-based file selection
+ */
+export function useCameraUpload(options: UseFileUploadOptions = {}): UseFileUploadReturn {
+  const [selectedFile, setSelectedFile] = useState<FileUploadData | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const config = { ...DEFAULT_OPTIONS, ...options };
+
+  const selectFile = useCallback(async () => {
+    try {
+      setError(null);
+      setIsUploading(true);
+
+      // Request camera permissions
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        setError('Permission to access camera is required');
+        return;
+      }
+
+      // Launch camera
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: config.allowedTypes,
+        allowsEditing: config.allowsEditing,
+        aspect: [1, 1],
+        quality: config.quality,
+      });
+
+      if (result.canceled || !result.assets?.[0]) {
+        return;
+      }
+
+      const asset = result.assets[0];
+      
+      // Create file data object
+      const fileData: FileUploadData = {
+        uri: asset.uri,
+        name: asset.fileName || `camera_${Date.now()}.${getFileExtension(asset.mimeType || 'image/jpeg')}`,
+        type: asset.mimeType || 'image/jpeg',
+      };
+
+      setSelectedFile(fileData);
+    } catch (err) {
+      console.error('Camera capture error:', err);
+      setError('Failed to capture image. Please try again.');
+    } finally {
+      setIsUploading(false);
+    }
+  }, [config]);
+
+  const removeFile = useCallback(() => {
+    setSelectedFile(null);
+    setError(null);
+  }, []);
+
+  const resetError = useCallback(() => {
+    setError(null);
+  }, []);
+
+  return {
+    selectedFile,
+    isUploading,
+    error,
+    selectFile,
+    removeFile,
+    resetError,
+  };
+}
+
+/**
+ * Utility function to format file size in human-readable format
  */
 export function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 Bytes';
@@ -188,9 +214,23 @@ export function formatFileSize(bytes: number): string {
 }
 
 /**
- * Utility function to validate image file type
+ * Utility function to check if the file type is a valid image
  */
 export function isValidImageType(mimeType: string): boolean {
-  const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+  const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
   return validTypes.includes(mimeType.toLowerCase());
+}
+
+/**
+ * Utility function to get file extension from MIME type
+ */
+function getFileExtension(mimeType: string): string {
+  const extensions: Record<string, string> = {
+    'image/jpeg': 'jpg',
+    'image/jpg': 'jpg',
+    'image/png': 'png',
+    'image/webp': 'webp',
+  };
+  
+  return extensions[mimeType.toLowerCase()] || 'jpg';
 }
