@@ -19,15 +19,13 @@ export function useCategories() {
     try {
       const response = await CategoryService.getCategories();
       
-      if (!response.success) {
-        throw new Error(response.error || 'Failed to fetch categories');
-      }
-
-      setCategories(response.data || []);
+      setCategories(response || []);
+      return response || [];
     } catch (err) {
-      const errorObj = err instanceof Error ? err : new Error('Unknown error occurred');
+      const errorObj = err instanceof Error ? err : new Error('Failed to fetch categories');
       setError(errorObj);
-      console.error('Error fetching categories:', errorObj);
+      setCategories([]);
+      return [];
     } finally {
       setIsLoading(false);
     }

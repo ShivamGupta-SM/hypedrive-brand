@@ -1,13 +1,21 @@
 import { useState, useEffect } from 'react';
 import { BrandService } from '@/lib/supabase/services/brand';
-import { AuthService } from '@/lib/supabase/services/auth';
-import type { Brand, CreateBrandData, UpdateBrandData } from '@/lib/supabase/types';
+import { getCurrentUser } from '@/lib/supabase/client';
+import type { 
+  Brand, 
+  BrandInsert, 
+  BrandUpdate,
+  BrandWithUser,
+  Database 
+} from '@/lib/supabase/types';
 
-// Updated types for brand/organization data
+// Form data types aligned with database schema
 export type OrganizationStep1FormData = {
   name: string;
   category: string;
   description: string;
+  website_url?: string;
+  contact_phone?: string;
 };
 
 export type FileUploadData = {
@@ -16,10 +24,11 @@ export type FileUploadData = {
   type: string;
 };
 
+// Standardized response type for consistency
 export type OrganizationResponse = {
+  data: Brand | null;
+  error: string | null;
   success: boolean;
-  organization?: Brand;
-  message?: string;
 };
 
 /**
@@ -43,36 +52,35 @@ export function useCreateOrganizationStep1() {
 
     try {
       // Get current user
-      const userResponse = await AuthService.getCurrentUser();
-      if (!userResponse.success || !userResponse.data) {
+      const user = await getCurrentUser();
+      if (!user) {
         throw new Error('User not authenticated');
       }
 
-      // Generate slug from business name
-      const slug = formData.name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '');
-
-      // Create brand data
-      const brandData: CreateBrandData = {
-        business_name: formData.name,
-        slug,
+      // Create brand data using database schema types
+      const brandData: BrandInsert = {
+        user_id: user.id,
+        brand_name: formData.name,
         description: formData.description,
-        logo_url: logoFile?.uri,
+        brand_logo_url: logoFile?.uri,
+        website: formData.website_url,
+        contact_person: user.user_metadata?.full_name || user.email || '',
+        phone_number: formData.contact_phone || '',
+        gst_number: '', // Will be filled later during verification
+        // Default values from schema
+        approval_status: 'pending',
+        gst_verified: false,
+        tds_rate: 10, // Default TDS rate
+        is_complete: false,
       };
 
       // Create brand via Supabase
-      const response = await BrandService.createBrand(userResponse.data.id, brandData);
-
-      if (!response.success || !response.data) {
-        throw new Error(response.error || 'Failed to create organization');
-      }
+      const response = await BrandService.createBrand(brandData);
 
       const result: OrganizationResponse = {
         success: true,
-        organization: response.data,
-        message: 'Organization created successfully',
+        data: response,
+        error: null,
       };
 
       setData(result);
@@ -83,7 +91,8 @@ export function useCreateOrganizationStep1() {
       
       const result: OrganizationResponse = {
         success: false,
-        message: errorObj.message,
+        data: null,
+        error: errorObj.message,
       };
       
       setData(result);
@@ -130,16 +139,10 @@ export function useValidateOrganizationName(name: string, enabled: boolean = tru
     setError(null);
 
     try {
-      // Generate slug from name
-      const slug = name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '');
-
-      // Check if brand with this slug exists
-      const response = await BrandService.getBrandBySlug(slug);
+      // For now, we'll use a simple search by name since getBrandBySlug doesn't exist
+      const brands = await BrandService.searchBrands(name, 1);
       
-      const available = !response.success || !response.data;
+      const available = brands.length === 0;
       const result = { available };
       
       setData(result);
@@ -186,13 +189,14 @@ export function useOrganization(id: string, enabled: boolean = true) {
     try {
       const response = await BrandService.getBrandById(id);
       
-      if (!response.success || !response.data) {
-        throw new Error(response.error || 'Failed to fetch organization');
+      if (!response) {
+        throw new Error('Failed to fetch organization');
       }
 
       const result: OrganizationResponse = {
         success: true,
-        organization: response.data,
+        data: response,
+        error: null,
       };
 
       setData(result);
@@ -235,13 +239,9 @@ export function useUpdateOrganization() {
     try {
       const response = await BrandService.updateBrand(id, data);
       
-      if (!response.success) {
-        throw new Error(response.error || 'Failed to update organization');
-      }
-
       return {
         success: true,
-        organization: response.data,
+        organization: response,
       };
     } catch (err) {
       const errorObj = err instanceof Error ? err : new Error('Update failed');

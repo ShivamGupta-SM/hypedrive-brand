@@ -126,17 +126,19 @@ Refer to Expo's documentation for detailed information on Views, Blueprints, and
 
 This project uses Supabase as the backend database. All backend/API/SDK integrations MUST reference the following schema file:
 
-**Schema File:** `lib/schema/v9.sql`
+**Schema File:** `lib/supabase/schema/v9.sql`
 
 ### Key Database Tables and Relationships
 
 #### Core User Tables
+
 - **users**: Base user table with authentication data
 - **admins**: Admin users with roles (super_admin, admin, manager, analyst, support, content_moderator)
 - **shoppers**: Consumer users with KYC verification
 - **brands**: Brand/business users with GST verification and approval workflow
 
 #### Product and Campaign Management
+
 - **product_categories**: Categories for products (Electronics, Fashion, Beauty, etc.)
 - **platforms**: Marketplace platforms (Amazon, Flipkart, Myntra, etc.)
 - **products**: Brand products with pricing, images, and platform links
@@ -145,6 +147,7 @@ This project uses Supabase as the backend database. All backend/API/SDK integrat
 - **campaign_deliverables**: Junction table linking campaigns to required deliverables
 
 #### Enrollment and Transaction Flow
+
 - **enrollments**: Shopper enrollments in campaigns with order tracking
 - **deliverable_submissions**: Proof submissions for campaign deliverables
 - **invoices**: Brand invoices with GST and TDS calculations
@@ -153,6 +156,7 @@ This project uses Supabase as the backend database. All backend/API/SDK integrat
 - **payouts**: Shopper payouts with status tracking
 
 #### Supporting Tables
+
 - **coupons**: Discount coupons with usage limits
 - **coupon_redemptions**: Coupon usage tracking
 - **notifications**: In-app notifications
@@ -162,6 +166,7 @@ This project uses Supabase as the backend database. All backend/API/SDK integrat
 ### Important Schema Features
 
 #### Enums
+
 - `approval_status`: pending, approved, rejected
 - `campaign_status`: draft, active, completed, expired, cancelled
 - `enrollment_status`: pending, submitted, approved, rejected, invoiced, paid, withdrawn, expired
@@ -170,12 +175,14 @@ This project uses Supabase as the backend database. All backend/API/SDK integrat
 - `payout_status`: queued, processing, completed, failed, cancelled
 
 #### Business Rules
+
 - Brands must be GST verified and approved before creating campaigns
 - Status transitions are validated with specific business logic
 - Row Level Security (RLS) policies enforce data access controls
 - Automatic invoice numbering with sequence (HD000001, HD000002, etc.)
 
 #### Storage Buckets
+
 - `brand-logos`: Public brand logo storage
 - `product-images`: Public product image storage
 - `deliverables`: Private deliverable file storage
@@ -184,7 +191,7 @@ This project uses Supabase as the backend database. All backend/API/SDK integrat
 
 ### Integration Guidelines
 
-1. **Always use the latest schema version** (`lib/schema/v9.sql`)
+1. **Always use the latest schema version** (`lib/supabase/schema/v9.sql`)
 2. **Follow RLS policies** for data access and security
 3. **Respect enum constraints** and status transition rules
 4. **Use proper TypeScript types** generated from the schema
@@ -194,6 +201,7 @@ This project uses Supabase as the backend database. All backend/API/SDK integrat
 ### Schema Updates
 
 When updating the schema:
+
 1. Create a new version file (e.g., `v10.sql`)
 2. Update this documentation
 3. Regenerate TypeScript types
