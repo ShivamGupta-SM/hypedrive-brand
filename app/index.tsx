@@ -4,9 +4,10 @@ import { colors, spacing, typography } from '@/constants/Design';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { ChartLineUp, MegaphoneSimple, Plus, Users } from 'phosphor-react-native';
-import React from 'react';
-import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect } from 'react';
+import { SafeAreaView, StyleSheet, Text, View, ActivityIndicator } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
+import { useAuth } from '@/lib/contexts/AuthContext';
 
 // Feature card data for looping
 const featureCards = [
@@ -37,6 +38,35 @@ const featureCards = [
 ];
 
 export default function CreateBrandScreen() {
+  const { user, loading } = useAuth();
+
+  useEffect(() => {
+    if (!loading) {
+      if (!user) {
+        // User is not authenticated, redirect to login
+        router.replace('/(auth)/login');
+      }
+      // If user is authenticated, stay on this screen (brand onboarding)
+    }
+  }, [user, loading]);
+
+  // Show loading spinner while checking authentication
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={styles.loadingText}>Loading...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Don't render the main content if user is not authenticated
+  // (will be redirected by useEffect)
+  if (!user) {
+    return null;
+  }
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar style="dark" />
@@ -124,5 +154,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.02,
     shadowRadius: 3,
     elevation: 3,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: spacing.md,
+    fontSize: typography.sizes.md,
+    color: colors.text.secondary,
   },
 });

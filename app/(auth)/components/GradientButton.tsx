@@ -8,6 +8,7 @@ interface GradientButtonProps {
   style?: ViewStyle;
   textStyle?: TextStyle;
   leftIcon?: React.ReactNode;
+  disabled?: boolean;
 }
 
 export function GradientButton({
@@ -16,16 +17,21 @@ export function GradientButton({
   style,
   textStyle,
   leftIcon,
+  disabled = false,
 }: GradientButtonProps) {
   return (
-    <TouchableOpacity onPress={onPress} style={[styles.buttonContainer, style]}>
+    <TouchableOpacity 
+      onPress={disabled ? undefined : onPress} 
+      style={[styles.buttonContainer, style, disabled && styles.disabled]}
+      disabled={disabled}
+    >
       <LinearGradient
-        colors={[colors.primary, '#FF5500']}
+        colors={disabled ? [colors.gray[300], colors.gray[400]] : [colors.primary, '#FF5500']}
         style={styles.gradient}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}>
         {leftIcon && <View style={styles.iconContainer}>{leftIcon}</View>}
-        <Text style={[styles.buttonText, textStyle]}>{title}</Text>
+        <Text style={[styles.buttonText, textStyle, disabled && styles.disabledText]}>{title}</Text>
       </LinearGradient>
     </TouchableOpacity>
   );
@@ -57,5 +63,11 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontSize: typography.sizes.md,
     fontWeight: typography.weights.semibold,
+  },
+  disabled: {
+    opacity: 0.6,
+  },
+  disabledText: {
+    color: colors.gray[500],
   },
 });

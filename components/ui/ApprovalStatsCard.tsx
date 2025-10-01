@@ -19,8 +19,8 @@ export const ApprovalStatsCard = ({
   style,
 }: ApprovalStatsCardProps) => {
   const colorGradient = {
-    orange: [colors.orange[500], colors.orange[600]],
-    green: [colors.green[500], colors.green[600]],
+    orange: [colors.orange[500], colors.orange[600]] as const,
+    green: [colors.green[500], colors.green[600]] as const,
   };
 
   return (

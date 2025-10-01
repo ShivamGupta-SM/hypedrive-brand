@@ -53,7 +53,7 @@ const StatusBadge = ({ status, containerStyle, size = 'medium' }: StatusBadgePro
         return {
           backgroundColor: colors.gray[100],
           textColor: colors.text.secondary,
-          label: status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' '),
+          label: (status as string).charAt(0).toUpperCase() + (status as string).slice(1).replace('_', ' '),
         };
     }
   };

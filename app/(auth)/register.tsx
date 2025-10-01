@@ -1,6 +1,6 @@
 import { Link, router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,8 @@ import {
   Platform,
   SafeAreaView,
 } from 'react-native';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import Feather from '@expo/vector-icons/Feather';
 import { colors, spacing, typography, borderRadius } from '@/constants/Design';
 import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler';
@@ -22,22 +24,37 @@ import TermsAgreement from './components/TermsAgreement';
 import Logo from './components/Logo';
 import Divider from './components/Divider';
 import { GradientButton } from './components/GradientButton';
+import { useSignUp } from '@/lib/query/auth';
+import { registerSchema, type RegisterFormData } from '@/lib/validations/auth';
 
-export default function LoginScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+export default function RegisterScreen() {
   const passwordRef = useRef<TextInput>(null);
   const scrollViewRef = useRef<ScrollView>(null);
+  
+  const signUpMutation = useSignUp();
+  
+  const {
+    control,
+    handleSubmit,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+      confirmPassword: '',
+      agreeToTerms: false,
+    },
+  });
 
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const watchShowPassword = watch('password');
 
-  const handleSubmit = () => {
-    if (!agreedToTerms) {
-      // Show error message
-      return;
-    }
-    // Continue with registration
+  const onSubmit = (data: RegisterFormData) => {
+    signUpMutation.mutate({
+      email: data.email,
+      password: data.password,
+    });
   };
 
   const focusOnInput = (y: number) => {
@@ -66,52 +83,100 @@ export default function LoginScreen() {
 
               <View style={styles.form}>
                 <Text style={styles.label}>Email</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="name@example.com"
-                  placeholderTextColor={colors.text.secondary}
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  returnKeyType="next"
-                  onSubmitEditing={() => passwordRef.current?.focus()}
-                  submitBehavior={'blurAndSubmit'}
-                  onFocus={() => focusOnInput(0)}
-                  onBlur={() => focusOnInput(0)}
+                <Controller
+                  control={control}
+                  name="email"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      style={[
+                        styles.input,
+                        errors.email && { borderColor: colors.rose[500] }
+                      ]}
+                      placeholder="name@example.com"
+                      placeholderTextColor={colors.text.secondary}
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      returnKeyType="next"
+                      onSubmitEditing={() => passwordRef.current?.focus()}
+                      submitBehavior={'blurAndSubmit'}
+                      onFocus={() => focusOnInput(0)}
+                    />
+                  )}
                 />
+                {errors.email && (
+                  <Text style={styles.errorText}>{errors.email.message}</Text>
+                )}
 
                 <Text style={styles.label}>Password</Text>
-                <View style={styles.passwordContainer}>
-                  <TextInput
-                    ref={passwordRef}
-                    style={styles.passwordInput}
-                    placeholder="Create a strong password"
-                    placeholderTextColor={colors.text.secondary}
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry={!showPassword}
-                    returnKeyType="done"
-                    onFocus={() => focusOnInput(150)}
-                  />
-                  <TouchableOpacity
-                    onPress={() => setShowPassword(!showPassword)}
-                    style={styles.eyeIcon}>
-                    <Feather
-                      name={showPassword ? 'eye' : 'eye-off'}
-                      size={24}
-                      color={colors.text.muted}
-                    />
-                  </TouchableOpacity>
-                </View>
+                <Controller
+                  control={control}
+                  name="password"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <View style={styles.passwordContainer}>
+                      <TextInput
+                        ref={passwordRef}
+                        style={[
+                          styles.passwordInput,
+                          errors.password && { borderColor: colors.rose[500] }
+                        ]}
+                        placeholder="Create a strong password"
+                        placeholderTextColor={colors.text.secondary}
+                        value={value}
+                        onChangeText={onChange}
+                        onBlur={onBlur}
+                        secureTextEntry={true}
+                        returnKeyType="done"
+                        onFocus={() => focusOnInput(150)}
+                      />
+                    </View>
+                  )}
+                />
+                {errors.password && (
+                  <Text style={styles.errorText}>{errors.password.message}</Text>
+                )}
 
-                <TermsAgreement checked={agreedToTerms} onCheckChange={setAgreedToTerms} />
+                <Text style={styles.label}>Confirm Password</Text>
+                <Controller
+                  control={control}
+                  name="confirmPassword"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      style={[
+                        styles.input,
+                        errors.confirmPassword && { borderColor: colors.rose[500] }
+                      ]}
+                      placeholder="Confirm your password"
+                      placeholderTextColor={colors.text.secondary}
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      secureTextEntry={true}
+                      returnKeyType="done"
+                    />
+                  )}
+                />
+                {errors.confirmPassword && (
+                  <Text style={styles.errorText}>{errors.confirmPassword.message}</Text>
+                )}
+
+                <Controller
+                  control={control}
+                  name="agreeToTerms"
+                  render={({ field: { onChange, value } }) => (
+                    <TermsAgreement checked={value} onCheckChange={onChange} />
+                  )}
+                />
+                {errors.agreeToTerms && (
+                  <Text style={styles.errorText}>{errors.agreeToTerms.message}</Text>
+                )}
 
                 <GradientButton
-                  title="Create Account"
-                  onPress={() => {
-                    router.replace('/(tabs)');
-                  }}
+                  title={isSubmitting || signUpMutation.isPending ? "Creating Account..." : "Create Account"}
+                  onPress={handleSubmit(onSubmit)}
+                  disabled={isSubmitting || signUpMutation.isPending}
                 />
 
                 <Divider text="or sign up with" />
@@ -276,5 +341,11 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontSize: typography.sizes.xm,
     fontWeight: typography.weights.semibold,
+  },
+  errorText: {
+    color: colors.rose[500],
+    fontSize: typography.sizes.sm,
+    marginTop: spacing.xs,
+    marginBottom: spacing.md,
   },
 });

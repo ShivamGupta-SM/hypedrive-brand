@@ -1,12 +1,10 @@
 import { borderRadius, colors, spacing, typography } from '@/constants/Design';
 import React, { useState } from 'react';
 import {
-  NativeSyntheticEvent,
   StyleProp,
   StyleSheet,
   Text,
   TextInput,
-  TextInputFocusEventData,
   TextInputProps,
   TextStyle,
   View,
@@ -78,12 +76,12 @@ export const Input = React.forwardRef<TextInput, InputProps>(
       return colors.text.muted;
     };
 
-    const handleFocus = (e: NativeSyntheticEvent<TextInputFocusEventData>) => {
+    const handleFocus = (e: Parameters<NonNullable<TextInputProps['onFocus']>>[0]) => {
       setIsFocused(true);
       props.onFocus?.(e);
     };
 
-    const handleBlur = (e: NativeSyntheticEvent<TextInputFocusEventData>) => {
+    const handleBlur = (e: Parameters<NonNullable<TextInputProps['onBlur']>>[0]) => {
       setIsFocused(false);
       props.onBlur?.(e);
     };

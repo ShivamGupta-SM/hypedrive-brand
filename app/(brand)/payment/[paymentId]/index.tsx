@@ -66,7 +66,7 @@ const PaymentDetails = () => {
   const id = typeof paymentId === 'string' ? paymentId : '';
 
   // Get payment data based on ID
-  const payment = paymentData[id] || null;
+  const payment = (paymentData as any)[id] || null;
 
   if (!payment) {
     return (
@@ -134,7 +134,7 @@ const PaymentDetails = () => {
             <Text style={styles.sectionTitle}>Applied to Invoices</Text>
           </View>
 
-          {payment.invoices.map((invoice, index) => (
+          {payment.invoices.map((invoice: any, index: number) => (
             <TouchableOpacity
               key={invoice.id}
               style={[

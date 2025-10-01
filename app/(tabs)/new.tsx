@@ -206,7 +206,6 @@ export default function ProductsScreen() {
           <FlashList
             data={filteredProducts}
             renderItem={renderItem}
-            estimatedItemSize={itemWidth + 200}
             numColumns={2}
             contentContainerStyle={styles.productList}
             showsVerticalScrollIndicator={false}

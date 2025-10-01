@@ -27,17 +27,17 @@ export default function ContactSupportScreen() {
     {
       id: 'create-campaign',
       question: 'How do I create a campaign?',
-      route: '/help/create-campaign',
+      route: '/help/create-campaign' as Route,
     },
     {
       id: 'payment-billing',
       question: 'Payment and billing questions',
-      route: '/help/payment-billing',
+      route: '/help/payment-billing' as Route,
     },
     {
       id: 'account-verification',
       question: 'Account verification process',
-      route: '/help/account-verification',
+      route: '/help/account-verification' as Route,
     },
   ];
 

@@ -417,7 +417,6 @@ const CampaignEnrollmentsTab = ({ campaignId }: CampaignEnrollmentsTabProps) => 
             keyExtractor={item => item.id}
             contentContainerStyle={styles.enrollmentsList}
             showsVerticalScrollIndicator={false}
-            estimatedItemSize={200}
             onRefresh={onRefresh}
             refreshing={refreshing}
             ListEmptyComponent={

@@ -1,5 +1,5 @@
 import * as Haptics from 'expo-haptics';
-import { usePathname, useRouter } from 'expo-router';
+import { usePathname, useRouter, Href } from 'expo-router';
 import { IconProps as PhosphorIconProps } from 'phosphor-react-native';
 import React, { useEffect, useRef } from 'react';
 import { Animated, Pressable, StyleSheet } from 'react-native';
@@ -15,7 +15,7 @@ interface AnimatedTabIconProps extends PhosphorIconProps {
   color: string;
   focused: boolean;
   size?: number;
-  route: '/' | '/payouts' | '/enrollments' | '/campaigns' | '/profile';
+  route: Href;
 }
 
 export function AnimatedTabIcon({ Icon, color, focused, size = 26, route }: AnimatedTabIconProps) {

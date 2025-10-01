@@ -11,13 +11,13 @@ import {
 } from 'phosphor-react-native';
 import React, { useRef } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import Animated, { interpolate, useAnimatedStyle } from 'react-native-reanimated';
+import Animated, { interpolate, useAnimatedStyle, SharedValue } from 'react-native-reanimated';
 import { CategoryTab } from './CategoryTab';
 
 interface CategoryTabsProps {
   activeCategory: string;
   onCategoryPress: (category: string) => void;
-  scrollY?: Animated.SharedValue<number>;
+  scrollY?: SharedValue<number>;
   showBackground?: boolean;
   scrollToTop?: () => void; // Optional prop to scroll main content to top
 }

@@ -69,13 +69,16 @@ Navigation
 State Management
 
 - Use Zustand and React Context for managing global state.
-- Leverage tanstack-query or react-query for data fetching and caching; avoid excessive API calls.
+- ALWAYS use TanStack Query (React Query) with Supabase for data fetching, caching, and state management (loading, error states).
+- NEVER use Supabase directly without TanStack Query wrapper.
 - For complex state management, consider using Zustand.
 - Handle URL search parameters using libraries like expo-linking.
 
 Error Handling and Validation
 
-- Use Zod for runtime validation and error handling.
+- ALWAYS use React Hook Form for form state management and validation.
+- Use Zod for runtime validation schemas with React Hook Form integration.
+- Use single source of truth for types - generate from Supabase schema, don't duplicate.
 - Implement proper error logging using Sentry or a similar service.
 - Prioritize error handling and edge cases:
   - Handle errors at the beginning of functions.
@@ -197,6 +200,11 @@ This project uses Supabase as the backend database. All backend/API/SDK integrat
 4. **Use proper TypeScript types** generated from the schema
 5. **Handle file uploads** through designated storage buckets
 6. **Implement proper error handling** for business rule violations
+
+### Development Preferences
+
+- **DO NOT** use web preview for testing - user tests on physical device
+- Focus on mobile-first development and testing
 
 ### Schema Updates
 

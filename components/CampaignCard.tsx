@@ -32,7 +32,7 @@ export function CampaignCard({
   onEnroll,
 }: CampaignCardProps) {
   return (
-    <Link href={`/(screens)/campaigns/${id}`} asChild>
+    <Link href={`/campaigns/${id}`} asChild>
       <Pressable style={styles.container}>
         <View style={styles.header}>
           <View style={styles.brand}>

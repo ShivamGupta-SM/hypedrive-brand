@@ -440,7 +440,6 @@ const CampaignEnrollmentsTab = ({ campaignId }: CampaignEnrollmentsTabProps) => 
           keyExtractor={(item, index) => `enrollment-${item.id}-${index}`}
           contentContainerStyle={styles.enrollmentsList}
           showsVerticalScrollIndicator={false}
-          estimatedItemSize={200}
           ListEmptyComponent={
             <View style={styles.emptyStateContainer}>
               <Text style={styles.emptyStateText}>No enrollments found</Text>

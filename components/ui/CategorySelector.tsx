@@ -97,8 +97,8 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
 
           <BottomSheetFlatList
             data={categories}
-            keyExtractor={item => item.id}
-            renderItem={({ item }) => (
+            keyExtractor={(item: Category) => item.id}
+            renderItem={({ item }: { item: Category }) => (
               <TouchableOpacity
                 style={styles.categoryItem}
                 onPress={() => {

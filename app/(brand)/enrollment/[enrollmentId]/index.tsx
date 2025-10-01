@@ -151,7 +151,8 @@ const EnrollmentDetails = () => {
   const id = typeof enrollmentId === 'string' ? enrollmentId : '';
 
   // Get enrollment data based on ID
-  const [enrollment, setEnrollment] = useState(enrollmentData[id] || null);
+  // Temporary any type cast for demo purposes
+  const [enrollment, setEnrollment] = useState((enrollmentData as any)[id] || null);
 
   // Reference to rejection reason bottom sheet
   const rejectionBottomSheetRef = useRef<RejectionReasonBottomSheetHandle>(null);
@@ -168,7 +169,8 @@ const EnrollmentDetails = () => {
   }
 
   const handleApprove = () => {
-    setEnrollment(prev => {
+    // Any type cast for demo purposes
+    setEnrollment((prev: any) => {
       if (!prev) return prev;
 
       const now = new Date();
@@ -205,7 +207,8 @@ const EnrollmentDetails = () => {
   };
 
   const handleSubmitRejection = (reason: string) => {
-    setEnrollment(prev => {
+    // Any type cast for demo purposes
+    setEnrollment((prev: any) => {
       if (!prev) return prev;
 
       const now = new Date();
@@ -512,7 +515,10 @@ const EnrollmentDetails = () => {
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Deliverables</Text>
           </View>
-          {enrollment.deliverables.map((deliverable, index) => (
+          {/* Render deliverables */}
+          {/* Any type cast for demo purposes */}
+          {/* TODO: Add type safety for deliverables */}
+          {enrollment.deliverables.map((deliverable: any, index: number) => (
             <View key={index} style={styles.deliverableContainer}>
               <View style={styles.deliverableHeader}>
                 <View style={styles.deliverableType}>

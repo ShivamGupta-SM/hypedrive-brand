@@ -13,27 +13,71 @@ import {
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
+  Alert,
 } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '@/constants/Design';
 import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler';
 import { StatusBar } from 'expo-status-bar';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import Divider from './components/Divider';
 import Logo from './components/Logo';
 import { Feather } from '@expo/vector-icons';
 import { GradientButton } from './components/GradientButton';
+import { useSignIn, useResetPassword } from '@/lib/query/auth';
+import { loginSchema, type LoginFormData } from '@/lib/validations/auth';
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const passwordRef = useRef<TextInput>(null);
   const scrollViewRef = useRef<ScrollView>(null);
+  
+  const signInMutation = useSignIn();
+  const resetPasswordMutation = useResetPassword();
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    watch,
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
+
+  const email = watch('email');
 
   const focusOnInput = (y: number) => {
     scrollViewRef.current?.scrollTo({
       y: y,
       animated: true,
     });
+  };
+
+  const onSubmit = async (data: LoginFormData) => {
+    try {
+      await signInMutation.mutateAsync(data);
+      // Navigation will be handled by AuthContext
+    } catch (error: any) {
+      Alert.alert('Login Failed', error.message || 'An error occurred during login');
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email?.trim()) {
+      Alert.alert('Email Required', 'Please enter your email address first');
+      return;
+    }
+
+    try {
+      await resetPasswordMutation.mutateAsync({ email: email.trim() });
+      Alert.alert('Success', 'Password reset email sent! Check your inbox.');
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to send reset email');
+    }
   };
 
   return (
@@ -55,33 +99,56 @@ export default function LoginScreen() {
 
               <View style={styles.form}>
                 <Text style={styles.label}>Email</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="name@example.com"
-                  placeholderTextColor={colors.text.secondary}
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  returnKeyType="next"
-                  onSubmitEditing={() => passwordRef.current?.focus()}
-                  submitBehavior={'blurAndSubmit'}
-                  onFocus={() => focusOnInput(0)}
-                  onBlur={() => focusOnInput(0)}
+                <Controller
+                  control={control}
+                  name="email"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      style={[
+                        styles.input,
+                        errors.email && styles.inputError,
+                      ]}
+                      placeholder="name@example.com"
+                      placeholderTextColor={colors.text.secondary}
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      returnKeyType="next"
+                      onSubmitEditing={() => passwordRef.current?.focus()}
+                      submitBehavior={'blurAndSubmit'}
+                      onFocus={() => focusOnInput(0)}
+                    />
+                  )}
                 />
+                {errors.email && (
+                  <Text style={styles.errorText}>{errors.email.message}</Text>
+                )}
 
                 <Text style={styles.label}>Password</Text>
                 <View style={styles.passwordContainer}>
-                  <TextInput
-                    ref={passwordRef}
-                    style={styles.passwordInput}
-                    placeholder="Enter your password"
-                    placeholderTextColor={colors.text.secondary}
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry={!showPassword}
-                    returnKeyType="done"
-                    onFocus={() => focusOnInput(150)}
+                  <Controller
+                    control={control}
+                    name="password"
+                    render={({ field: { onChange, onBlur, value } }) => (
+                      <TextInput
+                        ref={passwordRef}
+                        style={[
+                          styles.passwordInput,
+                          errors.password && styles.inputError,
+                        ]}
+                        placeholder="Enter your password"
+                        placeholderTextColor={colors.text.secondary}
+                        value={value}
+                        onChangeText={onChange}
+                        onBlur={onBlur}
+                        secureTextEntry={!showPassword}
+                        returnKeyType="done"
+                        onFocus={() => focusOnInput(150)}
+                        onSubmitEditing={handleSubmit(onSubmit)}
+                      />
+                    )}
                   />
                   <TouchableOpacity
                     onPress={() => setShowPassword(!showPassword)}
@@ -93,16 +160,18 @@ export default function LoginScreen() {
                     />
                   </TouchableOpacity>
                 </View>
+                {errors.password && (
+                  <Text style={styles.errorText}>{errors.password.message}</Text>
+                )}
 
-                <TouchableOpacity>
+                <TouchableOpacity onPress={handleForgotPassword}>
                   <Text style={styles.forgotPassword}>Forgot Password?</Text>
                 </TouchableOpacity>
 
                 <GradientButton
-                  title="Sign In with Email"
-                  onPress={() => {
-                    router.push('/');
-                  }}
+                  title={isSubmitting || signInMutation.isPending ? "Signing In..." : "Sign In with Email"}
+                  onPress={handleSubmit(onSubmit)}
+                  disabled={isSubmitting || signInMutation.isPending}
                 />
 
                 <Divider text="or continue with" />
@@ -202,15 +271,24 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     padding: spacing.md,
     fontSize: typography.sizes.md,
-    marginBottom: spacing.lg,
+    marginBottom: spacing.xs,
     color: colors.text.primary,
     fontWeight: typography.weights.medium,
     borderWidth: 1.5,
     borderColor: colors.gray[200],
   },
+  inputError: {
+    borderColor: colors.rose[500],
+  },
+  errorText: {
+    color: colors.rose[500],
+    fontSize: typography.sizes.xs,
+    marginBottom: spacing.md,
+    marginTop: spacing.xs,
+  },
   passwordContainer: {
     position: 'relative',
-    marginBottom: spacing.md,
+    marginBottom: spacing.xs,
   },
   passwordInput: {
     backgroundColor: colors.white,
@@ -234,6 +312,7 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.sm,
     fontWeight: typography.weights.semibold,
     marginBottom: spacing.md,
+    marginTop: spacing.md,
   },
   // primaryButton: {
   //   backgroundColor: colors.primary,

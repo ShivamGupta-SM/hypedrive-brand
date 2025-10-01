@@ -10,6 +10,9 @@ import 'react-native-reanimated';
 import { colors } from '@/constants/Design';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { PortalProvider } from '@gorhom/portal';
+import { AuthProvider } from '@/lib/contexts/AuthContext';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from '@/lib/query/client';
 
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { useEffect } from 'react';
@@ -52,39 +55,43 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <BottomSheetModalProvider>
-        <PortalProvider>
-          <ThemeProvider value={LightTheme}>
-            <View style={{ flex: 1, backgroundColor: colors.white }}>
-              <StatusBar style="dark" />
-              <Stack
-                screenOptions={{
-                  headerShown: false,
-                  contentStyle: { backgroundColor: colors.white },
-                  animation: 'slide_from_right',
-                }}>
-                <Stack.Screen name="index" options={{ headerShown: false }} />
-                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                <Stack.Screen name="(brand)" options={{ headerShown: false }} />
-                <Stack.Screen
-                  name="(modals)"
-                  options={{
-                    presentation: 'modal',
-                  }}
-                />
-                <Stack.Screen
-                  name="+not-found"
-                  options={{
-                    title: 'Oops!',
-                    headerShown: true,
-                  }}
-                />
-              </Stack>
-            </View>
-          </ThemeProvider>
-        </PortalProvider>
-      </BottomSheetModalProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <BottomSheetModalProvider>
+            <PortalProvider>
+              <ThemeProvider value={LightTheme}>
+                <View style={{ flex: 1, backgroundColor: colors.white }}>
+                  <StatusBar style="dark" />
+                  <Stack
+                    screenOptions={{
+                      headerShown: false,
+                      contentStyle: { backgroundColor: colors.white },
+                      animation: 'slide_from_right',
+                    }}>
+                    <Stack.Screen name="index" options={{ headerShown: false }} />
+                    <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                    <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                    <Stack.Screen name="(brand)" options={{ headerShown: false }} />
+                    <Stack.Screen
+                      name="(modals)"
+                      options={{
+                        presentation: 'modal',
+                      }}
+                    />
+                    <Stack.Screen
+                      name="+not-found"
+                      options={{
+                        title: 'Oops!',
+                        headerShown: true,
+                      }}
+                    />
+                  </Stack>
+                </View>
+              </ThemeProvider>
+            </PortalProvider>
+          </BottomSheetModalProvider>
+        </AuthProvider>
+      </QueryClientProvider>
     </GestureHandlerRootView>
   );
 }
