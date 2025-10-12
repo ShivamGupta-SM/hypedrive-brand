@@ -24,8 +24,8 @@ import Divider from './components/Divider';
 import Logo from './components/Logo';
 import { Feather } from '@expo/vector-icons';
 import { GradientButton } from './components/GradientButton';
-import { useSignIn, useResetPassword } from '@/lib/query/auth';
-import { loginSchema, type LoginFormData } from '@/lib/validations/auth';
+import { useSignIn, usePasswordReset } from '@/lib/hooks/useAuth';
+import { signInSchema, type SignInFormData } from '@/lib/validations/auth';
 
 export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
@@ -33,15 +33,15 @@ export default function LoginScreen() {
   const scrollViewRef = useRef<ScrollView>(null);
   
   const signInMutation = useSignIn();
-  const resetPasswordMutation = useResetPassword();
+  const resetPasswordMutation = usePasswordReset();
 
   const {
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
     watch,
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
+  } = useForm<SignInFormData>({
+    resolver: zodResolver(signInSchema),
     defaultValues: {
       email: '',
       password: '',
@@ -57,7 +57,7 @@ export default function LoginScreen() {
     });
   };
 
-  const onSubmit = async (data: LoginFormData) => {
+  const onSubmit = async (data: SignInFormData) => {
     try {
       await signInMutation.mutateAsync(data);
       // Navigation will be handled by AuthContext
@@ -73,7 +73,7 @@ export default function LoginScreen() {
     }
 
     try {
-      await resetPasswordMutation.mutateAsync({ email: email.trim() });
+      await resetPasswordMutation.mutateAsync(email.trim());
       Alert.alert('Success', 'Password reset email sent! Check your inbox.');
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Failed to send reset email');

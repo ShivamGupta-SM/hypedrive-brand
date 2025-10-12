@@ -1,0 +1,129 @@
+import { FeatureCard } from '@/components/FeatureCard';
+import { GradientButton } from '@/components/GradientButton';
+import { colors, spacing, typography } from '@/constants/Design';
+import { router } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { ChartLineUp, MegaphoneSimple, Plus, Users } from 'phosphor-react-native';
+import React from 'react';
+import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
+
+// Feature card data for looping
+const featureCards = [
+  {
+    id: 'track-performance',
+    title: 'Track Performance',
+    description: "Monitor your brand's growth and analytics in real-time",
+    icon: <ChartLineUp size={24} color={colors.primary} weight="bold" />,
+    backgroundColor: colors.orange[50],
+    borderColor: colors.orange[100],
+  },
+  {
+    id: 'manage-campaigns',
+    title: 'Manage Campaigns',
+    description: 'Create and manage marketing campaigns efficiently',
+    icon: <MegaphoneSimple size={24} color={colors.blue[500]} weight="bold" />,
+    backgroundColor: colors.blue[50],
+    borderColor: colors.blue[100],
+  },
+  {
+    id: 'grow-audience',
+    title: 'Grow Audience',
+    description: 'Build and engage with your target audience',
+    icon: <Users size={24} color={colors.green[500]} weight="fill" />,
+    backgroundColor: colors.green[50],
+    borderColor: colors.green[100],
+  },
+];
+
+export default function BrandOnboardingScreen() {
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar style="dark" />
+      <View style={styles.container}>
+        <ScrollView 
+          style={styles.container}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <Text style={styles.title}>
+            Let's create your{'\n'}brand profile
+          </Text>
+          <Text style={styles.subtitle}>
+            Set up your brand to start managing campaigns and tracking performance
+          </Text>
+
+          <View style={styles.cardsContainer}>
+            {featureCards.map((card) => (
+              <FeatureCard
+                key={card.id}
+                title={card.title}
+                description={card.description}
+                icon={card.icon}
+                backgroundColor={card.backgroundColor}
+                borderColor={card.borderColor}
+              />
+            ))}
+          </View>
+        </ScrollView>
+
+        <View style={styles.buttonContainer}>
+          <GradientButton
+            title="Create Brand Profile"
+            onPress={() => router.push('/(brand)/setup')}
+            icon={<Plus size={20} color={colors.white} weight="bold" />}
+            style={{ marginBottom: spacing.sm }}
+          />
+        </View>
+      </View>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.white,
+  },
+  container: {
+    flex: 1,
+    backgroundColor: colors.white,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    padding: spacing.mg,
+    paddingBottom: spacing.xxl * 3, // Add extra padding at bottom for the fixed button
+  },
+  title: {
+    fontSize: typography.sizes.xxl * 1.35,
+    fontWeight: typography.weights.bold,
+    color: colors.text.black,
+    letterSpacing: -0.8,
+    marginTop: spacing.xl,
+  },
+  subtitle: {
+    fontSize: typography.sizes.md,
+    fontWeight: typography.weights.medium,
+    color: colors.text.secondary,
+    marginTop: spacing.sm,
+    marginBottom: spacing.xl,
+  },
+  cardsContainer: {
+    gap: spacing.md,
+  },
+  buttonContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: spacing.mg,
+    backgroundColor: colors.white,
+    borderTopWidth: 1,
+    borderTopColor: colors.gray[100],
+    shadowColor: colors.black,
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.02,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+});

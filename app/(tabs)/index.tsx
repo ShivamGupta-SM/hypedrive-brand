@@ -1,927 +1,431 @@
-import { BrandHeader } from '@/components/brand/BrandHeader';
-import GradientCard from '@/components/GradientCard';
-import { AppHeader } from '@/components/ui/AppHeader';
-import { borderRadius, colors, spacing, typography } from '@/constants/Design';
-import { useBrandSwitcher } from '@/hooks/useBrandSwitcher';
-import { LinkProps, router } from 'expo-router';
-import {
-  Bell,
-  CaretRight,
-  ChartLineUp,
-  CheckCircle,
-  Clock,
-  FileText,
-  Gear,
-  LineSegments,
-  MagnifyingGlass,
-  Star,
-  Users,
-} from 'phosphor-react-native';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  Image,
-  ImageURISource,
-  Pressable,
-  Animated as RNAnimated,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import React from 'react';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, RefreshControl } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import { colors, spacing, typography } from '@/constants/Design';
+import { StatsCard } from '@/components/ui/StatsCard';
+import { Card } from '@/components/ui/Card';
+import { ErrorBoundary, DataErrorFallback, NetworkErrorFallback, ErrorFallback } from '@/components/ui/ErrorBoundary';
+import { SkeletonDashboard, SkeletonStats, SkeletonCard, SkeletonList } from '@/components/ui/SkeletonLoader';
+import { useDashboardStats, useRecentActivity, useActiveCampaigns, useNotifications, useRefreshHomeData } from '@/lib/hooks/useHomeData';
+import { useAuthStore } from '@/store/authStore';
 
-// Types for our data
-type Campaign = {
-  id: string;
-  name: string;
-  startDate: string;
-  enrollments: {
-    current: number;
-    total: number;
+export default function HomeScreen() {
+  const { user } = useAuthStore();
+  
+  // Data fetching hooks
+  const {
+    data: stats,
+    isLoading: statsLoading,
+    error: statsError,
+    refetch: refetchStats,
+  } = useDashboardStats();
+
+  const {
+    data: recentActivity,
+    isLoading: activityLoading,
+    error: activityError,
+    refetch: refetchActivity,
+  } = useRecentActivity();
+
+  const {
+    data: campaigns,
+    isLoading: campaignsLoading,
+    error: campaignsError,
+    refetch: refetchCampaigns,
+  } = useActiveCampaigns();
+
+  const {
+    data: notifications,
+    isLoading: notificationsLoading,
+    error: notificationsError,
+    refetch: refetchNotifications,
+  } = useNotifications();
+
+  // Refresh functionality
+  const { mutate: refreshData, isPending: isRefreshing } = useRefreshHomeData();
+
+  const handleRefresh = () => {
+    refreshData();
   };
-  reviews: number;
-  success: number;
-  isActive: boolean;
-  logo?: any;
-};
 
-type QuickAction = {
-  id: string;
-  name: string;
-  count: number;
-  icon: React.ReactNode;
-  iconImage?: ImageURISource;
-  color: string;
-  backgroundColor: string;
-  link: LinkProps['href'];
-};
+  // Loading states
+  const isInitialLoading = statsLoading && activityLoading && campaignsLoading && notificationsLoading;
+  const hasAnyError = statsError || activityError || campaignsError || notificationsError;
 
-type Stat = {
-  id: string;
-  title: string;
-  value: number | string;
-  icon: React.ReactNode;
-  color: string;
-  bgColor: string;
-};
-
-type MockData = {
-  brand: {
-    name: string;
-    logo: ImageURISource;
-    color: string;
+  // Network error detection
+  const isNetworkError = (error: any) => {
+    return error?.message?.includes('network') || 
+           error?.message?.includes('fetch') || 
+           error?.code === 'NETWORK_ERROR';
   };
-  user: {
-    firstName: string;
-    pendingTasks: number;
-  };
-  stats: Stat[];
-  quickActions: QuickAction[];
-  activeCampaigns: Campaign[];
-};
 
-// Mock data for the home screen
-const MOCK_DATA: MockData = {
-  brand: {
-    name: 'Nike Brand',
-    logo: require('@/assets/logo/logomark.png'), // Replace with actual logo path
-    color: colors.blue[600], // This would come from the server
-  },
-  user: {
-    firstName: 'Alex',
-    pendingTasks: 5,
-  },
-  stats: [
-    {
-      id: 'reviews',
-      title: 'Reviews',
-      value: 84,
-      icon: <Star size={22} weight="fill" />,
-      color: colors.blue[500],
-      bgColor: colors.blue[50],
-    },
-    {
-      id: 'campaigns',
-      title: 'Campaigns',
-      value: 24,
-      icon: <ChartLineUp size={22} weight="fill" />,
-      color: colors.green[500],
-      bgColor: colors.green[50],
-    },
-    {
-      id: 'influencers',
-      title: 'Influencers',
-      value: 156,
-      icon: <Users size={22} weight="fill" />,
-      color: colors.purple[500],
-      bgColor: colors.purple[50],
-    },
-    {
-      id: 'engagement',
-      title: 'Engagement',
-      value: '78%',
-      icon: <ChartLineUp size={22} weight="fill" />,
-      color: colors.rose[500],
-      bgColor: colors.rose[50],
-    },
-  ],
-  quickActions: [
-    {
-      id: 'approvals',
-      name: 'Approvals',
-      count: 12,
-      link: '/campaigns/approvals/quick-approvals',
-      icon: <CheckCircle weight="bold" />,
-      iconImage: require('@/assets/icons/3dicons-star-iso-gradient.png'),
-      color: colors.orange[500],
-      backgroundColor: colors.orange[50],
-    },
-    {
-      id: 'invoices',
-      name: 'Invoices',
-      count: 8,
-      link: '/invoices',
-      icon: <FileText weight="bold" />,
-      iconImage: require('@/assets/icons/file-update_18753931.png'),
-      color: colors.blue[500],
-      backgroundColor: colors.blue[50],
-    },
-    {
-      id: 'analytics',
-      name: 'Analytics',
-      count: 4,
-      link: '/analytics',
-      icon: <LineSegments weight="bold" />,
-      iconImage: require('@/assets/icons/3dicons-computer-iso-gradient.png'),
-      color: colors.green[500],
-      backgroundColor: colors.green[50],
-    },
-    {
-      id: 'team',
-      name: 'Team',
-      count: 3,
-      link: '/(brand)/team-members',
-      icon: <Users weight="bold" />,
-      iconImage: require('@/assets/icons/3dicons-girl-iso-color.png'),
-      color: colors.purple[500],
-      backgroundColor: colors.purple[50],
-    },
-  ],
-  activeCampaigns: [
-    {
-      id: '1',
-      name: 'Nike Air Max 2025',
-      startDate: 'June 15, 2025',
-      enrollments: {
-        current: 45,
-        total: 100,
-      },
-      reviews: 28,
-      success: 62,
-      isActive: true,
-      logo: require('@/assets/logo/others/amazon-logo2.png'),
-    },
-    {
-      id: '2',
-      name: 'Nike Dri-FIT',
-      startDate: 'June 10, 2025',
-      enrollments: {
-        current: 82,
-        total: 150,
-      },
-      reviews: 67,
-      success: 82,
-      isActive: true,
-      logo: require('@/assets/logo/others/amazon-logo2.png'),
-    },
-  ],
-};
+  const hasNetworkError = [statsError, activityError, campaignsError, notificationsError]
+    .some(error => error && isNetworkError(error));
 
-export default function BrandHomeScreen() {
-  const [loading, setLoading] = useState(true);
-  const [data, setData] = useState(MOCK_DATA);
-  const scrollY = useRef(new RNAnimated.Value(0)).current;
-  const [refreshing, setRefreshing] = useState(false);
+  // Show full screen loading on initial load
+  if (isInitialLoading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <SkeletonDashboard />
+      </SafeAreaView>
+    );
+  }
 
-  // Simulate data loading
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000);
+  // Show network error screen
+  if (hasNetworkError) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <NetworkErrorFallback 
+          onRetry={() => {
+            refetchStats();
+            refetchActivity();
+            refetchCampaigns();
+            refetchNotifications();
+          }} 
+        />
+      </SafeAreaView>
+    );
+  }
 
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Handle refresh
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    // Show skeleton while refreshing
-    setLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      // Update data if needed
-      setData({ ...MOCK_DATA });
-      setRefreshing(false);
-      setLoading(false);
-    }, 2000);
-  }, []);
-
-  const notificationCount = 13;
-  const { BrandSwitcherComponent, openBrandSwitcher } = useBrandSwitcher();
+  // Show general error screen if all data failed to load
+  if (hasAnyError && !stats && !recentActivity && !campaigns && !notifications) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <DataErrorFallback 
+          onRetry={() => {
+            refetchStats();
+            refetchActivity();
+            refetchCampaigns();
+            refetchNotifications();
+          }} 
+        />
+      </SafeAreaView>
+    );
+  }
 
   return (
-    <GestureHandlerRootView style={styles.container}>
-      <AppHeader
-        title="Home"
-        hideTitle
-        leftContent={<BrandHeader onPress={openBrandSwitcher} />}
-        rightContent={
-          <View style={styles.headerActions}>
-            <TouchableOpacity style={styles.iconButton}>
-              <MagnifyingGlass size={22} color={colors.text.primary} weight="bold" />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => router.push('/notifications')}
-              style={styles.iconButton}>
-              <Bell size={22} color={colors.text.primary} weight="bold" />
-              <View style={styles.notificationBadge}>
-                <Text style={styles.notificationText}>
-                  {notificationCount > 9 ? '9+' : notificationCount}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          </View>
+    <SafeAreaView style={styles.container}>
+      <ScrollView
+        style={styles.scrollView}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={handleRefresh}
+            colors={[colors.primary]}
+            tintColor={colors.primary}
+          />
         }
-      />
-
-      <RNAnimated.ScrollView
         showsVerticalScrollIndicator={false}
-        style={{ backgroundColor: colors.white }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        onScroll={RNAnimated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
-          useNativeDriver: true,
-        })}
-        scrollEventThrottle={16}>
-        <Animated.View entering={FadeIn.duration(300)} style={styles.content}>
-          {/* Greeting Card with Gradient */}
-          <Animated.View
-            entering={FadeInDown.delay(100).duration(400)}
-            style={styles.greetingCardContainer}>
-            <GradientCard baseColor={data.brand.color} style={styles.greetingCard}>
-              <Text style={styles.greetingText}>Good morning, {data.user.firstName}</Text>
-              <Text style={styles.tasksText}>
-                You have {data.user.pendingTasks} tasks pending today
-              </Text>
-              <TouchableOpacity
-                style={styles.settingsButton}
-                onPress={() => router.push('/notification-settings')}>
-                <Gear size={24} color={colors.white} weight="bold" />
-              </TouchableOpacity>
-            </GradientCard>
-          </Animated.View>
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.greeting}>Good morning</Text>
+            <Text style={styles.userName}>{user?.user_metadata?.name || 'User'}</Text>
+          </View>
+          <View style={styles.notificationBadge}>
+             <Text style={styles.badgeText}>
+               {notifications?.filter(n => n.status === 'unread').length || 0}
+             </Text>
+           </View>
+        </View>
 
-          {/* Stats Overview - Horizontally Scrollable */}
-          <Animated.View
-            entering={FadeInDown.delay(200).duration(400)}
-            style={styles.statCardContainer}>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.statCardsScroll}>
-              {data.stats.map(stat => (
-                <StatCardWithSkeleton key={stat.id} stat={stat} isLoading={loading} />
-              ))}
-            </ScrollView>
-          </Animated.View>
-
-          {/* Quick Actions */}
-          <Animated.View entering={FadeInDown.delay(300).duration(400)} style={styles.quickActions}>
-            <Text style={styles.sectionTitle}>Quick Actions</Text>
-            <View style={styles.quickActionsOuterContainer}>
-              <View style={styles.quickActionsContainer}>
-                {data.quickActions.map(action => (
-                  <ActionCardWithSkeleton key={action.id} action={action} isLoading={loading} />
-                ))}
+        {/* Dashboard Stats */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Dashboard Overview</Text>
+          {statsLoading ? (
+            <SkeletonStats />
+          ) : statsError ? (
+            <ErrorFallback
+              title="Failed to load stats"
+              message="Unable to fetch dashboard statistics"
+              onRetry={refetchStats}
+              showRetry={true}
+            />
+          ) : stats ? (
+            <View style={styles.statsGrid}>
+              <View style={styles.statCard}>
+                <Text style={styles.statValue}>{stats.totalCampaigns}</Text>
+                <Text style={styles.statLabel}>Total Campaigns</Text>
+              </View>
+              <View style={styles.statCard}>
+                <Text style={styles.statValue}>{stats.activeCampaigns}</Text>
+                <Text style={styles.statLabel}>Active</Text>
+              </View>
+              <View style={styles.statCard}>
+                <Text style={styles.statValue}>{stats.totalRevenue}</Text>
+                <Text style={styles.statLabel}>Revenue</Text>
+              </View>
+              <View style={styles.statCard}>
+                <Text style={styles.statValue}>{stats.pendingOrders}</Text>
+                <Text style={styles.statLabel}>Pending Orders</Text>
               </View>
             </View>
-          </Animated.View>
+          ) : null}
+        </View>
 
-          {/* Active Campaigns */}
-          <Animated.View
-            entering={FadeInDown.delay(400).duration(400)}
-            style={styles.campaignsSection}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Active Campaigns</Text>
-              <TouchableOpacity>
-                <View style={styles.viewAll}>
-                  <Text style={styles.viewAllText}>View All</Text>
-                  <CaretRight weight="bold" size={14} color={colors.orange[500]} />
+        {/* Recent Activity */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Recent Activity</Text>
+          {activityLoading ? (
+            <SkeletonList items={3} />
+          ) : activityError ? (
+            <ErrorFallback
+              title="Failed to load activity"
+              message="Unable to fetch recent activity"
+              onRetry={refetchActivity}
+              showRetry={true}
+            />
+          ) : recentActivity && recentActivity.length > 0 ? (
+            <View style={styles.activityList}>
+              {recentActivity?.map((activity) => (
+                <View key={activity.id} style={styles.activityItem}>
+                  <View style={styles.activityIcon}>
+                    <Ionicons
+                      name={
+                        activity.type === 'campaign_created' ? 'megaphone' :
+                        activity.type === 'order_received' ? 'bag' :
+                        activity.type === 'payment_completed' ? 'card' : 'document'
+                      }
+                      size={16}
+                      color={colors.primary}
+                    />
+                  </View>
+                  <View style={styles.activityContent}>
+                    <Text style={styles.activityTitle}>{activity.title}</Text>
+                    <Text style={styles.activityDescription}>{activity.description}</Text>
+                    <Text style={styles.activityTime}>
+                      {new Date(activity.timestamp).toLocaleDateString()}
+                    </Text>
+                  </View>
                 </View>
-              </TouchableOpacity>
+              ))}
             </View>
+          ) : (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyStateText}>No recent activity</Text>
+            </View>
+          )}
+        </View>
 
-            {data.activeCampaigns.map(campaign => (
-              <Pressable key={campaign.id} style={styles.campaignCard}>
-                <View style={styles.campaignHeader}>
-                  <View style={styles.campaignLogoContainer}>
-                    <Image source={campaign.logo} style={styles.campaignLogo} />
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.campaignName}>{campaign.name}</Text>
-                    <View style={styles.campaignDateContainer}>
-                      <Clock size={12} weight="bold" color={colors.text.muted} />
-                      <Text style={styles.campaignDateText}>Started: {campaign.startDate}</Text>
-                    </View>
-                  </View>
-                  <View style={styles.statusBadge}>
-                    <Text style={styles.statusText}>Active</Text>
+        {/* Active Campaigns */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Active Campaigns</Text>
+          {campaignsLoading ? (
+            <View>
+              <SkeletonCard />
+              <SkeletonCard />
+            </View>
+          ) : campaignsError ? (
+            <ErrorFallback
+              title="Failed to load campaigns"
+              message="Unable to fetch active campaigns"
+              onRetry={refetchCampaigns}
+              showRetry={true}
+            />
+          ) : campaigns && campaigns.length > 0 ? (
+            <View style={styles.campaignsList}>
+              {campaigns.map((campaign) => (
+                <View key={campaign.id} style={styles.campaignCard}>
+                  <Text style={styles.campaignTitle}>{campaign.title}</Text>
+                  <Text style={styles.campaignDescription}>{campaign.description}</Text>
+                  <View style={styles.campaignFooter}>
+                    <Text style={styles.campaignBudget}>
+                      Rebate: {campaign.rebate_percentage}%
+                    </Text>
+                    <Text style={styles.campaignStatus}>{campaign.status}</Text>
                   </View>
                 </View>
-
-                <View style={styles.campaignStats}>
-                  <View style={styles.campaignStat}>
-                    <Text style={styles.statTitle}>Enrollments</Text>
-                    <Text style={styles.statNumber}>
-                      {campaign.enrollments.current}/{campaign.enrollments.total}
-                    </Text>
-                  </View>
-                  <View style={styles.campaignStat}>
-                    <Text style={styles.statTitle}>Reviews</Text>
-                    <Text style={styles.statNumber}>{campaign.reviews}</Text>
-                  </View>
-                  <View style={styles.campaignStat}>
-                    <Text style={styles.statTitle}>Success</Text>
-                    <Text style={[styles.statNumber, { color: colors.green[500] }]}>
-                      {campaign.success}%
-                    </Text>
-                  </View>
-                </View>
-              </Pressable>
-            ))}
-          </Animated.View>
-
-          {/* Add spacing at bottom for the floating action button */}
-          <View style={{ height: 50 }} />
-        </Animated.View>
-      </RNAnimated.ScrollView>
-
-      {/* Brand Switcher Bottom Sheet */}
-      {BrandSwitcherComponent}
-    </GestureHandlerRootView>
+              ))}
+            </View>
+          ) : (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyStateText}>No active campaigns</Text>
+            </View>
+          )}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: colors.gray[50],
   },
-  content: {
-    paddingTop: spacing.md,
-    paddingBottom: spacing.xxl * 3,
-  },
-  fixedHeader: {
-    // position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: colors.white,
-    zIndex: 10,
-    paddingHorizontal: spacing.mg,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.sm,
-  },
-  fixedHeaderSkeleton: {
-    // position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: colors.white,
-    zIndex: 10,
-    paddingHorizontal: spacing.mg,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.sm,
+  scrollView: {
+    flex: 1,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    padding: spacing.md,
+    backgroundColor: colors.white,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
   },
-  headerSkeleton: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  brandContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  logoContainer: {
-    width: 42,
-    height: 42,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.orange[50],
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  logo: {
-    width: 24,
-    height: 24,
-    resizeMode: 'contain',
-    tintColor: colors.orange[500],
-  },
-  welcomeText: {
-    fontSize: typography.sizes.xs,
+  greeting: {
+    fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.regular,
     color: colors.text.secondary,
+  },
+  userName: {
+    fontSize: typography.sizes.lg,
     fontWeight: typography.weights.semibold,
-  },
-  brandName: {
-    fontSize: typography.sizes.md,
-    fontWeight: typography.weights.bold,
-    color: colors.text.black,
-    alignItems: 'center',
-    flexDirection: 'row',
-  },
-  headerActions: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-  iconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.gray[100],
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-  },
-  skeletonIconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.gray[200],
+    color: colors.text.primary,
+    marginTop: 2,
   },
   notificationBadge: {
-    position: 'absolute',
-    top: -2,
-    right: -2,
-    backgroundColor: colors.rose[500],
-    borderRadius: borderRadius.full,
-    minWidth: 18,
-    minHeight: 18,
-    padding: 2,
-    alignItems: 'center',
+    backgroundColor: colors.red[500],
+    borderRadius: 12,
+    minWidth: 24,
+    height: 24,
     justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 6,
   },
-  notificationText: {
-    color: colors.white,
-    fontSize: typography.sizes.xxs,
+  badgeText: {
+    fontSize: typography.sizes.xs,
     fontWeight: typography.weights.bold,
+    color: colors.white,
   },
-  greetingCardContainer: {
-    paddingHorizontal: spacing.md,
-    marginBottom: spacing.md,
-  },
-  greetingCard: {
+  section: {
     padding: spacing.md,
-    position: 'relative',
-  },
-  greetingText: {
-    fontSize: typography.sizes.md,
-    fontWeight: typography.weights.bold,
-    color: colors.white,
-    marginBottom: spacing.xs,
-  },
-  tasksText: {
-    fontSize: typography.sizes.sm,
-    fontWeight: typography.weights.medium,
-    color: colors.white,
-    opacity: 0.9,
-  },
-  settingsButton: {
-    position: 'absolute',
-    top: spacing.md,
-    right: spacing.md,
-    width: 40,
-    height: 40,
-    borderRadius: borderRadius.sm,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   sectionTitle: {
-    fontSize: typography.sizes.md,
-    fontWeight: typography.weights.bold,
-    color: colors.text.black,
+    fontSize: typography.sizes.lg,
+    fontWeight: typography.weights.semibold,
+    color: colors.text.primary,
     marginBottom: spacing.md,
   },
-  skeletonTitle: {
-    height: 24,
-    width: 120,
-    backgroundColor: colors.gray[200],
-    borderRadius: borderRadius.md,
-  },
-  statCardContainer: {
-    // marginBottom: spacing.md,
-  },
-  statCardsScroll: {
+  statsGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-    paddingBottom: spacing.md,
   },
   statCard: {
-    flexDirection: 'row',
+    flex: 1,
     backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
-    paddingHorizontal: spacing.xm,
-    paddingVertical: spacing.mg,
-    gap: spacing.sm,
+    padding: spacing.md,
+    borderRadius: 12,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.gray[100],
-    width: 160,
     shadowColor: colors.black,
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-    // overflow: 'hidden',
-  },
-  statCardSkeleton: {
-    flexDirection: 'row',
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.mg,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.gray[200],
-    width: 160,
-    overflow: 'hidden',
-  },
-  statIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: borderRadius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   statValue: {
-    fontSize: typography.sizes.md,
+    fontSize: typography.sizes.xl,
     fontWeight: typography.weights.bold,
-    color: colors.text.black,
+    color: colors.primary,
   },
   statLabel: {
     fontSize: typography.sizes.xs,
-    color: colors.text.secondary,
     fontWeight: typography.weights.medium,
+    color: colors.text.secondary,
+    marginTop: spacing.xs,
+    textAlign: 'center',
   },
-  quickActions: {
-    paddingHorizontal: spacing.md,
-    marginBottom: spacing.md,
+  activityList: {
+    gap: spacing.md,
   },
-  quickActionsOuterContainer: {},
-  quickActionsContainer: {
+  activityItem: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: spacing.xs,
-  },
-  actionCard: {
-    alignItems: 'center',
-    width: '23%', // Exactly 4 columns with equal width
-    borderWidth: 1,
-    borderColor: colors.gray[100],
-    padding: spacing.sm,
-    paddingVertical: spacing.sm,
     backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
-    shadowColor: colors.orange[400],
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    padding: spacing.md,
+    borderRadius: 12,
+    shadowColor: colors.black,
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
     elevation: 2,
   },
-  quickActionsContainerSkeleton: {
-    paddingHorizontal: spacing.md,
-  },
-  quickActionsGridSkeleton: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  actionCardSkeleton: {
-    alignItems: 'center',
-    width: '23%',
-    marginBottom: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.gray[200],
-    padding: spacing.sm,
-    paddingVertical: spacing.sm,
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
-  },
-  actionIconContainer: {
-    width: 42,
-    height: 42,
-    borderRadius: borderRadius.md,
-    alignItems: 'center',
+  activityIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.gray[100],
     justifyContent: 'center',
-    marginBottom: spacing.sm,
-    position: 'relative',
-  },
-  actionBadge: {
-    position: 'absolute',
-    top: -5,
-    right: -5,
-    backgroundColor: colors.rose[500],
-    borderRadius: borderRadius.full,
-    minWidth: 18,
-    height: 18,
-    paddingHorizontal: 2,
     alignItems: 'center',
-    justifyContent: 'center',
+    marginRight: spacing.md,
   },
-  actionBadgeText: {
-    color: colors.white,
-    fontSize: typography.sizes.xxs,
-    fontWeight: typography.weights.bold,
-    textAlign: 'center',
+  activityIconText: {
+    fontSize: 18,
   },
-  actionText: {
-    fontSize: typography.sizes.xxs,
-    color: colors.text.secondary,
+  activityContent: {
+    flex: 1,
+  },
+  activityTitle: {
+    fontSize: typography.sizes.md,
     fontWeight: typography.weights.medium,
-    textAlign: 'center',
+    color: colors.text.primary,
   },
-  campaignsSection: {
-    marginBottom: spacing.md,
-    paddingHorizontal: spacing.md,
+  activityDescription: {
+    fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.regular,
+    color: colors.text.secondary,
+    marginTop: 2,
   },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  viewAll: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    marginBottom: spacing.md,
-  },
-  viewAllText: {
+  activityTime: {
     fontSize: typography.sizes.xs,
-    color: colors.orange[500],
-    fontWeight: typography.weights.semibold,
+    fontWeight: typography.weights.regular,
+    color: colors.text.muted,
+    marginTop: spacing.xs,
+  },
+  campaignsList: {
+    gap: spacing.md,
   },
   campaignCard: {
     backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
     padding: spacing.md,
-    marginBottom: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.gray[100],
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
+    borderRadius: 12,
+    shadowColor: colors.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  campaignCardSkeleton: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
-    padding: spacing.md,
-    marginHorizontal: spacing.md,
-    marginBottom: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.gray[200],
-  },
-  campaignHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.md,
-  },
-  campaignLogoContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: borderRadius.md,
-    borderWidth: 1,
-    borderColor: colors.gray[200],
-    overflow: 'hidden',
-    marginRight: spacing.md,
-  },
-  campaignLogo: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-    tintColor: colors.orange[300],
-  },
-  campaignName: {
-    fontSize: typography.sizes.sm,
-    fontWeight: typography.weights.bold,
-    color: colors.text.black,
-    marginBottom: 2,
-  },
-  campaignDateContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  campaignDateText: {
-    fontSize: typography.sizes.xxs,
-    color: colors.text.secondary,
-    fontWeight: typography.weights.medium,
-  },
-  statusBadge: {
-    backgroundColor: colors.green[50],
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    borderRadius: borderRadius.full,
-    borderWidth: 1,
-    borderColor: colors.green[100],
-    marginLeft: 'auto',
-  },
-  statusBadgeSkeleton: {
-    width: 60,
-    height: 24,
-    backgroundColor: colors.gray[200],
-    borderRadius: borderRadius.full,
-    marginLeft: 'auto',
-  },
-  statusText: {
-    fontSize: typography.sizes.xs,
-    color: colors.green[600],
+  campaignTitle: {
+    fontSize: typography.sizes.md,
     fontWeight: typography.weights.semibold,
+    color: colors.text.primary,
   },
-  campaignStats: {
+  campaignDescription: {
+    fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.regular,
+    color: colors.text.secondary,
+    marginTop: spacing.xs,
+    lineHeight: 20,
+  },
+  campaignFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: spacing.sm,
+    alignItems: 'center',
+    marginTop: spacing.md,
   },
-  campaignStat: {
-    alignItems: 'flex-start',
-    flex: 1,
-    backgroundColor: colors.gray[100],
-    padding: spacing.sm,
-    borderRadius: borderRadius.md,
-  },
-  statTitle: {
-    fontSize: typography.sizes.xs,
-    fontWeight: typography.weights.medium,
-    color: colors.text.secondary,
-    marginBottom: 4,
-  },
-  statNumber: {
+  campaignBudget: {
     fontSize: typography.sizes.md,
     fontWeight: typography.weights.bold,
-    color: colors.text.black,
+    color: colors.green[600],
   },
-  fabContainer: {
-    position: 'absolute',
-    bottom: 16,
-    alignSelf: 'center',
+  campaignStatus: {
+    fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.medium,
+    color: colors.blue[600],
+    textTransform: 'capitalize',
+  },
+  emptyState: {
     alignItems: 'center',
+    padding: spacing.xl,
   },
-  fab: {
-    width: 60,
-    height: 60,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.orange[500],
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: colors.orange[500],
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  fabLabel: {
-    fontSize: typography.sizes.xs,
-    color: colors.text.secondary,
-    marginTop: 4,
+  emptyStateText: {
+    fontSize: typography.sizes.md,
+    fontWeight: typography.weights.regular,
+    color: colors.text.muted,
   },
 });
-
-// Example of using View components directly for a stat card
-const StatCardWithSkeleton = ({ stat, isLoading }: { stat: Stat; isLoading: boolean }) => {
-  if (isLoading) {
-    return (
-      <View style={styles.statCard}>
-        <View
-          style={[
-            styles.statIcon,
-            {
-              backgroundColor: colors.gray[200],
-              width: 40,
-              height: 40,
-            },
-          ]}
-        />
-        <View style={{ gap: 4 }}>
-          <View
-            style={{
-              width: 60,
-              height: 24,
-              backgroundColor: colors.gray[200],
-              borderRadius: borderRadius.sm,
-            }}
-          />
-          <View
-            style={{
-              width: 40,
-              height: 16,
-              backgroundColor: colors.gray[200],
-              borderRadius: borderRadius.sm,
-            }}
-          />
-        </View>
-      </View>
-    );
-  }
-
-  return (
-    <View style={styles.statCard}>
-      <View style={[styles.statIcon, { backgroundColor: stat.bgColor }]}>
-        {React.cloneElement(stat.icon as React.ReactElement<any, string>, {
-          color: stat.color,
-        })}
-      </View>
-      <View>
-        <Text style={styles.statValue}>{stat.value}</Text>
-        <Text style={styles.statLabel} numberOfLines={1} ellipsizeMode="tail">
-          {stat.title}
-        </Text>
-      </View>
-    </View>
-  );
-};
-
-// Example of using View components directly for action cards
-const ActionCardWithSkeleton = ({
-  action,
-  isLoading,
-}: {
-  action: QuickAction;
-  isLoading: boolean;
-}) => {
-  if (isLoading) {
-    return (
-      <View style={styles.actionCard}>
-        <View
-          style={[
-            styles.actionIconContainer,
-            {
-              backgroundColor: colors.gray[200],
-              width: 42,
-              height: 42,
-            },
-          ]}
-        />
-        <View
-          style={{
-            width: 60,
-            height: 16,
-            backgroundColor: colors.gray[200],
-            borderRadius: borderRadius.sm,
-            marginTop: spacing.sm,
-          }}
-        />
-      </View>
-    );
-  }
-
-  return (
-    <Pressable onPress={() => router.push(action.link)} style={styles.actionCard}>
-      <View style={[styles.actionIconContainer, { backgroundColor: action.backgroundColor }]}>
-        {React.cloneElement(action.icon as React.ReactElement<any, string>, {
-          size: 20,
-          color: action.color,
-        })}
-        {/* <Image source={action.iconImage} style={{ height: 44, width: 44, objectFit: 'contain' }} /> */}
-        {action.count > 0 && (
-          <View style={styles.actionBadge}>
-            <Text style={styles.actionBadgeText}>{action.count > 9 ? '9+' : action.count}</Text>
-          </View>
-        )}
-      </View>
-      <Text style={styles.actionText}>{action.name}</Text>
-    </Pressable>
-  );
-};

@@ -6,6 +6,7 @@ import { HapticTab } from '@/components/HapticTab';
 import TabBarBackground from '@/components/ui/TabBarBackground.ios';
 import { borderRadius, colors, spacing } from '@/constants/Design';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { AuthGuard } from '@/components/auth/AuthGuard';
 import { BlurView } from 'expo-blur';
 import {
   DotsThreeOutline,
@@ -19,73 +20,75 @@ export default function TabLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: colors.blue[600],
-        tabBarHideOnKeyboard: true,
-        tabBarBadgeStyle: { backgroundColor: colors.rose[500] },
-        headerShown: false,
-        tabBarInactiveTintColor: colors.gray[700],
-        tabBarLabelStyle: {
-          marginTop: 6,
-          fontSize: 9,
-          letterSpacing: -0.2,
-        },
-        tabBarButton: HapticTab,
-        tabBarBackground: () =>
-          Platform.OS === 'ios' ? (
-            <BlurView tint="extraLight" intensity={98} style={StyleSheet.absoluteFill} />
-          ) : (
-            <TabBarBackground />
-          ),
-        tabBarStyle: styles.tabBar,
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color, focused }) => (
-            <House color={color} size={26} weight={focused ? 'fill' : 'regular'} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="campaigns"
-        options={{
-          title: 'Campaigns',
-          tabBarIcon: ({ color, focused }) => (
-            <MegaphoneSimple color={color} size={26} weight={focused ? 'fill' : 'regular'} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="new"
-        options={{
-          title: 'Products',
-          tabBarIcon: ({ color, focused }) => (
-            <ShoppingBag color={color} size={28} weight={focused ? 'fill' : 'regular'} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="invoices"
-        options={{
-          title: 'Invoices',
-          tabBarIcon: ({ color, focused }) => (
-            <Receipt color={color} size={26} weight={focused ? 'fill' : 'regular'} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="more"
-        options={{
-          title: 'More',
-          tabBarIcon: ({ color, focused }) => (
-            <DotsThreeOutline color={color} size={26} weight={focused ? 'fill' : 'fill'} />
-          ),
-        }}
-      />
-    </Tabs>
+    <AuthGuard>
+      <Tabs
+        screenOptions={{
+          tabBarActiveTintColor: colors.blue[600],
+          tabBarHideOnKeyboard: true,
+          tabBarBadgeStyle: { backgroundColor: colors.rose[500] },
+          headerShown: false,
+          tabBarInactiveTintColor: colors.gray[700],
+          tabBarLabelStyle: {
+            marginTop: 6,
+            fontSize: 9,
+            letterSpacing: -0.2,
+          },
+          tabBarButton: HapticTab,
+          tabBarBackground: () =>
+            Platform.OS === 'ios' ? (
+              <BlurView tint="extraLight" intensity={98} style={StyleSheet.absoluteFill} />
+            ) : (
+              <TabBarBackground />
+            ),
+          tabBarStyle: styles.tabBar,
+        }}>
+        <Tabs.Screen
+          name="index"
+          options={{
+            title: 'Home',
+            tabBarIcon: ({ color, focused }) => (
+              <House color={color} size={26} weight={focused ? 'fill' : 'regular'} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="campaigns"
+          options={{
+            title: 'Campaigns',
+            tabBarIcon: ({ color, focused }) => (
+              <MegaphoneSimple color={color} size={26} weight={focused ? 'fill' : 'regular'} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="orders"
+          options={{
+            title: 'Orders',
+            tabBarIcon: ({ color, focused }) => (
+              <ShoppingBag color={color} size={26} weight={focused ? 'fill' : 'regular'} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="invoices"
+          options={{
+            title: 'Invoices',
+            tabBarIcon: ({ color, focused }) => (
+              <Receipt color={color} size={26} weight={focused ? 'fill' : 'regular'} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="more"
+          options={{
+            title: 'More',
+            tabBarIcon: ({ color, focused }) => (
+              <DotsThreeOutline color={color} size={26} weight={focused ? 'fill' : 'regular'} />
+            ),
+          }}
+        />
+      </Tabs>
+    </AuthGuard>
   );
 }
 

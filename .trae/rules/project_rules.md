@@ -74,6 +74,28 @@ State Management
 - For complex state management, consider using Zustand.
 - Handle URL search parameters using libraries like expo-linking.
 
+Data Fetching and Query Patterns
+
+- **Query Organization**: Create dedicated hook files in `lib/hooks/` for each feature area (e.g., `useHomeData.ts`, `useAuth.ts`)
+- **Query Keys**: Use consistent query key patterns with hierarchical structure:
+  ```typescript
+  export const queryKeys = {
+    all: ['feature'] as const,
+    lists: () => [...queryKeys.all, 'list'] as const,
+    list: (filters: string) => [...queryKeys.lists(), { filters }] as const,
+    details: () => [...queryKeys.all, 'detail'] as const,
+    detail: (id: string) => [...queryKeys.details(), id] as const,
+  };
+  ```
+- **Error Handling**: Always implement proper error boundaries and fallback UI components
+- **Loading States**: Use skeleton loaders and loading spinners for better UX during data fetching
+- **Retry Logic**: Implement retry functionality for failed requests with exponential backoff
+- **Optimistic Updates**: Use TanStack Query's optimistic updates for better perceived performance
+- **Cache Management**: Implement proper cache invalidation strategies using query client methods
+- **Authentication Integration**: Always check authentication state before making data requests
+- **Type Safety**: Generate TypeScript types from Supabase schema and use them consistently
+- **Real-time Updates**: Use Supabase subscriptions with TanStack Query for live data updates when needed
+
 Error Handling and Validation
 
 - ALWAYS use React Hook Form for form state management and validation.
@@ -86,6 +108,29 @@ Error Handling and Validation
   - Avoid unnecessary else statements; use if-return pattern instead.
   - Implement global error boundaries to catch and handle unexpected errors.
 - Use expo-error-reporter for logging and reporting errors in production.
+
+UI Components and Error States
+
+- **Error Boundaries**: Wrap components with ErrorBoundary for graceful error handling
+- **Error Screens**: Use dedicated error screen components for different scenarios:
+  - `NetworkErrorScreen`: For connectivity issues
+  - `ServerErrorScreen`: For server-side errors
+  - `UnauthorizedScreen`: For authentication failures
+  - `NotFoundScreen`: For missing resources
+  - `MaintenanceScreen`: For planned downtime
+- **Empty States**: Implement contextual empty state screens:
+  - `NoCampaignsEmpty`: When no campaigns exist
+  - `NoProductsEmpty`: When no products are added
+  - `NoSearchResultsEmpty`: When search returns no results
+  - `NoNotificationsEmpty`: When no notifications exist
+- **Loading States**: Use skeleton loaders and loading spinners consistently:
+  - `SkeletonDashboard`: For dashboard loading
+  - `SkeletonStats`: For statistics loading
+  - `SkeletonCard`: For card-based content
+  - `SkeletonList`: For list-based content
+- **Retry Components**: Implement retry functionality with loading states:
+  - `RetryButton`: Reusable retry button with loading indicator
+  - Include retry logic in error screens and fallback components
 
 Testing
 
@@ -205,6 +250,8 @@ This project uses Supabase as the backend database. All backend/API/SDK integrat
 
 - **DO NOT** use web preview for testing - user tests on physical device
 - Focus on mobile-first development and testing
+- Prefer iOS simulator when available, fallback to Android emulator
+- Test authentication flows and animations on actual devices for best results
 
 ### Schema Updates
 

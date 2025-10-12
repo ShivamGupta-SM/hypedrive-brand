@@ -24,8 +24,8 @@ import TermsAgreement from './components/TermsAgreement';
 import Logo from './components/Logo';
 import Divider from './components/Divider';
 import { GradientButton } from './components/GradientButton';
-import { useSignUp } from '@/lib/query/auth';
-import { registerSchema, type RegisterFormData } from '@/lib/validations/auth';
+import { useSignUp } from '@/lib/hooks/useAuth';
+import { signUpSchema, type SignUpFormData } from '@/lib/validations/auth';
 
 export default function RegisterScreen() {
   const passwordRef = useRef<TextInput>(null);
@@ -38,9 +38,11 @@ export default function RegisterScreen() {
     handleSubmit,
     watch,
     formState: { errors, isSubmitting },
-  } = useForm<RegisterFormData>({
-    resolver: zodResolver(registerSchema),
+  } = useForm<SignUpFormData>({
+    resolver: zodResolver(signUpSchema),
     defaultValues: {
+      firstName: '',
+      lastName: '',
       email: '',
       password: '',
       confirmPassword: '',
@@ -50,10 +52,12 @@ export default function RegisterScreen() {
 
   const watchShowPassword = watch('password');
 
-  const onSubmit = (data: RegisterFormData) => {
+  const onSubmit = (data: SignUpFormData) => {
     signUpMutation.mutate({
       email: data.email,
       password: data.password,
+      firstName: data.firstName,
+      lastName: data.lastName,
     });
   };
 

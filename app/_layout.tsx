@@ -10,9 +10,9 @@ import 'react-native-reanimated';
 import { colors } from '@/constants/Design';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { PortalProvider } from '@gorhom/portal';
-import { AuthProvider } from '@/lib/contexts/AuthContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/lib/query/client';
+import { useAuthStore } from '@/store/authStore';
 
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { useEffect } from 'react';
@@ -43,6 +43,11 @@ export default function RootLayout() {
     InterBold: require('@/assets/fonts/Inter-Bold.ttf'),
   });
 
+  // Initialize auth store
+  useEffect(() => {
+    useAuthStore.getState().initialize();
+  }, []);
+
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
@@ -56,41 +61,41 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <BottomSheetModalProvider>
-            <PortalProvider>
-              <ThemeProvider value={LightTheme}>
-                <View style={{ flex: 1, backgroundColor: colors.white }}>
-                  <StatusBar style="dark" />
-                  <Stack
-                    screenOptions={{
-                      headerShown: false,
-                      contentStyle: { backgroundColor: colors.white },
-                      animation: 'slide_from_right',
-                    }}>
-                    <Stack.Screen name="index" options={{ headerShown: false }} />
-                    <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-                    <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                    <Stack.Screen name="(brand)" options={{ headerShown: false }} />
-                    <Stack.Screen
-                      name="(modals)"
-                      options={{
-                        presentation: 'modal',
-                      }}
-                    />
-                    <Stack.Screen
-                      name="+not-found"
-                      options={{
-                        title: 'Oops!',
-                        headerShown: true,
-                      }}
-                    />
-                  </Stack>
-                </View>
-              </ThemeProvider>
-            </PortalProvider>
-          </BottomSheetModalProvider>
-        </AuthProvider>
+        <BottomSheetModalProvider>
+          <PortalProvider>
+            <ThemeProvider value={LightTheme}>
+              <View style={{ flex: 1, backgroundColor: colors.white }}>
+                <StatusBar style="dark" />
+                <Stack
+                  screenOptions={{
+                    headerShown: false,
+                    contentStyle: { backgroundColor: colors.white },
+                    animation: 'slide_from_right',
+                  }}>
+                  <Stack.Screen name="index" options={{ headerShown: false }} />
+                  <Stack.Screen name="brand-onboarding" options={{ headerShown: false }} />
+                  <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                  <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                  <Stack.Screen name="(brand)" options={{ headerShown: false }} />
+                  <Stack.Screen name="organization" options={{ headerShown: false }} />
+                  <Stack.Screen
+                    name="(modals)"
+                    options={{
+                      presentation: 'modal',
+                    }}
+                  />
+                  <Stack.Screen
+                    name="+not-found"
+                    options={{
+                      title: 'Oops!',
+                      headerShown: true,
+                    }}
+                  />
+                </Stack>
+              </View>
+            </ThemeProvider>
+          </PortalProvider>
+        </BottomSheetModalProvider>
       </QueryClientProvider>
     </GestureHandlerRootView>
   );
