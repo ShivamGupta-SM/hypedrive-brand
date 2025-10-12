@@ -1,13 +1,18 @@
 // https://docs.expo.dev/guides/using-eslint/
 const { defineConfig } = require('eslint/config');
 const expoConfig = require('eslint-config-expo/flat');
+const tsParser = require('@typescript-eslint/parser');
 
 module.exports = defineConfig([
   expoConfig,
   {
     ignores: ['dist/*'],
-    parser: '@typescript-eslint/parser',
-    plugins: ['@typescript-eslint'],
+    languageOptions: {
+      parser: tsParser,
+    },
+    plugins: {
+      '@typescript-eslint': require('@typescript-eslint/eslint-plugin'),
+    },
     settings: {
       'import/resolver': {
         typescript: {},
