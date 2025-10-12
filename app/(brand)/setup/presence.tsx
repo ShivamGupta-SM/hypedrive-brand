@@ -73,7 +73,6 @@ export default function BrandPresenceScreen() {
     control,
     handleSubmit,
     formState: { errors },
-    setValue,
     watch,
   } = useForm<BrandPresenceFormData>({
     resolver: zodResolver(brandPresenceSchema),
@@ -87,7 +86,7 @@ export default function BrandPresenceScreen() {
   });
 
   // Watch the marketplaces value
-  const selectedMarketplaces = watch('marketplaces') || [];
+  watch('marketplaces');
 
   // Mock mutation for saving brand presence data
   const saveBrandPresenceMutation = useMutation({
@@ -106,13 +105,6 @@ export default function BrandPresenceScreen() {
     saveBrandPresenceMutation.mutate(data);
   };
 
-  // Function to scroll to a specific input
-  const scrollToInput = (y: number) => {
-    scrollViewRef.current?.scrollTo({
-      y: y,
-      animated: true,
-    });
-  };
 
   return (
     <KeyboardAvoidingView

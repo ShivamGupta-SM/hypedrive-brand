@@ -75,7 +75,7 @@ export default function BrandDetailsScreen() {
           contentContainerStyle={styles.scrollContent}>
           <Text style={styles.title}>Brand Contact Details</Text>
           <Text style={styles.subtitle}>
-            Add your brand's contact information to help customers reach you
+            Add your brand&apos;s contact information to help customers reach you
           </Text>
 
           {/* Website Input */}

@@ -1,8 +1,7 @@
-import { View, Text, TouchableOpacity, Pressable, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { Link } from 'expo-router';
 import { colors, typography, spacing } from '@/constants/Design';
 import Checkbox from './Checkbox';
-import { useState } from 'react';
 
 type TermsAgreementProps = {
   checked: boolean;
@@ -10,7 +9,6 @@ type TermsAgreementProps = {
 };
 
 const TermsAgreement = ({ checked, onCheckChange }: TermsAgreementProps) => {
-  const [isChecked, setChecked] = useState(false);
   return (
     <View
       style={{
@@ -22,7 +20,7 @@ const TermsAgreement = ({ checked, onCheckChange }: TermsAgreementProps) => {
       <Checkbox checked={checked} onPress={() => onCheckChange(!checked)} />
       <View style={styles.terms}>
         <Text style={styles.termsText}>
-          I agree to Hyperdrive's{' '}
+          I agree to Hyperdrive&apos;s{' '}
           <Link href="/(auth)/(legal)/terms" asChild>
             <Text style={styles.termsLink}>Terms of Service</Text>
           </Link>{' '}

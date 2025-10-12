@@ -226,7 +226,7 @@ export default function CompleteKYCDetailsScreen() {
 
                 {verificationError && <Text style={styles.errorText}>{verificationError}</Text>}
 
-                <Text style={styles.infoText}>We'll fetch your business details automatically</Text>
+                <Text style={styles.infoText}>We&apos;ll fetch your business details automatically</Text>
 
                 <View style={styles.gstExamples}>
                   <Text style={styles.gstExampleTitle}>Try these sample GST numbers:</Text>

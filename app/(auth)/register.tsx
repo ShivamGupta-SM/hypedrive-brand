@@ -1,5 +1,4 @@
 import { Link, router } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
 import React, { useRef, useState } from 'react';
 import {
   View,
@@ -8,8 +7,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
-  ViewStyle,
-  TextStyle,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
@@ -31,14 +28,6 @@ export default function LoginScreen() {
   const scrollViewRef = useRef<ScrollView>(null);
 
   const [agreedToTerms, setAgreedToTerms] = useState(false);
-
-  const handleSubmit = () => {
-    if (!agreedToTerms) {
-      // Show error message
-      return;
-    }
-    // Continue with registration
-  };
 
   const focusOnInput = (y: number) => {
     scrollViewRef.current?.scrollTo({

@@ -25,7 +25,7 @@ export default function CreateBrandScreen() {
               </View>
               <Text style={styles.cardTitle}>Track Performance</Text>
               <Text style={styles.cardDescription}>
-                Monitor your brand's growth and analytics in real-time
+                Monitor your brand&apos;s growth and analytics in real-time
               </Text>
             </View>
 

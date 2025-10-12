@@ -116,7 +116,7 @@ export default function BrandSetupScreen() {
   });
 
   // Watch the logoUri value
-  const logoUri = watch('logoUri');
+  watch('logoUri');
 
   // Mock mutation for saving brand data
   const saveBrandMutation = useMutation({

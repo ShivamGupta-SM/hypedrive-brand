@@ -32,7 +32,7 @@ const LightTheme = {
 };
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  useColorScheme();
   const [loaded] = useFonts({
     // SpaceMono: require('../../assets/fonts/SpaceMono-Regular.ttf'),
     InterLight: require('@/assets/fonts/Inter-Light.ttf'),

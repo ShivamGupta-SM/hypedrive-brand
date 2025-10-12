@@ -35,7 +35,7 @@ const Logo = () => {
       clearTimeout(animationTimeout);
       cancelAnimation(rotation);
     };
-  }, []);
+  }, [rotation]);
 
   const animatedStyle = useAnimatedStyle(() => {
     return {

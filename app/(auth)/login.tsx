@@ -1,5 +1,4 @@
 import { Link, router } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
 import React, { useRef, useState } from 'react';
 import {
   View,
@@ -8,8 +7,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
-  ViewStyle,
-  TextStyle,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
@@ -126,7 +123,7 @@ export default function LoginScreen() {
                 </TouchableOpacity>
 
                 <View style={styles.footer}>
-                  <Text style={styles.footerText}>Don't have an account? </Text>
+                  <Text style={styles.footerText}>Don&apos;t have an account? </Text>
                   <Link href="/register">
                     <Text style={styles.footerLink}>Sign Up</Text>
                   </Link>
