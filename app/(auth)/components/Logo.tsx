@@ -1,7 +1,7 @@
 import { borderRadius, colors, spacing } from '@/constants/Design';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect } from 'react';
-import { Image, StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Text } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -15,22 +15,19 @@ const Logo = () => {
   const rotation = useSharedValue(0);
 
   useEffect(() => {
-    // Reset the value before starting new animation
     rotation.value = 0;
 
-    // Start the rotation animation with a delay to ensure proper setup
     const animationTimeout = setTimeout(() => {
       rotation.value = withRepeat(
         withTiming(360, {
-          duration: 15000, // Slightly faster rotation (15 seconds)
-          easing: Easing.linear, // Easing function for smoothness
+          duration: 15000,
+          easing: Easing.linear,
         }),
-        -1, // Infinite repetitions
-        false, // No reverse animation
+        -1,
+        false,
       );
     }, 100);
 
-    // Cleanup animation when component unmounts
     return () => {
       clearTimeout(animationTimeout);
       cancelAnimation(rotation);
@@ -51,7 +48,7 @@ const Logo = () => {
           start={{ x: 1, y: 1 }}
           end={{ x: 0, y: 0 }}
           style={styles.gradientBackground}>
-          <Image source={require('@/assets/logo/logomark.png')} style={styles.logoImage} />
+          <Text style={styles.logoText}>H</Text>
         </LinearGradient>
       </Animated.View>
     </View>
@@ -77,9 +74,6 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: borderRadius.full,
-    // backgroundColor: colors.primary,
-    // justifyContent: 'center',
-    // alignItems: 'center',
     overflow: 'hidden',
   },
   gradientBackground: {
@@ -88,9 +82,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  logoImage: {
-    width: 50,
-    height: 50,
-    tintColor: colors.white,
+  logoText: {
+    fontSize: 48,
+    fontWeight: '700',
+    color: colors.white,
   },
 });

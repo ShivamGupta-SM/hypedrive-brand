@@ -5,7 +5,8 @@ import { colors, spacing, typography, borderRadius } from '@/constants/Design';
 type MarketplaceOption = {
   id: string;
   name: string;
-  logo: ImageSourcePropType;
+  logo?: ImageSourcePropType;
+  icon?: React.ReactNode;
 };
 
 type MarketplaceSelectorProps = {
@@ -37,7 +38,15 @@ export const MarketplaceSelector = ({ options, selectedValues, onChange }: Marke
             onPress={() => toggleMarketplace(option.id)}
             activeOpacity={0.7}>
             <View style={styles.logoContainer}>
-              <Image source={option.logo} style={styles.logo} resizeMode="contain" />
+              {option.icon ? (
+                option.icon
+              ) : option.logo ? (
+                <Image source={option.logo} style={styles.logo} resizeMode="contain" />
+              ) : (
+                <View style={styles.placeholderLogo}>
+                  <Text style={styles.placeholderText}>{option.name.charAt(0)}</Text>
+                </View>
+              )}
             </View>
             <Text style={[styles.marketplaceName, isSelected && styles.selectedName]}>
               {option.name}
@@ -99,5 +108,18 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 10,
     backgroundColor: colors.primary,
+  },
+  placeholderLogo: {
+    width: 48,
+    height: 48,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.gray[200],
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  placeholderText: {
+    fontSize: typography.sizes.xl,
+    fontWeight: typography.weights.bold,
+    color: colors.gray[500],
   },
 });

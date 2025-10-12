@@ -34,12 +34,12 @@ const LightTheme = {
 export default function RootLayout() {
   useColorScheme();
   const [loaded] = useFonts({
-    // SpaceMono: require('../../assets/fonts/SpaceMono-Regular.ttf'),
-    InterLight: require('@/assets/fonts/Inter-Light.ttf'),
-    InterRegular: require('@/assets/fonts/Inter-Regular.ttf'),
-    InterMedium: require('@/assets/fonts/Inter-Medium.ttf'),
-    InterSemiBold: require('@/assets/fonts/Inter-SemiBold.ttf'),
-    InterBold: require('@/assets/fonts/Inter-Bold.ttf'),
+    // Custom fonts disabled - using system fonts
+    // InterLight: require('@/assets/fonts/Inter-Light.ttf'),
+    // InterRegular: require('@/assets/fonts/Inter-Regular.ttf'),
+    // InterMedium: require('@/assets/fonts/Inter-Medium.ttf'),
+    // InterSemiBold: require('@/assets/fonts/Inter-SemiBold.ttf'),
+    // InterBold: require('@/assets/fonts/Inter-Bold.ttf'),
   });
 
   useEffect(() => {

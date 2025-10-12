@@ -37,32 +37,32 @@ const marketplaceOptions = [
   {
     id: 'flipkart',
     name: 'Flipkart',
-    logo: require('@/assets/logo/others/amazon-logo2.png'),
+    icon: <Storefront size={32} color={colors.primary} />,
   },
   {
     id: 'amazon',
     name: 'Amazon.in',
-    logo: require('@/assets/logo/others/amazon-logo2.png'),
+    icon: <Storefront size={32} color={colors.primary} />,
   },
   {
     id: 'myntra',
     name: 'Myntra',
-    logo: require('@/assets/logo/others/amazon-logo2.png'),
+    icon: <Storefront size={32} color={colors.primary} />,
   },
   {
     id: 'meesho',
     name: 'Meesho',
-    logo: require('@/assets/logo/others/amazon-logo2.png'),
+    icon: <Storefront size={32} color={colors.primary} />,
   },
   {
     id: 'snapdeal',
     name: 'Snapdeal',
-    logo: require('@/assets/logo/others/amazon-logo2.png'),
+    icon: <Storefront size={32} color={colors.primary} />,
   },
   {
     id: 'ajio',
     name: 'Ajio',
-    logo: require('@/assets/logo/others/amazon-logo2.png'),
+    icon: <Storefront size={32} color={colors.primary} />,
   },
 ];
 

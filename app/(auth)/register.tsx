@@ -108,18 +108,16 @@ export default function LoginScreen() {
                 {/* <Text style={styles.dividerText}>or sign up with</Text> */}
 
                 <TouchableOpacity style={styles.socialButton}>
-                  <Image
-                    source={require('@/assets/icons/google-color-icon.png')}
-                    style={styles.socialIcon}
-                  />
+                  <View style={styles.socialIcon}>
+                    <Text style={styles.socialIconText}>G</Text>
+                  </View>
                   <Text style={styles.socialButtonText}>Sign up with Google</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={[styles.socialButton, styles.appleButton]}>
-                  <Image
-                    source={require('@/assets/icons/apple-icon.png')}
-                    style={[styles.socialIcon, { tintColor: 'white' }]}
-                  />
+                  <View style={[styles.socialIcon, styles.appleSocialIcon]}>
+                    <Text style={[styles.socialIconText, { color: colors.white }]}>A</Text>
+                  </View>
                   <Text style={[styles.socialButtonText, styles.appleButtonText]}>
                     Sign up with Apple
                   </Text>
@@ -242,6 +240,18 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     marginRight: spacing.sm,
+    backgroundColor: colors.gray[100],
+    borderRadius: borderRadius.sm,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  appleSocialIcon: {
+    backgroundColor: colors.black,
+  },
+  socialIconText: {
+    fontSize: typography.sizes.md,
+    fontWeight: typography.weights.bold,
+    color: colors.text.primary,
   },
   socialButtonText: {
     fontSize: typography.sizes.md,
