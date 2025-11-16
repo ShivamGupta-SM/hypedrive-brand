@@ -153,7 +153,7 @@ export default function BrandSetupScreen() {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
         automaticallyAdjustKeyboardInsets={true}
-        keyboardDismissMode="interactive">
+        keyboardDismissMode="on-drag">
         <Text style={styles.title}>Tell us about your brand</Text>
         <Text style={styles.subtitle}>
           This helps us customize your experience and provide relevant recommendations.
@@ -255,6 +255,13 @@ export default function BrandSetupScreen() {
             <Text style={styles.helperText}>Brief description about your brand and products</Text>
           </View>
         </View>
+
+        {/* Dev shortcut link */}
+        <Text style={styles.subtitle}>
+          <Text style={{ color: colors.blue[500] }} onPress={() => router.push('/(tabs)')}>
+            Skip for now
+          </Text>
+        </Text>
       </ScrollView>
 
       {/* Continue Button */}
@@ -265,7 +272,7 @@ export default function BrandSetupScreen() {
           loading={saveBrandMutation.isPending}
           icon={<ArrowRight size={18} color={colors.white} weight="bold" />}
           iconPosition="right"
-          gradientColors={[colors.blue[600], colors.blue[600], colors.blue[800]]}
+          gradientColors={[colors.blue[500], colors.blue[700]]}
         />
       </View>
     </KeyboardAvoidingView>

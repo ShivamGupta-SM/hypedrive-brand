@@ -156,7 +156,7 @@ export default function BrandDetailsScreen() {
             loading={saveBrandDetailsMutation.isPending}
             icon={<CaretRight size={20} color={colors.white} weight="bold" />}
             iconPosition="right"
-            gradientColors={[colors.blue[500], colors.blue[600], colors.blue[700]]}
+            gradientColors={[colors.blue[500], colors.blue[700]]}
           />
         </View>
       </View>

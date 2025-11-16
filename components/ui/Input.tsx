@@ -15,6 +15,8 @@ import {
 
 interface InputProps extends Omit<TextInputProps, 'style'> {
   leftIcon?: React.ReactNode;
+  leftIconStyle?: StyleProp<ViewStyle>;
+  leftIconColor?: string;
   rightIcon?: React.ReactNode;
   rightAddon?: React.ReactNode;
   error?: boolean;
@@ -31,7 +33,18 @@ interface IconProps {
 
 export const Input = React.forwardRef<TextInput, InputProps>(
   (
-    { leftIcon, rightIcon, rightAddon, error, errorMessage, style, containerStyle, ...props },
+    {
+      leftIcon,
+      leftIconStyle,
+      leftIconColor,
+      rightIcon,
+      rightAddon,
+      error,
+      errorMessage,
+      style,
+      containerStyle,
+      ...props
+    },
     ref,
   ) => {
     const [isFocused, setIsFocused] = useState(false);
@@ -59,6 +72,7 @@ export const Input = React.forwardRef<TextInput, InputProps>(
     };
 
     const getIconColor = () => {
+      if (leftIconColor) return leftIconColor;
       if (error) return colors.rose[500];
       if (isFocused) return colors.orange[500];
       return colors.text.muted;
