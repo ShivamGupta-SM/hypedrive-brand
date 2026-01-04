@@ -1,0 +1,9 @@
+@import "tailwindcss";
+@import "@fontsource-variable/geist";
+
+@theme {
+	--font-sans: "Geist Variable", sans-serif;
+	--font-sans--font-feature-settings: "cv11";
+}
+
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
