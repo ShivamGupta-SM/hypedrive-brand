@@ -4,7 +4,7 @@
  */
 
 import clsx from "clsx";
-import { TrendUp, TrendDown } from "@phosphor-icons/react";
+import { ArrowTrendingUpIcon, ArrowTrendingDownIcon } from "@heroicons/react/20/solid";
 
 // =============================================================================
 // STAT ITEM
@@ -128,9 +128,9 @@ function DefaultStat({ stat }: { stat: StatItemConfig }) {
             )}
           >
             {stat.trend.direction === "up" ? (
-              <TrendUp className="size-3.5" weight="bold" />
+              <ArrowTrendingUpIcon className="size-3.5" />
             ) : (
-              <TrendDown className="size-3.5" weight="bold" />
+              <ArrowTrendingDownIcon className="size-3.5" />
             )}
             {Math.abs(stat.trend.value)}%
           </span>
@@ -165,9 +165,9 @@ function CompactStat({ stat }: { stat: StatItemConfig }) {
           )}
         >
           {stat.trend.direction === "up" ? (
-            <TrendUp className="size-3" weight="bold" />
+            <ArrowTrendingUpIcon className="size-3" />
           ) : (
-            <TrendDown className="size-3" weight="bold" />
+            <ArrowTrendingDownIcon className="size-3" />
           )}
           {Math.abs(stat.trend.value)}%
         </span>

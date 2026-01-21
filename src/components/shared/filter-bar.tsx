@@ -8,7 +8,7 @@ import { Button } from "@/components/button";
 import { Input, InputGroup } from "@/components/input";
 import { Select } from "@/components/select";
 import { Text } from "@/components/text";
-import { MagnifyingGlass, X, FunnelSimple, Rows, SquaresFour } from "@phosphor-icons/react";
+import { MagnifyingGlassIcon, XMarkIcon, FunnelIcon, ListBulletIcon, Squares2X2Icon } from "@heroicons/react/20/solid";
 
 // =============================================================================
 // FILTER CONFIG TYPES
@@ -90,7 +90,7 @@ export function FilterBar({
         {showSearch && onSearchChange && (
           <div className="w-full sm:w-auto sm:min-w-[240px] sm:flex-1 sm:max-w-xs">
             <InputGroup>
-              <MagnifyingGlass data-slot="icon" weight="bold" />
+              <MagnifyingGlassIcon data-slot="icon" />
               <Input
                 name="search"
                 placeholder={searchPlaceholder}
@@ -103,7 +103,7 @@ export function FilterBar({
                   onClick={() => onSearchChange("")}
                   className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
                 >
-                  <X className="size-4" weight="bold" />
+                  <XMarkIcon className="size-4" />
                 </button>
               )}
             </InputGroup>
@@ -140,7 +140,7 @@ export function FilterBar({
         {/* Clear filters */}
         {hasActiveFilters && onClearFilters && (
           <Button plain onClick={onClearFilters} className="text-zinc-500 hover:text-zinc-700">
-            <X data-slot="icon" weight="bold" />
+            <XMarkIcon data-slot="icon" />
             Clear
           </Button>
         )}
@@ -162,7 +162,7 @@ export function FilterBar({
               )}
               aria-label="List view"
             >
-              <Rows className="size-4" weight={viewMode === "list" ? "fill" : "regular"} />
+              <ListBulletIcon className="size-4" />
             </button>
             <button
               type="button"
@@ -175,7 +175,7 @@ export function FilterBar({
               )}
               aria-label="Grid view"
             >
-              <SquaresFour className="size-4" weight={viewMode === "grid" ? "fill" : "regular"} />
+              <Squares2X2Icon className="size-4" />
             </button>
           </div>
         )}
@@ -203,7 +203,7 @@ export function FilterBar({
           )}
           {hasActiveFilters && (
             <div className="flex items-center gap-1 text-xs text-zinc-400">
-              <FunnelSimple className="size-3.5" weight="fill" />
+              <FunnelIcon className="size-3.5" />
               <span>Filtered</span>
             </div>
           )}
@@ -309,7 +309,7 @@ export function ActiveFilters({
             onClick={() => onRemove(filter.field)}
             className="rounded-full p-0.5 text-zinc-400 hover:bg-zinc-200 hover:text-zinc-600 dark:hover:bg-zinc-700 dark:hover:text-zinc-300"
           >
-            <X className="size-3.5" weight="bold" />
+            <XMarkIcon className="size-3.5" />
           </button>
         </span>
       ))}

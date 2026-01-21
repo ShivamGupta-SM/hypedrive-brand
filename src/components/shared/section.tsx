@@ -22,7 +22,16 @@ export interface SectionProps {
   columns?: 1 | 2;
   divided?: boolean;
   size?: "sm" | "md" | "lg";
+  iconVariant?: "default" | "success" | "warning" | "danger" | "info";
 }
+
+const iconVariantStyles = {
+  default: "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400",
+  success: "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400",
+  warning: "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400",
+  danger: "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400",
+  info: "bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400",
+};
 
 export function Section({
   children,
@@ -34,6 +43,7 @@ export function Section({
   columns = 1,
   divided = false,
   size = "md",
+  iconVariant = "default",
 }: SectionProps) {
   const TitleComponent = size === "lg" ? Heading : Subheading;
 
@@ -43,7 +53,10 @@ export function Section({
         <div className="mb-6 flex items-start justify-between gap-4">
           <div className="flex items-start gap-3">
             {icon && (
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+              <div className={clsx(
+                "flex size-10 shrink-0 items-center justify-center rounded-lg",
+                iconVariantStyles[iconVariant]
+              )}>
                 {icon}
               </div>
             )}

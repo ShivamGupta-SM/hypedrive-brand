@@ -8,9 +8,9 @@ import { useId, type ReactNode } from "react";
 import { Button } from "@/components/button";
 import { Heading, Subheading } from "@/components/heading";
 import { Text } from "@/components/text";
-import { ArrowLeft, CaretRight, House } from "@phosphor-icons/react";
-import { useNavigation } from "@refinedev/core";
+import { ArrowLeftIcon, ChevronRightIcon, HomeIcon } from "@heroicons/react/20/solid";
 import { Link } from "@/components/link";
+import { useNavigate } from "react-router";
 
 // =============================================================================
 // BREADCRUMBS
@@ -36,7 +36,7 @@ export function Breadcrumbs({
   homeHref = "/",
 }: BreadcrumbsProps) {
   const allItems = showHome
-    ? [{ label: "Home", href: homeHref, icon: <House className="size-4" weight="fill" /> }, ...items]
+    ? [{ label: "Home", href: homeHref, icon: <HomeIcon className="size-4" /> }, ...items]
     : items;
 
   return (
@@ -44,7 +44,7 @@ export function Breadcrumbs({
       {allItems.map((item, index) => (
         <span key={`${item.label}-${item.href || index}`} className="flex items-center gap-1.5">
           {index > 0 && (
-            <CaretRight className="size-3.5 text-zinc-400" weight="bold" />
+            <ChevronRightIcon className="size-3.5 text-zinc-400" />
           )}
           {item.href && index < allItems.length - 1 ? (
             <Link
@@ -99,7 +99,7 @@ export function PageHeader({
   size = "md",
   children,
 }: PageHeaderProps) {
-  const { list } = useNavigation();
+  const navigate = useNavigate();
 
   const TitleComponent = size === "lg" ? Heading : size === "sm" ? Subheading : Heading;
 
@@ -114,10 +114,10 @@ export function PageHeader({
       {backButton && (
         <Button
           plain
-          onClick={backButton.onClick || (() => list(backButton.resource))}
+          onClick={backButton.onClick || (() => navigate(`/${backButton.resource}`))}
           className="-ml-2 text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
         >
-          <ArrowLeft className="size-4" weight="bold" />
+          <ArrowLeftIcon className="size-4" />
           {backButton.label || `Back to ${backButton.resource}`}
         </Button>
       )}

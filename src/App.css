@@ -1,9 +1,730 @@
 @import "tailwindcss";
 @import "@fontsource-variable/geist";
+@import "@fontsource/instrument-serif";
 
 @theme {
 	--font-sans: "Geist Variable", sans-serif;
 	--font-sans--font-feature-settings: "cv11";
+	--font-serif: "Instrument Serif", Georgia, serif;
+
+	/* ==========================================================================
+	   HYPEDRIVE BRAND COLOR PALETTE
+	   A clean, minimal color system for a brand admin panel
+	   ========================================================================== */
+
+	/* --------------------------------------------------------------------------
+	   PRIMARY COLORS
+	   Main brand colors used for primary actions and key UI elements
+	   -------------------------------------------------------------------------- */
+
+	/* Primary: Emerald - Used for revenue, earnings, positive states */
+	--color-primary-50: #ecfdf5;
+	--color-primary-100: #d1fae5;
+	--color-primary-200: #a7f3d0;
+	--color-primary-300: #6ee7b7;
+	--color-primary-400: #34d399;
+	--color-primary-500: #10b981;
+	--color-primary-600: #059669;
+	--color-primary-700: #047857;
+	--color-primary-800: #065f46;
+	--color-primary-900: #064e3b;
+	--color-primary-950: #022c22;
+
+	/* --------------------------------------------------------------------------
+	   SEMANTIC COLORS
+	   Status colors with specific meanings throughout the app
+	   -------------------------------------------------------------------------- */
+
+	/* Success: Emerald - Approved, completed, positive balance */
+	--color-success-light: #d1fae5;
+	--color-success: #10b981;
+	--color-success-dark: #059669;
+	--color-success-text: #047857;
+	--color-success-text-dark: #34d399;
+
+	/* Warning: Amber - Pending, needs attention, caution */
+	--color-warning-light: #fef3c7;
+	--color-warning: #f59e0b;
+	--color-warning-dark: #d97706;
+	--color-warning-text: #92400e;
+	--color-warning-text-dark: #fcd34d;
+
+	/* Error: Red - Rejected, failed, issues */
+	--color-error-light: #fee2e2;
+	--color-error: #ef4444;
+	--color-error-dark: #dc2626;
+	--color-error-text: #b91c1c;
+	--color-error-text-dark: #fca5a5;
+
+	/* Info: Sky - Under review, processing, informational */
+	--color-info-light: #e0f2fe;
+	--color-info: #0ea5e9;
+	--color-info-dark: #0284c7;
+	--color-info-text: #0369a1;
+	--color-info-text-dark: #7dd3fc;
+
+	/* --------------------------------------------------------------------------
+	   NEUTRAL COLORS
+	   Zinc-based neutrals for text, backgrounds, and borders
+	   -------------------------------------------------------------------------- */
+
+	/* Light mode surfaces */
+	--color-surface-primary: #ffffff;
+	--color-surface-secondary: #fafafa;
+	--color-surface-tertiary: #f4f4f5;
+	--color-surface-elevated: #ffffff;
+
+	/* Dark mode surfaces */
+	--color-surface-primary-dark: #18181b;
+	--color-surface-secondary-dark: #27272a;
+	--color-surface-tertiary-dark: #3f3f46;
+	--color-surface-elevated-dark: #27272a;
+
+	/* Text colors - Light mode */
+	--color-text-primary: #09090b;
+	--color-text-secondary: #71717a;
+	--color-text-tertiary: #a1a1aa;
+	--color-text-disabled: #d4d4d8;
+
+	/* Text colors - Dark mode */
+	--color-text-primary-dark: #fafafa;
+	--color-text-secondary-dark: #a1a1aa;
+	--color-text-tertiary-dark: #71717a;
+	--color-text-disabled-dark: #52525b;
+
+	/* Border colors */
+	--color-border-light: rgba(9, 9, 11, 0.1);
+	--color-border-medium: rgba(9, 9, 11, 0.15);
+	--color-border-strong: rgba(9, 9, 11, 0.2);
+	--color-border-light-dark: rgba(255, 255, 255, 0.1);
+	--color-border-medium-dark: rgba(255, 255, 255, 0.15);
+	--color-border-strong-dark: rgba(255, 255, 255, 0.2);
+
+	/* --------------------------------------------------------------------------
+	   INTERACTIVE STATES
+	   Hover, active, focus states for consistency
+	   -------------------------------------------------------------------------- */
+
+	/* Hover overlays */
+	--color-hover-light: rgba(9, 9, 11, 0.05);
+	--color-hover-medium: rgba(9, 9, 11, 0.1);
+	--color-hover-light-dark: rgba(255, 255, 255, 0.05);
+	--color-hover-medium-dark: rgba(255, 255, 255, 0.1);
+
+	/* Focus ring */
+	--color-focus-ring: #3b82f6;
+
+	/* --------------------------------------------------------------------------
+	   ACCENT COLORS
+	   Secondary accent colors for highlights and badges
+	   -------------------------------------------------------------------------- */
+
+	/* Bonus/Reward accent: Amber/Gold */
+	--color-accent-bonus: #f59e0b;
+	--color-accent-bonus-light: #fef3c7;
+	--color-accent-bonus-text: #92400e;
+	--color-accent-bonus-text-dark: #fcd34d;
+
+	/* --------------------------------------------------------------------------
+	   ENROLLMENT STATUS COLORS
+	   Specific colors for enrollment/campaign statuses
+	   -------------------------------------------------------------------------- */
+
+	/* Awaiting submission - Amber */
+	--color-status-awaiting-submission: #d97706;
+	--color-status-awaiting-submission-dark: #fbbf24;
+	--color-status-awaiting-submission-bg: #fef3c7;
+	--color-status-awaiting-submission-bg-dark: rgba(251, 191, 36, 0.15);
+
+	/* Awaiting review - Sky */
+	--color-status-awaiting-review: #0284c7;
+	--color-status-awaiting-review-dark: #38bdf8;
+	--color-status-awaiting-review-bg: #e0f2fe;
+	--color-status-awaiting-review-bg-dark: rgba(56, 189, 248, 0.15);
+
+	/* Changes requested - Amber */
+	--color-status-changes-requested: #d97706;
+	--color-status-changes-requested-dark: #fbbf24;
+	--color-status-changes-requested-bg: #fef3c7;
+	--color-status-changes-requested-bg-dark: rgba(251, 191, 36, 0.15);
+
+	/* Approved - Emerald */
+	--color-status-approved: #059669;
+	--color-status-approved-dark: #34d399;
+	--color-status-approved-bg: #d1fae5;
+	--color-status-approved-bg-dark: rgba(52, 211, 153, 0.15);
+
+	/* Rejected - Red */
+	--color-status-rejected: #dc2626;
+	--color-status-rejected-dark: #f87171;
+	--color-status-rejected-bg: #fee2e2;
+	--color-status-rejected-bg-dark: rgba(248, 113, 113, 0.15);
 }
 
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+/* Hide scrollbars globally */
+* {
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+	display: none;
+}
+
+/* ==========================================================================
+   iOS SAFE AREA UTILITIES
+   Handle notch, home indicator, and dynamic island on iOS devices
+   ========================================================================== */
+
+.pt-safe {
+	padding-top: env(safe-area-inset-top);
+}
+
+.pb-safe {
+	padding-bottom: env(safe-area-inset-bottom);
+}
+
+.pl-safe {
+	padding-left: env(safe-area-inset-left);
+}
+
+.pr-safe {
+	padding-right: env(safe-area-inset-right);
+}
+
+.p-safe {
+	padding-top: env(safe-area-inset-top);
+	padding-bottom: env(safe-area-inset-bottom);
+	padding-left: env(safe-area-inset-left);
+	padding-right: env(safe-area-inset-right);
+}
+
+/* Margin variants */
+.mt-safe {
+	margin-top: env(safe-area-inset-top);
+}
+
+.mb-safe {
+	margin-bottom: env(safe-area-inset-bottom);
+}
+
+.ml-safe {
+	margin-left: env(safe-area-inset-left);
+}
+
+.mr-safe {
+	margin-right: env(safe-area-inset-right);
+}
+
+/* ==========================================================================
+   SAFARI/iOS ROOT STYLES
+   Prevent rubber-band scrolling and set status bar background
+   ========================================================================== */
+
+/* Safari uses the html/body background for status bar color when no theme-color is set */
+html {
+	background-color: #f5f5f4; /* stone-100 */
+	overscroll-behavior: none; /* Prevent iOS rubber-band scrolling on root */
+}
+
+body {
+	overscroll-behavior: none;
+}
+
+[data-theme="dark"] html,
+html:has([data-theme="dark"]) {
+	background-color: #09090b; /* zinc-950 */
+}
+
+/* ==========================================================================
+   SKELETON LOADING COLORS
+   CSS variables for react-loading-skeleton dark mode support
+   ========================================================================== */
+
+:root {
+	--skeleton-base: #e4e4e7;
+	--skeleton-highlight: #f4f4f5;
+}
+
+[data-theme="dark"] {
+	--skeleton-base: #3f3f46;
+	--skeleton-highlight: #52525b;
+}
+
+/* =============================================================================
+   GLAZE/SHIMMER ANIMATION
+   Subtle shine effect for balance text and other highlights
+   ============================================================================= */
+
+@keyframes glaze {
+	0%,
+	90% {
+		background-position: 100% 100%;
+	}
+	100% {
+		background-position: 0% 0%;
+	}
+}
+
+.text-glaze {
+	background: linear-gradient(
+		-45deg,
+		currentColor 0%,
+		currentColor 40%,
+		rgba(255, 255, 255, 0.6) 50%,
+		currentColor 60%,
+		currentColor 100%
+	);
+	background-size: 300% 300%;
+	background-clip: text;
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	animation: glaze 8s ease-out infinite;
+}
+
+/* Dark mode glaze - slightly brighter highlight */
+[data-theme="dark"] .text-glaze {
+	background: linear-gradient(
+		-45deg,
+		currentColor 0%,
+		currentColor 40%,
+		rgba(255, 255, 255, 0.75) 50%,
+		currentColor 60%,
+		currentColor 100%
+	);
+	background-size: 300% 300%;
+	background-clip: text;
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+}
+
+/* Shimmer animation for loading skeletons */
+@keyframes shimmer {
+	0% {
+		transform: translateX(-100%);
+	}
+	100% {
+		transform: translateX(400%);
+	}
+}
+
+.skeleton-shimmer {
+	position: relative;
+	overflow: hidden;
+}
+
+.skeleton-shimmer::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(
+		90deg,
+		transparent 0%,
+		rgba(255, 255, 255, 0.4) 50%,
+		transparent 100%
+	);
+	animation: shimmer 1.5s infinite;
+}
+
+[data-theme="dark"] .skeleton-shimmer::after {
+	background: linear-gradient(
+		90deg,
+		transparent 0%,
+		rgba(255, 255, 255, 0.1) 50%,
+		transparent 100%
+	);
+}
+
+/* Fade in animation */
+@keyframes fade-in {
+	from {
+		opacity: 0;
+		transform: translateY(4px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.animate-fade-in {
+	animation: fade-in 0.3s ease-out;
+}
+
+/* Pulse animation for attention elements */
+@keyframes pulse-soft {
+	0%, 100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.7;
+	}
+}
+
+.animate-pulse-soft {
+	animation: pulse-soft 2s ease-in-out infinite;
+}
+
+/* Scale in animation for cards */
+@keyframes scale-in {
+	from {
+		opacity: 0;
+		transform: scale(0.95);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+.animate-scale-in {
+	animation: scale-in 0.2s ease-out;
+}
+
+/* Slide up animation */
+@keyframes slide-up {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.animate-slide-up {
+	animation: slide-up 0.3s ease-out;
+}
+
+/* ==========================================================================
+   DOCUMENT SCAN ANIMATION
+   Clean, minimal scanning effect for document verification
+   ========================================================================== */
+
+@keyframes scan {
+	0% {
+		top: 8%;
+	}
+	50% {
+		top: 88%;
+	}
+	100% {
+		top: 8%;
+	}
+}
+
+/* Scanner container - holds the scanning elements */
+.scanner-container {
+	position: absolute;
+	inset: 16px;
+	z-index: 10;
+	pointer-events: none;
+}
+
+/* Scanner line - single crisp horizontal line */
+.scanner-line {
+	position: absolute;
+	left: -12px;
+	right: -12px;
+	height: 1px;
+	background: #18181b;
+	animation: scan 2.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+	will-change: top;
+}
+
+/* Scanner line glow - soft blur effect */
+.scanner-line::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(90deg, transparent, #10b981, transparent);
+	filter: blur(3px);
+	opacity: 0.8;
+}
+
+/* Dark mode */
+[data-theme="dark"] .scanner-line {
+	background: #fafafa;
+}
+
+[data-theme="dark"] .scanner-line::after {
+	background: linear-gradient(90deg, transparent, #34d399, transparent);
+}
+
+/* ==========================================================================
+   SONNER TOAST CUSTOM STYLES
+   Clean neutral background with colored icons
+   ========================================================================== */
+
+/* Base toast styles - neutral white/gray background */
+[data-sonner-toaster] [data-sonner-toast] {
+	font-family: var(--font-sans);
+	background: #ffffff;
+	border: 1px solid rgba(0, 0, 0, 0.08);
+	border-radius: 14px;
+	padding: 16px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 0 1px rgba(0, 0, 0, 0.1);
+	gap: 12px;
+}
+
+/* All toasts - neutral background, dark text */
+[data-sonner-toaster] [data-sonner-toast] [data-title] {
+	color: #18181b;
+	font-weight: 600;
+	font-size: 14px;
+}
+
+[data-sonner-toaster] [data-sonner-toast] [data-description] {
+	color: #71717a;
+	font-size: 13px;
+}
+
+/* Close button - neutral */
+[data-sonner-toaster] [data-sonner-toast] [data-close-button] {
+	color: #a1a1aa;
+}
+
+[data-sonner-toaster] [data-sonner-toast] [data-close-button]:hover {
+	color: #71717a;
+}
+
+/* Icon wrapper styling for filled circle background */
+[data-sonner-toaster] [data-sonner-toast] [data-icon] {
+	width: 36px;
+	height: 36px;
+	min-width: 36px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	flex-shrink: 0;
+}
+
+[data-sonner-toaster] [data-sonner-toast] [data-icon] svg {
+	width: 20px;
+	height: 20px;
+}
+
+/* Success icon - green filled circle with white checkmark */
+[data-sonner-toaster] [data-sonner-toast][data-type="success"] [data-icon] {
+	background: #22c55e;
+}
+
+[data-sonner-toaster] [data-sonner-toast][data-type="success"] [data-icon] svg {
+	color: white;
+}
+
+/* Warning icon - amber/yellow filled */
+[data-sonner-toaster] [data-sonner-toast][data-type="warning"] [data-icon] {
+	background: #eab308;
+}
+
+[data-sonner-toaster] [data-sonner-toast][data-type="warning"] [data-icon] svg {
+	color: white;
+}
+
+/* Info icon - blue filled circle */
+[data-sonner-toaster] [data-sonner-toast][data-type="info"] [data-icon] {
+	background: #3b82f6;
+}
+
+[data-sonner-toaster] [data-sonner-toast][data-type="info"] [data-icon] svg {
+	color: white;
+}
+
+/* Error icon - red filled circle */
+[data-sonner-toaster] [data-sonner-toast][data-type="error"] [data-icon] {
+	background: #ef4444;
+}
+
+[data-sonner-toaster] [data-sonner-toast][data-type="error"] [data-icon] svg {
+	color: white;
+}
+
+/* Action button styling */
+[data-sonner-toaster] [data-sonner-toast] [data-button] {
+	font-weight: 500;
+	border-radius: 8px;
+	padding: 8px 14px;
+	font-size: 13px;
+}
+
+/* Dark mode toast styles */
+[data-theme="dark"] [data-sonner-toaster] [data-sonner-toast] {
+	background: #1f1f23;
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 1px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] [data-sonner-toaster] [data-sonner-toast] [data-title] {
+	color: #fafafa;
+}
+
+[data-theme="dark"] [data-sonner-toaster] [data-sonner-toast] [data-description] {
+	color: #a1a1aa;
+}
+
+[data-theme="dark"] [data-sonner-toaster] [data-sonner-toast] [data-close-button] {
+	color: #71717a;
+}
+
+[data-theme="dark"] [data-sonner-toaster] [data-sonner-toast] [data-close-button]:hover {
+	color: #a1a1aa;
+}
+
+/* ==========================================================================
+   REACT-DATEPICKER CUSTOM STYLES
+   Theme integration for date picker with dark mode support
+   ========================================================================== */
+
+/* Base calendar styles */
+.react-datepicker {
+	font-family: var(--font-sans) !important;
+	border-radius: 12px !important;
+	border: 1px solid #e4e4e7 !important;
+	box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+	overflow: hidden !important;
+}
+
+.react-datepicker__header {
+	background: #fafafa !important;
+	border-bottom: 1px solid #e4e4e7 !important;
+	padding-top: 12px !important;
+}
+
+.react-datepicker__current-month,
+.react-datepicker-time__header {
+	color: #18181b !important;
+	font-weight: 600 !important;
+	font-size: 14px !important;
+}
+
+.react-datepicker__day-name {
+	color: #71717a !important;
+	font-weight: 500 !important;
+	font-size: 12px !important;
+}
+
+.react-datepicker__day {
+	color: #18181b !important;
+	border-radius: 8px !important;
+	transition: all 0.15s ease !important;
+}
+
+.react-datepicker__day:hover {
+	background: #f4f4f5 !important;
+}
+
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+	background: #3b82f6 !important;
+	color: white !important;
+}
+
+.react-datepicker__day--selected:hover {
+	background: #2563eb !important;
+}
+
+.react-datepicker__day--today {
+	font-weight: 600 !important;
+}
+
+.react-datepicker__day--outside-month {
+	color: #a1a1aa !important;
+}
+
+.react-datepicker__day--disabled {
+	color: #d4d4d8 !important;
+}
+
+.react-datepicker__navigation {
+	top: 12px !important;
+}
+
+.react-datepicker__navigation-icon::before {
+	border-color: #71717a !important;
+}
+
+.react-datepicker__navigation:hover *::before {
+	border-color: #18181b !important;
+}
+
+/* Time picker styles */
+.react-datepicker__time-container {
+	border-left: 1px solid #e4e4e7 !important;
+}
+
+.react-datepicker__time-list-item {
+	color: #18181b !important;
+	transition: all 0.15s ease !important;
+}
+
+.react-datepicker__time-list-item:hover {
+	background: #f4f4f5 !important;
+}
+
+.react-datepicker__time-list-item--selected {
+	background: #3b82f6 !important;
+	color: white !important;
+}
+
+/* Dark mode styles */
+[data-theme="dark"] .react-datepicker {
+	background: #27272a !important;
+	border-color: #3f3f46 !important;
+	box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-theme="dark"] .react-datepicker__header {
+	background: #1f1f23 !important;
+	border-color: #3f3f46 !important;
+}
+
+[data-theme="dark"] .react-datepicker__current-month,
+[data-theme="dark"] .react-datepicker-time__header {
+	color: #fafafa !important;
+}
+
+[data-theme="dark"] .react-datepicker__day-name {
+	color: #a1a1aa !important;
+}
+
+[data-theme="dark"] .react-datepicker__day {
+	color: #fafafa !important;
+}
+
+[data-theme="dark"] .react-datepicker__day:hover {
+	background: #3f3f46 !important;
+}
+
+[data-theme="dark"] .react-datepicker__day--outside-month {
+	color: #71717a !important;
+}
+
+[data-theme="dark"] .react-datepicker__day--disabled {
+	color: #52525b !important;
+}
+
+[data-theme="dark"] .react-datepicker__navigation-icon::before {
+	border-color: #a1a1aa !important;
+}
+
+[data-theme="dark"] .react-datepicker__navigation:hover *::before {
+	border-color: #fafafa !important;
+}
+
+[data-theme="dark"] .react-datepicker__time-container {
+	border-color: #3f3f46 !important;
+}
+
+[data-theme="dark"] .react-datepicker__time-list-item {
+	color: #fafafa !important;
+	background: #27272a !important;
+}
+
+[data-theme="dark"] .react-datepicker__time-list-item:hover {
+	background: #3f3f46 !important;
+}

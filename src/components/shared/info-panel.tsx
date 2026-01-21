@@ -1,6 +1,7 @@
 /**
  * InfoPanel Component
  * Colored info/warning/success/error boxes for alerts and messages
+ * Styled consistently with Shopper app patterns
  */
 
 import clsx from "clsx";
@@ -11,6 +12,7 @@ import {
   CheckCircleIcon,
   XCircleIcon,
 } from "@heroicons/react/24/outline";
+import { ChevronRightIcon } from "@heroicons/react/20/solid";
 
 // =============================================================================
 // INFO PANEL
@@ -322,5 +324,86 @@ export function EmptyMessage({ children, className, message = "No data available
       <p className="text-sm text-zinc-500 dark:text-zinc-400">{message}</p>
       {children}
     </div>
+  );
+}
+
+// =============================================================================
+// ACTION LINK (Shopper-style clickable row)
+// =============================================================================
+
+export interface ActionLinkProps {
+  href?: string;
+  onClick?: () => void;
+  title: string;
+  description?: string;
+  icon?: React.ReactNode;
+  variant?: "default" | "warning" | "danger";
+  className?: string;
+}
+
+const actionLinkStyles = {
+  default: {
+    container: "bg-white dark:bg-zinc-900 ring-zinc-200 dark:ring-zinc-800 hover:ring-zinc-300 dark:hover:ring-zinc-700",
+    icon: "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400",
+    title: "text-zinc-900 dark:text-white",
+    description: "text-zinc-500 dark:text-zinc-400",
+    chevron: "text-zinc-400 dark:text-zinc-500",
+  },
+  warning: {
+    container: "bg-amber-50 dark:bg-amber-950/30 ring-amber-200 dark:ring-amber-800/50 hover:ring-amber-300 dark:hover:ring-amber-700",
+    icon: "bg-linear-to-b from-amber-400 to-amber-600 text-white shadow-sm ring-1 ring-amber-600/20 dark:from-amber-500 dark:to-amber-700",
+    title: "text-amber-900 dark:text-amber-100",
+    description: "text-amber-700 dark:text-amber-300",
+    chevron: "text-amber-600 dark:text-amber-400",
+  },
+  danger: {
+    container: "bg-red-50 dark:bg-red-950/30 ring-red-200 dark:ring-red-800/50 hover:ring-red-300 dark:hover:ring-red-700",
+    icon: "bg-linear-to-b from-red-400 to-red-600 text-white shadow-sm ring-1 ring-red-600/20 dark:from-red-500 dark:to-red-700",
+    title: "text-red-900 dark:text-red-100",
+    description: "text-red-700 dark:text-red-300",
+    chevron: "text-red-600 dark:text-red-400",
+  },
+};
+
+export function ActionLink({
+  href,
+  onClick,
+  title,
+  description,
+  icon,
+  variant = "default",
+  className,
+}: ActionLinkProps) {
+  const styles = actionLinkStyles[variant];
+  const Component = href ? "a" : "button";
+
+  return (
+    <Component
+      href={href}
+      onClick={onClick}
+      className={clsx(
+        "flex items-center gap-4 rounded-xl p-4 ring-1 transition-all",
+        styles.container,
+        className
+      )}
+    >
+      {icon && (
+        <div
+          className={clsx(
+            "flex size-10 shrink-0 items-center justify-center rounded-full",
+            styles.icon
+          )}
+        >
+          {icon}
+        </div>
+      )}
+      <div className="min-w-0 flex-1 text-left">
+        <p className={clsx("font-medium", styles.title)}>{title}</p>
+        {description && (
+          <p className={clsx("text-sm", styles.description)}>{description}</p>
+        )}
+      </div>
+      <ChevronRightIcon className={clsx("size-5 shrink-0", styles.chevron)} />
+    </Component>
   );
 }
