@@ -1,0 +1,386 @@
+import {
+	ArrowDownTrayIcon,
+	ArrowLeftIcon,
+	ArrowPathIcon,
+	ArrowUpTrayIcon,
+	BanknotesIcon,
+	CalendarIcon,
+	ClockIcon,
+	CurrencyRupeeIcon,
+	DocumentTextIcon,
+	ExclamationTriangleIcon,
+	HashtagIcon,
+} from "@heroicons/react/16/solid";
+import { getRouteApi } from "@tanstack/react-router";
+import { useMemo } from "react";
+import { Badge } from "@/components/badge";
+import { Button } from "@/components/button";
+import { Heading } from "@/components/heading";
+import { Link } from "@/components/link";
+import { CopyButton } from "@/components/shared";
+import { Card, CardGrid, StatCard } from "@/components/shared/card";
+import { Skeleton } from "@/components/skeleton";
+import { Text } from "@/components/text";
+import { useCurrentOrganization, useWalletTransactions } from "@/hooks";
+import { useOrgSlug } from "@/hooks/use-org-slug";
+import { formatCurrency, formatDateTime } from "@/lib/design-tokens";
+
+const routeApi = getRouteApi("/_app/$orgSlug/wallet_/transactions_/$id");
+
+// =============================================================================
+// TRANSACTION TYPE CONFIG
+// =============================================================================
+
+function getTransactionTypeConfig(type: string): {
+	label: string;
+	icon: typeof ArrowDownTrayIcon;
+	color: "emerald" | "red" | "amber" | "sky" | "zinc";
+	bgClass: string;
+} {
+	const typeMap: Record<
+		string,
+		{
+			label: string;
+			icon: typeof ArrowDownTrayIcon;
+			color: "emerald" | "red" | "amber" | "sky" | "zinc";
+			bgClass: string;
+		}
+	> = {
+		credit: {
+			label: "Credit",
+			icon: ArrowDownTrayIcon,
+			color: "emerald",
+			bgClass: "bg-emerald-50 dark:bg-emerald-950/30",
+		},
+		debit: {
+			label: "Debit",
+			icon: ArrowUpTrayIcon,
+			color: "red",
+			bgClass: "bg-red-50 dark:bg-red-950/30",
+		},
+	};
+	return (
+		typeMap[type] || {
+			label: type,
+			icon: BanknotesIcon,
+			color: "zinc",
+			bgClass: "bg-zinc-100 dark:bg-zinc-800",
+		}
+	);
+}
+
+// =============================================================================
+// ERROR STATE
+// =============================================================================
+
+function ErrorState({ onRetry }: { onRetry: () => void }) {
+	return (
+		<div className="flex flex-col items-center justify-center py-16 text-center">
+			<div className="flex size-16 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-950/30">
+				<ExclamationTriangleIcon className="size-8 text-red-400" />
+			</div>
+			<p className="mt-4 text-lg font-semibold text-zinc-900 dark:text-white">
+				Transaction not found
+			</p>
+			<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+				The transaction you're looking for doesn't exist or has been removed.
+			</p>
+			<Button className="mt-6" onClick={onRetry} color="dark/zinc">
+				<ArrowPathIcon className="size-4" />
+				Try Again
+			</Button>
+		</div>
+	);
+}
+
+// =============================================================================
+// LOADING SKELETON
+// =============================================================================
+
+function LoadingSkeleton() {
+	return (
+		<div className="space-y-6 animate-fade-in">
+			{/* Back button */}
+			<Skeleton width={120} height={36} borderRadius={8} />
+
+			{/* Header */}
+			<div className="flex items-start gap-4">
+				<Skeleton width={80} height={80} borderRadius={16} />
+				<div className="space-y-2">
+					<Skeleton width={200} height={28} borderRadius={8} />
+					<Skeleton width={150} height={20} borderRadius={6} />
+					<Skeleton width={100} height={24} borderRadius={12} />
+				</div>
+			</div>
+
+			{/* Stats */}
+			<div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+				{[1, 2, 3, 4].map((i) => (
+					<Skeleton key={i} width="100%" height={100} borderRadius={12} />
+				))}
+			</div>
+
+			{/* Details */}
+			<Skeleton width="100%" height={300} borderRadius={12} />
+		</div>
+	);
+}
+
+// =============================================================================
+// TRANSACTION SHOW PAGE
+// =============================================================================
+
+export function TransactionShow() {
+	const { id: transactionId } = routeApi.useParams();
+	const organization = useCurrentOrganization();
+	const organizationId = organization?.id;
+	const orgSlug = useOrgSlug();
+
+	// Fetch transactions — limit to a smaller page size since we only need one
+	const {
+		data: transactions,
+		loading,
+		error,
+		refetch,
+	} = useWalletTransactions(organizationId, { take: 20 });
+
+	const transaction = useMemo(() => {
+		return transactions.find((t) => t.id === transactionId) || null;
+	}, [transactions, transactionId]);
+
+	if (loading) {
+		return <LoadingSkeleton />;
+	}
+
+	if (error || !transaction) {
+		return <ErrorState onRetry={refetch} />;
+	}
+
+	const typeConfig = getTransactionTypeConfig(transaction.type);
+	const TypeIcon = typeConfig.icon;
+	const isCredit = transaction.type === "credit";
+	const isDebit = transaction.type === "debit";
+
+	return (
+		<div className="space-y-6">
+			{/* Back Button */}
+			<Link
+				href={`/${orgSlug}/wallet`}
+				className="inline-flex items-center gap-2 text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+			>
+				<ArrowLeftIcon className="size-4" />
+				Back to Wallet
+			</Link>
+
+			{/* Header */}
+			<div className="flex flex-wrap items-start justify-between gap-4">
+				<div className="flex items-start gap-4">
+					{/* Transaction Icon */}
+					<div
+						className={`flex size-20 shrink-0 items-center justify-center rounded-2xl ${typeConfig.bgClass}`}
+					>
+						<TypeIcon
+							className={`size-10 ${
+								typeConfig.color === "emerald"
+									? "text-emerald-500"
+									: typeConfig.color === "red"
+										? "text-red-500"
+										: typeConfig.color === "amber"
+											? "text-amber-500"
+											: typeConfig.color === "sky"
+												? "text-sky-500"
+												: "text-zinc-500"
+							}`}
+						/>
+					</div>
+
+					<div>
+						<div className="flex items-center gap-2">
+							<Heading>
+								{isCredit ? "+" : isDebit ? "-" : ""}
+								{formatCurrency(transaction.amount)}
+							</Heading>
+						</div>
+						<Text className="mt-1">{transaction.description || typeConfig.label}</Text>
+						<div className="mt-2 flex flex-wrap items-center gap-2">
+							<Badge color={typeConfig.color} className="inline-flex items-center gap-1">
+								<TypeIcon className="size-3" />
+								{typeConfig.label}
+							</Badge>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			{/* Stats Row */}
+			<CardGrid columns={4} gap="md">
+				<StatCard
+					icon={<CurrencyRupeeIcon className="size-5" />}
+					label="Amount"
+					value={formatCurrency(transaction.amount)}
+					variant={isCredit ? "success" : isDebit ? "danger" : "default"}
+				/>
+				<StatCard
+					icon={<BanknotesIcon className="size-5" />}
+					label="Type"
+					value={typeConfig.label}
+				/>
+				<StatCard
+					icon={<CalendarIcon className="size-5" />}
+					label="Date"
+					value={new Date(transaction.createdAt).toLocaleDateString("en-IN", {
+						month: "short",
+						day: "numeric",
+						year: "numeric",
+					})}
+				/>
+				<StatCard
+					icon={<ClockIcon className="size-5" />}
+					label="Time"
+					value={new Date(transaction.createdAt).toLocaleTimeString("en-IN", {
+						hour: "2-digit",
+						minute: "2-digit",
+					})}
+				/>
+			</CardGrid>
+
+			{/* Transaction Details */}
+			<Card>
+				<div className="p-6">
+					<h3 className="text-lg font-semibold text-zinc-900 dark:text-white">
+						Transaction Details
+					</h3>
+
+					<div className="mt-6 space-y-4">
+						{/* Transaction ID */}
+						<div className="flex items-center justify-between border-b border-zinc-200 pb-4 dark:border-zinc-700">
+							<div className="flex items-center gap-3">
+								<div className="flex size-10 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
+									<HashtagIcon className="size-5 text-zinc-500" />
+								</div>
+								<div>
+									<p className="text-sm font-medium text-zinc-900 dark:text-white">
+										Transaction ID
+									</p>
+									<p className="text-sm text-zinc-500 dark:text-zinc-400">Unique identifier</p>
+								</div>
+							</div>
+							<div className="flex items-center gap-1">
+								<span className="max-w-50 truncate font-mono text-xs text-zinc-600 dark:text-zinc-400">
+									{transaction.id}
+								</span>
+								<CopyButton value={transaction.id} label="Transaction ID" />
+							</div>
+						</div>
+
+						{/* Wallet ID */}
+						<div className="flex items-center justify-between border-b border-zinc-200 pb-4 dark:border-zinc-700">
+							<div className="flex items-center gap-3">
+								<div className="flex size-10 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
+									<BanknotesIcon className="size-5 text-zinc-500" />
+								</div>
+								<div>
+									<p className="text-sm font-medium text-zinc-900 dark:text-white">Wallet ID</p>
+									<p className="text-sm text-zinc-500 dark:text-zinc-400">Associated wallet</p>
+								</div>
+							</div>
+							<div className="flex items-center gap-1">
+								<span className="max-w-50 truncate font-mono text-xs text-zinc-600 dark:text-zinc-400">
+									{transaction.walletId}
+								</span>
+								<CopyButton value={transaction.walletId} label="Wallet ID" />
+							</div>
+						</div>
+
+						{/* Amount */}
+						<div className="flex items-center justify-between border-b border-zinc-200 pb-4 dark:border-zinc-700">
+							<div className="flex items-center gap-3">
+								<div
+									className={`flex size-10 items-center justify-center rounded-lg ${typeConfig.bgClass}`}
+								>
+									<CurrencyRupeeIcon
+										className={`size-5 ${
+											typeConfig.color === "emerald"
+												? "text-emerald-500"
+												: typeConfig.color === "red"
+													? "text-red-500"
+													: "text-amber-500"
+										}`}
+									/>
+								</div>
+								<div>
+									<p className="text-sm font-medium text-zinc-900 dark:text-white">Amount</p>
+									<p className="text-sm text-zinc-500 dark:text-zinc-400">INR</p>
+								</div>
+							</div>
+							<span
+								className={`text-xl font-bold ${
+									isCredit
+										? "text-emerald-600 dark:text-emerald-400"
+										: isDebit
+											? "text-red-600 dark:text-red-400"
+											: "text-zinc-900 dark:text-white"
+								}`}
+							>
+								{isCredit ? "+" : isDebit ? "-" : ""}
+								{formatCurrency(transaction.amount)}
+							</span>
+						</div>
+
+						{/* Reference */}
+						{transaction.reference && (
+							<div className="flex items-center justify-between border-b border-zinc-200 pb-4 dark:border-zinc-700">
+								<div className="flex items-center gap-3">
+									<div className="flex size-10 items-center justify-center rounded-lg bg-sky-50 dark:bg-sky-950/30">
+										<DocumentTextIcon className="size-5 text-sky-500" />
+									</div>
+									<div>
+										<p className="text-sm font-medium text-zinc-900 dark:text-white">Reference</p>
+										<p className="text-sm text-zinc-500 dark:text-zinc-400">External reference</p>
+									</div>
+								</div>
+								<div className="flex items-center gap-1">
+									<span className="max-w-50 truncate text-sm text-zinc-900 dark:text-white">
+										{transaction.reference}
+									</span>
+									<CopyButton value={transaction.reference} label="Reference" />
+								</div>
+							</div>
+						)}
+
+						{/* Description */}
+						<div className="flex items-center justify-between border-b border-zinc-200 pb-4 dark:border-zinc-700">
+							<div className="flex items-center gap-3">
+								<div className="flex size-10 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-950/30">
+									<DocumentTextIcon className="size-5 text-amber-500" />
+								</div>
+								<div>
+									<p className="text-sm font-medium text-zinc-900 dark:text-white">Description</p>
+									<p className="text-sm text-zinc-500 dark:text-zinc-400">Transaction note</p>
+								</div>
+							</div>
+							<span className="max-w-[250px] text-right text-sm text-zinc-900 dark:text-white">
+								{transaction.description || "—"}
+							</span>
+						</div>
+
+						{/* Created At */}
+						<div className="flex items-center justify-between pt-2">
+							<div className="flex items-center gap-3">
+								<div className="flex size-10 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
+									<CalendarIcon className="size-5 text-zinc-500" />
+								</div>
+								<div>
+									<p className="text-sm font-medium text-zinc-900 dark:text-white">Created</p>
+									<p className="text-sm text-zinc-500 dark:text-zinc-400">
+										{formatDateTime(transaction.createdAt)}
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</Card>
+		</div>
+	);
+}

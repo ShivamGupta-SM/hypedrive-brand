@@ -34,6 +34,7 @@ import {
 	DropdownLabel,
 	DropdownMenu,
 } from "@/components/dropdown";
+import { Logo } from "@/components/logo";
 import { Navbar, NavbarItem, NavbarSection, NavbarSpacer } from "@/components/navbar";
 import { SettingsDialog } from "@/components/settings-dialog";
 import {
@@ -49,7 +50,7 @@ import {
 	SidebarSpacer,
 } from "@/components/sidebar";
 import { SidebarLayout } from "@/components/sidebar-layout";
-import { useActiveMember, useCurrentOrganization, useOrgSlug, useUnifiedSearch } from "@/hooks";
+import { useCurrentOrganization, useOrgSlug, useUnifiedSearch } from "@/hooks";
 import type { brand } from "@/lib/brand-client";
 import { HighlightText } from "@/lib/highlight-text";
 import { Can } from "@/providers/ability-provider";
@@ -909,7 +910,7 @@ export function AppLayout({
 	const orgSlug = useOrgSlug();
 	const serverCurrentOrg = serverOrganizations.find((o) => o.slug === orgSlug) ?? serverOrganizations[0] ?? null;
 	const user = useAuthStore((state) => state.user);
-	const activeMember = useActiveMember(orgSlug);
+
 
 	const [showSettings, setShowSettings] = useState(false);
 	const [settingsTab, setSettingsTab] = useState<"org" | "account">("org");
@@ -945,7 +946,7 @@ export function AppLayout({
 					<Navbar>
 						<NavbarSpacer />
 						<NavbarSection>
-							<NavbarItem onClick={() => setShowSearch(true)}>
+							<NavbarItem onClick={() => setShowSearch(true)} aria-label="Search (⌘K)">
 								<MagnifyingGlassIcon />
 							</NavbarItem>
 							<Dropdown>
@@ -968,12 +969,17 @@ export function AppLayout({
 				sidebar={
 					<Sidebar>
 						<SidebarHeader>
+							{/* Logo — sits naturally in SidebarHeader's p-4 */}
+							<Logo className="mb-1 h-6 w-auto text-zinc-950 dark:text-white" />
+
+							{/* Org Switcher */}
 							<OrganizationSwitcher
 								serverOrganizations={serverOrganizations}
 								serverCurrentOrg={serverCurrentOrg}
 								onOpenOrgSettings={openOrgSettings}
 							/>
-							{/* Search trigger */}
+
+							{/* Search */}
 							<SidebarSection>
 								<SidebarItem onClick={() => setShowSearch(true)}>
 									<MagnifyingGlassIcon />
@@ -986,8 +992,9 @@ export function AppLayout({
 						</SidebarHeader>
 
 						<SidebarBody>
-							{/* Main */}
+							{/* Core nav */}
 							<SidebarSection>
+								<SidebarHeading>Workspace</SidebarHeading>
 								<SidebarItem href={`/${orgSlug}`} current={pathname === `/${orgSlug}` || pathname === `/${orgSlug}/`}>
 									<HomeIcon />
 									<SidebarLabel>Dashboard</SidebarLabel>
@@ -1029,7 +1036,7 @@ export function AppLayout({
 
 							<SidebarSpacer />
 
-							{/* Bottom utility */}
+							{/* Bottom */}
 							<SidebarSection>
 								<SidebarItem href={`/${orgSlug}/changelog`} current={isActive(`/${orgSlug}/changelog`)}>
 									<SparklesIcon />
@@ -1046,8 +1053,8 @@ export function AppLayout({
 							<Dropdown>
 								<DropdownButton as={SidebarItem}>
 									<span className="flex min-w-0 items-center gap-3">
-										{activeMember?.data?.user?.image ? (
-											<Avatar src={activeMember.data.user?.image} className="size-10" square alt="" />
+										{user?.image ? (
+											<Avatar src={user.image} className="size-10" square alt="" />
 										) : (
 											<Avatar
 												initials={user?.name?.charAt(0).toUpperCase() || "U"}

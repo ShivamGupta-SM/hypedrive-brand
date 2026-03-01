@@ -1,37 +1,37 @@
-# This Dockerfile uses `serve` npm package to serve the static files with node process.
-# You can find the Dockerfile for nginx in the following link:
-# https://github.com/refinedev/dockerfiles/blob/main/vite/Dockerfile.nginx
-FROM refinedev/node:18 AS base
+# TanStack Start — Node 22 production image
+# Build: docker build -t hypedrive-brand .
+# Run:   docker run -p 3000:3000 -e VITE_API_URL=https://api.hypedrive.com hypedrive-brand
 
-FROM base as deps
+FROM node:22-alpine AS base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
 
-COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* .npmrc* ./
+WORKDIR /app
 
-RUN \
-  if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
-  elif [ -f package-lock.json ]; then npm ci; \
-  elif [ -f pnpm-lock.yaml ]; then yarn global add pnpm && pnpm i --frozen-lockfile; \
-  else echo "Lockfile not found." && exit 1; \
-  fi
+# ── deps ──────────────────────────────────────────────────────────────────────
+FROM base AS deps
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
-FROM base as builder
+# ── build ─────────────────────────────────────────────────────────────────────
+FROM base AS builder
+ENV NODE_ENV=production
 
-ENV NODE_ENV production
-
-COPY --from=deps /app/refine/node_modules ./node_modules
-
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-RUN npm run build
+RUN pnpm build
 
-FROM base as runner
+# ── runner ────────────────────────────────────────────────────────────────────
+FROM node:22-alpine AS runner
+ENV NODE_ENV=production
 
-ENV NODE_ENV production
+WORKDIR /app
 
-RUN npm install -g serve
+# Only copy the built output — no source, no devDeps
+COPY --from=builder /app/.output ./.output
 
-COPY --from=builder /app/refine/dist ./
+EXPOSE 3000
 
-USER refine
-
-CMD ["serve"]
+CMD ["node", ".output/server/index.mjs"]

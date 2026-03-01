@@ -24,3 +24,19 @@ _.ntvs_
 _.njsproj
 _.sln
 \*.sw?
+
+# TanStack temp files
+.tanstack/
+
+# Encore manifest
+.encore/
+
+# Environment files
+.env.local
+.env.example
+
+# Claude settings
+.claude/settings.local.json
+
+# pnpm lock (using package-lock.json)
+pnpm-lock.yaml

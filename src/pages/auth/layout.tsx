@@ -1,5 +1,5 @@
-import { Outlet } from "react-router";
+import { Outlet } from "@tanstack/react-router";
 
 export function AuthLayout() {
-  return <Outlet />;
+	return <Outlet />;
 }

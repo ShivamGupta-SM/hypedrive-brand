@@ -1,594 +1,690 @@
-# Refine.dev v5 Admin Panel
-
-<llm_info>Generic CLAUDE.md for any Refine.dev v5 project. Copy to project root and customize project_stack section.</llm_info>
-
-<project_stack>
-- Framework: Next.js 14+ with App Router
-- Admin: Refine.dev v5 (headless mode)
-- Styling: Tailwind CSS
-- Backend: Custom API
-- Auth: Custom Auth Provider
-</project_stack>
-
-## TypeScript Style Guide
-
-- Use interface/type for complex objects
-- Prefer built-in utility types (Record, Partial, Pick) over any
-- Always ES6+ syntax and import, never require
-- Use built-in fetch for HTTP
-
-## Refine v5 Breaking Changes
-
-### Hook Return Values (CRITICAL)
-
-| Hook | v4 Return | v5 Return |
-|------|-----------|-----------|
-| useList/useOne/useMany | `{ data, isLoading }` | `{ result, query: { isLoading } }` |
-| useShow | `{ queryResult }` | `{ result, query }` |
-| useCreate/useUpdate/useDelete | `{ mutate, isLoading }` | `{ mutate, mutation: { isPending } }` |
-| useLogin/useRegister | `{ mutate, isLoading }` | `{ mutate, isPending }` (direct!) |
-| useCustom | `{ data, isLoading }` | `{ result, query: { isLoading } }` |
-| useCustomMutation | `{ mutate, isLoading }` | `{ mutate, mutation: { isPending } }` |
-| useSelect | `{ options, queryResult }` | `{ options, query }` |
-| useTable (core) | `{ tableQueryResult }` | `{ tableQuery }` |
-| useForm | `{ queryResult, mutationResult }` | `{ query, mutation }` |
-| useInfiniteList | `{ data, fetchNextPage }` | `{ result, query: { fetchNextPage } }` |
-
-### Key Pattern: `result` vs `data`
-
-```typescript
-// v4
-const { data, isLoading } = useList();
-const products = data?.data;  // Nested
-
-// v5 PREFERRED
-const { result, query: { isLoading } } = useList();
-const products = result.data;  // Cleaner
-```
-
-### Filters Format
-
-```typescript
-filters: {
-  initial: [],      // Applied ONLY on first load
-  permanent: [],    // ALWAYS applied - use for dynamic filters from state
-}
-
-// Dynamic filters pattern
-const refineFilters = useMemo(() => {
-  return filters.filter(f => f.value).map(f => ({ field: f.field, operator: f.operator, value: f.value }));
-}, [filters]);
-refineCoreProps: { filters: { permanent: refineFilters } }
-```
-
-### Auth vs Data Hooks Return Type
-
-```typescript
-// DATA MUTATION HOOKS - wrapped in mutation
-const { mutate, mutation: { isPending } } = useCreate();
-
-// AUTH MUTATION HOOKS - direct (NOT wrapped!)
-const { mutate: login, isPending } = useLogin();
-```
-
-### Navigation
-
-```typescript
-// v5
-const go = useGo();
-go({ to: "/posts" });                    // push
-go({ to: "/posts", type: "replace" });   // replace
-// goBack: use Next.js router
-import { useRouter } from "next/navigation";
-router.back();
-```
-
-### Parameter Renames
-
-| Old (v4) | New (v5) |
-|----------|----------|
-| metaData | meta |
-| sort/sorter | sorters |
-| initialSorter/permanentSorter | sorters: { initial, permanent } |
-| initialFilter/permanentFilter | filters: { initial, permanent } |
-| hasPagination: false | pagination: { mode: "off" } |
-| initialCurrent | pagination: { currentPage } |
-| setCurrent | setCurrentPage |
-| queryResult | query |
-| mutationResult | mutation |
-| isLoading (mutations) | isPending |
-
-### Type/Import Renames
-
-```typescript
-// v4 → v5
-AuthBindings → AuthProvider
-RouterBindings → RouterProvider
-resources options → resources meta
-ThemedLayoutV2 → ThemedLayout
-```
-
-### Removed in v5
-
-- legacyRouterProvider, legacyAuthProvider
-- v3LegacyAuthProviderCompatible flag
-- Direct push, goBack, replace from useNavigation
-
-## Data Provider
-
-### Required Methods
-
-- **getList**: Fetch paginated, sorted, filtered list
-- **getOne**: Fetch single record by ID
-- **create**: Create new record
-- **update**: Update existing record
-- **deleteOne**: Delete single record
-- **getApiUrl**: Return API base URL
-
-### Optional Methods
-
-getMany, createMany, updateMany, deleteMany, custom
-
-### Implementation
-
-```typescript
-import { DataProvider, HttpError } from "@refinedev/core";
-
-export const dataProvider = (apiUrl: string): DataProvider => ({
-  getApiUrl: () => apiUrl,
-  getList: async ({ resource, pagination, sorters, filters }) => {
-    const { current = 1, pageSize = 10 } = pagination ?? {};
-    const query: Record<string, any> = { page: current, limit: pageSize };
-    if (sorters?.length) query.sort = sorters.map(s => `${s.field}:${s.order}`).join(",");
-    filters?.forEach((filter) => {
-      if ("field" in filter) {
-        if (filter.operator === "eq") query[filter.field] = filter.value;
-        else if (filter.operator === "contains") query[`${filter.field}_like`] = filter.value;
-      }
-    });
-    const response = await fetch(`${apiUrl}/${resource}?${new URLSearchParams(query)}`);
-    const data = await response.json();
-    return { data: data.items || data, total: data.total || data.length };
-  },
-  getOne: async ({ resource, id }) => {
-    const response = await fetch(`${apiUrl}/${resource}/${id}`);
-    return { data: await response.json() };
-  },
-  create: async ({ resource, variables }) => {
-    const response = await fetch(`${apiUrl}/${resource}`, {
-      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(variables),
-    });
-    return { data: await response.json() };
-  },
-  update: async ({ resource, id, variables }) => {
-    const response = await fetch(`${apiUrl}/${resource}/${id}`, {
-      method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(variables),
-    });
-    return { data: await response.json() };
-  },
-  deleteOne: async ({ resource, id }) => {
-    const response = await fetch(`${apiUrl}/${resource}/${id}`, { method: "DELETE" });
-    return { data: await response.json() };
-  },
-  custom: async ({ url, method, payload, query }) => {
-    const response = await fetch(`${apiUrl}${url}?${new URLSearchParams(query)}`, {
-      method, headers: { "Content-Type": "application/json" }, body: payload ? JSON.stringify(payload) : undefined,
-    });
-    return { data: await response.json() };
-  },
-});
-```
-
-## Auth Provider
-
-### Required Methods
-
-- **login**: returns `{ success, redirectTo?, error? }`
-- **check**: returns `{ authenticated, redirectTo?, logout?, error? }`
-- **logout**: returns `{ success, redirectTo? }`
-- **onError**: returns `{ logout?, redirectTo?, error? }`
-
-### Optional Methods
-
-getIdentity, getPermissions, register, forgotPassword, updatePassword
-
-### Implementation
-
-```typescript
-import { AuthProvider } from "@refinedev/core";
-
-export const authProvider: AuthProvider = {
-  login: async ({ email, password }) => {
-    const response = await fetch("/api/auth/login", {
-      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password }),
-    });
-    const data = await response.json();
-    if (data.token) {
-      localStorage.setItem("auth_token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
-      return { success: true, redirectTo: "/" };
-    }
-    return { success: false, error: { name: "LoginError", message: "Invalid credentials" } };
-  },
-  check: async () => {
-    const token = localStorage.getItem("auth_token");
-    if (!token) return { authenticated: false, redirectTo: "/login", logout: true };
-    return { authenticated: true };
-  },
-  logout: async () => {
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("user");
-    return { success: true, redirectTo: "/login" };
-  },
-  onError: async (error) => {
-    if (error?.statusCode === 401 || error?.statusCode === 403) return { logout: true, redirectTo: "/login" };
-    return {};
-  },
-  getIdentity: async () => {
-    const user = localStorage.getItem("user");
-    return user ? JSON.parse(user) : null;
-  },
-  getPermissions: async () => {
-    const user = localStorage.getItem("user");
-    return user ? JSON.parse(user).role : null;
-  },
-};
-```
-
-### Auth Hooks Usage
-
-```typescript
-// Auth hooks return { mutate, isPending } directly (NOT wrapped in mutation!)
-const { mutate: login, isPending } = useLogin();
-const { mutate: logout, isPending: isLoggingOut } = useLogout();
-const { mutate: register, isPending: isRegistering } = useRegister();
-const { data: authData, isLoading } = useIsAuthenticated();
-const { data: identity } = useGetIdentity();
-```
-
-## Notification Provider
-
-```typescript
-import { NotificationProvider } from "@refinedev/core";
-import { toast } from "react-toastify";
-
-export const notificationProvider: NotificationProvider = {
-  open: ({ key, message, type }) => {
-    if (type === "success") toast.success(message, { toastId: key });
-    else if (type === "error") toast.error(message, { toastId: key });
-    else toast.info(message, { toastId: key });
-  },
-  close: (key) => toast.dismiss(key),
-};
-```
-
-## Resources & Routing
-
-### Next.js App Router Setup
-
-```typescript
-import { Refine } from "@refinedev/core";
-import routerProvider from "@refinedev/nextjs-router";
-
-const resources = [
-  { name: "products", list: "/products", show: "/products/:id", edit: "/products/:id/edit", meta: { label: "Products" } },
-  { name: "users", list: "/users", show: "/users/:id", create: "/users/create", meta: { label: "Users", canDelete: true } },
-];
-
-<Refine routerProvider={routerProvider} dataProvider={dataProvider(API_URL)} authProvider={authProvider} resources={resources} options={{ syncWithLocation: true }}>
-  {children}
-</Refine>
-```
-
-### Navigation Hooks
-
-```typescript
-import { useNavigation, useGo } from "@refinedev/core";
-const { list, create, edit, show } = useNavigation();
-list("products"); create("products"); edit("products", "123"); show("products", "123");
-
-const go = useGo();
-go({ to: "/custom-path", query: { search: "test" } });
-```
-
-## Data Hooks
-
-### useList
-
-```typescript
-const { result, query: { isLoading, isError } } = useList({
-  resource: "products",
-  pagination: { current: 1, pageSize: 10 },
-  sorters: [{ field: "createdAt", order: "desc" }],
-  filters: [{ field: "status", operator: "eq", value: "active" }],
-});
-const products = result.data ?? [];
-```
-
-### useOne
-
-```typescript
-const { result: product, query: { isLoading } } = useOne({ resource: "products", id: "123" });
-```
-
-### useCreate/useUpdate/useDelete
-
-```typescript
-const { mutate, mutation: { isPending } } = useCreate();
-mutate({ resource: "products", values: { name: "Product", price: 100 } }, {
-  onSuccess: (data) => console.log("Created:", data),
-  onError: (error) => console.error(error),
-});
-
-const { mutate: update } = useUpdate();
-mutate({ resource: "products", id: "123", values: { name: "Updated" } });
-
-const { mutate: remove } = useDelete();
-mutate({ resource: "products", id: "123" });
-```
-
-### useCustom/useCustomMutation
-
-```typescript
-const { result, query: { isLoading } } = useCustom({ url: "/admin/stats", method: "get", config: { query: { period: "monthly" } } });
-
-const { mutate } = useCustomMutation();
-mutate({ url: "/products/123/publish", method: "post", values: { publishedAt: new Date().toISOString() } });
-```
-
-### useMany/useInfiniteList
-
-```typescript
-const { result, query: { isLoading } } = useMany({ resource: "products", ids: ["1", "2", "3"] });
-
-const { result, query: { hasNextPage, fetchNextPage } } = useInfiniteList({ resource: "products", pagination: { pageSize: 20 } });
-```
-
-## Forms & Tables
-
-### useForm
-
-```typescript
-const { query, mutation, onFinish, formLoading } = useForm({
-  resource: "products", action: "edit", id: "123", redirect: "list",
-  autoSave: { enabled: true, debounce: 2000 },
-});
-const product = query?.data?.data;
-
-<form onSubmit={(e) => { e.preventDefault(); onFinish(Object.fromEntries(new FormData(e.currentTarget))); }}>
-  <input name="name" defaultValue={product?.name} />
-  <button disabled={mutation.isPending}>{mutation.isPending ? "Saving..." : "Save"}</button>
-</form>
-```
-
-### useTable (core)
-
-```typescript
-const { tableQuery, currentPage, setCurrentPage, sorters, setSorters, filters, setFilters } = useTable({
-  resource: "products",
-  pagination: { pageSize: 10 },
-  sorters: { initial: [{ field: "createdAt", order: "desc" }] },
-  filters: { initial: [], permanent: [] },
-  syncWithLocation: true,
-});
-const { data, isLoading } = tableQuery;
-```
-
-### useSelect
-
-```typescript
-const { options, query: { isLoading } } = useSelect({
-  resource: "categories", optionLabel: "name", optionValue: "id",
-  filters: [{ field: "status", operator: "eq", value: "active" }],
-});
-```
-
-### Zod Validation
-
-```typescript
-import { useForm } from "@refinedev/react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-
-const schema = z.object({
-  name: z.string().min(3), price: z.number().positive(), status: z.enum(["active", "inactive"]),
-});
-
-const { refineCore: { onFinish, formLoading }, register, handleSubmit, formState: { errors } } = useForm({
-  resolver: zodResolver(schema),
-  refineCoreProps: { resource: "products", action: "create" },
-});
-```
-
-## @refinedev/react-table v6
-
-```typescript
-import { useTable } from "@refinedev/react-table";
-import { flexRender } from "@tanstack/react-table";
-
-const { reactTable, refineCore } = useTable({
-  columns,
-  refineCoreProps: {
-    resource: "products",
-    pagination: { mode: "server" },
-    filters: { permanent: refineFilters },
-  },
-});
-
-const { getHeaderGroups, getRowModel, nextPage, previousPage, getCanNextPage, getCanPreviousPage } = reactTable;
-const { tableQuery } = refineCore;
-const isLoading = tableQuery?.isLoading;
-
-// Render
-{getHeaderGroups().map(hg => (
-  <tr key={hg.id}>{hg.headers.map(h => <th key={h.id}>{flexRender(h.column.columnDef.header, h.getContext())}</th>)}</tr>
-))}
-{getRowModel().rows.map(row => (
-  <tr key={row.id}>{row.getVisibleCells().map(cell => <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>)}</tr>
-))}
-```
-
-## Access Control
-
-```typescript
-import { AccessControlProvider } from "@refinedev/core";
-
-export const accessControlProvider: AccessControlProvider = {
-  can: async ({ resource, action, params }) => {
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
-    if (user.role === "admin") return { can: true };
-    if (action === "delete") return { can: false, reason: "Only admins can delete" };
-    return { can: true };
-  },
-};
-
-// Usage
-const { data: canEdit } = useCan({ resource: "products", action: "edit", params: { id } });
-{canEdit?.can && <button>Edit</button>}
-```
-
-## Filter Operators
-
-**Comparison:** eq, ne, lt, lte, gt, gte
-
-**Array:** in, nin, ina, nina
-
-**String:** contains, ncontains, containss, ncontainss, startswith, endswith
-
-**Range:** between, nbetween
-
-**Null:** null, nnull
-
-**Logical:** or, and
-
-```typescript
-filters: [{ field: "status", operator: "eq", value: "active" }]
-filters: [{ field: "price", operator: "gte", value: 100 }, { field: "price", operator: "lte", value: 500 }]
-filters: [{ field: "category", operator: "in", value: ["electronics", "clothing"] }]
-filters: [{ operator: "or", value: [{ field: "status", operator: "eq", value: "pending" }, { field: "status", operator: "eq", value: "processing" }] }]
-```
-
-## Best Practices
-
-### Error Handling
-
-```typescript
-mutate({ resource: "products", values }, {
-  onError: (error) => toast.error(error.message),
-  onSuccess: () => toast.success("Created successfully"),
-});
-```
-
-### Cache Invalidation
-
-```typescript
-import { useInvalidate } from "@refinedev/core";
-const invalidate = useInvalidate();
-invalidate({ resource: "products", invalidates: ["list", "many", "detail"] });
-```
-
-### Optimistic Updates
-
-```typescript
-const { mutate } = useUpdate({ mutationMode: "optimistic" });
-const { mutate: undoable } = useUpdate({ mutationMode: "undoable", undoableTimeout: 5000 });
-```
-
-## Additional Hooks
-
-```typescript
-const apiUrl = useApiUrl();
-const dataProvider = useDataProvider();
-const { resource, action, id } = useResource();
-const { resource, action, id, params } = useParsed();
-const { result: product, query: { isLoading } } = useShow({ resource: "products", id: "123" });
-const { modal: { visible, show, close }, formProps } = useModalForm({ resource: "products", action: "create" });
-```
-
-## Token Refresh Pattern
-
-```typescript
-import axios from "axios";
-const axiosInstance = axios.create({ baseURL: process.env.NEXT_PUBLIC_API_URL });
-
-axiosInstance.interceptors.request.use((config) => {
-  const token = localStorage.getItem("auth_token");
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
-
-axiosInstance.interceptors.response.use((response) => response, async (error) => {
-  if (error.response?.status === 401 && !error.config._retry) {
-    error.config._retry = true;
-    const refreshToken = localStorage.getItem("refresh_token");
-    if (refreshToken) {
-      try {
-        const { data } = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`, { refreshToken });
-        localStorage.setItem("auth_token", data.token);
-        error.config.headers.Authorization = `Bearer ${data.token}`;
-        return axiosInstance(error.config);
-      } catch { /* redirect to login */ }
-    }
-    window.location.href = "/login";
-  }
-  return Promise.reject(error);
-});
+# Hypedrive Brand Dashboard
+
+## Project Stack
+
+- **Framework:** TanStack Start (React 19 + Vite 7) — full-stack SSR meta-framework
+- **Routing:** TanStack Router v1 (file-based, type-safe, nested)
+- **Server State:** TanStack Query v5
+- **Client State:** Zustand 5 (persistent auth + org stores)
+- **Backend:** Encore.ts (auto-generated TypeScript client at `src/lib/brand-client.ts`)
+- **UI:** Catalyst (Headless UI wrappers) + Tailwind CSS 4
+- **Forms:** react-hook-form 7 + Zod 4
+- **Tables:** @tanstack/react-table v8 + @tanstack/react-virtual
+- **Charts:** Recharts 3
+- **Toasts:** Sonner
+- **Animations:** Motion (Framer Motion)
+- **Icons:** @heroicons/react (solid + outline)
+- **Linting:** Biome (format + lint)
+
+## Commands
+
+```bash
+pnpm dev          # Start dev server (also regenerates routeTree.gen.ts)
+pnpm build        # Production build
+pnpm start        # Run production server (node .output/server/index.mjs)
+pnpm test         # Run tests (vitest)
+pnpm test:watch   # Tests in watch mode
+pnpm format       # Format with Biome
+pnpm lint         # Lint with Biome
+pnpm check        # Biome check (format + lint)
 ```
 
 ## File Structure
 
 ```
 src/
-├── app/                      # Next.js App Router pages
-│   ├── layout.tsx, page.tsx, login/page.tsx
-│   └── [resource]/ (page.tsx, create/page.tsx, [id]/page.tsx, [id]/edit/page.tsx)
-├── components/               # Shared (layout/, common/)
-├── providers/                # dataProvider, authProvider, accessControlProvider, notificationProvider
-├── lib/                      # api-client.ts, utils.ts
-├── hooks/                    # Custom hooks
-├── types/                    # TypeScript types
-└── config/                   # Configuration
+├── routes/                    # TanStack Router file-based routes
+│   ├── __root.tsx             # Root layout (html/head/body, QueryClientProvider, Toaster)
+│   ├── _app.tsx               # Authenticated layout (beforeLoad auth check)
+│   ├── _app/$orgSlug.tsx      # Org-scoped layout (validates org, sets context)
+│   ├── _app/$orgSlug/         # Org pages: index, campaigns, enrollments, wallet, etc.
+│   ├── _app/index.tsx         # Redirect to current org
+│   ├── _auth.tsx              # Auth layout (login, register)
+│   ├── _approval.tsx          # Pending/rejected org states
+│   └── _onboarding.tsx        # New user onboarding
+├── components/                # UI components (Catalyst wrappers + shared)
+│   ├── shared/                # Card, EmptyState, FilterBar, StatsRow, InfoPanel, etc.
+│   └── icons/                 # Platform-specific icons
+├── hooks/                     # Custom React hooks (TanStack Query wrappers)
+│   ├── api-client.ts          # Encore client setup, queryKeys, error utils
+│   ├── index.ts               # Barrel export + useInvalidateQueries helper
+│   ├── use-auth.ts            # 2FA, session, device management
+│   ├── use-campaigns.ts       # Campaign CRUD
+│   ├── use-enrollments.ts     # Enrollment hooks
+│   ├── use-wallet.ts          # Wallet, transactions, withdrawals
+│   ├── use-invoices.ts        # Invoice hooks
+│   ├── use-listings.ts        # Product/listing hooks
+│   ├── use-organization.ts    # Org profile, settings, activity
+│   ├── use-team.ts            # Team members, invitations
+│   ├── use-dashboard.ts       # Dashboard stats
+│   └── use-org-slug.ts        # Get current orgSlug from route params
+├── store/                     # Zustand stores (persistent)
+│   ├── auth-store.ts          # Auth state, login/logout/register, cookie sync
+│   ├── organization-store.ts  # Current org, org list
+│   └── permissions-store.ts   # RBAC permission state
+├── providers/
+│   └── ability-provider.tsx   # Permission checks (Can component, useCan hook)
+├── lib/
+│   ├── brand-client.ts        # Auto-generated Encore SDK (DO NOT EDIT)
+│   ├── server-auth.ts         # Server functions for cookie auth (get/set/clear)
+│   ├── design-tokens.ts       # Typography, colors, spacing, card styles
+│   └── permissions/           # Access control definitions
+├── router.tsx                 # Router + QueryClient factory (getRouter)
+├── client.tsx                 # Client entry point
+├── server.tsx                 # SSR entry point
+└── routeTree.gen.ts           # Auto-generated route tree (DO NOT EDIT)
 ```
+
+---
+
+## TanStack Start
+
+### Vite Configuration (CRITICAL)
+
+```typescript
+// vite.config.ts — Plugin order matters!
+plugins: [
+  tsconfigPaths(),           // 1. Path aliases (@/ → src/)
+  tanstackStart({ ... }),    // 2. MUST come BEFORE react()
+  react(),                   // 3. MUST come AFTER tanstackStart()
+  tailwindcss(),             // 4. Tailwind CSS
+]
+```
+
+**Never** enable `verbatimModuleSyntax` in tsconfig — it leaks server bundles into client bundles.
+
+### Code Execution Patterns (CRITICAL)
+
+TanStack Start has three execution environments:
+
+| Environment | Where it runs | Example |
+|-------------|---------------|---------|
+| **Server-only** | Server only | `createServerFn()`, `createServerOnlyFn()` |
+| **Client-only** | Client only | `createClientOnlyFn()`, `useEffect`, `localStorage` |
+| **Isomorphic** | Both SSR + Client | Route `loader`, `beforeLoad`, components |
+
+**The most common mistake:** Route `loader`s are **isomorphic** — they run on the server for initial SSR but on the **CLIENT** during navigation. Never put server-only code (env vars, DB queries) directly in a loader.
+
+```typescript
+// ❌ WRONG — loader runs on client too, exposes secrets
+export const Route = createFileRoute('/dashboard')({
+  loader: () => {
+    const secret = process.env.SECRET; // Exposed to client!
+    return fetch(`/api?key=${secret}`);
+  },
+});
+
+// ✅ CORRECT — wrap in createServerFn
+const getData = createServerFn().handler(async () => {
+  const secret = process.env.SECRET; // Server-only
+  return fetch(`/api?key=${secret}`);
+});
+
+export const Route = createFileRoute('/dashboard')({
+  loader: () => getData(),
+});
+```
+
+### Server Functions
+
+Server functions are created with `createServerFn()`. They run on the server but can be called from anywhere (loaders, components, hooks, event handlers). On the client, calls become `fetch` requests.
+
+```typescript
+import { createServerFn } from "@tanstack/react-start";
+
+// Basic server function (GET by default)
+export const getData = createServerFn().handler(async () => {
+  return { message: "Hello from server" };
+});
+
+// POST with input validation
+export const saveData = createServerFn({ method: "POST" })
+  .inputValidator((data: { name: string }) => data)
+  .handler(async ({ data }) => {
+    return { saved: data.name };
+  });
+
+// With Zod validation
+export const createItem = createServerFn({ method: "POST" })
+  .inputValidator(z.object({ name: z.string().min(1), price: z.number() }))
+  .handler(async ({ data }) => {
+    // data is typed and validated
+  });
+```
+
+**Calling server functions:**
+
+```typescript
+// In a loader
+loader: () => getData()
+
+// In a component (wrap with useServerFn for React patterns)
+const getPosts = useServerFn(getServerPosts);
+const { data } = useQuery({ queryKey: ['posts'], queryFn: () => getPosts() });
+
+// With parameters — always pass as { data: ... }
+await saveData({ data: { name: "test" } });
+```
+
+**Server context utilities** (from `@tanstack/react-start/server`):
+
+```typescript
+import { getRequest, getRequestHeader, getCookie, setCookie, deleteCookie,
+         setResponseHeader, setResponseHeaders, setResponseStatus } from "@tanstack/react-start/server";
+```
+
+**Redirects and errors in server functions:**
+
+```typescript
+import { redirect, notFound } from "@tanstack/react-router";
+
+export const requireAuth = createServerFn().handler(async () => {
+  const user = await getCurrentUser();
+  if (!user) throw redirect({ to: "/login" });
+  return user;
+});
+
+export const getPost = createServerFn()
+  .inputValidator((data: { id: string }) => data)
+  .handler(async ({ data }) => {
+    const post = await db.findPost(data.id);
+    if (!post) throw notFound();
+    return post;
+  });
+```
+
+**Static imports are safe** — the build replaces server function implementations with RPC stubs in client bundles. **Avoid dynamic imports** (`await import(...)`) for server functions.
+
+### Server Function File Organization
+
+```
+src/utils/
+├── users.functions.ts   # createServerFn wrappers (safe to import anywhere)
+├── users.server.ts      # Server-only helpers (DB, internal logic)
+└── schemas.ts           # Shared validation schemas (client-safe)
+```
+
+### Middleware
+
+Middleware customizes server requests and server functions. Two types:
+
+**Request middleware** — runs for all requests (SSR, server routes, server functions):
+
+```typescript
+import { createMiddleware } from "@tanstack/react-start";
+
+const loggingMiddleware = createMiddleware().server(async ({ next, context, request }) => {
+  console.log("Request:", request.url);
+  const result = await next();
+  return result;
+});
+```
+
+**Server function middleware** — extra features: `inputValidator`, `.client()`:
+
+```typescript
+const authMiddleware = createMiddleware({ type: "function" })
+  .server(async ({ next }) => {
+    const user = await getUser();
+    if (!user) throw redirect({ to: "/login" });
+    return next({ context: { user } }); // Pass context to downstream
+  });
+
+const fn = createServerFn()
+  .middleware([authMiddleware])
+  .handler(async ({ context }) => {
+    // context.user is available and typed
+  });
+```
+
+**Global middleware** — create `src/start.ts`:
+
+```typescript
+import { createStart, createMiddleware } from "@tanstack/react-start";
+
+export const startInstance = createStart(() => ({
+  requestMiddleware: [loggingMiddleware],    // Every request
+  functionMiddleware: [authMiddleware],      // Every server function
+}));
+```
+
+**Context flow:**
+- `next({ context: { ... } })` — pass context to downstream middleware
+- `next({ sendContext: { ... } })` — send context across client↔server boundary (must validate!)
+
+**Execution order:** global middleware → dependency middleware → local middleware → handler.
+
+### Server Routes (API Endpoints)
+
+Define HTTP endpoints using `server.handlers` on routes:
+
+```typescript
+export const Route = createFileRoute("/api/users")({
+  server: {
+    middleware: [authMiddleware], // Optional: applies to all handlers
+    handlers: {
+      GET: async ({ request, params, context }) => {
+        return Response.json({ users: [] });
+      },
+      POST: async ({ request }) => {
+        const body = await request.json();
+        return Response.json({ created: body }, { status: 201 });
+      },
+    },
+  },
+  // Can ALSO have a component — same file serves API + page
+  component: UsersPage,
+});
+```
+
+Server routes follow the same file-naming conventions as regular routes.
+
+---
+
+## TanStack Router
+
+### File Naming Conventions
+
+Routes live in `src/routes/`. The route tree auto-generates into `routeTree.gen.ts` — **never edit it manually**.
+
+| File | URL | Type |
+|------|-----|------|
+| `__root.tsx` | (always rendered) | Root layout |
+| `index.tsx` | `/` | Index route |
+| `about.tsx` | `/about` | Static route |
+| `posts.tsx` | `/posts` | Layout route (renders children via `<Outlet />`) |
+| `posts/index.tsx` | `/posts` | Index route for `/posts` |
+| `posts/$postId.tsx` | `/posts/:postId` | Dynamic route |
+| `posts_.$postId.tsx` | `/posts/:postId` | Flat (non-nested) dynamic route |
+| `_app.tsx` | (no URL segment) | Pathless layout route |
+| `_app/$orgSlug.tsx` | `/:orgSlug` | Pathless parent + dynamic child |
+| `settings_.account.tsx` | `/settings/account` | Break-out from `settings` layout |
+| `file/$.tsx` | `/file/*` | Wildcard/splat route |
+| `my-script[.]js.tsx` | `/my-script.js` | Escaped dot |
+
+**Key conventions:**
+- `$paramName` → Dynamic segment
+- `_prefix` → Pathless layout (no URL segment, but wraps children)
+- `suffix_` → Break-out from parent layout nesting
+- `.` (dot) → Path separator in flat file names (`posts.$postId` = `posts/$postId`)
+- `-prefix` on files/folders → Ignored (for co-located non-route files)
+
+### Route Definition
+
+```typescript
+import { createFileRoute } from "@tanstack/react-router";
+
+export const Route = createFileRoute("/_app/$orgSlug/campaigns")({
+  // The path string is auto-managed by the router plugin — don't worry about it
+  component: CampaignsPage,
+
+  // Runs before loader, can redirect/provide context
+  beforeLoad: ({ context, params, location }) => {
+    if (!context.auth) throw redirect({ to: "/login" });
+    return { someContext: "value" }; // Merged into context for children
+  },
+
+  // Data loading (isomorphic — use server functions for server-only code)
+  loader: ({ params, context, deps }) => fetchCampaigns(params.orgSlug),
+
+  // Declare deps from search params to properly key the cache
+  loaderDeps: ({ search: { page } }) => ({ page }),
+
+  // Validate search params (typed + safe)
+  validateSearch: z.object({
+    page: z.number().catch(1),
+    filter: z.string().catch(""),
+  }),
+
+  // Document head management
+  head: () => ({
+    meta: [{ title: "Campaigns" }],
+  }),
+
+  // Error/pending UI
+  errorComponent: ErrorPage,
+  pendingComponent: LoadingSkeleton,
+  pendingMs: 1000,     // Show pending after 1s (default)
+  pendingMinMs: 500,   // Show pending for at least 500ms
+});
+```
+
+### Root Route (this project)
+
+Uses `createRootRouteWithContext<RouterContext>()` to pass `queryClient` and org data down:
+
+```typescript
+export interface RouterContext {
+  queryClient: QueryClient;
+  organization?: Organization | null;
+  orgSlug?: string;
+}
+```
+
+Root renders `<html>`, `<head>` with `<HeadContent />`, `<body>` with `<Scripts />`, `<QueryClientProvider>`, `<Toaster>`, and `<AbilityProvider>`.
+
+### Navigation
+
+```typescript
+import { Link, useNavigate, useParams } from "@tanstack/react-router";
+
+// Link component (type-safe)
+<Link to="/$orgSlug/campaigns/$id" params={{ orgSlug, id: campaign.id }}>
+  {campaign.name}
+</Link>
+
+// With search params
+<Link to="/$orgSlug/campaigns" params={{ orgSlug }} search={{ page: 2 }}>
+  Page 2
+</Link>
+
+// Programmatic navigation
+const navigate = useNavigate();
+navigate({ to: "/$orgSlug/campaigns", params: { orgSlug } });
+navigate({ to: "..", replace: true }); // Go back, replace history
+
+// Route-scoped params (type-safe)
+const { orgSlug } = Route.useParams();
+const { page } = Route.useSearch();
+const data = Route.useLoaderData();
+```
+
+### Accessing Route API from deep components
+
+```typescript
+import { getRouteApi } from "@tanstack/react-router";
+
+// Avoids circular imports — preferred over importing Route directly
+const routeApi = getRouteApi("/_app/$orgSlug/campaigns");
+const params = routeApi.useParams();
+const search = routeApi.useSearch();
+```
+
+### Search Params
+
+TanStack Router treats search params as **JSON-first** — supports numbers, booleans, arrays, nested objects.
+
+```typescript
+// Define with validateSearch (Zod recommended)
+import { zodValidator } from "@tanstack/zod-adapter";
+
+export const Route = createFileRoute("/_app/$orgSlug/campaigns")({
+  validateSearch: zodValidator(z.object({
+    page: fallback(z.number(), 1).default(1),
+    filter: fallback(z.string(), "").default(""),
+    sort: fallback(z.enum(["newest", "oldest"]), "newest").default("newest"),
+  })),
+});
+
+// Read in components
+const { page, filter, sort } = Route.useSearch();
+
+// Update search params
+navigate({ search: (prev) => ({ ...prev, page: prev.page + 1 }) });
+```
+
+**Use `loaderDeps`** to extract search params into loader deps (controls cache key):
+
+```typescript
+loaderDeps: ({ search: { page, filter } }) => ({ page, filter }),
+loader: ({ deps: { page, filter } }) => fetchCampaigns({ page, filter }),
+```
+
+### Route Loading Lifecycle
+
+1. **Route Matching** (top-down): `params.parse` → `validateSearch`
+2. **Pre-Loading** (serial): `beforeLoad` → `onError`
+3. **Loading** (parallel): `component.preload` + `loader` → `pendingComponent` → `component`
+
+### Data Loading Caching
+
+Built-in SWR cache keyed on pathname + `loaderDeps`:
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `staleTime` | `0` | How long data stays fresh (ms) |
+| `preloadStaleTime` | `30_000` | How long preloaded data stays fresh |
+| `gcTime` | `30 min` | When unused cache is garbage collected |
+| `shouldReload` | `true` | Whether to refetch on route re-match |
+
+When using TanStack Query as external cache, set `defaultPreloadStaleTime: 0` on the router.
+
+### Document Head Management
+
+```typescript
+// Per-route head tags — child routes override parent by name/property
+export const Route = createFileRoute("/campaigns")({
+  head: () => ({
+    meta: [
+      { title: "Campaigns - Hypedrive" },
+      { name: "description", content: "Manage campaigns" },
+    ],
+    links: [{ rel: "canonical", href: "/campaigns" }],
+  }),
+});
+```
+
+Required components in root: `<HeadContent />` in `<head>`, `<Scripts />` in `<body>`.
+
+### Authenticated Routes Pattern (this project)
+
+Uses pathless layout `_app.tsx` with `beforeLoad` that calls a server function:
+
+```typescript
+// _app.tsx
+beforeLoad: async () => {
+  const { isAuthenticated } = await getServerAuth(); // Server function reads cookie
+  if (!isAuthenticated) throw redirect({ to: "/login" });
+},
+```
+
+Auth cookie (`hd_auth`) synced via server functions in `src/lib/server-auth.ts`:
+- `getServerAuth()` — reads cookie, returns `{ isAuthenticated, token }`
+- `setServerAuthCookie({ data: { token } })` — sets cookie after login
+- `clearServerAuthCookie()` — deletes cookie on logout
+
+---
+
+## Encore API Client
+
+### Setup
+
+```typescript
+// src/hooks/api-client.ts
+import Client, { Local } from "@/lib/brand-client"; // Auto-generated — DO NOT EDIT
+
+const API_URL = import.meta.env.VITE_API_URL || Local;
+export const apiClient = new Client(API_URL);
+
+export function getAuthenticatedClient(): Client {
+  const token = getAuthToken() || getAuthTokenFromCookie();
+  if (!token) return apiClient;
+  return apiClient.with({
+    requestInit: { headers: { Authorization: `Bearer ${token}` } },
+  });
+}
+```
+
+### Services
+
+`auth`, `brand`, `catalog`, `ledger`, `admin`, `audit`, `storage`, `notifications`, `core`
+
+```typescript
+const client = getAuthenticatedClient();
+await client.brand.listCampaigns({ organizationId, page, limit });
+await client.brand.getCampaign({ id });
+await client.auth.signInEmail({ email, password });
+```
+
+---
+
+## TanStack Query Patterns
+
+### Query Client Config (in router.tsx)
+
+```typescript
+staleTime: 30_000          // 30 seconds
+gcTime: 5 * 60_000         // 5 minutes
+retry: (count, error) => { if (401) handleAuthError(); return count < 1; }
+refetchOnWindowFocus: false
+```
+
+### Query Keys (centralized in hooks/api-client.ts)
+
+```typescript
+queryKeys.campaigns(orgId, params)     // ["campaigns", orgId, params]
+queryKeys.campaign(orgId, campaignId)  // ["campaigns", orgId, campaignId]
+queryKeys.wallet(orgId)                // ["wallet", orgId]
+queryKeys.dashboard(orgId)             // ["dashboard", orgId]
+queryKeys.members(orgId)               // ["members", orgId]
+// etc.
+```
+
+### Hook Patterns
+
+```typescript
+// Query hook
+export function useCampaigns(orgId: string, params?: ListParams) {
+  return useQuery({
+    queryKey: queryKeys.campaigns(orgId, params),
+    queryFn: () => getAuthenticatedClient().brand.listCampaigns({ organizationId: orgId, ...params }),
+    enabled: !!orgId,
+  });
+}
+
+// Mutation hook
+export function useCreateCampaign() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: CreateCampaignInput) =>
+      getAuthenticatedClient().brand.createCampaign(data),
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["campaigns", vars.organizationId] });
+    },
+  });
+}
+```
+
+### Cache Invalidation
+
+```typescript
+const { invalidateCampaigns, invalidateWallet, invalidateAll } = useInvalidateQueries();
+invalidateCampaigns(orgId);
+```
+
+---
+
+## Authentication
+
+### Auth Store (Zustand + persist + cookie sync)
+
+Auth state persisted in localStorage. On login/register, token also synced to an HTTP cookie via `setServerAuthCookie()` for SSR auth checks.
+
+```typescript
+const { mutate: login, isPending } = useLogin();
+const { mutate: logout } = useLogout();
+const { mutate: register, isPending } = useRegister();
+const { mutate: forgotPassword, isPending } = useForgotPassword();
+const { mutate: socialLogin, isPending } = useSocialLogin();
+
+login({ email, password }, {
+  onSuccess: () => navigate({ to: "/" }),
+  onError: (error) => toast.error(error.message),
+});
+```
+
+### 401 Handling
+
+`handleAuthError()` in `auth-store.ts`: clears cookie → clears QueryClient → clears auth store.
+
+---
+
+## Multi-Tenancy
+
+All app routes scoped under `/$orgSlug`. The `_app/$orgSlug.tsx` layout validates the org and sets router context.
+
+```typescript
+const { orgSlug } = useOrgSlug();
+const { currentOrg, organizations } = useOrganizationStore();
+```
+
+**Org approval flow:**
+- `approved` → normal access
+- `draft`/`pending` → redirect to `/_approval/pending-approval`
+- `rejected`/`banned` → redirect to `/_approval/rejected`
+
+---
+
+## RBAC
+
+```typescript
+<Can resource="campaign" action="read"><CampaignList /></Can>
+const canEdit = useCan("campaign", "update");
+```
+
+---
+
+## UI Patterns
+
+### Design Tokens (`lib/design-tokens.ts`)
+
+Colors: Emerald (success/revenue), Amber (warning/pending), Sky (info/processing), Red (error/rejected), Zinc (neutral).
+
+```typescript
+import { typography, statusColors, cardStyles } from "@/lib/design-tokens";
+```
+
+### Components (Catalyst / Headless UI)
+
+Button, Dialog, Dropdown, Select, Input, Checkbox, Radio, Switch, Sidebar, SidebarLayout, AppLayout, PageHeader, Card, EmptyState, FilterBar, StatsRow, InfoPanel, Section.
+
+### Forms
+
+```typescript
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
+  resolver: zodResolver(schema),
+});
+```
+
+### Toasts
+
+```typescript
+import { toast } from "sonner";
+toast.success("Campaign created");
+toast.error("Something went wrong");
+```
+
+---
+
+## Error Handling
+
+```typescript
+import { isAPIError, getAPIErrorMessage } from "@/hooks/api-client";
+
+onError: (error) => toast.error(getAPIErrorMessage(error, "Failed to create campaign"));
+```
+
+---
+
+## TypeScript
+
+- Path alias: `@/` → `src/`
+- `interface` for object shapes, `type` for unions
+- Utility types over `any` (`Record`, `Partial`, `Pick`, `Omit`)
+- ES6+ imports only, never `require()`
+- Types from Encore client where possible
 
 ## Naming Conventions
 
-- **Files:** Utilities camelCase, Components PascalCase, Hooks use-prefix, Types PascalCase
-- **Components:** PascalCase (ProductList, UserEdit)
-- **Hooks:** camelCase with "use" (useProductStats)
-- **Types:** PascalCase (Product, User)
-- **Constants:** UPPER_SNAKE_CASE (API_URL)
-- **Functions:** camelCase (formatPrice)
-
-## TypeScript Types
-
-```typescript
-export interface BaseRecord { id: string; createdAt: string; updatedAt: string; }
-export interface Product extends BaseRecord {
-  name: string; description?: string; price: number; stock: number; categoryId: string; status: "active" | "inactive" | "draft";
-}
-export interface User extends BaseRecord {
-  email: string; name: string; avatar?: string; role: "admin" | "staff" | "customer"; status: "active" | "inactive" | "suspended";
-}
-export interface ListResponse<T> { data: T[]; total: number; }
-export type FilterOperator = "eq" | "ne" | "lt" | "lte" | "gt" | "gte" | "contains" | "startswith" | "endswith" | "in" | "nin" | "between" | "null" | "nnull";
-```
-
-## Troubleshooting
-
-- **Data not fetching:** Check data provider, API endpoint, auth token in headers
-- **Auth not working:** Verify check() returns { authenticated: true/false }, check localStorage
-- **Routing issues:** Verify routerProvider, resource paths, syncWithLocation
-- **Type errors:** Check generic types useList<Product>
-- **Performance:** Enable pagination, use React.memo/useCallback/useMemo, server-side pagination
-- **v5 Migration:** result vs data, query vs queryResult, isPending vs isLoading, setCurrentPage vs setCurrent
-
-## Essential Hooks Reference
-
-useList, useOne, useCreate, useUpdate, useDelete, useForm, useTable, useSelect, useCustom, useCustomMutation, useNavigation, useGo, useInvalidate, useCan, useApiUrl, useResource, useShow, useModalForm
-
-## HTTP Status Codes
-
-200: Success | 201: Created | 400: Bad Request | 401: Unauthorized (logout) | 403: Forbidden | 404: Not Found | 500: Server Error
+- **Files:** kebab-case (`use-campaigns.ts`, `filter-bar.tsx`)
+- **Components:** PascalCase (`CampaignList`, `FilterBar`)
+- **Hooks:** `use` prefix camelCase (`useCampaigns`)
+- **Types:** PascalCase (`Campaign`, `ListParams`)
+- **Constants:** UPPER_SNAKE_CASE (`DEFAULT_PAGE_SIZE`)
+- **Functions:** camelCase (`getAuthenticatedClient`)
 
 ## Git Rules
 

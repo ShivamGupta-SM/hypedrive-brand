@@ -1,11 +1,138 @@
 @import "tailwindcss";
-@import "@fontsource-variable/geist";
-@import "@fontsource/instrument-serif";
+
+/* Geist Variable — served from /public/fonts, preloaded in __root.tsx head() */
+@font-face {
+	font-family: "Geist Variable";
+	font-style: normal;
+	font-display: optional;
+	font-weight: 100 900;
+	src: url("/fonts/geist-latin-wght-normal.woff2") format("woff2-variations");
+	unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+		U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+		U+FEFF, U+FFFD;
+}
+
+/* Instrument Serif — served from /public/fonts, preloaded in __root.tsx head() */
+@font-face {
+	font-family: "Instrument Serif";
+	font-style: normal;
+	font-display: optional;
+	font-weight: 400;
+	src: url("/fonts/instrument-serif-latin-400-normal.woff2") format("woff2");
+	unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+		U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+		U+FEFF, U+FFFD;
+}
+
+/* Fallback font with adjusted metrics to minimize layout shift during font swap */
+@font-face {
+	font-family: "Geist Fallback";
+	src: local("Arial");
+	ascent-override: 89%;
+	descent-override: 22%;
+	line-gap-override: 0%;
+	size-adjust: 107%;
+}
 
 @theme {
-	--font-sans: "Geist Variable", sans-serif;
+	--font-sans: "Geist Variable", "Geist Fallback", sans-serif;
 	--font-sans--font-feature-settings: "cv11";
 	--font-serif: "Instrument Serif", Georgia, serif;
+
+	/* ==========================================================================
+	   ALIGNUI SEMANTIC DESIGN TOKENS
+	   Semantic color system for AlignUI-inspired component patterns.
+	   Based on the Hypedrive brand palette mapped to AlignUI naming conventions.
+	   ========================================================================== */
+
+	/* --- Background tokens --- */
+	--color-bg-white-0: #ffffff;
+	--color-bg-weak-50: #fafafa;
+	--color-bg-soft-200: #f4f4f5;
+	--color-bg-sub-300: #e4e4e7;
+	--color-bg-strong-950: #09090b;
+
+	/* Dark mode backgrounds */
+	--color-bg-white-0-dark: #18181b;
+	--color-bg-weak-50-dark: #1c1c1f;
+	--color-bg-soft-200-dark: #27272a;
+
+	/* --- Text tokens --- */
+	--color-text-strong-950: #09090b;
+	--color-text-sub-600: #52525b;
+	--color-text-soft-400: #a1a1aa;
+	--color-text-disabled-300: #d4d4d8;
+	--color-text-white-0: #ffffff;
+
+	/* Dark mode text */
+	--color-text-strong-950-dark: #fafafa;
+	--color-text-sub-600-dark: #a1a1aa;
+	--color-text-soft-400-dark: #71717a;
+
+	/* --- Stroke/border tokens --- */
+	--color-stroke-soft-200: #e4e4e7;
+	--color-stroke-sub-300: #d4d4d8;
+	--color-stroke-strong-950: #09090b;
+
+	/* --- Primary color tokens (Emerald brand) --- */
+	--color-primary-base: #059669;
+	--color-primary-light: #d1fae5;
+	--color-primary-lighter: #ecfdf5;
+	--color-primary-dark: #047857;
+	--color-primary-darker: #065f46;
+
+	/* --- Semantic status tokens --- */
+	/* Success */
+	--color-success-base: #10b981;
+	--color-success-light: #a7f3d0;
+	--color-success-lighter: #d1fae5;
+	--color-success-dark: #059669;
+
+	/* Warning */
+	--color-warning-base: #f59e0b;
+	--color-warning-light: #fcd34d;
+	--color-warning-lighter: #fef3c7;
+	--color-warning-dark: #d97706;
+
+	/* Error */
+	--color-error-base: #ef4444;
+	--color-error-light: #fca5a5;
+	--color-error-lighter: #fee2e2;
+	--color-error-dark: #dc2626;
+
+	/* Information (sky) */
+	--color-information-base: #0ea5e9;
+	--color-information-light: #7dd3fc;
+	--color-information-lighter: #e0f2fe;
+	--color-information-dark: #0284c7;
+
+	/* Faded/disabled */
+	--color-faded-base: #a1a1aa;
+	--color-faded-light: #d4d4d8;
+
+	/* --- Border radius tokens --- */
+	--radius-10: 10px;
+	--radius-16: 16px;
+	--radius-20: 20px;
+
+	/* --- Typography scale (AlignUI naming) --- */
+	--text-title-h1: 2.25rem;
+	--text-title-h2: 1.875rem;
+	--text-title-h3: 1.5rem;
+	--text-title-h4: 1.25rem;
+	--text-title-h5: 1.125rem;
+	--text-label-xs: 0.6875rem;
+	--text-label-sm: 0.8125rem;
+	--text-label-md: 0.9375rem;
+	--text-paragraph-xs: 0.75rem;
+	--text-paragraph-sm: 0.875rem;
+	--text-paragraph-md: 1rem;
+	--text-subheading-xs: 0.6875rem;
+
+	/* --- Shadow tokens --- */
+	--shadow-regular: 0 1px 3px 0 rgba(9,9,11,0.08), 0 0 1px 0 rgba(9,9,11,0.04);
+	--shadow-regular-md: 0 4px 8px -2px rgba(9,9,11,0.1), 0 0 1px 0 rgba(9,9,11,0.06);
+	--shadow-regular-lg: 0 8px 16px -4px rgba(9,9,11,0.12), 0 0 1px 0 rgba(9,9,11,0.06);
 
 	/* ==========================================================================
 	   HYPEDRIVE BRAND COLOR PALETTE
@@ -455,276 +582,171 @@ html:has([data-theme="dark"]) {
 }
 
 /* ==========================================================================
-   SONNER TOAST CUSTOM STYLES
-   Clean neutral background with colored icons
+   SONNER TOAST STYLES
+   Glassmorphic, bottom-center, expand mode.
+   Sonner handles light/dark via theme prop — we override shape + glass + icons.
    ========================================================================== */
 
-/* Base toast styles - neutral white/gray background */
+[data-sonner-toaster] {
+	--width: 356px;
+}
+
+/* ── Light mode base ── */
 [data-sonner-toaster] [data-sonner-toast] {
 	font-family: var(--font-sans);
-	background: #ffffff;
-	border: 1px solid rgba(0, 0, 0, 0.08);
 	border-radius: 14px;
-	padding: 16px;
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 0 1px rgba(0, 0, 0, 0.1);
-	gap: 12px;
+	padding: 13px 15px;
+	gap: 11px;
+
+	/* Glassmorphic */
+	background: rgba(255, 255, 255, 0.82);
+	backdrop-filter: blur(20px) saturate(180%);
+	-webkit-backdrop-filter: blur(20px) saturate(180%);
+	border: 1px solid rgba(0, 0, 0, 0.07);
+	box-shadow:
+		0 2px 8px rgba(0, 0, 0, 0.06),
+		0 8px 24px rgba(0, 0, 0, 0.08),
+		inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
-/* All toasts - neutral background, dark text */
+/* ── Dark mode base ── */
+[data-sonner-toaster][data-theme="dark"] [data-sonner-toast] {
+	background: rgba(28, 28, 32, 0.82);
+	backdrop-filter: blur(20px) saturate(160%);
+	-webkit-backdrop-filter: blur(20px) saturate(160%);
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	box-shadow:
+		0 2px 8px rgba(0, 0, 0, 0.3),
+		0 8px 24px rgba(0, 0, 0, 0.4),
+		inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* ── Title ── */
 [data-sonner-toaster] [data-sonner-toast] [data-title] {
-	color: #18181b;
-	font-weight: 600;
-	font-size: 14px;
-}
-
-[data-sonner-toaster] [data-sonner-toast] [data-description] {
-	color: #71717a;
 	font-size: 13px;
+	font-weight: 600;
+	line-height: 1.4;
+	letter-spacing: -0.01em;
+	color: #18181b;
 }
 
-/* Close button - neutral */
+[data-sonner-toaster][data-theme="dark"] [data-sonner-toast] [data-title] {
+	color: #fafafa;
+}
+
+/* ── Description ── */
+[data-sonner-toaster] [data-sonner-toast] [data-description] {
+	font-size: 12px;
+	line-height: 1.5;
+	margin-top: 1px;
+	color: #71717a;
+}
+
+[data-sonner-toaster][data-theme="dark"] [data-sonner-toast] [data-description] {
+	color: #a1a1aa;
+}
+
+/* ── Close button ── */
 [data-sonner-toaster] [data-sonner-toast] [data-close-button] {
+	top: 8px;
+	right: 8px;
+	left: auto;
+	border-radius: 6px;
+	width: 18px;
+	height: 18px;
+	border: none;
+	background: transparent;
+	opacity: 0.4;
+	transition: opacity 0.12s ease;
+	color: #71717a;
+}
+
+[data-sonner-toaster][data-theme="dark"] [data-sonner-toast] [data-close-button] {
 	color: #a1a1aa;
 }
 
 [data-sonner-toaster] [data-sonner-toast] [data-close-button]:hover {
-	color: #71717a;
+	opacity: 1;
+	background: rgba(0, 0, 0, 0.06);
 }
 
-/* Icon wrapper styling for filled circle background */
+[data-sonner-toaster][data-theme="dark"] [data-sonner-toast] [data-close-button]:hover {
+	background: rgba(255, 255, 255, 0.08);
+}
+
+/* ── Icon pill ── */
 [data-sonner-toaster] [data-sonner-toast] [data-icon] {
-	width: 36px;
-	height: 36px;
-	min-width: 36px;
+	width: 30px;
+	height: 30px;
+	min-width: 30px;
+	border-radius: 8px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	border-radius: 50%;
 	flex-shrink: 0;
 }
 
 [data-sonner-toaster] [data-sonner-toast] [data-icon] svg {
-	width: 20px;
-	height: 20px;
+	width: 16px;
+	height: 16px;
 }
 
-/* Success icon - green filled circle with white checkmark */
+/* success — emerald */
 [data-sonner-toaster] [data-sonner-toast][data-type="success"] [data-icon] {
-	background: #22c55e;
+	background: rgba(22, 163, 74, 0.12);
+	color: #16a34a;
 }
 
-[data-sonner-toaster] [data-sonner-toast][data-type="success"] [data-icon] svg {
-	color: white;
+[data-sonner-toaster][data-theme="dark"] [data-sonner-toast][data-type="success"] [data-icon] {
+	background: rgba(74, 222, 128, 0.14);
+	color: #4ade80;
 }
 
-/* Warning icon - amber/yellow filled */
-[data-sonner-toaster] [data-sonner-toast][data-type="warning"] [data-icon] {
-	background: #eab308;
-}
-
-[data-sonner-toaster] [data-sonner-toast][data-type="warning"] [data-icon] svg {
-	color: white;
-}
-
-/* Info icon - blue filled circle */
-[data-sonner-toaster] [data-sonner-toast][data-type="info"] [data-icon] {
-	background: #3b82f6;
-}
-
-[data-sonner-toaster] [data-sonner-toast][data-type="info"] [data-icon] svg {
-	color: white;
-}
-
-/* Error icon - red filled circle */
+/* error — red */
 [data-sonner-toaster] [data-sonner-toast][data-type="error"] [data-icon] {
-	background: #ef4444;
+	background: rgba(220, 38, 38, 0.1);
+	color: #dc2626;
 }
 
-[data-sonner-toaster] [data-sonner-toast][data-type="error"] [data-icon] svg {
-	color: white;
+[data-sonner-toaster][data-theme="dark"] [data-sonner-toast][data-type="error"] [data-icon] {
+	background: rgba(248, 113, 113, 0.14);
+	color: #f87171;
 }
 
-/* Action button styling */
+/* warning — amber */
+[data-sonner-toaster] [data-sonner-toast][data-type="warning"] [data-icon] {
+	background: rgba(217, 119, 6, 0.1);
+	color: #d97706;
+}
+
+[data-sonner-toaster][data-theme="dark"] [data-sonner-toast][data-type="warning"] [data-icon] {
+	background: rgba(251, 191, 36, 0.14);
+	color: #fbbf24;
+}
+
+/* info — sky */
+[data-sonner-toaster] [data-sonner-toast][data-type="info"] [data-icon] {
+	background: rgba(2, 132, 199, 0.1);
+	color: #0284c7;
+}
+
+[data-sonner-toaster][data-theme="dark"] [data-sonner-toast][data-type="info"] [data-icon] {
+	background: rgba(56, 189, 248, 0.14);
+	color: #38bdf8;
+}
+
+/* loading */
+[data-sonner-toaster] [data-sonner-toast][data-type="loading"] [data-icon] {
+	background: transparent;
+	opacity: 0.5;
+}
+
+/* ── Action button ── */
 [data-sonner-toaster] [data-sonner-toast] [data-button] {
+	font-size: 12px;
 	font-weight: 500;
-	border-radius: 8px;
-	padding: 8px 14px;
-	font-size: 13px;
+	border-radius: 6px;
+	padding: 5px 11px;
+	height: auto;
 }
 
-/* Dark mode toast styles */
-[data-theme="dark"] [data-sonner-toaster] [data-sonner-toast] {
-	background: #1f1f23;
-	border: 1px solid rgba(255, 255, 255, 0.1);
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 1px rgba(0, 0, 0, 0.3);
-}
-
-[data-theme="dark"] [data-sonner-toaster] [data-sonner-toast] [data-title] {
-	color: #fafafa;
-}
-
-[data-theme="dark"] [data-sonner-toaster] [data-sonner-toast] [data-description] {
-	color: #a1a1aa;
-}
-
-[data-theme="dark"] [data-sonner-toaster] [data-sonner-toast] [data-close-button] {
-	color: #71717a;
-}
-
-[data-theme="dark"] [data-sonner-toaster] [data-sonner-toast] [data-close-button]:hover {
-	color: #a1a1aa;
-}
-
-/* ==========================================================================
-   REACT-DATEPICKER CUSTOM STYLES
-   Theme integration for date picker with dark mode support
-   ========================================================================== */
-
-/* Base calendar styles */
-.react-datepicker {
-	font-family: var(--font-sans) !important;
-	border-radius: 12px !important;
-	border: 1px solid #e4e4e7 !important;
-	box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
-	overflow: hidden !important;
-}
-
-.react-datepicker__header {
-	background: #fafafa !important;
-	border-bottom: 1px solid #e4e4e7 !important;
-	padding-top: 12px !important;
-}
-
-.react-datepicker__current-month,
-.react-datepicker-time__header {
-	color: #18181b !important;
-	font-weight: 600 !important;
-	font-size: 14px !important;
-}
-
-.react-datepicker__day-name {
-	color: #71717a !important;
-	font-weight: 500 !important;
-	font-size: 12px !important;
-}
-
-.react-datepicker__day {
-	color: #18181b !important;
-	border-radius: 8px !important;
-	transition: all 0.15s ease !important;
-}
-
-.react-datepicker__day:hover {
-	background: #f4f4f5 !important;
-}
-
-.react-datepicker__day--selected,
-.react-datepicker__day--keyboard-selected {
-	background: #3b82f6 !important;
-	color: white !important;
-}
-
-.react-datepicker__day--selected:hover {
-	background: #2563eb !important;
-}
-
-.react-datepicker__day--today {
-	font-weight: 600 !important;
-}
-
-.react-datepicker__day--outside-month {
-	color: #a1a1aa !important;
-}
-
-.react-datepicker__day--disabled {
-	color: #d4d4d8 !important;
-}
-
-.react-datepicker__navigation {
-	top: 12px !important;
-}
-
-.react-datepicker__navigation-icon::before {
-	border-color: #71717a !important;
-}
-
-.react-datepicker__navigation:hover *::before {
-	border-color: #18181b !important;
-}
-
-/* Time picker styles */
-.react-datepicker__time-container {
-	border-left: 1px solid #e4e4e7 !important;
-}
-
-.react-datepicker__time-list-item {
-	color: #18181b !important;
-	transition: all 0.15s ease !important;
-}
-
-.react-datepicker__time-list-item:hover {
-	background: #f4f4f5 !important;
-}
-
-.react-datepicker__time-list-item--selected {
-	background: #3b82f6 !important;
-	color: white !important;
-}
-
-/* Dark mode styles */
-[data-theme="dark"] .react-datepicker {
-	background: #27272a !important;
-	border-color: #3f3f46 !important;
-	box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3) !important;
-}
-
-[data-theme="dark"] .react-datepicker__header {
-	background: #1f1f23 !important;
-	border-color: #3f3f46 !important;
-}
-
-[data-theme="dark"] .react-datepicker__current-month,
-[data-theme="dark"] .react-datepicker-time__header {
-	color: #fafafa !important;
-}
-
-[data-theme="dark"] .react-datepicker__day-name {
-	color: #a1a1aa !important;
-}
-
-[data-theme="dark"] .react-datepicker__day {
-	color: #fafafa !important;
-}
-
-[data-theme="dark"] .react-datepicker__day:hover {
-	background: #3f3f46 !important;
-}
-
-[data-theme="dark"] .react-datepicker__day--outside-month {
-	color: #71717a !important;
-}
-
-[data-theme="dark"] .react-datepicker__day--disabled {
-	color: #52525b !important;
-}
-
-[data-theme="dark"] .react-datepicker__navigation-icon::before {
-	border-color: #a1a1aa !important;
-}
-
-[data-theme="dark"] .react-datepicker__navigation:hover *::before {
-	border-color: #fafafa !important;
-}
-
-[data-theme="dark"] .react-datepicker__time-container {
-	border-color: #3f3f46 !important;
-}
-
-[data-theme="dark"] .react-datepicker__time-list-item {
-	color: #fafafa !important;
-	background: #27272a !important;
-}
-
-[data-theme="dark"] .react-datepicker__time-list-item:hover {
-	background: #3f3f46 !important;
-}
