@@ -12,13 +12,7 @@ export function Navbar({ className, ...props }: React.ComponentPropsWithoutRef<"
 }
 
 export function NavbarDivider({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
-	return (
-		<div
-			aria-hidden="true"
-			{...props}
-			className={clsx(className, "h-6 w-px bg-zinc-950/10 dark:bg-white/10")}
-		/>
-	);
+	return <div aria-hidden="true" {...props} className={clsx(className, "h-6 w-px bg-zinc-950/10 dark:bg-white/10")} />;
 }
 
 export function NavbarSection({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
@@ -62,11 +56,7 @@ export const NavbarItem = forwardRef(function NavbarItem(
 
 	return (
 		<span className={clsx(className, "relative")}>
-			{current && (
-				<span
-					className="absolute inset-x-2 -bottom-2.5 h-0.5 rounded-full bg-zinc-950 dark:bg-white"
-				/>
-			)}
+			{current && <span className="absolute inset-x-2 -bottom-2.5 h-0.5 rounded-full bg-zinc-950 dark:bg-white" />}
 			{typeof props.href === "string" ? (
 				<Link
 					{...props}

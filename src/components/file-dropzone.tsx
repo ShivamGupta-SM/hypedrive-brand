@@ -95,8 +95,7 @@ export function FileDropzone({
 	const acceptedTypesText = accept ? Object.values(accept).flat().join(", ") : "All files";
 
 	const defaultDescription =
-		description ||
-		`Drag and drop or click to upload. ${acceptedTypesText}. Max ${formatFileSize(maxSize)}.`;
+		description || `Drag and drop or click to upload. ${acceptedTypesText}. Max ${formatFileSize(maxSize)}.`;
 
 	return (
 		<div className={clsx("space-y-3", className)}>
@@ -130,31 +129,19 @@ export function FileDropzone({
 						)}
 					>
 						{isDragActive ? (
-							<ArrowUpTrayIcon
-								className={clsx("text-blue-500", variant === "minimal" ? "size-5" : "size-8")}
-							/>
+							<ArrowUpTrayIcon className={clsx("text-blue-500", variant === "minimal" ? "size-5" : "size-8")} />
 						) : (
 							<ArrowUpTrayIcon
-								className={clsx(
-									"text-zinc-400 dark:text-zinc-500",
-									variant === "minimal" ? "size-5" : "size-8"
-								)}
+								className={clsx("text-zinc-400 dark:text-zinc-500", variant === "minimal" ? "size-5" : "size-8")}
 							/>
 						)}
 					</div>
 					<div className={variant === "minimal" ? "text-left" : ""}>
-						<Text
-							className={clsx(
-								"font-medium text-zinc-700 dark:text-zinc-300",
-								variant === "minimal" && "text-sm"
-							)}
-						>
+						<Text className={clsx("font-medium text-zinc-700 dark:text-zinc-300", variant === "minimal" && "text-sm")}>
 							{isDragActive ? "Drop files here" : isDragReject ? "Invalid file type" : label}
 						</Text>
 						{variant !== "minimal" && (
-							<Text className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-								{defaultDescription}
-							</Text>
+							<Text className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{defaultDescription}</Text>
 						)}
 					</div>
 				</div>
@@ -176,7 +163,7 @@ export function FileDropzone({
 								<img
 									src={file.preview}
 									alt={file.name}
-									className="size-10 rounded-lg object-cover"
+									className="size-10 rounded-lg object-contain bg-zinc-100 dark:bg-zinc-800"
 								/>
 							) : (
 								<div className="flex size-10 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
@@ -190,12 +177,8 @@ export function FileDropzone({
 
 							{/* Info */}
 							<div className="min-w-0 flex-1">
-								<Text className="truncate text-sm font-medium text-zinc-900 dark:text-white">
-									{file.name}
-								</Text>
-								<Text className="text-xs text-zinc-500 dark:text-zinc-400">
-									{formatFileSize(file.size)}
-								</Text>
+								<Text className="truncate text-sm font-medium text-zinc-900 dark:text-white">{file.name}</Text>
+								<Text className="text-xs text-zinc-500 dark:text-zinc-400">{formatFileSize(file.size)}</Text>
 							</div>
 
 							{/* Remove */}
@@ -257,14 +240,7 @@ export interface AvatarUploadProps {
 	className?: string;
 }
 
-export function AvatarUpload({
-	src,
-	onFileChange,
-	size = 96,
-	error,
-	disabled,
-	className,
-}: AvatarUploadProps) {
+export function AvatarUpload({ src, onFileChange, size = 96, error, disabled, className }: AvatarUploadProps) {
 	const onDrop = useCallback(
 		(acceptedFiles: File[]) => {
 			if (acceptedFiles[0]) {

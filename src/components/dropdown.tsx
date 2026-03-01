@@ -136,14 +136,7 @@ export function DropdownDivider({
 }
 
 export function DropdownLabel({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
-	return (
-		<div
-			{...props}
-			data-slot="label"
-			className={clsx(className, "col-start-2 row-start-1")}
-			{...props}
-		/>
-	);
+	return <div {...props} data-slot="label" className={clsx(className, "col-start-2 row-start-1")} {...props} />;
 }
 
 export function DropdownDescription({
@@ -166,10 +159,7 @@ export function DropdownShortcut({
 	keys,
 	className,
 	...props
-}: { keys: string | string[]; className?: string } & Omit<
-	Headless.DescriptionProps<"kbd">,
-	"as" | "className"
->) {
+}: { keys: string | string[]; className?: string } & Omit<Headless.DescriptionProps<"kbd">, "as" | "className">) {
 	return (
 		<Headless.Description
 			as="kbd"

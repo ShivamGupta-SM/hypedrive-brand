@@ -32,10 +32,7 @@ export function useInvoices(
 	};
 }
 
-export function useInfiniteInvoices(
-	organizationId: string | undefined,
-	params?: { status?: db.InvoiceStatus }
-) {
+export function useInfiniteInvoices(organizationId: string | undefined, params?: { status?: db.InvoiceStatus }) {
 	const query = useInfiniteQuery({
 		queryKey: queryKeys.infiniteInvoices(organizationId || "", params),
 		queryFn: async ({ pageParam = 0 }) => {

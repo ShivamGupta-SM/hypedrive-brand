@@ -123,14 +123,7 @@ export function useUpdateOrganizationSettings(organizationId: string | undefined
 			description?: string;
 			website?: string;
 			logo?: string;
-			businessType?:
-				| "pvt_ltd"
-				| "llp"
-				| "partnership"
-				| "proprietorship"
-				| "public_ltd"
-				| "trust"
-				| "society";
+			businessType?: "pvt_ltd" | "llp" | "partnership" | "proprietorship" | "public_ltd" | "trust" | "society";
 			industryCategory?: string;
 			contactPerson?: string;
 			email?: string;
@@ -154,11 +147,7 @@ export function useChangeOrgPhone(organizationId: string | undefined) {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: async (params: {
-			phoneNumber: string;
-			passkeyResponse: unknown;
-			challengeId: string;
-		}) => {
+		mutationFn: async (params: { phoneNumber: string; passkeyResponse: unknown; challengeId: string }) => {
 			const client = getAuthenticatedClient();
 			return client.brand.changeOrgPhone(organizationId as string, params);
 		},
@@ -683,10 +672,7 @@ export function useDeleteOrganizationRole(organizationId: string | undefined) {
 // WITHDRAWAL DETAIL / CANCEL
 // =============================================================================
 
-export function useWithdrawalDetail(
-	organizationId: string | undefined,
-	withdrawalId: string | undefined
-) {
+export function useWithdrawalDetail(organizationId: string | undefined, withdrawalId: string | undefined) {
 	const query = useQuery({
 		queryKey: queryKeys.withdrawal(organizationId || "", withdrawalId || ""),
 		queryFn: async () => {

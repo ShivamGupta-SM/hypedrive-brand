@@ -1,25 +1,21 @@
 import {
-	ArrowDownTrayIcon,
 	ArrowPathIcon,
 	CheckCircleIcon,
-	ChevronRightIcon,
 	ClockIcon,
 	ExclamationCircleIcon,
 	ExclamationTriangleIcon,
 	MagnifyingGlassIcon,
-	MegaphoneIcon,
-	UserGroupIcon,
 	XCircleIcon,
 	XMarkIcon,
 } from "@heroicons/react/16/solid";
 import { useCallback, useMemo, useState } from "react";
-import { showToast } from "@/lib/toast";
-import { Badge } from "@/components/badge";
+import { FiTable } from "react-icons/fi";
 import { Button } from "@/components/button";
+import { EnrollmentCardFull, getEnrollmentStatusConfig, isEnrollmentOverdue } from "@/components/enrollment-card";
 import { Heading } from "@/components/heading";
-import { Link } from "@/components/link";
-import { StatCard } from "@/components/shared/card";
+import { Input, InputGroup } from "@/components/input";
 import { EmptyState } from "@/components/shared/empty-state";
+import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
 import { Text } from "@/components/text";
 import {
 	useBulkApproveEnrollments,
@@ -31,115 +27,11 @@ import {
 } from "@/hooks";
 import { useOrgSlug } from "@/hooks/use-org-slug";
 import type { brand, db } from "@/lib/brand-client";
-import { formatCurrency } from "@/lib/design-tokens";
+import { showToast } from "@/lib/toast";
 
 type Enrollment = brand.EnrollmentWithRelations;
 type EnrollmentStatus = db.EnrollmentStatus;
 type StatusFilter = "all" | EnrollmentStatus;
-
-// =============================================================================
-// STATUS CONFIG
-// =============================================================================
-
-function getStatusConfig(status: EnrollmentStatus): {
-	label: string;
-	shortLabel: string;
-	icon: typeof CheckCircleIcon;
-	color: "lime" | "sky" | "amber" | "red" | "zinc" | "emerald" | "orange";
-	bgClass: string;
-	textClass: string;
-} {
-	const statusMap: Record<
-		EnrollmentStatus,
-		{
-			label: string;
-			shortLabel: string;
-			icon: typeof CheckCircleIcon;
-			color: "lime" | "sky" | "amber" | "red" | "zinc" | "emerald" | "orange";
-			bgClass: string;
-			textClass: string;
-		}
-	> = {
-		awaiting_submission: {
-			label: "Awaiting Submission",
-			shortLabel: "Pending",
-			icon: ClockIcon,
-			color: "zinc",
-			bgClass: "bg-zinc-100 dark:bg-zinc-800",
-			textClass: "text-zinc-600 dark:text-zinc-400",
-		},
-		awaiting_review: {
-			label: "Awaiting Review",
-			shortLabel: "In Review",
-			icon: ClockIcon,
-			color: "amber",
-			bgClass: "bg-amber-50 dark:bg-amber-950/30",
-			textClass: "text-amber-600 dark:text-amber-400",
-		},
-		changes_requested: {
-			label: "Changes Requested",
-			shortLabel: "Changes",
-			icon: ExclamationTriangleIcon,
-			color: "orange",
-			bgClass: "bg-orange-50 dark:bg-orange-950/30",
-			textClass: "text-orange-600 dark:text-orange-400",
-		},
-		approved: {
-			label: "Approved",
-			shortLabel: "Approved",
-			icon: CheckCircleIcon,
-			color: "lime",
-			bgClass: "bg-emerald-50 dark:bg-emerald-950/30",
-			textClass: "text-emerald-600 dark:text-emerald-400",
-		},
-		permanently_rejected: {
-			label: "Rejected",
-			shortLabel: "Rejected",
-			icon: XCircleIcon,
-			color: "red",
-			bgClass: "bg-red-50 dark:bg-red-950/30",
-			textClass: "text-red-600 dark:text-red-400",
-		},
-		cancelled: {
-			label: "Cancelled",
-			shortLabel: "Cancelled",
-			icon: XCircleIcon,
-			color: "zinc",
-			bgClass: "bg-zinc-100 dark:bg-zinc-800",
-			textClass: "text-zinc-600 dark:text-zinc-400",
-		},
-		expired: {
-			label: "Expired",
-			shortLabel: "Expired",
-			icon: ClockIcon,
-			color: "zinc",
-			bgClass: "bg-zinc-100 dark:bg-zinc-800",
-			textClass: "text-zinc-600 dark:text-zinc-400",
-		},
-	};
-	return (
-		statusMap[status] || {
-			label: status,
-			shortLabel: status,
-			icon: ClockIcon,
-			color: "zinc",
-			bgClass: "bg-zinc-100 dark:bg-zinc-800",
-			textClass: "text-zinc-600 dark:text-zinc-400",
-		}
-	);
-}
-
-// =============================================================================
-// OVERDUE DETECTION
-// =============================================================================
-
-const OVERDUE_HOURS = 48;
-
-function isOverdue(createdAt: string, referenceTime: Date = new Date()): boolean {
-	const created = new Date(createdAt);
-	const hoursDiff = (referenceTime.getTime() - created.getTime()) / (1000 * 60 * 60);
-	return hoursDiff > OVERDUE_HOURS;
-}
 
 // =============================================================================
 // TRACKER COMPONENT
@@ -168,18 +60,14 @@ function Tracker({ data, className = "" }: { data: TrackerData[]; className?: st
 
 	if (data.length === 0) {
 		return (
-			<div
-				className={`flex h-2 w-full items-center gap-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 ${className}`}
-			>
+			<div className={`flex h-2 w-full items-center gap-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 ${className}`}>
 				<div className="h-full w-full rounded-full bg-zinc-200 dark:bg-zinc-700" />
 			</div>
 		);
 	}
 
 	return (
-		<div
-			className={`flex h-2 w-full items-center gap-px overflow-hidden rounded-full ${className}`}
-		>
+		<div className={`flex h-2 w-full items-center gap-px overflow-hidden rounded-full ${className}`}>
 			{data.map((item, idx) => (
 				<div
 					key={`${item.status}-${item.tooltip ?? idx}`}
@@ -209,18 +97,15 @@ function exportEnrollmentsToCSV(enrollments: Enrollment[], filename = "enrollmen
 	];
 
 	const rows = enrollments.map((e) => {
-		const orderValue = e.orderValue / 100; // Convert from paise to rupees
-		const platformFee = (e.lockedPlatformFee / 100).toFixed(2);
-
 		return [
 			e.orderId,
-			getStatusConfig(e.status).label,
+			getEnrollmentStatusConfig(e.status).label,
 			e.campaignId,
 			e.creatorId,
 			e.platform?.name || "",
-			orderValue.toFixed(2),
+			e.orderValueDecimal,
 			`${e.lockedBillRate}%`,
-			platformFee,
+			e.lockedPlatformFeeDecimal,
 			new Date(e.createdAt).toISOString(),
 		];
 	});
@@ -258,51 +143,35 @@ function BulkActionsBar({
 	if (selectedCount === 0) return null;
 
 	return (
-		<div className="sticky top-0 z-20 -mx-4 mb-4 flex items-center justify-between gap-3 bg-zinc-900 px-4 py-3 text-white shadow-lg dark:bg-white dark:text-zinc-900 sm:-mx-0 sm:rounded-xl">
-			<div className="flex items-center gap-3">
-				<span className="flex size-7 items-center justify-center rounded-full bg-white/20 text-sm font-semibold dark:bg-zinc-900/20">
-					{selectedCount}
-				</span>
-				<span className="text-sm font-medium">
-					{selectedCount} enrollment{selectedCount !== 1 ? "s" : ""} selected
-				</span>
-			</div>
-			<div className="flex items-center gap-2">
-				<Button color="emerald" onClick={onApprove} disabled={isLoading} className="text-xs!">
+		<div className="fixed inset-x-0 bottom-6 z-30 mx-auto flex w-max items-center gap-3 rounded-xl bg-zinc-900 px-4 py-2.5 text-white shadow-2xl ring-1 ring-white/10 dark:bg-white dark:text-zinc-900 dark:ring-zinc-900/10">
+			<span className="flex size-6 items-center justify-center rounded-full bg-white/20 text-xs font-bold tabular-nums dark:bg-zinc-900/20">
+				{selectedCount}
+			</span>
+			<span className="text-sm font-medium">{selectedCount} selected</span>
+			<div className="mx-1 h-5 w-px bg-white/20 dark:bg-zinc-900/10" />
+			<div className="flex items-center gap-1.5">
+				<Button color="emerald" onClick={onApprove} disabled={isLoading}>
 					{isLoading ? (
-						<ArrowPathIcon className="size-4 animate-spin" />
+						<ArrowPathIcon data-slot="icon" className="size-4 animate-spin" />
 					) : (
-						<CheckCircleIcon className="size-4" />
+						<CheckCircleIcon data-slot="icon" className="size-4" />
 					)}
 					Approve
 				</Button>
-				<Button color="red" onClick={onReject} disabled={isLoading} className="text-xs!">
-					<XCircleIcon className="size-4" />
+				<Button color="red" onClick={onReject} disabled={isLoading}>
+					<XCircleIcon data-slot="icon" className="size-4" />
 					Reject
 				</Button>
-				<button
-					type="button"
-					onClick={onClear}
-					className="ml-2 rounded-full p-1.5 hover:bg-white/10 dark:hover:bg-zinc-900/10"
-					aria-label="Clear selection"
-				>
-					<XMarkIcon className="size-4" />
-				</button>
 			</div>
+			<button
+				type="button"
+				onClick={onClear}
+				className="rounded-full p-1 hover:bg-white/10 dark:hover:bg-zinc-900/10"
+				aria-label="Clear selection"
+			>
+				<XMarkIcon className="size-4" />
+			</button>
 		</div>
-	);
-}
-
-// =============================================================================
-// OVERDUE ALERT BADGE
-// =============================================================================
-
-function OverdueAlert() {
-	return (
-		<span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-700 dark:bg-red-950/50 dark:text-red-400">
-			<ExclamationCircleIcon className="size-3" />
-			Overdue
-		</span>
 	);
 }
 
@@ -314,42 +183,63 @@ function EnrollmentsListSkeleton() {
 	return (
 		<div className="space-y-6">
 			{/* Header skeleton */}
-			<div className="flex items-center justify-between">
+			<div className="flex items-start justify-between gap-4">
 				<div>
 					<div className="h-8 w-36 animate-pulse rounded-lg bg-zinc-200 skeleton-shimmer dark:bg-zinc-800" />
-					<div className="mt-2 h-4 w-56 animate-pulse rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-800" />
+					<div className="mt-2 h-4 w-48 animate-pulse rounded bg-zinc-200 skeleton-shimmer sm:w-56 dark:bg-zinc-800" />
 				</div>
 			</div>
 
-			{/* Stats skeleton - horizontal scroll on mobile */}
-			<div className="-mx-4 px-4 sm:mx-0 sm:px-0">
-				<div className="flex gap-3 overflow-x-auto pb-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:overflow-visible sm:pb-0">
+			{/* Stats skeleton */}
+			<FinancialStatsGridBordered
+				stats={[
+					{ name: "Total", value: "" },
+					{ name: "In Review", value: "" },
+					{ name: "Approved", value: "" },
+					{ name: "Rejected", value: "" },
+				]}
+				loading
+				columns={4}
+			/>
+
+			{/* Search + Filters skeleton */}
+			<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+				<div className="h-9 w-full animate-pulse rounded-lg bg-zinc-200 skeleton-shimmer sm:w-52 dark:bg-zinc-800" />
+				<div className="flex gap-2 overflow-x-auto">
 					{[1, 2, 3, 4].map((i) => (
 						<div
 							key={i}
-							className="h-20 w-32 shrink-0 animate-pulse rounded-xl bg-zinc-100 skeleton-shimmer dark:bg-zinc-800 sm:w-auto"
+							className="h-9 w-24 shrink-0 animate-pulse rounded-full bg-zinc-200 skeleton-shimmer dark:bg-zinc-800"
 						/>
 					))}
 				</div>
 			</div>
 
-			{/* Filters skeleton */}
-			<div className="flex gap-2 overflow-x-auto pb-2">
-				{[1, 2, 3, 4].map((i) => (
-					<div
-						key={i}
-						className="h-9 w-24 shrink-0 animate-pulse rounded-full bg-zinc-200 skeleton-shimmer dark:bg-zinc-800"
-					/>
-				))}
-			</div>
-
 			{/* Cards skeleton */}
-			<div className="space-y-3 sm:grid sm:grid-cols-2 sm:gap-4 sm:space-y-0">
+			<div className="grid grid-cols-1 gap-2.5 sm:gap-3 md:grid-cols-2 lg:gap-4">
 				{[1, 2, 3, 4].map((i) => (
 					<div
 						key={i}
-						className="h-44 animate-pulse rounded-xl bg-zinc-100 skeleton-shimmer dark:bg-zinc-800"
-					/>
+						className="overflow-hidden rounded-xl bg-white ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800"
+					>
+						<div className="flex items-start gap-3 p-3 sm:p-4">
+							<div className="size-11 shrink-0 animate-pulse rounded-lg bg-zinc-200 sm:size-12 dark:bg-zinc-700" />
+							<div className="min-w-0 flex-1 space-y-2">
+								<div className="h-4 w-2/3 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
+								<div className="h-3 w-1/2 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
+								<div className="h-3 w-3/4 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
+							</div>
+						</div>
+						<div className="h-px bg-zinc-200 dark:bg-zinc-700" />
+						<div className="grid grid-cols-3 divide-x divide-zinc-200 dark:divide-zinc-700">
+							{[1, 2, 3].map((j) => (
+								<div key={j} className="flex flex-col items-center gap-1 py-2.5">
+									<div className="h-2.5 w-10 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
+									<div className="h-3.5 w-14 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
+								</div>
+							))}
+						</div>
+					</div>
 				))}
 			</div>
 		</div>
@@ -366,246 +256,13 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
 			<div className="flex size-16 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-950/30">
 				<ExclamationTriangleIcon className="size-8 text-red-400" />
 			</div>
-			<p className="mt-4 text-lg font-semibold text-zinc-900 dark:text-white">
-				Something went wrong
-			</p>
-			<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-				Failed to load enrollments. Please try again.
-			</p>
+			<p className="mt-4 text-lg font-semibold text-zinc-900 dark:text-white">Something went wrong</p>
+			<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Failed to load enrollments. Please try again.</p>
 			<Button className="mt-6" onClick={onRetry} color="dark/zinc">
 				<ArrowPathIcon className="size-4" />
 				Try Again
 			</Button>
 		</div>
-	);
-}
-
-
-// =============================================================================
-// ENROLLMENT CARD (Desktop/Tablet)
-// =============================================================================
-
-function EnrollmentCard({
-	enrollment,
-	searchQuery: _searchQuery = "",
-	isSelected = false,
-	onSelect,
-	showOverdueAlert = false,
-	campaignName,
-}: {
-	enrollment: Enrollment;
-	searchQuery?: string;
-	isSelected?: boolean;
-	onSelect?: (id: string, selected: boolean) => void;
-	campaignName?: string;
-	showOverdueAlert?: boolean;
-}) {
-	const orgSlug = useOrgSlug();
-	const statusConfig = getStatusConfig(enrollment.status);
-	const StatusIcon = statusConfig.icon;
-
-	// Format date
-	const formatDate = (dateStr: string | undefined) => {
-		if (!dateStr) return "—";
-		return new Date(dateStr).toLocaleDateString("en-IN", {
-			month: "short",
-			day: "numeric",
-			year: "numeric",
-		});
-	};
-
-	// Calculate platform fee from locked values
-	const platformFeeDisplay = useMemo(() => {
-		return enrollment.lockedPlatformFeeDecimal || (enrollment.lockedPlatformFee / 100).toFixed(2);
-	}, [enrollment.lockedPlatformFee, enrollment.lockedPlatformFeeDecimal]);
-
-	const handleCheckboxClick = (e: React.MouseEvent) => {
-		e.preventDefault();
-		e.stopPropagation();
-		onSelect?.(enrollment.id, !isSelected);
-	};
-
-	// Avatar color based on order ID (deterministic)
-	const avatarColors = [
-		"bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
-		"bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300",
-		"bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
-		"bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300",
-		"bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300",
-	];
-	const avatarColorClass = avatarColors[(enrollment.orderId.charCodeAt(0) || 0) % avatarColors.length];
-	const initials = enrollment.orderId.slice(-2).toUpperCase();
-
-	return (
-		<div
-			className={`group relative hidden flex-col overflow-hidden rounded-2xl bg-white ring-1 transition-all hover:shadow-md sm:flex ${isSelected ? "ring-2 ring-zinc-900 dark:ring-white" : "ring-inset ring-zinc-950/5 hover:ring-zinc-950/10 dark:ring-white/10 dark:hover:ring-white/20"}`}
-		>
-			{/* Selection Checkbox */}
-			{onSelect && (
-				<button
-					type="button"
-					onClick={handleCheckboxClick}
-					className="absolute left-3 top-3 z-10 flex size-5 items-center justify-center rounded border border-zinc-300 bg-white transition-colors hover:border-zinc-400 dark:border-zinc-600 dark:bg-zinc-800 dark:hover:border-zinc-500"
-				>
-					{isSelected && <CheckCircleIcon className="size-4 text-zinc-900 dark:text-white" />}
-				</button>
-			)}
-
-			<Link
-				href={`/${orgSlug}/campaigns/${enrollment.campaignId}/enrollments/${enrollment.id}`}
-				className="flex flex-1 flex-col"
-			>
-				{/* Main Content */}
-				<div className={`p-4 ${onSelect ? "pl-10" : ""}`}>
-					<div className="flex items-start gap-3">
-						{/* Avatar with initials */}
-						<div className={`flex size-11 shrink-0 items-center justify-center rounded-xl text-sm font-semibold ${avatarColorClass}`}>
-							{initials}
-						</div>
-
-						{/* Info */}
-						<div className="min-w-0 flex-1">
-							{/* Order ID + Status */}
-							<div className="flex items-start justify-between gap-2">
-								<div className="min-w-0">
-									<div className="flex items-center gap-2">
-										<span className="font-mono text-sm font-medium text-zinc-900 dark:text-white">
-											{enrollment.orderId}
-										</span>
-										{showOverdueAlert && <OverdueAlert />}
-									</div>
-									<div className="mt-0.5 flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
-										<MegaphoneIcon className="size-3 shrink-0" />
-										<span className="line-clamp-1">
-											{campaignName || `Campaign: ${enrollment.campaignId.slice(-8)}`}
-										</span>
-									</div>
-								</div>
-								<Badge
-									color={statusConfig.color}
-									className="inline-flex shrink-0 items-center gap-1 text-xs!"
-								>
-									<StatusIcon className="size-3" />
-									{statusConfig.label}
-								</Badge>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				{/* Stats Footer */}
-				<div className="relative border-t border-zinc-100 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-800/50">
-					<div className="grid grid-cols-3 items-center px-4 py-3">
-						{/* Order Value */}
-						<div className="text-center">
-							<p className="text-[10px] font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-								Order Value
-							</p>
-							<p className="mt-0.5 text-sm font-semibold text-zinc-900 dark:text-white">
-								{formatCurrency(enrollment.orderValue / 100)}
-							</p>
-						</div>
-
-						{/* Platform Fee */}
-						<div className="border-x border-zinc-200 text-center dark:border-zinc-700">
-							<p className="text-[10px] font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-								Fee ({enrollment.lockedBillRate}%)
-							</p>
-							<p className="mt-0.5 text-sm font-semibold text-emerald-600 dark:text-emerald-400">
-								{formatCurrency(platformFeeDisplay)}
-							</p>
-						</div>
-
-						{/* Created */}
-						<div className="text-center">
-							<p className="text-[10px] font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-								Submitted
-							</p>
-							<p className="mt-0.5 text-sm font-semibold text-zinc-700 dark:text-zinc-300">
-								{formatDate(enrollment.createdAt)}
-							</p>
-						</div>
-					</div>
-				</div>
-			</Link>
-		</div>
-	);
-}
-
-// =============================================================================
-// ENROLLMENT LIST ITEM (Mobile)
-// =============================================================================
-
-function EnrollmentListItem({
-	enrollment,
-	searchQuery: _searchQuery = "",
-	campaignName,
-}: {
-	enrollment: Enrollment;
-	searchQuery?: string;
-	campaignName?: string;
-}) {
-	const orgSlug = useOrgSlug();
-	const statusConfig = getStatusConfig(enrollment.status);
-	const StatusIcon = statusConfig.icon;
-
-	const avatarColors = [
-		"bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
-		"bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300",
-		"bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
-		"bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300",
-		"bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300",
-	];
-	const avatarColorClass =
-		avatarColors[(enrollment.orderId.charCodeAt(0) || 0) % avatarColors.length];
-	const initials = enrollment.orderId.slice(-2).toUpperCase();
-
-	return (
-		<Link
-			href={`/${orgSlug}/campaigns/${enrollment.campaignId}/enrollments/${enrollment.id}`}
-			className="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-inset ring-zinc-950/5 transition-all active:scale-[0.98] dark:bg-zinc-900 dark:ring-zinc-800 sm:hidden"
-		>
-			{/* Avatar */}
-			<div
-				className={`flex size-11 shrink-0 items-center justify-center rounded-xl text-xs font-bold ${avatarColorClass}`}
-			>
-				{initials}
-			</div>
-
-			{/* Content */}
-			<div className="min-w-0 flex-1">
-				<div className="flex items-center justify-between gap-2">
-					<h3 className="truncate font-mono text-sm font-semibold text-zinc-900 dark:text-white">
-						{enrollment.orderId.slice(-12)}
-					</h3>
-					<span
-						className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${statusConfig.bgClass} ${statusConfig.textClass}`}
-					>
-						<StatusIcon className="size-2.5" />
-						{statusConfig.shortLabel}
-					</span>
-				</div>
-
-				<div className="mt-0.5 flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
-					<MegaphoneIcon className="size-3 shrink-0" />
-					<span className="truncate">
-						{campaignName || enrollment.campaignId.slice(-8)}
-					</span>
-				</div>
-
-				<div className="mt-1.5 flex items-center gap-3 text-xs">
-					<span className="font-semibold text-zinc-900 dark:text-white">
-						{formatCurrency(enrollment.orderValue / 100)}
-					</span>
-					<span className="font-medium text-emerald-600 dark:text-emerald-400">
-						+{enrollment.lockedBillRate}% fee
-					</span>
-				</div>
-			</div>
-
-			{/* Arrow */}
-			<ChevronRightIcon className="size-5 shrink-0 text-zinc-400" />
-		</Link>
 	);
 }
 
@@ -639,7 +296,7 @@ function FilterTab({
 			{Icon && <Icon className="size-3.5" />}
 			{label}
 			<span
-				className={`inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-semibold ${isActive ? "bg-white/20 text-white dark:bg-zinc-900/20 dark:text-zinc-900" : "bg-zinc-200 text-zinc-500 dark:bg-zinc-700 dark:text-zinc-400"}`}
+				className={`inline-flex h-4.5 min-w-4.5 items-center justify-center rounded-full px-1 text-[10px] font-semibold ${isActive ? "bg-white/20 text-white dark:bg-zinc-900/20 dark:text-zinc-900" : "bg-zinc-200 text-zinc-500 dark:bg-zinc-700 dark:text-zinc-400"}`}
 			>
 				{count}
 			</span>
@@ -654,6 +311,7 @@ function FilterTab({
 export function EnrollmentsList() {
 	const organization = useCurrentOrganization();
 	const organizationId = organization?.id;
+	const orgSlug = useOrgSlug();
 
 	const [searchQuery, setSearchQuery] = useState("");
 	const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
@@ -704,6 +362,7 @@ export function EnrollmentsList() {
 			const query = searchQuery.toLowerCase();
 			result = result.filter(
 				(enrollment) =>
+					enrollment.displayId.toLowerCase().includes(query) ||
 					enrollment.orderId.toLowerCase().includes(query) ||
 					campaignNameMap.get(enrollment.campaignId)?.toLowerCase().includes(query)
 			);
@@ -727,23 +386,23 @@ export function EnrollmentsList() {
 				case "approved":
 					return {
 						status: "success" as TrackerStatus,
-						tooltip: `Order #${e.orderId.slice(-8)} - Approved`,
+						tooltip: `${e.displayId} - Approved`,
 					};
 				case "awaiting_review":
 				case "awaiting_submission":
 					return {
 						status: "warning" as TrackerStatus,
-						tooltip: `Order #${e.orderId.slice(-8)} - Pending`,
+						tooltip: `${e.displayId} - Pending`,
 					};
 				case "permanently_rejected":
 					return {
 						status: "error" as TrackerStatus,
-						tooltip: `Order #${e.orderId.slice(-8)} - Rejected`,
+						tooltip: `${e.displayId} - Rejected`,
 					};
 				default:
 					return {
 						status: "neutral" as TrackerStatus,
-						tooltip: `Order #${e.orderId.slice(-8)} - ${e.status}`,
+						tooltip: `${e.displayId} - ${e.status}`,
 					};
 			}
 		});
@@ -754,9 +413,8 @@ export function EnrollmentsList() {
 
 	// Count overdue enrollments
 	const overdueCount = useMemo(() => {
-		return enrollments.filter(
-			(e) => e.status === "awaiting_review" && isOverdue(e.createdAt, referenceTime)
-		).length;
+		return enrollments.filter((e) => e.status === "awaiting_review" && isEnrollmentOverdue(e.createdAt, referenceTime))
+			.length;
 	}, [enrollments, referenceTime]);
 
 	// Selection handlers
@@ -774,9 +432,7 @@ export function EnrollmentsList() {
 
 	const handleSelectAll = useCallback(() => {
 		// Only select enrollments that can be actioned (awaiting_review)
-		const actionableIds = filteredEnrollments
-			.filter((e) => e.status === "awaiting_review")
-			.map((e) => e.id);
+		const actionableIds = filteredEnrollments.filter((e) => e.status === "awaiting_review").map((e) => e.id);
 
 		if (selectedIds.size === actionableIds.length && actionableIds.length > 0) {
 			setSelectedIds(new Set());
@@ -862,15 +518,6 @@ export function EnrollmentsList() {
 
 	return (
 		<div className="space-y-5">
-			{/* Bulk Actions Bar */}
-			<BulkActionsBar
-				selectedCount={selectedIds.size}
-				onApprove={handleBulkApprove}
-				onReject={handleBulkReject}
-				onClear={clearSelection}
-				isLoading={isBulkLoading}
-			/>
-
 			{/* Header */}
 			<div className="flex items-start justify-between gap-4">
 				<div>
@@ -878,7 +525,7 @@ export function EnrollmentsList() {
 					<Text className="mt-1">Review and manage campaign enrollments</Text>
 				</div>
 				<Button
-					outline
+					color="emerald"
 					onClick={handleExport}
 					disabled={exportEnrollments.isPending}
 					className="hidden shrink-0 sm:flex"
@@ -886,7 +533,7 @@ export function EnrollmentsList() {
 					{exportEnrollments.isPending ? (
 						<ArrowPathIcon className="size-4 animate-spin" />
 					) : (
-						<ArrowDownTrayIcon className="size-4" />
+						<FiTable data-slot="icon" className="size-4" />
 					)}
 					{exportEnrollments.isPending ? "Exporting..." : "Export"}
 				</Button>
@@ -896,9 +543,7 @@ export function EnrollmentsList() {
 			{enrollments.length > 0 && (
 				<div className="space-y-2">
 					<div className="flex items-center justify-between">
-						<span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
-							Status Overview
-						</span>
+						<span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Status Overview</span>
 						<div className="flex items-center gap-3 text-[10px] font-medium">
 							<span className="flex items-center gap-1">
 								<span className="size-2 rounded-full bg-emerald-500" />
@@ -928,100 +573,79 @@ export function EnrollmentsList() {
 						<p className="text-sm font-medium text-red-800 dark:text-red-200">
 							{overdueCount} enrollment{overdueCount !== 1 ? "s" : ""} overdue
 						</p>
-						<p className="text-xs text-red-600 dark:text-red-400">
-							Pending review for more than 48 hours
-						</p>
+						<p className="text-xs text-red-600 dark:text-red-400">Pending review for more than 48 hours</p>
 					</div>
-					<Button
-						color="red"
-						onClick={() => setStatusFilter("awaiting_review")}
-						className="text-xs!"
-					>
+					<Button color="red" onClick={() => setStatusFilter("awaiting_review")} className="text-xs!">
 						View
 					</Button>
 				</div>
 			)}
 
 			{/* Stats */}
-			<div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
-				<StatCard icon={<UserGroupIcon className="size-5" />} label="Total" value={stats.total} size="sm" />
-				<StatCard
-					icon={<ClockIcon className="size-5" />}
-					label="In Review"
-					value={stats.awaitingReview}
-					variant="warning"
-					size="sm"
-				/>
-				<StatCard
-					icon={<CheckCircleIcon className="size-5" />}
-					label="Approved"
-					value={stats.approved}
-					variant="success"
-					size="sm"
-				/>
-				<StatCard
-					icon={<XCircleIcon className="size-5" />}
-					label="Rejected"
-					value={stats.rejected}
-					variant="danger"
-					size="sm"
-				/>
-			</div>
+			<FinancialStatsGridBordered
+				stats={[
+					{ name: "Total", value: stats.total },
+					{ name: "In Review", value: stats.awaitingReview },
+					{ name: "Approved", value: stats.approved, changeType: "positive" },
+					{ name: "Rejected", value: stats.rejected, changeType: "negative" },
+				]}
+				columns={4}
+			/>
 
 			{/* Search + Filter Row */}
-			<div className="flex items-center gap-3">
-				<div className="relative w-52 shrink-0">
-					<MagnifyingGlassIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
-					<input
-						type="text"
-						value={searchQuery}
-						onChange={(e) => setSearchQuery(e.target.value)}
-						placeholder="Search by shopper, campaign..."
-						className="h-9 w-full rounded-lg bg-white pl-9 pr-8 text-sm text-zinc-900 ring-1 ring-inset ring-zinc-200 placeholder:text-zinc-400 transition-all focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:bg-zinc-900 dark:text-white dark:ring-zinc-700 dark:focus:ring-white"
-						aria-label="Search enrollments"
-					/>
-					{searchQuery && (
-						<button
-							type="button"
-							onClick={() => setSearchQuery("")}
-							className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-700"
-							aria-label="Clear search"
-						>
-							<XMarkIcon className="size-3.5" />
-						</button>
-					)}
+			<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+				<div className="w-full sm:w-52 sm:shrink-0">
+					<InputGroup>
+						<MagnifyingGlassIcon data-slot="icon" />
+						<Input
+							type="text"
+							value={searchQuery}
+							onChange={(e) => setSearchQuery(e.target.value)}
+							placeholder="Search by shopper, campaign..."
+							aria-label="Search enrollments"
+						/>
+						{searchQuery && (
+							<button
+								type="button"
+								onClick={() => setSearchQuery("")}
+								className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+							>
+								<XMarkIcon className="size-4" />
+							</button>
+						)}
+					</InputGroup>
 				</div>
 
 				{/* Tab Filters */}
 				<div className="min-w-0 flex-1 overflow-x-auto">
 					<div className="flex min-w-max gap-1.5 sm:min-w-0 sm:flex-wrap">
-					<FilterTab
-						label="All"
-						count={stats.total}
-						isActive={statusFilter === "all"}
-						onClick={() => setStatusFilter("all")}
-					/>
-					<FilterTab
-						label="Awaiting Review"
-						count={stats.awaitingReview}
-						isActive={statusFilter === "awaiting_review"}
-						onClick={() => setStatusFilter("awaiting_review")}
-						icon={ClockIcon}
-					/>
-					<FilterTab
-						label="Approved"
-						count={stats.approved}
-						isActive={statusFilter === "approved"}
-						onClick={() => setStatusFilter("approved")}
-						icon={CheckCircleIcon}
-					/>
-					<FilterTab
-						label="Rejected"
-						count={stats.rejected}
-						isActive={statusFilter === "permanently_rejected"}
-						onClick={() => setStatusFilter("permanently_rejected")}
-						icon={XCircleIcon}
-					/>
+						<FilterTab
+							label="All"
+							count={stats.total}
+							isActive={statusFilter === "all"}
+							onClick={() => setStatusFilter("all")}
+						/>
+						<FilterTab
+							label="Awaiting Review"
+							count={stats.awaitingReview}
+							isActive={statusFilter === "awaiting_review"}
+							onClick={() => setStatusFilter("awaiting_review")}
+							icon={ClockIcon}
+						/>
+						<FilterTab
+							label="Approved"
+							count={stats.approved}
+							isActive={statusFilter === "approved"}
+							onClick={() => setStatusFilter("approved")}
+							icon={CheckCircleIcon}
+						/>
+						<FilterTab
+							label="Rejected"
+							count={stats.rejected}
+							isActive={statusFilter === "permanently_rejected"}
+							onClick={() => setStatusFilter("permanently_rejected")}
+							icon={XCircleIcon}
+						/>
 					</div>
 				</div>
 			</div>
@@ -1044,7 +668,7 @@ export function EnrollmentsList() {
 					)}
 					{statusFilter !== "all" && (
 						<span className="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
-							{getStatusConfig(statusFilter).label}
+							{getEnrollmentStatusConfig(statusFilter).label}
 							<button
 								type="button"
 								onClick={() => setStatusFilter("all")}
@@ -1069,24 +693,20 @@ export function EnrollmentsList() {
 			{filteredEnrollments.length === 0 ? (
 				<EmptyState
 					preset="enrollments"
-					title={
-						searchQuery || statusFilter !== "all" ? "No enrollments found" : "No enrollments yet"
-					}
+					title={searchQuery || statusFilter !== "all" ? "No enrollments found" : "No enrollments yet"}
 					description={
 						searchQuery || statusFilter !== "all"
 							? "Try adjusting your filters or search query"
 							: "Enrollments will appear here when shoppers join your campaigns"
 					}
 					action={
-						searchQuery || statusFilter !== "all"
-							? { label: "Clear filters", onClick: clearAllFilters }
-							: undefined
+						searchQuery || statusFilter !== "all" ? { label: "Clear filters", onClick: clearAllFilters } : undefined
 					}
 				/>
 			) : (
-				<div className="rounded-xl bg-white ring-1 ring-inset ring-zinc-950/5 overflow-hidden dark:bg-zinc-900 dark:ring-white/10">
+				<div className="space-y-4">
 					{/* Results header with Select All */}
-					<div className="flex items-center justify-between px-3 py-2.5 border-b border-zinc-100 dark:border-zinc-800">
+					<div className="flex items-center justify-between">
 						<div className="flex items-center gap-3">
 							{actionableCount > 0 && (
 								<button
@@ -1108,62 +728,55 @@ export function EnrollmentsList() {
 									Select all ({actionableCount})
 								</button>
 							)}
-							<span className="text-sm text-zinc-500">
+							<span className="text-xs text-zinc-400 dark:text-zinc-500">
 								{filteredEnrollments.length} enrollment{filteredEnrollments.length !== 1 ? "s" : ""}
 							</span>
 						</div>
 					</div>
 
-					<div className="p-3 sm:p-4">
-						{/* Cards Grid - Desktop */}
-						<div className="hidden grid-cols-1 gap-4 sm:grid md:grid-cols-2">
-							{filteredEnrollments.map((enrollment) => (
-								<EnrollmentCard
-									key={enrollment.id}
-									enrollment={enrollment}
-									searchQuery={searchQuery}
-									isSelected={selectedIds.has(enrollment.id)}
-									onSelect={enrollment.status === "awaiting_review" ? handleSelect : undefined}
-									showOverdueAlert={
-										enrollment.status === "awaiting_review" &&
-										isOverdue(enrollment.createdAt, referenceTime)
-									}
-									campaignName={campaignNameMap.get(enrollment.campaignId)}
-								/>
-							))}
-						</div>
-
-						{/* List View - Mobile */}
-						<div className="space-y-2 sm:hidden">
-							{filteredEnrollments.map((enrollment) => (
-								<EnrollmentListItem
-									key={enrollment.id}
-									enrollment={enrollment}
-									searchQuery={searchQuery}
-									campaignName={campaignNameMap.get(enrollment.campaignId)}
-								/>
-							))}
-						</div>
-
-						{/* Load More */}
-						{hasMore && (
-							<div className="flex justify-center pt-4">
-								<Button outline onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
-									{isFetchingNextPage ? (
-										<>
-											<ArrowPathIcon className="size-4 animate-spin" />
-											Loading...
-										</>
-									) : (
-										"Load More"
-									)}
-								</Button>
-							</div>
-						)}
+					{/* Cards Grid */}
+					<div className="grid grid-cols-1 gap-2.5 sm:gap-3 md:grid-cols-2 lg:gap-4">
+						{filteredEnrollments.map((enrollment) => (
+							<EnrollmentCardFull
+								key={enrollment.id}
+								enrollment={enrollment}
+								orgSlug={orgSlug}
+								isSelected={selectedIds.has(enrollment.id)}
+								onSelect={enrollment.status === "awaiting_review" ? handleSelect : undefined}
+								showOverdueAlert={
+									enrollment.status === "awaiting_review" && isEnrollmentOverdue(enrollment.createdAt, referenceTime)
+								}
+								campaignName={campaignNameMap.get(enrollment.campaignId)}
+							/>
+						))}
 					</div>
+
+					{/* Load More */}
+					{hasMore && (
+						<div className="flex justify-center pt-2">
+							<Button outline onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
+								{isFetchingNextPage ? (
+									<>
+										<ArrowPathIcon className="size-4 animate-spin" />
+										Loading...
+									</>
+								) : (
+									"Load More"
+								)}
+							</Button>
+						</div>
+					)}
 				</div>
 			)}
 
+			{/* Floating Bulk Actions Bar */}
+			<BulkActionsBar
+				selectedCount={selectedIds.size}
+				onApprove={handleBulkApprove}
+				onReject={handleBulkReject}
+				onClear={clearSelection}
+				isLoading={isBulkLoading}
+			/>
 		</div>
 	);
 }

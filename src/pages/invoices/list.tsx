@@ -1,35 +1,28 @@
 import {
-	ArrowDownTrayIcon,
 	ArrowPathIcon,
-	CalendarIcon,
 	CheckCircleIcon,
-	CurrencyRupeeIcon,
 	DocumentTextIcon,
 	ExclamationTriangleIcon,
 	MagnifyingGlassIcon,
-	ReceiptPercentIcon,
-	UserGroupIcon,
 	XMarkIcon,
 } from "@heroicons/react/16/solid";
 import { useCallback, useMemo, useState } from "react";
-import { showToast } from "@/lib/toast";
+import { FaFilePdf } from "react-icons/fa";
 import { Badge } from "@/components/badge";
 import { Button } from "@/components/button";
 import { Dialog, DialogActions, DialogBody } from "@/components/dialog";
 import { Heading } from "@/components/heading";
+import { Input, InputGroup } from "@/components/input";
 import { Logo } from "@/components/logo";
-import { StatCard } from "@/components/shared/card";
 import { EmptyState } from "@/components/shared/empty-state";
-import { Skeleton, StatCardSkeleton } from "@/components/skeleton";
+import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
+import { Skeleton } from "@/components/skeleton";
 import { Text } from "@/components/text";
-import {
-	useCurrentOrganization,
-	useGenerateInvoicePDF,
-	useInfiniteInvoices,
-	useInvoice,
-} from "@/hooks";
+import { useCurrentOrganization, useGenerateInvoicePDF, useInfiniteInvoices, useInvoice } from "@/hooks";
 import type { brand } from "@/lib/brand-client";
 import { formatCurrency, formatDate } from "@/lib/design-tokens";
+import { showToast } from "@/lib/toast";
+import { useCan } from "@/store/permissions-store";
 
 type Invoice = brand.Invoice;
 
@@ -59,11 +52,16 @@ function InvoicesSkeleton() {
 			</div>
 
 			{/* Stats */}
-			<div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
-				{[1, 2, 3, 4].map((i) => (
-					<StatCardSkeleton key={i} />
-				))}
-			</div>
+			<FinancialStatsGridBordered
+				stats={[
+					{ name: "Invoices", value: "" },
+					{ name: "Billed", value: "" },
+					{ name: "GST", value: "" },
+					{ name: "Enrollments", value: "" },
+				]}
+				loading
+				columns={4}
+			/>
 
 			{/* Filters + Search */}
 			<div className="space-y-3">
@@ -80,7 +78,7 @@ function InvoicesSkeleton() {
 			{/* Invoice list skeleton */}
 			<div className="space-y-2">
 				{[1, 2, 3, 4, 5].map((i) => (
-					<Skeleton key={i} width="100%" height={80} borderRadius={12} />
+					<Skeleton key={i} width="100%" height={56} borderRadius={8} />
 				))}
 			</div>
 		</div>
@@ -97,12 +95,8 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
 			<div className="flex size-16 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-950/30">
 				<ExclamationTriangleIcon className="size-8 text-red-400" />
 			</div>
-			<p className="mt-4 text-lg font-semibold text-zinc-900 dark:text-white">
-				Something went wrong
-			</p>
-			<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-				Failed to load invoices. Please try again.
-			</p>
+			<p className="mt-4 text-lg font-semibold text-zinc-900 dark:text-white">Something went wrong</p>
+			<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Failed to load invoices. Please try again.</p>
 			<Button className="mt-6" onClick={onRetry} color="dark/zinc">
 				<ArrowPathIcon className="size-4" />
 				Try Again
@@ -120,44 +114,31 @@ function InvoiceRow({ invoice, onView }: { invoice: Invoice; onView: () => void 
 		<button
 			type="button"
 			onClick={onView}
-			className="group flex w-full flex-col gap-3 rounded-xl bg-white p-4 text-left ring-1 ring-zinc-200 transition-all hover:bg-zinc-50 hover:ring-zinc-300 sm:flex-row sm:items-center sm:justify-between dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:bg-zinc-800/80 dark:hover:ring-zinc-700"
+			className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
 		>
-			{/* Left side - Invoice info */}
-			<div className="flex items-center gap-3">
-				<div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-zinc-100 transition-colors group-hover:bg-emerald-100 dark:bg-zinc-800 dark:group-hover:bg-emerald-900/30">
-					<DocumentTextIcon className="size-5 text-zinc-500 transition-colors group-hover:text-emerald-600 dark:text-zinc-400 dark:group-hover:text-emerald-400" />
-				</div>
-				<div className="min-w-0">
+			<div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
+				<DocumentTextIcon className="size-4 text-zinc-500 dark:text-zinc-400" />
+			</div>
+			<div className="min-w-0 flex-1">
+				<div className="flex items-center gap-2">
 					<p className="truncate font-mono text-sm font-medium text-zinc-900 dark:text-white">
 						{invoice.invoiceNumber}
 					</p>
-					<div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-zinc-500 dark:text-zinc-400">
-						<span className="flex items-center gap-1">
-							<CalendarIcon className="size-3 shrink-0" />
-							<span className="truncate">
-								{formatDate(invoice.periodStart ?? "")} – {formatDate(invoice.periodEnd ?? "")}
-							</span>
-						</span>
-						<span className="hidden text-zinc-300 sm:inline dark:text-zinc-600">•</span>
-						<span className="text-zinc-400">Billed</span>
-					</div>
+					<Badge color="emerald" className="shrink-0">
+						Paid
+					</Badge>
 				</div>
+				<p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
+					{formatDate(invoice.periodStart ?? "")} – {formatDate(invoice.periodEnd ?? "")}
+				</p>
 			</div>
-
-			{/* Right side - Amount and status */}
-			<div className="flex items-center justify-between gap-3 pl-13 sm:justify-end sm:gap-4 sm:pl-0">
-				<div className="text-left sm:text-right">
-					<p className="font-semibold text-zinc-900 dark:text-white">
-						{formatCurrency(invoice.totalAmount)}
-					</p>
-					<p className="text-xs text-zinc-400 dark:text-zinc-500">
-						GST {formatCurrency(invoice.gstAmount)}
-					</p>
-				</div>
-				<Badge color="green" className="shrink-0">
-					<CheckCircleIcon className="size-3" />
-					Paid
-				</Badge>
+			<div className="shrink-0 text-right">
+				<p className="text-sm font-semibold tabular-nums text-zinc-900 dark:text-white">
+					{formatCurrency(invoice.totalAmountDecimal)}
+				</p>
+				<p className="text-[10px] tabular-nums text-zinc-400 dark:text-zinc-500">
+					GST {formatCurrency(invoice.gstAmountDecimal)}
+				</p>
 			</div>
 		</button>
 	);
@@ -167,14 +148,9 @@ function InvoiceRow({ invoice, onView }: { invoice: Invoice; onView: () => void 
 // INVOICE DETAIL MODAL
 // =============================================================================
 
-function InvoiceDetailModal({
-	invoice,
-	onClose,
-}: {
-	invoice: Invoice | null;
-	onClose: () => void;
-}) {
+function InvoiceDetailModal({ invoice, onClose }: { invoice: Invoice | null; onClose: () => void }) {
 	const organization = useCurrentOrganization();
+	const canDownload = useCan("invoice", "download");
 	const generatePDF = useGenerateInvoicePDF(organization?.id);
 	// Fetch fresh invoice detail when modal opens
 	const { data: freshInvoice } = useInvoice(organization?.id, invoice?.id);
@@ -255,8 +231,7 @@ function InvoiceDetailModal({
 					<div className="col-span-2">
 						<p className="text-xs text-zinc-400">Billing Period</p>
 						<p className="mt-0.5 text-xs font-medium text-zinc-900 dark:text-white">
-							{formatDate(displayInvoice.periodStart ?? "")} –{" "}
-							{formatDate(displayInvoice.periodEnd ?? "")}
+							{formatDate(displayInvoice.periodStart ?? "")} – {formatDate(displayInvoice.periodEnd ?? "")}
 						</p>
 					</div>
 				</div>
@@ -273,7 +248,7 @@ function InvoiceDetailModal({
 							<p className="text-xs text-zinc-500">Campaign enrollment fees</p>
 						</div>
 						<p className="text-sm font-medium text-zinc-900 dark:text-white">
-							{formatCurrency(displayInvoice.subtotal)}
+							{formatCurrency(displayInvoice.subtotalDecimal)}
 						</p>
 					</div>
 				</div>
@@ -282,20 +257,20 @@ function InvoiceDetailModal({
 				<div className="space-y-2 border-t border-zinc-200 pt-3 dark:border-zinc-700">
 					<div className="flex justify-between text-xs text-zinc-500">
 						<span>Subtotal</span>
-						<span>{formatCurrency(displayInvoice.subtotal)}</span>
+						<span>{formatCurrency(displayInvoice.subtotalDecimal)}</span>
 					</div>
 					<div className="flex justify-between text-xs text-zinc-500">
 						<span>CGST @ 9%</span>
-						<span>{formatCurrency(Math.round(displayInvoice.gstAmount / 2))}</span>
+						<span>{formatCurrency(parseFloat(displayInvoice.gstAmountDecimal) / 2)}</span>
 					</div>
 					<div className="flex justify-between text-xs text-zinc-500">
 						<span>SGST @ 9%</span>
-						<span>{formatCurrency(Math.round(displayInvoice.gstAmount / 2))}</span>
+						<span>{formatCurrency(parseFloat(displayInvoice.gstAmountDecimal) / 2)}</span>
 					</div>
 					<div className="flex justify-between border-t border-zinc-200 pt-2 dark:border-zinc-700">
 						<span className="text-sm font-medium text-zinc-900 dark:text-white">Total</span>
 						<span className="text-base font-bold text-zinc-900 dark:text-white">
-							{formatCurrency(displayInvoice.totalAmount)}
+							{formatCurrency(displayInvoice.totalAmountDecimal)}
 						</span>
 					</div>
 				</div>
@@ -304,24 +279,19 @@ function InvoiceDetailModal({
 				{displayInvoice.status === "paid" && (
 					<div className="flex items-center justify-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 dark:bg-emerald-950/30">
 						<CheckCircleIcon className="size-4 text-emerald-600 dark:text-emerald-400" />
-						<span className="text-xs font-medium text-emerald-700 dark:text-emerald-300">
-							Paid via Wallet
-						</span>
+						<span className="text-xs font-medium text-emerald-700 dark:text-emerald-300">Paid via Wallet</span>
 					</div>
 				)}
 			</DialogBody>
 
+			{canDownload && (
 			<DialogActions className="border-t border-zinc-200 pt-4 dark:border-zinc-700">
-				<Button
-					color="dark/zinc"
-					onClick={handleDownloadPDF}
-					disabled={generatePDF.isPending}
-					className="w-full"
-				>
-					<ArrowDownTrayIcon className="size-4" />
+				<Button color="red" onClick={handleDownloadPDF} disabled={generatePDF.isPending} className="w-full">
+					<FaFilePdf data-slot="icon" className="size-4" />
 					{generatePDF.isPending ? "Generating..." : "Download PDF"}
 				</Button>
 			</DialogActions>
+			)}
 
 			{/* Footer */}
 			<div className="mt-4 text-center">
@@ -384,30 +354,29 @@ export function InvoicesList() {
 
 		// Search filter
 		if (search) {
-			result = result.filter((inv: Invoice) =>
-				inv.invoiceNumber.toLowerCase().includes(search.toLowerCase())
-			);
+			result = result.filter((inv: Invoice) => inv.invoiceNumber.toLowerCase().includes(search.toLowerCase()));
 		}
 
 		return result;
 	}, [invoices, periodFilter, search]);
 
-	// Calculate stats
+	// Calculate stats (sum decimal strings → rupees)
 	const stats = useMemo(
 		() => ({
 			count: filteredInvoices.length,
-			totalAmount: filteredInvoices.reduce((acc: number, inv: Invoice) => acc + inv.totalAmount, 0),
-			totalGst: filteredInvoices.reduce((acc: number, inv: Invoice) => acc + inv.gstAmount, 0),
+			totalAmount: filteredInvoices.reduce((acc, inv: Invoice) => acc + parseFloat(inv.totalAmountDecimal || "0"), 0).toFixed(2),
+			totalGst: filteredInvoices.reduce((acc, inv: Invoice) => acc + parseFloat(inv.gstAmountDecimal || "0"), 0).toFixed(2),
 			totalEnrollments: filteredInvoices.length,
 		}),
 		[filteredInvoices]
 	);
 
-	// Format compact currency
-	const formatCompact = useCallback((amount: number) => {
-		if (amount >= 100000) return `₹${(amount / 100000).toFixed(1)}L`;
-		if (amount >= 1000) return `₹${(amount / 1000).toFixed(1)}K`;
-		return `₹${amount}`;
+	// Format compact currency (amount is a decimal string in rupees)
+	const formatCompact = useCallback((amount: string) => {
+		const rupees = parseFloat(amount) || 0;
+		if (rupees >= 100000) return `₹${(rupees / 100000).toFixed(1)}L`;
+		if (rupees >= 1000) return `₹${(rupees / 1000).toFixed(1)}K`;
+		return `₹${Math.round(rupees)}`;
 	}, []);
 
 	if (loading) {
@@ -429,73 +398,57 @@ export function InvoicesList() {
 			</div>
 
 			{/* Stats */}
-			<div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
-				<StatCard
-					label="Invoices"
-					value={stats.count}
-					icon={<DocumentTextIcon className="size-4" />}
-				/>
-				<StatCard
-					label="Billed"
-					value={formatCompact(stats.totalAmount)}
-					icon={<CurrencyRupeeIcon className="size-4" />}
-					variant="success"
-				/>
-				<StatCard
-					label="GST"
-					value={formatCompact(stats.totalGst)}
-					icon={<ReceiptPercentIcon className="size-4" />}
-					variant="warning"
-				/>
-				<StatCard
-					label="Enrollments"
-					value={stats.totalEnrollments}
-					icon={<UserGroupIcon className="size-4" />}
-					variant="info"
-				/>
-			</div>
+			<FinancialStatsGridBordered
+				stats={[
+					{ name: "Invoices", value: stats.count },
+					{ name: "Billed", value: formatCompact(stats.totalAmount) },
+					{ name: "GST", value: formatCompact(stats.totalGst) },
+					{ name: "Enrollments", value: stats.totalEnrollments },
+				]}
+				columns={4}
+			/>
 
 			{/* Search + Filter Row */}
-			<div className="flex items-center gap-3">
-				<div className="relative w-52 shrink-0">
-					<MagnifyingGlassIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
-					<input
-						type="text"
-						value={search}
-						onChange={(e) => setSearch(e.target.value)}
-						placeholder="Search invoices..."
-						className="h-9 w-full rounded-lg bg-white pl-9 pr-8 text-sm text-zinc-900 ring-1 ring-inset ring-zinc-200 placeholder:text-zinc-400 transition-all focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:bg-zinc-900 dark:text-white dark:ring-zinc-700 dark:focus:ring-white"
-						aria-label="Search invoices"
-					/>
-					{search && (
-						<button
-							type="button"
-							onClick={() => setSearch("")}
-							className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-700"
-							aria-label="Clear search"
-						>
-							<XMarkIcon className="size-3.5" />
-						</button>
-					)}
+			<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+				<div className="w-full sm:w-52 sm:shrink-0">
+					<InputGroup>
+						<MagnifyingGlassIcon data-slot="icon" />
+						<Input
+							type="text"
+							value={search}
+							onChange={(e) => setSearch(e.target.value)}
+							placeholder="Search invoices..."
+							aria-label="Search invoices"
+						/>
+						{search && (
+							<button
+								type="button"
+								onClick={() => setSearch("")}
+								className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+							>
+								<XMarkIcon className="size-4" />
+							</button>
+						)}
+					</InputGroup>
 				</div>
 
 				{/* Period Pills */}
 				<div className="min-w-0 flex-1 overflow-x-auto">
 					<div className="flex min-w-max gap-1.5 sm:min-w-0 sm:flex-wrap">
-					{periodFilters.map((filter) => (
-						<button
-							key={filter.value}
-							type="button"
-							onClick={() => setPeriodFilter(filter.value)}
-							className={`inline-flex shrink-0 items-center whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-200 active:scale-95 ${
-								periodFilter === filter.value
-									? "bg-zinc-900 text-white shadow-sm dark:bg-white dark:text-zinc-900"
-									: "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
-							}`}
-						>
-							{filter.label}
-						</button>
-					))}
+						{periodFilters.map((filter) => (
+							<button
+								key={filter.value}
+								type="button"
+								onClick={() => setPeriodFilter(filter.value)}
+								className={`inline-flex shrink-0 items-center whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-200 active:scale-95 ${
+									periodFilter === filter.value
+										? "bg-zinc-900 text-white shadow-sm dark:bg-white dark:text-zinc-900"
+										: "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
+								}`}
+							>
+								{filter.label}
+							</button>
+						))}
 					</div>
 				</div>
 			</div>
@@ -508,35 +461,32 @@ export function InvoicesList() {
 					description={search ? `No results for "${search}"` : "No invoices for this period"}
 				/>
 			) : (
-				<div className="rounded-xl bg-white ring-1 ring-inset ring-zinc-950/5 overflow-hidden dark:bg-zinc-900 dark:ring-white/10">
-					<div className="flex items-center justify-between px-3 py-2.5 border-b border-zinc-100 dark:border-zinc-800">
-						<span className="text-sm text-zinc-500">
-							{filteredInvoices.length} invoice{filteredInvoices.length !== 1 ? "s" : ""}
-						</span>
+				<div className="overflow-hidden rounded-xl bg-white ring-1 ring-inset ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10">
+					<div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3 dark:border-zinc-800">
+						<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">
+							Invoices
+							<span className="ml-2 text-xs font-normal text-zinc-500">{filteredInvoices.length}</span>
+						</h3>
 					</div>
-					<div className="p-3 sm:p-4">
-						<div className="space-y-2">
-							{filteredInvoices.map((inv: Invoice) => (
-								<InvoiceRow key={inv.id} invoice={inv} onView={() => setSelectedInvoice(inv)} />
-							))}
+					<div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+						{filteredInvoices.map((inv: Invoice) => (
+							<InvoiceRow key={inv.id} invoice={inv} onView={() => setSelectedInvoice(inv)} />
+						))}
+					</div>
+					{hasMore && (
+						<div className="flex justify-center border-t border-zinc-100 px-4 py-3 dark:border-zinc-800">
+							<Button outline onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
+								{isFetchingNextPage ? (
+									<>
+										<ArrowPathIcon className="size-4 animate-spin" />
+										Loading...
+									</>
+								) : (
+									"Load More"
+								)}
+							</Button>
 						</div>
-
-						{/* Load More */}
-						{hasMore && (
-							<div className="flex justify-center pt-4">
-								<Button outline onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
-									{isFetchingNextPage ? (
-										<>
-											<ArrowPathIcon className="size-4 animate-spin" />
-											Loading...
-										</>
-									) : (
-										"Load More"
-									)}
-								</Button>
-							</div>
-						)}
-					</div>
+					)}
 				</div>
 			)}
 

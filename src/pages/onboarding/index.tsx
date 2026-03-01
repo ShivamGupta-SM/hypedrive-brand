@@ -1,12 +1,13 @@
 import { CheckCircleIcon as CheckCircleSolidIcon, XCircleIcon } from "@heroicons/react/16/solid";
 import {
-	BuildingOffice2Icon,
+	ArrowRightStartOnRectangleIcon,
+	BuildingStorefrontIcon,
 	DocumentTextIcon,
 	ExclamationTriangleIcon,
 	IdentificationIcon,
 	RocketLaunchIcon,
 } from "@heroicons/react/24/outline";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/button";
 import { Input } from "@/components/input";
@@ -22,6 +23,7 @@ import {
 	useSetupProgressStream,
 	useVerifyGSTPreview,
 } from "@/hooks";
+import { useLogout } from "@/store/auth-store";
 
 // =============================================================================
 // STEP INDICATOR
@@ -111,9 +113,7 @@ function OrganizationStep({
 			debounceRef.current = setTimeout(async () => {
 				try {
 					const result = await checkSlug.mutateAsync(slug);
-					setSlugStatus(
-						(result as { available?: boolean }).available !== false ? "available" : "taken"
-					);
+					setSlugStatus((result as { available?: boolean }).available !== false ? "available" : "taken");
 				} catch {
 					setSlugStatus("taken");
 				}
@@ -194,12 +194,10 @@ function OrganizationStep({
 	return (
 		<form onSubmit={handleSubmit} className="space-y-6">
 			<div className="text-center">
-				<div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
-					<BuildingOffice2Icon className="size-7 text-emerald-600 dark:text-emerald-400" />
+				<div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800">
+					<BuildingStorefrontIcon className="size-7 text-zinc-500 dark:text-zinc-400" />
 				</div>
-				<h2 className="text-xl font-bold text-zinc-900 dark:text-white">
-					Create Your Organization
-				</h2>
+				<h2 className="text-xl font-bold text-zinc-900 dark:text-white">Create Your Organization</h2>
 				<p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
 					Tell us about your brand to get started with campaigns.
 				</p>
@@ -241,20 +239,8 @@ function OrganizationStep({
 						{slugStatus !== "idle" && (
 							<div className="absolute right-3 top-1/2 -translate-y-1/2">
 								{slugStatus === "checking" && (
-									<svg
-										className="size-4 animate-spin text-zinc-400"
-										fill="none"
-										viewBox="0 0 24 24"
-										aria-hidden="true"
-									>
-										<circle
-											className="opacity-25"
-											cx="12"
-											cy="12"
-											r="10"
-											stroke="currentColor"
-											strokeWidth="4"
-										/>
+									<svg className="size-4 animate-spin text-zinc-400" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+										<circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
 										<path
 											className="opacity-75"
 											fill="currentColor"
@@ -262,9 +248,7 @@ function OrganizationStep({
 										/>
 									</svg>
 								)}
-								{slugStatus === "available" && (
-									<CheckCircleSolidIcon className="size-4 text-emerald-500" />
-								)}
+								{slugStatus === "available" && <CheckCircleSolidIcon className="size-4 text-emerald-500" />}
 								{slugStatus === "taken" && <XCircleIcon className="size-4 text-red-500" />}
 							</div>
 						)}
@@ -274,17 +258,12 @@ function OrganizationStep({
 						{slugStatus === "available" && (
 							<span className="ml-2 text-emerald-600 dark:text-emerald-400">Available!</span>
 						)}
-						{slugStatus === "taken" && (
-							<span className="ml-2 text-red-600 dark:text-red-400">Already taken</span>
-						)}
+						{slugStatus === "taken" && <span className="ml-2 text-red-600 dark:text-red-400">Already taken</span>}
 					</p>
 				</div>
 
 				<div>
-					<label
-						htmlFor="org-description"
-						className="text-sm font-medium text-zinc-900 dark:text-white"
-					>
+					<label htmlFor="org-description" className="text-sm font-medium text-zinc-900 dark:text-white">
 						Description
 					</label>
 					<Textarea
@@ -298,10 +277,7 @@ function OrganizationStep({
 				</div>
 
 				<div>
-					<label
-						htmlFor="org-website"
-						className="text-sm font-medium text-zinc-900 dark:text-white"
-					>
+					<label htmlFor="org-website" className="text-sm font-medium text-zinc-900 dark:text-white">
 						Website
 					</label>
 					<div className="mt-1.5 flex items-center gap-3">
@@ -323,9 +299,7 @@ function OrganizationStep({
 						/>
 					</div>
 					{logoPreview?.logoUrl && (
-						<p className="mt-1 text-xs text-emerald-600 dark:text-emerald-400">
-							Logo detected from website
-						</p>
+						<p className="mt-1 text-xs text-emerald-600 dark:text-emerald-400">Logo detected from website</p>
 					)}
 				</div>
 			</div>
@@ -449,30 +423,20 @@ function GSTStep({
 					<div className="rounded-xl bg-emerald-50 p-4 dark:bg-emerald-950/20">
 						<div className="space-y-2">
 							<div>
-								<p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
-									Legal Name
-								</p>
-								<p className="text-sm font-medium text-zinc-900 dark:text-white">
-									{data.gstLegalName}
-								</p>
+								<p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">Legal Name</p>
+								<p className="text-sm font-medium text-zinc-900 dark:text-white">{data.gstLegalName}</p>
 							</div>
 							{data.gstTradeName && (
 								<div>
-									<p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
-										Trade Name
-									</p>
+									<p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">Trade Name</p>
 									<p className="text-sm text-zinc-700 dark:text-zinc-300">{data.gstTradeName}</p>
 								</div>
 							)}
 							{data.address && (
 								<div>
-									<p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
-										Address
-									</p>
+									<p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">Address</p>
 									<p className="text-sm text-zinc-700 dark:text-zinc-300">
-										{[data.address, data.city, data.state, data.postalCode]
-											.filter(Boolean)
-											.join(", ")}
+										{[data.address, data.city, data.state, data.postalCode].filter(Boolean).join(", ")}
 									</p>
 								</div>
 							)}
@@ -531,27 +495,19 @@ function ReviewStep({
 			<div className="rounded-xl bg-zinc-50 p-4 dark:bg-zinc-900">
 				<dl className="space-y-3">
 					<div>
-						<dt className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
-							Organization Name
-						</dt>
-						<dd className="mt-0.5 text-sm font-medium text-zinc-900 dark:text-white">
-							{data.name}
-						</dd>
+						<dt className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Organization Name</dt>
+						<dd className="mt-0.5 text-sm font-medium text-zinc-900 dark:text-white">{data.name}</dd>
 					</div>
 					{data.slug && (
 						<div>
 							<dt className="text-xs font-medium text-zinc-500 dark:text-zinc-400">URL Slug</dt>
-							<dd className="mt-0.5 font-mono text-sm text-zinc-700 dark:text-zinc-300">
-								{data.slug}
-							</dd>
+							<dd className="mt-0.5 font-mono text-sm text-zinc-700 dark:text-zinc-300">{data.slug}</dd>
 						</div>
 					)}
 					{data.description && (
 						<div>
 							<dt className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Description</dt>
-							<dd className="mt-0.5 text-sm text-zinc-700 dark:text-zinc-300">
-								{data.description}
-							</dd>
+							<dd className="mt-0.5 text-sm text-zinc-700 dark:text-zinc-300">{data.description}</dd>
 						</div>
 					)}
 					{data.website && (
@@ -562,9 +518,7 @@ function ReviewStep({
 					)}
 					<div>
 						<dt className="text-xs font-medium text-zinc-500 dark:text-zinc-400">GSTIN</dt>
-						<dd className="mt-0.5 font-mono text-sm font-medium text-zinc-900 dark:text-white">
-							{data.gstNumber}
-						</dd>
+						<dd className="mt-0.5 font-mono text-sm font-medium text-zinc-900 dark:text-white">{data.gstNumber}</dd>
 					</div>
 					<div>
 						<dt className="text-xs font-medium text-zinc-500 dark:text-zinc-400">GST Legal Name</dt>
@@ -572,12 +526,8 @@ function ReviewStep({
 					</div>
 					{data.gstTradeName && (
 						<div>
-							<dt className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
-								GST Trade Name
-							</dt>
-							<dd className="mt-0.5 text-sm text-zinc-700 dark:text-zinc-300">
-								{data.gstTradeName}
-							</dd>
+							<dt className="text-xs font-medium text-zinc-500 dark:text-zinc-400">GST Trade Name</dt>
+							<dd className="mt-0.5 text-sm text-zinc-700 dark:text-zinc-300">{data.gstTradeName}</dd>
 						</div>
 					)}
 				</dl>
@@ -585,8 +535,8 @@ function ReviewStep({
 
 			<div className="rounded-xl bg-amber-50 p-4 dark:bg-amber-950/30">
 				<p className="text-sm text-amber-700 dark:text-amber-300">
-					<strong>Note:</strong> After submission, your organization will be reviewed by our team.
-					This usually takes 1-2 business days.
+					<strong>Note:</strong> After submission, your organization will be reviewed by our team. This usually takes
+					1-2 business days.
 				</p>
 			</div>
 
@@ -654,13 +604,12 @@ function SuccessStep({ orgName, organizationId }: { orgName: string; organizatio
 				<p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
 					{stream.isComplete ? (
 						<>
-							<strong className="text-zinc-700 dark:text-zinc-300">{orgName}</strong> is ready
-							for review.
+							<strong className="text-zinc-700 dark:text-zinc-300">{orgName}</strong> is ready for review.
 						</>
 					) : (
 						<>
-							Configuring <strong className="text-zinc-700 dark:text-zinc-300">{orgName}</strong>
-							 — this usually takes a few seconds.
+							Configuring <strong className="text-zinc-700 dark:text-zinc-300">{orgName}</strong>— this usually takes a
+							few seconds.
 						</>
 					)}
 				</p>
@@ -699,14 +648,7 @@ function SuccessStep({ orgName, organizationId }: { orgName: string; organizatio
 											viewBox="0 0 24 24"
 											aria-hidden="true"
 										>
-											<circle
-												className="opacity-25"
-												cx="12"
-												cy="12"
-												r="10"
-												stroke="currentColor"
-												strokeWidth="4"
-											/>
+											<circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
 											<path
 												className="opacity-75"
 												fill="currentColor"
@@ -734,9 +676,7 @@ function SuccessStep({ orgName, organizationId }: { orgName: string; organizatio
 										{meta.label}
 									</p>
 									{status === "active" && (
-										<p className="text-xs text-zinc-500 dark:text-zinc-400">
-											{meta.description}
-										</p>
+										<p className="text-xs text-zinc-500 dark:text-zinc-400">{meta.description}</p>
 									)}
 								</div>
 							</div>
@@ -758,24 +698,19 @@ function SuccessStep({ orgName, organizationId }: { orgName: string; organizatio
 			{stream.isComplete ? (
 				<div className="rounded-xl bg-emerald-50 p-4 dark:bg-emerald-950/20">
 					<p className="text-sm text-emerald-700 dark:text-emerald-300">
-						Setup complete! Your organization will be reviewed by our team.
-						This usually takes 1-2 business days.
+						Setup complete! Your organization will be reviewed by our team. This usually takes 1-2 business days.
 					</p>
 				</div>
 			) : (
 				<div className="rounded-xl bg-amber-50 p-4 dark:bg-amber-950/30">
 					<p className="text-sm text-amber-700 dark:text-amber-300">
-						<strong>Note:</strong> After setup, your organization will be reviewed by our team.
-						This usually takes 1-2 business days.
+						<strong>Note:</strong> After setup, your organization will be reviewed by our team. This usually takes 1-2
+						business days.
 					</p>
 				</div>
 			)}
 
-			<Button
-				color="dark/zinc"
-				onClick={() => navigate({ to: "/pending-approval" })}
-				className="w-full"
-			>
+			<Button color="dark/zinc" onClick={() => navigate({ to: "/pending-approval" })} className="w-full">
 				<RocketLaunchIcon className="size-4" />
 				{stream.isComplete ? "Continue" : "Continue to Dashboard"}
 			</Button>
@@ -801,6 +736,7 @@ function useStepStatuses(updates: { completedStep?: string; failedStep?: string;
 // =============================================================================
 
 export function Onboarding() {
+	const { mutate: logout } = useLogout();
 	const [step, setStep] = useState(0);
 	const [formData, setFormData] = useState<OrganizationFormData>({
 		name: "",
@@ -863,17 +799,10 @@ export function Onboarding() {
 					)}
 
 					{/* Steps */}
-					{step === 0 && (
-						<OrganizationStep data={formData} onChange={setFormData} onNext={() => setStep(1)} />
-					)}
+					{step === 0 && <OrganizationStep data={formData} onChange={setFormData} onNext={() => setStep(1)} />}
 
 					{step === 1 && (
-						<GSTStep
-							data={formData}
-							onChange={setFormData}
-							onNext={() => setStep(2)}
-							onBack={() => setStep(0)}
-						/>
+						<GSTStep data={formData} onChange={setFormData} onNext={() => setStep(2)} onBack={() => setStep(0)} />
 					)}
 
 					{step === 2 && (
@@ -888,17 +817,18 @@ export function Onboarding() {
 
 					{step === 3 && <SuccessStep orgName={submittedOrgName} organizationId={submittedOrgId} />}
 
-					{/* Back to login */}
+					{/* Logout */}
 					{step < 3 && (
-						<p className="mt-8 text-center text-sm text-zinc-500 dark:text-zinc-400">
-							Already have an organization?{" "}
-							<Link
-								to="/login"
-								className="font-medium text-zinc-900 underline decoration-zinc-300 underline-offset-2 hover:decoration-zinc-500 dark:text-white dark:decoration-zinc-600 dark:hover:decoration-zinc-400"
+						<div className="mt-8 flex justify-center">
+							<button
+								type="button"
+								onClick={() => logout()}
+								className="inline-flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
 							>
-								Sign in
-							</Link>
-						</p>
+								<ArrowRightStartOnRectangleIcon className="size-4" />
+								Sign out
+							</button>
+						</div>
 					)}
 				</div>
 			</div>

@@ -326,9 +326,7 @@ export const badgeColors = {
 /**
  * Map enrollment status to badge color
  */
-export function getStatusBadgeColor(
-	status: string
-): (typeof badgeColors)[keyof typeof badgeColors] {
+export function getStatusBadgeColor(status: string): (typeof badgeColors)[keyof typeof badgeColors] {
 	const mapping: Record<string, (typeof badgeColors)[keyof typeof badgeColors]> = {
 		awaiting_submission: badgeColors.warning,
 		awaiting_review: badgeColors.info,

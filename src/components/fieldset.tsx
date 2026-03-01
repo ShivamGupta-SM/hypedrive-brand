@@ -34,10 +34,7 @@ export function FieldGroup({ className, ...props }: React.ComponentPropsWithoutR
 	return <div data-slot="control" {...props} className={clsx(className, "space-y-8")} />;
 }
 
-export function Field({
-	className,
-	...props
-}: { className?: string } & Omit<Headless.FieldProps, "as" | "className">) {
+export function Field({ className, ...props }: { className?: string } & Omit<Headless.FieldProps, "as" | "className">) {
 	return (
 		<Headless.Field
 			{...props}
@@ -54,10 +51,7 @@ export function Field({
 	);
 }
 
-export function Label({
-	className,
-	...props
-}: { className?: string } & Omit<Headless.LabelProps, "as" | "className">) {
+export function Label({ className, ...props }: { className?: string } & Omit<Headless.LabelProps, "as" | "className">) {
 	return (
 		<Headless.Label
 			data-slot="label"
@@ -78,10 +72,7 @@ export function Description({
 		<Headless.Description
 			data-slot="description"
 			{...props}
-			className={clsx(
-				className,
-				"text-base/6 text-zinc-500 data-disabled:opacity-50 sm:text-sm/6 dark:text-zinc-400"
-			)}
+			className={clsx(className, "text-base/6 text-zinc-500 data-disabled:opacity-50 sm:text-sm/6 dark:text-zinc-400")}
 		/>
 	);
 }
@@ -94,10 +85,7 @@ export function ErrorMessage({
 		<Headless.Description
 			data-slot="error"
 			{...props}
-			className={clsx(
-				className,
-				"text-base/6 text-red-600 data-disabled:opacity-50 sm:text-sm/6 dark:text-red-500"
-			)}
+			className={clsx(className, "text-base/6 text-red-600 data-disabled:opacity-50 sm:text-sm/6 dark:text-red-500")}
 		/>
 	);
 }

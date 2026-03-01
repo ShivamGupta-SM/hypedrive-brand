@@ -22,17 +22,7 @@
 export const ADMIN_STATEMENT = {
 	// Better Auth internal — user & session management
 	// (explicitly listed instead of spreading adminDefaultStatements)
-	user: [
-		"create",
-		"list",
-		"set-role",
-		"ban",
-		"impersonate",
-		"delete",
-		"set-password",
-		"get",
-		"update",
-	],
+	user: ["create", "list", "set-role", "ban", "impersonate", "delete", "set-password", "get", "update"],
 	session: ["list", "revoke", "delete"],
 
 	// Platform business resources

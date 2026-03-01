@@ -47,11 +47,7 @@ export interface FilterIconButtonProps {
 	className?: string;
 }
 
-export function FilterIconButton({
-	onClick,
-	hasActiveFilters = false,
-	className,
-}: FilterIconButtonProps) {
+export function FilterIconButton({ onClick, hasActiveFilters = false, className }: FilterIconButtonProps) {
 	return (
 		<button
 			type="button"
@@ -87,14 +83,7 @@ export interface TabButtonProps {
 	className?: string;
 }
 
-export function TabButton({
-	label,
-	icon: Icon,
-	isActive,
-	onClick,
-	count,
-	className,
-}: TabButtonProps) {
+export function TabButton({ label, icon: Icon, isActive, onClick, count, className }: TabButtonProps) {
 	return (
 		<button
 			type="button"
@@ -135,11 +124,7 @@ export interface TabGroupProps {
 }
 
 export function TabGroup({ children, className }: TabGroupProps) {
-	return (
-		<div className={clsx("flex gap-1 rounded-xl bg-zinc-100 p-1 dark:bg-zinc-800", className)}>
-			{children}
-		</div>
-	);
+	return <div className={clsx("flex gap-1 rounded-xl bg-zinc-100 p-1 dark:bg-zinc-800", className)}>{children}</div>;
 }
 
 // =============================================================================
@@ -201,12 +186,7 @@ export interface SearchInputProps {
 	className?: string;
 }
 
-export function SearchInput({
-	value,
-	onChange,
-	placeholder = "Search...",
-	className,
-}: SearchInputProps) {
+export function SearchInput({ value, onChange, placeholder = "Search...", className }: SearchInputProps) {
 	return (
 		<div className={clsx("relative", className)}>
 			<svg

@@ -1,11 +1,4 @@
-import {
-	ArrowLeftIcon,
-	CheckCircleIcon,
-	EyeIcon,
-	EyeSlashIcon,
-	KeyIcon,
-	XCircleIcon,
-} from "@heroicons/react/16/solid";
+import { ArrowLeftIcon, CheckCircleIcon, EyeIcon, EyeSlashIcon, KeyIcon, XCircleIcon } from "@heroicons/react/16/solid";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -60,7 +53,9 @@ function PasswordStrength({ password }: { password: string }) {
 					) : (
 						<XCircleIcon className="size-3.5 shrink-0 text-zinc-300 dark:text-zinc-600" />
 					)}
-					<span className={`text-xs ${check.valid ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-400 dark:text-zinc-500"}`}>
+					<span
+						className={`text-xs ${check.valid ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-400 dark:text-zinc-500"}`}
+					>
 						{check.label}
 					</span>
 				</div>
@@ -91,7 +86,10 @@ function InvalidToken() {
 			</Button>
 
 			<div className="text-center">
-				<TextLink href="/login" className="inline-flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200">
+				<TextLink
+					href="/login"
+					className="inline-flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+				>
 					<ArrowLeftIcon className="size-3.5" />
 					Back to sign in
 				</TextLink>
@@ -106,7 +104,9 @@ function SuccessState() {
 	const navigate = useNavigate();
 	const { fire } = useConfetti();
 
-	useEffect(() => { fire("burst"); }, [fire]);
+	useEffect(() => {
+		fire("burst");
+	}, [fire]);
 	useEffect(() => {
 		const t = setTimeout(() => navigate({ to: "/login" }), 3000);
 		return () => clearTimeout(t);
@@ -143,7 +143,12 @@ export function ResetPassword() {
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-	const { register, handleSubmit, watch, formState: { errors } } = useForm<ResetPasswordFormData>({
+	const {
+		register,
+		handleSubmit,
+		watch,
+		formState: { errors },
+	} = useForm<ResetPasswordFormData>({
 		resolver: zodResolver(resetPasswordSchema),
 		defaultValues: { password: "", confirmPassword: "" },
 	});
@@ -171,7 +176,9 @@ export function ResetPassword() {
 			footer={
 				<p className="text-center text-sm text-zinc-500 dark:text-zinc-400">
 					Remembered it?{" "}
-					<TextLink href="/login"><Strong>Sign in</Strong></TextLink>
+					<TextLink href="/login">
+						<Strong>Sign in</Strong>
+					</TextLink>
 				</p>
 			}
 		>
@@ -182,9 +189,7 @@ export function ResetPassword() {
 					<KeyIcon className="size-5 text-zinc-500 dark:text-zinc-400" />
 				</div>
 				<h1 className="text-xl font-semibold text-zinc-900 dark:text-white">Create new password</h1>
-				<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-					Choose a strong password for your account.
-				</p>
+				<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Choose a strong password for your account.</p>
 			</div>
 
 			{/* Form */}
@@ -244,7 +249,10 @@ export function ResetPassword() {
 			</form>
 
 			<div className="text-center">
-				<TextLink href="/login" className="inline-flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200">
+				<TextLink
+					href="/login"
+					className="inline-flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+				>
 					<ArrowLeftIcon className="size-3.5" />
 					Back to sign in
 				</TextLink>

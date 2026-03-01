@@ -1,21 +1,12 @@
-import { PlusIcon, UserIcon } from "@heroicons/react/16/solid";
+import { EnvelopeIcon, UserIcon } from "@heroicons/react/16/solid";
 import { useState } from "react";
 import { Button } from "@/components/button";
 import { EmptyState } from "@/components/shared/empty-state";
-import {
-	useCurrentOrganization,
-	useMembers,
-} from "@/hooks";
+import { useCurrentOrganization, useMembers } from "@/hooks";
 import { useAuthStore } from "@/store/auth-store";
 import { useCan } from "@/store/permissions-store";
 import type { Member, MemberRole } from "./components";
-import {
-	AddMemberDialog,
-	ChangeRoleDialog,
-	InviteMemberModal,
-	MemberRow,
-	RemoveMemberDialog,
-} from "./components";
+import { AddMemberDialog, ChangeRoleDialog, InviteMemberModal, MemberRow, RemoveMemberDialog } from "./components";
 
 export function TeamMembers() {
 	const organization = useCurrentOrganization();
@@ -36,26 +27,25 @@ export function TeamMembers() {
 
 	return (
 		<div>
-			{/* CTA buttons */}
-			{canInviteMembers && (
-				<div className="mb-4 flex items-center justify-end gap-2">
-					<Button outline onClick={() => setShowAddMemberModal(true)}>
-						<UserIcon className="size-4" />
-						Add Directly
-					</Button>
-					<Button color="emerald" onClick={() => setShowInviteModal(true)}>
-						<PlusIcon className="size-4" />
-						Invite Member
-					</Button>
-				</div>
-			)}
-
-			<div className="overflow-hidden rounded-xl bg-white ring-1 ring-inset ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10">
+			<div className="overflow-hidden rounded-xl bg-white ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
 				<div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3 dark:border-zinc-800">
 					<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">
 						Members
 						<span className="ml-2 text-xs font-normal text-zinc-500">{members.length}</span>
 					</h3>
+					{canInviteMembers && (
+						<div className="flex items-center gap-2">
+							<Button outline onClick={() => setShowAddMemberModal(true)}>
+								<UserIcon className="size-4" />
+								<span className="hidden sm:inline">Add Directly</span>
+								<span className="sm:hidden">Add</span>
+							</Button>
+							<Button color="dark/zinc" onClick={() => setShowInviteModal(true)}>
+								<EnvelopeIcon className="size-4" />
+								Invite
+							</Button>
+						</div>
+					)}
 				</div>
 				<div className="p-3 sm:p-4">
 					{members.length === 0 ? (
@@ -64,13 +54,11 @@ export function TeamMembers() {
 							title="No team members"
 							description="Invite team members to collaborate"
 							action={
-								canInviteMembers
-									? { label: "Invite Member", onClick: () => setShowInviteModal(true) }
-									: undefined
+								canInviteMembers ? { label: "Invite Member", onClick: () => setShowInviteModal(true) } : undefined
 							}
 						/>
 					) : (
-						<div className="space-y-2">
+						<div className="space-y-px">
 							{members.map((member) => (
 								<MemberRow
 									key={member.id}

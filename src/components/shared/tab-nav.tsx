@@ -3,8 +3,8 @@
  * Uses Link + useRouterState for active detection (not onClick state)
  */
 
-import clsx from "clsx";
 import { Link, useRouterState } from "@tanstack/react-router";
+import clsx from "clsx";
 
 export interface TabNavItem {
 	label: string;
@@ -24,17 +24,10 @@ export function TabNav({ tabs, className }: TabNavProps) {
 	const pathname = useRouterState({ select: (s) => s.location.pathname });
 
 	return (
-		<div
-			className={clsx(
-				"-mx-4 overflow-x-auto px-4 sm:mx-0 sm:overflow-visible sm:px-0",
-				className
-			)}
-		>
+		<div className={clsx("-mx-4 overflow-x-auto px-4 sm:mx-0 sm:overflow-visible sm:px-0", className)}>
 			<div className="flex min-w-max gap-1.5 sm:min-w-0 sm:flex-wrap">
 				{tabs.map((tab) => {
-					const isActive = tab.exact
-						? pathname === tab.to
-						: pathname.startsWith(tab.to);
+					const isActive = tab.exact ? pathname === tab.to : pathname.startsWith(tab.to);
 
 					return (
 						<Link

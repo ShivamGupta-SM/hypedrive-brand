@@ -29,12 +29,7 @@ export interface BreadcrumbsProps {
 	homeHref?: string;
 }
 
-export function Breadcrumbs({
-	items,
-	className,
-	showHome = true,
-	homeHref = "/",
-}: BreadcrumbsProps) {
+export function Breadcrumbs({ items, className, showHome = true, homeHref = "/" }: BreadcrumbsProps) {
 	const allItems = showHome
 		? [{ label: "Home", href: homeHref, icon: <HomeIcon className="size-4" /> }, ...items]
 		: items;
@@ -104,9 +99,7 @@ export function PageHeader({
 	return (
 		<div className={clsx("space-y-4", className)}>
 			{/* Breadcrumbs */}
-			{showBreadcrumbs && breadcrumbs && breadcrumbs.length > 0 && (
-				<Breadcrumbs items={breadcrumbs} />
-			)}
+			{showBreadcrumbs && breadcrumbs && breadcrumbs.length > 0 && <Breadcrumbs items={breadcrumbs} />}
 
 			{/* Back Button */}
 			{backButton && (
@@ -127,17 +120,13 @@ export function PageHeader({
 						<TitleComponent className="text-2xl/8!">{title}</TitleComponent>
 						{badge}
 					</div>
-					{description && (
-						<Text className="mt-1 max-w-2xl text-zinc-500 dark:text-zinc-400">{description}</Text>
-					)}
+					{description && <Text className="mt-1 max-w-2xl text-zinc-500 dark:text-zinc-400">{description}</Text>}
 					{/* Additional content slot */}
 					{children}
 				</div>
 
 				{/* Actions */}
-				{actions && (
-					<div className="flex shrink-0 flex-wrap items-center gap-2 sm:flex-nowrap">{actions}</div>
-				)}
+				{actions && <div className="flex shrink-0 flex-wrap items-center gap-2 sm:flex-nowrap">{actions}</div>}
 			</div>
 		</div>
 	);
@@ -197,9 +186,7 @@ export function PageSection({
 							</div>
 						)}
 						<div>
-							{title && (
-								<h2 className="text-base font-semibold text-zinc-900 dark:text-white">{title}</h2>
-							)}
+							{title && <h2 className="text-base font-semibold text-zinc-900 dark:text-white">{title}</h2>}
 							{description && <Text className="mt-0.5 text-sm text-zinc-500">{description}</Text>}
 						</div>
 					</div>
@@ -252,11 +239,7 @@ const gapClasses = {
 };
 
 export function ContentGrid({ children, columns = 4, gap = "md", className }: ContentGridProps) {
-	return (
-		<div className={clsx("grid", columnClasses[columns], gapClasses[gap], className)}>
-			{children}
-		</div>
-	);
+	return <div className={clsx("grid", columnClasses[columns], gapClasses[gap], className)}>{children}</div>;
 }
 
 // =============================================================================
@@ -305,9 +288,7 @@ export function ContentCard({
 							</div>
 						)}
 						<div>
-							{title && (
-								<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">{title}</h3>
-							)}
+							{title && <h3 className="text-sm font-semibold text-zinc-900 dark:text-white">{title}</h3>}
 							{description && <Text className="mt-0.5 text-sm text-zinc-500">{description}</Text>}
 						</div>
 					</div>
@@ -404,33 +385,13 @@ const alertVariants = {
 	},
 };
 
-export function AlertBanner({
-	variant,
-	title,
-	children,
-	actions,
-	icon,
-	onDismiss,
-	className,
-}: AlertBannerProps) {
+export function AlertBanner({ variant, title, children, actions, icon, onDismiss, className }: AlertBannerProps) {
 	const styles = alertVariants[variant];
 
 	return (
-		<div
-			className={clsx(
-				"flex items-start gap-4 rounded-xl border p-4",
-				styles.bg,
-				styles.border,
-				className
-			)}
-		>
+		<div className={clsx("flex items-start gap-4 rounded-xl border p-4", styles.bg, styles.border, className)}>
 			{icon && (
-				<div
-					className={clsx(
-						"flex size-8 shrink-0 items-center justify-center rounded-full text-white",
-						styles.icon
-					)}
-				>
+				<div className={clsx("flex size-8 shrink-0 items-center justify-center rounded-full text-white", styles.icon)}>
 					{icon}
 				</div>
 			)}
@@ -510,10 +471,7 @@ export function PageSkeleton({
 			{showStats && (
 				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 					{statKeys.map((key) => (
-						<div
-							key={key}
-							className="h-28 rounded-xl bg-zinc-100 skeleton-shimmer dark:bg-zinc-800"
-						/>
+						<div key={key} className="h-28 rounded-xl bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
 					))}
 				</div>
 			)}
@@ -548,23 +506,14 @@ export function TableSkeleton({ rows = 5, columns = 4 }: TableSkeletonProps) {
 				{/* Header */}
 				<div className="flex gap-4 border-b border-zinc-200 bg-zinc-50 px-4 py-3 dark:border-zinc-700 dark:bg-zinc-800/50">
 					{Array.from({ length: columns }).map((_, i) => (
-						<div
-							key={i}
-							className="h-4 flex-1 rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700"
-						/>
+						<div key={i} className="h-4 flex-1 rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
 					))}
 				</div>
 				{/* Rows */}
 				{Array.from({ length: rows }).map((_, i) => (
-					<div
-						key={i}
-						className="flex gap-4 border-b border-zinc-200 px-4 py-4 last:border-0 dark:border-zinc-800"
-					>
+					<div key={i} className="flex gap-4 border-b border-zinc-200 px-4 py-4 last:border-0 dark:border-zinc-800">
 						{Array.from({ length: columns }).map((_, j) => (
-							<div
-								key={j}
-								className="h-5 flex-1 rounded bg-zinc-100 skeleton-shimmer dark:bg-zinc-800"
-							/>
+							<div key={j} className="h-5 flex-1 rounded bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
 						))}
 					</div>
 				))}

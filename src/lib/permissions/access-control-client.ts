@@ -69,11 +69,34 @@ export {
 } from "./definitions";
 
 // =============================================================================
+// CUSTOM ROLE PERMISSION REGISTRY
+// =============================================================================
+
+/**
+ * Runtime registry for custom role permissions.
+ * Populated by the permissions store when a member has a non-static role.
+ * Static roles (owner, admin, etc.) always use the hardcoded ORG_ROLE_PERMISSIONS matrix.
+ */
+let customRolePermissions: Record<string, string[]> | null = null;
+
+/** Register custom role permissions at runtime. Called by the permissions store. */
+export function registerCustomRolePermissions(permissions: Record<string, string[]> | null): void {
+	customRolePermissions = permissions;
+}
+
+/** Clear custom role permissions. Called on org switch or logout. */
+export function clearCustomRolePermissions(): void {
+	customRolePermissions = null;
+}
+
+// =============================================================================
 // CORE PERMISSION CHECK FUNCTIONS
 // =============================================================================
 
 /**
  * Check if an organization role can perform an action on a resource.
+ * Checks the hardcoded matrix first (static roles), then falls back to the
+ * runtime custom role registry for dynamic/custom roles.
  *
  * @example
  * ```tsx
@@ -88,11 +111,21 @@ export function canPerformOrgAction<R extends OrgResource>(
 	action: OrgAction<R>
 ): boolean {
 	if (!role) return false;
-	const rolePerms = ORG_ROLE_PERMISSIONS[role as OrgRole];
-	if (!rolePerms) return false;
 
-	const resourcePerms = rolePerms[resource] as readonly string[];
-	return resourcePerms?.includes(action as string) ?? false;
+	// 1. Try hardcoded matrix (static roles: owner, admin, etc.)
+	const rolePerms = ORG_ROLE_PERMISSIONS[role as OrgRole];
+	if (rolePerms) {
+		const resourcePerms = rolePerms[resource] as readonly string[];
+		return resourcePerms?.includes(action as string) ?? false;
+	}
+
+	// 2. Fall back to runtime custom role permissions
+	if (customRolePermissions) {
+		const resourcePerms = customRolePermissions[resource];
+		return resourcePerms?.includes(action as string) ?? false;
+	}
+
+	return false;
 }
 
 /**
@@ -125,9 +158,7 @@ export function canPerformAllOrgActions(
 	role: string | undefined | null,
 	permissions: Array<{ resource: OrgResource; action: string }>
 ): boolean {
-	return permissions.every((p) =>
-		canPerformOrgAction(role, p.resource, p.action as OrgAction<typeof p.resource>)
-	);
+	return permissions.every((p) => canPerformOrgAction(role, p.resource, p.action as OrgAction<typeof p.resource>));
 }
 
 /**
@@ -137,9 +168,7 @@ export function canPerformAnyOrgAction(
 	role: string | undefined | null,
 	permissions: Array<{ resource: OrgResource; action: string }>
 ): boolean {
-	return permissions.some((p) =>
-		canPerformOrgAction(role, p.resource, p.action as OrgAction<typeof p.resource>)
-	);
+	return permissions.some((p) => canPerformOrgAction(role, p.resource, p.action as OrgAction<typeof p.resource>));
 }
 
 // =============================================================================
@@ -154,10 +183,19 @@ export function getOrgAllowedActions<R extends OrgResource>(
 	resource: R
 ): readonly OrgAction<R>[] {
 	if (!role) return [];
-	const rolePerms = ORG_ROLE_PERMISSIONS[role as OrgRole];
-	if (!rolePerms) return [];
 
-	return (rolePerms[resource] ?? []) as readonly OrgAction<R>[];
+	// Static roles
+	const rolePerms = ORG_ROLE_PERMISSIONS[role as OrgRole];
+	if (rolePerms) {
+		return (rolePerms[resource] ?? []) as readonly OrgAction<R>[];
+	}
+
+	// Custom role fallback
+	if (customRolePermissions) {
+		return (customRolePermissions[resource] ?? []) as readonly OrgAction<R>[];
+	}
+
+	return [];
 }
 
 /**
@@ -178,10 +216,7 @@ export function getAdminAllowedActions<R extends AdminResource>(
  * Check if a role has any permission on a resource.
  * Useful for showing/hiding entire sections.
  */
-export function hasAnyOrgPermission(
-	role: string | undefined | null,
-	resource: OrgResource
-): boolean {
+export function hasAnyOrgPermission(role: string | undefined | null, resource: OrgResource): boolean {
 	const actions = getOrgAllowedActions(role, resource);
 	return actions.length > 0;
 }
@@ -189,10 +224,7 @@ export function hasAnyOrgPermission(
 /**
  * Check if a role has any admin permission on a resource.
  */
-export function hasAnyAdminPermission(
-	role: string | undefined | null,
-	resource: AdminResource
-): boolean {
+export function hasAnyAdminPermission(role: string | undefined | null, resource: AdminResource): boolean {
 	const actions = getAdminAllowedActions(role, resource);
 	return actions.length > 0;
 }
@@ -200,10 +232,7 @@ export function hasAnyAdminPermission(
 /**
  * Check if user can write (create/update/delete) to a resource.
  */
-export function canWriteOrgResource(
-	role: string | undefined | null,
-	resource: OrgResource
-): boolean {
+export function canWriteOrgResource(role: string | undefined | null, resource: OrgResource): boolean {
 	const writeActions = ["create", "update", "delete"];
 	const allowedActions = getOrgAllowedActions(role, resource);
 	return allowedActions.some((action) => writeActions.includes(action as string));
@@ -212,10 +241,7 @@ export function canWriteOrgResource(
 /**
  * Check if user can only read a resource (no write permissions).
  */
-export function isReadOnlyOrgResource(
-	role: string | undefined | null,
-	resource: OrgResource
-): boolean {
+export function isReadOnlyOrgResource(role: string | undefined | null, resource: OrgResource): boolean {
 	const allowedActions = getOrgAllowedActions(role, resource);
 	return allowedActions.length > 0 && !canWriteOrgResource(role, resource);
 }
@@ -223,9 +249,10 @@ export function isReadOnlyOrgResource(
 /**
  * Check if role is a valid organization role.
  */
-export function isValidOrgRole(role: string | undefined | null): role is OrgRole {
+export function isValidOrgRole(role: string | undefined | null): boolean {
 	if (!role) return false;
-	return role in ORG_ROLE_PERMISSIONS;
+	if (role in ORG_ROLE_PERMISSIONS) return true;
+	return customRolePermissions !== null;
 }
 
 /**

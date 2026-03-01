@@ -112,15 +112,11 @@ export function useIsRejected(): boolean {
 }
 
 export function useFirstApprovedOrganization(): Organization | undefined {
-	return useOrganizationStore((state) =>
-		state.organizations.find((org) => org.approvalStatus === "approved")
-	);
+	return useOrganizationStore((state) => state.organizations.find((org) => org.approvalStatus === "approved"));
 }
 
 export function useApprovedOrganizations(): Organization[] {
-	return useOrganizationStore((state) =>
-		state.organizations.filter((org) => org.approvalStatus === "approved")
-	);
+	return useOrganizationStore((state) => state.organizations.filter((org) => org.approvalStatus === "approved"));
 }
 
 // Get organization ID outside React components

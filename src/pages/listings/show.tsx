@@ -1,10 +1,10 @@
 import * as Headless from "@headlessui/react";
 import { Button } from "@/components/button";
 import { Heading } from "@/components/heading";
-import { Link } from "@/components/link";
 import { CopyButton } from "@/components/shared";
-import { Card, CardGrid, StatCard } from "@/components/shared/card";
+import { Card } from "@/components/shared/card";
 import { EmptyState } from "@/components/shared/empty-state";
+import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
 import { Skeleton } from "@/components/skeleton";
 import { Text } from "@/components/text";
 import {
@@ -31,7 +31,6 @@ import {
 	CubeIcon,
 	CurrencyRupeeIcon,
 	ExclamationTriangleIcon,
-	EyeIcon,
 	LinkIcon,
 	PencilIcon,
 	PhotoIcon,
@@ -59,12 +58,8 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
 			<div className="flex size-16 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-950/30">
 				<ExclamationTriangleIcon className="size-8 text-red-400" />
 			</div>
-			<p className="mt-4 text-lg font-semibold text-zinc-900 dark:text-white">
-				Something went wrong
-			</p>
-			<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-				Failed to load listing details. Please try again.
-			</p>
+			<p className="mt-4 text-lg font-semibold text-zinc-900 dark:text-white">Something went wrong</p>
+			<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Failed to load listing details. Please try again.</p>
 			<Button className="mt-6" onClick={onRetry} color="dark/zinc">
 				<ArrowPathIcon className="size-4" />
 				Try Again
@@ -133,7 +128,7 @@ function ImageGallery({ images }: { images: string[] }) {
 		<div className="space-y-3">
 			{/* Main image */}
 			<div className="aspect-square w-full max-w-sm overflow-hidden rounded-2xl bg-zinc-100 dark:bg-zinc-800">
-				<img src={getAssetUrl(primaryImage)} alt="Listing" className="h-full w-full object-cover" />
+				<img src={getAssetUrl(primaryImage)} alt="Listing" className="h-full w-full object-contain p-2" />
 			</div>
 
 			{/* Thumbnails */}
@@ -144,11 +139,7 @@ function ImageGallery({ images }: { images: string[] }) {
 							key={`${imgUrl}-${i}`}
 							className="size-16 shrink-0 overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-800"
 						>
-							<img
-								src={getAssetUrl(imgUrl)}
-								alt={`Listing ${i + 2}`}
-								className="h-full w-full object-cover"
-							/>
+							<img src={getAssetUrl(imgUrl)} alt={`Listing ${i + 2}`} className="h-full w-full object-contain p-1" />
 						</div>
 					))}
 					{otherImages.length > 4 && (
@@ -214,7 +205,7 @@ function EditListingModal({
 				name: listing.name,
 				description: listing.description || "",
 				identifier: listing.identifier || "",
-				price: (listing.price / 100).toFixed(2),
+				price: listing.priceDecimal,
 				link: listing.link || "",
 				listingImages: listing.listingImages?.map((img) => img.imageUrl) || [],
 			});
@@ -224,13 +215,10 @@ function EditListingModal({
 		}
 	}, [isOpen, listing]);
 
-	const updateField = useCallback(
-		<K extends keyof EditListingFormData>(field: K, value: EditListingFormData[K]) => {
-			setFormData((prev) => ({ ...prev, [field]: value }));
-			setErrors((prev) => ({ ...prev, [field]: undefined }));
-		},
-		[]
-	);
+	const updateField = useCallback(<K extends keyof EditListingFormData>(field: K, value: EditListingFormData[K]) => {
+		setFormData((prev) => ({ ...prev, [field]: value }));
+		setErrors((prev) => ({ ...prev, [field]: undefined }));
+	}, []);
 
 	const validateStep = useCallback(
 		(currentStep: number): boolean => {
@@ -309,9 +297,7 @@ function EditListingModal({
 				price: Math.round(parseFloat(formData.price) * 100),
 				link: formData.link.trim(),
 				listingImages:
-					formData.listingImages.length > 0
-						? formData.listingImages.map((url) => ({ imageUrl: url }))
-						: undefined,
+					formData.listingImages.length > 0 ? formData.listingImages.map((url) => ({ imageUrl: url })) : undefined,
 			});
 			onSuccess();
 			onClose();
@@ -447,9 +433,7 @@ function EditListingModal({
 												)}
 											/>
 										</div>
-										{errors.identifier && (
-											<p className="mt-1 text-sm text-red-500">{errors.identifier}</p>
-										)}
+										{errors.identifier && <p className="mt-1 text-sm text-red-500">{errors.identifier}</p>}
 									</div>
 
 									{/* Price */}
@@ -574,7 +558,7 @@ function EditListingModal({
 														<img
 															src={getAssetUrl(imgUrl)}
 															alt={`Listing ${idx + 1}`}
-															className="size-12 rounded-lg object-cover"
+															className="size-12 rounded-lg object-contain bg-zinc-100 dark:bg-zinc-800"
 															onError={(e) => {
 																(e.target as HTMLImageElement).src =
 																	"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'%3E%3Cpath fill='%23a1a1aa' d='M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'/%3E%3C/svg%3E";
@@ -613,9 +597,7 @@ function EditListingModal({
 											<div className="mt-3 rounded-xl border-2 border-dashed border-zinc-200 p-6 text-center dark:border-zinc-700">
 												<PhotoIcon className="mx-auto size-8 text-zinc-400" />
 												<p className="mt-2 text-sm text-zinc-500">No images added yet</p>
-												<p className="text-xs text-zinc-400">
-													Add image URLs above to showcase your listing
-												</p>
+												<p className="text-xs text-zinc-400">Add image URLs above to showcase your listing</p>
 											</div>
 										)}
 									</div>
@@ -643,12 +625,7 @@ function EditListingModal({
 										<ChevronRightIcon className="size-4" />
 									</Button>
 								) : (
-									<Button
-										type="button"
-										onClick={handleSubmit}
-										color="emerald"
-										disabled={updateListing.isPending}
-									>
+									<Button type="button" onClick={handleSubmit} color="emerald" disabled={updateListing.isPending}>
 										{updateListing.isPending ? (
 											<>
 												<ArrowPathIcon className="size-4 animate-spin" />
@@ -730,13 +707,10 @@ export function ListingShow() {
 	return (
 		<div className="space-y-6">
 			{/* Back Button */}
-			<Link
-				href={`/${orgSlug}/listings`}
-				className="inline-flex items-center gap-2 text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-			>
+			<Button href={`/${orgSlug}/listings`} color="zinc">
 				<ArrowLeftIcon className="size-4" />
-				Back to Listings
-			</Link>
+				Listings
+			</Button>
 
 			{/* Header */}
 			<div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
@@ -753,13 +727,11 @@ export function ListingShow() {
 						</div>
 
 						<div className="flex items-center gap-1">
-						<p className="text-sm text-zinc-500 dark:text-zinc-400">SKU: {listing.identifier}</p>
-						<CopyButton value={listing.identifier} label="SKU" />
-					</div>
+							<p className="text-sm text-zinc-500 dark:text-zinc-400">SKU: {listing.identifier}</p>
+							<CopyButton value={listing.identifier} label="SKU" />
+						</div>
 
-						<p className="text-2xl font-bold text-zinc-900 dark:text-white">
-							{formatCurrency(listing.price / 100)}
-						</p>
+						<p className="text-2xl font-bold text-zinc-900 dark:text-white">{formatCurrency(listing.priceDecimal)}</p>
 
 						{listing.description && <Text className="max-w-lg">{listing.description}</Text>}
 
@@ -798,28 +770,21 @@ export function ListingShow() {
 			</div>
 
 			{/* Stats Row */}
-			<CardGrid columns={3} gap="md">
-				<StatCard
-					icon={<EyeIcon className="size-5" />}
-					label="Total Views"
-					value={listing.views.toLocaleString("en-IN")}
-				/>
-				<StatCard
-					icon={<TagIcon className="size-5" />}
-					label="Price"
-					value={formatCurrency(listing.price / 100)}
-					variant="success"
-				/>
-				<StatCard
-					icon={<CalendarIcon className="size-5" />}
-					label="Created"
-					value={new Date(listing.createdAt).toLocaleDateString("en-IN", {
-						month: "short",
-						day: "numeric",
-						year: "numeric",
-					})}
-				/>
-			</CardGrid>
+			<FinancialStatsGridBordered
+				stats={[
+					{ name: "Total Views", value: listing.views.toLocaleString("en-IN") },
+					{ name: "Price", value: formatCurrency(listing.priceDecimal) },
+					{
+						name: "Created",
+						value: new Date(listing.createdAt).toLocaleDateString("en-IN", {
+							month: "short",
+							day: "numeric",
+							year: "numeric",
+						}),
+					},
+				]}
+				columns={3}
+			/>
 
 			{/* Main Content */}
 			<div className="grid gap-6 lg:grid-cols-2">
@@ -841,11 +806,9 @@ export function ListingShow() {
 									</div>
 								</div>
 								<div className="flex items-center gap-1">
-								<span className="font-mono text-sm text-zinc-900 dark:text-white">
-									{listing.identifier}
-								</span>
-								<CopyButton value={listing.identifier} label="SKU" />
-							</div>
+									<span className="font-mono text-sm text-zinc-900 dark:text-white">{listing.identifier}</span>
+									<CopyButton value={listing.identifier} label="SKU" />
+								</div>
 							</div>
 
 							{/* Created/Updated */}
@@ -855,9 +818,7 @@ export function ListingShow() {
 										<CalendarIcon className="size-5 text-sky-500" />
 									</div>
 									<div>
-										<p className="text-sm font-medium text-zinc-900 dark:text-white">
-											Last Updated
-										</p>
+										<p className="text-sm font-medium text-zinc-900 dark:text-white">Last Updated</p>
 										<p className="text-sm text-zinc-500 dark:text-zinc-400">
 											{new Date(listing.updatedAt).toLocaleDateString("en-IN", {
 												month: "long",
@@ -906,11 +867,7 @@ export function ListingShow() {
 			)}
 
 			{/* Delete Confirmation Dialog */}
-			<Headless.Dialog
-				open={showDeleteConfirm}
-				onClose={() => setShowDeleteConfirm(false)}
-				className="relative z-50"
-			>
+			<Headless.Dialog open={showDeleteConfirm} onClose={() => setShowDeleteConfirm(false)} className="relative z-50">
 				<Headless.DialogBackdrop
 					transition
 					className="fixed inset-0 bg-black/40 backdrop-blur-sm transition duration-200 ease-out data-closed:opacity-0"
@@ -928,19 +885,14 @@ export function ListingShow() {
 						</Headless.DialogTitle>
 						<p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
 							Are you sure you want to delete{" "}
-							<strong className="text-zinc-700 dark:text-zinc-300">{listing.name}</strong>? This
-							action cannot be undone.
+							<strong className="text-zinc-700 dark:text-zinc-300">{listing.name}</strong>? This action cannot be
+							undone.
 						</p>
 						<div className="mt-6 flex gap-3">
 							<Button outline onClick={() => setShowDeleteConfirm(false)} className="flex-1">
 								Cancel
 							</Button>
-							<Button
-								color="red"
-								onClick={handleDelete}
-								disabled={deleteListing.isPending}
-								className="flex-1"
-							>
+							<Button color="red" onClick={handleDelete} disabled={deleteListing.isPending} className="flex-1">
 								{deleteListing.isPending ? (
 									<>
 										<ArrowPathIcon className="size-4 animate-spin" />

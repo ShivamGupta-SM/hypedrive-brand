@@ -5,6 +5,7 @@ import {
 	ClipboardDocumentListIcon,
 	ComputerDesktopIcon,
 	DevicePhoneMobileIcon,
+	DeviceTabletIcon,
 	EnvelopeIcon,
 	EnvelopeOpenIcon,
 	FingerPrintIcon,
@@ -23,6 +24,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/button";
 import { Heading } from "@/components/heading";
+import { GoogleIcon } from "@/components/icons/platform-icons";
 import { Input } from "@/components/input";
 import { usePanelNav } from "@/components/settings-dialog";
 import {
@@ -361,22 +363,52 @@ function ActiveSessionsPanel() {
 		});
 	};
 
-	const getDeviceIcon = (session: { iconType?: string; userAgent?: string | null }) => {
+	const getDeviceIcon = (session: { iconType?: string; device?: string; userAgent?: string | null }) => {
 		if (session.iconType === "smartphone") return DevicePhoneMobileIcon;
+		if (session.iconType === "tablet") return DeviceTabletIcon;
 		if (session.iconType === "mac" || session.iconType === "computer") return ComputerDesktopIcon;
+		if (session.device) {
+			const d = session.device.toLowerCase();
+			if (d.includes("mobile") || d.includes("phone")) return DevicePhoneMobileIcon;
+			if (d.includes("tablet") || d.includes("ipad")) return DeviceTabletIcon;
+		}
 		if (!session.userAgent) return ComputerDesktopIcon;
 		const ua = session.userAgent.toLowerCase();
-		if (ua.includes("mobile") || ua.includes("android") || ua.includes("iphone")) {
-			return DevicePhoneMobileIcon;
-		}
+		if (ua.includes("ipad") || ua.includes("tablet")) return DeviceTabletIcon;
+		if (ua.includes("mobile") || ua.includes("android") || ua.includes("iphone")) return DevicePhoneMobileIcon;
 		return ComputerDesktopIcon;
 	};
 
-	const getDeviceLabel = (session: { device?: string; browser?: string; userAgent?: string | null }) => {
-		if (session.browser && session.device) return `${session.browser} on ${session.device}`;
-		if (session.browser) return session.browser;
+	const getDeviceName = (session: { device?: string; userAgent?: string | null }) => {
 		if (session.device) return session.device;
-		return session.userAgent?.split("/")[0] || "Unknown Device";
+		if (!session.userAgent) return "Unknown Device";
+		const ua = session.userAgent.toLowerCase();
+		if (ua.includes("iphone")) return "iPhone";
+		if (ua.includes("ipad")) return "iPad";
+		if (ua.includes("android")) return "Android";
+		if (ua.includes("mac")) return "Mac";
+		if (ua.includes("windows")) return "Windows";
+		if (ua.includes("linux")) return "Linux";
+		return "Unknown Device";
+	};
+
+	const getBrowserName = (session: { browser?: string; userAgent?: string | null }) => {
+		if (session.browser) return session.browser;
+		if (!session.userAgent) return "";
+		const ua = session.userAgent.toLowerCase();
+		if (ua.includes("edg")) return "Edge";
+		if (ua.includes("chrome")) return "Chrome";
+		if (ua.includes("safari")) return "Safari";
+		if (ua.includes("firefox")) return "Firefox";
+		return "";
+	};
+
+	const getDeviceLabel = (session: { device?: string; browser?: string; userAgent?: string | null }) => {
+		const device = getDeviceName(session);
+		const browser = getBrowserName(session);
+		if (browser && device !== "Unknown Device") return `${browser} on ${device}`;
+		if (browser) return browser;
+		return device;
 	};
 
 	const sessionList = hasDeviceSessions ? deviceSessions : sessions;
@@ -491,9 +523,7 @@ function ActiveSessionsPanel() {
 								</div>
 								<div className="min-w-0 flex-1">
 									<div className="flex items-center gap-2">
-										<p className="text-sm font-medium text-zinc-900 dark:text-white">
-											{session.userAgent?.split("/")[0] || "Unknown Device"}
-										</p>
+										<p className="text-sm font-medium text-zinc-900 dark:text-white">{getDeviceLabel(session)}</p>
 										{isCurrent && (
 											<span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
 												Current
@@ -1394,7 +1424,7 @@ function DeleteAccountPanel() {
 // LINKED ACCOUNTS PANEL
 // =============================================================================
 
-const SOCIAL_PROVIDERS = [{ id: "google", label: "Google", icon: GlobeAltIcon, color: "red" as const }];
+const SOCIAL_PROVIDERS = [{ id: "google", label: "Google", icon: GoogleIcon, color: "red" as const }];
 
 function LinkedAccountsPanel() {
 	const panelNav = usePanelNav();
@@ -1944,7 +1974,7 @@ export function AccountSettings({ section = "all" }: { section?: AccountSettings
 	const isDialog = section !== "all";
 
 	return (
-		<div className={isDialog ? "space-y-6 px-6 py-5 pb-10" : "space-y-6 pb-20"}>
+		<div className={isDialog ? "space-y-6 px-4 py-5 pb-10 sm:px-6" : "space-y-6 pb-20"}>
 			{/* Page heading — only in full-page mode */}
 			{section === "all" && (
 				<div>

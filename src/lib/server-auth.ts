@@ -1,11 +1,16 @@
 import { createServerFn } from "@tanstack/react-start";
 import { deleteCookie, getCookie, setCookie } from "@tanstack/react-start/server";
 import Client from "@/lib/brand-client";
-import { API_URL, AUTH_COOKIE_MAX_AGE, AUTH_COOKIE_NAME, AUTH_COOKIE_PUBLIC_NAME } from "@/lib/config";
+import {
+	API_URL,
+	AUTH_COOKIE_MAX_AGE,
+	AUTH_COOKIE_NAME,
+	AUTH_COOKIE_PUBLIC_NAME,
+	AUTH_COOKIE_SESSION_MAX_AGE,
+} from "@/lib/config";
 
 const AUTH_COOKIE = AUTH_COOKIE_NAME;
 const AUTH_COOKIE_PUBLIC = AUTH_COOKIE_PUBLIC_NAME;
-const COOKIE_MAX_AGE = AUTH_COOKIE_MAX_AGE;
 const IS_PROD = process.env.NODE_ENV === "production";
 
 // =============================================================================
@@ -24,11 +29,13 @@ export const getServerAuth = createServerFn({ method: "GET" }).handler(async () 
 /**
  * Set auth cookies after login/register.
  * Two cookies: httpOnly (SSR reads) + public (JS reads for Bearer headers).
+ * Pass rememberMe: true for extended session (30 days), false for 1 day.
  */
 export const setServerAuthCookie = createServerFn({ method: "POST" })
-	.inputValidator((input: { token: string }) => input)
+	.inputValidator((input: { token: string; rememberMe?: boolean }) => input)
 	.handler(async ({ data }) => {
-		const base = { path: "/", sameSite: "lax" as const, secure: IS_PROD, maxAge: COOKIE_MAX_AGE };
+		const maxAge = data.rememberMe ? AUTH_COOKIE_MAX_AGE : AUTH_COOKIE_SESSION_MAX_AGE;
+		const base = { path: "/", sameSite: "lax" as const, secure: IS_PROD, maxAge };
 		setCookie(AUTH_COOKIE, data.token, { ...base, httpOnly: true });
 		setCookie(AUTH_COOKIE_PUBLIC, data.token, base);
 	});
@@ -110,6 +117,28 @@ export const getOrganizationsFromServer = createServerFn({ method: "GET" }).hand
 		return { organizations: [] };
 	}
 });
+
+/**
+ * Fetch organization roles server-side.
+ * Used to resolve custom role permissions when the member's role
+ * is not one of the hardcoded static roles.
+ */
+export const getOrgRolesFromServer = createServerFn({ method: "GET" })
+	.inputValidator((input: { organizationId: string }) => input)
+	.handler(async ({ data }) => {
+		const token = getCookie(AUTH_COOKIE);
+		if (!token) {
+			return { roles: [] };
+		}
+
+		try {
+			const client = getServerClient(token);
+			const result = await client.auth.listOrganizationRoles(data.organizationId);
+			return { roles: result.roles ?? [] };
+		} catch {
+			return { roles: [] };
+		}
+	});
 
 /**
  * Fetch current user's member record for an organization, server-side.

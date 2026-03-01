@@ -18,8 +18,7 @@ export const Route = createFileRoute("/api/og")({
 			GET: async ({ request }) => {
 				const url = new URL(request.url);
 				const title = url.searchParams.get("title") || "Hypedrive Brand";
-				const description =
-					url.searchParams.get("description") || "Influencer Marketing — Brand Admin Panel";
+				const description = url.searchParams.get("description") || "Influencer Marketing — Brand Admin Panel";
 
 				// Load font from public/fonts (stable URL, no hash)
 				const baseUrl = `${url.protocol}//${url.host}`;
@@ -143,7 +142,7 @@ export const Route = createFileRoute("/api/og")({
 								style: "normal",
 							},
 						],
-					},
+					}
 				);
 
 				// Convert SVG → PNG via resvg-wasm

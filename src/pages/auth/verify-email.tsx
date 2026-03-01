@@ -12,12 +12,8 @@ export function VerifyEmail() {
 	const { token } = Route.useSearch();
 	const navigate = useNavigate();
 	const verifyEmail = useVerifyEmail();
-	const [status, setStatus] = useState<"loading" | "success" | "error">(
-		token ? "loading" : "error"
-	);
-	const [errorMessage, setErrorMessage] = useState<string | null>(
-		token ? null : "No verification token provided."
-	);
+	const [status, setStatus] = useState<"loading" | "success" | "error">(token ? "loading" : "error");
+	const [errorMessage, setErrorMessage] = useState<string | null>(token ? null : "No verification token provided.");
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: intentional run-once on mount
 	useEffect(() => {
@@ -49,7 +45,11 @@ export function VerifyEmail() {
 					<div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
 						<svg className="size-7 animate-spin text-zinc-400" fill="none" viewBox="0 0 24 24" aria-hidden="true">
 							<circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-							<path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+							<path
+								className="opacity-75"
+								fill="currentColor"
+								d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+							/>
 						</svg>
 					</div>
 					<h1 className="text-xl font-semibold text-zinc-900 dark:text-white">Verifying your email…</h1>
@@ -89,7 +89,10 @@ export function VerifyEmail() {
 						Try registering again
 					</Button>
 					<div className="text-center">
-						<TextLink href="/login" className="inline-flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200">
+						<TextLink
+							href="/login"
+							className="inline-flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+						>
 							<ArrowLeftIcon className="size-3.5" />
 							Back to sign in
 						</TextLink>

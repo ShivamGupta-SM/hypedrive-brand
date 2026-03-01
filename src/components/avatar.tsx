@@ -31,9 +31,7 @@ export function Avatar({
 				"inline-grid shrink-0 align-middle [--avatar-radius:20%] *:col-start-1 *:row-start-1",
 				"outline -outline-offset-1 outline-black/10 dark:outline-white/10",
 				// Border radius
-				square
-					? "rounded-(--avatar-radius) *:rounded-(--avatar-radius)"
-					: "rounded-full *:rounded-full"
+				square ? "rounded-(--avatar-radius) *:rounded-(--avatar-radius)" : "rounded-full *:rounded-full"
 			)}
 		>
 			{initials && (
@@ -43,14 +41,7 @@ export function Avatar({
 					aria-hidden={alt ? undefined : "true"}
 				>
 					{alt && <title>{alt}</title>}
-					<text
-						x="50%"
-						y="50%"
-						alignmentBaseline="middle"
-						dominantBaseline="middle"
-						textAnchor="middle"
-						dy=".125em"
-					>
+					<text x="50%" y="50%" alignmentBaseline="middle" dominantBaseline="middle" textAnchor="middle" dy=".125em">
 						{initials}
 					</text>
 				</svg>

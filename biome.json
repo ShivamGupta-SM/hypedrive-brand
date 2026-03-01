@@ -25,7 +25,8 @@
 				"noUnusedVariables": "warn"
 			},
 			"suspicious": {
-				"noExplicitAny": "warn"
+				"noExplicitAny": "warn",
+				"noArrayIndexKey": "off"
 			},
 			"security": {
 				"noDangerouslySetInnerHtml": "off"

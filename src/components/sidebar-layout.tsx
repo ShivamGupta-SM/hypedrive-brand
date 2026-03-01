@@ -1,32 +1,22 @@
 "use client";
 
 import * as Headless from "@headlessui/react";
+import { Link } from "@tanstack/react-router";
 import type React from "react";
 import { useState } from "react";
 import { Logo } from "./logo";
-import { NavbarItem } from "./navbar";
 
-function OpenMenuIcon() {
+function MenuIcon({ className }: { className?: string }) {
 	return (
-		<svg data-slot="icon" viewBox="0 0 20 20" aria-hidden="true">
-			<path d="M2 6.75C2 6.33579 2.33579 6 2.75 6H17.25C17.6642 6 18 6.33579 18 6.75C18 7.16421 17.6642 7.5 17.25 7.5H2.75C2.33579 7.5 2 7.16421 2 6.75ZM2 13.25C2 12.8358 2.33579 12.5 2.75 12.5H17.25C17.6642 12.5 18 12.8358 18 13.25C18 13.6642 17.6642 14 17.25 14H2.75C2.33579 14 2 13.6642 2 13.25Z" />
+		<svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className={className}>
+			<line x1="4" y1="7" x2="20" y2="7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+			<line x1="4" y1="12" x2="20" y2="12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+			<line x1="4" y1="17" x2="14" y2="17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
 		</svg>
 	);
 }
 
-function CloseMenuIcon() {
-	return (
-		<svg data-slot="icon" viewBox="0 0 20 20" aria-hidden="true">
-			<path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
-		</svg>
-	);
-}
-
-function MobileSidebar({
-	open,
-	close,
-	children,
-}: React.PropsWithChildren<{ open: boolean; close: () => void }>) {
+function MobileSidebar({ open, close, children }: React.PropsWithChildren<{ open: boolean; close: () => void }>) {
 	return (
 		<Headless.Dialog open={open} onClose={close} className="lg:hidden">
 			<Headless.DialogBackdrop
@@ -35,14 +25,17 @@ function MobileSidebar({
 			/>
 			<Headless.DialogPanel
 				transition
-				className="fixed inset-y-0 left-0 w-full max-w-70 p-2 transition duration-300 ease-in-out data-closed:-translate-x-full"
+				className="fixed inset-y-0 left-0 w-full max-w-72 p-2 transition duration-300 ease-in-out data-closed:-translate-x-full"
 			>
-				<div className="flex h-full flex-col rounded-2xl bg-white shadow-xl ring-1 ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10">
-					<div className="-mb-3 px-4 pt-3">
-						<Headless.CloseButton as={NavbarItem} aria-label="Close navigation">
-							<CloseMenuIcon />
-						</Headless.CloseButton>
-					</div>
+				<div className="relative flex h-full flex-col rounded-2xl bg-white shadow-xl ring-1 ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10">
+					<Headless.CloseButton
+						aria-label="Close navigation"
+						className="absolute right-3 top-3.5 z-10 rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-950/5 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-zinc-200"
+					>
+						<svg className="size-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+							<path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
+						</svg>
+					</Headless.CloseButton>
 					{children}
 				</div>
 			</Headless.DialogPanel>
@@ -53,52 +46,56 @@ function MobileSidebar({
 export function SidebarLayout({
 	navbar,
 	sidebar,
+	contentHeader,
+	mobileOrgSwitcher,
 	children,
-}: React.PropsWithChildren<{ navbar: React.ReactNode; sidebar: React.ReactNode }>) {
+}: React.PropsWithChildren<{
+	navbar: React.ReactNode;
+	sidebar: React.ReactNode;
+	contentHeader?: React.ReactNode;
+	mobileOrgSwitcher?: React.ReactNode;
+}>) {
 	const [showSidebar, setShowSidebar] = useState(false);
 
 	return (
-		<div className="relative isolate flex h-dvh w-full max-lg:flex-col bg-zinc-100 dark:bg-zinc-950"
+		<div
+			className="relative isolate flex h-dvh w-full bg-zinc-100 max-lg:flex-col dark:bg-zinc-950"
 			style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
 		>
-			{/* ============================================ */}
-			{/* DESKTOP LAYOUT — Inset sidebar + floating content card */}
-			{/* ============================================ */}
+			{/* Desktop sidebar — z-10 ensures dropdowns render above content */}
+			<div className="fixed inset-y-0 left-0 z-10 hidden w-60 lg:block">{sidebar}</div>
 
-			{/* Sidebar — desktop: fixed inset, sits on the gray shell */}
-			<div className="fixed inset-y-0 left-0 hidden w-60 lg:block">
-				{sidebar}
-			</div>
-
-			{/* Sidebar on mobile */}
+			{/* Mobile sidebar */}
 			<MobileSidebar open={showSidebar} close={() => setShowSidebar(false)}>
 				{sidebar}
 			</MobileSidebar>
 
-			{/* Mobile header bar */}
-			<header className="flex items-center gap-3 border-b border-zinc-200 bg-white px-4 py-2 lg:hidden dark:border-zinc-800 dark:bg-zinc-900">
-				<div className="flex items-center">
-					<NavbarItem onClick={() => setShowSidebar(true)} aria-label="Open navigation">
-						<OpenMenuIcon />
-					</NavbarItem>
-				</div>
-				<div className="flex min-w-0 flex-1 items-center justify-center">
-					<Logo className="h-6 w-auto text-zinc-950 dark:text-white" />
-				</div>
-				<div className="flex items-center">{navbar}</div>
+			{/* Mobile header */}
+			<header className="flex h-12 shrink-0 items-center gap-3 border-b border-zinc-950/10 bg-white px-3 lg:hidden dark:border-white/10 dark:bg-zinc-900">
+				<button
+					type="button"
+					onClick={() => setShowSidebar(true)}
+					aria-label="Open navigation"
+					className="-ml-1 rounded-lg p-1.5 text-zinc-600 active:bg-zinc-100 dark:text-zinc-300 dark:active:bg-zinc-800"
+				>
+					<MenuIcon className="size-5" />
+				</button>
+				<Link to="/" className="shrink-0">
+					<Logo className="h-4.5 w-auto text-zinc-950 dark:text-white" />
+				</Link>
+				<div className="h-5 w-px bg-zinc-950/10 dark:bg-white/10" />
+				{mobileOrgSwitcher}
+				<div className="min-w-0 flex-1" />
+				<div className="flex shrink-0 items-center">{navbar}</div>
 			</header>
 
-			{/* Main content area — offset by sidebar width on desktop */}
-			{/* The content sits inside a white floating card with rounded corners */}
+			{/* Main content — offset by sidebar width on desktop */}
 			<main className="flex min-h-0 flex-1 flex-col lg:pl-60">
-				{/* Desktop: padding creates the "inset" effect; the card has its own bg */}
-				<div className="flex flex-1 flex-col min-h-0 lg:p-3">
-					<div className="flex flex-1 flex-col min-h-0 lg:rounded-2xl lg:bg-white lg:shadow-md lg:ring-1 lg:ring-zinc-950/5 dark:lg:bg-zinc-900 dark:lg:ring-white/10">
-						{/* Scrollable content */}
-						<div className="flex-1 min-h-0 overflow-y-auto">
-							<div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-8">
-								{children}
-							</div>
+				<div className="flex min-h-0 flex-1 flex-col lg:p-2.5 lg:pl-2">
+					<div className="flex min-h-0 flex-1 flex-col bg-white lg:rounded-2xl lg:shadow-sm lg:ring-1 lg:ring-zinc-950/5 dark:bg-zinc-900 dark:lg:ring-white/10">
+						{contentHeader}
+						<div className="min-h-0 flex-1 overflow-y-auto">
+							<div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-8">{children}</div>
 						</div>
 					</div>
 				</div>

@@ -2,26 +2,25 @@ import {
 	ArrowTopRightOnSquareIcon,
 	ChatBubbleLeftRightIcon,
 	CheckCircleIcon,
+	ChevronDownIcon,
 	DocumentTextIcon,
 	EnvelopeIcon,
+	LifebuoyIcon,
+	PaperAirplaneIcon,
 	PhoneIcon,
 	QuestionMarkCircleIcon,
 } from "@heroicons/react/16/solid";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/button";
 import { Heading } from "@/components/heading";
 import { Input } from "@/components/input";
-import {
-	MenuRow,
-	MenuSection,
-	MenuSectionHeader,
-	MenuSeparator,
-} from "@/components/shared/menu-list";
+import { Card } from "@/components/shared/card";
+import { MenuRow, MenuSection, MenuSectionHeader, MenuSeparator } from "@/components/shared/menu-list";
 import { Text } from "@/components/text";
 import { Textarea } from "@/components/textarea";
 
 // =============================================================================
-// FAQ SECTION
+// FAQ DATA
 // =============================================================================
 
 const faqs = [
@@ -52,6 +51,10 @@ const faqs = [
 	},
 ];
 
+// =============================================================================
+// FAQ ITEM
+// =============================================================================
+
 function FAQItem({
 	question,
 	answer,
@@ -63,27 +66,34 @@ function FAQItem({
 	isOpen: boolean;
 	onToggle: () => void;
 }) {
+	const contentRef = useRef<HTMLDivElement>(null);
+
 	return (
-		<div className="border-b border-zinc-200 dark:border-zinc-800">
+		<div className="border-b border-zinc-100 last:border-b-0 dark:border-zinc-800">
 			<button
 				type="button"
 				onClick={onToggle}
-				className="flex w-full items-center justify-between py-4 text-left"
+				className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/40"
 			>
 				<span className="text-sm font-medium text-zinc-900 dark:text-white">{question}</span>
-				<span
-					className={`ml-4 flex size-5 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-xs text-zinc-500 transition-transform dark:bg-zinc-800 dark:text-zinc-400 ${
-						isOpen ? "rotate-45" : ""
+				<ChevronDownIcon
+					className={`size-4 shrink-0 text-zinc-400 transition-transform duration-200 dark:text-zinc-500 ${
+						isOpen ? "rotate-180" : ""
 					}`}
-				>
-					+
-				</span>
+				/>
 			</button>
-			{isOpen && (
-				<div className="pb-4">
-					<p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">{answer}</p>
+			<div
+				className="grid transition-all duration-200 ease-in-out"
+				style={{
+					gridTemplateRows: isOpen ? "1fr" : "0fr",
+				}}
+			>
+				<div className="overflow-hidden">
+					<div ref={contentRef} className="px-4 pb-3.5">
+						<p className="text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">{answer}</p>
+					</div>
 				</div>
-			)}
+			</div>
 		</div>
 	);
 }
@@ -106,7 +116,6 @@ function ContactForm() {
 
 		setIsSubmitting(true);
 		try {
-			// Open mailto with pre-filled subject and body as fallback
 			const subject = encodeURIComponent(formData.subject);
 			const body = encodeURIComponent(formData.message);
 			window.open(`mailto:support@hypedrive.com?subject=${subject}&body=${body}`);
@@ -114,7 +123,6 @@ function ContactForm() {
 			setIsSubmitted(true);
 			setFormData({ subject: "", message: "" });
 
-			// Reset success message after 5 seconds
 			setTimeout(() => setIsSubmitted(false), 5000);
 		} finally {
 			setIsSubmitting(false);
@@ -123,14 +131,12 @@ function ContactForm() {
 
 	if (isSubmitted) {
 		return (
-			<div className="flex flex-col items-center rounded-xl bg-emerald-50 p-6 text-center dark:bg-emerald-950/30">
-				<div className="flex size-12 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50">
+			<div className="flex flex-col items-center rounded-xl bg-emerald-50/60 px-6 py-8 text-center ring-1 ring-inset ring-emerald-200/40 dark:bg-emerald-950/15 dark:ring-emerald-800/30">
+				<div className="flex size-12 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-900/40">
 					<CheckCircleIcon className="size-6 text-emerald-600 dark:text-emerald-400" />
 				</div>
-				<p className="mt-3 text-sm font-medium text-emerald-700 dark:text-emerald-300">
-					Message sent successfully!
-				</p>
-				<p className="mt-1 text-xs text-emerald-600 dark:text-emerald-400">
+				<p className="mt-3 text-sm font-semibold text-emerald-700 dark:text-emerald-300">Message sent!</p>
+				<p className="mt-1 text-xs text-emerald-600/80 dark:text-emerald-400/70">
 					We'll get back to you within 24 hours.
 				</p>
 			</div>
@@ -138,35 +144,34 @@ function ContactForm() {
 	}
 
 	return (
-		<form onSubmit={handleSubmit} className="space-y-4">
+		<form onSubmit={handleSubmit} className="space-y-3.5">
 			<div>
-				<label htmlFor="subject" className="text-sm font-medium text-zinc-900 dark:text-white">
+				<label htmlFor="support-subject" className="mb-1.5 block text-sm font-medium text-zinc-900 dark:text-white">
 					Subject
 				</label>
 				<Input
-					id="subject"
+					id="support-subject"
 					value={formData.subject}
 					onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
 					placeholder="What do you need help with?"
-					className="mt-1.5"
 					required
 				/>
 			</div>
 			<div>
-				<label htmlFor="message" className="text-sm font-medium text-zinc-900 dark:text-white">
+				<label htmlFor="support-message" className="mb-1.5 block text-sm font-medium text-zinc-900 dark:text-white">
 					Message
 				</label>
 				<Textarea
-					id="message"
+					id="support-message"
 					value={formData.message}
 					onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-					placeholder="Describe your issue or question..."
-					className="mt-1.5"
+					placeholder="Describe your issue or question in detail..."
 					rows={4}
 					required
 				/>
 			</div>
 			<Button type="submit" color="dark/zinc" className="w-full" disabled={isSubmitting}>
+				<PaperAirplaneIcon className="size-4" />
 				{isSubmitting ? "Sending..." : "Send Message"}
 			</Button>
 		</form>
@@ -183,12 +188,30 @@ export function Support() {
 	return (
 		<div className="space-y-6 pb-20">
 			{/* Header */}
-			<div>
-				<Heading>Help & Support</Heading>
-				<Text className="mt-1">Get help with Hypedrive or contact our support team</Text>
+			<div className="flex items-start justify-between gap-4">
+				<div>
+					<Heading>Help & Support</Heading>
+					<Text className="mt-1">Get help with Hypedrive or contact our support team</Text>
+				</div>
 			</div>
 
-			{/* Quick Actions */}
+			{/* Support Hero */}
+			<div className="overflow-hidden rounded-xl bg-zinc-900 p-5 dark:bg-zinc-800">
+				<div className="flex items-start gap-4">
+					<div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/10">
+						<LifebuoyIcon className="size-5 text-white" />
+					</div>
+					<div className="min-w-0">
+						<p className="text-xs font-semibold uppercase tracking-widest text-zinc-400">Support Center</p>
+						<h2 className="mt-0.5 text-base font-semibold text-white sm:text-lg">How can we help you?</h2>
+						<p className="mt-1 text-sm leading-relaxed text-white/50">
+							Browse FAQs, check documentation, or reach out to our team directly.
+						</p>
+					</div>
+				</div>
+			</div>
+
+			{/* Contact Options */}
 			<div>
 				<MenuSectionHeader>Contact Us</MenuSectionHeader>
 				<MenuSection>
@@ -205,7 +228,7 @@ export function Support() {
 						icon={ChatBubbleLeftRightIcon}
 						iconColor="emerald"
 						label="Live Chat"
-						value="Available 9 AM - 6 PM IST"
+						value="9 AM – 6 PM IST"
 						onClick={() => window.open("mailto:support@hypedrive.com?subject=Live Chat Request")}
 					/>
 					<MenuSeparator />
@@ -235,7 +258,7 @@ export function Support() {
 					<MenuSeparator />
 					<MenuRow
 						icon={QuestionMarkCircleIcon}
-						iconColor="zinc"
+						iconColor="violet"
 						label="Help Center"
 						suffix={<ArrowTopRightOnSquareIcon className="size-4 text-zinc-400" />}
 						onClick={() => window.open("https://help.hypedrive.com", "_blank")}
@@ -247,27 +270,25 @@ export function Support() {
 			{/* FAQ */}
 			<div>
 				<MenuSectionHeader>Frequently Asked Questions</MenuSectionHeader>
-				<div className="rounded-xl bg-white ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-					<div className="px-4">
-						{faqs.map((faq, index) => (
-							<FAQItem
-								key={index}
-								question={faq.question}
-								answer={faq.answer}
-								isOpen={openFAQ === index}
-								onToggle={() => setOpenFAQ(openFAQ === index ? null : index)}
-							/>
-						))}
-					</div>
-				</div>
+				<Card padding="none">
+					{faqs.map((faq, index) => (
+						<FAQItem
+							key={index}
+							question={faq.question}
+							answer={faq.answer}
+							isOpen={openFAQ === index}
+							onToggle={() => setOpenFAQ(openFAQ === index ? null : index)}
+						/>
+					))}
+				</Card>
 			</div>
 
 			{/* Contact Form */}
 			<div>
 				<MenuSectionHeader>Send us a message</MenuSectionHeader>
-				<div className="rounded-xl bg-white p-4 ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
+				<Card padding="md">
 					<ContactForm />
-				</div>
+				</Card>
 			</div>
 		</div>
 	);

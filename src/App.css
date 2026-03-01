@@ -7,7 +7,8 @@
 	font-display: optional;
 	font-weight: 100 900;
 	src: url("/fonts/geist-latin-wght-normal.woff2") format("woff2-variations");
-	unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+	unicode-range:
+		U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
 		U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
 		U+FEFF, U+FFFD;
 }
@@ -19,7 +20,8 @@
 	font-display: optional;
 	font-weight: 400;
 	src: url("/fonts/instrument-serif-latin-400-normal.woff2") format("woff2");
-	unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+	unicode-range:
+		U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
 		U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
 		U+FEFF, U+FFFD;
 }
@@ -370,15 +372,7 @@ html:has([data-theme="dark"]) {
    CSS variables for react-loading-skeleton dark mode support
    ========================================================================== */
 
-:root {
-	--skeleton-base: #e4e4e7;
-	--skeleton-highlight: #f4f4f5;
-}
-
-[data-theme="dark"] {
-	--skeleton-base: #3f3f46;
-	--skeleton-highlight: #52525b;
-}
+/* Skeleton colors are handled by SkeletonTheme provider in __root.tsx */
 
 /* =============================================================================
    GLAZE/SHIMMER ANIMATION
@@ -446,22 +440,12 @@ html:has([data-theme="dark"]) {
 	content: "";
 	position: absolute;
 	inset: 0;
-	background: linear-gradient(
-		90deg,
-		transparent 0%,
-		rgba(255, 255, 255, 0.4) 50%,
-		transparent 100%
-	);
+	background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.4) 50%, transparent 100%);
 	animation: shimmer 1.5s infinite;
 }
 
 [data-theme="dark"] .skeleton-shimmer::after {
-	background: linear-gradient(
-		90deg,
-		transparent 0%,
-		rgba(255, 255, 255, 0.1) 50%,
-		transparent 100%
-	);
+	background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
 }
 
 /* Fade in animation */
@@ -482,7 +466,8 @@ html:has([data-theme="dark"]) {
 
 /* Pulse animation for attention elements */
 @keyframes pulse-soft {
-	0%, 100% {
+	0%,
+	100% {
 		opacity: 1;
 	}
 	50% {
@@ -648,21 +633,35 @@ html:has([data-theme="dark"]) {
 
 /* ── Close button ── */
 [data-sonner-toaster] [data-sonner-toast] [data-close-button] {
-	top: 8px;
-	right: 8px;
+	position: absolute;
+	top: 6px;
+	right: 6px;
 	left: auto;
+	transform: none;
 	border-radius: 6px;
-	width: 18px;
-	height: 18px;
+	width: 24px;
+	height: 24px;
 	border: none;
 	background: transparent;
 	opacity: 0.4;
-	transition: opacity 0.12s ease;
+	transition:
+		opacity 0.15s ease,
+		background 0.15s ease;
 	color: #71717a;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	padding: 0;
 }
 
 [data-sonner-toaster][data-theme="dark"] [data-sonner-toast] [data-close-button] {
 	color: #a1a1aa;
+}
+
+[data-sonner-toaster] [data-sonner-toast] [data-close-button] svg {
+	width: 12px;
+	height: 12px;
 }
 
 [data-sonner-toaster] [data-sonner-toast] [data-close-button]:hover {
@@ -749,4 +748,3 @@ html:has([data-theme="dark"]) {
 	padding: 5px 11px;
 	height: auto;
 }
-

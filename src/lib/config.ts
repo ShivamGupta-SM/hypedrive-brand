@@ -24,8 +24,7 @@ export const API_URL: string =
 // ─── ENVIRONMENT ──────────────────────────────────────────────────────────────
 
 export const IS_PRODUCTION: boolean =
-	(typeof import.meta !== "undefined" && import.meta.env?.PROD) ||
-	process.env.NODE_ENV === "production";
+	(typeof import.meta !== "undefined" && import.meta.env?.PROD) || process.env.NODE_ENV === "production";
 
 export const IS_DEV: boolean = !IS_PRODUCTION;
 
@@ -40,5 +39,8 @@ export const AUTH_COOKIE_NAME = "hd_auth";
  */
 export const AUTH_COOKIE_PUBLIC_NAME = "hd_auth_pub";
 
-/** Cookie max-age in seconds (7 days). */
-export const AUTH_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
+/** Cookie max-age in seconds when "Keep me signed in" is checked (30 days). */
+export const AUTH_COOKIE_MAX_AGE = 60 * 60 * 24 * 30;
+
+/** Cookie max-age in seconds for normal sessions (1 day). */
+export const AUTH_COOKIE_SESSION_MAX_AGE = 60 * 60 * 24;

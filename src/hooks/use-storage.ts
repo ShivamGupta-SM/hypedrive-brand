@@ -84,11 +84,7 @@ export function useFileUpload() {
 	const requestUploadUrl = useRequestUploadUrl();
 
 	return useMutation({
-		mutationFn: async (params: {
-			file: File;
-			folder: storage.StorageFolder;
-			resourceId?: string;
-		}) => {
+		mutationFn: async (params: { file: File; folder: storage.StorageFolder; resourceId?: string }) => {
 			// Step 1: Get signed upload URL
 			const { uploadUrl, fileUrl, key } = await requestUploadUrl.mutateAsync({
 				filename: params.file.name,

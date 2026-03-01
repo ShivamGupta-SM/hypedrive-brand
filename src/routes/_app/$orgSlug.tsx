@@ -13,7 +13,8 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { useEffect } from "react";
 
-import { getActiveMemberFromServer } from "@/lib/server-auth";
+import { ORG_ROLE_PERMISSIONS, registerCustomRolePermissions } from "@/lib/permissions/access-control-client";
+import { getActiveMemberFromServer, getOrgRolesFromServer } from "@/lib/server-auth";
 import { useOrganizationStore } from "@/store/organization-store";
 import { usePermissionsStore } from "@/store/permissions-store";
 
@@ -50,17 +51,33 @@ export const Route = createFileRoute("/_app/$orgSlug")({
 			staleTime: 5 * 60 * 1000,
 		});
 
+		// If member has a custom role (not in the hardcoded matrix), fetch its permissions
+		let customPermissions: Record<string, string[]> | null = null;
+		if (member?.role && !(member.role in ORG_ROLE_PERMISSIONS)) {
+			const { roles } = await context.queryClient.ensureQueryData({
+				queryKey: ["server", "orgRoles", org.id],
+				queryFn: () => getOrgRolesFromServer({ data: { organizationId: org.id } }),
+				staleTime: 10 * 60 * 1000,
+			});
+			const match = roles.find((r) => r.role === member.role);
+			customPermissions = match?.permission ?? null;
+
+			// Register immediately for SSR-time rendering
+			registerCustomRolePermissions(customPermissions);
+		}
+
 		return {
 			organization: org,
 			orgSlug: params.orgSlug,
 			activeMember: member,
+			customPermissions,
 		};
 	},
 	component: OrgLayoutWrapper,
 });
 
 function OrgLayoutWrapper() {
-	const { organization, organizations, activeMember, auth } = Route.useRouteContext();
+	const { organization, organizations, activeMember, customPermissions, auth } = Route.useRouteContext();
 
 	// Sync server-resolved data to client stores for reactive UI (dropdowns, permissions, etc.)
 	useEffect(() => {
@@ -78,11 +95,12 @@ function OrgLayoutWrapper() {
 			usePermissionsStore.getState().setPermissions({
 				userId: auth.user.id,
 				organizationRole: activeMember.role,
+				customPermissions,
 			});
 		} else {
 			usePermissionsStore.getState().clearPermissions();
 		}
-	}, [activeMember, organization, auth?.user]);
+	}, [activeMember, organization, auth?.user, customPermissions]);
 
 	return <Outlet />;
 }

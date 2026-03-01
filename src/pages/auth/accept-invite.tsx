@@ -1,5 +1,5 @@
 import {
-	BuildingOffice2Icon,
+	BuildingStorefrontIcon,
 	CheckCircleIcon,
 	ExclamationTriangleIcon,
 	XCircleIcon,
@@ -8,12 +8,7 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/button";
 import { Logo } from "@/components/logo";
-import {
-	getAPIErrorMessage,
-	useAcceptInvitation,
-	useGetInvitation,
-	useRejectInvitation,
-} from "@/hooks";
+import { getAPIErrorMessage, useAcceptInvitation, useGetInvitation, useRejectInvitation } from "@/hooks";
 import { AuthShell } from "./login";
 
 type InviteState = "loading" | "preview" | "accepted" | "rejected" | "error";
@@ -101,13 +96,15 @@ export function AcceptInvite() {
 					<div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
 						<svg className="size-7 animate-spin text-zinc-400" fill="none" viewBox="0 0 24 24" aria-hidden="true">
 							<circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-							<path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+							<path
+								className="opacity-75"
+								fill="currentColor"
+								d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+							/>
 						</svg>
 					</div>
 					<h1 className="text-xl font-semibold text-zinc-900 dark:text-white">Loading invitation…</h1>
-					<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-						Please wait while we fetch your invite.
-					</p>
+					<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Please wait while we fetch your invite.</p>
 				</div>
 			</AuthShell>
 		);
@@ -139,9 +136,7 @@ export function AcceptInvite() {
 						<XCircleIcon className="size-7 text-zinc-500 dark:text-zinc-400" />
 					</div>
 					<h1 className="text-xl font-semibold text-zinc-900 dark:text-white">Invitation declined</h1>
-					<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-						You've declined the invitation.
-					</p>
+					<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">You've declined the invitation.</p>
 				</div>
 				<Button className="w-full" color="dark/zinc" onClick={() => navigate({ to: "/" })}>
 					Go to Dashboard
@@ -176,18 +171,14 @@ export function AcceptInvite() {
 			<Logo className="h-7 w-auto text-zinc-950 dark:text-white" />
 
 			<div className="text-center">
-				<div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-950/40">
-					<BuildingOffice2Icon className="size-7 text-emerald-500 dark:text-emerald-400" />
+				<div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800">
+					<BuildingStorefrontIcon className="size-7 text-zinc-500 dark:text-zinc-400" />
 				</div>
 				<h1 className="text-xl font-semibold text-zinc-900 dark:text-white">You're invited!</h1>
 				<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-					{invitation?.inviterEmail
-						? `${invitation.inviterEmail} invited you to join`
-						: "You've been invited to join"}
+					{invitation?.inviterEmail ? `${invitation.inviterEmail} invited you to join` : "You've been invited to join"}
 				</p>
-				<p className="mt-2 text-base font-semibold text-zinc-900 dark:text-white">
-					{invitation?.organizationName}
-				</p>
+				<p className="mt-2 text-base font-semibold text-zinc-900 dark:text-white">{invitation?.organizationName}</p>
 				{invitation?.role && (
 					<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
 						Role: <span className="font-medium capitalize">{invitation.role}</span>

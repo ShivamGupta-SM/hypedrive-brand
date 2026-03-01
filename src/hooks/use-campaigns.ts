@@ -88,10 +88,7 @@ export function useCampaign(organizationId: string | undefined, campaignId: stri
 	};
 }
 
-export function useCampaignStats(
-	organizationId: string | undefined,
-	campaignId: string | undefined
-) {
+export function useCampaignStats(organizationId: string | undefined, campaignId: string | undefined) {
 	const query = useQuery({
 		queryKey: queryKeys.campaignStats(organizationId || "", campaignId || ""),
 		queryFn: async () => {
@@ -188,13 +185,7 @@ export function useResumeCampaign() {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: async ({
-			organizationId,
-			campaignId,
-		}: {
-			organizationId: string;
-			campaignId: string;
-		}) => {
+		mutationFn: async ({ organizationId, campaignId }: { organizationId: string; campaignId: string }) => {
 			const client = getAuthenticatedClient();
 			return client.brand.updateCampaignState(organizationId, campaignId, { action: "resume" });
 		},
@@ -212,13 +203,7 @@ export function useEndCampaign() {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: async ({
-			organizationId,
-			campaignId,
-		}: {
-			organizationId: string;
-			campaignId: string;
-		}) => {
+		mutationFn: async ({ organizationId, campaignId }: { organizationId: string; campaignId: string }) => {
 			const client = getAuthenticatedClient();
 			return client.brand.updateCampaignState(organizationId, campaignId, { action: "end" });
 		},
@@ -232,19 +217,13 @@ export function useEndCampaign() {
 	});
 }
 
-export function useDeleteCampaign() {
+export function useCancelCampaign() {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: async ({
-			organizationId,
-			campaignId,
-		}: {
-			organizationId: string;
-			campaignId: string;
-		}) => {
+		mutationFn: async ({ organizationId, campaignId }: { organizationId: string; campaignId: string }) => {
 			const client = getAuthenticatedClient();
-			return client.brand.cancelCampaign(organizationId, campaignId);
+			return client.brand.updateCampaignState(organizationId, campaignId, { action: "cancel" });
 		},
 		onSuccess: (_, v) => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.campaigns(v.organizationId) });
@@ -280,13 +259,7 @@ export function useArchiveCampaign() {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: async ({
-			organizationId,
-			campaignId,
-		}: {
-			organizationId: string;
-			campaignId: string;
-		}) => {
+		mutationFn: async ({ organizationId, campaignId }: { organizationId: string; campaignId: string }) => {
 			const client = getAuthenticatedClient();
 			return client.brand.updateCampaignState(organizationId, campaignId, { action: "archive" });
 		},
@@ -301,13 +274,7 @@ export function useSubmitCampaign() {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: async ({
-			organizationId,
-			campaignId,
-		}: {
-			organizationId: string;
-			campaignId: string;
-		}) => {
+		mutationFn: async ({ organizationId, campaignId }: { organizationId: string; campaignId: string }) => {
 			const client = getAuthenticatedClient();
 			return client.brand.updateCampaignState(organizationId, campaignId, { action: "submit" });
 		},
@@ -347,10 +314,7 @@ export function useCreateAndSubmitCampaign(organizationId: string | undefined) {
 // CAMPAIGN TASKS
 // =============================================================================
 
-export function useCampaignTasks(
-	organizationId: string | undefined,
-	campaignId: string | undefined
-) {
+export function useCampaignTasks(organizationId: string | undefined, campaignId: string | undefined) {
 	const query = useQuery({
 		queryKey: queryKeys.campaignTasks(organizationId || "", campaignId || ""),
 		queryFn: async () => {
@@ -369,10 +333,7 @@ export function useCampaignTasks(
 	};
 }
 
-export function useAddCampaignTask(
-	organizationId: string | undefined,
-	campaignId: string | undefined
-) {
+export function useAddCampaignTask(organizationId: string | undefined, campaignId: string | undefined) {
 	const queryClient = useQueryClient();
 
 	return useMutation({
@@ -397,10 +358,7 @@ export function useAddCampaignTask(
 	});
 }
 
-export function useUpdateCampaignTask(
-	organizationId: string | undefined,
-	campaignId: string | undefined
-) {
+export function useUpdateCampaignTask(organizationId: string | undefined, campaignId: string | undefined) {
 	const queryClient = useQueryClient();
 
 	return useMutation({
@@ -415,12 +373,7 @@ export function useUpdateCampaignTask(
 			requirements?: db.TaskRequirements;
 		}) => {
 			const client = getAuthenticatedClient();
-			return client.brand.updateCampaignTask(
-				organizationId as string,
-				campaignId as string,
-				taskId,
-				params
-			);
+			return client.brand.updateCampaignTask(organizationId as string, campaignId as string, taskId, params);
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({
@@ -433,20 +386,13 @@ export function useUpdateCampaignTask(
 	});
 }
 
-export function useRemoveCampaignTask(
-	organizationId: string | undefined,
-	campaignId: string | undefined
-) {
+export function useRemoveCampaignTask(organizationId: string | undefined, campaignId: string | undefined) {
 	const queryClient = useQueryClient();
 
 	return useMutation({
 		mutationFn: async (taskId: string) => {
 			const client = getAuthenticatedClient();
-			return client.brand.removeCampaignTask(
-				organizationId as string,
-				campaignId as string,
-				taskId
-			);
+			return client.brand.removeCampaignTask(organizationId as string, campaignId as string, taskId);
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({
@@ -457,4 +403,44 @@ export function useRemoveCampaignTask(
 			});
 		},
 	});
+}
+
+export function usePlatforms() {
+	const query = useQuery({
+		queryKey: queryKeys.platforms(),
+		queryFn: async () => {
+			const client = getAuthenticatedClient();
+			return client.catalog.listPlatforms({ take: 100, status: "active" });
+		},
+		staleTime: 10 * 60 * 1000, // 10 min — platforms rarely change
+	});
+
+	return {
+		data: query.data?.data ?? [],
+		loading: query.isLoading,
+		error: query.error,
+	};
+}
+
+export function useTaskTemplates(params?: { category?: string; status?: string; platformId?: string }) {
+	const query = useQuery({
+		queryKey: queryKeys.taskTemplates(params),
+		queryFn: async () => {
+			const client = getAuthenticatedClient();
+			return client.catalog.listTaskTemplates({
+				take: 100,
+				status: "active" as db.TaskTemplateStatus,
+				...(params?.category ? { category: params.category as db.TaskCategory } : {}),
+				...(params?.platformId ? { platformId: params.platformId } : {}),
+			});
+		},
+		staleTime: 5 * 60 * 1000, // 5 min — templates rarely change
+	});
+
+	return {
+		data: query.data?.data ?? [],
+		total: query.data?.total ?? 0,
+		loading: query.isLoading,
+		error: query.error,
+	};
 }

@@ -4,39 +4,33 @@
  */
 
 import {
-	ArrowDownTrayIcon,
+	ArrowDownLeftIcon,
 	ArrowPathIcon,
-	ArrowUpTrayIcon,
+	ArrowUpRightIcon,
 	BuildingLibraryIcon,
-	ClipboardDocumentIcon,
+	BuildingOffice2Icon,
+	ClipboardDocumentListIcon,
+	CreditCardIcon,
+	DocumentDuplicateIcon,
 	ExclamationTriangleIcon,
-	LockClosedIcon,
+	HashtagIcon,
+	ShieldExclamationIcon,
+	UserIcon,
 } from "@heroicons/react/16/solid";
-import { useState } from "react";
 import { startAuthentication } from "@simplewebauthn/browser";
-import { showToast } from "@/lib/toast";
+import { useState } from "react";
 import { Badge } from "@/components/badge";
 import { Button } from "@/components/button";
-import {
-	Dialog,
-	DialogActions,
-	DialogBody,
-	DialogDescription,
-	DialogTitle,
-} from "@/components/dialog";
+import { Dialog, DialogActions, DialogBody, DialogDescription, DialogTitle } from "@/components/dialog";
 import { Field, Label } from "@/components/fieldset";
 import { Input } from "@/components/input";
-import { Card } from "@/components/shared/card";
 import { Skeleton } from "@/components/skeleton";
 import { Textarea } from "@/components/textarea";
-import {
-	getAPIErrorMessage,
-	useCancelWithdrawal,
-	useCreateWithdrawal,
-	usePasskeyReauthOptions,
-} from "@/hooks";
+import { getAPIErrorMessage, useCancelWithdrawal, useCreateWithdrawal, usePasskeyReauthOptions } from "@/hooks";
 import type { brand } from "@/lib/brand-client";
 import { formatCurrency, formatDateTime } from "@/lib/design-tokens";
+import { showToast } from "@/lib/toast";
+import { useCan } from "@/store/permissions-store";
 
 type WalletTransaction = brand.WalletTransaction;
 type ActiveHold = brand.ActiveHold;
@@ -52,12 +46,8 @@ export function ErrorState({ onRetry }: { onRetry: () => void }) {
 			<div className="flex size-16 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-950/30">
 				<ExclamationTriangleIcon className="size-8 text-red-400" />
 			</div>
-			<p className="mt-4 text-lg font-semibold text-zinc-900 dark:text-white">
-				Something went wrong
-			</p>
-			<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-				Failed to load wallet. Please try again.
-			</p>
+			<p className="mt-4 text-lg font-semibold text-zinc-900 dark:text-white">Something went wrong</p>
+			<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Failed to load wallet. Please try again.</p>
 			<Button className="mt-6" onClick={onRetry} color="dark/zinc">
 				<ArrowPathIcon className="size-4" />
 				Try Again
@@ -97,13 +87,25 @@ export function LoadingSkeleton() {
 }
 
 // =============================================================================
-// DEPOSIT ACCOUNT CARD
+// DEPOSIT ACCOUNT DIALOG
 // =============================================================================
 
-export function DepositAccountCard({
+const depositFields: { key: string; label: string; icon: typeof BuildingLibraryIcon; mono: boolean }[] = [
+	{ key: "bankName", label: "Bank Name", icon: BuildingLibraryIcon, mono: false },
+	{ key: "accountNumber", label: "Account Number", icon: CreditCardIcon, mono: true },
+	{ key: "ifscCode", label: "IFSC Code", icon: HashtagIcon, mono: true },
+	{ key: "accountHolderName", label: "Account Holder", icon: UserIcon, mono: false },
+	{ key: "upiId", label: "UPI ID", icon: ArrowDownLeftIcon, mono: true },
+];
+
+export function DepositAccountDialog({
+	open,
+	onClose,
 	account,
 	loading,
 }: {
+	open: boolean;
+	onClose: () => void;
 	account: VirtualAccountResponse | null;
 	loading: boolean;
 }) {
@@ -112,89 +114,91 @@ export function DepositAccountCard({
 		showToast.copy(label);
 	};
 
-	if (loading) {
-		return (
-			<Card padding="lg">
-				<div className="space-y-4">
-					<Skeleton width={200} height={24} />
+	const accountDetails = account?.virtualAccount;
+
+	const details = accountDetails
+		? depositFields
+				.map((f) => ({ ...f, value: accountDetails[f.key as keyof typeof accountDetails] as string | undefined }))
+				.filter((f) => f.key !== "upiId" || f.value)
+				.map((f) => ({ ...f, value: f.value || "—" }))
+		: [];
+
+	const copyAll = () => {
+		const text = details
+			.filter((d) => d.value !== "—")
+			.map((d) => `${d.label}: ${d.value}`)
+			.join("\n");
+		navigator.clipboard.writeText(text);
+		showToast.copy("All details");
+	};
+
+	return (
+		<Dialog open={open} onClose={onClose} size="md">
+			<DialogTitle>Deposit Account</DialogTitle>
+			<DialogDescription>Transfer funds to this account to top up your wallet.</DialogDescription>
+
+			<DialogBody>
+				{loading ? (
 					<div className="space-y-3">
 						{[1, 2, 3, 4].map((i) => (
 							<Skeleton key={i} width="100%" height={48} borderRadius={8} />
 						))}
 					</div>
-				</div>
-			</Card>
-		);
-	}
-
-	if (!account || !account.virtualAccount) {
-		return (
-			<Card padding="lg">
-				<div className="flex items-center gap-4">
-					<div className="flex size-12 items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-950/30">
-						<BuildingLibraryIcon className="size-6 text-amber-500" />
-					</div>
-					<div>
-						<h3 className="font-semibold text-zinc-900 dark:text-white">
-							Deposit Account Not Set Up
-						</h3>
-						<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-							Contact support to set up your deposit account for receiving funds.
-						</p>
-					</div>
-				</div>
-			</Card>
-		);
-	}
-
-	const accountDetails = account.virtualAccount;
-	const details = [
-		{ label: "Bank Name", value: accountDetails.bankName },
-		{ label: "Account Number", value: accountDetails.accountNumber },
-		{ label: "IFSC Code", value: accountDetails.ifscCode },
-		{ label: "Account Holder", value: accountDetails.accountHolderName },
-		{ label: "UPI ID", value: accountDetails.upiId },
-	].filter((d) => d.value);
-
-	return (
-		<Card padding="lg">
-			<div className="flex items-start justify-between gap-4">
-				<div className="flex items-center gap-4">
-					<div className="flex size-12 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-950/30">
-						<BuildingLibraryIcon className="size-6 text-emerald-500" />
-					</div>
-					<div>
-						<h3 className="font-semibold text-zinc-900 dark:text-white">Deposit Account</h3>
-						<p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
-							Transfer funds to this account to top up your wallet
-						</p>
-					</div>
-				</div>
-			</div>
-
-			<div className="mt-6 grid gap-3 sm:grid-cols-2">
-				{details.map((detail) => (
-					<div
-						key={detail.label}
-						className="flex items-center justify-between rounded-lg bg-zinc-50 px-4 py-3 dark:bg-zinc-800/50"
-					>
-						<div>
-							<p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">{detail.label}</p>
-							<p className="mt-0.5 font-mono text-sm text-zinc-900 dark:text-white">
-								{detail.value}
-							</p>
+				) : !accountDetails ? (
+					<div className="flex flex-col items-center py-8 text-center">
+						<div className="flex size-14 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800">
+							<BuildingOffice2Icon className="size-7 text-zinc-400" />
 						</div>
-						<button
-							type="button"
-							onClick={() => copyToClipboard(detail.value || "", detail.label)}
-							className="rounded-lg p-2 text-zinc-400 transition-colors hover:bg-zinc-200 hover:text-zinc-600 dark:hover:bg-zinc-700 dark:hover:text-zinc-300"
-						>
-							<ClipboardDocumentIcon className="size-4" />
-						</button>
+						<p className="mt-3 text-sm font-semibold text-zinc-900 dark:text-white">
+							Deposit Account Not Set Up
+						</p>
+						<p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+							Contact support to set up your deposit account.
+						</p>
 					</div>
-				))}
-			</div>
-		</Card>
+				) : (
+					<div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+						{details.map((detail) => {
+							const Icon = detail.icon;
+							return (
+							<div key={detail.key} className="group flex items-center gap-3 py-3">
+								<div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
+									<Icon className="size-4 text-zinc-500 dark:text-zinc-400" />
+								</div>
+								<div className="min-w-0 flex-1">
+									<p className="text-xs text-zinc-500 dark:text-zinc-400">{detail.label}</p>
+									<p className={`mt-0.5 truncate text-sm font-medium text-zinc-900 dark:text-white ${detail.mono ? "font-mono tracking-wide" : ""}`}>
+										{detail.value}
+									</p>
+								</div>
+								{detail.value !== "—" && (
+									<button
+										type="button"
+										onClick={() => copyToClipboard(detail.value, detail.label)}
+										className="shrink-0 rounded-md p-1.5 text-zinc-300 transition-colors hover:text-zinc-500 group-hover:text-zinc-400 dark:text-zinc-600 dark:hover:text-zinc-300 dark:group-hover:text-zinc-500"
+									>
+										<DocumentDuplicateIcon className="size-3.5" />
+									</button>
+								)}
+							</div>
+							);
+						})}
+					</div>
+				)}
+			</DialogBody>
+
+			<DialogActions>
+				{accountDetails && !loading && (
+					<Button outline onClick={copyAll} className="mr-auto">
+						<ClipboardDocumentListIcon className="size-4" />
+						Copy All
+					</Button>
+				)}
+				<Button plain onClick={onClose}>
+					Close
+				</Button>
+			</DialogActions>
+		</Dialog>
 	);
 }
 
@@ -206,42 +210,39 @@ export function TransactionRow({ transaction }: { transaction: WalletTransaction
 	const isCredit = transaction.type === "credit";
 
 	return (
-		<div className="flex items-center justify-between rounded-xl bg-white p-4 ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-			<div className="flex items-center gap-4">
-				<div
-					className={`flex size-10 items-center justify-center rounded-xl ${
-						isCredit ? "bg-emerald-50 dark:bg-emerald-950/30" : "bg-red-50 dark:bg-red-950/30"
-					}`}
-				>
-					{isCredit ? (
-						<ArrowDownTrayIcon className="size-5 text-emerald-500" />
-					) : (
-						<ArrowUpTrayIcon className="size-5 text-red-500" />
-					)}
-				</div>
-				<div>
-					<p className="font-medium text-zinc-900 dark:text-white">
-						{transaction.description || (isCredit ? "Deposit" : "Debit")}
-					</p>
-					<p className="text-sm text-zinc-500 dark:text-zinc-400">
-						{formatDateTime(transaction.createdAt)}
-					</p>
-				</div>
-			</div>
-
-			<div className="text-right">
-				<p
-					className={`font-semibold ${
-						isCredit ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"
-					}`}
-				>
-					{isCredit ? "+" : "-"}
-					{formatCurrency(transaction.amount)}
-				</p>
-				{transaction.reference && (
-					<p className="text-xs text-zinc-400 dark:text-zinc-500">Ref: {transaction.reference}</p>
+		<div className="flex items-center gap-3 px-4 py-3">
+			<div
+				className={`flex size-8 shrink-0 items-center justify-center rounded-lg ${
+					isCredit ? "bg-emerald-50 dark:bg-emerald-950/30" : "bg-red-50 dark:bg-red-950/30"
+				}`}
+			>
+				{isCredit ? (
+					<ArrowDownLeftIcon className="size-4 text-emerald-600 dark:text-emerald-400" />
+				) : (
+					<ArrowUpRightIcon className="size-4 text-red-600 dark:text-red-400" />
 				)}
 			</div>
+			<div className="min-w-0 flex-1">
+				<p className="truncate text-sm font-medium text-zinc-900 dark:text-white">
+					{transaction.description || (isCredit ? "Deposit" : "Debit")}
+				</p>
+				<div className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+					<span className="shrink-0">{formatDateTime(transaction.createdAt)}</span>
+					{transaction.reference && (
+						<span className="truncate font-mono text-[10px] text-zinc-400 dark:text-zinc-500">
+							{transaction.reference.slice(-12)}
+						</span>
+					)}
+				</div>
+			</div>
+			<p
+				className={`shrink-0 text-sm font-semibold tabular-nums ${
+					isCredit ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"
+				}`}
+			>
+				{isCredit ? "+" : "-"}
+				{formatCurrency(transaction.amountDecimal)}
+			</p>
 		</div>
 	);
 }
@@ -252,29 +253,22 @@ export function TransactionRow({ transaction }: { transaction: WalletTransaction
 
 export function HoldRow({ hold }: { hold: ActiveHold }) {
 	return (
-		<div className="flex items-center justify-between rounded-xl bg-amber-50 p-4 ring-1 ring-amber-200/60 dark:bg-amber-950/20 dark:ring-amber-800/40">
-			<div className="flex items-center gap-4">
-				<div className="flex size-10 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/30">
-					<LockClosedIcon className="size-5 text-amber-600 dark:text-amber-400" />
-				</div>
-				<div>
-					<p className="font-medium text-amber-900 dark:text-amber-100">
-						{hold.campaignTitle || "Hold"}
-					</p>
-					<p className="text-sm text-amber-700 dark:text-amber-300">
-						{formatDateTime(hold.createdAt)}
-						{hold.expiresAt && ` • Expires ${formatDateTime(hold.expiresAt)}`}
-					</p>
-				</div>
+		<div className="flex items-center gap-3 px-4 py-3">
+			<div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-900/30">
+				<ShieldExclamationIcon className="size-4 text-amber-600 dark:text-amber-400" />
 			</div>
-
-			<div className="text-right">
-				<p className="font-semibold text-amber-700 dark:text-amber-300">
-					{formatCurrency(hold.amount)}
+			<div className="min-w-0 flex-1">
+				<p className="truncate text-sm font-medium text-zinc-900 dark:text-white">{hold.campaignTitle || "Hold"}</p>
+				<p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
+					{formatDateTime(hold.createdAt)}
+					{hold.expiresAt && ` · Expires ${formatDateTime(hold.expiresAt)}`}
 				</p>
-				<Badge color="amber" className="mt-1">
-					On Hold
-				</Badge>
+			</div>
+			<div className="flex shrink-0 items-center gap-2">
+				<p className="text-sm font-semibold tabular-nums text-amber-600 dark:text-amber-400">
+					{formatCurrency(hold.amountDecimal)}
+				</p>
+				<Badge color="amber">Held</Badge>
 			</div>
 		</div>
 	);
@@ -313,7 +307,7 @@ export function WithdrawDialog({
 			setError("Please enter a valid amount");
 			return;
 		}
-		if (amountNum > availableBalance / 100) {
+		if (amountNum > availableBalance) {
 			setError("Amount exceeds available balance");
 			return;
 		}
@@ -349,8 +343,7 @@ export function WithdrawDialog({
 		<Dialog open={open} onClose={onClose} size="md">
 			<DialogTitle>Request Withdrawal</DialogTitle>
 			<DialogDescription>
-				Request a withdrawal to your linked bank account. Available:{" "}
-				{formatCurrency(availableBalance)}
+				Request a withdrawal to your linked bank account. Available: {formatCurrency(availableBalance)}
 			</DialogDescription>
 
 			<DialogBody>
@@ -388,11 +381,7 @@ export function WithdrawDialog({
 				<Button plain onClick={onClose} disabled={isPending}>
 					Cancel
 				</Button>
-				<Button
-					color="dark/zinc"
-					onClick={handleSubmit}
-					disabled={isPending || !amount}
-				>
+				<Button color="dark/zinc" onClick={handleSubmit} disabled={isPending || !amount}>
 					{passkeyReauth.isPending
 						? "Verifying passkey..."
 						: createWithdrawal.isPending
@@ -427,7 +416,8 @@ export function WithdrawalRow({
 	};
 
 	const cancelWithdrawal = useCancelWithdrawal(organizationId);
-	const canCancel = withdrawal.status === "pending";
+	const canCancelWithdrawal = useCan("withdrawal", "cancel");
+	const canCancel = withdrawal.status === "pending" && canCancelWithdrawal;
 
 	const handleCancel = async (e: React.MouseEvent) => {
 		e.stopPropagation();
@@ -442,25 +432,26 @@ export function WithdrawalRow({
 	return (
 		<button
 			type="button"
-			className={`flex w-full items-center justify-between rounded-xl bg-white p-4 text-left ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800 ${onClick ? "transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/80" : ""}`}
+			className={`flex w-full items-center gap-3 px-4 py-3 text-left ${onClick ? "transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50" : ""}`}
 			onClick={onClick}
 		>
-			<div className="flex items-center gap-4">
-				<div className="flex size-10 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800">
-					<ArrowUpTrayIcon className="size-5 text-zinc-500" />
-				</div>
-				<div>
-					<p className="font-medium text-zinc-900 dark:text-white">Withdrawal Request</p>
-					<p className="text-sm text-zinc-500 dark:text-zinc-400">
-						{formatDateTime(withdrawal.requestedAt)}
-					</p>
-				</div>
+			<div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
+				<ArrowUpRightIcon className="size-4 text-zinc-500 dark:text-zinc-400" />
 			</div>
-			<div className="flex items-center gap-3">
-				<p className="font-semibold text-zinc-900 dark:text-white">
-					{formatCurrency(withdrawal.amount)}
+			<div className="min-w-0 flex-1">
+				<div className="flex items-center gap-2">
+					<p className="truncate text-sm font-medium text-zinc-900 dark:text-white">Withdrawal</p>
+					<Badge color={statusColors[withdrawal.status] || "zinc"}>{withdrawal.status}</Badge>
+				</div>
+				<p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
+					{formatDateTime(withdrawal.requestedAt)}
+					<span className="ml-1.5 font-mono text-zinc-400 dark:text-zinc-500">#{withdrawal.id.slice(-8)}</span>
 				</p>
-				<Badge color={statusColors[withdrawal.status] || "zinc"}>{withdrawal.status}</Badge>
+			</div>
+			<div className="flex shrink-0 items-center gap-2">
+				<p className="text-sm font-semibold tabular-nums text-zinc-900 dark:text-white">
+					{formatCurrency(withdrawal.amountDecimal)}
+				</p>
 				{canCancel && (
 					<Button
 						plain
@@ -468,7 +459,7 @@ export function WithdrawalRow({
 						disabled={cancelWithdrawal.isPending}
 						className="text-xs text-red-500 hover:text-red-700"
 					>
-						{cancelWithdrawal.isPending ? "Cancelling..." : "Cancel"}
+						{cancelWithdrawal.isPending ? "..." : "Cancel"}
 					</Button>
 				)}
 			</div>
@@ -482,25 +473,23 @@ export function WithdrawalRow({
 
 export function DepositRow({ deposit }: { deposit: brand.DepositTransaction }) {
 	return (
-		<div className="flex items-center justify-between rounded-xl bg-white p-4 ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-			<div className="flex items-center gap-4">
-				<div className="flex size-10 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-950/30">
-					<ArrowDownTrayIcon className="size-5 text-emerald-500" />
-				</div>
-				<div>
-					<p className="font-medium text-zinc-900 dark:text-white">Deposit</p>
-					<p className="text-sm text-zinc-500 dark:text-zinc-400">
-						{formatDateTime(deposit.createdAt)}
-						{deposit.reference && ` · Ref: ${deposit.reference}`}
-					</p>
-				</div>
+		<div className="flex items-center gap-3 px-4 py-3">
+			<div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-950/30">
+				<ArrowDownLeftIcon className="size-4 text-emerald-600 dark:text-emerald-400" />
 			</div>
-			<div className="flex items-center gap-3">
-				<p className="font-semibold text-emerald-600 dark:text-emerald-400">
-					+{formatCurrency(deposit.amount)}
+			<div className="min-w-0 flex-1">
+				<div className="flex items-center gap-2">
+					<p className="text-sm font-medium text-zinc-900 dark:text-white">Deposit</p>
+					<Badge color={deposit.status === "completed" ? "emerald" : "amber"}>{deposit.status}</Badge>
+				</div>
+				<p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
+					{formatDateTime(deposit.createdAt)}
+					<span className="ml-1.5 font-mono text-zinc-400 dark:text-zinc-500">#{deposit.id.slice(-8)}</span>
 				</p>
-				<Badge color={deposit.status === "completed" ? "emerald" : "amber"}>{deposit.status}</Badge>
 			</div>
+			<p className="shrink-0 text-sm font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">
+				+{formatCurrency(deposit.amountDecimal)}
+			</p>
 		</div>
 	);
 }

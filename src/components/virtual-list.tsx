@@ -86,9 +86,7 @@ export function VirtualList<T>({
 							left: 0,
 							width: horizontal ? undefined : "100%",
 							height: horizontal ? "100%" : `${virtualItem.size}px`,
-							transform: horizontal
-								? `translateX(${virtualItem.start}px)`
-								: `translateY(${virtualItem.start}px)`,
+							transform: horizontal ? `translateX(${virtualItem.start}px)` : `translateY(${virtualItem.start}px)`,
 						}}
 					>
 						{renderItem(items[virtualItem.index], virtualItem.index)}
@@ -185,10 +183,7 @@ export function VirtualGrid<T>({
 							{rowItems.map((item, colIndex) => {
 								const itemIndex = startIndex + colIndex;
 								return (
-									<div
-										key={getItemKey ? getItemKey(item, itemIndex) : itemIndex}
-										className={itemClassName}
-									>
+									<div key={getItemKey ? getItemKey(item, itemIndex) : itemIndex} className={itemClassName}>
 										{renderItem(item, itemIndex)}
 									</div>
 								);
@@ -269,12 +264,7 @@ export function VirtualTable<T>({
 	};
 
 	return (
-		<div
-			className={clsx(
-				"overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700",
-				className
-			)}
-		>
+		<div className={clsx("overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700", className)}>
 			{/* Header */}
 			<div
 				className="flex border-b border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800/50"
@@ -299,10 +289,7 @@ export function VirtualTable<T>({
 				ref={parentRef}
 				className="overflow-auto"
 				style={{
-					height:
-						typeof height === "number"
-							? `${height - headerHeight}px`
-							: `calc(${height} - ${headerHeight}px)`,
+					height: typeof height === "number" ? `${height - headerHeight}px` : `calc(${height} - ${headerHeight}px)`,
 				}}
 			>
 				<div
@@ -372,12 +359,7 @@ export interface UseInfiniteScrollOptions {
 	threshold?: number;
 }
 
-export function useInfiniteScroll({
-	onLoadMore,
-	hasMore,
-	isLoading,
-	threshold = 200,
-}: UseInfiniteScrollOptions) {
+export function useInfiniteScroll({ onLoadMore, hasMore, isLoading, threshold = 200 }: UseInfiniteScrollOptions) {
 	const handleScroll = (e: React.UIEvent<HTMLElement>) => {
 		const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
 		const distanceFromBottom = scrollHeight - scrollTop - clientHeight;

@@ -18,13 +18,7 @@ export function PaginationPrevious({
 	return (
 		<span className={clsx(className, "grow basis-0")}>
 			<Button {...(href === null ? { disabled: true } : { href })} plain aria-label="Previous page">
-				<svg
-					className="stroke-current"
-					data-slot="icon"
-					viewBox="0 0 16 16"
-					fill="none"
-					aria-hidden="true"
-				>
+				<svg className="stroke-current" data-slot="icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
 					<path
 						d="M2.75 8H13.25M2.75 8L5.25 5.5M2.75 8L5.25 10.5"
 						strokeWidth={1.5}
@@ -47,13 +41,7 @@ export function PaginationNext({
 		<span className={clsx(className, "flex grow basis-0 justify-end")}>
 			<Button {...(href === null ? { disabled: true } : { href })} plain aria-label="Next page">
 				{children}
-				<svg
-					className="stroke-current"
-					data-slot="icon"
-					viewBox="0 0 16 16"
-					fill="none"
-					aria-hidden="true"
-				>
+				<svg className="stroke-current" data-slot="icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
 					<path
 						d="M13.25 8L2.75 8M13.25 8L10.75 10.5M13.25 8L10.75 5.5"
 						strokeWidth={1.5}
@@ -102,10 +90,7 @@ export function PaginationGap({
 		<span
 			aria-hidden="true"
 			{...props}
-			className={clsx(
-				className,
-				"w-9 text-center text-sm/6 font-semibold text-zinc-950 select-none dark:text-white"
-			)}
+			className={clsx(className, "w-9 text-center text-sm/6 font-semibold text-zinc-950 select-none dark:text-white")}
 		>
 			{children}
 		</span>

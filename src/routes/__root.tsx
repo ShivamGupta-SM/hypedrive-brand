@@ -1,6 +1,7 @@
-import { type QueryClient, QueryClientProvider, isCancelledError } from "@tanstack/react-query";
+import { isCancelledError, type QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRootRouteWithContext, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { SkeletonTheme } from "react-loading-skeleton";
 import { Toaster } from "sonner";
 import type { types } from "@/lib/brand-client";
 import { getSessionFromCookie } from "@/lib/server-auth";
@@ -93,9 +94,7 @@ function RootErrorComponent({ error }: { error: unknown }) {
 	return (
 		<div className="flex min-h-dvh items-center justify-center p-6">
 			<div className="text-center max-w-md">
-				<p className="text-sm font-medium text-zinc-800 dark:text-zinc-200 mb-1">
-					Something went wrong
-				</p>
+				<p className="text-sm font-medium text-zinc-800 dark:text-zinc-200 mb-1">Something went wrong</p>
 				{isDev && (
 					<p className="mb-4 wrap-break-word rounded bg-red-50 px-3 py-2 text-left font-mono text-xs text-red-700 dark:bg-red-950 dark:text-red-300">
 						{message}
@@ -113,8 +112,8 @@ function RootErrorComponent({ error }: { error: unknown }) {
 	);
 }
 
-/** Reads the app's data-theme attribute so Sonner matches the active theme. */
-function AppToaster() {
+/** Reactively reads data-theme from <html> via MutationObserver. */
+function useTheme() {
 	const [theme, setTheme] = useState<"light" | "dark">(() => {
 		if (typeof document === "undefined") return "light";
 		return document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
@@ -129,6 +128,11 @@ function AppToaster() {
 		return () => observer.disconnect();
 	}, []);
 
+	return theme;
+}
+
+function AppToaster() {
+	const theme = useTheme();
 	return (
 		<Toaster
 			theme={theme}
@@ -142,13 +146,30 @@ function AppToaster() {
 	);
 }
 
+const SKELETON_COLORS = {
+	light: { base: "#e4e4e7", highlight: "#f4f4f5" }, // zinc-200 / zinc-100
+	dark: { base: "#27272a", highlight: "#3f3f46" }, // zinc-800 / zinc-700
+};
+
+function AppSkeletonTheme({ children }: { children: React.ReactNode }) {
+	const theme = useTheme();
+	const colors = SKELETON_COLORS[theme];
+	return (
+		<SkeletonTheme baseColor={colors.base} highlightColor={colors.highlight}>
+			{children}
+		</SkeletonTheme>
+	);
+}
+
 function RootComponent() {
 	return (
 		<RootDocument>
-			<AbilityProvider>
-				<Outlet />
-				<AppToaster />
-			</AbilityProvider>
+			<AppSkeletonTheme>
+				<AbilityProvider>
+					<Outlet />
+					<AppToaster />
+				</AbilityProvider>
+			</AppSkeletonTheme>
 		</RootDocument>
 	);
 }

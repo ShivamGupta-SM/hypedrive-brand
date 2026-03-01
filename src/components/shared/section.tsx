@@ -70,9 +70,7 @@ export function Section({
 					{action && <div className="shrink-0">{action}</div>}
 				</div>
 			)}
-			<div className={clsx(columns === 2 && "grid grid-cols-1 gap-6 sm:grid-cols-2")}>
-				{children}
-			</div>
+			<div className={clsx(columns === 2 && "grid grid-cols-1 gap-6 sm:grid-cols-2")}>{children}</div>
 			{divided && <Divider className="mt-8" />}
 		</section>
 	);
@@ -113,10 +111,7 @@ export interface FormSectionProps {
 export function FormSection({ children, className, icon, title, description }: FormSectionProps) {
 	return (
 		<div
-			className={clsx(
-				"rounded-xl bg-white p-6 ring-1 ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10",
-				className
-			)}
+			className={clsx("rounded-xl bg-white p-6 ring-1 ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10", className)}
 		>
 			<div className="flex items-start gap-3 border-b border-zinc-200 pb-4 dark:border-zinc-700">
 				{icon && (
@@ -160,9 +155,7 @@ export function DetailSection({
 			{(title || description || action) && (
 				<div className="mb-4 flex items-start justify-between gap-4">
 					<div>
-						{title && (
-							<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">{title}</h3>
-						)}
+						{title && <h3 className="text-sm font-semibold text-zinc-900 dark:text-white">{title}</h3>}
 						{description && <Text className="mt-0.5 text-xs text-zinc-500">{description}</Text>}
 					</div>
 					{action && <div className="shrink-0">{action}</div>}
@@ -229,15 +222,7 @@ const detailSpan: Record<string, string> = {
 	full: "col-span-full",
 };
 
-export function DetailItem({
-	label,
-	value,
-	children,
-	className,
-	span = 1,
-	copyable,
-	onCopy,
-}: DetailItemProps) {
+export function DetailItem({ label, value, children, className, span = 1, copyable, onCopy }: DetailItemProps) {
 	const content = children ?? value;
 
 	return (
@@ -252,13 +237,7 @@ export function DetailItem({
 						className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-700 dark:hover:text-zinc-300"
 						title="Copy"
 					>
-						<svg
-							className="size-3.5"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-							strokeWidth={2}
-						>
+						<svg className="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
 							<path
 								strokeLinecap="round"
 								strokeLinejoin="round"

@@ -1,10 +1,6 @@
-import {
-	EnvelopeIcon,
-	ShieldCheckIcon,
-	UserGroupIcon,
-} from "@heroicons/react/16/solid";
 import { Outlet } from "@tanstack/react-router";
 import { Heading } from "@/components/heading";
+import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
 import { TabNav, type TabNavItem } from "@/components/shared/tab-nav";
 import { Text } from "@/components/text";
 import { useInvitations, useMembers } from "@/hooks";
@@ -26,6 +22,7 @@ export function TeamLayout() {
 
 	const totalMembers = members.length;
 	const adminCount = members.filter((m) => m.role === "admin" || m.role === "owner").length;
+	const memberCount = members.filter((m) => m.role === "member").length;
 	const pendingInvitations = invitations.length;
 
 	const tabs: TabNavItem[] = [
@@ -37,49 +34,28 @@ export function TeamLayout() {
 	return (
 		<div className="space-y-6 pb-20">
 			{/* Header */}
-			<div>
-				<Heading>Team</Heading>
-				<Text className="mt-1">Manage your organization's team members</Text>
+			<div className="flex items-start justify-between gap-4">
+				<div>
+					<Heading>Team</Heading>
+					<Text className="mt-1">Manage your organization's team members</Text>
+				</div>
 			</div>
 
 			{/* Stats */}
-			<div className="grid grid-cols-3 gap-4">
-				<div className="rounded-xl bg-white p-4 ring-1 ring-inset ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10">
-					<div className="flex items-center gap-3">
-						<div className="flex size-10 items-center justify-center rounded-xl bg-sky-100 dark:bg-sky-900/30">
-							<UserGroupIcon className="size-5 text-sky-600 dark:text-sky-400" />
-						</div>
-						<div>
-							<p className="text-2xl font-bold text-zinc-900 dark:text-white">{totalMembers}</p>
-							<p className="text-sm text-zinc-500 dark:text-zinc-400">Members</p>
-						</div>
-					</div>
-				</div>
-
-				<div className="rounded-xl bg-white p-4 ring-1 ring-inset ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10">
-					<div className="flex items-center gap-3">
-						<div className="flex size-10 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/30">
-							<ShieldCheckIcon className="size-5 text-amber-600 dark:text-amber-400" />
-						</div>
-						<div>
-							<p className="text-2xl font-bold text-zinc-900 dark:text-white">{adminCount}</p>
-							<p className="text-sm text-zinc-500 dark:text-zinc-400">Admins</p>
-						</div>
-					</div>
-				</div>
-
-				<div className="rounded-xl bg-white p-4 ring-1 ring-inset ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10">
-					<div className="flex items-center gap-3">
-						<div className="flex size-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/30">
-							<EnvelopeIcon className="size-5 text-emerald-600 dark:text-emerald-400" />
-						</div>
-						<div>
-							<p className="text-2xl font-bold text-zinc-900 dark:text-white">{pendingInvitations}</p>
-							<p className="text-sm text-zinc-500 dark:text-zinc-400">Pending</p>
-						</div>
-					</div>
-				</div>
-			</div>
+			<FinancialStatsGridBordered
+				stats={[
+					{ name: "Members", value: totalMembers },
+					{ name: "Admins", value: adminCount },
+					{ name: "Members", value: memberCount },
+					{
+						name: "Pending",
+						value: pendingInvitations,
+						change: pendingInvitations > 0 ? "needs attention" : undefined,
+						changeType: pendingInvitations > 0 ? "negative" : undefined,
+					},
+				]}
+				columns={4}
+			/>
 
 			{/* URL-based tab navigation */}
 			<TabNav tabs={tabs} />

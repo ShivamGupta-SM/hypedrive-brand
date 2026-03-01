@@ -38,8 +38,7 @@ function SuccessState({ email, onTryAgain }: { email: string; onTryAgain: () => 
 				</div>
 				<h1 className="text-xl font-semibold text-zinc-900 dark:text-white">Check your email</h1>
 				<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-					We sent a reset link to{" "}
-					<span className="font-medium text-zinc-700 dark:text-zinc-300">{email}</span>
+					We sent a reset link to <span className="font-medium text-zinc-700 dark:text-zinc-300">{email}</span>
 				</p>
 			</div>
 
@@ -83,7 +82,11 @@ export function ForgotPassword() {
 	const [submittedEmail, setSubmittedEmail] = useState("");
 	const [serverError, setServerError] = useState<string | null>(null);
 
-	const { register, handleSubmit, formState: { errors } } = useForm<ForgotPasswordFormData>({
+	const {
+		register,
+		handleSubmit,
+		formState: { errors },
+	} = useForm<ForgotPasswordFormData>({
 		resolver: zodResolver(forgotPasswordSchema),
 		defaultValues: { email: "" },
 	});
@@ -93,7 +96,10 @@ export function ForgotPassword() {
 		forgotPassword(
 			{ email: data.email },
 			{
-				onSuccess: () => { setSubmittedEmail(data.email); setSubmitted(true); },
+				onSuccess: () => {
+					setSubmittedEmail(data.email);
+					setSubmitted(true);
+				},
 				onError: (err) => {
 					const error = err as Error;
 					setServerError(error.message || "Failed to send reset email. Please try again.");
@@ -111,7 +117,9 @@ export function ForgotPassword() {
 			footer={
 				<p className="text-center text-sm text-zinc-500 dark:text-zinc-400">
 					Remembered it?{" "}
-					<TextLink href="/login"><Strong>Sign in</Strong></TextLink>
+					<TextLink href="/login">
+						<Strong>Sign in</Strong>
+					</TextLink>
 				</p>
 			}
 		>
@@ -135,7 +143,7 @@ export function ForgotPassword() {
 						type="email"
 						{...register("email")}
 						disabled={isPending}
-						autoComplete="email username"
+						autoComplete="username"
 						autoCapitalize="none"
 						inputMode="email"
 						placeholder="you@example.com"

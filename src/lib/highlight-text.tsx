@@ -13,10 +13,7 @@ export function HighlightText({ text, query }: { text: string; query: string }) 
 			<>
 				{parts.map((part, i) =>
 					regex.test(part) ? (
-						<mark
-							key={i}
-							className="rounded bg-amber-200 text-amber-900 dark:bg-amber-500/30 dark:text-amber-200"
-						>
+						<mark key={i} className="rounded bg-amber-200 text-amber-900 dark:bg-amber-500/30 dark:text-amber-200">
 							{part}
 						</mark>
 					) : (

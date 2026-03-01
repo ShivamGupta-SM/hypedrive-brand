@@ -34,12 +34,7 @@ export function PageContainer({
 }: PageContainerProps) {
 	return (
 		<Component
-			className={clsx(
-				"mx-auto w-full",
-				maxWidthStyles[maxWidth],
-				padding && "px-4 sm:px-6 lg:px-8",
-				className
-			)}
+			className={clsx("mx-auto w-full", maxWidthStyles[maxWidth], padding && "px-4 sm:px-6 lg:px-8", className)}
 		>
 			{children}
 		</Component>
@@ -92,9 +87,7 @@ const gridGap = {
 };
 
 export function ContentGrid({ children, className, columns = 12, gap = "lg" }: ContentGridProps) {
-	return (
-		<div className={clsx("grid", gridColumns[columns], gridGap[gap], className)}>{children}</div>
-	);
+	return <div className={clsx("grid", gridColumns[columns], gridGap[gap], className)}>{children}</div>;
 }
 
 // =============================================================================
@@ -159,14 +152,7 @@ const spanLgStyles: Record<string, string> = {
 
 export function GridItem({ children, className, span = "full", spanSm, spanLg }: GridItemProps) {
 	return (
-		<div
-			className={clsx(
-				spanStyles[span],
-				spanSm && spanSmStyles[spanSm],
-				spanLg && spanLgStyles[spanLg],
-				className
-			)}
-		>
+		<div className={clsx(spanStyles[span], spanSm && spanSmStyles[spanSm], spanLg && spanLgStyles[spanLg], className)}>
 			{children}
 		</div>
 	);

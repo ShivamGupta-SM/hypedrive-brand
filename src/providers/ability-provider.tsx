@@ -16,11 +16,7 @@
 
 import type { ReactNode } from "react";
 
-import {
-	canPerformOrgAction,
-	type OrgAction,
-	type OrgResource,
-} from "@/lib/permissions/access-control-client";
+import { canPerformOrgAction, type OrgAction, type OrgResource } from "@/lib/permissions/access-control-client";
 import { useOrgRole } from "@/store/permissions-store";
 
 // =============================================================================
@@ -66,13 +62,7 @@ interface CanProps<R extends OrgResource> {
  * </Can>
  * ```
  */
-export function Can<R extends OrgResource>({
-	resource,
-	action,
-	children,
-	passThrough,
-	not,
-}: CanProps<R>) {
+export function Can<R extends OrgResource>({ resource, action, children, passThrough, not }: CanProps<R>) {
 	const role = useOrgRole();
 
 	// When role hasn't loaded yet, default to showing content.

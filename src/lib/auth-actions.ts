@@ -8,17 +8,22 @@
 import { createServerFn } from "@tanstack/react-start";
 import { deleteCookie, getCookie, setCookie } from "@tanstack/react-start/server";
 import Client from "@/lib/brand-client";
-import { API_URL, AUTH_COOKIE_MAX_AGE, AUTH_COOKIE_NAME, AUTH_COOKIE_PUBLIC_NAME } from "@/lib/config";
+import {
+	API_URL,
+	AUTH_COOKIE_MAX_AGE,
+	AUTH_COOKIE_NAME,
+	AUTH_COOKIE_PUBLIC_NAME,
+	AUTH_COOKIE_SESSION_MAX_AGE,
+} from "@/lib/config";
 
 const AUTH_COOKIE = AUTH_COOKIE_NAME;
-const COOKIE_MAX_AGE = AUTH_COOKIE_MAX_AGE;
-
 const AUTH_COOKIE_PUBLIC = AUTH_COOKIE_PUBLIC_NAME;
 const IS_PROD = process.env.NODE_ENV === "production";
 
 /** Set both auth cookies: httpOnly (SSR) + public (JS Bearer header) */
-function setAuthCookie(token: string) {
-	const base = { path: "/", sameSite: "lax" as const, secure: IS_PROD, maxAge: COOKIE_MAX_AGE };
+function setAuthCookie(token: string, rememberMe = false) {
+	const maxAge = rememberMe ? AUTH_COOKIE_MAX_AGE : AUTH_COOKIE_SESSION_MAX_AGE;
+	const base = { path: "/", sameSite: "lax" as const, secure: IS_PROD, maxAge };
 	setCookie(AUTH_COOKIE, token, { ...base, httpOnly: true });
 	setCookie(AUTH_COOKIE_PUBLIC, token, base);
 }
@@ -34,7 +39,7 @@ function clearAuthCookie() {
 // =============================================================================
 
 export const loginAction = createServerFn({ method: "POST" })
-	.inputValidator((input: { email: string; password: string }) => input)
+	.inputValidator((input: { email: string; password: string; rememberMe?: boolean }) => input)
 	.handler(async ({ data }) => {
 		try {
 			const client = new Client(API_URL);
@@ -44,7 +49,7 @@ export const loginAction = createServerFn({ method: "POST" })
 			});
 
 			if (response.token && response.user) {
-				setAuthCookie(response.token);
+				setAuthCookie(response.token, data.rememberMe);
 				return {
 					success: true as const,
 					user: response.user,

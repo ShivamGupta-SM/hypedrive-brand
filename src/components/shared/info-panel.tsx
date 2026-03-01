@@ -102,22 +102,13 @@ export function InfoPanel({
 	return (
 		<div className={clsx("rounded-lg border p-4", styles.container, styles.border, className)}>
 			<div className="flex gap-3">
-				{showIcon && (
-					<div className="shrink-0">
-						{icon || <DefaultIcon className={clsx("size-5", styles.icon)} />}
-					</div>
-				)}
+				{showIcon && <div className="shrink-0">{icon || <DefaultIcon className={clsx("size-5", styles.icon)} />}</div>}
 				<div className="min-w-0 flex-1">
 					{title && <h4 className={clsx("font-medium", styles.title)}>{title}</h4>}
 					<div className={clsx("text-sm", title && "mt-1", styles.content)}>{children}</div>
 					{action && (
 						<div className="mt-3">
-							<Button
-								color={styles.button}
-								onClick={action.onClick}
-								href={action.href}
-								className="text-sm"
-							>
+							<Button color={styles.button} onClick={action.onClick} href={action.href} className="text-sm">
 								{action.label}
 							</Button>
 						</div>
@@ -200,15 +191,7 @@ const bannerIcons = {
 	success: CheckCircleIcon,
 };
 
-export function AlertBanner({
-	className,
-	variant,
-	title,
-	description,
-	action,
-	icon,
-	onDismiss,
-}: AlertBannerProps) {
+export function AlertBanner({ className, variant, title, description, action, icon, onDismiss }: AlertBannerProps) {
 	const styles = bannerStyles[variant];
 	const DefaultIcon = bannerIcons[variant];
 
@@ -221,12 +204,7 @@ export function AlertBanner({
 				className
 			)}
 		>
-			<div
-				className={clsx(
-					"flex size-10 shrink-0 items-center justify-center rounded-full text-white",
-					styles.icon
-				)}
-			>
+			<div className={clsx("flex size-10 shrink-0 items-center justify-center rounded-full text-white", styles.icon)}>
 				{icon || <DefaultIcon className="size-5" />}
 			</div>
 			<div className="min-w-0 flex-1">
@@ -235,12 +213,7 @@ export function AlertBanner({
 			</div>
 			<div className="flex items-center gap-2">
 				{action && (
-					<Button
-						color={styles.button}
-						onClick={action.onClick}
-						href={action.href}
-						className="shrink-0"
-					>
+					<Button color={styles.button} onClick={action.onClick} href={action.href} className="shrink-0">
 						{action.label}
 					</Button>
 				)}
@@ -278,13 +251,7 @@ export function TipBox({ children, className, title = "Tip" }: TipBoxProps) {
 		>
 			<div className="flex gap-3">
 				<div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-blue-500 text-white">
-					<svg
-						className="size-3.5"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke="currentColor"
-						strokeWidth={2.5}
-					>
+					<svg className="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
 						<path
 							strokeLinecap="round"
 							strokeLinejoin="round"
@@ -312,12 +279,7 @@ export interface EmptyMessageProps {
 	icon?: React.ReactNode;
 }
 
-export function EmptyMessage({
-	children,
-	className,
-	message = "No data available",
-	icon,
-}: EmptyMessageProps) {
+export function EmptyMessage({ children, className, message = "No data available", icon }: EmptyMessageProps) {
 	return (
 		<div className={clsx("flex flex-col items-center justify-center py-8 text-center", className)}>
 			{icon && <div className="mb-3 text-zinc-300 dark:text-zinc-600">{icon}</div>}
@@ -384,19 +346,10 @@ export function ActionLink({
 		<Component
 			href={href}
 			onClick={onClick}
-			className={clsx(
-				"flex items-center gap-4 rounded-xl p-4 ring-1 transition-all",
-				styles.container,
-				className
-			)}
+			className={clsx("flex items-center gap-4 rounded-xl p-4 ring-1 transition-all", styles.container, className)}
 		>
 			{icon && (
-				<div
-					className={clsx(
-						"flex size-10 shrink-0 items-center justify-center rounded-full",
-						styles.icon
-					)}
-				>
+				<div className={clsx("flex size-10 shrink-0 items-center justify-center rounded-full", styles.icon)}>
 					{icon}
 				</div>
 			)}

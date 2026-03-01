@@ -8,11083 +8,16054 @@
 /**
  * BaseURL is the base URL for calling the Encore application's API.
  */
-export type BaseURL = string;
+export type BaseURL = string
 
-export const Local: BaseURL = "http://localhost:4000";
+export const Local: BaseURL = "http://localhost:4000"
 
 /**
  * Environment returns a BaseURL for calling the cloud environment with the given name.
  */
 export function Environment(name: string): BaseURL {
-	return `https://${name}-hypedrive-wiei.encr.app`;
+    return `https://${name}-hypedrive-wiei.encr.app`
 }
 
 /**
  * PreviewEnv returns a BaseURL for calling the preview environment with the given PR number.
  */
 export function PreviewEnv(pr: number | string): BaseURL {
-	return Environment(`pr${pr}`);
+    return Environment(`pr${pr}`)
 }
 
-const BROWSER = typeof globalThis === "object" && "window" in globalThis;
+const BROWSER = typeof globalThis === "object" && ("window" in globalThis);
 
 /**
  * Client is an API client for the hypedrive-wiei Encore application.
  */
 export default class Client {
-	public readonly admin: admin.ServiceClient;
-	public readonly audit: audit.ServiceClient;
-	public readonly auth: auth.ServiceClient;
-	public readonly brand: brand.ServiceClient;
-	public readonly catalog: catalog.ServiceClient;
-	public readonly core: core.ServiceClient;
-	public readonly creator: creator.ServiceClient;
-	public readonly enrichment: enrichment.ServiceClient;
-	public readonly incoming_webhooks: incoming_webhooks.ServiceClient;
-	public readonly ledger: ledger.ServiceClient;
-	public readonly notifications: notifications.ServiceClient;
-	public readonly ocr: ocr.ServiceClient;
-	public readonly storage: storage.ServiceClient;
-	private readonly options: ClientOptions;
-	private readonly target: string;
+    public readonly admin: admin.ServiceClient
+    public readonly audit: audit.ServiceClient
+    public readonly auth: auth.ServiceClient
+    public readonly brand: brand.ServiceClient
+    public readonly catalog: catalog.ServiceClient
+    public readonly core: core.ServiceClient
+    public readonly creator: creator.ServiceClient
+    public readonly enrichment: enrichment.ServiceClient
+    public readonly incoming_webhooks: incoming_webhooks.ServiceClient
+    public readonly ledger: ledger.ServiceClient
+    public readonly notifications: notifications.ServiceClient
+    public readonly ocr: ocr.ServiceClient
+    public readonly storage: storage.ServiceClient
+    private readonly options: ClientOptions
+    private readonly target: string
 
-	/**
-	 * Creates a Client for calling the public and authenticated APIs of your Encore application.
-	 *
-	 * @param target  The target which the client should be configured to use. See Local and Environment for options.
-	 * @param options Options for the client
-	 */
-	constructor(target: BaseURL, options?: ClientOptions) {
-		this.target = target;
-		this.options = options ?? {};
-		const base = new BaseClient(this.target, this.options);
-		this.admin = new admin.ServiceClient(base);
-		this.audit = new audit.ServiceClient(base);
-		this.auth = new auth.ServiceClient(base);
-		this.brand = new brand.ServiceClient(base);
-		this.catalog = new catalog.ServiceClient(base);
-		this.core = new core.ServiceClient(base);
-		this.creator = new creator.ServiceClient(base);
-		this.enrichment = new enrichment.ServiceClient(base);
-		this.incoming_webhooks = new incoming_webhooks.ServiceClient(base);
-		this.ledger = new ledger.ServiceClient(base);
-		this.notifications = new notifications.ServiceClient(base);
-		this.ocr = new ocr.ServiceClient(base);
-		this.storage = new storage.ServiceClient(base);
-	}
 
-	/**
-	 * Creates a new Encore client with the given client options set.
-	 *
-	 * @param options Client options to set. They are merged with existing options.
-	 **/
-	public with(options: ClientOptions): Client {
-		return new Client(this.target, {
-			...this.options,
-			...options,
-		});
-	}
+    /**
+     * Creates a Client for calling the public and authenticated APIs of your Encore application.
+     *
+     * @param target  The target which the client should be configured to use. See Local and Environment for options.
+     * @param options Options for the client
+     */
+    constructor(target: BaseURL, options?: ClientOptions) {
+        this.target = target
+        this.options = options ?? {}
+        const base = new BaseClient(this.target, this.options)
+        this.admin = new admin.ServiceClient(base)
+        this.audit = new audit.ServiceClient(base)
+        this.auth = new auth.ServiceClient(base)
+        this.brand = new brand.ServiceClient(base)
+        this.catalog = new catalog.ServiceClient(base)
+        this.core = new core.ServiceClient(base)
+        this.creator = new creator.ServiceClient(base)
+        this.enrichment = new enrichment.ServiceClient(base)
+        this.incoming_webhooks = new incoming_webhooks.ServiceClient(base)
+        this.ledger = new ledger.ServiceClient(base)
+        this.notifications = new notifications.ServiceClient(base)
+        this.ocr = new ocr.ServiceClient(base)
+        this.storage = new storage.ServiceClient(base)
+    }
+
+    /**
+     * Creates a new Encore client with the given client options set.
+     *
+     * @param options Client options to set. They are merged with existing options.
+     **/
+    public with(options: ClientOptions): Client {
+        return new Client(this.target, {
+            ...this.options,
+            ...options,
+        })
+    }
 }
 
 /**
  * ClientOptions allows you to override any default behaviour within the generated Encore client.
  */
 export interface ClientOptions {
-	/**
-	 * By default the client will use the inbuilt fetch function for making the API requests.
-	 * however you can override it with your own implementation here if you want to run custom
-	 * code on each API request made or response received.
-	 */
-	fetcher?: Fetcher;
+    /**
+     * By default the client will use the inbuilt fetch function for making the API requests.
+     * however you can override it with your own implementation here if you want to run custom
+     * code on each API request made or response received.
+     */
+    fetcher?: Fetcher
 
-	/** Default RequestInit to be used for the client */
-	requestInit?: Omit<RequestInit, "headers"> & { headers?: Record<string, string> };
+    /** Default RequestInit to be used for the client */
+    requestInit?: Omit<RequestInit, "headers"> & { headers?: Record<string, string> }
 
-	/**
-	 * Allows you to set the authentication data to be used for each
-	 * request either by passing in a static object or by passing in
-	 * a function which returns a new object for each request.
-	 */
-	auth?: auth.AuthParams | AuthDataGenerator;
+    /**
+     * Allows you to set the authentication data to be used for each
+     * request either by passing in a static object or by passing in
+     * a function which returns a new object for each request.
+     */
+    auth?: auth.AuthParams | AuthDataGenerator
 }
 
 export namespace admin {
-	export interface ActiveHold {
-		id: string;
-		enrollmentId: string;
-		campaignId: string;
-		campaignTitle: string;
-		currency: string;
-		/**
-		 * Amount in smallest units (paise)
-		 */
-		amount: number;
-
-		/**
-		 * Decimal amount for display
-		 */
-		amountDecimal: string;
-
-		createdAt: string;
-		expiresAt?: string;
-	}
-
-	export interface ActivityFeedItem {
-		id: string;
-		type: string;
-		description: string;
-		timestamp: string;
-		entityId: string;
-		entityType: string;
-	}
-
-	export interface ActivityLog {
-		id: string;
-		adminId: string;
-		action: string;
-		entityType: string;
-		entityId: string;
-		details?: ActivityLogDetails;
-		ipAddress?: string;
-		createdAt: string;
-	}
-
-	export interface ActivityLogDetails {
-		startDate?: string;
-		endDate?: string;
-		format?: string;
-		targetAudience?: string;
-		targetCount?: number;
-		sent?: number;
-		failed?: number;
-		reason?: string;
-		status?: string;
-		organizationId?: string;
-		campaignId?: string;
-		enrollmentId?: string;
-		creatorId?: string;
-		userId?: string;
-		listingId?: string;
-		invoiceId?: string;
-		withdrawalId?: string;
-		amount?: number;
-		previousValue?: string;
-		newValue?: string;
-		provider?: string;
-		externalId?: string;
-	}
-
-	export interface AdminCategory {
-		id: string;
-		name: string;
-		description?: string;
-		icon?: string;
-		logo?: string;
-		createdBy: string;
-		updatedBy?: string;
-		createdAt: string;
-		updatedAt: string;
-	}
-
-	export interface AdminCoupon {
-		id: string;
-		code: string;
-		createdBy: string;
-		/**
-		 * Bonus type: 'fixed' for fixed amount, 'percentage' for percentage of order value
-		 */
-		bonusType: CouponBonusType;
-
-		/**
-		 * Bonus amount in smallest units (paise). Used when bonusType='fixed'
-		 */
-		bonus: number;
-
-		/**
-		 * Decimal bonus amount for display (e.g., "50.00")
-		 */
-		bonusDecimal: string;
-
-		/**
-		 * Bonus percentage (0-100). Used when bonusType='percentage'
-		 */
-		bonusRate: number | null;
-
-		/**
-		 * Maximum bonus cap in paise for percentage coupons
-		 */
-		maxBonus: number | null;
-
-		/**
-		 * Decimal max bonus for display
-		 */
-		maxBonusDecimal: string | null;
-
-		/**
-		 * Minimum order value in paise required to use coupon
-		 */
-		minOrderValue: number | null;
-
-		/**
-		 * Decimal min order value for display
-		 */
-		minOrderValueDecimal: string | null;
-
-		currency: string;
-		usageLimit: number | null;
-		oneTimeUse: boolean;
-		specificCampaignId: string | null;
-		status: "active" | "inactive" | "expired";
-		validFrom: string;
-		validUntil: string;
-		timesUsed: number;
-		createdAt: string;
-		updatedAt: string;
-	}
-
-	export interface AdminCreatorAddress {
-		id: string;
-		label: string;
-		addressLine1: string;
-		addressLine2?: string;
-		city: string;
-		state: string;
-		postalCode: string;
-		country: string;
-		isDefault: boolean;
-		createdAt: string;
-		updatedAt: string;
-	}
-
-	export interface AdminDepositAccount {
-		id: string;
-		organizationId: string;
-		organizationName: string;
-		provider: string;
-		receiverType: string;
-		externalId: string;
-		details: DepositAccountDetails;
-		status: string;
-		createdAt: string;
-		updatedAt: string;
-	}
-
-	export interface AdminDocumentVerification {
-		id: string;
-		subjectId: string;
-		subjectType: string;
-		subjectName?: string;
-		verificationType: string;
-		status: string;
-		method: string | null;
-		documents: KycDocuments | null;
-		result: KycVerificationResult | null;
-		verifiedBy: string | null;
-		verifiedAt: string | null;
-		rejectionReason: string | null;
-		retryCount: number;
-		expiresAt: string | null;
-		createdAt: string;
-		updatedAt: string;
-	}
-
-	export interface AdminDownloadUrlResponse {
-		downloadUrl: string;
-		expiresIn: number;
-		key: string;
-		bucket: string;
-	}
-
-	export interface AdminInvoiceResponse {
-		id: string;
-		organizationId: string;
-		organizationName: string;
-		invoiceNumber: string;
-		issuedAt?: string;
-		dueDate: string;
-		periodStart?: string;
-		periodEnd?: string;
-		currency: string;
-		/**
-		 * Subtotal in smallest units (paise)
-		 */
-		subtotal: number;
-
-		/**
-		 * Decimal subtotal for display
-		 */
-		subtotalDecimal: string;
-
-		/**
-		 * GST amount in smallest units (paise)
-		 */
-		gstAmount: number;
-
-		/**
-		 * Decimal GST amount for display
-		 */
-		gstAmountDecimal: string;
-
-		gstRate: number;
-		tdsRate: number;
-		/**
-		 * TDS amount in smallest units (paise)
-		 */
-		tdsAmount: number;
-
-		/**
-		 * Decimal TDS amount for display
-		 */
-		tdsAmountDecimal: string;
-
-		/**
-		 * Total amount in smallest units (paise)
-		 */
-		totalAmount: number;
-
-		/**
-		 * Decimal total amount for display
-		 */
-		totalAmountDecimal: string;
-
-		/**
-		 * Amount paid in smallest units (paise)
-		 */
-		amountPaid: number;
-
-		/**
-		 * Decimal amount paid for display
-		 */
-		amountPaidDecimal: string;
-
-		status: db.InvoiceStatus;
-		pdfUrl?: string;
-		notes?: string;
-		enrollmentCount: number;
-		lineItemCount: number;
-		viewedAt?: string;
-		sentAt?: string;
-		paidAt?: string;
-		createdAt: string;
-	}
-
-	export interface AdminListingResponse {
-		id: string;
-		organizationId: string;
-		organizationName: string;
-		categoryId?: string;
-		categoryName?: string;
-		platformId?: string;
-		platformName?: string;
-		name: string;
-		slug?: string;
-		description?: string;
-		identifier: string;
-		/**
-		 * Price in smallest units (paise)
-		 */
-		price: number;
-
-		/**
-		 * Decimal price for display (e.g., "254.90")
-		 */
-		priceDecimal: string;
-
-		currency: string;
-		link: string;
-		listingImages: utils.ListingImageItem[];
-		views: number;
-		campaignCount: number;
-		activeCampaignCount: number;
-		createdBy: string;
-		updatedBy?: string;
-		createdAt: string;
-		updatedAt: string;
-	}
-
-	export interface AdminPayoutResponse {
-		id: string;
-		displayId: string;
-		holderId: string;
-		holderType: "organization" | "creator";
-		holderName: string;
-		currency: string;
-		amount: number;
-		amountDecimal: string;
-		status: string;
-		gatewayTransactionId?: string;
-		gatewayProvider?: string;
-		utr?: string;
-		failureReason?: string;
-		retryCount: number;
-		createdAt: string;
-		processedAt?: string;
-	}
-
-	export interface AdminSearchFacets {
-		campaigns: number;
-		enrollments: number;
-		invoices: number;
-		creators: number;
-		organizations: number;
-		withdrawals: number;
-	}
-
-	export interface AdminSearchResult {
-		/**
-		 * Result type
-		 */
-		resultType: "campaign" | "enrollment" | "invoice" | "creator" | "organization" | "withdrawal";
-
-		/**
-		 * Resource ID
-		 */
-		id: string;
-
-		/**
-		 * Short display ID (e.g., CPG-A3B7XWFK, ENR-K7X4FA9B, WTH-9BK4XMFR)
-		 */
-		displayId?: string;
-
-		/**
-		 * Display title
-		 */
-		title: string;
-
-		/**
-		 * Optional description
-		 */
-		description?: string;
-
-		/**
-		 * Status string
-		 */
-		status: string;
-
-		/**
-		 * Created timestamp
-		 */
-		createdAt: string;
-
-		/**
-		 * Primary amount in decimal format
-		 */
-		amountDecimal?: string;
-
-		/**
-		 * Secondary amount (e.g., listing price for campaigns)
-		 */
-		secondaryAmountDecimal?: string;
-
-		/**
-		 * Count field (enrollments for campaigns, member count for orgs, etc.)
-		 */
-		currentCount?: number;
-
-		/**
-		 * Max count (e.g., maxEnrollments for campaigns)
-		 */
-		maxCount?: number;
-
-		/**
-		 * Processed timestamp (approval, issue date, etc.)
-		 */
-		processedAt?: string;
-
-		/**
-		 * Expiry timestamp
-		 */
-		expiresAt?: string;
-
-		/**
-		 * Listing info
-		 */
-		listing?: SearchListingInfo;
-
-		/**
-		 * Platform info
-		 */
-		platform?: SearchPlatformInfo;
-
-		/**
-		 * Campaign info (for enrollments)
-		 */
-		campaign?: SearchCampaignInfo;
-
-		/**
-		 * Creator info (for enrollments)
-		 */
-		creator?: SearchCreatorInfo;
-
-		/**
-		 * Organization info (for campaigns, invoices)
-		 */
-		organization?: SearchOrganizationInfo;
-
-		/**
-		 * Invoice number
-		 */
-		invoiceNumber?: string;
-
-		/**
-		 * Email (for creators, organizations)
-		 */
-		email?: string;
-
-		/**
-		 * Phone number (for creators)
-		 */
-		phoneNumber?: string;
-
-		/**
-		 * KYC verified (for creators)
-		 */
-		kycVerified?: boolean;
-
-		/**
-		 * Payout ready (for creators)
-		 */
-		payoutReady?: boolean;
-
-		/**
-		 * Account tier (for organizations)
-		 */
-		accountTier?: string;
-
-		/**
-		 * Setup complete (for organizations)
-		 */
-		isSetupComplete?: boolean;
-
-		/**
-		 * Requires manual review (for organizations)
-		 */
-		requiresManualReview?: boolean;
-
-		/**
-		 * Holder type (for withdrawals)
-		 */
-		holderType?: string;
-
-		/**
-		 * Holder name (for withdrawals)
-		 */
-		holderName?: string;
-
-		/**
-		 * Requires approval (for withdrawals)
-		 */
-		requiresApproval?: boolean;
-
-		/**
-		 * Fields that matched the search query
-		 */
-		matchedFields: string[];
-	}
-
-	export interface AdminTaskSubmission {
-		id: string;
-		enrollmentTaskId: string;
-		proofLink?: string;
-		proofScreenshot?: string;
-		submittedAt?: string;
-		feedback?: string;
-		feedbackAt?: string;
-		/**
-		 * Related data
-		 */
-		enrollmentId: string;
-
-		campaignId: string;
-		campaignName: string;
-		creatorId: string;
-		creatorName: string;
-		taskName: string;
-		taskCategory: db.TaskCategory;
-		enrollmentStatus: string;
-		createdAt: string;
-		updatedAt: string;
-	}
-
-	export interface AdminTaskTemplate {
-		id: string;
-		name: string;
-		slug: string;
-		description?: string;
-		category: db.TaskCategory;
-		platformId?: string;
-		platformName?: string;
-		requireLink: boolean;
-		requireScreenshot: boolean;
-		defaultRequirements?: db.TaskRequirements;
-		exampleUrl?: string;
-		status: db.TaskTemplateStatus;
-		usageCount: number;
-		createdAt: string;
-		updatedAt: string;
-	}
-
-	export interface AdminUnifiedSearchParams {
-		/**
-		 * Search query (2-200 chars)
-		 */
-		q: string;
-
-		/**
-		 * Pagination cursor (base64 encoded)
-		 */
-		cursor?: string;
-
-		/**
-		 * Page size (1-50)
-		 */
-		limit?: number;
-	}
-
-	export interface AdminUnifiedSearchResponse {
-		data: AdminSearchResult[];
-		nextCursor: string | null;
-		hasMore: boolean;
-		facets: AdminSearchFacets;
-		query: string;
-	}
-
-	export interface AdminWalletResponse {
-		id: string;
-		holderId: string;
-		holderType: "organization" | "creator";
-		holderName: string;
-		ledgerAccountId?: string;
-		currency: string;
-		/**
-		 * Balance in smallest units (paise)
-		 */
-		balance: number;
-
-		/**
-		 * Decimal balance for display
-		 */
-		balanceDecimal: string;
-
-		/**
-		 * Pending balance in smallest units (paise)
-		 */
-		pendingBalance: number;
-
-		/**
-		 * Decimal pending balance for display
-		 */
-		pendingBalanceDecimal: string;
-
-		/**
-		 * Available balance in smallest units (paise)
-		 */
-		availableBalance: number;
-
-		/**
-		 * Decimal available balance for display
-		 */
-		availableBalanceDecimal: string;
-
-		isFrozen: boolean;
-		createdAt: string;
-		/**
-		 * Credit limit in smallest units (paise)
-		 */
-		creditLimit?: number;
-
-		/**
-		 * Decimal credit limit for display
-		 */
-		creditLimitDecimal?: string;
-
-		/**
-		 * Credit utilized in smallest units (paise)
-		 */
-		creditUtilized?: number;
-
-		/**
-		 * Decimal credit utilized for display
-		 */
-		creditUtilizedDecimal?: string;
-	}
-
-	export interface AdminWithdrawalMethodResponse {
-		id: string;
-		creatorId: string;
-		creatorName: string;
-		accountType: "bank_account" | "upi";
-		accountHolderName?: string;
-		accountNumber?: string;
-		accountNumberMasked?: string;
-		bankName?: string;
-		ifscCode?: string;
-		upiId?: string;
-		upiIdMasked?: string;
-		isVerified: boolean;
-		isDefault: boolean;
-		withdrawalCount: number;
-		/**
-		 * Total withdrawn in smallest units (paise)
-		 */
-		totalWithdrawn: number;
-
-		/**
-		 * Decimal total withdrawn for display
-		 */
-		totalWithdrawnDecimal: string;
-
-		currency: string;
-		lastUsedAt?: string;
-		createdAt: string;
-		updatedAt: string;
-	}
-
-	export interface AdminWithdrawalResponse {
-		id: string;
-		displayId: string;
-		holderId: string;
-		holderType: "organization" | "creator";
-		holderName: string;
-		currency: string;
-		amount: number;
-		amountDecimal: string;
-		status: db.WithdrawalStatus;
-		withdrawalMethodId?: string;
-		bankAccountId?: string;
-		requiresApproval: boolean;
-		approvedBy?: string;
-		approvedAt?: string;
-		rejectedBy?: string;
-		rejectionReason?: string;
-		notes?: string;
-		requestedAt: string;
-		processedAt?: string;
-	}
-
-	export interface AuthStats {
-		totalUsers: number;
-		verifiedUsers: number;
-		bannedUsers: number;
-		usersWithTwoFactor: number;
-		activeSessions: number;
-		expiredSessions: number;
-		byAccountProvider: {
-			provider: string;
-			count: number;
-		}[];
-	}
-
-	export interface BatchEnrollmentsRequest {
-		action: "approve" | "reject" | "request_changes";
-		ids: string[];
-		reason?: string;
-		remarks?: string;
-	}
-
-	export interface CampaignAnalytics {
-		campaignId: string;
-		campaignName: string;
-		organizationName: string;
-		totalEnrollments: number;
-		approvedEnrollments: number;
-		rejectedEnrollments: number;
-		pendingEnrollments: number;
-		conversionRate: number;
-		totalPayout: number;
-		totalPayoutDecimal: string;
-		avgPayoutPerEnrollment: number;
-		avgPayoutPerEnrollmentDecimal: string;
-	}
-
-	export interface CampaignDetail {
-		description?: string;
-		termsAndConditions?: string;
-		billRate?: number;
-		/**
-		 * Bonus amount in smallest units (paise)
-		 */
-		bonus?: number;
-
-		/**
-		 * Decimal bonus amount for display (e.g., "50.00")
-		 */
-		bonusDecimal?: string;
-
-		approvedBy?: string;
-		approvedAt?: string;
-		autoPauseReason?: string;
-		/**
-		 * Rejection reason (only present when status is 'rejected')
-		 */
-		rejectionReason?: string;
-
-		/**
-		 * Who rejected the campaign (admin user ID)
-		 */
-		rejectedBy?: string;
-
-		/**
-		 * When the campaign was rejected
-		 */
-		rejectedAt?: string;
-
-		/**
-		 * Cancellation reason (only present when status is 'cancelled')
-		 */
-		cancellationReason?: string;
-
-		/**
-		 * Who cancelled the campaign
-		 */
-		cancelledBy?: string;
-
-		/**
-		 * When the campaign was cancelled
-		 */
-		cancelledAt?: string;
-
-		/**
-		 * End reason (only present when status is 'ended')
-		 */
-		endReason?: string;
-
-		/**
-		 * Affiliate link URL for creators to use when purchasing
-		 */
-		affiliateLink?: string;
-
-		/**
-		 * Affiliate network source
-		 */
-		affiliateSource?: db.AffiliateSource;
-
-		/**
-		 * Campaign tasks with per-task pricing
-		 */
-		tasks?: {
-			id: string;
-			name: string;
-			category: string;
-			platformFee: number;
-			platformFeeDecimal: string;
-			bonus: number;
-			bonusDecimal: string;
-			sortOrder: number;
-			isRequired: boolean;
-		}[];
-
-		id: string;
-		/**
-		 * Short display ID for UI (e.g., CPG-A3B7XWFK)
-		 */
-		displayId: string;
-
-		title: string;
-		slug: string | null;
-		organizationId: string;
-		organizationName?: string;
-		status: db.CampaignStatus;
-		campaignType: db.CampaignType;
-		startDate?: string;
-		endDate?: string;
-		maxEnrollments?: number;
-		currentEnrollments: number;
-		rebateRate?: number;
-		/**
-		 * Platform fee in smallest units (paise)
-		 */
-		platformFee?: number;
-
-		/**
-		 * Decimal platform fee for display (e.g., "99.00")
-		 */
-		platformFeeDecimal?: string;
-
-		currency: string;
-		createdAt: string;
-		updatedAt: string;
-	}
-
-	export interface CampaignListItem {
-		id: string;
-		/**
-		 * Short display ID for UI (e.g., CPG-A3B7XWFK)
-		 */
-		displayId: string;
-
-		title: string;
-		slug: string | null;
-		organizationId: string;
-		organizationName?: string;
-		status: db.CampaignStatus;
-		campaignType: db.CampaignType;
-		startDate?: string;
-		endDate?: string;
-		maxEnrollments?: number;
-		currentEnrollments: number;
-		rebateRate?: number;
-		/**
-		 * Platform fee in smallest units (paise)
-		 */
-		platformFee?: number;
-
-		/**
-		 * Decimal platform fee for display (e.g., "99.00")
-		 */
-		platformFeeDecimal?: string;
-
-		currency: string;
-		createdAt: string;
-		updatedAt: string;
-	}
-
-	export interface CampaignStats {
-		total: number;
-		byStatus: { [key: string]: number };
-		byType: { [key: string]: number };
-		activeCount: number;
-		pendingApprovalCount: number;
-		totalEnrollments: number;
-		averageEnrollmentsPerCampaign: number;
-	}
-
-	export interface ChangeAdminRoleRequest {
-		newRole: db.AdminRole;
-	}
-
-	export interface ChannelQuota {
-		channel: notifications.Channel;
-		remaining: number;
-		limit: number;
-	}
-
-	export interface ConfigJsonSettings {
-		key1?: string;
-		key2?: string;
-		key3?: string;
-		enabled?: boolean;
-		threshold?: number;
-		timeout?: number;
-		retries?: number;
-		url?: string;
-		apiKey?: string;
-	}
-
-	export interface ConfigJsonValue {
-		enabled?: boolean;
-		value?: string | number;
-		values?: string[];
-		min?: number;
-		max?: number;
-		default?: string | number | boolean;
-		options?: string[];
-		settings?: ConfigJsonSettings;
-	}
-
-	export type CouponBonusType = "fixed" | "percentage";
-
-	export interface CreateConfigRequest {
-		key: string;
-		value: string;
-		valueType?: string;
-		description?: string;
-		category?: string;
-		isEditable?: boolean;
-	}
-
-	export interface CreateDepositAccountRequest {
-		organizationId: string;
-		provider: string;
-		receiverType: string;
-		externalId: string;
-		details: DepositAccountDetails;
-	}
-
-	export interface CreatePlatformRequest {
-		name: string;
-		description?: string;
-		type: PlatformType;
-		websiteUrl?: string;
-		logo?: string;
-		icon?: string;
-	}
-
-	export interface CreatorDetail {
-		dob: string;
-		addresses: AdminCreatorAddress[];
-		profilePicture?: string;
-		panNumber?: string;
-		kycMethod?: string;
-		kycVerifiedAt?: string;
-		kycVerifiedBy?: string;
-		kycRejectionReason?: string;
-		reversalCount: number;
-		lastReversalAt?: string;
-		isBanned: boolean;
-		banReason?: string;
-		updatedAt: string;
-		id: string;
-		displayId: string;
-		userId: string;
-		firstName: string;
-		lastName: string;
-		email?: string;
-		phoneNumber?: string;
-		kycVerified: boolean;
-		payoutReady: boolean;
-		enrollmentCount: number;
-		createdAt: string;
-	}
-
-	export interface CreatorEarnings {
-		currency: string;
-		totalEarned: number;
-		totalEarnedDecimal: string;
-		totalPending: number;
-		totalPendingDecimal: string;
-		totalPaidOut: number;
-		totalPaidOutDecimal: string;
-		monthlyEarnings: {
-			month: string;
-			amount: number;
-			amountDecimal: string;
-		}[];
-	}
-
-	export interface CreatorEnrollment {
-		id: string;
-		campaignId: string;
-		campaignName?: string;
-		orderId: string;
-		currency: string;
-		orderValue: number;
-		orderValueDecimal: string;
-		status: db.EnrollmentStatus;
-		createdAt: string;
-	}
-
-	export interface CreatorKYCDocuments {
-		creatorId: string;
-		panDocumentUrl?: string;
-		aadhaarDocumentUrl?: string;
-		selfieUrl?: string;
-		expiresIn: number;
-	}
-
-	export interface CreatorKycDetails {
-		creatorId: string;
-		name: string;
-		email: string;
-		phone: string | null;
-		panNumber: string | null;
-		aadhaarNumber: string | null;
-		kycVerified: boolean;
-		kycMethod: string | null;
-		kycVerifiedAt: string | null;
-		kycRejectionReason: string | null;
-		panDocumentUrl: string | null;
-		aadhaarDocumentUrl: string | null;
-		verifications: AdminDocumentVerification[];
-	}
-
-	export interface CreatorListItem {
-		id: string;
-		displayId: string;
-		userId: string;
-		firstName: string;
-		lastName: string;
-		email?: string;
-		phoneNumber?: string;
-		kycVerified: boolean;
-		payoutReady: boolean;
-		enrollmentCount: number;
-		createdAt: string;
-	}
-
-	export interface CreatorStats {
-		total: number;
-		kycVerified: number;
-		kycPending: number;
-		payoutReady: number;
-		bannedCount: number;
-		totalEnrollments: number;
-		averageEnrollmentsPerCreator: number;
-	}
-
-	export interface DateRangeParams {
-		startDate?: string;
-		endDate?: string;
-	}
-
-	export interface DateRangeParams {
-		startDate?: string;
-		endDate?: string;
-	}
-
-	export interface DepositAccountDetails {
-		accountNumber?: string;
-		ifsc?: string;
-		bankName?: string;
-		beneficiaryName?: string;
-		vpaAddress?: string;
-		qrCodeUrl?: string;
-		notes?: string;
-		accountType?: string;
-		branchName?: string;
-		referenceId?: string;
-	}
-
-	export interface DepositAccountStats {
-		totalAccounts: number;
-		activeAccounts: number;
-		byProvider: {
-			provider: string;
-			count: number;
-		}[];
-		byReceiverType: {
-			receiverType: string;
-			count: number;
-		}[];
-	}
-
-	export interface EnrollmentDetail {
-		creatorEmail?: string;
-		purchaseDate?: string;
-		lockedBillRate?: string;
-		/**
-		 * Bonus amount in smallest units (paise)
-		 */
-		lockedBonus?: number;
-
-		/**
-		 * Decimal bonus amount for display
-		 */
-		lockedBonusDecimal?: string;
-
-		/**
-		 * Creator info
-		 */
-		creator: {
-			id: string;
-			displayId?: string;
-			name?: string;
-			email?: string;
-			approvalRate: number;
-			previousEnrollments: number;
-		};
-
-		/**
-		 * Campaign info
-		 */
-		campaign: {
-			id: string;
-			title: string;
-			status: string;
-			type: string;
-			listingName?: string;
-			listingImage?: string;
-		};
-
-		/**
-		 * Platform info
-		 */
-		platform?: {
-			id: string;
-			name: string;
-			type?: string;
-		};
-
-		/**
-		 * OCR scan data (structured — consistent with brand/creator)
-		 */
-		ocrData?: {
-			id: string;
-			screenshotUrl: string;
-			extractedOrderId?: string;
-			extractedOrderValue?: number;
-			extractedOrderValueDecimal?: string;
-			extractedPurchaseDate?: string;
-			extractedProductName?: string;
-			extractedSellerName?: string;
-			extractedPlatform?: string;
-			confidence?: number;
-			validationPassed?: boolean;
-			validationErrors?: OCRValidationData;
-		};
-
-		/**
-		 * Enrollment tasks with submissions
-		 */
-		tasks: {
-			enrollmentTaskId: string;
-			submissionId?: string;
-			taskName: string;
-			taskDescription?: string;
-			category: string;
-			isRequired: boolean;
-			requireLink: boolean;
-			requireScreenshot: boolean;
-			instructions?: string;
-			proofLink?: string;
-			proofScreenshot?: string;
-			submittedAt?: string;
-			feedback?: string;
-			platformName?: string;
-		}[];
-
-		/**
-		 * Per-task fee breakdown (from financialBreakdown audit trail)
-		 */
-		taskFees?: {
-			taskId: string;
-			taskName: string;
-			platformFee: number;
-			platformFeeDecimal: string;
-			bonus: number;
-			bonusDecimal: string;
-		}[];
-
-		/**
-		 * Status history
-		 */
-		history: {
-			id: string;
-			fromStatus?: string;
-			toStatus: string;
-			changedBy?: string;
-			changedByName?: string;
-			reason?: string;
-			changedAt: string;
-		}[];
-
-		rejectionReason?: string;
-		rejectionFeedback?: RejectionFeedback;
-		approvalRemarks?: string;
-		orderScreenshotUrl?: string;
-		ocrValidated: boolean;
-		ocrValidationData?: OCRValidationData;
-		reviewedBy?: string;
-		completedAt?: string;
-		updatedAt: string;
-		holdStatus?: string | null;
-		holdTransactionId?: string | null;
-		id: string;
-		/**
-		 * Short display ID for UI (e.g., ENR-K7X4FA9B)
-		 */
-		displayId: string;
-
-		campaignId: string;
-		campaignName?: string;
-		creatorId: string;
-		creatorDisplayId?: string;
-		creatorName?: string;
-		orderId: string;
-		/**
-		 * Order value in smallest units (paise)
-		 */
-		orderValue: number;
-
-		/**
-		 * Decimal order value for display (e.g., "254.90")
-		 */
-		orderValueDecimal: string;
-
-		currency: string;
-		status: db.EnrollmentStatus;
-		/**
-		 * Payment mode: prefund (hold created) or post_submission (pay at approval)
-		 */
-		paymentMode: db.PaymentMode;
-
-		lockedRebateRate: string;
-		/**
-		 * Platform fee in smallest units (paise)
-		 */
-		lockedPlatformFee: number;
-
-		/**
-		 * Decimal platform fee for display
-		 */
-		lockedPlatformFeeDecimal: string;
-
-		submittedAt?: string;
-		approvedAt?: string;
-		expiresAt?: string;
-		/**
-		 * Actions the admin can take on this enrollment
-		 */
-		allowedActions: internal.AdminAction[];
-
-		createdAt: string;
-	}
-
-	export interface EnrollmentListItem {
-		id: string;
-		/**
-		 * Short display ID for UI (e.g., ENR-K7X4FA9B)
-		 */
-		displayId: string;
-
-		campaignId: string;
-		campaignName?: string;
-		creatorId: string;
-		creatorDisplayId?: string;
-		creatorName?: string;
-		orderId: string;
-		/**
-		 * Order value in smallest units (paise)
-		 */
-		orderValue: number;
-
-		/**
-		 * Decimal order value for display (e.g., "254.90")
-		 */
-		orderValueDecimal: string;
-
-		currency: string;
-		status: db.EnrollmentStatus;
-		/**
-		 * Payment mode: prefund (hold created) or post_submission (pay at approval)
-		 */
-		paymentMode: db.PaymentMode;
-
-		lockedRebateRate: string;
-		/**
-		 * Platform fee in smallest units (paise)
-		 */
-		lockedPlatformFee: number;
-
-		/**
-		 * Decimal platform fee for display
-		 */
-		lockedPlatformFeeDecimal: string;
-
-		submittedAt?: string;
-		approvedAt?: string;
-		expiresAt?: string;
-		/**
-		 * Actions the admin can take on this enrollment
-		 */
-		allowedActions: internal.AdminAction[];
-
-		createdAt: string;
-	}
-
-	export interface EnrollmentOCRData {
-		enrollmentId: string;
-		orderId?: string;
-		orderScreenshotUrl?: string;
-		extractedData?: ocr.ExtractedOrderData;
-		campaignId: string;
-		campaignName: string;
-		listingName: string;
-		creatorId: string;
-		creatorName: string;
-		status: string;
-		createdAt: string;
-	}
-
-	export interface EnrollmentStats {
-		total: number;
-		byStatus: { [key: string]: number };
-		/**
-		 * Consistent naming with shared/enrollment-stats.ts
-		 */
-		awaitingSubmission: number;
-
-		awaitingReview: number;
-		changesRequested: number;
-		approved: number;
-		rejected: number;
-		cancelled: number;
-		expired: number;
-		/**
-		 * Total order value in smallest units (paise)
-		 */
-		totalOrderValue: number;
-
-		/**
-		 * Decimal total order value for display
-		 */
-		totalOrderValueDecimal: string;
-
-		/**
-		 * Total payouts in smallest units (paise)
-		 */
-		totalPayouts: number;
-
-		/**
-		 * Decimal total payouts for display
-		 */
-		totalPayoutsDecimal: string;
-
-		/**
-		 * Average order value in smallest units (paise)
-		 */
-		averageOrderValue: number;
-
-		/**
-		 * Decimal average order value for display
-		 */
-		averageOrderValueDecimal: string;
-
-		currency: string;
-	}
-
-	export interface FakeDataRequest {
-		/**
-		 * Number of users to create (default: 50)
-		 */
-		users?: number;
-
-		/**
-		 * Number of admin users (default: 3)
-		 */
-		admins?: number;
-
-		/**
-		 * Number of organizations (default: 10)
-		 */
-		organizations?: number;
-
-		/**
-		 * Listings per organization (default: 5)
-		 */
-		listingsPerOrg?: number;
-
-		/**
-		 * Campaigns per organization (default: 3)
-		 */
-		campaignsPerOrg?: number;
-
-		/**
-		 * Enrollments per campaign (default: 10)
-		 */
-		enrollmentsPerCampaign?: number;
-
-		/**
-		 * Number of coupons (default: 20)
-		 */
-		coupons?: number;
-
-		/**
-		 * Invoices per organization (default: 3)
-		 */
-		invoicesPerOrg?: number;
-
-		/**
-		 * Number of withdrawals (default: 20)
-		 */
-		withdrawals?: number;
-
-		/**
-		 * Clean existing fake data first (default: false)
-		 */
-		cleanFirst?: boolean;
-	}
-
-	export interface FakeDataResponse {
-		success: boolean;
-		message: string;
-		stats?: {
-			users: number;
-			admins: number;
-			creators: number;
-			organizations: number;
-			listings: number;
-			campaigns: number;
-			enrollments: number;
-			coupons: number;
-			invoices: number;
-			withdrawals: number;
-			platforms: number;
-			categories: number;
-			taskTemplates: number;
-			/**
-			 * Additional tables
-			 */
-			documentVerifications: number;
-
-			invitations: number;
-			organizationRoles: number;
-			campaignPauseHistories: number;
-			ocrScans: number;
-			payments: number;
-			adminActivityLogs: number;
-			couponRedemptions: number;
-			payouts: number;
-			depositAccounts: number;
-			withdrawalMethodVerifications: number;
-			/**
-			 * Better Auth teams & system config
-			 */
-			teams: number;
-
-			teamMembers: number;
-			systemConfigs: number;
-			payoutTransactions: number;
-		};
-		error?: string;
-	}
-
-	export interface GrowthMetrics {
-		period: string;
-		newOrganizations: number;
-		newCreators: number;
-		newCampaigns: number;
-		newEnrollments: number;
-		growthRateOrganizations: number;
-		growthRateCreators: number;
-	}
-
-	export interface HourlyDataPoint {
-		/**
-		 * Hour in 24h format (0-23)
-		 */
-		hour: number;
-
-		/**
-		 * Time label (e.g., "14:00")
-		 */
-		label: string;
-
-		/**
-		 * New enrollments created this hour
-		 */
-		newEnrollments: number;
-
-		/**
-		 * Enrollments approved this hour
-		 */
-		approvedThisHour: number;
-
-		/**
-		 * New withdrawal requests this hour
-		 */
-		newWithdrawals: number;
-	}
-
-	export interface InvoiceLineItemResponse {
-		id: string;
-		invoiceId: string;
-		enrollmentId?: string;
-		description: string;
-		quantity: number;
-		currency: string;
-		/**
-		 * Rate in smallest units (paise)
-		 */
-		rate: number;
-
-		/**
-		 * Decimal rate for display
-		 */
-		rateDecimal: string;
-
-		/**
-		 * Amount in smallest units (paise)
-		 */
-		amount: number;
-
-		/**
-		 * Decimal amount for display
-		 */
-		amountDecimal: string;
-	}
-
-	export interface InvoiceStatsResponse {
-		totalInvoices: number;
-		currency: string;
-		/**
-		 * Total amount in smallest units (paise)
-		 */
-		totalAmount: number;
-
-		/**
-		 * Decimal total amount for display
-		 */
-		totalAmountDecimal: string;
-
-		/**
-		 * Total paid in smallest units (paise)
-		 */
-		totalPaid: number;
-
-		/**
-		 * Decimal total paid for display
-		 */
-		totalPaidDecimal: string;
-
-		/**
-		 * Total pending in smallest units (paise)
-		 */
-		totalPending: number;
-
-		/**
-		 * Decimal total pending for display
-		 */
-		totalPendingDecimal: string;
-
-		countByStatus: { [key: string]: number };
-		amountByStatus: { [key: string]: number };
-		overdueCount: number;
-		/**
-		 * Overdue amount in smallest units (paise)
-		 */
-		overdueAmount: number;
-
-		/**
-		 * Decimal overdue amount for display
-		 */
-		overdueAmountDecimal: string;
-
-		/**
-		 * Average amount in smallest units (paise)
-		 */
-		averageAmount: number;
-
-		/**
-		 * Decimal average amount for display
-		 */
-		averageAmountDecimal: string;
-
-		thisMonthCount: number;
-		/**
-		 * This month amount in smallest units (paise)
-		 */
-		thisMonthAmount: number;
-
-		/**
-		 * Decimal this month amount for display
-		 */
-		thisMonthAmountDecimal: string;
-	}
-
-	export interface KycDocuments {
-		panUrl?: string;
-		aadhaarUrl?: string;
-		passportUrl?: string;
-		voterIdUrl?: string;
-		drivingLicenseUrl?: string;
-		addressProofUrl?: string;
-		bankStatementUrl?: string;
-		gstCertificateUrl?: string;
-		incorporationCertificateUrl?: string;
-		selfieUrl?: string;
-		signatureUrl?: string;
-		chequeUrl?: string;
-	}
-
-	export interface KycVerificationResult {
-		verified?: boolean;
-		verifiedAt?: string;
-		matchScore?: number;
-		nameMatch?: boolean;
-		dobMatch?: boolean;
-		addressMatch?: boolean;
-		extractedName?: string;
-		extractedDob?: string;
-		extractedAddress?: string;
-		panNumber?: string;
-		aadhaarLastFour?: string;
-		providerResponse?: string;
-		errorCode?: string;
-		errorMessage?: string;
-		faceMatchScore?: number;
-		livenessScore?: number;
-		documentType?: string;
-	}
-
-	export interface ListAdminTaskTemplatesParams {
-		status?: db.TaskTemplateStatus;
-		category?: db.TaskCategory;
-		platformId?: string;
-		sortBy?: string;
-		sortOrder?: "asc" | "desc";
-		search?: string;
-		skip?: number;
-		take?: number;
-	}
-
-	export interface ListCampaignsQuery {
-		status?: string;
-		type?: string;
-		organizationId?: string;
-		search?: string;
-		startDateFrom?: string;
-		startDateTo?: string;
-		skip?: number;
-		take?: number;
-	}
-
-	export interface ListCreatorsQuery {
-		kycVerified?: boolean;
-		payoutReady?: boolean;
-		isBanned?: boolean;
-		search?: string;
-		createdFrom?: string;
-		createdTo?: string;
-		sortBy?: "createdAt" | "firstName" | "lastName" | "enrollmentCount";
-		sortOrder?: "asc" | "desc";
-		skip?: number;
-		take?: number;
-	}
-
-	export interface ListDepositAccountsParams {
-		organizationId?: string;
-		provider?: string;
-		receiverType?: string;
-		status?: string;
-		sortBy?: string;
-		sortOrder?: "asc" | "desc";
-		search?: string;
-		skip?: number;
-		take?: number;
-	}
-
-	export interface ListDocVerificationsParams {
-		subjectType?: string;
-		verificationType?: string;
-		status?: string;
-		expiringSoon?: boolean;
-		sortBy?: string;
-		sortOrder?: "asc" | "desc";
-		search?: string;
-		skip?: number;
-		take?: number;
-	}
-
-	export interface ListEnrollmentsForOCRParams {
-		hasScreenshot?: boolean;
-		hasSuspiciousScreenshot?: boolean;
-		campaignId?: string;
-		skip?: number;
-		take?: number;
-	}
-
-	export interface ListEnrollmentsQuery {
-		status?: string;
-		campaignId?: string;
-		creatorId?: string;
-		search?: string;
-		fromDate?: string;
-		toDate?: string;
-		skip?: number;
-		take?: number;
-	}
-
-	export interface ListEnrollmentsQuery {
-		status?: string;
-		campaignId?: string;
-		creatorId?: string;
-		search?: string;
-		fromDate?: string;
-		toDate?: string;
-		skip?: number;
-		take?: number;
-	}
-
-	export interface ListFilesParams {
-		userId?: string;
-		prefix?: string;
-		skip?: number;
-		take?: number;
-	}
-
-	export interface ListFilesParams {
-		userId?: string;
-		prefix?: string;
-		skip?: number;
-		take?: number;
-	}
-
-	export interface ListFilesParams {
-		userId?: string;
-		prefix?: string;
-		skip?: number;
-		take?: number;
-	}
-
-	export interface ListOrganizationsQuery {
-		/**
-		 * Filter by new status (onboarding, active, suspended)
-		 */
-		status?: string;
-
-		accountTier?: string;
-		/**
-		 * Filter to only flagged organizations (requiresManualReview=true)
-		 */
-		flaggedOnly?: boolean;
-
-		search?: string;
-		skip?: number;
-		take?: number;
-	}
-
-	export interface ListPlatformsQuery {
-		search?: string;
-		type?: string;
-		status?: string;
-		sortBy?: "createdAt" | "name" | "listingCount";
-		sortOrder?: "asc" | "desc";
-		skip?: number;
-		take?: number;
-	}
-
-	export interface ListSubmissionsParams {
-		campaignId?: string;
-		creatorId?: string;
-		hasProof?: boolean;
-		taskTemplateId?: string;
-		sortBy?: string;
-		sortOrder?: "asc" | "desc";
-		search?: string;
-		skip?: number;
-		take?: number;
-	}
-
-	export interface ListSystemConfigParams {
-		category?: string;
-		isEditable?: boolean;
-		sortBy?: string;
-		sortOrder?: "asc" | "desc";
-		search?: string;
-		skip?: number;
-		take?: number;
-	}
-
-	export interface ListingImageInput {
-		imageUrl: string;
-		sortOrder?: number;
-		altText?: string;
-		isPrimary?: boolean;
-	}
-
-	export interface ListingStatsResponse {
-		totalListings: number;
-		listingsWithCampaigns: number;
-		listingsWithoutCampaigns: number;
-		byCategory: {
-			categoryId: string;
-			categoryName: string;
-			count: number;
-		}[];
-		byPlatform: {
-			platformId: string;
-			platformName: string;
-			count: number;
-		}[];
-		totalViews: number;
-		/**
-		 * Average price in smallest units (paise)
-		 */
-		averagePrice: number;
-
-		/**
-		 * Decimal average price for display
-		 */
-		averagePriceDecimal: string;
-
-		currency: string;
-	}
-
-	export interface MaintenanceStatus {
-		isActive: boolean;
-		message: string | null;
-		startedAt: string | null;
-		estimatedEndAt: string | null;
-		allowedRoles: string[];
-	}
-
-	export interface NotificationHistoryDetails {
-		userCount?: number;
-		sent?: number;
-		failed?: number;
-		targetAudience?: string;
-		targetCount?: number;
-		title?: string;
-		templateId?: string;
-		type?: string;
-	}
-
-	export interface NotificationPayload {
-		campaignId?: string;
-		campaignTitle?: string;
-		enrollmentId?: string;
-		payoutAmount?: string;
-		amount?: string;
-		utr?: string;
-		reason?: string;
-		organizationId?: string;
-		organizationName?: string;
-		invoiceId?: string;
-		invoiceNumber?: string;
-		source?: string;
-		title?: string;
-		message?: string;
-		actionUrl?: string;
-		creatorId?: string;
-		creatorName?: string;
-	}
-
-	export interface OCRExtractionResult {
-		enrollmentId: string;
-		extractedData: ocr.ExtractedOrderData;
-		validationResult: {
-			isValid: boolean;
-			issues: string[];
-			confidence: number;
-		};
-		processedAt: string;
-	}
-
-	export interface OCRValidationData {
-		merchantName?: string;
-		merchantNameMatch?: boolean;
-		orderDate?: string;
-		orderDateMatch?: boolean;
-		totalAmount?: string;
-		totalAmountMatch?: boolean;
-		itemsDetected?: string[];
-		confidenceScore?: number;
-		rawText?: string;
-		validationPassed?: boolean;
-		validationErrors?: string[];
-		receiptType?: string;
-		currency?: string;
-	}
-
-	export interface OrganizationAnalytics {
-		organizationId: string;
-		organizationName: string;
-		totalCampaigns: number;
-		activeCampaigns: number;
-		totalEnrollments: number;
-		approvalRate: number;
-	}
-
-	export interface OrganizationBankAccount {
-		id: string;
-		accountHolderName: string;
-		bankName: string | null;
-		ifscCode: string;
-		accountNumberMasked: string;
-		isVerified: boolean;
-		createdAt: string;
-	}
-
-	export interface OrganizationDetail {
-		description?: string;
-		website?: string;
-		businessType?: string;
-		industryCategory?: string;
-		contactPerson?: string;
-		address?: string;
-		city?: string;
-		state?: string;
-		country?: string;
-		postalCode?: string;
-		gstLegalName?: string;
-		gstTradeName?: string;
-		gstVerifiedAt?: string;
-		creditLimitCurrency?: string;
-		creditLimit?: number;
-		creditLimitDecimal?: string;
-		tdsRate?: string;
-		paymentInReady: boolean;
-		payoutReady: boolean;
-		/**
-		 * Who reviewed the organization (admin review for manual review cases)
-		 */
-		reviewedBy?: string;
-
-		reviewedAt?: string;
-		updatedAt: string;
-		id: string;
-		name: string;
-		slug: string;
-		logo?: string;
-		email?: string;
-		phoneNumber?: string;
-		/**
-		 * New 3-state status: onboarding | active | suspended
-		 */
-		status: db.OrganizationStatus;
-
-		accountTier: db.AccountTier;
-		gstNumber?: string;
-		/**
-		 * Setup progress tracking
-		 */
-		setupProgress: db.OrganizationSetupProgress;
-
-		isSetupComplete: boolean;
-		/**
-		 * Flagged for manual review (duplicate GST, etc.)
-		 */
-		requiresManualReview: boolean;
-
-		memberCount: number;
-		createdAt: string;
-		/**
-		 * Days in onboarding (for monitoring)
-		 */
-		daysOnboarding?: number;
-
-		/**
-		 * Suspension reason (only if suspended)
-		 */
-		suspensionReason?: string;
-	}
-
-	export interface OrganizationListItem {
-		id: string;
-		name: string;
-		slug: string;
-		logo?: string;
-		email?: string;
-		phoneNumber?: string;
-		/**
-		 * New 3-state status: onboarding | active | suspended
-		 */
-		status: db.OrganizationStatus;
-
-		accountTier: db.AccountTier;
-		gstNumber?: string;
-		/**
-		 * Setup progress tracking
-		 */
-		setupProgress: db.OrganizationSetupProgress;
-
-		isSetupComplete: boolean;
-		/**
-		 * Flagged for manual review (duplicate GST, etc.)
-		 */
-		requiresManualReview: boolean;
-
-		memberCount: number;
-		createdAt: string;
-		/**
-		 * Days in onboarding (for monitoring)
-		 */
-		daysOnboarding?: number;
-
-		/**
-		 * Suspension reason (only if suspended)
-		 */
-		suspensionReason?: string;
-	}
-
-	export interface OrganizationMember {
-		id: string;
-		userId: string;
-		userName?: string;
-		userEmail?: string;
-		role: string;
-		department?: string;
-		jobTitle?: string;
-		isActive: boolean;
-		createdAt: string;
-	}
-
-	export interface OrganizationStats {
-		total: number;
-		/**
-		 * Counts by new status (onboarding, active, suspended)
-		 */
-		byStatus: { [key: string]: number };
-
-		byAccountTier: { [key: string]: number };
-		/**
-		 * Organizations in onboarding status
-		 */
-		onboardingCount: number;
-
-		/**
-		 * Organizations that are active
-		 */
-		activeCount: number;
-
-		/**
-		 * Organizations flagged for manual review
-		 */
-		flaggedCount: number;
-
-		totalMembers: number;
-	}
-
-	export type ParsedConfigValue = string | number | boolean | ConfigJsonValue;
-
-	export interface Platform {
-		id: string;
-		name: string;
-		description?: string;
-		type: PlatformType;
-		websiteUrl?: string;
-		logo?: string;
-		icon?: string;
-		status: PlatformStatus;
-		createdBy: string;
-		updatedBy?: string;
-		createdAt: string;
-		updatedAt: string;
-	}
-
-	export interface PlatformHealth {
-		status: "healthy" | "degraded" | "maintenance";
-		services: {
-			name: string;
-			status: "up" | "down" | "degraded";
-			lastCheck: string;
-			responseTimeMs?: number;
-		}[];
-		database: {
-			status: "connected" | "disconnected";
-			latencyMs: number;
-		};
-		uptime: number;
-	}
-
-	export interface PlatformListItem {
-		listingCount: number;
-		taskTemplateCount: number;
-		id: string;
-		name: string;
-		description?: string;
-		type: PlatformType;
-		websiteUrl?: string;
-		logo?: string;
-		icon?: string;
-		status: PlatformStatus;
-		createdBy: string;
-		updatedBy?: string;
-		createdAt: string;
-		updatedAt: string;
-	}
-
-	export interface PlatformOverview {
-		campaigns: {
-			total: number;
-			active: number;
-			pending: number;
-			ended: number;
-		};
-		enrollments: {
-			total: number;
-			approved: number;
-			pending: number;
-			rejected: number;
-		};
-		organizations: {
-			total: number;
-			active: number;
-			onboarding: number;
-			suspended: number;
-		};
-		creators: {
-			total: number;
-			verified: number;
-			active: number;
-		};
-		financial: {
-			/**
-			 * Total payouts in smallest units (paise)
-			 */
-			totalPayouts: number;
-
-			/**
-			 * Decimal string representation (e.g., "254.90")
-			 */
-			totalPayoutsDecimal: string;
-
-			/**
-			 * Pending withdrawals in smallest units (paise)
-			 */
-			pendingWithdrawals: number;
-
-			/**
-			 * Decimal string representation
-			 */
-			pendingWithdrawalsDecimal: string;
-
-			/**
-			 * Total invoiced in smallest units (paise)
-			 */
-			totalInvoiced: number;
-
-			/**
-			 * Decimal string representation
-			 */
-			totalInvoicedDecimal: string;
-
-			/**
-			 * Currency code (ISO 4217)
-			 */
-			currency: string;
-		};
-	}
-
-	export type PlatformStatus = "active" | "inactive" | "maintenance";
-
-	export type PlatformType =
-		| "marketplace"
-		| "social"
-		| "ecommerce"
-		| "delivery"
-		| "grocery"
-		| "fashion"
-		| "electronics"
-		| "beauty"
-		| "food"
-		| "quick_commerce"
-		| "other";
-
-	export interface ProviderStatus {
-		name: string;
-		configured: boolean;
-		circuitState: string;
-		isAvailable: boolean;
-	}
-
-	export interface RejectionFeedback {
-		category?: string;
-		subcategory?: string;
-		details?: string;
-		suggestedFix?: string;
-		rejectedFields?: string[];
-		requiresResubmission?: boolean;
-	}
-
-	export interface RevenueAnalytics {
-		period: string;
-		totalInvoiced: number;
-		totalInvoicedDecimal: string;
-		totalPaid: number;
-		totalPaidDecimal: string;
-		totalPending: number;
-		totalPendingDecimal: string;
-		invoiceCount: number;
-		avgInvoiceValue: number;
-		avgInvoiceValueDecimal: string;
-	}
-
-	export interface ReviewOrganizationRequest {
-		/**
-		 * Approve (clears flag, allows auto-activation) or Reject (suspends org)
-		 */
-		action: "approve" | "reject";
-
-		/**
-		 * Required reason when rejecting
-		 */
-		reason?: string;
-
-		/**
-		 * Optional notes for approval
-		 */
-		notes?: string;
-	}
-
-	export interface SearchCampaignInfo {
-		id: string;
-		title: string;
-	}
-
-	export interface SearchCreatorInfo {
-		id: string;
-		displayId: string;
-		displayName: string;
-	}
-
-	export interface SearchListingInfo {
-		id: string;
-		name: string;
-		priceDecimal?: string;
-		primaryImage?: string;
-	}
-
-	export interface SearchOrganizationInfo {
-		id: string;
-		name: string;
-		logo?: string;
-	}
-
-	export interface SearchPlatformInfo {
-		id: string;
-		name: string;
-		icon?: string;
-	}
-
-	export interface SetCreditLimitRequest {
-		creditLimit: number;
-		accountTier?: db.AccountTier;
-	}
-
-	export interface SetPaymentModeRequest {
-		paymentMode: db.PaymentMode;
-		/**
-		 * Required credit limit when switching to post_submission (exposure cap)
-		 */
-		creditLimit?: number;
-	}
-
-	export interface StorageFile {
-		key: string;
-		bucket: string;
-		size?: number;
-		lastModified?: string;
-		contentType?: string;
-	}
-
-	export interface StorageStats {
-		uploads: {
-			fileCount: number;
-		};
-		profilePictures: {
-			fileCount: number;
-		};
-		kycDocuments: {
-			fileCount: number;
-		};
-		totalFiles: number;
-	}
-
-	export interface SystemConfigItem {
-		id: string;
-		key: string;
-		value: string;
-		parsedValue: ParsedConfigValue;
-		valueType: string;
-		description: string | null;
-		isEditable: boolean;
-		category: string | null;
-		createdAt: string;
-		updatedAt: string;
-		updatedBy: string | null;
-	}
-
-	export interface TaskPricingUpdate {
-		/**
-		 * campaignTask.id
-		 */
-		id: string;
-
-		/**
-		 * Per-task platform fee in paise (0 = no extra fee)
-		 */
-		platformFee?: number;
-
-		/**
-		 * Per-task bonus in paise (0 = no extra bonus)
-		 */
-		bonus?: number;
-	}
-
-	export interface TaskStats {
-		totalTemplates: number;
-		activeTemplates: number;
-		inactiveTemplates: number;
-		deprecatedTemplates: number;
-		totalSubmissions: number;
-		submissionsWithProof: number;
-		submissionsWithoutProof: number;
-		byCategory: {
-			category: db.TaskCategory;
-			count: number;
-		}[];
-		topTemplates: {
-			id: string;
-			name: string;
-			usageCount: number;
-		}[];
-	}
-
-	export interface TimeSeriesDataPoint {
-		date: string;
-		value: number;
-	}
-
-	export interface TodayStats {
-		/**
-		 * Today's date in ISO format
-		 */
-		date: string;
-
-		enrollments: {
-			/**
-			 * New enrollments created today
-			 */
-			newToday: number;
-
-			/**
-			 * Enrollments approved today (regardless of when created)
-			 */
-			approvedToday: number;
-
-			/**
-			 * Enrollments rejected today (regardless of when created)
-			 */
-			rejectedToday: number;
-
-			/**
-			 * Currently pending review (all time)
-			 */
-			pendingReview: number;
-		};
-		withdrawals: {
-			/**
-			 * New withdrawal requests today
-			 */
-			newToday: number;
-
-			/**
-			 * Total amount requested today in paise
-			 */
-			totalAmount: number;
-
-			/**
-			 * Decimal string representation
-			 */
-			totalAmountDecimal: string;
-
-			/**
-			 * Withdrawals completed today
-			 */
-			completedToday: number;
-		};
-		newCreators: number;
-		newOrganizations: number;
-		newCampaigns: number;
-		/**
-		 * Currency code
-		 */
-		currency: string;
-	}
-
-	export interface UpdateCampaignRequest {
-		/**
-		 * Field updates
-		 */
-		title?: string;
-
-		description?: string;
-		termsAndConditions?: string;
-		startDate?: string;
-		endDate?: string;
-		maxEnrollments?: number;
-		/**
-		 * Pricing (can be updated directly)
-		 */
-		rebateRate?: number;
-
-		platformFee?: number;
-		billRate?: number;
-		bonus?: number;
-		/**
-		 * Affiliate link URL for creators to use when purchasing
-		 */
-		affiliateLink?: string;
-
-		/**
-		 * Affiliate network source
-		 */
-		affiliateSource?: db.AffiliateSource;
-
-		/**
-		 * Per-task platform fee and bonus overrides
-		 */
-		taskPricing?: TaskPricingUpdate[];
-	}
-
-	export interface UpdateConfigRequest {
-		value?: string;
-		description?: string;
-		isEditable?: boolean;
-		category?: string;
-	}
-
-	export interface UpdateCreatorRequest {
-		firstName?: string;
-		lastName?: string;
-		phoneNumber?: string;
-		isMediator?: boolean;
-	}
-
-	export interface UpdateEnrollmentRequest {
-		/**
-		 * Field updates
-		 */
-		expiresAt?: string;
-
-		orderId?: string;
-		orderValue?: number;
-		approvalRemarks?: string;
-	}
-
-	export interface UpdateOrganizationRequest {
-		name?: string;
-		description?: string;
-		website?: string;
-		email?: string;
-		phoneNumber?: string;
-		contactPerson?: string;
-		address?: string;
-		city?: string;
-		state?: string;
-		postalCode?: string;
-		businessType?: string;
-		industryCategory?: string;
-		creditLimit?: number;
-		accountTier?: db.AccountTier;
-		tdsRate?: number;
-	}
-
-	export interface UpdatePlatformRequest {
-		name?: string;
-		description?: string;
-		type?: PlatformType;
-		websiteUrl?: string;
-		logo?: string;
-		icon?: string;
-		status?: PlatformStatus;
-	}
-
-	export interface UserQuotaResponse {
-		userId: string;
-		quotas: ChannelQuota[];
-		totalRemaining: number;
-	}
-
-	export interface VerificationGatewayResponse {
-		transactionId?: string;
-		referenceId?: string;
-		status?: string;
-		statusCode?: string;
-		message?: string;
-		bankReferenceNumber?: string;
-		utr?: string;
-		amount?: number;
-		currency?: string;
-		timestamp?: string;
-		provider?: string;
-		providerStatus?: string;
-		rawResponse?: string;
-	}
-
-	export interface VerificationHistoryItem {
-		id: string;
-		withdrawalMethodId: string;
-		method: "penny_drop" | "manual" | "document";
-		success: boolean;
-		attemptedAt: string;
-		verifiedBy?: string;
-		errorCode?: string;
-		errorMessage?: string;
-		gatewayResponse?: VerificationGatewayResponse;
-		metadata?: VerificationMetadata;
-	}
-
-	export interface VerificationMetadata {
-		ipAddress?: string;
-		userAgent?: string;
-		requestId?: string;
-		attemptNumber?: number;
-		source?: string;
-		initiatedBy?: string;
-		completedAt?: string;
-		duration?: number;
-		retryCount?: number;
-		notes?: string;
-	}
-
-	export interface VerificationStats {
-		total: number;
-		byStatus: {
-			status: string;
-			count: number;
-		}[];
-		byType: {
-			type: string;
-			count: number;
-		}[];
-		bySubjectType: {
-			subjectType: string;
-			count: number;
-		}[];
-		pendingCount: number;
-		expiringSoonCount: number;
-		avgProcessingTimeHours: number;
-	}
-
-	export interface WalletStatsResponse {
-		totalWallets: number;
-		currency: string;
-		/**
-		 * Total balance in smallest units (paise)
-		 */
-		totalBalance: number;
-
-		/**
-		 * Decimal total balance for display
-		 */
-		totalBalanceDecimal: string;
-
-		/**
-		 * Total pending balance in smallest units (paise)
-		 */
-		totalPendingBalance: number;
-
-		/**
-		 * Decimal total pending balance for display
-		 */
-		totalPendingBalanceDecimal: string;
-
-		byHolderType: {
-			creator: {
-				count: number;
-				balance: number;
-				balanceDecimal: string;
-			};
-			organization: {
-				count: number;
-				balance: number;
-				balanceDecimal: string;
-			};
-		};
-		frozenWallets: number;
-	}
-
-	export interface WalletTransaction {
-		id: string;
-		walletId: string;
-		type: "credit" | "debit" | "hold" | "release" | "hold_committed";
-		currency: string;
-		/**
-		 * Amount in smallest units (paise)
-		 */
-		amount: number;
-
-		/**
-		 * Decimal amount for display
-		 */
-		amountDecimal: string;
-
-		description: string;
-		reference?: string;
-		createdAt: string;
-		/**
-		 * Enhanced fields for frontend
-		 */
-		status: "pending" | "completed" | "voided";
-
-		enrollmentId?: string;
-		category?: "deposit" | "enrollment_hold" | "payout" | "refund" | "admin_credit" | "other";
-	}
-
-	export interface WithdrawalMethodStatsResponse {
-		totalMethods: number;
-		verifiedMethods: number;
-		unverifiedMethods: number;
-		byType: {
-			bank_account: number;
-			upi: number;
-		};
-		topBanks: {
-			bankName: string;
-			count: number;
-		}[];
-	}
-
-	export interface WithdrawalMethodVerificationDetails {
-		bankName?: string;
-		accountNumber?: string;
-		ifsc?: string;
-		accountHolderName?: string;
-		upiId?: string;
-		pennyDropAmount?: number;
-		pennyDropReference?: string;
-		verificationAttempt?: number;
-		errorCode?: string;
-		errorMessage?: string;
-		providerResponse?: string;
-		transactionId?: string;
-		verifiedAt?: string;
-	}
-
-	export interface WithdrawalStatsResponse {
-		currency: string;
-		totalCount: number;
-		totalAmount: number;
-		totalAmountDecimal: string;
-		countByStatus: { [key: string]: number };
-		amountByStatus: { [key: string]: number };
-		amountByStatusDecimal: { [key: string]: string };
-		pendingApprovalCount: number;
-		pendingApprovalAmount: number;
-		pendingApprovalAmountDecimal: string;
-		averageAmount: number;
-		averageAmountDecimal: string;
-		todayCount: number;
-		todayAmount: number;
-		todayAmountDecimal: string;
-	}
-
-	export class ServiceClient {
-		private baseClient: BaseClient;
-
-		constructor(baseClient: BaseClient) {
-			this.baseClient = baseClient;
-		}
-	}
+    export interface ActiveHold {
+        id: string
+        enrollmentId: string
+        campaignId: string
+        campaignTitle: string
+        currency: string
+        /**
+         * Amount in smallest units (paise)
+         */
+        amount: number
+
+        /**
+         * Decimal amount for display
+         */
+        amountDecimal: string
+
+        createdAt: string
+        expiresAt?: string
+    }
+
+    export interface ActivityFeedItem {
+        id: string
+        type: string
+        description: string
+        timestamp: string
+        entityId: string
+        entityType: string
+    }
+
+    export interface ActivityLog {
+        id: string
+        adminId: string
+        action: string
+        entityType: string
+        entityId: string
+        details?: ActivityLogDetails
+        ipAddress?: string
+        createdAt: string
+    }
+
+    export interface ActivityLogDetails {
+        startDate?: string
+        endDate?: string
+        format?: string
+        targetAudience?: string
+        targetCount?: number
+        sent?: number
+        failed?: number
+        reason?: string
+        status?: string
+        organizationId?: string
+        campaignId?: string
+        enrollmentId?: string
+        creatorId?: string
+        userId?: string
+        listingId?: string
+        invoiceId?: string
+        withdrawalId?: string
+        amount?: number
+        previousValue?: string
+        newValue?: string
+        provider?: string
+        externalId?: string
+    }
+
+    export interface AdminCategory {
+        id: string
+        name: string
+        description?: string
+        icon?: string
+        logo?: string
+        createdBy: string
+        updatedBy?: string
+        createdAt: string
+        updatedAt: string
+    }
+
+    export interface AdminCoupon {
+        id: string
+        code: string
+        createdBy: string
+        /**
+         * Bonus type: 'fixed' for fixed amount, 'percentage' for percentage of order value
+         */
+        bonusType: CouponBonusType
+
+        /**
+         * Bonus amount in smallest units (paise). Used when bonusType='fixed'
+         */
+        bonus: number
+
+        /**
+         * Decimal bonus amount for display (e.g., "50.00")
+         */
+        bonusDecimal: string
+
+        /**
+         * Bonus percentage (0-100). Used when bonusType='percentage'
+         */
+        bonusRate: number | null
+
+        /**
+         * Maximum bonus cap in paise for percentage coupons
+         */
+        maxBonus: number | null
+
+        /**
+         * Decimal max bonus for display
+         */
+        maxBonusDecimal: string | null
+
+        /**
+         * Minimum order value in paise required to use coupon
+         */
+        minOrderValue: number | null
+
+        /**
+         * Decimal min order value for display
+         */
+        minOrderValueDecimal: string | null
+
+        currency: string
+        usageLimit: number | null
+        oneTimeUse: boolean
+        specificCampaignId: string | null
+        status: "active" | "inactive" | "expired"
+        validFrom: string
+        validUntil: string
+        timesUsed: number
+        createdAt: string
+        updatedAt: string
+    }
+
+    export interface AdminCreatorAddress {
+        id: string
+        label: string
+        addressLine1: string
+        addressLine2?: string
+        city: string
+        state: string
+        postalCode: string
+        country: string
+        isDefault: boolean
+        createdAt: string
+        updatedAt: string
+    }
+
+    export interface AdminDepositAccount {
+        id: string
+        organizationId: string
+        organizationName: string
+        provider: string
+        receiverType: string
+        externalId: string
+        details: DepositAccountDetails
+        status: string
+        createdAt: string
+        updatedAt: string
+    }
+
+    export interface AdminDocumentVerification {
+        id: string
+        subjectId: string
+        subjectType: string
+        subjectName?: string
+        verificationType: string
+        status: string
+        method: string | null
+        documents: KycDocuments | null
+        result: KycVerificationResult | null
+        verifiedBy: string | null
+        verifiedAt: string | null
+        rejectionReason: string | null
+        retryCount: number
+        expiresAt: string | null
+        createdAt: string
+        updatedAt: string
+    }
+
+    export interface AdminDownloadUrlResponse {
+        downloadUrl: string
+        expiresIn: number
+        key: string
+        bucket: string
+    }
+
+    export interface AdminInvoiceResponse {
+        id: string
+        organizationId: string
+        organizationName: string
+        invoiceNumber: string
+        issuedAt?: string
+        dueDate: string
+        periodStart?: string
+        periodEnd?: string
+        currency: string
+        /**
+         * Subtotal in smallest units (paise)
+         */
+        subtotal: number
+
+        /**
+         * Decimal subtotal for display
+         */
+        subtotalDecimal: string
+
+        /**
+         * GST amount in smallest units (paise)
+         */
+        gstAmount: number
+
+        /**
+         * Decimal GST amount for display
+         */
+        gstAmountDecimal: string
+
+        gstRate: number
+        tdsRate: number
+        /**
+         * TDS amount in smallest units (paise)
+         */
+        tdsAmount: number
+
+        /**
+         * Decimal TDS amount for display
+         */
+        tdsAmountDecimal: string
+
+        /**
+         * Total amount in smallest units (paise)
+         */
+        totalAmount: number
+
+        /**
+         * Decimal total amount for display
+         */
+        totalAmountDecimal: string
+
+        /**
+         * Amount paid in smallest units (paise)
+         */
+        amountPaid: number
+
+        /**
+         * Decimal amount paid for display
+         */
+        amountPaidDecimal: string
+
+        status: db.InvoiceStatus
+        pdfUrl?: string
+        notes?: string
+        enrollmentCount: number
+        lineItemCount: number
+        viewedAt?: string
+        sentAt?: string
+        paidAt?: string
+        createdAt: string
+    }
+
+    export interface AdminListingResponse {
+        id: string
+        organizationId: string
+        organizationName: string
+        categoryId?: string
+        categoryName?: string
+        platformId?: string
+        platformName?: string
+        name: string
+        slug?: string
+        description?: string
+        identifier: string
+        /**
+         * Price in smallest units (paise)
+         */
+        price: number
+
+        /**
+         * Decimal price for display (e.g., "254.90")
+         */
+        priceDecimal: string
+
+        currency: string
+        link: string
+        listingImages: utils.ListingImageItem[]
+        views: number
+        campaignCount: number
+        activeCampaignCount: number
+        createdBy: string
+        updatedBy?: string
+        createdAt: string
+        updatedAt: string
+    }
+
+    export interface AdminPayoutResponse {
+        id: string
+        displayId: string
+        holderId: string
+        holderType: "organization" | "creator"
+        holderName: string
+        currency: string
+        amount: number
+        amountDecimal: string
+        status: string
+        gatewayTransactionId?: string
+        gatewayProvider?: string
+        utr?: string
+        failureReason?: string
+        retryCount: number
+        createdAt: string
+        processedAt?: string
+    }
+
+    export interface AdminSearchFacets {
+        campaigns: number
+        enrollments: number
+        invoices: number
+        creators: number
+        organizations: number
+        withdrawals: number
+    }
+
+    export interface AdminSearchResult {
+        /**
+         * Result type
+         */
+        resultType: "campaign" | "enrollment" | "invoice" | "creator" | "organization" | "withdrawal"
+
+        /**
+         * Resource ID
+         */
+        id: string
+
+        /**
+         * Short display ID (e.g., CPG-A3B7XWFK, ENR-K7X4FA9B, WTH-9BK4XMFR)
+         */
+        displayId?: string
+
+        /**
+         * Display title
+         */
+        title: string
+
+        /**
+         * Optional description
+         */
+        description?: string
+
+        /**
+         * Status string
+         */
+        status: string
+
+        /**
+         * Created timestamp
+         */
+        createdAt: string
+
+        /**
+         * Primary amount in decimal format
+         */
+        amountDecimal?: string
+
+        /**
+         * Secondary amount (e.g., listing price for campaigns)
+         */
+        secondaryAmountDecimal?: string
+
+        /**
+         * Count field (enrollments for campaigns, member count for orgs, etc.)
+         */
+        currentCount?: number
+
+        /**
+         * Max count (e.g., maxEnrollments for campaigns)
+         */
+        maxCount?: number
+
+        /**
+         * Processed timestamp (approval, issue date, etc.)
+         */
+        processedAt?: string
+
+        /**
+         * Expiry timestamp
+         */
+        expiresAt?: string
+
+        /**
+         * Listing info
+         */
+        listing?: SearchListingInfo
+
+        /**
+         * Platform info
+         */
+        platform?: SearchPlatformInfo
+
+        /**
+         * Campaign info (for enrollments)
+         */
+        campaign?: SearchCampaignInfo
+
+        /**
+         * Creator info (for enrollments)
+         */
+        creator?: SearchCreatorInfo
+
+        /**
+         * Organization info (for campaigns, invoices)
+         */
+        organization?: SearchOrganizationInfo
+
+        /**
+         * Invoice number
+         */
+        invoiceNumber?: string
+
+        /**
+         * Email (for creators, organizations)
+         */
+        email?: string
+
+        /**
+         * Phone number (for creators)
+         */
+        phoneNumber?: string
+
+        /**
+         * KYC verified (for creators)
+         */
+        kycVerified?: boolean
+
+        /**
+         * Payout ready (for creators)
+         */
+        payoutReady?: boolean
+
+        /**
+         * Account tier (for organizations)
+         */
+        accountTier?: string
+
+        /**
+         * Setup complete (for organizations)
+         */
+        isSetupComplete?: boolean
+
+        /**
+         * Requires manual review (for organizations)
+         */
+        requiresManualReview?: boolean
+
+        /**
+         * Holder type (for withdrawals)
+         */
+        holderType?: string
+
+        /**
+         * Holder name (for withdrawals)
+         */
+        holderName?: string
+
+        /**
+         * Requires approval (for withdrawals)
+         */
+        requiresApproval?: boolean
+
+        /**
+         * Fields that matched the search query
+         */
+        matchedFields: string[]
+    }
+
+    export interface AdminTaskSubmission {
+        id: string
+        enrollmentTaskId: string
+        proofLink?: string
+        proofScreenshot?: string
+        submittedAt?: string
+        feedback?: string
+        feedbackAt?: string
+        /**
+         * Related data
+         */
+        enrollmentId: string
+
+        campaignId: string
+        campaignName: string
+        creatorId: string
+        creatorName: string
+        taskName: string
+        taskCategory: db.TaskCategory
+        enrollmentStatus: string
+        createdAt: string
+        updatedAt: string
+    }
+
+    export interface AdminTaskTemplate {
+        id: string
+        name: string
+        slug: string
+        description?: string
+        category: db.TaskCategory
+        platformId?: string
+        platformName?: string
+        requireLink: boolean
+        requireScreenshot: boolean
+        defaultRequirements?: db.TaskRequirements
+        exampleUrl?: string
+        status: db.TaskTemplateStatus
+        usageCount: number
+        createdAt: string
+        updatedAt: string
+    }
+
+    export interface AdminUnifiedSearchParams {
+        /**
+         * Search query (2-200 chars)
+         */
+        q: string
+
+        /**
+         * Pagination cursor (base64 encoded)
+         */
+        cursor?: string
+
+        /**
+         * Page size (1-50)
+         */
+        limit?: number
+    }
+
+    export interface AdminUnifiedSearchResponse {
+        data: AdminSearchResult[]
+        nextCursor: string | null
+        hasMore: boolean
+        facets: AdminSearchFacets
+        query: string
+    }
+
+    export interface AdminWalletResponse {
+        id: string
+        holderId: string
+        holderType: "organization" | "creator"
+        holderName: string
+        ledgerAccountId?: string
+        currency: string
+        /**
+         * Balance in smallest units (paise)
+         */
+        balance: number
+
+        /**
+         * Decimal balance for display
+         */
+        balanceDecimal: string
+
+        /**
+         * Pending balance in smallest units (paise)
+         */
+        pendingBalance: number
+
+        /**
+         * Decimal pending balance for display
+         */
+        pendingBalanceDecimal: string
+
+        /**
+         * Available balance in smallest units (paise)
+         */
+        availableBalance: number
+
+        /**
+         * Decimal available balance for display
+         */
+        availableBalanceDecimal: string
+
+        isFrozen: boolean
+        createdAt: string
+        /**
+         * Credit limit in smallest units (paise)
+         */
+        creditLimit?: number
+
+        /**
+         * Decimal credit limit for display
+         */
+        creditLimitDecimal?: string
+
+        /**
+         * Credit utilized in smallest units (paise)
+         */
+        creditUtilized?: number
+
+        /**
+         * Decimal credit utilized for display
+         */
+        creditUtilizedDecimal?: string
+    }
+
+    export interface AdminWithdrawalMethodResponse {
+        id: string
+        creatorId: string
+        creatorName: string
+        accountType: "bank_account" | "upi"
+        accountHolderName?: string
+        accountNumber?: string
+        accountNumberMasked?: string
+        bankName?: string
+        ifscCode?: string
+        upiId?: string
+        upiIdMasked?: string
+        isVerified: boolean
+        isDefault: boolean
+        withdrawalCount: number
+        /**
+         * Total withdrawn in smallest units (paise)
+         */
+        totalWithdrawn: number
+
+        /**
+         * Decimal total withdrawn for display
+         */
+        totalWithdrawnDecimal: string
+
+        currency: string
+        lastUsedAt?: string
+        createdAt: string
+        updatedAt: string
+    }
+
+    export interface AdminWithdrawalResponse {
+        id: string
+        displayId: string
+        holderId: string
+        holderType: "organization" | "creator"
+        holderName: string
+        currency: string
+        amount: number
+        amountDecimal: string
+        status: db.WithdrawalStatus
+        withdrawalMethodId?: string
+        bankAccountId?: string
+        requiresApproval: boolean
+        approvedBy?: string
+        approvedAt?: string
+        rejectedBy?: string
+        rejectionReason?: string
+        notes?: string
+        requestedAt: string
+        processedAt?: string
+    }
+
+    export interface AuthStats {
+        totalUsers: number
+        verifiedUsers: number
+        bannedUsers: number
+        usersWithTwoFactor: number
+        activeSessions: number
+        expiredSessions: number
+        byAccountProvider: {
+            provider: string
+            count: number
+        }[]
+    }
+
+    export interface BatchEnrollmentsRequest {
+        action: "approve" | "reject" | "request_changes"
+        ids: string[]
+        reason?: string
+        remarks?: string
+    }
+
+    export interface CampaignAnalytics {
+        campaignId: string
+        campaignName: string
+        organizationName: string
+        totalEnrollments: number
+        approvedEnrollments: number
+        rejectedEnrollments: number
+        pendingEnrollments: number
+        conversionRate: number
+        totalPayout: number
+        totalPayoutDecimal: string
+        avgPayoutPerEnrollment: number
+        avgPayoutPerEnrollmentDecimal: string
+    }
+
+    export interface CampaignDetail {
+        description?: string
+        termsAndConditions?: string
+        billRate?: number
+        /**
+         * Bonus amount in smallest units (paise)
+         */
+        bonus?: number
+
+        /**
+         * Decimal bonus amount for display (e.g., "50.00")
+         */
+        bonusDecimal?: string
+
+        approvedBy?: string
+        approvedAt?: string
+        autoPauseReason?: string
+        /**
+         * Rejection reason (only present when status is 'rejected')
+         */
+        rejectionReason?: string
+
+        /**
+         * Who rejected the campaign (admin user ID)
+         */
+        rejectedBy?: string
+
+        /**
+         * When the campaign was rejected
+         */
+        rejectedAt?: string
+
+        /**
+         * Cancellation reason (only present when status is 'cancelled')
+         */
+        cancellationReason?: string
+
+        /**
+         * Who cancelled the campaign
+         */
+        cancelledBy?: string
+
+        /**
+         * When the campaign was cancelled
+         */
+        cancelledAt?: string
+
+        /**
+         * End reason (only present when status is 'ended')
+         */
+        endReason?: string
+
+        /**
+         * Affiliate link URL for creators to use when purchasing
+         */
+        affiliateLink?: string
+
+        /**
+         * Affiliate network source
+         */
+        affiliateSource?: db.AffiliateSource
+
+        /**
+         * Campaign tasks with per-task pricing
+         */
+        tasks?: {
+            id: string
+            name: string
+            category: string
+            platformFee: number
+            platformFeeDecimal: string
+            bonus: number
+            bonusDecimal: string
+            sortOrder: number
+            isRequired: boolean
+        }[]
+
+        id: string
+        /**
+         * Short display ID for UI (e.g., CPG-A3B7XWFK)
+         */
+        displayId: string
+
+        title: string
+        slug: string | null
+        organizationId: string
+        organizationName?: string
+        status: db.CampaignStatus
+        campaignType: db.CampaignType
+        startDate?: string
+        endDate?: string
+        maxEnrollments?: number
+        currentEnrollments: number
+        rebateRate?: number
+        /**
+         * Platform fee in smallest units (paise)
+         */
+        platformFee?: number
+
+        /**
+         * Decimal platform fee for display (e.g., "99.00")
+         */
+        platformFeeDecimal?: string
+
+        currency: string
+        createdAt: string
+        updatedAt: string
+    }
+
+    export interface CampaignListItem {
+        id: string
+        /**
+         * Short display ID for UI (e.g., CPG-A3B7XWFK)
+         */
+        displayId: string
+
+        title: string
+        slug: string | null
+        organizationId: string
+        organizationName?: string
+        status: db.CampaignStatus
+        campaignType: db.CampaignType
+        startDate?: string
+        endDate?: string
+        maxEnrollments?: number
+        currentEnrollments: number
+        rebateRate?: number
+        /**
+         * Platform fee in smallest units (paise)
+         */
+        platformFee?: number
+
+        /**
+         * Decimal platform fee for display (e.g., "99.00")
+         */
+        platformFeeDecimal?: string
+
+        currency: string
+        createdAt: string
+        updatedAt: string
+    }
+
+    export interface CampaignStats {
+        total: number
+        byStatus: { [key: string]: number }
+        byType: { [key: string]: number }
+        activeCount: number
+        pendingApprovalCount: number
+        totalEnrollments: number
+        averageEnrollmentsPerCampaign: number
+    }
+
+    export interface ChangeAdminRoleRequest {
+        newRole: db.AdminRole
+    }
+
+    export interface ChannelQuota {
+        channel: notifications.Channel
+        remaining: number
+        limit: number
+    }
+
+    export interface ConfigJsonSettings {
+        key1?: string
+        key2?: string
+        key3?: string
+        enabled?: boolean
+        threshold?: number
+        timeout?: number
+        retries?: number
+        url?: string
+        apiKey?: string
+    }
+
+    export interface ConfigJsonValue {
+        enabled?: boolean
+        value?: string | number
+        values?: string[]
+        min?: number
+        max?: number
+        default?: string | number | boolean
+        options?: string[]
+        settings?: ConfigJsonSettings
+    }
+
+    export type CouponBonusType = "fixed" | "percentage"
+
+    export interface CreateConfigRequest {
+        key: string
+        value: string
+        valueType?: string
+        description?: string
+        category?: string
+        isEditable?: boolean
+    }
+
+    export interface CreateDepositAccountRequest {
+        organizationId: string
+        provider: string
+        receiverType: string
+        externalId: string
+        details: DepositAccountDetails
+    }
+
+    export interface CreatePlatformRequest {
+        name: string
+        description?: string
+        type: PlatformType
+        websiteUrl?: string
+        logo?: string
+        icon?: string
+    }
+
+    export interface CreatorDetail {
+        dob: string
+        addresses: AdminCreatorAddress[]
+        profilePicture?: string
+        panNumber?: string
+        kycMethod?: string
+        kycVerifiedAt?: string
+        kycVerifiedBy?: string
+        kycRejectionReason?: string
+        reversalCount: number
+        lastReversalAt?: string
+        isBanned: boolean
+        banReason?: string
+        updatedAt: string
+        id: string
+        displayId: string
+        userId: string
+        firstName: string
+        lastName: string
+        email?: string
+        phoneNumber?: string
+        kycVerified: boolean
+        payoutReady: boolean
+        enrollmentCount: number
+        createdAt: string
+    }
+
+    export interface CreatorEarnings {
+        currency: string
+        totalEarned: number
+        totalEarnedDecimal: string
+        totalPending: number
+        totalPendingDecimal: string
+        totalPaidOut: number
+        totalPaidOutDecimal: string
+        monthlyEarnings: {
+            month: string
+            amount: number
+            amountDecimal: string
+        }[]
+    }
+
+    export interface CreatorEnrollment {
+        id: string
+        campaignId: string
+        campaignName?: string
+        orderId: string
+        currency: string
+        orderValue: number
+        orderValueDecimal: string
+        status: db.EnrollmentStatus
+        createdAt: string
+    }
+
+    export interface CreatorKYCDocuments {
+        creatorId: string
+        panDocumentUrl?: string
+        aadhaarDocumentUrl?: string
+        selfieUrl?: string
+        expiresIn: number
+    }
+
+    export interface CreatorKycDetails {
+        creatorId: string
+        name: string
+        email: string
+        phone: string | null
+        panNumber: string | null
+        aadhaarNumber: string | null
+        kycVerified: boolean
+        kycMethod: string | null
+        kycVerifiedAt: string | null
+        kycRejectionReason: string | null
+        panDocumentUrl: string | null
+        aadhaarDocumentUrl: string | null
+        verifications: AdminDocumentVerification[]
+    }
+
+    export interface CreatorListItem {
+        id: string
+        displayId: string
+        userId: string
+        firstName: string
+        lastName: string
+        email?: string
+        phoneNumber?: string
+        kycVerified: boolean
+        payoutReady: boolean
+        enrollmentCount: number
+        createdAt: string
+    }
+
+    export interface CreatorStats {
+        total: number
+        kycVerified: number
+        kycPending: number
+        payoutReady: number
+        bannedCount: number
+        totalEnrollments: number
+        averageEnrollmentsPerCreator: number
+    }
+
+    export interface DateRangeParams {
+        startDate?: string
+        endDate?: string
+    }
+
+    export interface DateRangeParams {
+        startDate?: string
+        endDate?: string
+    }
+
+    export interface DepositAccountDetails {
+        accountNumber?: string
+        ifsc?: string
+        bankName?: string
+        beneficiaryName?: string
+        vpaAddress?: string
+        qrCodeUrl?: string
+        notes?: string
+        accountType?: string
+        branchName?: string
+        referenceId?: string
+    }
+
+    export interface DepositAccountStats {
+        totalAccounts: number
+        activeAccounts: number
+        byProvider: {
+            provider: string
+            count: number
+        }[]
+        byReceiverType: {
+            receiverType: string
+            count: number
+        }[]
+    }
+
+    export interface EnrollmentDetail {
+        creatorEmail?: string
+        purchaseDate?: string
+        lockedBillRate?: string
+        /**
+         * Bonus amount in smallest units (paise)
+         */
+        lockedBonus?: number
+
+        /**
+         * Decimal bonus amount for display
+         */
+        lockedBonusDecimal?: string
+
+        /**
+         * Creator info
+         */
+        creator: {
+            id: string
+            displayId?: string
+            name?: string
+            email?: string
+            approvalRate: number
+            previousEnrollments: number
+        }
+
+        /**
+         * Campaign info
+         */
+        campaign: {
+            id: string
+            title: string
+            status: string
+            type: string
+            listingName?: string
+            listingImage?: string
+        }
+
+        /**
+         * Platform info
+         */
+        platform?: {
+            id: string
+            name: string
+            type?: string
+        }
+
+        /**
+         * OCR scan data (structured — consistent with brand/creator)
+         */
+        ocrData?: {
+            id: string
+            screenshotUrl: string
+            extractedOrderId?: string
+            extractedOrderValue?: number
+            extractedOrderValueDecimal?: string
+            extractedPurchaseDate?: string
+            extractedProductName?: string
+            extractedSellerName?: string
+            extractedPlatform?: string
+            confidence?: number
+            validationPassed?: boolean
+            validationErrors?: OCRValidationData
+        }
+
+        /**
+         * Enrollment tasks with submissions
+         */
+        tasks: {
+            enrollmentTaskId: string
+            submissionId?: string
+            taskName: string
+            taskDescription?: string
+            category: string
+            isRequired: boolean
+            requireLink: boolean
+            requireScreenshot: boolean
+            instructions?: string
+            proofLink?: string
+            proofScreenshot?: string
+            submittedAt?: string
+            feedback?: string
+            platformName?: string
+        }[]
+
+        /**
+         * Per-task fee breakdown (from financialBreakdown audit trail)
+         */
+        taskFees?: {
+            taskId: string
+            taskName: string
+            platformFee: number
+            platformFeeDecimal: string
+            bonus: number
+            bonusDecimal: string
+        }[]
+
+        /**
+         * Status history
+         */
+        history: {
+            id: string
+            fromStatus?: string
+            toStatus: string
+            changedBy?: string
+            changedByName?: string
+            reason?: string
+            changedAt: string
+        }[]
+
+        rejectionReason?: string
+        rejectionFeedback?: RejectionFeedback
+        approvalRemarks?: string
+        orderScreenshotUrl?: string
+        ocrValidated: boolean
+        ocrValidationData?: OCRValidationData
+        reviewedBy?: string
+        completedAt?: string
+        updatedAt: string
+        holdStatus?: string | null
+        holdTransactionId?: string | null
+        id: string
+        /**
+         * Short display ID for UI (e.g., ENR-K7X4FA9B)
+         */
+        displayId: string
+
+        campaignId: string
+        campaignName?: string
+        creatorId: string
+        creatorDisplayId?: string
+        creatorName?: string
+        orderId: string
+        /**
+         * Order value in smallest units (paise)
+         */
+        orderValue: number
+
+        /**
+         * Decimal order value for display (e.g., "254.90")
+         */
+        orderValueDecimal: string
+
+        currency: string
+        status: db.EnrollmentStatus
+        /**
+         * Payment mode: prefund (hold created) or post_submission (pay at approval)
+         */
+        paymentMode: db.PaymentMode
+
+        lockedRebateRate: string
+        /**
+         * Platform fee in smallest units (paise)
+         */
+        lockedPlatformFee: number
+
+        /**
+         * Decimal platform fee for display
+         */
+        lockedPlatformFeeDecimal: string
+
+        submittedAt?: string
+        approvedAt?: string
+        expiresAt?: string
+        /**
+         * Actions the admin can take on this enrollment
+         */
+        allowedActions: internal.AdminAction[]
+
+        createdAt: string
+    }
+
+    export interface EnrollmentListItem {
+        id: string
+        /**
+         * Short display ID for UI (e.g., ENR-K7X4FA9B)
+         */
+        displayId: string
+
+        campaignId: string
+        campaignName?: string
+        creatorId: string
+        creatorDisplayId?: string
+        creatorName?: string
+        orderId: string
+        /**
+         * Order value in smallest units (paise)
+         */
+        orderValue: number
+
+        /**
+         * Decimal order value for display (e.g., "254.90")
+         */
+        orderValueDecimal: string
+
+        currency: string
+        status: db.EnrollmentStatus
+        /**
+         * Payment mode: prefund (hold created) or post_submission (pay at approval)
+         */
+        paymentMode: db.PaymentMode
+
+        lockedRebateRate: string
+        /**
+         * Platform fee in smallest units (paise)
+         */
+        lockedPlatformFee: number
+
+        /**
+         * Decimal platform fee for display
+         */
+        lockedPlatformFeeDecimal: string
+
+        submittedAt?: string
+        approvedAt?: string
+        expiresAt?: string
+        /**
+         * Actions the admin can take on this enrollment
+         */
+        allowedActions: internal.AdminAction[]
+
+        createdAt: string
+    }
+
+    export interface EnrollmentOCRData {
+        enrollmentId: string
+        orderId?: string
+        orderScreenshotUrl?: string
+        extractedData?: ocr.ExtractedOrderData
+        campaignId: string
+        campaignName: string
+        listingName: string
+        creatorId: string
+        creatorName: string
+        status: string
+        createdAt: string
+    }
+
+    export interface EnrollmentStats {
+        total: number
+        byStatus: { [key: string]: number }
+        /**
+         * Consistent naming with shared/enrollment-stats.ts
+         */
+        awaitingSubmission: number
+
+        awaitingReview: number
+        changesRequested: number
+        approved: number
+        rejected: number
+        cancelled: number
+        expired: number
+        /**
+         * Total order value in smallest units (paise)
+         */
+        totalOrderValue: number
+
+        /**
+         * Decimal total order value for display
+         */
+        totalOrderValueDecimal: string
+
+        /**
+         * Total payouts in smallest units (paise)
+         */
+        totalPayouts: number
+
+        /**
+         * Decimal total payouts for display
+         */
+        totalPayoutsDecimal: string
+
+        /**
+         * Average order value in smallest units (paise)
+         */
+        averageOrderValue: number
+
+        /**
+         * Decimal average order value for display
+         */
+        averageOrderValueDecimal: string
+
+        currency: string
+    }
+
+    export interface FakeDataRequest {
+        /**
+         * Number of users to create (default: 50)
+         */
+        users?: number
+
+        /**
+         * Number of admin users (default: 3)
+         */
+        admins?: number
+
+        /**
+         * Number of organizations (default: 10)
+         */
+        organizations?: number
+
+        /**
+         * Listings per organization (default: 5)
+         */
+        listingsPerOrg?: number
+
+        /**
+         * Campaigns per organization (default: 3)
+         */
+        campaignsPerOrg?: number
+
+        /**
+         * Enrollments per campaign (default: 10)
+         */
+        enrollmentsPerCampaign?: number
+
+        /**
+         * Number of coupons (default: 20)
+         */
+        coupons?: number
+
+        /**
+         * Invoices per organization (default: 3)
+         */
+        invoicesPerOrg?: number
+
+        /**
+         * Number of withdrawals (default: 20)
+         */
+        withdrawals?: number
+
+        /**
+         * Clean existing fake data first (default: false)
+         */
+        cleanFirst?: boolean
+    }
+
+    export interface FakeDataResponse {
+        success: boolean
+        message: string
+        stats?: {
+            users: number
+            admins: number
+            creators: number
+            organizations: number
+            listings: number
+            campaigns: number
+            enrollments: number
+            coupons: number
+            invoices: number
+            withdrawals: number
+            platforms: number
+            categories: number
+            taskTemplates: number
+            /**
+             * Additional tables
+             */
+            documentVerifications: number
+
+            invitations: number
+            organizationRoles: number
+            campaignPauseHistories: number
+            ocrScans: number
+            payments: number
+            adminActivityLogs: number
+            couponRedemptions: number
+            payouts: number
+            depositAccounts: number
+            withdrawalMethodVerifications: number
+            /**
+             * Better Auth teams & system config
+             */
+            teams: number
+
+            teamMembers: number
+            systemConfigs: number
+            payoutTransactions: number
+        }
+        error?: string
+    }
+
+    export interface GrowthMetrics {
+        period: string
+        newOrganizations: number
+        newCreators: number
+        newCampaigns: number
+        newEnrollments: number
+        growthRateOrganizations: number
+        growthRateCreators: number
+    }
+
+    export interface HourlyDataPoint {
+        /**
+         * Hour in 24h format (0-23)
+         */
+        hour: number
+
+        /**
+         * Time label (e.g., "14:00")
+         */
+        label: string
+
+        /**
+         * New enrollments created this hour
+         */
+        newEnrollments: number
+
+        /**
+         * Enrollments approved this hour
+         */
+        approvedThisHour: number
+
+        /**
+         * New withdrawal requests this hour
+         */
+        newWithdrawals: number
+    }
+
+    export interface InvoiceLineItemResponse {
+        id: string
+        invoiceId: string
+        enrollmentId?: string
+        description: string
+        quantity: number
+        currency: string
+        /**
+         * Rate in smallest units (paise)
+         */
+        rate: number
+
+        /**
+         * Decimal rate for display
+         */
+        rateDecimal: string
+
+        /**
+         * Amount in smallest units (paise)
+         */
+        amount: number
+
+        /**
+         * Decimal amount for display
+         */
+        amountDecimal: string
+    }
+
+    export interface InvoiceStatsResponse {
+        totalInvoices: number
+        currency: string
+        /**
+         * Total amount in smallest units (paise)
+         */
+        totalAmount: number
+
+        /**
+         * Decimal total amount for display
+         */
+        totalAmountDecimal: string
+
+        /**
+         * Total paid in smallest units (paise)
+         */
+        totalPaid: number
+
+        /**
+         * Decimal total paid for display
+         */
+        totalPaidDecimal: string
+
+        /**
+         * Total pending in smallest units (paise)
+         */
+        totalPending: number
+
+        /**
+         * Decimal total pending for display
+         */
+        totalPendingDecimal: string
+
+        countByStatus: { [key: string]: number }
+        amountByStatus: { [key: string]: number }
+        overdueCount: number
+        /**
+         * Overdue amount in smallest units (paise)
+         */
+        overdueAmount: number
+
+        /**
+         * Decimal overdue amount for display
+         */
+        overdueAmountDecimal: string
+
+        /**
+         * Average amount in smallest units (paise)
+         */
+        averageAmount: number
+
+        /**
+         * Decimal average amount for display
+         */
+        averageAmountDecimal: string
+
+        thisMonthCount: number
+        /**
+         * This month amount in smallest units (paise)
+         */
+        thisMonthAmount: number
+
+        /**
+         * Decimal this month amount for display
+         */
+        thisMonthAmountDecimal: string
+    }
+
+    export interface KycDocuments {
+        panUrl?: string
+        aadhaarUrl?: string
+        passportUrl?: string
+        voterIdUrl?: string
+        drivingLicenseUrl?: string
+        addressProofUrl?: string
+        bankStatementUrl?: string
+        gstCertificateUrl?: string
+        incorporationCertificateUrl?: string
+        selfieUrl?: string
+        signatureUrl?: string
+        chequeUrl?: string
+    }
+
+    export interface KycVerificationResult {
+        verified?: boolean
+        verifiedAt?: string
+        matchScore?: number
+        nameMatch?: boolean
+        dobMatch?: boolean
+        addressMatch?: boolean
+        extractedName?: string
+        extractedDob?: string
+        extractedAddress?: string
+        panNumber?: string
+        aadhaarLastFour?: string
+        providerResponse?: string
+        errorCode?: string
+        errorMessage?: string
+        faceMatchScore?: number
+        livenessScore?: number
+        documentType?: string
+    }
+
+    export interface ListAdminTaskTemplatesParams {
+        status?: db.TaskTemplateStatus
+        category?: db.TaskCategory
+        platformId?: string
+        sortBy?: string
+        sortOrder?: "asc" | "desc"
+        search?: string
+        skip?: number
+        take?: number
+    }
+
+    export interface ListCampaignsQuery {
+        status?: string
+        type?: string
+        organizationId?: string
+        search?: string
+        startDateFrom?: string
+        startDateTo?: string
+        skip?: number
+        take?: number
+    }
+
+    export interface ListCreatorsQuery {
+        kycVerified?: boolean
+        payoutReady?: boolean
+        isBanned?: boolean
+        search?: string
+        createdFrom?: string
+        createdTo?: string
+        sortBy?: "createdAt" | "firstName" | "lastName" | "enrollmentCount"
+        sortOrder?: "asc" | "desc"
+        skip?: number
+        take?: number
+    }
+
+    export interface ListDepositAccountsParams {
+        organizationId?: string
+        provider?: string
+        receiverType?: string
+        status?: string
+        sortBy?: string
+        sortOrder?: "asc" | "desc"
+        search?: string
+        skip?: number
+        take?: number
+    }
+
+    export interface ListDocVerificationsParams {
+        subjectType?: string
+        verificationType?: string
+        status?: string
+        expiringSoon?: boolean
+        sortBy?: string
+        sortOrder?: "asc" | "desc"
+        search?: string
+        skip?: number
+        take?: number
+    }
+
+    export interface ListEnrollmentsForOCRParams {
+        hasScreenshot?: boolean
+        hasSuspiciousScreenshot?: boolean
+        campaignId?: string
+        skip?: number
+        take?: number
+    }
+
+    export interface ListEnrollmentsQuery {
+        status?: string
+        campaignId?: string
+        creatorId?: string
+        search?: string
+        fromDate?: string
+        toDate?: string
+        skip?: number
+        take?: number
+    }
+
+    export interface ListEnrollmentsQuery {
+        status?: string
+        campaignId?: string
+        creatorId?: string
+        search?: string
+        fromDate?: string
+        toDate?: string
+        skip?: number
+        take?: number
+    }
+
+    export interface ListFilesParams {
+        userId?: string
+        prefix?: string
+        skip?: number
+        take?: number
+    }
+
+    export interface ListFilesParams {
+        userId?: string
+        prefix?: string
+        skip?: number
+        take?: number
+    }
+
+    export interface ListFilesParams {
+        userId?: string
+        prefix?: string
+        skip?: number
+        take?: number
+    }
+
+    export interface ListOrganizationsQuery {
+        /**
+         * Filter by new status (onboarding, active, suspended)
+         */
+        status?: string
+
+        accountTier?: string
+        /**
+         * Filter to only flagged organizations (requiresManualReview=true)
+         */
+        flaggedOnly?: boolean
+
+        search?: string
+        skip?: number
+        take?: number
+    }
+
+    export interface ListPlatformsQuery {
+        search?: string
+        type?: string
+        status?: string
+        sortBy?: "createdAt" | "name" | "listingCount"
+        sortOrder?: "asc" | "desc"
+        skip?: number
+        take?: number
+    }
+
+    export interface ListSubmissionsParams {
+        campaignId?: string
+        creatorId?: string
+        hasProof?: boolean
+        taskTemplateId?: string
+        sortBy?: string
+        sortOrder?: "asc" | "desc"
+        search?: string
+        skip?: number
+        take?: number
+    }
+
+    export interface ListSystemConfigParams {
+        category?: string
+        isEditable?: boolean
+        sortBy?: string
+        sortOrder?: "asc" | "desc"
+        search?: string
+        skip?: number
+        take?: number
+    }
+
+    export interface ListingImageInput {
+        imageUrl: string
+        sortOrder?: number
+        altText?: string
+        isPrimary?: boolean
+    }
+
+    export interface ListingStatsResponse {
+        totalListings: number
+        listingsWithCampaigns: number
+        listingsWithoutCampaigns: number
+        byCategory: {
+            categoryId: string
+            categoryName: string
+            count: number
+        }[]
+        byPlatform: {
+            platformId: string
+            platformName: string
+            count: number
+        }[]
+        totalViews: number
+        /**
+         * Average price in smallest units (paise)
+         */
+        averagePrice: number
+
+        /**
+         * Decimal average price for display
+         */
+        averagePriceDecimal: string
+
+        currency: string
+    }
+
+    export interface MaintenanceStatus {
+        isActive: boolean
+        message: string | null
+        startedAt: string | null
+        estimatedEndAt: string | null
+        allowedRoles: string[]
+    }
+
+    export interface NotificationHistoryDetails {
+        userCount?: number
+        sent?: number
+        failed?: number
+        targetAudience?: string
+        targetCount?: number
+        title?: string
+        templateId?: string
+        type?: string
+    }
+
+    export interface NotificationPayload {
+        campaignId?: string
+        campaignTitle?: string
+        enrollmentId?: string
+        payoutAmount?: string
+        amount?: string
+        utr?: string
+        reason?: string
+        organizationId?: string
+        organizationName?: string
+        invoiceId?: string
+        invoiceNumber?: string
+        source?: string
+        title?: string
+        message?: string
+        actionUrl?: string
+        creatorId?: string
+        creatorName?: string
+    }
+
+    export interface OCRExtractionResult {
+        enrollmentId: string
+        extractedData: ocr.ExtractedOrderData
+        validationResult: {
+            isValid: boolean
+            issues: string[]
+            confidence: number
+        }
+        processedAt: string
+    }
+
+    export interface OCRValidationData {
+        merchantName?: string
+        merchantNameMatch?: boolean
+        orderDate?: string
+        orderDateMatch?: boolean
+        totalAmount?: string
+        totalAmountMatch?: boolean
+        itemsDetected?: string[]
+        confidenceScore?: number
+        rawText?: string
+        validationPassed?: boolean
+        validationErrors?: string[]
+        receiptType?: string
+        currency?: string
+    }
+
+    export interface OrganizationAnalytics {
+        organizationId: string
+        organizationName: string
+        totalCampaigns: number
+        activeCampaigns: number
+        totalEnrollments: number
+        approvalRate: number
+    }
+
+    export interface OrganizationBankAccount {
+        id: string
+        accountHolderName: string
+        bankName: string | null
+        ifscCode: string
+        accountNumberMasked: string
+        isVerified: boolean
+        createdAt: string
+    }
+
+    export interface OrganizationDetail {
+        description?: string
+        website?: string
+        businessType?: string
+        industryCategory?: string
+        contactPerson?: string
+        address?: string
+        city?: string
+        state?: string
+        country?: string
+        postalCode?: string
+        gstLegalName?: string
+        gstTradeName?: string
+        gstVerifiedAt?: string
+        creditLimitCurrency?: string
+        creditLimit?: number
+        creditLimitDecimal?: string
+        tdsRate?: string
+        paymentInReady: boolean
+        payoutReady: boolean
+        /**
+         * Who reviewed the organization (admin review for manual review cases)
+         */
+        reviewedBy?: string
+
+        reviewedAt?: string
+        updatedAt: string
+        id: string
+        name: string
+        slug: string
+        logo?: string
+        email?: string
+        phoneNumber?: string
+        /**
+         * New 3-state status: onboarding | active | suspended
+         */
+        status: db.OrganizationStatus
+
+        accountTier: db.AccountTier
+        gstNumber?: string
+        /**
+         * Setup progress tracking
+         */
+        setupProgress: db.OrganizationSetupProgress
+
+        isSetupComplete: boolean
+        /**
+         * Flagged for manual review (duplicate GST, etc.)
+         */
+        requiresManualReview: boolean
+
+        memberCount: number
+        createdAt: string
+        /**
+         * Days in onboarding (for monitoring)
+         */
+        daysOnboarding?: number
+
+        /**
+         * Suspension reason (only if suspended)
+         */
+        suspensionReason?: string
+    }
+
+    export interface OrganizationListItem {
+        id: string
+        name: string
+        slug: string
+        logo?: string
+        email?: string
+        phoneNumber?: string
+        /**
+         * New 3-state status: onboarding | active | suspended
+         */
+        status: db.OrganizationStatus
+
+        accountTier: db.AccountTier
+        gstNumber?: string
+        /**
+         * Setup progress tracking
+         */
+        setupProgress: db.OrganizationSetupProgress
+
+        isSetupComplete: boolean
+        /**
+         * Flagged for manual review (duplicate GST, etc.)
+         */
+        requiresManualReview: boolean
+
+        memberCount: number
+        createdAt: string
+        /**
+         * Days in onboarding (for monitoring)
+         */
+        daysOnboarding?: number
+
+        /**
+         * Suspension reason (only if suspended)
+         */
+        suspensionReason?: string
+    }
+
+    export interface OrganizationMember {
+        id: string
+        userId: string
+        userName?: string
+        userEmail?: string
+        role: string
+        department?: string
+        jobTitle?: string
+        isActive: boolean
+        createdAt: string
+    }
+
+    export interface OrganizationStats {
+        total: number
+        /**
+         * Counts by new status (onboarding, active, suspended)
+         */
+        byStatus: { [key: string]: number }
+
+        byAccountTier: { [key: string]: number }
+        /**
+         * Organizations in onboarding status
+         */
+        onboardingCount: number
+
+        /**
+         * Organizations that are active
+         */
+        activeCount: number
+
+        /**
+         * Organizations flagged for manual review
+         */
+        flaggedCount: number
+
+        totalMembers: number
+    }
+
+    export type ParsedConfigValue = string | number | boolean | ConfigJsonValue
+
+    export interface Platform {
+        id: string
+        name: string
+        description?: string
+        type: PlatformType
+        websiteUrl?: string
+        logo?: string
+        icon?: string
+        status: PlatformStatus
+        createdBy: string
+        updatedBy?: string
+        createdAt: string
+        updatedAt: string
+    }
+
+    export interface PlatformHealth {
+        status: "healthy" | "degraded" | "maintenance"
+        services: {
+            name: string
+            status: "up" | "down" | "degraded"
+            lastCheck: string
+            responseTimeMs?: number
+        }[]
+        database: {
+            status: "connected" | "disconnected"
+            latencyMs: number
+        }
+        uptime: number
+    }
+
+    export interface PlatformListItem {
+        listingCount: number
+        taskTemplateCount: number
+        id: string
+        name: string
+        description?: string
+        type: PlatformType
+        websiteUrl?: string
+        logo?: string
+        icon?: string
+        status: PlatformStatus
+        createdBy: string
+        updatedBy?: string
+        createdAt: string
+        updatedAt: string
+    }
+
+    export interface PlatformOverview {
+        campaigns: {
+            total: number
+            active: number
+            pending: number
+            ended: number
+        }
+        enrollments: {
+            total: number
+            approved: number
+            pending: number
+            rejected: number
+        }
+        organizations: {
+            total: number
+            active: number
+            onboarding: number
+            suspended: number
+        }
+        creators: {
+            total: number
+            verified: number
+            active: number
+        }
+        financial: {
+            /**
+             * Total payouts in smallest units (paise)
+             */
+            totalPayouts: number
+
+            /**
+             * Decimal string representation (e.g., "254.90")
+             */
+            totalPayoutsDecimal: string
+
+            /**
+             * Pending withdrawals in smallest units (paise)
+             */
+            pendingWithdrawals: number
+
+            /**
+             * Decimal string representation
+             */
+            pendingWithdrawalsDecimal: string
+
+            /**
+             * Total invoiced in smallest units (paise)
+             */
+            totalInvoiced: number
+
+            /**
+             * Decimal string representation
+             */
+            totalInvoicedDecimal: string
+
+            /**
+             * Currency code (ISO 4217)
+             */
+            currency: string
+        }
+    }
+
+    export type PlatformStatus = "active" | "inactive" | "maintenance"
+
+    export type PlatformType = "marketplace" | "social" | "ecommerce" | "delivery" | "grocery" | "fashion" | "electronics" | "beauty" | "food" | "quick_commerce" | "other"
+
+    export interface ProviderStatus {
+        name: string
+        configured: boolean
+        circuitState: string
+        isAvailable: boolean
+    }
+
+    export interface RejectionFeedback {
+        category?: string
+        subcategory?: string
+        details?: string
+        suggestedFix?: string
+        rejectedFields?: string[]
+        requiresResubmission?: boolean
+    }
+
+    export interface RevenueAnalytics {
+        period: string
+        totalInvoiced: number
+        totalInvoicedDecimal: string
+        totalPaid: number
+        totalPaidDecimal: string
+        totalPending: number
+        totalPendingDecimal: string
+        invoiceCount: number
+        avgInvoiceValue: number
+        avgInvoiceValueDecimal: string
+    }
+
+    export interface ReviewOrganizationRequest {
+        /**
+         * Approve (clears flag, allows auto-activation) or Reject (suspends org)
+         */
+        action: "approve" | "reject"
+
+        /**
+         * Required reason when rejecting
+         */
+        reason?: string
+
+        /**
+         * Optional notes for approval
+         */
+        notes?: string
+    }
+
+    export interface SearchCampaignInfo {
+        id: string
+        title: string
+    }
+
+    export interface SearchCreatorInfo {
+        id: string
+        displayId: string
+        displayName: string
+    }
+
+    export interface SearchListingInfo {
+        id: string
+        name: string
+        priceDecimal?: string
+        primaryImage?: string
+    }
+
+    export interface SearchOrganizationInfo {
+        id: string
+        name: string
+        logo?: string
+    }
+
+    export interface SearchPlatformInfo {
+        id: string
+        name: string
+        icon?: string
+    }
+
+    export interface SetCreditLimitRequest {
+        creditLimit: number
+        accountTier?: db.AccountTier
+    }
+
+    export interface SetPaymentModeRequest {
+        paymentMode: db.PaymentMode
+        /**
+         * Required credit limit when switching to post_submission (exposure cap)
+         */
+        creditLimit?: number
+    }
+
+    export interface StorageFile {
+        key: string
+        bucket: string
+        size?: number
+        lastModified?: string
+        contentType?: string
+    }
+
+    export interface StorageStats {
+        uploads: {
+            fileCount: number
+        }
+        profilePictures: {
+            fileCount: number
+        }
+        kycDocuments: {
+            fileCount: number
+        }
+        totalFiles: number
+    }
+
+    export interface SystemConfigItem {
+        id: string
+        key: string
+        value: string
+        parsedValue: ParsedConfigValue
+        valueType: string
+        description: string | null
+        isEditable: boolean
+        category: string | null
+        createdAt: string
+        updatedAt: string
+        updatedBy: string | null
+    }
+
+    export interface TaskPricingUpdate {
+        /**
+         * campaignTask.id
+         */
+        id: string
+
+        /**
+         * Per-task platform fee in paise (0 = no extra fee)
+         */
+        platformFee?: number
+
+        /**
+         * Per-task bonus in paise (0 = no extra bonus)
+         */
+        bonus?: number
+    }
+
+    export interface TaskStats {
+        totalTemplates: number
+        activeTemplates: number
+        inactiveTemplates: number
+        deprecatedTemplates: number
+        totalSubmissions: number
+        submissionsWithProof: number
+        submissionsWithoutProof: number
+        byCategory: {
+            category: db.TaskCategory
+            count: number
+        }[]
+        topTemplates: {
+            id: string
+            name: string
+            usageCount: number
+        }[]
+    }
+
+    export interface TimeSeriesDataPoint {
+        date: string
+        value: number
+    }
+
+    export interface TodayStats {
+        /**
+         * Today's date in ISO format
+         */
+        date: string
+
+        enrollments: {
+            /**
+             * New enrollments created today
+             */
+            newToday: number
+
+            /**
+             * Enrollments approved today (regardless of when created)
+             */
+            approvedToday: number
+
+            /**
+             * Enrollments rejected today (regardless of when created)
+             */
+            rejectedToday: number
+
+            /**
+             * Currently pending review (all time)
+             */
+            pendingReview: number
+        }
+        withdrawals: {
+            /**
+             * New withdrawal requests today
+             */
+            newToday: number
+
+            /**
+             * Total amount requested today in paise
+             */
+            totalAmount: number
+
+            /**
+             * Decimal string representation
+             */
+            totalAmountDecimal: string
+
+            /**
+             * Withdrawals completed today
+             */
+            completedToday: number
+        }
+        newCreators: number
+        newOrganizations: number
+        newCampaigns: number
+        /**
+         * Currency code
+         */
+        currency: string
+    }
+
+    export interface UpdateCampaignRequest {
+        /**
+         * Field updates
+         */
+        title?: string
+
+        description?: string
+        termsAndConditions?: string
+        startDate?: string
+        endDate?: string
+        maxEnrollments?: number
+        /**
+         * Pricing (can be updated directly)
+         */
+        rebateRate?: number
+
+        platformFee?: number
+        billRate?: number
+        bonus?: number
+        /**
+         * Affiliate link URL for creators to use when purchasing
+         */
+        affiliateLink?: string
+
+        /**
+         * Affiliate network source
+         */
+        affiliateSource?: db.AffiliateSource
+
+        /**
+         * Per-task platform fee and bonus overrides
+         */
+        taskPricing?: TaskPricingUpdate[]
+    }
+
+    export interface UpdateConfigRequest {
+        value?: string
+        description?: string
+        isEditable?: boolean
+        category?: string
+    }
+
+    export interface UpdateCreatorRequest {
+        firstName?: string
+        lastName?: string
+        phoneNumber?: string
+        isMediator?: boolean
+    }
+
+    export interface UpdateEnrollmentRequest {
+        /**
+         * Field updates
+         */
+        expiresAt?: string
+
+        orderId?: string
+        orderValue?: number
+        approvalRemarks?: string
+    }
+
+    export interface UpdateOrganizationRequest {
+        name?: string
+        description?: string
+        website?: string
+        email?: string
+        phoneNumber?: string
+        contactPerson?: string
+        address?: string
+        city?: string
+        state?: string
+        postalCode?: string
+        businessType?: string
+        industryCategory?: string
+        creditLimit?: number
+        accountTier?: db.AccountTier
+        tdsRate?: number
+    }
+
+    export interface UpdatePlatformRequest {
+        name?: string
+        description?: string
+        type?: PlatformType
+        websiteUrl?: string
+        logo?: string
+        icon?: string
+        status?: PlatformStatus
+    }
+
+    export interface UserQuotaResponse {
+        userId: string
+        quotas: ChannelQuota[]
+        totalRemaining: number
+    }
+
+    export interface VerificationGatewayResponse {
+        transactionId?: string
+        referenceId?: string
+        status?: string
+        statusCode?: string
+        message?: string
+        bankReferenceNumber?: string
+        utr?: string
+        amount?: number
+        currency?: string
+        timestamp?: string
+        provider?: string
+        providerStatus?: string
+        rawResponse?: string
+    }
+
+    export interface VerificationHistoryItem {
+        id: string
+        withdrawalMethodId: string
+        method: "penny_drop" | "manual" | "document"
+        success: boolean
+        attemptedAt: string
+        verifiedBy?: string
+        errorCode?: string
+        errorMessage?: string
+        gatewayResponse?: VerificationGatewayResponse
+        metadata?: VerificationMetadata
+    }
+
+    export interface VerificationMetadata {
+        ipAddress?: string
+        userAgent?: string
+        requestId?: string
+        attemptNumber?: number
+        source?: string
+        initiatedBy?: string
+        completedAt?: string
+        duration?: number
+        retryCount?: number
+        notes?: string
+    }
+
+    export interface VerificationStats {
+        total: number
+        byStatus: {
+            status: string
+            count: number
+        }[]
+        byType: {
+            type: string
+            count: number
+        }[]
+        bySubjectType: {
+            subjectType: string
+            count: number
+        }[]
+        pendingCount: number
+        expiringSoonCount: number
+        avgProcessingTimeHours: number
+    }
+
+    export interface WalletStatsResponse {
+        totalWallets: number
+        currency: string
+        /**
+         * Total balance in smallest units (paise)
+         */
+        totalBalance: number
+
+        /**
+         * Decimal total balance for display
+         */
+        totalBalanceDecimal: string
+
+        /**
+         * Total pending balance in smallest units (paise)
+         */
+        totalPendingBalance: number
+
+        /**
+         * Decimal total pending balance for display
+         */
+        totalPendingBalanceDecimal: string
+
+        byHolderType: {
+            creator: {
+                count: number
+                balance: number
+                balanceDecimal: string
+            }
+            organization: {
+                count: number
+                balance: number
+                balanceDecimal: string
+            }
+        }
+        frozenWallets: number
+    }
+
+    export interface WalletTransaction {
+        id: string
+        walletId: string
+        type: "credit" | "debit" | "hold" | "release" | "hold_committed"
+        currency: string
+        /**
+         * Amount in smallest units (paise)
+         */
+        amount: number
+
+        /**
+         * Decimal amount for display
+         */
+        amountDecimal: string
+
+        description: string
+        reference?: string
+        createdAt: string
+        /**
+         * Enhanced fields for frontend
+         */
+        status: "pending" | "completed" | "voided"
+
+        enrollmentId?: string
+        category?: "deposit" | "enrollment_hold" | "payout" | "refund" | "admin_credit" | "other"
+    }
+
+    export interface WithdrawalMethodStatsResponse {
+        totalMethods: number
+        verifiedMethods: number
+        unverifiedMethods: number
+        byType: {
+            "bank_account": number
+            upi: number
+        }
+        topBanks: {
+            bankName: string
+            count: number
+        }[]
+    }
+
+    export interface WithdrawalMethodVerificationDetails {
+        bankName?: string
+        accountNumber?: string
+        ifsc?: string
+        accountHolderName?: string
+        upiId?: string
+        pennyDropAmount?: number
+        pennyDropReference?: string
+        verificationAttempt?: number
+        errorCode?: string
+        errorMessage?: string
+        providerResponse?: string
+        transactionId?: string
+        verifiedAt?: string
+    }
+
+    export interface WithdrawalStatsResponse {
+        currency: string
+        totalCount: number
+        totalAmount: number
+        totalAmountDecimal: string
+        countByStatus: { [key: string]: number }
+        amountByStatus: { [key: string]: number }
+        amountByStatusDecimal: { [key: string]: string }
+        pendingApprovalCount: number
+        pendingApprovalAmount: number
+        pendingApprovalAmountDecimal: string
+        averageAmount: number
+        averageAmountDecimal: string
+        todayCount: number
+        todayAmount: number
+        todayAmountDecimal: string
+    }
+
+    export class ServiceClient {
+        private baseClient: BaseClient
+
+        constructor(baseClient: BaseClient) {
+            this.baseClient = baseClient
+            this.adminExtractOrder = this.adminExtractOrder.bind(this)
+            this.adminSendNotification = this.adminSendNotification.bind(this)
+            this.approveCampaign = this.approveCampaign.bind(this)
+            this.approveDocumentVerification = this.approveDocumentVerification.bind(this)
+            this.approveEnrollment = this.approveEnrollment.bind(this)
+            this.approveWithdrawal = this.approveWithdrawal.bind(this)
+            this.archiveCampaign = this.archiveCampaign.bind(this)
+            this.banCreator = this.banCreator.bind(this)
+            this.batchEnrollments = this.batchEnrollments.bind(this)
+            this.bootstrapAdmin = this.bootstrapAdmin.bind(this)
+            this.broadcastNotification = this.broadcastNotification.bind(this)
+            this.cancelCampaign = this.cancelCampaign.bind(this)
+            this.cancelEnrollment = this.cancelEnrollment.bind(this)
+            this.cancelPayout = this.cancelPayout.bind(this)
+            this.changeAdminRole = this.changeAdminRole.bind(this)
+            this.checkOrderIdDuplicate = this.checkOrderIdDuplicate.bind(this)
+            this.checkUserConnection = this.checkUserConnection.bind(this)
+            this.cleanFakeData = this.cleanFakeData.bind(this)
+            this.cleanupExpiredSessions = this.cleanupExpiredSessions.bind(this)
+            this.createAdminTaskTemplate = this.createAdminTaskTemplate.bind(this)
+            this.createCategory = this.createCategory.bind(this)
+            this.createCoupon = this.createCoupon.bind(this)
+            this.createDepositAccount = this.createDepositAccount.bind(this)
+            this.createPlatform = this.createPlatform.bind(this)
+            this.createSystemConfig = this.createSystemConfig.bind(this)
+            this.creditWallet = this.creditWallet.bind(this)
+            this.debitWallet = this.debitWallet.bind(this)
+            this.deleteCampaign = this.deleteCampaign.bind(this)
+            this.deleteKycDocumentsFile = this.deleteKycDocumentsFile.bind(this)
+            this.deleteProfilePicturesFile = this.deleteProfilePicturesFile.bind(this)
+            this.deleteUploadsFile = this.deleteUploadsFile.bind(this)
+            this.endCampaign = this.endCampaign.bind(this)
+            this.exportAnalyticsReport = this.exportAnalyticsReport.bind(this)
+            this.exportCoupons = this.exportCoupons.bind(this)
+            this.exportEnrollments = this.exportEnrollments.bind(this)
+            this.exportInvoices = this.exportInvoices.bind(this)
+            this.exportListings = this.exportListings.bind(this)
+            this.exportSystemConfigs = this.exportSystemConfigs.bind(this)
+            this.exportTaskTemplates = this.exportTaskTemplates.bind(this)
+            this.exportVerifications = this.exportVerifications.bind(this)
+            this.extendCouponValidity = this.extendCouponValidity.bind(this)
+            this.extendEnrollmentDeadline = this.extendEnrollmentDeadline.bind(this)
+            this.forceCompleteWithdrawal = this.forceCompleteWithdrawal.bind(this)
+            this.forceVerifyCreatorKyc = this.forceVerifyCreatorKyc.bind(this)
+            this.freezeWallet = this.freezeWallet.bind(this)
+            this.generateFakeData = this.generateFakeData.bind(this)
+            this.generateInvoice = this.generateInvoice.bind(this)
+            this.getActiveTemplatesList = this.getActiveTemplatesList.bind(this)
+            this.getActivityFeed = this.getActivityFeed.bind(this)
+            this.getAdminTaskSubmission = this.getAdminTaskSubmission.bind(this)
+            this.getAdminTaskTemplate = this.getAdminTaskTemplate.bind(this)
+            this.getAdminWallet = this.getAdminWallet.bind(this)
+            this.getAuthStats = this.getAuthStats.bind(this)
+            this.getCampaign = this.getCampaign.bind(this)
+            this.getCampaignPerformance = this.getCampaignPerformance.bind(this)
+            this.getCampaignStats = this.getCampaignStats.bind(this)
+            this.getCircuitBreakerStatus = this.getCircuitBreakerStatus.bind(this)
+            this.getComplianceReport = this.getComplianceReport.bind(this)
+            this.getConfigValue = this.getConfigValue.bind(this)
+            this.getConnectionStats = this.getConnectionStats.bind(this)
+            this.getCoupon = this.getCoupon.bind(this)
+            this.getCouponAnalytics = this.getCouponAnalytics.bind(this)
+            this.getCouponRedemptionAnalytics = this.getCouponRedemptionAnalytics.bind(this)
+            this.getCouponStats = this.getCouponStats.bind(this)
+            this.getCreator = this.getCreator.bind(this)
+            this.getCreatorEarnings = this.getCreatorEarnings.bind(this)
+            this.getCreatorEnrollments = this.getCreatorEnrollments.bind(this)
+            this.getCreatorKYCDocuments = this.getCreatorKYCDocuments.bind(this)
+            this.getCreatorKycDetails = this.getCreatorKycDetails.bind(this)
+            this.getCreatorStats = this.getCreatorStats.bind(this)
+            this.getDepositAccount = this.getDepositAccount.bind(this)
+            this.getDepositAccountStats = this.getDepositAccountStats.bind(this)
+            this.getDocumentVerification = this.getDocumentVerification.bind(this)
+            this.getDocumentVerificationStats = this.getDocumentVerificationStats.bind(this)
+            this.getEnrollment = this.getEnrollment.bind(this)
+            this.getEnrollmentStats = this.getEnrollmentStats.bind(this)
+            this.getEnrollmentTrends = this.getEnrollmentTrends.bind(this)
+            this.getGrowthMetrics = this.getGrowthMetrics.bind(this)
+            this.getHourlyTrends = this.getHourlyTrends.bind(this)
+            this.getInvoice = this.getInvoice.bind(this)
+            this.getInvoiceLineItems = this.getInvoiceLineItems.bind(this)
+            this.getInvoiceStats = this.getInvoiceStats.bind(this)
+            this.getKycDocumentsDownloadUrl = this.getKycDocumentsDownloadUrl.bind(this)
+            this.getListing = this.getListing.bind(this)
+            this.getListingCampaigns = this.getListingCampaigns.bind(this)
+            this.getListingStats = this.getListingStats.bind(this)
+            this.getMaintenanceStatus = this.getMaintenanceStatus.bind(this)
+            this.getNotificationHistory = this.getNotificationHistory.bind(this)
+            this.getNotificationTypes = this.getNotificationTypes.bind(this)
+            this.getOrganization = this.getOrganization.bind(this)
+            this.getOrganizationAnalytics = this.getOrganizationAnalytics.bind(this)
+            this.getOrganizationBankAccounts = this.getOrganizationBankAccounts.bind(this)
+            this.getOrganizationMembers = this.getOrganizationMembers.bind(this)
+            this.getOrganizationStats = this.getOrganizationStats.bind(this)
+            this.getPayout = this.getPayout.bind(this)
+            this.getPlatform = this.getPlatform.bind(this)
+            this.getPlatformHealth = this.getPlatformHealth.bind(this)
+            this.getPlatformOverview = this.getPlatformOverview.bind(this)
+            this.getProfilePicturesDownloadUrl = this.getProfilePicturesDownloadUrl.bind(this)
+            this.getProviderStatus = this.getProviderStatus.bind(this)
+            this.getRevenueAnalytics = this.getRevenueAnalytics.bind(this)
+            this.getStorageStats = this.getStorageStats.bind(this)
+            this.getSystemConfigById = this.getSystemConfigById.bind(this)
+            this.getSystemConfigByKey = this.getSystemConfigByKey.bind(this)
+            this.getTaskStats = this.getTaskStats.bind(this)
+            this.getTemplate = this.getTemplate.bind(this)
+            this.getTodayStats = this.getTodayStats.bind(this)
+            this.getUploadsDownloadUrl = this.getUploadsDownloadUrl.bind(this)
+            this.getUserQuota = this.getUserQuota.bind(this)
+            this.getVerificationHistory = this.getVerificationHistory.bind(this)
+            this.getWalletHolds = this.getWalletHolds.bind(this)
+            this.getWalletStats = this.getWalletStats.bind(this)
+            this.getWalletTransactions = this.getWalletTransactions.bind(this)
+            this.getWithdrawalAnalytics = this.getWithdrawalAnalytics.bind(this)
+            this.getWithdrawalMethod = this.getWithdrawalMethod.bind(this)
+            this.getWithdrawalMethodStats = this.getWithdrawalMethodStats.bind(this)
+            this.getWithdrawalStats = this.getWithdrawalStats.bind(this)
+            this.importSystemConfigs = this.importSystemConfigs.bind(this)
+            this.listActivityLogs = this.listActivityLogs.bind(this)
+            this.listAdminTaskTemplates = this.listAdminTaskTemplates.bind(this)
+            this.listAllTaskSubmissions = this.listAllTaskSubmissions.bind(this)
+            this.listCampaigns = this.listCampaigns.bind(this)
+            this.listConfigCategories = this.listConfigCategories.bind(this)
+            this.listCoupons = this.listCoupons.bind(this)
+            this.listCreatorsAdmin = this.listCreatorsAdmin.bind(this)
+            this.listDepositAccounts = this.listDepositAccounts.bind(this)
+            this.listDocumentVerifications = this.listDocumentVerifications.bind(this)
+            this.listEnrollments = this.listEnrollments.bind(this)
+            this.listEnrollmentsForOCR = this.listEnrollmentsForOCR.bind(this)
+            this.listInvoices = this.listInvoices.bind(this)
+            this.listKycDocumentsFiles = this.listKycDocumentsFiles.bind(this)
+            this.listListings = this.listListings.bind(this)
+            this.listOrganizations = this.listOrganizations.bind(this)
+            this.listPayouts = this.listPayouts.bind(this)
+            this.listPlatforms = this.listPlatforms.bind(this)
+            this.listProfilePicturesFiles = this.listProfilePicturesFiles.bind(this)
+            this.listSystemConfigs = this.listSystemConfigs.bind(this)
+            this.listTemplates = this.listTemplates.bind(this)
+            this.listUploadsFiles = this.listUploadsFiles.bind(this)
+            this.listUserFilesAll = this.listUserFilesAll.bind(this)
+            this.listWallets = this.listWallets.bind(this)
+            this.listWithdrawalMethodVerifications = this.listWithdrawalMethodVerifications.bind(this)
+            this.listWithdrawalMethods = this.listWithdrawalMethods.bind(this)
+            this.listWithdrawals = this.listWithdrawals.bind(this)
+            this.markOrganizationVerified = this.markOrganizationVerified.bind(this)
+            this.pauseCampaign = this.pauseCampaign.bind(this)
+            this.processEnrollmentOCR = this.processEnrollmentOCR.bind(this)
+            this.reinstateOrganization = this.reinstateOrganization.bind(this)
+            this.rejectCampaign = this.rejectCampaign.bind(this)
+            this.rejectDocumentVerification = this.rejectDocumentVerification.bind(this)
+            this.rejectEnrollment = this.rejectEnrollment.bind(this)
+            this.rejectWithdrawal = this.rejectWithdrawal.bind(this)
+            this.releaseWalletHold = this.releaseWalletHold.bind(this)
+            this.removeOrganizationMember = this.removeOrganizationMember.bind(this)
+            this.requestChanges = this.requestChanges.bind(this)
+            this.requestReVerification = this.requestReVerification.bind(this)
+            this.resetCouponUsage = this.resetCouponUsage.bind(this)
+            this.resetCreatorKyc = this.resetCreatorKyc.bind(this)
+            this.resetUserQuota = this.resetUserQuota.bind(this)
+            this.resetUserTwoFactor = this.resetUserTwoFactor.bind(this)
+            this.resumeCampaign = this.resumeCampaign.bind(this)
+            this.retryPayout = this.retryPayout.bind(this)
+            this.retrySetup = this.retrySetup.bind(this)
+            this.retryWithdrawal = this.retryWithdrawal.bind(this)
+            this.reversePayout = this.reversePayout.bind(this)
+            this.reviewOrganization = this.reviewOrganization.bind(this)
+            this.setCreditLimit = this.setCreditLimit.bind(this)
+            this.setPaymentMode = this.setPaymentMode.bind(this)
+            this.suspendCreator = this.suspendCreator.bind(this)
+            this.suspendOrganization = this.suspendOrganization.bind(this)
+            this.syncPayoutStatus = this.syncPayoutStatus.bind(this)
+            this.unarchiveCampaign = this.unarchiveCampaign.bind(this)
+            this.unbanCreator = this.unbanCreator.bind(this)
+            this.unfreezeWallet = this.unfreezeWallet.bind(this)
+            this.unifiedSearch = this.unifiedSearch.bind(this)
+            this.unsuspendCreator = this.unsuspendCreator.bind(this)
+            this.unverifyWithdrawalMethod = this.unverifyWithdrawalMethod.bind(this)
+            this.updateAdminTaskTemplate = this.updateAdminTaskTemplate.bind(this)
+            this.updateCampaign = this.updateCampaign.bind(this)
+            this.updateCategory = this.updateCategory.bind(this)
+            this.updateCoupon = this.updateCoupon.bind(this)
+            this.updateCreator = this.updateCreator.bind(this)
+            this.updateDepositAccount = this.updateDepositAccount.bind(this)
+            this.updateEnrollment = this.updateEnrollment.bind(this)
+            this.updateListing = this.updateListing.bind(this)
+            this.updateMaintenanceMode = this.updateMaintenanceMode.bind(this)
+            this.updateOrganization = this.updateOrganization.bind(this)
+            this.updatePlatform = this.updatePlatform.bind(this)
+            this.updateSystemConfigById = this.updateSystemConfigById.bind(this)
+            this.validateOrderScreenshot = this.validateOrderScreenshot.bind(this)
+            this.validatePushTokens = this.validatePushTokens.bind(this)
+            this.verifyBankAccount = this.verifyBankAccount.bind(this)
+            this.verifyCreatorAadhaar = this.verifyCreatorAadhaar.bind(this)
+            this.verifyCreatorPAN = this.verifyCreatorPAN.bind(this)
+            this.verifyOrganizationGST = this.verifyOrganizationGST.bind(this)
+            this.verifyWithdrawalMethod = this.verifyWithdrawalMethod.bind(this)
+        }
+
+        /**
+         * Extract order data from screenshot (admin manual trigger)
+         */
+        public async adminExtractOrder(params: {
+    imageUrl: string
+    campaignListingName?: string
+}): Promise<ocr.ExtractedOrderData> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/ocr/extract`, JSON.stringify(params))
+            return await resp.json() as ocr.ExtractedOrderData
+        }
+
+        /**
+         * POST /admin/notifications/send - Send notification to specific users
+         */
+        public async adminSendNotification(params: {
+    templateId: string
+    userIds: string[]
+    payload?: NotificationPayload
+}): Promise<{
+    sent: number
+    failed: number
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/notifications/send`, JSON.stringify(params))
+            return await resp.json() as {
+    sent: number
+    failed: number
+}
+        }
+
+        /**
+         * POST /admin/campaigns/:id/approve
+         * Approve campaign (pending_approval → approved)
+         */
+        public async approveCampaign(id: string, params: {
+    rebateRate: number
+    platformFee: number
+    billRate?: number
+    bonus?: number
+    /**
+     * Affiliate link URL for creators to use when purchasing (optional)
+     */
+    affiliateLink?: string
+
+    /**
+     * Affiliate network source: amazon_associates, flipkart_affiliate, etc.
+     */
+    affiliateSource?: db.AffiliateSource
+
+    /**
+     * Per-task platform fee and bonus overrides
+     */
+    taskPricing?: TaskPricingUpdate[]
+}): Promise<{
+    success: boolean
+    campaign: CampaignDetail
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/campaigns/${encodeURIComponent(id)}/approve`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    campaign: CampaignDetail
+}
+        }
+
+        /**
+         * Approve document verification (admin)
+         */
+        public async approveDocumentVerification(id: string, params: {
+    notes?: string
+    expiresAt?: string
+}): Promise<{
+    success: boolean
+    message: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/document-verifications/${encodeURIComponent(id)}/approve`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    message: string
+}
+        }
+
+        /**
+         * POST /admin/enrollments/:id/approve
+         * Approve enrollment (awaiting_review → approved)
+         */
+        public async approveEnrollment(id: string, params: {
+    remarks?: string
+}): Promise<{
+    success: boolean
+    enrollment: EnrollmentDetail
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/enrollments/${encodeURIComponent(id)}/approve`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    enrollment: EnrollmentDetail
+}
+        }
+
+        /**
+         * POST /admin/withdrawals/:id/approve - Approve withdrawal (≥₹10,000 require approval)
+         * NOTE: This only updates status and publishes event.
+         * The WithdrawalApproved subscriber handles RazorpayX payout initiation.
+         */
+        public async approveWithdrawal(id: string, params: {
+    notes?: string
+}): Promise<{
+    success: boolean
+    withdrawalId: string
+    status: string
+    approvedBy: string
+    message: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/withdrawals/${encodeURIComponent(id)}/approve`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    withdrawalId: string
+    status: string
+    approvedBy: string
+    message: string
+}
+        }
+
+        /**
+         * POST /admin/campaigns/:id/archive
+         * Archive campaign (ended → archived)
+         */
+        public async archiveCampaign(id: string): Promise<{
+    success: boolean
+    campaign: CampaignDetail
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/campaigns/${encodeURIComponent(id)}/archive`)
+            return await resp.json() as {
+    success: boolean
+    campaign: CampaignDetail
+}
+        }
+
+        public async banCreator(creatorId: string, params: {
+    reason: string
+}): Promise<db.SuccessResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/creators/${encodeURIComponent(creatorId)}/ban`, JSON.stringify(params))
+            return await resp.json() as db.SuccessResponse
+        }
+
+        /**
+         * POST /admin/enrollments/batch
+         * Unified batch operations for enrollments
+         * Replaces: batchApprove, batchReject
+         */
+        public async batchEnrollments(params: BatchEnrollmentsRequest): Promise<{
+    processed: number
+    failed: number
+    errors: { [key: string]: string }
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/enrollments/batch`, JSON.stringify(params))
+            return await resp.json() as {
+    processed: number
+    failed: number
+    errors: { [key: string]: string }
+}
+        }
+
+        /**
+         * Bootstrap an admin user (development only)
+         * Creates admin record for existing user - used for initial setup
+         * 
+         * ⚠️ ONLY available in development/test environments
+         */
+        public async bootstrapAdmin(params: {
+    userId: string
+    firstName: string
+    lastName: string
+    phoneNumber: string
+}): Promise<{
+    success: boolean
+    message: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/bootstrap`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    message: string
+}
+        }
+
+        /**
+         * POST /admin/notifications/broadcast - Broadcast to audience
+         */
+        public async broadcastNotification(params: {
+    title: string
+    message: string
+    targetAudience: "all" | "creators" | "organizations"
+    actionUrl?: string
+}): Promise<{
+    sent: number
+    targetCount: number
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/notifications/broadcast`, JSON.stringify(params))
+            return await resp.json() as {
+    sent: number
+    targetCount: number
+}
+        }
+
+        /**
+         * POST /admin/campaigns/:id/cancel
+         * Cancel campaign (draft/pending_approval/approved/active/paused → cancelled)
+         */
+        public async cancelCampaign(id: string, params: {
+    reason?: string
+}): Promise<{
+    success: boolean
+    campaign: CampaignDetail
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/campaigns/${encodeURIComponent(id)}/cancel`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    campaign: CampaignDetail
+}
+        }
+
+        /**
+         * POST /admin/enrollments/:id/cancel
+         * Cancel enrollment (admin action)
+         */
+        public async cancelEnrollment(id: string, params: {
+    reason?: string
+}): Promise<{
+    success: boolean
+    enrollment: EnrollmentDetail
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/enrollments/${encodeURIComponent(id)}/cancel`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    enrollment: EnrollmentDetail
+}
+        }
+
+        /**
+         * Cancel a queued payout.
+         * 
+         * IMPORTANT: This also voids the ledger hold to return funds to the wallet.
+         * Without voiding, the funds would remain locked until hold expiry.
+         */
+        public async cancelPayout(id: string, params: {
+    reason?: string
+}): Promise<db.SuccessResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/payouts/${encodeURIComponent(id)}/cancel`, JSON.stringify(params))
+            return await resp.json() as db.SuccessResponse
+        }
+
+        /**
+         * Change admin role (super admin only)
+         * NOTE: Admin roles are stored in user.role (Better Auth admin plugin pattern)
+         * The admin table only stores profile info (name, phone, picture)
+         */
+        public async changeAdminRole(adminId: string, params: ChangeAdminRoleRequest): Promise<{
+    success: boolean
+    adminId: string
+    userId: string
+    newRole: db.AdminRole
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/admins/${encodeURIComponent(adminId)}/change-role`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    adminId: string
+    userId: string
+    newRole: db.AdminRole
+}
+        }
+
+        /**
+         * Check for duplicate order ID (admin)
+         */
+        public async checkOrderIdDuplicate(params: {
+    orderId: string
+    excludeEnrollmentId?: string
+}): Promise<{
+    isDuplicate: boolean
+    existingEnrollmentId?: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/ocr/check-duplicate`, JSON.stringify(params))
+            return await resp.json() as {
+    isDuplicate: boolean
+    existingEnrollmentId?: string
+}
+        }
+
+        /**
+         * GET /admin/notifications/connections/:userId - Check if user is connected
+         */
+        public async checkUserConnection(userId: string): Promise<{
+    userId: string
+    isConnected: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/notifications/connections/${encodeURIComponent(userId)}`)
+            return await resp.json() as {
+    userId: string
+    isConnected: boolean
+}
+        }
+
+        /**
+         * Clean all fake data from database
+         * 
+         * ⚠️ ONLY available in development/test environments
+         * 
+         * Removes all data created by the fake data factory.
+         * Only affects records with @hypedrive.fake emails.
+         */
+        public async cleanFakeData(): Promise<{
+    success: boolean
+    message: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/fake-data/clean`)
+            return await resp.json() as {
+    success: boolean
+    message: string
+}
+        }
+
+        /**
+         * Clean up expired sessions (admin) - Not available in Better Auth SDK
+         */
+        public async cleanupExpiredSessions(): Promise<{
+    success: boolean
+    deletedCount: number
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/admin/sessions/cleanup`)
+            return await resp.json() as {
+    success: boolean
+    deletedCount: number
+}
+        }
+
+        /**
+         * Create a new task template (admin)
+         */
+        public async createAdminTaskTemplate(params: {
+    name: string
+    slug?: string
+    category: db.TaskCategory
+    platformId?: string
+    description?: string
+    requireLink?: boolean
+    requireScreenshot?: boolean
+    defaultRequirements?: db.TaskRequirements
+    exampleUrl?: string
+    status?: db.TaskTemplateStatus
+}): Promise<AdminTaskTemplate> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/task-templates`, JSON.stringify(params))
+            return await resp.json() as AdminTaskTemplate
+        }
+
+        /**
+         * POST /admin/categories - Create category
+         */
+        public async createCategory(params: {
+    name: string
+    description?: string
+    icon?: string
+    logo?: string
+}): Promise<AdminCategory> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/categories`, JSON.stringify(params))
+            return await resp.json() as AdminCategory
+        }
+
+        /**
+         * Create single coupon (admin)
+         */
+        public async createCoupon(params: {
+    code: string
+    /**
+     * Bonus type: 'fixed' (default) or 'percentage'
+     */
+    bonusType?: CouponBonusType
+
+    /**
+     * Fixed bonus amount in paise. Required when bonusType='fixed'
+     */
+    bonus?: number
+
+    /**
+     * Bonus percentage (1-100). Required when bonusType='percentage'
+     */
+    bonusRate?: number
+
+    /**
+     * Max bonus cap in paise for percentage coupons
+     */
+    maxBonus?: number
+
+    /**
+     * Min order value in paise required to use coupon
+     */
+    minOrderValue?: number
+
+    usageLimit?: number
+    oneTimeUse?: boolean
+    specificCampaignId?: string
+    validFrom?: string
+    validUntil?: string
+}): Promise<{
+    success: boolean
+    coupon: AdminCoupon
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/coupons`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    coupon: AdminCoupon
+}
+        }
+
+        /**
+         * Create deposit account for organization (admin)
+         */
+        public async createDepositAccount(params: CreateDepositAccountRequest): Promise<AdminDepositAccount> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/deposit-accounts`, JSON.stringify(params))
+            return await resp.json() as AdminDepositAccount
+        }
+
+        /**
+         * Create platform
+         */
+        public async createPlatform(params: CreatePlatformRequest): Promise<Platform> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/platforms`, JSON.stringify(params))
+            return await resp.json() as Platform
+        }
+
+        /**
+         * Create system config (super admin only)
+         */
+        public async createSystemConfig(params: CreateConfigRequest): Promise<SystemConfigItem> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/system-configs`, JSON.stringify(params))
+            return await resp.json() as SystemConfigItem
+        }
+
+        /**
+         * POST /admin/wallets/:holderId/credit - Credit/top-up wallet
+         */
+        public async creditWallet(holderId: string, params: {
+    amount: number
+    reason: string
+    reference: string
+}): Promise<{
+    success: boolean
+    transactionId: string
+    newBalance: number
+    newBalanceDecimal: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/wallets/${encodeURIComponent(holderId)}/credit`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    transactionId: string
+    newBalance: number
+    newBalanceDecimal: string
+}
+        }
+
+        /**
+         * POST /admin/wallets/:holderId/debit - Debit/charge wallet
+         */
+        public async debitWallet(holderId: string, params: {
+    amount: number
+    reason: string
+    reference: string
+}): Promise<{
+    success: boolean
+    transactionId: string
+    newBalance: number
+    newBalanceDecimal: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/wallets/${encodeURIComponent(holderId)}/debit`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    transactionId: string
+    newBalance: number
+    newBalanceDecimal: string
+}
+        }
+
+        /**
+         * DELETE /admin/campaigns/:id
+         * Hard delete a campaign (draft/rejected with 0 enrollments only).
+         * Permanently removes campaign + tasks from DB. Admin-only.
+         */
+        public async deleteCampaign(id: string): Promise<{
+    success: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("DELETE", `/admin/campaigns/${encodeURIComponent(id)}`)
+            return await resp.json() as {
+    success: boolean
+}
+        }
+
+        /**
+         * Delete file from kyc-documents bucket (admin)
+         */
+        public async deleteKycDocumentsFile(params: {
+    key: string
+}): Promise<{
+    success: boolean
+    message: string
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                key: params.key,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("DELETE", `/admin/storage/kyc-documents/files`, undefined, {query})
+            return await resp.json() as {
+    success: boolean
+    message: string
+}
+        }
+
+        /**
+         * Delete file from profile-pictures bucket (admin)
+         */
+        public async deleteProfilePicturesFile(params: {
+    key: string
+}): Promise<{
+    success: boolean
+    message: string
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                key: params.key,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("DELETE", `/admin/storage/profile-pictures/files`, undefined, {query})
+            return await resp.json() as {
+    success: boolean
+    message: string
+}
+        }
+
+        /**
+         * Delete file from uploads bucket (admin)
+         */
+        public async deleteUploadsFile(params: {
+    key: string
+}): Promise<{
+    success: boolean
+    message: string
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                key: params.key,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("DELETE", `/admin/storage/uploads/files`, undefined, {query})
+            return await resp.json() as {
+    success: boolean
+    message: string
+}
+        }
+
+        /**
+         * POST /admin/campaigns/:id/end
+         * End campaign (active/paused → ended)
+         */
+        public async endCampaign(id: string, params: {
+    reason?: string
+}): Promise<{
+    success: boolean
+    campaign: CampaignDetail
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/campaigns/${encodeURIComponent(id)}/end`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    campaign: CampaignDetail
+}
+        }
+
+        /**
+         * Export analytics report (super admin)
+         */
+        public async exportAnalyticsReport(params: {
+    reportType: "overview" | "campaigns" | "organizations" | "revenue" | "withdrawals"
+    startDate: string
+    endDate: string
+    format?: "json" | "csv"
+}): Promise<{
+    data: string
+    filename: string
+    contentType: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/analytics/export`, JSON.stringify(params))
+            return await resp.json() as {
+    data: string
+    filename: string
+    contentType: string
+}
+        }
+
+        /**
+         * Export all coupons (admin)
+         */
+        public async exportCoupons(params: {
+    format?: "json" | "csv"
+    status?: "active" | "inactive" | "expired"
+}): Promise<{
+    data: string
+    filename: string
+    contentType: string
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                format: params.format === undefined ? undefined : String(params.format),
+                status: params.status === undefined ? undefined : String(params.status),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/coupons/export`, undefined, {query})
+            return await resp.json() as {
+    data: string
+    filename: string
+    contentType: string
+}
+        }
+
+        public async exportEnrollments(params: ListEnrollmentsQuery): Promise<{
+    csv: string
+    filename: string
+    count: number
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                campaignId: params.campaignId,
+                creatorId:  params.creatorId,
+                fromDate:   params.fromDate,
+                search:     params.search,
+                skip:       params.skip === undefined ? undefined : String(params.skip),
+                status:     params.status,
+                take:       params.take === undefined ? undefined : String(params.take),
+                toDate:     params.toDate,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/enrollments/export`, undefined, {query})
+            return await resp.json() as {
+    csv: string
+    filename: string
+    count: number
+}
+        }
+
+        /**
+         * GET /admin/invoices/export - Export invoices to CSV
+         */
+        public async exportInvoices(params: {
+    organizationId?: string
+    status?: db.InvoiceStatus
+    periodStart?: string
+    periodEnd?: string
+}): Promise<{
+    csv: string
+    filename: string
+    recordCount: number
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                organizationId: params.organizationId,
+                periodEnd:      params.periodEnd,
+                periodStart:    params.periodStart,
+                status:         params.status === undefined ? undefined : String(params.status),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/invoices/export`, undefined, {query})
+            return await resp.json() as {
+    csv: string
+    filename: string
+    recordCount: number
+}
+        }
+
+        /**
+         * GET /admin/listings/export - Export listings to CSV
+         */
+        public async exportListings(params: {
+    organizationId?: string
+    categoryId?: string
+    platformId?: string
+}): Promise<{
+    csv: string
+    filename: string
+    recordCount: number
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                categoryId:     params.categoryId,
+                organizationId: params.organizationId,
+                platformId:     params.platformId,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/listings/export`, undefined, {query})
+            return await resp.json() as {
+    csv: string
+    filename: string
+    recordCount: number
+}
+        }
+
+        /**
+         * Export all configs (super admin only)
+         */
+        public async exportSystemConfigs(params: {
+    category?: string
+    format?: "json" | "env"
+}): Promise<{
+    data: string
+    filename: string
+    contentType: string
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                category: params.category,
+                format:   params.format === undefined ? undefined : String(params.format),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/system-config/export`, undefined, {query})
+            return await resp.json() as {
+    data: string
+    filename: string
+    contentType: string
+}
+        }
+
+        /**
+         * Export task templates data (admin)
+         */
+        public async exportTaskTemplates(params: {
+    format?: "csv" | "json"
+}): Promise<{
+    data: string
+    filename: string
+    contentType: string
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                format: params.format === undefined ? undefined : String(params.format),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/task-templates/export`, undefined, {query})
+            return await resp.json() as {
+    data: string
+    filename: string
+    contentType: string
+}
+        }
+
+        /**
+         * Export verifications report (admin)
+         */
+        public async exportVerifications(params: {
+    status?: string
+    subjectType?: string
+    format?: "json" | "csv"
+}): Promise<{
+    data: string
+    filename: string
+    contentType: string
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                format:      params.format === undefined ? undefined : String(params.format),
+                status:      params.status,
+                subjectType: params.subjectType,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/document-verifications/export`, undefined, {query})
+            return await resp.json() as {
+    data: string
+    filename: string
+    contentType: string
+}
+        }
+
+        /**
+         * Extend coupon validity (admin)
+         */
+        public async extendCouponValidity(id: string, params: {
+    newValidUntil: string
+}): Promise<{
+    success: boolean
+    message: string
+    previousValidUntil: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/coupons/${encodeURIComponent(id)}/extend`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    message: string
+    previousValidUntil: string
+}
+        }
+
+        /**
+         * POST /admin/enrollments/:id/extend
+         * Extend enrollment deadline
+         */
+        public async extendEnrollmentDeadline(id: string, params: {
+    expiresAt: string
+}): Promise<{
+    success: boolean
+    enrollment: EnrollmentDetail
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/enrollments/${encodeURIComponent(id)}/extend`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    enrollment: EnrollmentDetail
+}
+        }
+
+        /**
+         * Force complete a withdrawal that is stuck.
+         * 
+         * SAFETY CHECKS (using merged withdrawal table):
+         * 1. Withdrawal must not be in terminal state
+         * 2. Withdrawal must have ledger hold transaction
+         * 3. Ledger hold must not already be committed (prevents double-deduction)
+         * 4. Cannot force-complete while gateway is actively processing
+         */
+        public async forceCompleteWithdrawal(id: string, params: {
+    utr?: string
+    notes?: string
+}): Promise<db.SuccessResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/withdrawals/${encodeURIComponent(id)}/force-complete`, JSON.stringify(params))
+            return await resp.json() as db.SuccessResponse
+        }
+
+        /**
+         * Force verify creator KYC (admin)
+         */
+        public async forceVerifyCreatorKyc(creatorId: string, params: {
+    notes?: string
+}): Promise<{
+    success: boolean
+    message: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/creators/${encodeURIComponent(creatorId)}/kyc/verify`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    message: string
+}
+        }
+
+        /**
+         * POST /admin/wallets/:holderId/freeze - Freeze wallet
+         * NOTE: This only freezes the wallet, does NOT ban the entity.
+         * Use ban/suspend endpoints to ban AND freeze wallet together.
+         */
+        public async freezeWallet(holderId: string, params: {
+    reason: string
+}): Promise<db.SuccessResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/wallets/${encodeURIComponent(holderId)}/freeze`, JSON.stringify(params))
+            return await resp.json() as db.SuccessResponse
+        }
+
+        /**
+         * Generate fake data for the entire database
+         * 
+         * ⚠️ ONLY available in development/test environments
+         * 
+         * Uses @faker-js/faker with Indian locale for realistic data.
+         * All money values follow PAISE-FIRST architecture.
+         * 
+         * Default credentials:
+         * - Admin users: admin1@hypedrive.fake, admin2@hypedrive.fake, etc.
+         * Password: SEED_ADMIN_PASSWORD (see data-factory.ts)
+         * - Regular users: random emails ending in @hypedrive.fake
+         * Password: SEED_USER_PASSWORD (see data-factory.ts)
+         */
+        public async generateFakeData(params: FakeDataRequest): Promise<FakeDataResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/fake-data/generate`, JSON.stringify(params))
+            return await resp.json() as FakeDataResponse
+        }
+
+        /**
+         * POST /admin/invoices/generate - Generate invoice for organization
+         */
+        public async generateInvoice(params: {
+    organizationId: string
+    periodStart: string
+    periodEnd: string
+    dueDate: string
+    gstRate?: number
+    tdsRate?: number
+    notes?: string
+    autoSend?: boolean
+}): Promise<AdminInvoiceResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/invoices/generate`, JSON.stringify(params))
+            return await resp.json() as AdminInvoiceResponse
+        }
+
+        /**
+         * GET /admin/notifications/templates/active - Get only active templates
+         */
+        public async getActiveTemplatesList(): Promise<{
+    templates: notifications.NotificationTemplate[]
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/notifications/templates/active`)
+            return await resp.json() as {
+    templates: notifications.NotificationTemplate[]
+}
+        }
+
+        /**
+         * Get real-time activity feed (admin) - CURSOR PAGINATION
+         * Combines recent enrollments, organizations, and campaigns into a single feed
+         */
+        public async getActivityFeed(params: {
+    cursor?: string
+    limit?: number
+}): Promise<{
+    data: ActivityFeedItem[]
+    nextCursor: string | null
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                cursor: params.cursor,
+                limit:  params.limit === undefined ? undefined : String(params.limit),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/analytics/activity-feed`, undefined, {query})
+            return await resp.json() as {
+    data: ActivityFeedItem[]
+    nextCursor: string | null
+    hasMore: boolean
+}
+        }
+
+        /**
+         * Get task submission details (admin)
+         */
+        public async getAdminTaskSubmission(id: string): Promise<AdminTaskSubmission> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/task-submissions/${encodeURIComponent(id)}`)
+            return await resp.json() as AdminTaskSubmission
+        }
+
+        /**
+         * Get task template details with full stats (admin)
+         */
+        public async getAdminTaskTemplate(id: string): Promise<{
+    id: string
+    name: string
+    slug: string
+    description?: string
+    category: db.TaskCategory
+    platformId?: string
+    platformName?: string
+    requireLink: boolean
+    requireScreenshot: boolean
+    defaultRequirements?: db.TaskRequirements
+    exampleUrl?: string
+    status: db.TaskTemplateStatus
+    usageCount: number
+    createdAt: string
+    updatedAt: string
+    campaigns: {
+        id: string
+        name: string
+    }[]
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/task-templates/${encodeURIComponent(id)}`)
+            return await resp.json() as {
+    id: string
+    name: string
+    slug: string
+    description?: string
+    category: db.TaskCategory
+    platformId?: string
+    platformName?: string
+    requireLink: boolean
+    requireScreenshot: boolean
+    defaultRequirements?: db.TaskRequirements
+    exampleUrl?: string
+    status: db.TaskTemplateStatus
+    usageCount: number
+    createdAt: string
+    updatedAt: string
+    campaigns: {
+        id: string
+        name: string
+    }[]
+}
+        }
+
+        /**
+         * GET /admin/wallets/:holderId - View specific wallet
+         */
+        public async getAdminWallet(holderId: string): Promise<AdminWalletResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/wallets/${encodeURIComponent(holderId)}`)
+            return await resp.json() as AdminWalletResponse
+        }
+
+        /**
+         * Get auth statistics (admin) - Not available in Better Auth SDK
+         */
+        public async getAuthStats(): Promise<AuthStats> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/auth/admin/stats`)
+            return await resp.json() as AuthStats
+        }
+
+        public async getCampaign(id: string): Promise<CampaignDetail> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/campaigns/${encodeURIComponent(id)}`)
+            return await resp.json() as CampaignDetail
+        }
+
+        /**
+         * Get campaign performance analytics (admin)
+         */
+        public async getCampaignPerformance(params: {
+    startDate?: string
+    endDate?: string
+    limit?: number
+}): Promise<{
+    campaigns: CampaignAnalytics[]
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                endDate:   params.endDate,
+                limit:     params.limit === undefined ? undefined : String(params.limit),
+                startDate: params.startDate,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/analytics/campaigns/performance`, undefined, {query})
+            return await resp.json() as {
+    campaigns: CampaignAnalytics[]
+}
+        }
+
+        public async getCampaignStats(): Promise<CampaignStats> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/campaigns/stats`)
+            return await resp.json() as CampaignStats
+        }
+
+        /**
+         * Get status of all circuit breakers
+         * Used for monitoring external service health
+         */
+        public async getCircuitBreakerStatus(): Promise<{
+    circuitBreakers: { [key: string]: {
+        state: string
+    } }
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/circuit-breakers`)
+            return await resp.json() as {
+    circuitBreakers: { [key: string]: {
+        state: string
+    } }
+}
+        }
+
+        public async getComplianceReport(): Promise<{
+    totalOrganizations: number
+    gstVerified: number
+    gstPending: number
+    bankVerified: number
+    bankPending: number
+    fullyCompliant: number
+    nonCompliant: number
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/organizations/compliance`)
+            return await resp.json() as {
+    totalOrganizations: number
+    gstVerified: number
+    gstPending: number
+    bankVerified: number
+    bankPending: number
+    fullyCompliant: number
+    nonCompliant: number
+}
+        }
+
+        /**
+         * Get config value by key (for internal use, returns parsed value)
+         */
+        public async getConfigValue(key: string): Promise<{
+    key: string
+    value: ParsedConfigValue
+    valueType: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/system-config/value/${encodeURIComponent(key)}`)
+            return await resp.json() as {
+    key: string
+    value: ParsedConfigValue
+    valueType: string
+}
+        }
+
+        /**
+         * GET /admin/notifications/connections - Get SSE connection stats
+         */
+        public async getConnectionStats(): Promise<{
+    connectedUsers: number
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/notifications/connections`)
+            return await resp.json() as {
+    connectedUsers: number
+}
+        }
+
+        /**
+         * Get single coupon by ID (admin)
+         */
+        public async getCoupon(id: string): Promise<{
+    coupon: AdminCoupon
+    redemptionCount: number
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/coupons/${encodeURIComponent(id)}`)
+            return await resp.json() as {
+    coupon: AdminCoupon
+    redemptionCount: number
+}
+        }
+
+        /**
+         * Get coupon analytics (admin)
+         */
+        public async getCouponAnalytics(params: DateRangeParams): Promise<{
+    totalCoupons: number
+    activeCoupons: number
+    totalRedemptions: number
+    topCoupons: {
+        code: string
+        redemptions: number
+    }[]
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                endDate:   params.endDate,
+                startDate: params.startDate,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/analytics/coupons`, undefined, {query})
+            return await resp.json() as {
+    totalCoupons: number
+    activeCoupons: number
+    totalRedemptions: number
+    topCoupons: {
+        code: string
+        redemptions: number
+    }[]
+}
+        }
+
+        /**
+         * Get coupon redemption analytics (admin)
+         */
+        public async getCouponRedemptionAnalytics(id: string, params: {
+    startDate?: string
+    endDate?: string
+}): Promise<{
+    couponId: string
+    code: string
+    totalRedemptions: number
+    redemptionsByDay: {
+        date: string
+        count: number
+    }[]
+    topUsers: {
+        userId: string | null
+        redemptions: number
+    }[]
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                endDate:   params.endDate,
+                startDate: params.startDate,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/coupons/${encodeURIComponent(id)}/analytics`, undefined, {query})
+            return await resp.json() as {
+    couponId: string
+    code: string
+    totalRedemptions: number
+    redemptionsByDay: {
+        date: string
+        count: number
+    }[]
+    topUsers: {
+        userId: string | null
+        redemptions: number
+    }[]
+}
+        }
+
+        /**
+         * Get coupon statistics (admin)
+         */
+        public async getCouponStats(): Promise<{
+    total: number
+    active: number
+    inactive: number
+    expired: number
+    totalRedemptions: number
+    totalBonusPaid: number
+    totalBonusPaidDecimal: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/coupons/stats`)
+            return await resp.json() as {
+    total: number
+    active: number
+    inactive: number
+    expired: number
+    totalRedemptions: number
+    totalBonusPaid: number
+    totalBonusPaidDecimal: string
+}
+        }
+
+        public async getCreator(creatorId: string): Promise<CreatorDetail> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/creators/${encodeURIComponent(creatorId)}`)
+            return await resp.json() as CreatorDetail
+        }
+
+        public async getCreatorEarnings(creatorId: string): Promise<CreatorEarnings> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/creators/${encodeURIComponent(creatorId)}/earnings`)
+            return await resp.json() as CreatorEarnings
+        }
+
+        public async getCreatorEnrollments(creatorId: string, params: {
+    skip?: number
+    take?: number
+}): Promise<{
+    data: CreatorEnrollment[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                skip: params.skip === undefined ? undefined : String(params.skip),
+                take: params.take === undefined ? undefined : String(params.take),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/creators/${encodeURIComponent(creatorId)}/enrollments`, undefined, {query})
+            return await resp.json() as {
+    data: CreatorEnrollment[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+
+        /**
+         * Get creator KYC documents with signed URLs (15 min expiry)
+         */
+        public async getCreatorKYCDocuments(creatorId: string): Promise<CreatorKYCDocuments> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/creators/${encodeURIComponent(creatorId)}/kyc-documents`)
+            return await resp.json() as CreatorKYCDocuments
+        }
+
+        /**
+         * Get creator KYC details (admin)
+         */
+        public async getCreatorKycDetails(creatorId: string): Promise<CreatorKycDetails> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/creators/${encodeURIComponent(creatorId)}/kyc`)
+            return await resp.json() as CreatorKycDetails
+        }
+
+        public async getCreatorStats(): Promise<CreatorStats> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/creators/stats`)
+            return await resp.json() as CreatorStats
+        }
+
+        /**
+         * Get deposit account details (admin)
+         */
+        public async getDepositAccount(id: string): Promise<AdminDepositAccount> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/deposit-accounts/${encodeURIComponent(id)}`)
+            return await resp.json() as AdminDepositAccount
+        }
+
+        /**
+         * Get deposit account statistics (admin)
+         */
+        public async getDepositAccountStats(): Promise<DepositAccountStats> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/deposit-accounts/stats`)
+            return await resp.json() as DepositAccountStats
+        }
+
+        /**
+         * Get document verification details (admin)
+         */
+        public async getDocumentVerification(id: string): Promise<{
+    id: string
+    subjectId: string
+    subjectType: string
+    subjectName?: string
+    verificationType: string
+    status: string
+    method: string | null
+    documents: KycDocuments | null
+    result: KycVerificationResult | null
+    verifiedBy: string | null
+    verifiedAt: string | null
+    rejectionReason: string | null
+    retryCount: number
+    expiresAt: string | null
+    createdAt: string
+    updatedAt: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/document-verifications/${encodeURIComponent(id)}`)
+            return await resp.json() as {
+    id: string
+    subjectId: string
+    subjectType: string
+    subjectName?: string
+    verificationType: string
+    status: string
+    method: string | null
+    documents: KycDocuments | null
+    result: KycVerificationResult | null
+    verifiedBy: string | null
+    verifiedAt: string | null
+    rejectionReason: string | null
+    retryCount: number
+    expiresAt: string | null
+    createdAt: string
+    updatedAt: string
+}
+        }
+
+        /**
+         * Get verification statistics (admin)
+         */
+        public async getDocumentVerificationStats(): Promise<VerificationStats> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/document-verifications/stats`)
+            return await resp.json() as VerificationStats
+        }
+
+        public async getEnrollment(id: string): Promise<EnrollmentDetail> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/enrollments/${encodeURIComponent(id)}`)
+            return await resp.json() as EnrollmentDetail
+        }
+
+        public async getEnrollmentStats(): Promise<EnrollmentStats> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/enrollments/stats`)
+            return await resp.json() as EnrollmentStats
+        }
+
+        /**
+         * Get enrollment trends over time (admin)
+         */
+        public async getEnrollmentTrends(params: {
+    startDate?: string
+    endDate?: string
+    interval?: "day" | "week" | "month"
+}): Promise<{
+    data: TimeSeriesDataPoint[]
+    interval: string
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                endDate:   params.endDate,
+                interval:  params.interval === undefined ? undefined : String(params.interval),
+                startDate: params.startDate,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/analytics/enrollments/trends`, undefined, {query})
+            return await resp.json() as {
+    data: TimeSeriesDataPoint[]
+    interval: string
+}
+        }
+
+        /**
+         * Get growth metrics (admin)
+         */
+        public async getGrowthMetrics(params: {
+    startDate?: string
+    endDate?: string
+    interval?: "day" | "week" | "month"
+}): Promise<{
+    data: GrowthMetrics[]
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                endDate:   params.endDate,
+                interval:  params.interval === undefined ? undefined : String(params.interval),
+                startDate: params.startDate,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/analytics/growth`, undefined, {query})
+            return await resp.json() as {
+    data: GrowthMetrics[]
+}
+        }
+
+        /**
+         * Get hourly trends for today - for intraday graphs
+         */
+        public async getHourlyTrends(params: {
+    date?: string
+}): Promise<{
+    date: string
+    data: HourlyDataPoint[]
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                date: params.date,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/analytics/today/hourly`, undefined, {query})
+            return await resp.json() as {
+    date: string
+    data: HourlyDataPoint[]
+}
+        }
+
+        /**
+         * GET /admin/invoices/:id - Get invoice details
+         */
+        public async getInvoice(id: string): Promise<AdminInvoiceResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/invoices/${encodeURIComponent(id)}`)
+            return await resp.json() as AdminInvoiceResponse
+        }
+
+        /**
+         * GET /admin/invoices/:id/line-items - Get invoice line items
+         */
+        public async getInvoiceLineItems(id: string): Promise<{
+    lineItems: InvoiceLineItemResponse[]
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/invoices/${encodeURIComponent(id)}/line-items`)
+            return await resp.json() as {
+    lineItems: InvoiceLineItemResponse[]
+}
+        }
+
+        /**
+         * GET /admin/invoices/stats - Invoice statistics
+         */
+        public async getInvoiceStats(): Promise<InvoiceStatsResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/invoices/stats`)
+            return await resp.json() as InvoiceStatsResponse
+        }
+
+        /**
+         * Get download URL for kyc-documents bucket (admin)
+         */
+        public async getKycDocumentsDownloadUrl(params: {
+    key: string
+}): Promise<AdminDownloadUrlResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/storage/kyc-documents/download-url`, JSON.stringify(params))
+            return await resp.json() as AdminDownloadUrlResponse
+        }
+
+        /**
+         * GET /admin/listings/:id - Get listing details
+         */
+        public async getListing(id: string): Promise<AdminListingResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/listings/${encodeURIComponent(id)}`)
+            return await resp.json() as AdminListingResponse
+        }
+
+        /**
+         * GET /admin/listings/:id/campaigns - View listing campaigns
+         */
+        public async getListingCampaigns(id: string, params: {
+    skip?: number
+    take?: number
+}): Promise<{
+    data: {
+        id: string
+        title: string
+        status: string
+        startDate: string
+        endDate: string
+        enrollmentCount: number
+    }[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                skip: params.skip === undefined ? undefined : String(params.skip),
+                take: params.take === undefined ? undefined : String(params.take),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/listings/${encodeURIComponent(id)}/campaigns`, undefined, {query})
+            return await resp.json() as {
+    data: {
+        id: string
+        title: string
+        status: string
+        startDate: string
+        endDate: string
+        enrollmentCount: number
+    }[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+
+        /**
+         * GET /admin/listings/stats - Listing statistics
+         */
+        public async getListingStats(): Promise<ListingStatsResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/listings/stats`)
+            return await resp.json() as ListingStatsResponse
+        }
+
+        /**
+         * Get maintenance status (admin)
+         */
+        public async getMaintenanceStatus(): Promise<MaintenanceStatus> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/platform/maintenance`)
+            return await resp.json() as MaintenanceStatus
+        }
+
+        /**
+         * GET /admin/notifications/history - Get notification history (cursor paginated)
+         */
+        public async getNotificationHistory(params: db.CursorPaginationParams): Promise<{
+    data: {
+        id: string
+        action: string
+        entityType: string
+        entityId: string
+        details: NotificationHistoryDetails | null
+        adminId: string
+        timestamp: string
+    }[]
+    nextCursor: string | null
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                cursor: params.cursor,
+                limit:  params.limit === undefined ? undefined : String(params.limit),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/notifications/history`, undefined, {query})
+            return await resp.json() as {
+    data: {
+        id: string
+        action: string
+        entityType: string
+        entityId: string
+        details: NotificationHistoryDetails | null
+        adminId: string
+        timestamp: string
+    }[]
+    nextCursor: string | null
+    hasMore: boolean
+}
+        }
+
+        /**
+         * GET /admin/notifications/templates/types - Get available notification types
+         */
+        public async getNotificationTypes(): Promise<{
+    types: string[]
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/notifications/templates/types`)
+            return await resp.json() as {
+    types: string[]
+}
+        }
+
+        public async getOrganization(id: string): Promise<OrganizationDetail> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/organizations/${encodeURIComponent(id)}`)
+            return await resp.json() as OrganizationDetail
+        }
+
+        /**
+         * Get organization analytics (admin)
+         */
+        public async getOrganizationAnalytics(params: {
+    limit?: number
+}): Promise<{
+    organizations: OrganizationAnalytics[]
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                limit: params.limit === undefined ? undefined : String(params.limit),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/analytics/organizations`, undefined, {query})
+            return await resp.json() as {
+    organizations: OrganizationAnalytics[]
+}
+        }
+
+        public async getOrganizationBankAccounts(id: string): Promise<{
+    bankAccounts: OrganizationBankAccount[]
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/organizations/${encodeURIComponent(id)}/bank-accounts`)
+            return await resp.json() as {
+    bankAccounts: OrganizationBankAccount[]
+}
+        }
+
+        public async getOrganizationMembers(id: string, params: {
+    skip?: number
+    take?: number
+}): Promise<{
+    data: OrganizationMember[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                skip: params.skip === undefined ? undefined : String(params.skip),
+                take: params.take === undefined ? undefined : String(params.take),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/organizations/${encodeURIComponent(id)}/members`, undefined, {query})
+            return await resp.json() as {
+    data: OrganizationMember[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+
+        public async getOrganizationStats(): Promise<OrganizationStats> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/organizations/stats`)
+            return await resp.json() as OrganizationStats
+        }
+
+        /**
+         * GET /admin/payouts/:id - View payout details
+         */
+        public async getPayout(id: string): Promise<AdminPayoutResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/payouts/${encodeURIComponent(id)}`)
+            return await resp.json() as AdminPayoutResponse
+        }
+
+        /**
+         * Get single platform by ID
+         */
+        public async getPlatform(id: string): Promise<PlatformListItem> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/platforms/${encodeURIComponent(id)}`)
+            return await resp.json() as PlatformListItem
+        }
+
+        /**
+         * Get platform health (admin)
+         */
+        public async getPlatformHealth(): Promise<PlatformHealth> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/platform/health`)
+            return await resp.json() as PlatformHealth
+        }
+
+        /**
+         * Get platform overview dashboard (admin)
+         */
+        public async getPlatformOverview(): Promise<PlatformOverview> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/analytics/overview`)
+            return await resp.json() as PlatformOverview
+        }
+
+        /**
+         * Get download URL for profile-pictures bucket (admin)
+         */
+        public async getProfilePicturesDownloadUrl(params: {
+    key: string
+}): Promise<AdminDownloadUrlResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/storage/profile-pictures/download-url`, JSON.stringify(params))
+            return await resp.json() as AdminDownloadUrlResponse
+        }
+
+        /**
+         * GET /admin/notifications/providers - Get provider health status
+         */
+        public async getProviderStatus(): Promise<{
+    providers: ProviderStatus[]
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/notifications/providers`)
+            return await resp.json() as {
+    providers: ProviderStatus[]
+}
+        }
+
+        /**
+         * Get revenue analytics (admin)
+         */
+        public async getRevenueAnalytics(params: {
+    startDate?: string
+    endDate?: string
+    interval?: "day" | "week" | "month"
+}): Promise<{
+    data: RevenueAnalytics[]
+    totals: {
+        invoiced: number
+        invoicedDecimal: string
+        paid: number
+        paidDecimal: string
+        pending: number
+        pendingDecimal: string
+    }
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                endDate:   params.endDate,
+                interval:  params.interval === undefined ? undefined : String(params.interval),
+                startDate: params.startDate,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/analytics/revenue`, undefined, {query})
+            return await resp.json() as {
+    data: RevenueAnalytics[]
+    totals: {
+        invoiced: number
+        invoicedDecimal: string
+        paid: number
+        paidDecimal: string
+        pending: number
+        pendingDecimal: string
+    }
+}
+        }
+
+        /**
+         * Get storage statistics (admin)
+         */
+        public async getStorageStats(): Promise<StorageStats> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/storage/stats`)
+            return await resp.json() as StorageStats
+        }
+
+        /**
+         * Get system config by ID (admin)
+         */
+        public async getSystemConfigById(id: string): Promise<SystemConfigItem> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/system-configs/${encodeURIComponent(id)}`)
+            return await resp.json() as SystemConfigItem
+        }
+
+        /**
+         * Get system config by key (admin)
+         */
+        public async getSystemConfigByKey(key: string): Promise<SystemConfigItem> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/system-configs/key/${encodeURIComponent(key)}`)
+            return await resp.json() as SystemConfigItem
+        }
+
+        /**
+         * Get task statistics (admin)
+         */
+        public async getTaskStats(): Promise<TaskStats> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/task-templates/stats`)
+            return await resp.json() as TaskStats
+        }
+
+        /**
+         * GET /admin/notifications/templates/:id - Get template details
+         */
+        public async getTemplate(id: string): Promise<notifications.NotificationTemplate> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/notifications/templates/${encodeURIComponent(id)}`)
+            return await resp.json() as notifications.NotificationTemplate
+        }
+
+        /**
+         * Get today's stats - real-time daily view for admin dashboard
+         */
+        public async getTodayStats(): Promise<TodayStats> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/analytics/today`)
+            return await resp.json() as TodayStats
+        }
+
+        /**
+         * Get download URL for uploads bucket (admin)
+         */
+        public async getUploadsDownloadUrl(params: {
+    key: string
+}): Promise<AdminDownloadUrlResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/storage/uploads/download-url`, JSON.stringify(params))
+            return await resp.json() as AdminDownloadUrlResponse
+        }
+
+        /**
+         * GET /admin/notifications/quota/:userId - Get user's notification quota
+         */
+        public async getUserQuota(userId: string): Promise<UserQuotaResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/notifications/quota/${encodeURIComponent(userId)}`)
+            return await resp.json() as UserQuotaResponse
+        }
+
+        /**
+         * GET /admin/withdrawal-methods/:id/verification-history - Get verification history
+         */
+        public async getVerificationHistory(id: string): Promise<{
+    history: VerificationHistoryItem[]
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/withdrawal-methods/${encodeURIComponent(id)}/verification-history`)
+            return await resp.json() as {
+    history: VerificationHistoryItem[]
+}
+        }
+
+        /**
+         * GET /admin/wallets/:holderId/holds - View all holds
+         */
+        public async getWalletHolds(holderId: string): Promise<{
+    holds: ActiveHold[]
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/wallets/${encodeURIComponent(holderId)}/holds`)
+            return await resp.json() as {
+    holds: ActiveHold[]
+}
+        }
+
+        /**
+         * GET /admin/wallets/stats - Wallet stats
+         */
+        public async getWalletStats(): Promise<WalletStatsResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/wallets/stats`)
+            return await resp.json() as WalletStatsResponse
+        }
+
+        /**
+         * GET /admin/wallets/:holderId/transactions - View transactions
+         */
+        public async getWalletTransactions(holderId: string, params: {
+    skip?: number
+    take?: number
+    /**
+     * Filter by transaction status: pending, completed, voided
+     */
+    status?: "pending" | "completed" | "voided"
+
+    /**
+     * Filter by transaction category
+     */
+    category?: "deposit" | "enrollment_hold" | "payout" | "refund" | "admin_credit"
+
+    /**
+     * Filter by transaction type: credit, debit
+     */
+    type?: "credit" | "debit"
+
+    /**
+     * Filter transactions from this date (ISO 8601)
+     */
+    dateFrom?: string
+
+    /**
+     * Filter transactions until this date (ISO 8601)
+     */
+    dateTo?: string
+
+    /**
+     * Filter transactions with amount >= this value (smallest units)
+     */
+    amountMin?: number
+
+    /**
+     * Filter transactions with amount <= this value (smallest units)
+     */
+    amountMax?: number
+}): Promise<{
+    data: WalletTransaction[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                amountMax: params.amountMax === undefined ? undefined : String(params.amountMax),
+                amountMin: params.amountMin === undefined ? undefined : String(params.amountMin),
+                category:  params.category === undefined ? undefined : String(params.category),
+                dateFrom:  params.dateFrom,
+                dateTo:    params.dateTo,
+                skip:      params.skip === undefined ? undefined : String(params.skip),
+                status:    params.status === undefined ? undefined : String(params.status),
+                take:      params.take === undefined ? undefined : String(params.take),
+                type:      params.type === undefined ? undefined : String(params.type),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/wallets/${encodeURIComponent(holderId)}/transactions`, undefined, {query})
+            return await resp.json() as {
+    data: WalletTransaction[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+
+        /**
+         * Get withdrawal analytics (admin)
+         */
+        public async getWithdrawalAnalytics(params: DateRangeParams): Promise<{
+    /**
+     * Withdrawals REQUESTED in the date range, grouped by current status
+     */
+    requestedInPeriod: {
+        status: string
+        count: number
+        totalAmount: number
+        totalAmountDecimal: string
+    }[]
+
+    /**
+     * Withdrawals COMPLETED in the date range (regardless of request date)
+     */
+    completedInPeriod: {
+        count: number
+        totalAmount: number
+        totalAmountDecimal: string
+    }
+
+    /**
+     * Average processing time for completed withdrawals (in hours)
+     */
+    avgProcessingTimeHours: number
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                endDate:   params.endDate,
+                startDate: params.startDate,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/analytics/withdrawals`, undefined, {query})
+            return await resp.json() as {
+    /**
+     * Withdrawals REQUESTED in the date range, grouped by current status
+     */
+    requestedInPeriod: {
+        status: string
+        count: number
+        totalAmount: number
+        totalAmountDecimal: string
+    }[]
+
+    /**
+     * Withdrawals COMPLETED in the date range (regardless of request date)
+     */
+    completedInPeriod: {
+        count: number
+        totalAmount: number
+        totalAmountDecimal: string
+    }
+
+    /**
+     * Average processing time for completed withdrawals (in hours)
+     */
+    avgProcessingTimeHours: number
+}
+        }
+
+        /**
+         * GET /admin/withdrawal-methods/:id - Get withdrawal method details
+         */
+        public async getWithdrawalMethod(id: string): Promise<AdminWithdrawalMethodResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/withdrawal-methods/${encodeURIComponent(id)}`)
+            return await resp.json() as AdminWithdrawalMethodResponse
+        }
+
+        /**
+         * GET /admin/withdrawal-methods/stats - Get withdrawal method statistics
+         */
+        public async getWithdrawalMethodStats(): Promise<WithdrawalMethodStatsResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/withdrawal-methods/stats`)
+            return await resp.json() as WithdrawalMethodStatsResponse
+        }
+
+        /**
+         * GET /admin/withdrawals/stats - Withdrawal stats
+         */
+        public async getWithdrawalStats(): Promise<WithdrawalStatsResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/withdrawals/stats`)
+            return await resp.json() as WithdrawalStatsResponse
+        }
+
+        /**
+         * Import configs (super admin only)
+         */
+        public async importSystemConfigs(params: {
+    configs: {
+        key: string
+        value: string
+        valueType?: string
+        description?: string
+        category?: string
+    }[]
+    overwrite?: boolean
+}): Promise<{
+    success: boolean
+    created: number
+    updated: number
+    skipped: number
+    errors: {
+        key: string
+        error: string
+    }[]
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/system-config/import`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    created: number
+    updated: number
+    skipped: number
+    errors: {
+        key: string
+        error: string
+    }[]
+}
+        }
+
+        /**
+         * List activity logs (audit trail for admin actions) - CURSOR PAGINATION
+         * High-volume audit logs benefit from cursor pagination for consistent performance
+         */
+        public async listActivityLogs(params: {
+    cursor?: string
+    limit?: number
+    action?: string
+}): Promise<{
+    data: ActivityLog[]
+    nextCursor: string | null
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                action: params.action,
+                cursor: params.cursor,
+                limit:  params.limit === undefined ? undefined : String(params.limit),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/activity-logs`, undefined, {query})
+            return await resp.json() as {
+    data: ActivityLog[]
+    nextCursor: string | null
+    hasMore: boolean
+}
+        }
+
+        /**
+         * List all task templates with usage stats (admin)
+         */
+        public async listAdminTaskTemplates(params: ListAdminTaskTemplatesParams): Promise<{
+    data: AdminTaskTemplate[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                category:   params.category === undefined ? undefined : String(params.category),
+                platformId: params.platformId,
+                search:     params.search,
+                skip:       params.skip === undefined ? undefined : String(params.skip),
+                sortBy:     params.sortBy,
+                sortOrder:  params.sortOrder === undefined ? undefined : String(params.sortOrder),
+                status:     params.status === undefined ? undefined : String(params.status),
+                take:       params.take === undefined ? undefined : String(params.take),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/task-templates`, undefined, {query})
+            return await resp.json() as {
+    data: AdminTaskTemplate[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+
+        /**
+         * List all task submissions for review (admin)
+         */
+        public async listAllTaskSubmissions(params: ListSubmissionsParams): Promise<{
+    data: AdminTaskSubmission[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                campaignId:     params.campaignId,
+                creatorId:      params.creatorId,
+                hasProof:       params.hasProof === undefined ? undefined : String(params.hasProof),
+                search:         params.search,
+                skip:           params.skip === undefined ? undefined : String(params.skip),
+                sortBy:         params.sortBy,
+                sortOrder:      params.sortOrder === undefined ? undefined : String(params.sortOrder),
+                take:           params.take === undefined ? undefined : String(params.take),
+                taskTemplateId: params.taskTemplateId,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/task-submissions`, undefined, {query})
+            return await resp.json() as {
+    data: AdminTaskSubmission[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+
+        public async listCampaigns(params: ListCampaignsQuery): Promise<{
+    data: CampaignListItem[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                organizationId: params.organizationId,
+                search:         params.search,
+                skip:           params.skip === undefined ? undefined : String(params.skip),
+                startDateFrom:  params.startDateFrom,
+                startDateTo:    params.startDateTo,
+                status:         params.status,
+                take:           params.take === undefined ? undefined : String(params.take),
+                type:           params.type,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/campaigns`, undefined, {query})
+            return await resp.json() as {
+    data: CampaignListItem[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+
+        /**
+         * List config categories (admin)
+         */
+        public async listConfigCategories(): Promise<{
+    categories: {
+        name: string
+        count: number
+    }[]
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/system-config/categories`)
+            return await resp.json() as {
+    categories: {
+        name: string
+        count: number
+    }[]
+}
+        }
+
+        /**
+         * List all coupons (admin)
+         */
+        public async listCoupons(params: {
+    sortBy?: string
+    sortOrder?: "asc" | "desc"
+    search?: string
+    skip?: number
+    take?: number
+    status?: "active" | "inactive" | "expired"
+    campaignId?: string
+}): Promise<{
+    data: AdminCoupon[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                campaignId: params.campaignId,
+                search:     params.search,
+                skip:       params.skip === undefined ? undefined : String(params.skip),
+                sortBy:     params.sortBy,
+                sortOrder:  params.sortOrder === undefined ? undefined : String(params.sortOrder),
+                status:     params.status === undefined ? undefined : String(params.status),
+                take:       params.take === undefined ? undefined : String(params.take),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/coupons`, undefined, {query})
+            return await resp.json() as {
+    data: AdminCoupon[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+
+        public async listCreatorsAdmin(params: ListCreatorsQuery): Promise<{
+    data: CreatorListItem[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                createdFrom: params.createdFrom,
+                createdTo:   params.createdTo,
+                isBanned:    params.isBanned === undefined ? undefined : String(params.isBanned),
+                kycVerified: params.kycVerified === undefined ? undefined : String(params.kycVerified),
+                payoutReady: params.payoutReady === undefined ? undefined : String(params.payoutReady),
+                search:      params.search,
+                skip:        params.skip === undefined ? undefined : String(params.skip),
+                sortBy:      params.sortBy === undefined ? undefined : String(params.sortBy),
+                sortOrder:   params.sortOrder === undefined ? undefined : String(params.sortOrder),
+                take:        params.take === undefined ? undefined : String(params.take),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/creators`, undefined, {query})
+            return await resp.json() as {
+    data: CreatorListItem[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+
+        /**
+         * List all deposit accounts (admin)
+         */
+        public async listDepositAccounts(params: ListDepositAccountsParams): Promise<{
+    data: AdminDepositAccount[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                organizationId: params.organizationId,
+                provider:       params.provider,
+                receiverType:   params.receiverType,
+                search:         params.search,
+                skip:           params.skip === undefined ? undefined : String(params.skip),
+                sortBy:         params.sortBy,
+                sortOrder:      params.sortOrder === undefined ? undefined : String(params.sortOrder),
+                status:         params.status,
+                take:           params.take === undefined ? undefined : String(params.take),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/deposit-accounts`, undefined, {query})
+            return await resp.json() as {
+    data: AdminDepositAccount[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+
+        /**
+         * List all document verifications (admin)
+         */
+        public async listDocumentVerifications(params: ListDocVerificationsParams): Promise<{
+    data: AdminDocumentVerification[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                expiringSoon:     params.expiringSoon === undefined ? undefined : String(params.expiringSoon),
+                search:           params.search,
+                skip:             params.skip === undefined ? undefined : String(params.skip),
+                sortBy:           params.sortBy,
+                sortOrder:        params.sortOrder === undefined ? undefined : String(params.sortOrder),
+                status:           params.status,
+                subjectType:      params.subjectType,
+                take:             params.take === undefined ? undefined : String(params.take),
+                verificationType: params.verificationType,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/document-verifications`, undefined, {query})
+            return await resp.json() as {
+    data: AdminDocumentVerification[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+
+        public async listEnrollments(params: ListEnrollmentsQuery): Promise<{
+    data: EnrollmentListItem[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                campaignId: params.campaignId,
+                creatorId:  params.creatorId,
+                fromDate:   params.fromDate,
+                search:     params.search,
+                skip:       params.skip === undefined ? undefined : String(params.skip),
+                status:     params.status,
+                take:       params.take === undefined ? undefined : String(params.take),
+                toDate:     params.toDate,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/enrollments`, undefined, {query})
+            return await resp.json() as {
+    data: EnrollmentListItem[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+
+        /**
+         * List enrollments with OCR data (admin)
+         */
+        public async listEnrollmentsForOCR(params: ListEnrollmentsForOCRParams): Promise<{
+    data: EnrollmentOCRData[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                campaignId:              params.campaignId,
+                hasScreenshot:           params.hasScreenshot === undefined ? undefined : String(params.hasScreenshot),
+                hasSuspiciousScreenshot: params.hasSuspiciousScreenshot === undefined ? undefined : String(params.hasSuspiciousScreenshot),
+                skip:                    params.skip === undefined ? undefined : String(params.skip),
+                take:                    params.take === undefined ? undefined : String(params.take),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/ocr/enrollments`, undefined, {query})
+            return await resp.json() as {
+    data: EnrollmentOCRData[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+
+        /**
+         * GET /admin/invoices - List all invoices
+         */
+        public async listInvoices(params: {
+    sortBy?: string
+    sortOrder?: "asc" | "desc"
+    search?: string
+    skip?: number
+    take?: number
+    organizationId?: string
+    status?: db.InvoiceStatus
+    /**
+     * NOTE: "overdue" filter removed - not applicable in prepaid model
+     * All invoices are auto-generated as "paid"
+     */
+    periodStart?: string
+
+    periodEnd?: string
+}): Promise<{
+    data: AdminInvoiceResponse[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                organizationId: params.organizationId,
+                periodEnd:      params.periodEnd,
+                periodStart:    params.periodStart,
+                search:         params.search,
+                skip:           params.skip === undefined ? undefined : String(params.skip),
+                sortBy:         params.sortBy,
+                sortOrder:      params.sortOrder === undefined ? undefined : String(params.sortOrder),
+                status:         params.status === undefined ? undefined : String(params.status),
+                take:           params.take === undefined ? undefined : String(params.take),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/invoices`, undefined, {query})
+            return await resp.json() as {
+    data: AdminInvoiceResponse[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+
+        /**
+         * List files in kyc-documents bucket (admin)
+         */
+        public async listKycDocumentsFiles(params: ListFilesParams): Promise<{
+    data: StorageFile[]
+    total: number
+    bucket: string
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                prefix: params.prefix,
+                skip:   params.skip === undefined ? undefined : String(params.skip),
+                take:   params.take === undefined ? undefined : String(params.take),
+                userId: params.userId,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/storage/kyc-documents/files`, undefined, {query})
+            return await resp.json() as {
+    data: StorageFile[]
+    total: number
+    bucket: string
+}
+        }
+
+        /**
+         * GET /admin/listings - List all listings
+         */
+        public async listListings(params: {
+    sortBy?: string
+    sortOrder?: "asc" | "desc"
+    search?: string
+    skip?: number
+    take?: number
+    organizationId?: string
+    categoryId?: string
+    platformId?: string
+}): Promise<{
+    data: AdminListingResponse[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                categoryId:     params.categoryId,
+                organizationId: params.organizationId,
+                platformId:     params.platformId,
+                search:         params.search,
+                skip:           params.skip === undefined ? undefined : String(params.skip),
+                sortBy:         params.sortBy,
+                sortOrder:      params.sortOrder === undefined ? undefined : String(params.sortOrder),
+                take:           params.take === undefined ? undefined : String(params.take),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/listings`, undefined, {query})
+            return await resp.json() as {
+    data: AdminListingResponse[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+
+        public async listOrganizations(params: ListOrganizationsQuery): Promise<{
+    data: OrganizationListItem[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                accountTier: params.accountTier,
+                flaggedOnly: params.flaggedOnly === undefined ? undefined : String(params.flaggedOnly),
+                search:      params.search,
+                skip:        params.skip === undefined ? undefined : String(params.skip),
+                status:      params.status,
+                take:        params.take === undefined ? undefined : String(params.take),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/organizations`, undefined, {query})
+            return await resp.json() as {
+    data: OrganizationListItem[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+
+        /**
+         * GET /admin/payouts - List all payouts (withdrawals with gateway interaction)
+         */
+        public async listPayouts(params: {
+    sortBy?: string
+    sortOrder?: "asc" | "desc"
+    search?: string
+    skip?: number
+    take?: number
+    status?: string
+    holderType?: "organization" | "creator"
+}): Promise<{
+    data: AdminPayoutResponse[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                holderType: params.holderType === undefined ? undefined : String(params.holderType),
+                search:     params.search,
+                skip:       params.skip === undefined ? undefined : String(params.skip),
+                sortBy:     params.sortBy,
+                sortOrder:  params.sortOrder === undefined ? undefined : String(params.sortOrder),
+                status:     params.status,
+                take:       params.take === undefined ? undefined : String(params.take),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/payouts`, undefined, {query})
+            return await resp.json() as {
+    data: AdminPayoutResponse[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+
+        /**
+         * List platforms with search, filtering, and sorting
+         */
+        public async listPlatforms(params: ListPlatformsQuery): Promise<{
+    data: PlatformListItem[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                search:    params.search,
+                skip:      params.skip === undefined ? undefined : String(params.skip),
+                sortBy:    params.sortBy === undefined ? undefined : String(params.sortBy),
+                sortOrder: params.sortOrder === undefined ? undefined : String(params.sortOrder),
+                status:    params.status,
+                take:      params.take === undefined ? undefined : String(params.take),
+                type:      params.type,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/platforms`, undefined, {query})
+            return await resp.json() as {
+    data: PlatformListItem[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+
+        /**
+         * List files in profile-pictures bucket (admin)
+         */
+        public async listProfilePicturesFiles(params: ListFilesParams): Promise<{
+    data: StorageFile[]
+    total: number
+    bucket: string
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                prefix: params.prefix,
+                skip:   params.skip === undefined ? undefined : String(params.skip),
+                take:   params.take === undefined ? undefined : String(params.take),
+                userId: params.userId,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/storage/profile-pictures/files`, undefined, {query})
+            return await resp.json() as {
+    data: StorageFile[]
+    total: number
+    bucket: string
+}
+        }
+
+        /**
+         * List all system configs with pagination (admin)
+         */
+        public async listSystemConfigs(params: ListSystemConfigParams): Promise<{
+    data: SystemConfigItem[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                category:   params.category,
+                isEditable: params.isEditable === undefined ? undefined : String(params.isEditable),
+                search:     params.search,
+                skip:       params.skip === undefined ? undefined : String(params.skip),
+                sortBy:     params.sortBy,
+                sortOrder:  params.sortOrder === undefined ? undefined : String(params.sortOrder),
+                take:       params.take === undefined ? undefined : String(params.take),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/system-configs`, undefined, {query})
+            return await resp.json() as {
+    data: SystemConfigItem[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+
+        /**
+         * GET /admin/notifications/templates - List notification templates
+         */
+        public async listTemplates(): Promise<{
+    templates: notifications.NotificationTemplate[]
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/notifications/templates`)
+            return await resp.json() as {
+    templates: notifications.NotificationTemplate[]
+}
+        }
+
+        /**
+         * List files in uploads bucket (admin)
+         */
+        public async listUploadsFiles(params: ListFilesParams): Promise<{
+    data: StorageFile[]
+    total: number
+    bucket: string
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                prefix: params.prefix,
+                skip:   params.skip === undefined ? undefined : String(params.skip),
+                take:   params.take === undefined ? undefined : String(params.take),
+                userId: params.userId,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/storage/uploads/files`, undefined, {query})
+            return await resp.json() as {
+    data: StorageFile[]
+    total: number
+    bucket: string
+}
+        }
+
+        /**
+         * List all files for a specific user across all buckets (admin)
+         */
+        public async listUserFilesAll(userId: string): Promise<{
+    uploads: StorageFile[]
+    profilePictures: StorageFile[]
+    kycDocuments: StorageFile[]
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/users/${encodeURIComponent(userId)}/files/all`)
+            return await resp.json() as {
+    uploads: StorageFile[]
+    profilePictures: StorageFile[]
+    kycDocuments: StorageFile[]
+}
+        }
+
+        /**
+         * GET /admin/wallets - List all wallets
+         * PRODUCTION-GRADE: DB-level pagination + parallel ledger calls
+         */
+        public async listWallets(params: {
+    sortBy?: string
+    sortOrder?: "asc" | "desc"
+    search?: string
+    skip?: number
+    take?: number
+    holderType?: "organization" | "creator"
+    isFrozen?: boolean
+}): Promise<{
+    data: AdminWalletResponse[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                holderType: params.holderType === undefined ? undefined : String(params.holderType),
+                isFrozen:   params.isFrozen === undefined ? undefined : String(params.isFrozen),
+                search:     params.search,
+                skip:       params.skip === undefined ? undefined : String(params.skip),
+                sortBy:     params.sortBy,
+                sortOrder:  params.sortOrder === undefined ? undefined : String(params.sortOrder),
+                take:       params.take === undefined ? undefined : String(params.take),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/wallets`, undefined, {query})
+            return await resp.json() as {
+    data: AdminWalletResponse[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+
+        /**
+         * List withdrawal method verifications (admin)
+         */
+        public async listWithdrawalMethodVerifications(params: {
+    sortBy?: string
+    sortOrder?: "asc" | "desc"
+    search?: string
+    skip?: number
+    take?: number
+    status?: string
+}): Promise<{
+    data: {
+        id: string
+        withdrawalMethodId: string
+        method: string
+        success: boolean
+        attemptedAt: string
+        verifiedBy: string | null
+        details: WithdrawalMethodVerificationDetails | null
+    }[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                search:    params.search,
+                skip:      params.skip === undefined ? undefined : String(params.skip),
+                sortBy:    params.sortBy,
+                sortOrder: params.sortOrder === undefined ? undefined : String(params.sortOrder),
+                status:    params.status,
+                take:      params.take === undefined ? undefined : String(params.take),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/withdrawal-methods/verifications`, undefined, {query})
+            return await resp.json() as {
+    data: {
+        id: string
+        withdrawalMethodId: string
+        method: string
+        success: boolean
+        attemptedAt: string
+        verifiedBy: string | null
+        details: WithdrawalMethodVerificationDetails | null
+    }[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+
+        /**
+         * GET /admin/withdrawal-methods - List all withdrawal methods
+         */
+        public async listWithdrawalMethods(params: {
+    sortBy?: string
+    sortOrder?: "asc" | "desc"
+    search?: string
+    skip?: number
+    take?: number
+    creatorId?: string
+    accountType?: "bank_account" | "upi"
+    isVerified?: boolean
+}): Promise<{
+    data: AdminWithdrawalMethodResponse[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                accountType: params.accountType === undefined ? undefined : String(params.accountType),
+                creatorId:   params.creatorId,
+                isVerified:  params.isVerified === undefined ? undefined : String(params.isVerified),
+                search:      params.search,
+                skip:        params.skip === undefined ? undefined : String(params.skip),
+                sortBy:      params.sortBy,
+                sortOrder:   params.sortOrder === undefined ? undefined : String(params.sortOrder),
+                take:        params.take === undefined ? undefined : String(params.take),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/withdrawal-methods`, undefined, {query})
+            return await resp.json() as {
+    data: AdminWithdrawalMethodResponse[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+
+        /**
+         * GET /admin/withdrawals - List ALL withdrawals
+         */
+        public async listWithdrawals(params: {
+    sortBy?: string
+    sortOrder?: "asc" | "desc"
+    search?: string
+    skip?: number
+    take?: number
+    status?: db.WithdrawalStatus
+    holderType?: "organization" | "creator"
+    requiresApproval?: boolean
+    q?: string
+    amountMin?: number
+    amountMax?: number
+    requestedFrom?: string
+    requestedTo?: string
+}): Promise<{
+    data: AdminWithdrawalResponse[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                amountMax:        params.amountMax === undefined ? undefined : String(params.amountMax),
+                amountMin:        params.amountMin === undefined ? undefined : String(params.amountMin),
+                holderType:       params.holderType === undefined ? undefined : String(params.holderType),
+                q:                params.q,
+                requestedFrom:    params.requestedFrom,
+                requestedTo:      params.requestedTo,
+                requiresApproval: params.requiresApproval === undefined ? undefined : String(params.requiresApproval),
+                search:           params.search,
+                skip:             params.skip === undefined ? undefined : String(params.skip),
+                sortBy:           params.sortBy,
+                sortOrder:        params.sortOrder === undefined ? undefined : String(params.sortOrder),
+                status:           params.status === undefined ? undefined : String(params.status),
+                take:             params.take === undefined ? undefined : String(params.take),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/withdrawals`, undefined, {query})
+            return await resp.json() as {
+    data: AdminWithdrawalResponse[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+
+        /**
+         * Mark organization as verified (upgrade account tier)
+         */
+        public async markOrganizationVerified(id: string): Promise<db.SuccessResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/organizations/${encodeURIComponent(id)}/mark-verified`)
+            return await resp.json() as db.SuccessResponse
+        }
+
+        /**
+         * POST /admin/campaigns/:id/pause
+         * Pause campaign (active → paused)
+         */
+        public async pauseCampaign(id: string, params: {
+    reason?: string
+}): Promise<{
+    success: boolean
+    campaign: CampaignDetail
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/campaigns/${encodeURIComponent(id)}/pause`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    campaign: CampaignDetail
+}
+        }
+
+        /**
+         * Process OCR for enrollment screenshot (admin)
+         */
+        public async processEnrollmentOCR(enrollmentId: string): Promise<OCRExtractionResult> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/enrollments/${encodeURIComponent(enrollmentId)}/ocr`)
+            return await resp.json() as OCRExtractionResult
+        }
+
+        /**
+         * Reinstate organization (transitions suspended → active)
+         */
+        public async reinstateOrganization(id: string): Promise<db.SuccessResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/organizations/${encodeURIComponent(id)}/reinstate`)
+            return await resp.json() as db.SuccessResponse
+        }
+
+        /**
+         * POST /admin/campaigns/:id/reject
+         * Reject campaign (pending_approval → rejected)
+         */
+        public async rejectCampaign(id: string, params: {
+    reason: string
+}): Promise<{
+    success: boolean
+    campaign: CampaignDetail
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/campaigns/${encodeURIComponent(id)}/reject`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    campaign: CampaignDetail
+}
+        }
+
+        /**
+         * Reject document verification (admin)
+         */
+        public async rejectDocumentVerification(id: string, params: {
+    reason: string
+}): Promise<{
+    success: boolean
+    message: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/document-verifications/${encodeURIComponent(id)}/reject`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    message: string
+}
+        }
+
+        /**
+         * POST /admin/enrollments/:id/reject
+         * Permanently reject enrollment (awaiting_review → permanently_rejected)
+         */
+        public async rejectEnrollment(id: string, params: {
+    reason: string
+    feedback?: { [key: string]: string }
+}): Promise<{
+    success: boolean
+    enrollment: EnrollmentDetail
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/enrollments/${encodeURIComponent(id)}/reject`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    enrollment: EnrollmentDetail
+}
+        }
+
+        /**
+         * POST /admin/withdrawals/:id/reject - Reject withdrawal and refund funds to wallet
+         */
+        public async rejectWithdrawal(id: string, params: {
+    reason: string
+}): Promise<{
+    success: boolean
+    withdrawalId: string
+    status: string
+    rejectedBy: string
+    reason: string
+    fundsRefunded: boolean
+    message: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/withdrawals/${encodeURIComponent(id)}/reject`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    withdrawalId: string
+    status: string
+    rejectedBy: string
+    reason: string
+    fundsRefunded: boolean
+    message: string
+}
+        }
+
+        /**
+         * POST /admin/wallets/:holderId/holds/:holdId/release - Release hold
+         */
+        public async releaseWalletHold(holderId: string, holdId: string): Promise<db.SuccessResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/wallets/${encodeURIComponent(holderId)}/holds/${encodeURIComponent(holdId)}/release`)
+            return await resp.json() as db.SuccessResponse
+        }
+
+        /**
+         * Remove member from organization
+         */
+        public async removeOrganizationMember(id: string, userId: string): Promise<db.SuccessResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/organizations/${encodeURIComponent(id)}/members/${encodeURIComponent(userId)}/remove`)
+            return await resp.json() as db.SuccessResponse
+        }
+
+        /**
+         * POST /admin/enrollments/:id/request-changes
+         * Request changes from creator (awaiting_review → changes_requested)
+         */
+        public async requestChanges(id: string, params: {
+    reason: string
+    feedback?: { [key: string]: string }
+}): Promise<{
+    success: boolean
+    enrollment: EnrollmentDetail
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/enrollments/${encodeURIComponent(id)}/request-changes`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    enrollment: EnrollmentDetail
+}
+        }
+
+        /**
+         * Request re-verification (admin)
+         */
+        public async requestReVerification(id: string, params: {
+    reason: string
+}): Promise<{
+    success: boolean
+    message: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/document-verifications/${encodeURIComponent(id)}/request-reverification`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    message: string
+}
+        }
+
+        /**
+         * Reset coupon usage count (admin)
+         */
+        public async resetCouponUsage(id: string): Promise<{
+    success: boolean
+    message: string
+    previousUsage: number
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/coupons/${encodeURIComponent(id)}/reset-usage`)
+            return await resp.json() as {
+    success: boolean
+    message: string
+    previousUsage: number
+}
+        }
+
+        /**
+         * Reset creator KYC (admin)
+         */
+        public async resetCreatorKyc(creatorId: string, params: {
+    reason: string
+}): Promise<{
+    success: boolean
+    message: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/creators/${encodeURIComponent(creatorId)}/kyc/reset`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    message: string
+}
+        }
+
+        /**
+         * POST /admin/notifications/quota/:userId/reset - Reset user's rate limit
+         */
+        public async resetUserQuota(userId: string, params: {
+    channel?: notifications.Channel
+}): Promise<{
+    success: boolean
+    message: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/notifications/quota/${encodeURIComponent(userId)}/reset`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    message: string
+}
+        }
+
+        /**
+         * Reset user's two-factor authentication (admin) - Not available in Better Auth SDK
+         */
+        public async resetUserTwoFactor(params: {
+    userId: string
+}): Promise<{
+    success: boolean
+    message: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/admin/reset-2fa`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    message: string
+}
+        }
+
+        /**
+         * POST /admin/campaigns/:id/resume
+         * Resume campaign (paused → active)
+         */
+        public async resumeCampaign(id: string): Promise<{
+    success: boolean
+    campaign: CampaignDetail
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/campaigns/${encodeURIComponent(id)}/resume`)
+            return await resp.json() as {
+    success: boolean
+    campaign: CampaignDetail
+}
+        }
+
+        /**
+         * Retry a failed payout.
+         * 
+         * SAFETY: This endpoint first syncs with gateway to ensure we don't
+         * retry a payout that was actually processed (webhook missed scenario).
+         */
+        public async retryPayout(id: string): Promise<{
+    success: boolean
+    message: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/payouts/${encodeURIComponent(id)}/retry`)
+            return await resp.json() as {
+    success: boolean
+    message: string
+}
+        }
+
+        /**
+         * Retry setup for organization
+         * Re-publishes OrganizationCreated event to trigger all setup jobs again.
+         * Each job is idempotent - already completed steps are skipped.
+         */
+        public async retrySetup(id: string): Promise<db.SuccessResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/organizations/${encodeURIComponent(id)}/retry-setup`)
+            return await resp.json() as db.SuccessResponse
+        }
+
+        /**
+         * POST /admin/withdrawals/:id/retry
+         * Retry a failed withdrawal (admin only)
+         * Transitions: failed → processing
+         */
+        public async retryWithdrawal(id: string, params: {
+    notes?: string
+}): Promise<{
+    success: boolean
+    withdrawalId: string
+    status: string
+    retryCount: number
+    message: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/withdrawals/${encodeURIComponent(id)}/retry`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    withdrawalId: string
+    status: string
+    retryCount: number
+    message: string
+}
+        }
+
+        /**
+         * POST /admin/payouts/:id/reverse - Reverse payout (manual status update)
+         */
+        public async reversePayout(id: string, params: {
+    reason: string
+}): Promise<db.SuccessResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/payouts/${encodeURIComponent(id)}/reverse`, JSON.stringify(params))
+            return await resp.json() as db.SuccessResponse
+        }
+
+        public async reviewOrganization(id: string, params: ReviewOrganizationRequest): Promise<db.SuccessResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/organizations/${encodeURIComponent(id)}/review`, JSON.stringify(params))
+            return await resp.json() as db.SuccessResponse
+        }
+
+        /**
+         * Set organization credit limit
+         */
+        public async setCreditLimit(organizationId: string, params: SetCreditLimitRequest): Promise<{
+    success: boolean
+    creditLimit: number
+    accountTier: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/organizations/${encodeURIComponent(organizationId)}/credit-limit`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    creditLimit: number
+    accountTier: string
+}
+        }
+
+        /**
+         * Set organization payment mode (prefund or post_submission)
+         * - prefund: Brand funds wallet BEFORE enrollments (holds created at enrollment time)
+         * - post_submission: Brand pays AFTER creator submits (no holds, direct transfer at approval)
+         * 
+         * When switching to post_submission, creditLimit acts as exposure cap.
+         */
+        public async setPaymentMode(organizationId: string, params: SetPaymentModeRequest): Promise<{
+    success: boolean
+    paymentMode: db.PaymentMode
+    creditLimit: number
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/organizations/${encodeURIComponent(organizationId)}/payment-mode`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    paymentMode: db.PaymentMode
+    creditLimit: number
+}
+        }
+
+        public async suspendCreator(creatorId: string, params: {
+    reason: string
+}): Promise<db.SuccessResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/creators/${encodeURIComponent(creatorId)}/suspend`, JSON.stringify(params))
+            return await resp.json() as db.SuccessResponse
+        }
+
+        /**
+         * Suspend organization (transitions active → suspended)
+         */
+        public async suspendOrganization(id: string, params: {
+    reason: string
+}): Promise<db.SuccessResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/organizations/${encodeURIComponent(id)}/suspend`, JSON.stringify(params))
+            return await resp.json() as db.SuccessResponse
+        }
+
+        /**
+         * Sync payout status from gateway (RazorpayX).
+         * 
+         * Use this when:
+         * - Webhook was missed
+         * - Payout stuck in "processing" status
+         * - Need to verify actual gateway status
+         * 
+         * SAFETY: If gateway shows "processed" but our DB doesn't, this will
+         * trigger WithdrawalCompleted event to commit the ledger hold.
+         */
+        public async syncPayoutStatus(id: string): Promise<{
+    success: boolean
+    previousStatus: string
+    currentStatus: string
+    gatewayStatus?: string
+    message: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/payouts/${encodeURIComponent(id)}/sync`)
+            return await resp.json() as {
+    success: boolean
+    previousStatus: string
+    currentStatus: string
+    gatewayStatus?: string
+    message: string
+}
+        }
+
+        /**
+         * POST /admin/campaigns/:id/unarchive
+         * Unarchive campaign (archived → ended)
+         */
+        public async unarchiveCampaign(id: string): Promise<{
+    success: boolean
+    campaign: CampaignDetail
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/campaigns/${encodeURIComponent(id)}/unarchive`)
+            return await resp.json() as {
+    success: boolean
+    campaign: CampaignDetail
+}
+        }
+
+        public async unbanCreator(creatorId: string): Promise<db.SuccessResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/creators/${encodeURIComponent(creatorId)}/unban`)
+            return await resp.json() as db.SuccessResponse
+        }
+
+        /**
+         * POST /admin/wallets/:holderId/unfreeze - Unfreeze wallet
+         * NOTE: This only unfreezes the wallet, does NOT unban/reinstate the entity.
+         * Use unban/reinstate endpoints to unban AND unfreeze wallet together.
+         * Consolidated endpoint that handles both creator and organization wallets
+         */
+        public async unfreezeWallet(holderId: string): Promise<db.SuccessResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/wallets/${encodeURIComponent(holderId)}/unfreeze`)
+            return await resp.json() as db.SuccessResponse
+        }
+
+        /**
+         * GET /admin/search
+         * 
+         * Unified search across campaigns, enrollments, invoices, creators,
+         * organizations, and withdrawals.
+         * 
+         * - Campaigns: Search by displayId, title, description, listing name
+         * - Enrollments: Search by displayId, orderId, campaign title, listing name, creator
+         * - Invoices: Search by invoice number, notes
+         * - Creators: Search by displayId, name, email, phone
+         * - Organizations: Search by name, slug, GST number, email
+         * - Withdrawals: Search by displayId, notes
+         * 
+         * Results are interleaved in round-robin fashion for balanced display.
+         * Returns facet counts for each resource type.
+         */
+        public async unifiedSearch(params: AdminUnifiedSearchParams): Promise<AdminUnifiedSearchResponse> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                cursor: params.cursor,
+                limit:  params.limit === undefined ? undefined : String(params.limit),
+                q:      params.q,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/admin/search`, undefined, {query})
+            return await resp.json() as AdminUnifiedSearchResponse
+        }
+
+        public async unsuspendCreator(creatorId: string): Promise<db.SuccessResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/creators/${encodeURIComponent(creatorId)}/unsuspend`)
+            return await resp.json() as db.SuccessResponse
+        }
+
+        /**
+         * POST /admin/withdrawal-methods/:id/unverify - Remove verification
+         */
+        public async unverifyWithdrawalMethod(id: string, params: {
+    reason: string
+}): Promise<db.SuccessResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/withdrawal-methods/${encodeURIComponent(id)}/unverify`, JSON.stringify(params))
+            return await resp.json() as db.SuccessResponse
+        }
+
+        /**
+         * Update a task template (admin)
+         */
+        public async updateAdminTaskTemplate(id: string, params: {
+    name?: string
+    slug?: string
+    category?: db.TaskCategory
+    platformId?: string | null
+    description?: string | null
+    requireLink?: boolean
+    requireScreenshot?: boolean
+    defaultRequirements?: db.TaskRequirements | null
+    exampleUrl?: string | null
+    status?: db.TaskTemplateStatus
+}): Promise<AdminTaskTemplate> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("PATCH", `/admin/task-templates/${encodeURIComponent(id)}`, JSON.stringify(params))
+            return await resp.json() as AdminTaskTemplate
+        }
+
+        public async updateCampaign(id: string, params: UpdateCampaignRequest): Promise<{
+    success: boolean
+    campaign: CampaignDetail
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("PATCH", `/admin/campaigns/${encodeURIComponent(id)}`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    campaign: CampaignDetail
+}
+        }
+
+        /**
+         * PATCH /admin/categories/:id - Update category
+         */
+        public async updateCategory(id: string, params: {
+    name?: string
+    description?: string
+    icon?: string
+    logo?: string
+}): Promise<AdminCategory> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("PATCH", `/admin/categories/${encodeURIComponent(id)}`, JSON.stringify(params))
+            return await resp.json() as AdminCategory
+        }
+
+        /**
+         * Update coupon (admin)
+         */
+        public async updateCoupon(id: string, params: {
+    bonusType?: CouponBonusType
+    bonus?: number
+    bonusRate?: number | null
+    maxBonus?: number | null
+    minOrderValue?: number | null
+    usageLimit?: number | null
+    oneTimeUse?: boolean
+    specificCampaignId?: string | null
+    validFrom?: string
+    validUntil?: string
+    status?: "active" | "inactive" | "expired"
+}): Promise<{
+    success: boolean
+    coupon: AdminCoupon
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("PATCH", `/admin/coupons/${encodeURIComponent(id)}`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    coupon: AdminCoupon
+}
+        }
+
+        public async updateCreator(creatorId: string, params: UpdateCreatorRequest): Promise<{
+    success: boolean
+    creator: CreatorDetail
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("PATCH", `/admin/creators/${encodeURIComponent(creatorId)}`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    creator: CreatorDetail
+}
+        }
+
+        /**
+         * Update deposit account (admin)
+         */
+        public async updateDepositAccount(id: string, params: {
+    externalId?: string
+    provider?: string
+    receiverType?: string
+    details?: DepositAccountDetails
+    status?: string
+}): Promise<AdminDepositAccount> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("PATCH", `/admin/deposit-accounts/${encodeURIComponent(id)}`, JSON.stringify(params))
+            return await resp.json() as AdminDepositAccount
+        }
+
+        public async updateEnrollment(id: string, params: UpdateEnrollmentRequest): Promise<{
+    success: boolean
+    enrollment: EnrollmentDetail
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("PATCH", `/admin/enrollments/${encodeURIComponent(id)}`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    enrollment: EnrollmentDetail
+}
+        }
+
+        /**
+         * PATCH /admin/listings/:id - Update listing
+         */
+        public async updateListing(id: string, params: {
+    name?: string
+    description?: string
+    identifier?: string
+    categoryId?: string
+    platformId?: string
+    price?: number
+    link?: string
+    listingImages?: ListingImageInput[]
+}): Promise<AdminListingResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("PATCH", `/admin/listings/${encodeURIComponent(id)}`, JSON.stringify(params))
+            return await resp.json() as AdminListingResponse
+        }
+
+        /**
+         * Update maintenance mode (super admin only)
+         * Consolidated from separate enable/disable endpoints
+         */
+        public async updateMaintenanceMode(params: {
+    isActive: boolean
+    message?: string
+    estimatedEndAt?: string
+}): Promise<{
+    success: boolean
+    status: MaintenanceStatus
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("PATCH", `/admin/platform/maintenance`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    status: MaintenanceStatus
+}
+        }
+
+        public async updateOrganization(id: string, params: UpdateOrganizationRequest): Promise<{
+    success: boolean
+    organization: OrganizationDetail
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("PATCH", `/admin/organizations/${encodeURIComponent(id)}`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    organization: OrganizationDetail
+}
+        }
+
+        /**
+         * Update platform
+         */
+        public async updatePlatform(id: string, params: UpdatePlatformRequest): Promise<Platform> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("PATCH", `/admin/platforms/${encodeURIComponent(id)}`, JSON.stringify(params))
+            return await resp.json() as Platform
+        }
+
+        /**
+         * Update system config by ID (admin)
+         */
+        public async updateSystemConfigById(id: string, params: UpdateConfigRequest): Promise<SystemConfigItem> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("PATCH", `/admin/system-configs/${encodeURIComponent(id)}`, JSON.stringify(params))
+            return await resp.json() as SystemConfigItem
+        }
+
+        /**
+         * Validate order screenshot manually (admin)
+         */
+        public async validateOrderScreenshot(params: {
+    imageUrl: string
+    expectedOrderId?: string
+    expectedAmount?: number
+    expectedMerchant?: string
+    campaignListingName?: string
+}): Promise<{
+    extractedData: ocr.ExtractedOrderData
+    validation: {
+        orderIdMatch: boolean | null
+        amountMatch: boolean | null
+        merchantMatch: boolean | null
+        listingMatch: boolean | null
+        overallValid: boolean
+        issues: string[]
+    }
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/ocr/validate`, JSON.stringify(params))
+            return await resp.json() as {
+    extractedData: ocr.ExtractedOrderData
+    validation: {
+        orderIdMatch: boolean | null
+        amountMatch: boolean | null
+        merchantMatch: boolean | null
+        listingMatch: boolean | null
+        overallValid: boolean
+        issues: string[]
+    }
+}
+        }
+
+        /**
+         * POST /admin/notifications/tokens/validate - Validate push tokens
+         */
+        public async validatePushTokens(params: {
+    tokens: string[]
+}): Promise<{
+    valid: string[]
+    invalid: string[]
+    validCount: number
+    invalidCount: number
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/notifications/tokens/validate`, JSON.stringify(params))
+            return await resp.json() as {
+    valid: string[]
+    invalid: string[]
+    validCount: number
+    invalidCount: number
+}
+        }
+
+        /**
+         * Force verify bank account
+         */
+        public async verifyBankAccount(id: string, bankId: string): Promise<db.SuccessResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/organizations/${encodeURIComponent(id)}/bank-accounts/${encodeURIComponent(bankId)}/verify`)
+            return await resp.json() as db.SuccessResponse
+        }
+
+        public async verifyCreatorAadhaar(creatorId: string, params: {
+    useApi?: boolean
+}): Promise<{
+    success: boolean
+    message: string
+    verificationResult?: {
+        isValid: boolean
+        name?: string
+        error?: string
+    }
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/creators/${encodeURIComponent(creatorId)}/verify-aadhaar`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    message: string
+    verificationResult?: {
+        isValid: boolean
+        name?: string
+        error?: string
+    }
+}
+        }
+
+        public async verifyCreatorPAN(creatorId: string, params: {
+    useApi?: boolean
+}): Promise<{
+    success: boolean
+    message: string
+    verificationResult?: {
+        isValid: boolean
+        name?: string
+        error?: string
+    }
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/creators/${encodeURIComponent(creatorId)}/verify-pan`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    message: string
+    verificationResult?: {
+        isValid: boolean
+        name?: string
+        error?: string
+    }
+}
+        }
+
+        public async verifyOrganizationGST(id: string): Promise<db.SuccessResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/organizations/${encodeURIComponent(id)}/gst/verify`)
+            return await resp.json() as db.SuccessResponse
+        }
+
+        /**
+         * POST /admin/withdrawal-methods/:id/verify - Verify withdrawal method
+         */
+        public async verifyWithdrawalMethod(id: string, params: {
+    verificationNotes?: string
+}): Promise<db.SuccessResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/admin/withdrawal-methods/${encodeURIComponent(id)}/verify`, JSON.stringify(params))
+            return await resp.json() as db.SuccessResponse
+        }
+    }
 }
 
 export namespace audit {
-	export interface ActorActivitySummary {
-		actorId: string;
-		actorType: ActorType;
-		actorName?: string;
-		totalEvents: number;
-		eventsByAction: { [key: string]: number };
-		eventsByEntityType: { [key: string]: number };
-		lastActivity?: string;
-	}
+    export interface ActorActivitySummary {
+        actorId: string
+        actorType: ActorType
+        actorName?: string
+        totalEvents: number
+        eventsByAction: { [key: string]: number }
+        eventsByEntityType: { [key: string]: number }
+        lastActivity?: string
+    }
 
-	export type ActorType = "admin" | "user" | "system" | "api_key" | "cron";
+    export type ActorType = "admin" | "user" | "system" | "api_key" | "cron"
 
-	export type AuditChanges = {
-		[key: string]: {
-			old: any | null;
-			new: any;
-		};
-	};
+    export type AuditChanges = { [key: string]: {
+        old: any | null
+        new: any
+    } }
 
-	export interface AuditEventListResponse {
-		events: AuditEventResponse[];
-		nextCursor?: string;
-		hasMore: boolean;
-		total?: number;
-	}
+    export interface AuditEventListResponse {
+        events: AuditEventResponse[]
+        nextCursor?: string
+        hasMore: boolean
+        total?: number
+    }
 
-	export interface AuditEventResponse {
-		id: string;
-		timestamp: string;
-		actorId: string;
-		actorType: ActorType;
-		actorName?: string;
-		action: string;
-		entityType: string;
-		entityId: string;
-		entityName?: string;
-		changes?: AuditChanges;
-		metadata?: { [key: string]: any };
-		ipAddress?: string;
-		userAgent?: string;
-		requestId?: string;
-		expiresAt?: string;
-	}
+    export interface AuditEventResponse {
+        id: string
+        timestamp: string
+        actorId: string
+        actorType: ActorType
+        actorName?: string
+        action: string
+        entityType: string
+        entityId: string
+        entityName?: string
+        changes?: AuditChanges
+        metadata?: { [key: string]: any }
+        ipAddress?: string
+        userAgent?: string
+        requestId?: string
+        expiresAt?: string
+    }
 
-	export interface CampaignRateHistoryResponse {
-		campaignId: string;
-		events: RateChangeEntry[];
-		nextCursor?: string;
-		hasMore: boolean;
-	}
+    export interface CampaignRateHistoryResponse {
+        campaignId: string
+        events: RateChangeEntry[]
+        nextCursor?: string
+        hasMore: boolean
+    }
 
-	export interface CleanupResult {
-		deletedCount: number;
-		oldestRetained?: string;
-		nextCleanup?: string;
-	}
+    export interface CleanupResult {
+        deletedCount: number
+        oldestRetained?: string
+        nextCleanup?: string
+    }
 
-	export interface EntityHistoryResponse {
-		entityType: string;
-		entityId: string;
-		entityName?: string;
-		events: AuditEventResponse[];
-		nextCursor?: string;
-		hasMore: boolean;
-	}
+    export interface EntityHistoryResponse {
+        entityType: string
+        entityId: string
+        entityName?: string
+        events: AuditEventResponse[]
+        nextCursor?: string
+        hasMore: boolean
+    }
 
-	export interface RateChangeEntry {
-		timestamp: string;
-		actorId: string;
-		actorName?: string;
-		action: string;
-		changes: {
-			[key: string]: {
-				old: any;
-				new: any;
-			};
-		};
-	}
+    export interface RateChangeEntry {
+        timestamp: string
+        actorId: string
+        actorName?: string
+        action: string
+        changes: { [key: string]: {
+            old: any
+            new: any
+        } }
+    }
 
-	export class ServiceClient {
-		private baseClient: BaseClient;
+    export class ServiceClient {
+        private baseClient: BaseClient
 
-		constructor(baseClient: BaseClient) {
-			this.baseClient = baseClient;
-		}
-	}
+        constructor(baseClient: BaseClient) {
+            this.baseClient = baseClient
+            this.forcePurge = this.forcePurge.bind(this)
+            this.getActorActivity = this.getActorActivity.bind(this)
+            this.getCampaignRateHistory = this.getCampaignRateHistory.bind(this)
+            this.getEntityHistory = this.getEntityHistory.bind(this)
+            this.getEvent = this.getEvent.bind(this)
+            this.getRetentionStats = this.getRetentionStats.bind(this)
+            this.queryEvents = this.queryEvents.bind(this)
+        }
+
+        /**
+         * POST /audit/retention/purge
+         * Force purge events older than specified days
+         * 
+         * Use with caution - this permanently deletes data!
+         */
+        public async forcePurge(params: {
+    olderThanDays: number
+    entityType?: string
+    confirm: boolean
+}): Promise<CleanupResult> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/audit/retention/purge`, JSON.stringify(params))
+            return await resp.json() as CleanupResult
+        }
+
+        /**
+         * GET /audit/actor/:actorId/activity
+         * Get activity summary for an actor
+         */
+        public async getActorActivity(actorId: string, params: {
+    startTime?: string
+    endTime?: string
+}): Promise<ActorActivitySummary> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                endTime:   params.endTime,
+                startTime: params.startTime,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/audit/actor/${encodeURIComponent(actorId)}/activity`, undefined, {query})
+            return await resp.json() as ActorActivitySummary
+        }
+
+        /**
+         * GET /audit/campaigns/:campaignId/rate-history
+         * Get pricing/rate change history for a campaign.
+         * Returns only audit events where pricing fields were modified.
+         */
+        public async getCampaignRateHistory(campaignId: string, params: {
+    cursor?: string
+    limit?: number
+}): Promise<CampaignRateHistoryResponse> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                cursor: params.cursor,
+                limit:  params.limit === undefined ? undefined : String(params.limit),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/audit/campaigns/${encodeURIComponent(campaignId)}/rate-history`, undefined, {query})
+            return await resp.json() as CampaignRateHistoryResponse
+        }
+
+        /**
+         * GET /audit/entity/:entityType/:entityId
+         * Get audit history for a specific entity
+         */
+        public async getEntityHistory(entityType: string, entityId: string, params: {
+    cursor?: string
+    limit?: number
+}): Promise<EntityHistoryResponse> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                cursor: params.cursor,
+                limit:  params.limit === undefined ? undefined : String(params.limit),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/audit/entity/${encodeURIComponent(entityType)}/${encodeURIComponent(entityId)}`, undefined, {query})
+            return await resp.json() as EntityHistoryResponse
+        }
+
+        /**
+         * GET /audit/events/:id
+         * Get a single audit event by ID
+         */
+        public async getEvent(id: string): Promise<AuditEventResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/audit/events/${encodeURIComponent(id)}`)
+            return await resp.json() as AuditEventResponse
+        }
+
+        /**
+         * GET /audit/retention/stats
+         * Get retention statistics
+         */
+        public async getRetentionStats(): Promise<{
+    totalEvents: number
+    expiringWithin7Days: number
+    expiringWithin30Days: number
+    oldestEvent?: string
+    newestEvent?: string
+    storageEstimateBytes?: number
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/audit/retention/stats`)
+            return await resp.json() as {
+    totalEvents: number
+    expiringWithin7Days: number
+    expiringWithin30Days: number
+    oldestEvent?: string
+    newestEvent?: string
+    storageEstimateBytes?: number
+}
+        }
+
+        /**
+         * GET /audit/events
+         * Query audit events with filters
+         */
+        public async queryEvents(params: {
+    /**
+     * Time filters
+     */
+    startTime?: string
+
+    endTime?: string
+    /**
+     * Actor filters
+     */
+    actorId?: string
+
+    actorType?: ActorType
+    /**
+     * Entity filters
+     */
+    entityType?: string
+
+    entityId?: string
+    action?: string
+    /**
+     * Pagination
+     */
+    cursor?: string
+
+    limit?: number
+}): Promise<AuditEventListResponse> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                action:     params.action,
+                actorId:    params.actorId,
+                actorType:  params.actorType === undefined ? undefined : String(params.actorType),
+                cursor:     params.cursor,
+                endTime:    params.endTime,
+                entityId:   params.entityId,
+                entityType: params.entityType,
+                limit:      params.limit === undefined ? undefined : String(params.limit),
+                startTime:  params.startTime,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/audit/events`, undefined, {query})
+            return await resp.json() as AuditEventListResponse
+        }
+    }
 }
 
 export namespace auth {
-	export interface AuthParams {
-		/**
-		 * Bearer token (mobile apps, SPAs, API clients)
-		 */
-		authorization?: string;
-	}
-
-	export interface MeResponse {
-		userID: string;
-		email: string;
-		name: string;
-		image?: string;
-		emailVerified: boolean;
-		role: string;
-		activeOrganizationId?: string;
-		organizationRole?: string;
-		organizationIds?: string[];
-		creatorId?: string;
-		adminId?: string;
-		isImpersonating?: boolean;
-		impersonatedBy?: string;
-		phone?: string;
-		twoFactorEnabled?: boolean;
-	}
-
-	export class ServiceClient {
-		private baseClient: BaseClient;
-
-		constructor(baseClient: BaseClient) {
-			this.baseClient = baseClient;
-			this.acceptInvitation = this.acceptInvitation.bind(this);
-			this.addMember = this.addMember.bind(this);
-			this.cancelInvitation = this.cancelInvitation.bind(this);
-			this.changeEmail = this.changeEmail.bind(this);
-			this.changePassword = this.changePassword.bind(this);
-			this.checkSlug = this.checkSlug.bind(this);
-			this.createOrganization = this.createOrganization.bind(this);
-			this.createOrganizationRole = this.createOrganizationRole.bind(this);
-			this.deleteOrganizationRole = this.deleteOrganizationRole.bind(this);
-			this.deleteUser = this.deleteUser.bind(this);
-			this.deleteUserCallback = this.deleteUserCallback.bind(this);
-			this.errorInfo = this.errorInfo.bind(this);
-			this.forgotPassword = this.forgotPassword.bind(this);
-			this.getAccessToken = this.getAccessToken.bind(this);
-			this.getAccountInfo = this.getAccountInfo.bind(this);
-			this.getActiveMember = this.getActiveMember.bind(this);
-			this.getFullOrganization = this.getFullOrganization.bind(this);
-			this.getInvitation = this.getInvitation.bind(this);
-			this.getOrganizationRole = this.getOrganizationRole.bind(this);
-			this.getSession = this.getSession.bind(this);
-			this.hasOrganizationPermission = this.hasOrganizationPermission.bind(this);
-			this.healthCheck = this.healthCheck.bind(this);
-			this.inviteMemberAuth = this.inviteMemberAuth.bind(this);
-			this.leaveOrganization = this.leaveOrganization.bind(this);
-			this.linkSocial = this.linkSocial.bind(this);
-			this.listAccounts = this.listAccounts.bind(this);
-			this.listDeviceSessions = this.listDeviceSessions.bind(this);
-			this.listInvitations = this.listInvitations.bind(this);
-			this.listMembersAuth = this.listMembersAuth.bind(this);
-			this.listOrganizationRoles = this.listOrganizationRoles.bind(this);
-			this.listOrganizations = this.listOrganizations.bind(this);
-			this.listSessions = this.listSessions.bind(this);
-			this.listUserInvitations = this.listUserInvitations.bind(this);
-			this.me = this.me.bind(this);
-			this.oauthCallback = this.oauthCallback.bind(this);
-			this.passkeyAuthenticate = this.passkeyAuthenticate.bind(this);
-			this.passkeyAuthenticateOptions = this.passkeyAuthenticateOptions.bind(this);
-			this.passkeyDelete = this.passkeyDelete.bind(this);
-			this.passkeyList = this.passkeyList.bind(this);
-			this.passkeyReauthOptions = this.passkeyReauthOptions.bind(this);
-			this.passkeyRegister = this.passkeyRegister.bind(this);
-			this.passkeyRegisterOptions = this.passkeyRegisterOptions.bind(this);
-			this.passkeyUpdateName = this.passkeyUpdateName.bind(this);
-			this.refreshOAuthToken = this.refreshOAuthToken.bind(this);
-			this.refreshToken = this.refreshToken.bind(this);
-			this.rejectInvitation = this.rejectInvitation.bind(this);
-			this.removeMember = this.removeMember.bind(this);
-			this.resetPassword = this.resetPassword.bind(this);
-			this.resetPasswordCallback = this.resetPasswordCallback.bind(this);
-			this.revokeDeviceSession = this.revokeDeviceSession.bind(this);
-			this.revokeOtherSessions = this.revokeOtherSessions.bind(this);
-			this.revokeSession = this.revokeSession.bind(this);
-			this.revokeSessions = this.revokeSessions.bind(this);
-			this.sendVerificationEmail = this.sendVerificationEmail.bind(this);
-			this.setActiveOrganization = this.setActiveOrganization.bind(this);
-			this.setActiveSession = this.setActiveSession.bind(this);
-			this.setPassword = this.setPassword.bind(this);
-			this.signInEmail = this.signInEmail.bind(this);
-			this.signInSocial = this.signInSocial.bind(this);
-			this.signOut = this.signOut.bind(this);
-			this.signUpEmail = this.signUpEmail.bind(this);
-			this.twoFactorDisable = this.twoFactorDisable.bind(this);
-			this.twoFactorEnable = this.twoFactorEnable.bind(this);
-			this.twoFactorGenerateBackupCodes = this.twoFactorGenerateBackupCodes.bind(this);
-			this.twoFactorGetTotpUri = this.twoFactorGetTotpUri.bind(this);
-			this.twoFactorSendOtp = this.twoFactorSendOtp.bind(this);
-			this.twoFactorVerifyBackupCode = this.twoFactorVerifyBackupCode.bind(this);
-			this.twoFactorVerifyOtp = this.twoFactorVerifyOtp.bind(this);
-			this.twoFactorVerifyTotp = this.twoFactorVerifyTotp.bind(this);
-			this.twoFactorViewBackupCodes = this.twoFactorViewBackupCodes.bind(this);
-			this.unlinkAccount = this.unlinkAccount.bind(this);
-			this.updateMemberRole = this.updateMemberRole.bind(this);
-			this.updateOrganizationRole = this.updateOrganizationRole.bind(this);
-			this.updateUser = this.updateUser.bind(this);
-			this.verifyEmail = this.verifyEmail.bind(this);
-		}
-
-		/**
-		 * Accept invitation
-		 * NOTE: Better Auth SDK automatically sets the joined organization as active
-		 * NOTE: User accepting invitation doesn't need org permission - they're being invited
-		 */
-		public async acceptInvitation(
-			organizationId: string,
-			invitationId: string
-		): Promise<{
-			success: boolean;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/organizations/${encodeURIComponent(organizationId)}/invitations/${encodeURIComponent(invitationId)}/accept`
-			);
-			return (await resp.json()) as {
-				success: boolean;
-			};
-		}
-
-		/**
-		 * Add member directly to organization (without invitation)
-		 * SDK returns member object directly (not wrapped)
-		 */
-		public async addMember(
-			organizationId: string,
-			params: {
-				userId: string;
-				role: "owner" | "admin" | "member";
-			}
-		): Promise<types.MemberResponse> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/organizations/${encodeURIComponent(organizationId)}/members`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as types.MemberResponse;
-		}
-
-		/**
-		 * Cancel invitation
-		 */
-		public async cancelInvitation(
-			organizationId: string,
-			invitationId: string
-		): Promise<{
-			success: boolean;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/organizations/${encodeURIComponent(organizationId)}/invitations/${encodeURIComponent(invitationId)}/cancel`
-			);
-			return (await resp.json()) as {
-				success: boolean;
-			};
-		}
-
-		/**
-		 * Change user email address
-		 * FIX BUG-028: Wrap with callBetterAuth for proper error handling (disabled feature → 403, not 500)
-		 */
-		public async changeEmail(params: { newEmail: string; callbackURL?: string }): Promise<{
-			status: boolean;
-			message?: string;
-			user?: types.UserResponse;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/auth/change-email`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				status: boolean;
-				message?: string;
-				user?: types.UserResponse;
-			};
-		}
-
-		/**
-		 * Change password
-		 */
-		public async changePassword(params: {
-			currentPassword: string;
-			newPassword: string;
-			revokeOtherSessions?: boolean;
-		}): Promise<{
-			success: boolean;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/auth/change-password`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				success: boolean;
-			};
-		}
-
-		/**
-		 * Check if slug is available
-		 * SDK returns { status: boolean } where true = available
-		 */
-		public async checkSlug(params: { slug: string }): Promise<{
-			status: boolean;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/organizations/slug/check`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				status: boolean;
-			};
-		}
-
-		/**
-		 * POST /organizations
-		 * Create organization with optional passkey verification.
-		 *
-		 * If phoneNumber is provided → passkeyResponse is required (identity verification).
-		 * If phoneNumber is NOT provided → creates org directly (no verification needed).
-		 *
-		 * Single-step flow replaces the previous 2-step OTP flow.
-		 */
-		public async createOrganization(
-			params: endpoints.CreateOrganizationRequest
-		): Promise<endpoints.CreateOrganizationResponse> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/organizations`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as endpoints.CreateOrganizationResponse;
-		}
-
-		/**
-		 * Create custom organization role
-		 * FIX: Better Auth expects 'role' and 'permission' (not 'name' and 'permissions')
-		 */
-		public async createOrganizationRole(
-			organizationId: string,
-			params: {
-				role: string;
-				permission?: { [key: string]: string[] };
-			}
-		): Promise<{
-			success: boolean;
-			role: types.RoleResponse;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/organizations/${encodeURIComponent(organizationId)}/roles`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				success: boolean;
-				role: types.RoleResponse;
-			};
-		}
-
-		/**
-		 * Delete organization role
-		 */
-		public async deleteOrganizationRole(
-			organizationId: string,
-			roleId: string
-		): Promise<{
-			success: boolean;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"DELETE",
-				`/organizations/${encodeURIComponent(organizationId)}/roles/${encodeURIComponent(roleId)}`
-			);
-			return (await resp.json()) as {
-				success: boolean;
-			};
-		}
-
-		/**
-		 * Delete user account
-		 * FIX BUG-035: Use callBetterAuth wrapper for proper error handling
-		 */
-		public async deleteUser(params: { password?: string; callbackURL?: string }): Promise<{
-			success: boolean;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/auth/delete-user`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				success: boolean;
-			};
-		}
-
-		/**
-		 * Delete user callback (completes deletion with verification token)
-		 * FIX BUG-005: Use callBetterAuth wrapper for proper error handling
-		 */
-		public async deleteUserCallback(params: {
-			deleteToken: string;
-			callbackURL?: string;
-		}): Promise<{
-			success: boolean;
-			message: string;
-		}> {
-			// Convert our params into the objects we need for the request
-			const query = makeRecord<string, string | string[]>({
-				callbackURL: params.callbackURL,
-				deleteToken: params.deleteToken,
-			});
-
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/auth/delete-user/callback`,
-				undefined,
-				{ query }
-			);
-			return (await resp.json()) as {
-				success: boolean;
-				message: string;
-			};
-		}
-
-		/**
-		 * Error info endpoint
-		 * FIX BUG-028: Don't call SDK's error() method - it fails with URL parsing errors
-		 * This endpoint is used by OAuth callbacks to display error information
-		 * The error and message come from query params (e.g., /auth/error?error=access_denied&message=User%20denied)
-		 */
-		public async errorInfo(params: { error?: string; message?: string }): Promise<{
-			error: string;
-			message: string;
-		}> {
-			// Convert our params into the objects we need for the request
-			const query = makeRecord<string, string | string[]>({
-				error: params.error,
-				message: params.message,
-			});
-
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI("GET", `/auth/error`, undefined, { query });
-			return (await resp.json()) as {
-				error: string;
-				message: string;
-			};
-		}
-
-		/**
-		 * Forgot password - request reset email
-		 * FIX BUG-023: Changed forgetPassword -> requestPasswordReset (correct SDK method name)
-		 */
-		public async forgotPassword(params: { email: string; redirectTo?: string }): Promise<{
-			success: boolean;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/auth/request-password-reset`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				success: boolean;
-			};
-		}
-
-		/**
-		 * Get access token for a linked OAuth provider.
-		 *
-		 * Better Auth endpoint: POST /get-access-token
-		 * Method: auth.api.getAccessToken()
-		 * Body: { providerId, accountId?, userId? }
-		 * Returns: { accessToken, accessTokenExpiresAt?, scopes, idToken? }
-		 */
-		public async getAccessToken(params: {
-			providerId: string;
-			accountId?: string;
-			userId?: string;
-		}): Promise<{
-			accessToken: string;
-			idToken?: string;
-			scopes: string[];
-			accessTokenExpiresAt?: string;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/auth/get-access-token`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				accessToken: string;
-				idToken?: string;
-				scopes: string[];
-				accessTokenExpiresAt?: string;
-			};
-		}
-
-		/**
-		 * Get account info from provider.
-		 *
-		 * Better Auth endpoint: GET /account-info
-		 * Method: auth.api.accountInfo()
-		 * Returns: { user, data }
-		 */
-		public async getAccountInfo(): Promise<{
-			user: {
-				id: string;
-				name: string;
-				email: string;
-				image: string | null;
-				emailVerified: boolean;
-			};
-			data: endpoints.AccountInfoData;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI("GET", `/auth/account-info`);
-			return (await resp.json()) as {
-				user: {
-					id: string;
-					name: string;
-					email: string;
-					image: string | null;
-					emailVerified: boolean;
-				};
-				data: endpoints.AccountInfoData;
-			};
-		}
-
-		/**
-		 * Get current user's member record for an organization.
-		 * Uses explicit organizationId — does NOT depend on session's activeOrganizationId.
-		 * This supports URL-based multitenancy where the org comes from the URL, not the session.
-		 */
-		public async getActiveMember(organizationId: string): Promise<types.ActiveMemberResponse> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/members/active`
-			);
-			return (await resp.json()) as types.ActiveMemberResponse;
-		}
-
-		/**
-		 * Get full organization details - Returns ALL business fields from database
-		 * NOTE: Better Auth SDK's getFullOrganization only returns basic fields (id, name, slug, logo, createdAt)
-		 * So we bypass it and query the database directly to get all additionalFields
-		 */
-		public async getFullOrganization(
-			organizationId: string,
-			params: {
-				membersLimit?: number;
-			}
-		): Promise<{
-			id: string;
-			name: string;
-			slug: string;
-			logo: string | null;
-			createdAt: string;
-			updatedAt: string;
-			/**
-			 * Business details
-			 */
-			description: string | null;
-
-			website: string | null;
-			businessType: string | null;
-			industryCategory: string | null;
-			contactPerson: string | null;
-			phoneNumber: string | null;
-			email: string | null;
-			/**
-			 * Address
-			 */
-			address: string | null;
-
-			city: string | null;
-			state: string | null;
-			country: string | null;
-			postalCode: string | null;
-			/**
-			 * GST details
-			 */
-			gstNumber: string | null;
-
-			gstVerified: boolean;
-			gstLegalName: string | null;
-			gstTradeName: string | null;
-			/**
-			 * Status (3-state model: onboarding → active → suspended)
-			 */
-			status: "onboarding" | "active" | "suspended";
-
-			accountTier: string;
-			/**
-			 * Setup progress (tracks which setup steps are complete)
-			 */
-			setupProgress: {
-				gstVerified: boolean;
-				walletCreated: boolean;
-				depositAccountCreated: boolean;
-				zohoSynced: boolean;
-				enrichmentCompleted: boolean;
-			};
-
-			isSetupComplete: boolean;
-			requiresManualReview: boolean;
-			/**
-			 * Financial
-			 */
-			creditLimit: number | null;
-
-			tdsRate: string;
-			/**
-			 * Readiness flags
-			 */
-			paymentInReady: boolean;
-
-			payoutReady: boolean;
-			members: types.MemberResponse[];
-		}> {
-			// Convert our params into the objects we need for the request
-			const query = makeRecord<string, string | string[]>({
-				membersLimit: params.membersLimit === undefined ? undefined : String(params.membersLimit),
-			});
-
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/full`,
-				undefined,
-				{ query }
-			);
-			return (await resp.json()) as {
-				id: string;
-				name: string;
-				slug: string;
-				logo: string | null;
-				createdAt: string;
-				updatedAt: string;
-				/**
-				 * Business details
-				 */
-				description: string | null;
-
-				website: string | null;
-				businessType: string | null;
-				industryCategory: string | null;
-				contactPerson: string | null;
-				phoneNumber: string | null;
-				email: string | null;
-				/**
-				 * Address
-				 */
-				address: string | null;
-
-				city: string | null;
-				state: string | null;
-				country: string | null;
-				postalCode: string | null;
-				/**
-				 * GST details
-				 */
-				gstNumber: string | null;
-
-				gstVerified: boolean;
-				gstLegalName: string | null;
-				gstTradeName: string | null;
-				/**
-				 * Status (3-state model: onboarding → active → suspended)
-				 */
-				status: "onboarding" | "active" | "suspended";
-
-				accountTier: string;
-				/**
-				 * Setup progress (tracks which setup steps are complete)
-				 */
-				setupProgress: {
-					gstVerified: boolean;
-					walletCreated: boolean;
-					depositAccountCreated: boolean;
-					zohoSynced: boolean;
-					enrichmentCompleted: boolean;
-				};
-
-				isSetupComplete: boolean;
-				requiresManualReview: boolean;
-				/**
-				 * Financial
-				 */
-				creditLimit: number | null;
-
-				tdsRate: string;
-				/**
-				 * Readiness flags
-				 */
-				paymentInReady: boolean;
-
-				payoutReady: boolean;
-				members: types.MemberResponse[];
-			};
-		}
-
-		/**
-		 * Get invitation details (public - allows invitees to view invitation before accepting)
-		 * FIX BUG-004: Add headers: {} to prevent "Headers is required" error
-		 */
-		public async getInvitation(params: { invitationId: string }): Promise<{
-			invitation: types.InvitationResponse | null;
-		}> {
-			// Convert our params into the objects we need for the request
-			const query = makeRecord<string, string | string[]>({
-				invitationId: params.invitationId,
-			});
-
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/auth/organization/get-invitation`,
-				undefined,
-				{ query }
-			);
-			return (await resp.json()) as {
-				invitation: types.InvitationResponse | null;
-			};
-		}
-
-		/**
-		 * Get specific organization role
-		 */
-		public async getOrganizationRole(
-			organizationId: string,
-			roleId: string
-		): Promise<{
-			role: types.RoleResponse;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/roles/${encodeURIComponent(roleId)}`
-			);
-			return (await resp.json()) as {
-				role: types.RoleResponse;
-			};
-		}
-
-		/**
-		 * Get the current session and user.
-		 *
-		 * Better Auth endpoint: GET /get-session
-		 * Method: auth.api.getSession()
-		 * Returns: { session, user }
-		 */
-		public async getSession(): Promise<{
-			session: types.SessionResponse | null;
-			user: types.UserResponse | null;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI("GET", `/auth/get-session`);
-			return (await resp.json()) as {
-				session: types.SessionResponse | null;
-				user: types.UserResponse | null;
-			};
-		}
-
-		/**
-		 * Check if user has specific permission in organization
-		 */
-		public async hasOrganizationPermission(
-			organizationId: string,
-			params: {
-				permission: { [key: string]: string[] };
-			}
-		): Promise<{
-			hasPermission: boolean;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/organizations/${encodeURIComponent(organizationId)}/permissions/check`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				hasPermission: boolean;
-			};
-		}
-
-		/**
-		 * Health check
-		 */
-		public async healthCheck(): Promise<{
-			ok: boolean;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI("GET", `/auth/ok`);
-			return (await resp.json()) as {
-				ok: boolean;
-			};
-		}
-
-		/**
-		 * Invite member to organization
-		 */
-		public async inviteMemberAuth(
-			organizationId: string,
-			params: {
-				email: string;
-				role: "owner" | "admin" | "member";
-			}
-		): Promise<{
-			invitation: types.InvitationResponse;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/organizations/${encodeURIComponent(organizationId)}/invitations`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				invitation: types.InvitationResponse;
-			};
-		}
-
-		/**
-		 * Leave organization
-		 */
-		public async leaveOrganization(organizationId: string): Promise<{
-			success: boolean;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/organizations/${encodeURIComponent(organizationId)}/leave`
-			);
-			return (await resp.json()) as {
-				success: boolean;
-			};
-		}
-
-		/**
-		 * Link a social account to the current user.
-		 *
-		 * Better Auth endpoint: POST /link-social
-		 * Method: auth.api.linkSocialAccount()
-		 * Returns: { url?, redirect?, status? }
-		 */
-		public async linkSocial(params: {
-			provider: string;
-			callbackURL?: string;
-			errorCallbackURL?: string;
-			disableRedirect?: boolean;
-			idToken?: endpoints.IdToken;
-			scopes?: string[];
-		}): Promise<{
-			url?: string;
-			redirect: boolean;
-			status?: boolean;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/auth/link-social`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				url?: string;
-				redirect: boolean;
-				status?: boolean;
-			};
-		}
-
-		/**
-		 * List all linked accounts for the current user.
-		 *
-		 * Better Auth endpoint: GET /list-user-accounts
-		 * Method: auth.api.listUserAccounts()
-		 * Returns: Account[]
-		 */
-		public async listAccounts(): Promise<{
-			accounts: types.LinkedAccountResponse[];
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI("GET", `/auth/list-accounts`);
-			return (await resp.json()) as {
-				accounts: types.LinkedAccountResponse[];
-			};
-		}
-
-		/**
-		 * List all device sessions for the current user.
-		 *
-		 * Better Auth endpoint: GET /multi-session/list-device-sessions
-		 * Method: auth.api.listDeviceSessions()
-		 * Returns: Array of { session, user } pairs
-		 */
-		public async listDeviceSessions(): Promise<{
-			sessions: endpoints.DeviceSession[];
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/auth/multi-session/list-device-sessions`
-			);
-			return (await resp.json()) as {
-				sessions: endpoints.DeviceSession[];
-			};
-		}
-
-		/**
-		 * List invitations for organization
-		 * SDK returns array directly
-		 */
-		public async listInvitations(organizationId: string): Promise<types.InvitationsListResponse> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/invitations`
-			);
-			return (await resp.json()) as types.InvitationsListResponse;
-		}
-
-		/**
-		 * List members of organization
-		 * SDK returns { members: [...], total: number }
-		 */
-		public async listMembersAuth(organizationId: string): Promise<{
-			members: types.MemberResponse[];
-			total: number;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/members`
-			);
-			return (await resp.json()) as {
-				members: types.MemberResponse[];
-				total: number;
-			};
-		}
-
-		/**
-		 * List organization roles
-		 */
-		public async listOrganizationRoles(organizationId: string): Promise<{
-			roles: types.RoleResponse[];
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/roles`
-			);
-			return (await resp.json()) as {
-				roles: types.RoleResponse[];
-			};
-		}
-
-		/**
-		 * List user's organizations
-		 */
-		public async listOrganizations(): Promise<{
-			organizations: {
-				id: string;
-				name: string;
-				slug: string;
-				logo: string | null;
-				createdAt: string;
-				status?: string;
-				isSetupComplete?: boolean;
-				requiresManualReview?: boolean;
-			}[];
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI("GET", `/organizations`);
-			return (await resp.json()) as {
-				organizations: {
-					id: string;
-					name: string;
-					slug: string;
-					logo: string | null;
-					createdAt: string;
-					status?: string;
-					isSetupComplete?: boolean;
-					requiresManualReview?: boolean;
-				}[];
-			};
-		}
-
-		/**
-		 * List all sessions for the current user.
-		 *
-		 * Better Auth endpoint: GET /list-sessions
-		 * Method: auth.api.listSessions()
-		 * Returns: Session[]
-		 */
-		public async listSessions(): Promise<{
-			sessions: types.SessionResponse[];
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI("GET", `/auth/list-sessions`);
-			return (await resp.json()) as {
-				sessions: types.SessionResponse[];
-			};
-		}
-
-		/**
-		 * List user's invitations
-		 * SDK returns array directly
-		 */
-		public async listUserInvitations(): Promise<types.InvitationsListResponse> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI("GET", `/user/invitations`);
-			return (await resp.json()) as types.InvitationsListResponse;
-		}
-
-		/**
-		 * Get current authenticated user info (includes display fields for frontend)
-		 * All data is cached in authData from the auth handler - no extra DB queries needed!
-		 */
-		public async me(): Promise<MeResponse> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI("GET", `/auth/me`);
-			return (await resp.json()) as MeResponse;
-		}
-
-		/**
-		 * OAuth provider callback - handles Google, GitHub, etc redirects.
-		 * This is a raw endpoint because it needs to handle redirects and various response types.
-		 */
-		public async oauthCallback(
-			method: "GET" | "POST" | "PATCH" | "PUT" | "DELETE" | "HEAD" | "OPTIONS" | "TRACE",
-			id: string,
-			body?: RequestInit["body"],
-			options?: CallParameters
-		): Promise<globalThis.Response> {
-			return this.baseClient.callAPI(
-				method,
-				`/auth/callback/${encodeURIComponent(id)}`,
-				body,
-				options
-			);
-		}
-
-		/**
-		 * Authenticate with a passkey credential.
-		 * Returns a session token upon successful authentication.
-		 *
-		 * Better Auth endpoint: POST /passkey/verify-authentication
-		 * Uses auth.handler() HTTP passthrough with challenge cookie from step 1.
-		 *
-		 * Flow:
-		 * 1. Client gets options + challengeCookie from passkeyAuthenticateOptions
-		 * 2. Client calls navigator.credentials.get(options)
-		 * 3. Client sends credential + challengeCookie here
-		 * 4. Server validates and returns session
-		 *
-		 * Note: This is a public endpoint (no auth required) for login flow.
-		 */
-		public async passkeyAuthenticate(params: { response: any; challengeCookie: string }): Promise<{
-			success: boolean;
-			token: string | null;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/auth/passkey/authenticate`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				success: boolean;
-				token: string | null;
-			};
-		}
-
-		/**
-		 * Get authentication options for signing in with a passkey.
-		 * Returns WebAuthn PublicKeyCredentialRequestOptionsJSON.
-		 *
-		 * Better Auth endpoint: GET /passkey/generate-authenticate-options
-		 * Uses auth.handler() HTTP passthrough so the challenge cookie flows properly.
-		 *
-		 * Flow:
-		 * 1. Client calls this endpoint to get authentication options + challengeCookie
-		 * 2. Client uses navigator.credentials.get() with options
-		 * 3. Client sends credential + challengeCookie to passkeyAuthenticate endpoint
-		 *
-		 * Note: This is a public endpoint (no auth required) for login flow.
-		 */
-		public async passkeyAuthenticateOptions(): Promise<{
-			options: { [key: string]: any };
-			challengeCookie: string;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI("GET", `/auth/passkey/authenticate-options`);
-			return (await resp.json()) as {
-				options: { [key: string]: any };
-				challengeCookie: string;
-			};
-		}
-
-		/**
-		 * Delete a passkey by ID.
-		 *
-		 * Better Auth endpoint: POST /passkey/delete-passkey
-		 * Method: auth.api.deletePasskey()
-		 * Body: { id: string }
-		 * Returns: { status: boolean }
-		 */
-		public async passkeyDelete(params: { id: string }): Promise<{
-			success: boolean;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/auth/passkey/delete`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				success: boolean;
-			};
-		}
-
-		/**
-		 * List all passkeys for the authenticated user.
-		 *
-		 * Better Auth endpoint: GET /passkey/list-user-passkeys
-		 * Method: auth.api.listPasskeys()
-		 * Returns: Passkey[]
-		 */
-		public async passkeyList(): Promise<{
-			passkeys: endpoints.PasskeyRecord[];
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI("GET", `/auth/passkey/list`);
-			return (await resp.json()) as {
-				passkeys: endpoints.PasskeyRecord[];
-			};
-		}
-
-		/**
-		 * Get re-authentication options for verifying a passkey before a sensitive operation.
-		 * Returns WebAuthn PublicKeyCredentialRequestOptionsJSON + a challengeId.
-		 *
-		 * Unlike passkeyAuthenticateOptions (public, for login), this endpoint:
-		 * - Requires authentication (knows the user)
-		 * - Scopes allowCredentials to the user's passkeys only
-		 * - Stores challenge in DB with challengeId (no cookie dependency)
-		 * - Does NOT create a new session on verify
-		 *
-		 * Flow:
-		 * 1. Client calls this endpoint → { options, challengeId }
-		 * 2. Client calls navigator.credentials.get(options)
-		 * 3. Client sends assertion + challengeId to the protected endpoint
-		 * 4. Backend verifies via verifyPasskeyForUser(response, userId, challengeId)
-		 */
-		public async passkeyReauthOptions(): Promise<{
-			options: { [key: string]: any };
-			challengeId: string;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI("GET", `/auth/passkey/reauth-options`);
-			return (await resp.json()) as {
-				options: { [key: string]: any };
-				challengeId: string;
-			};
-		}
-
-		/**
-		 * Complete passkey registration with the credential from navigator.credentials.create().
-		 *
-		 * Better Auth endpoint: POST /passkey/verify-registration
-		 * Uses auth.handler() HTTP passthrough with the challenge cookie from step 1.
-		 *
-		 * Flow:
-		 * 1. Client gets options + challengeCookie from passkeyRegisterOptions
-		 * 2. Client calls navigator.credentials.create(options)
-		 * 3. Client sends credential + challengeCookie here
-		 */
-		public async passkeyRegister(params: {
-			response: any;
-			name?: string;
-			challengeCookie: string;
-		}): Promise<{
-			success: boolean;
-			passkey: endpoints.PasskeyRecord | null;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/auth/passkey/register`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				success: boolean;
-				passkey: endpoints.PasskeyRecord | null;
-			};
-		}
-
-		/**
-		 * Get registration options for creating a new passkey.
-		 * Returns WebAuthn PublicKeyCredentialCreationOptionsJSON.
-		 *
-		 * Better Auth endpoint: GET /passkey/generate-register-options
-		 * Uses auth.handler() HTTP passthrough so the challenge cookie flows properly.
-		 * The challenge cookie is returned to the client and must be passed back in passkeyRegister.
-		 *
-		 * Flow:
-		 * 1. Client calls this endpoint to get registration options + challengeCookie
-		 * 2. Client uses navigator.credentials.create() with options
-		 * 3. Client sends credential + challengeCookie to passkeyRegister endpoint
-		 */
-		public async passkeyRegisterOptions(params: {
-			name?: string;
-			authenticatorAttachment?: "platform" | "cross-platform";
-		}): Promise<{
-			options: { [key: string]: any };
-			challengeCookie: string;
-		}> {
-			// Convert our params into the objects we need for the request
-			const query = makeRecord<string, string | string[]>({
-				authenticatorAttachment:
-					params.authenticatorAttachment === undefined
-						? undefined
-						: String(params.authenticatorAttachment),
-				name: params.name,
-			});
-
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/auth/passkey/register-options`,
-				undefined,
-				{ query }
-			);
-			return (await resp.json()) as {
-				options: { [key: string]: any };
-				challengeCookie: string;
-			};
-		}
-
-		/**
-		 * Update a passkey's name.
-		 *
-		 * Better Auth endpoint: POST /passkey/update-passkey
-		 * Method: auth.api.updatePasskey()
-		 * Body: { id: string, name: string }
-		 * Returns: { passkey: Passkey }
-		 */
-		public async passkeyUpdateName(params: { id: string; name: string }): Promise<{
-			success: boolean;
-			passkey: endpoints.PasskeyRecord;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/auth/passkey/update-name`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				success: boolean;
-				passkey: endpoints.PasskeyRecord;
-			};
-		}
-
-		/**
-		 * Refresh OAuth provider access token using the stored refresh token.
-		 *
-		 * Better Auth endpoint: POST /refresh-token
-		 * Method: auth.api.refreshToken()
-		 * Body: { providerId }
-		 * Returns: { accessToken?, refreshToken?, accessTokenExpiresAt?, refreshTokenExpiresAt? }
-		 */
-		public async refreshOAuthToken(params: { providerId: string }): Promise<{
-			accessToken?: string;
-			refreshToken?: string;
-			accessTokenExpiresAt?: string;
-			refreshTokenExpiresAt?: string;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/auth/refresh-oauth-token`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				accessToken?: string;
-				refreshToken?: string;
-				accessTokenExpiresAt?: string;
-				refreshTokenExpiresAt?: string;
-			};
-		}
-
-		/**
-		 * Refresh session token
-		 * FIX BUG-009: Use getSession with disableCookieCache to force session refresh from database
-		 * Note: auth.api.refreshToken is for OAuth provider tokens (requires providerId), not session tokens
-		 */
-		public async refreshToken(): Promise<{
-			token: string | null;
-			expiresAt: string | null;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI("POST", `/auth/refresh-token`);
-			return (await resp.json()) as {
-				token: string | null;
-				expiresAt: string | null;
-			};
-		}
-
-		/**
-		 * Reject invitation
-		 * NOTE: User rejecting invitation doesn't need org permission - they're being invited
-		 */
-		public async rejectInvitation(
-			organizationId: string,
-			invitationId: string
-		): Promise<{
-			success: boolean;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/organizations/${encodeURIComponent(organizationId)}/invitations/${encodeURIComponent(invitationId)}/reject`
-			);
-			return (await resp.json()) as {
-				success: boolean;
-			};
-		}
-
-		/**
-		 * Remove member from organization
-		 * SECURITY: Removing owner/admin members requires passkey re-authentication
-		 */
-		public async removeMember(
-			organizationId: string,
-			memberIdOrEmail: string,
-			params: {
-				/**
-				 * WebAuthn assertion response — required when removing owner/admin members
-				 */
-				passkeyResponse?: any;
-
-				/**
-				 * Challenge ID from GET /auth/passkey/reauth-options — required when passkeyResponse is provided
-				 */
-				challengeId?: string;
-			}
-		): Promise<{
-			success: boolean;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/organizations/${encodeURIComponent(organizationId)}/members/${encodeURIComponent(memberIdOrEmail)}/remove`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				success: boolean;
-			};
-		}
-
-		/**
-		 * Reset password with token
-		 * FIX BUG-002: Use callBetterAuth wrapper for proper error handling
-		 */
-		public async resetPassword(params: { token: string; newPassword: string }): Promise<{
-			success: boolean;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/auth/reset-password`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				success: boolean;
-			};
-		}
-
-		/**
-		 * Password reset callback (GET with token in path)
-		 * Note: Better Auth SDK's resetPassword requires body with newPassword.
-		 * This endpoint validates a reset token via the handler for token verification.
-		 */
-		public async resetPasswordCallback(token: string): Promise<{
-			valid: boolean;
-			email?: string;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/auth/reset-password/${encodeURIComponent(token)}`
-			);
-			return (await resp.json()) as {
-				valid: boolean;
-				email?: string;
-			};
-		}
-
-		/**
-		 * Revoke a specific device session.
-		 *
-		 * Better Auth endpoint: POST /multi-session/revoke
-		 * Method: auth.api.revokeDeviceSession()
-		 * Body: { sessionToken: string }
-		 * Returns: { status: boolean }
-		 */
-		public async revokeDeviceSession(params: { sessionToken: string }): Promise<{
-			success: boolean;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/auth/multi-session/revoke`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				success: boolean;
-			};
-		}
-
-		/**
-		 * Revoke all other sessions except the current one.
-		 *
-		 * Better Auth endpoint: POST /revoke-other-sessions
-		 * Method: auth.api.revokeOtherSessions()
-		 * Returns: { status: boolean }
-		 */
-		public async revokeOtherSessions(): Promise<{
-			status: boolean;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI("POST", `/auth/revoke-other-sessions`);
-			return (await resp.json()) as {
-				status: boolean;
-			};
-		}
-
-		/**
-		 * Revoke a specific session by token.
-		 *
-		 * Better Auth endpoint: POST /revoke-session
-		 * Method: auth.api.revokeSession()
-		 * Body: { token: string }
-		 * Returns: { status: boolean }
-		 */
-		public async revokeSession(params: { token: string }): Promise<{
-			status: boolean;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/auth/revoke-session`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				status: boolean;
-			};
-		}
-
-		/**
-		 * Revoke all sessions for the current user.
-		 *
-		 * Better Auth endpoint: POST /revoke-sessions
-		 * Method: auth.api.revokeSessions()
-		 * Returns: { status: boolean }
-		 */
-		public async revokeSessions(): Promise<{
-			status: boolean;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI("POST", `/auth/revoke-sessions`);
-			return (await resp.json()) as {
-				status: boolean;
-			};
-		}
-
-		/**
-		 * Send verification email
-		 * FIX BUG-026: Wrap with callBetterAuth for proper error handling
-		 */
-		public async sendVerificationEmail(params: { email: string; callbackURL?: string }): Promise<{
-			status: boolean;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/auth/send-verification-email`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				status: boolean;
-			};
-		}
-
-		/**
-		 * Set active organization
-		 * SDK already validates membership - throws FORBIDDEN if not a member
-		 */
-		public async setActiveOrganization(params: { organizationId: string | null }): Promise<{
-			success: boolean;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/organizations/active`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				success: boolean;
-			};
-		}
-
-		/**
-		 * Set active session (switch between multi-sessions).
-		 *
-		 * Better Auth endpoint: POST /multi-session/set-active
-		 * Method: auth.api.setActiveSession()
-		 * Body: { sessionToken: string }
-		 * Returns: { session, user }
-		 */
-		public async setActiveSession(params: { sessionToken: string }): Promise<{
-			success: boolean;
-			token: string | null;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/auth/multi-session/set-active`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				success: boolean;
-				token: string | null;
-			};
-		}
-
-		/**
-		 * Set password (for OAuth users who don't have a password)
-		 * FIX BUG-027: Wrap with callBetterAuth for proper error handling (already has password → 400, not 500)
-		 */
-		public async setPassword(params: { newPassword: string }): Promise<{
-			success: boolean;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/auth/set-password`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				success: boolean;
-			};
-		}
-
-		/**
-		 * Sign in with email and password
-		 */
-		public async signInEmail(params: {
-			email: string;
-			password: string;
-			rememberMe?: boolean;
-			callbackURL?: string;
-		}): Promise<{
-			redirect: boolean;
-			token: string | null;
-			url: string | null;
-			user: types.UserResponse | null;
-			twoFactorRedirect?: boolean;
-			twoFactorToken?: string;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/auth/sign-in/email`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				redirect: boolean;
-				token: string | null;
-				url: string | null;
-				user: types.UserResponse | null;
-				twoFactorRedirect?: boolean;
-				twoFactorToken?: string;
-			};
-		}
-
-		/**
-		 * Sign in with a social provider (OAuth).
-		 *
-		 * Better Auth endpoint: POST /sign-in/social
-		 * Method: auth.api.signInSocial()
-		 * Returns: { user?, token?, url?, redirect? }
-		 */
-		public async signInSocial(params: {
-			provider: string;
-			callbackURL?: string;
-			newUserCallbackURL?: string;
-			errorCallbackURL?: string;
-			disableRedirect?: boolean;
-			idToken?: endpoints.IdToken;
-			scopes?: string[];
-			requestSignUp?: boolean;
-			loginHint?: string;
-		}): Promise<endpoints.SocialSignInResponse> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/auth/sign-in/social`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as endpoints.SocialSignInResponse;
-		}
-
-		/**
-		 * Sign out
-		 */
-		public async signOut(): Promise<{
-			success: boolean;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI("POST", `/auth/sign-out`);
-			return (await resp.json()) as {
-				success: boolean;
-			};
-		}
-
-		/**
-		 * Sign up with email and password
-		 */
-		public async signUpEmail(params: {
-			name: string;
-			email: string;
-			password: string;
-			image?: string;
-			callbackURL?: string;
-			rememberMe?: boolean;
-		}): Promise<{
-			token: string | null;
-			user: types.UserResponse;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/auth/sign-up/email`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				token: string | null;
-				user: types.UserResponse;
-			};
-		}
-
-		/**
-		 * Disable two-factor authentication (auth: true)
-		 */
-		public async twoFactorDisable(params: { password: string }): Promise<{
-			success: boolean;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/auth/two-factor/disable`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				success: boolean;
-			};
-		}
-
-		/**
-		 * Enable two-factor authentication (auth: true)
-		 */
-		public async twoFactorEnable(params: { password: string; issuer?: string }): Promise<{
-			success: boolean;
-			backupCodes?: string[];
-			totpURI?: string;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/auth/two-factor/enable`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				success: boolean;
-				backupCodes?: string[];
-				totpURI?: string;
-			};
-		}
-
-		/**
-		 * Generate backup codes (auth: true)
-		 */
-		public async twoFactorGenerateBackupCodes(params: { password: string }): Promise<{
-			backupCodes: string[];
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/auth/two-factor/generate-backup-codes`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				backupCodes: string[];
-			};
-		}
-
-		/**
-		 * Get TOTP URI for setup (auth: true)
-		 * SDK path: /two-factor/get-totp-uri
-		 */
-		public async twoFactorGetTotpUri(params: { password: string }): Promise<{
-			totpURI: string;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/auth/two-factor/get-totp-uri`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				totpURI: string;
-			};
-		}
-
-		/**
-		 * Send OTP for 2FA verification (public - uses twoFactorToken)
-		 * NOTE: Prefer passkey authentication (POST /auth/passkey/authenticate) over 2FA OTP.
-		 * Passkeys provide stronger security (phishing-resistant) and better UX (no code entry).
-		 * These OTP endpoints remain as fallback for users without passkeys.
-		 * FIX BUG-006: Use auth.api.sendTwoFactorOTP() - actual endpoint name from Better Auth source
-		 */
-		public async twoFactorSendOtp(params: {
-			twoFactorToken: string;
-			trustDevice?: boolean;
-		}): Promise<{
-			success: boolean;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/auth/two-factor/send-otp`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				success: boolean;
-			};
-		}
-
-		/**
-		 * Verify backup code during 2FA flow (public - uses twoFactorToken)
-		 * SDK Compatible: Sets session cookie after successful backup code verification
-		 */
-		public async twoFactorVerifyBackupCode(params: {
-			twoFactorToken: string;
-			code: string;
-			trustDevice?: boolean;
-			disableSession?: boolean;
-		}): Promise<{
-			success: boolean;
-			token: string | null;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/auth/two-factor/verify-backup-code`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				success: boolean;
-				token: string | null;
-			};
-		}
-
-		/**
-		 * Verify OTP for 2FA (public - uses twoFactorToken)
-		 * FIX BUG-007: Use auth.api.verifyOTP() - documented in Better Auth source (line 404)
-		 * GitHub: better-auth/dist/index-Drqkvf7w.d.mts line 404 shows auth.api.verifyOTP
-		 * SDK Compatible: Sets session cookie after successful OTP verification
-		 */
-		public async twoFactorVerifyOtp(params: {
-			twoFactorToken: string;
-			otp: string;
-			trustDevice?: boolean;
-		}): Promise<{
-			success: boolean;
-			token: string | null;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/auth/two-factor/verify-otp`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				success: boolean;
-				token: string | null;
-			};
-		}
-
-		/**
-		 * Verify TOTP code during 2FA flow (public - uses twoFactorToken)
-		 * SDK Compatible: Sets session cookie after successful 2FA verification
-		 */
-		public async twoFactorVerifyTotp(params: {
-			twoFactorToken: string;
-			code: string;
-			trustDevice?: boolean;
-		}): Promise<{
-			success: boolean;
-			token: string | null;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/auth/two-factor/verify-totp`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				success: boolean;
-				token: string | null;
-			};
-		}
-
-		/**
-		 * View existing backup codes (requires password verification)
-		 * FIX BUG-014: Use callBetterAuth wrapper - handles "Invalid UUID" when 2FA not enabled
-		 */
-		public async twoFactorViewBackupCodes(params: { password: string }): Promise<{
-			backupCodes: string[];
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/auth/two-factor/view-backup-codes`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				backupCodes: string[];
-			};
-		}
-
-		/**
-		 * Unlink a social account from the current user.
-		 *
-		 * Better Auth endpoint: POST /unlink-account
-		 * Method: auth.api.unlinkAccount()
-		 * Body: { providerId, accountId? }
-		 * Returns: { status: boolean }
-		 */
-		public async unlinkAccount(params: { providerId: string; accountId?: string }): Promise<{
-			status: boolean;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/auth/unlink-account`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				status: boolean;
-			};
-		}
-
-		/**
-		 * Update member role
-		 * SECURITY: Promoting to or demoting from owner requires passkey re-authentication
-		 */
-		public async updateMemberRole(
-			organizationId: string,
-			memberId: string,
-			params: {
-				role: "owner" | "admin" | "member";
-				/**
-				 * WebAuthn assertion response — required when promoting to or demoting from owner
-				 */
-				passkeyResponse?: any;
-
-				/**
-				 * Challenge ID from GET /auth/passkey/reauth-options — required when passkeyResponse is provided
-				 */
-				challengeId?: string;
-			}
-		): Promise<{
-			success: boolean;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"PATCH",
-				`/organizations/${encodeURIComponent(organizationId)}/members/${encodeURIComponent(memberId)}/role`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				success: boolean;
-			};
-		}
-
-		/**
-		 * Update organization role
-		 * FIX: Better Auth expects 'roleId' and 'data.permission' (Record format)
-		 */
-		public async updateOrganizationRole(
-			organizationId: string,
-			roleId: string,
-			params: {
-				permission?: { [key: string]: string[] };
-			}
-		): Promise<{
-			success: boolean;
-			role: types.RoleResponse;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"PATCH",
-				`/organizations/${encodeURIComponent(organizationId)}/roles/${encodeURIComponent(roleId)}`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				success: boolean;
-				role: types.RoleResponse;
-			};
-		}
-
-		/**
-		 * Update user profile
-		 */
-		public async updateUser(params: { name?: string; image?: string }): Promise<{
-			success: boolean;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/auth/update-user`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				success: boolean;
-			};
-		}
-
-		/**
-		 * Verify email
-		 * FIX BUG-025: Wrap with callBetterAuth for proper error handling (invalid token → 400, not 500)
-		 */
-		public async verifyEmail(params: { token: string; callbackURL?: string }): Promise<{
-			success: boolean;
-		}> {
-			// Convert our params into the objects we need for the request
-			const query = makeRecord<string, string | string[]>({
-				callbackURL: params.callbackURL,
-				token: params.token,
-			});
-
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI("GET", `/auth/verify-email`, undefined, {
-				query,
-			});
-			return (await resp.json()) as {
-				success: boolean;
-			};
-		}
-	}
+    export interface AuthParams {
+        /**
+         * Bearer token (mobile apps, SPAs, API clients)
+         */
+        authorization?: string
+    }
+
+    export interface MeResponse {
+        userID: string
+        email: string
+        name: string
+        image?: string
+        emailVerified: boolean
+        role: string
+        activeOrganizationId?: string
+        organizationRole?: string
+        organizationIds?: string[]
+        creatorId?: string
+        adminId?: string
+        isImpersonating?: boolean
+        impersonatedBy?: string
+        phone?: string
+        twoFactorEnabled?: boolean
+    }
+
+    export class ServiceClient {
+        private baseClient: BaseClient
+
+        constructor(baseClient: BaseClient) {
+            this.baseClient = baseClient
+            this.acceptInvitation = this.acceptInvitation.bind(this)
+            this.addMember = this.addMember.bind(this)
+            this.adminBanUser = this.adminBanUser.bind(this)
+            this.adminCreateUser = this.adminCreateUser.bind(this)
+            this.adminGetUser = this.adminGetUser.bind(this)
+            this.adminHasPermission = this.adminHasPermission.bind(this)
+            this.adminImpersonateUser = this.adminImpersonateUser.bind(this)
+            this.adminListUserSessions = this.adminListUserSessions.bind(this)
+            this.adminListUsers = this.adminListUsers.bind(this)
+            this.adminRemoveUser = this.adminRemoveUser.bind(this)
+            this.adminRevokeUserSession = this.adminRevokeUserSession.bind(this)
+            this.adminRevokeUserSessions = this.adminRevokeUserSessions.bind(this)
+            this.adminSetRole = this.adminSetRole.bind(this)
+            this.adminSetUserPassword = this.adminSetUserPassword.bind(this)
+            this.adminStopImpersonating = this.adminStopImpersonating.bind(this)
+            this.adminUnbanUser = this.adminUnbanUser.bind(this)
+            this.adminUpdateUser = this.adminUpdateUser.bind(this)
+            this.cancelInvitation = this.cancelInvitation.bind(this)
+            this.changeEmail = this.changeEmail.bind(this)
+            this.changePassword = this.changePassword.bind(this)
+            this.checkSlug = this.checkSlug.bind(this)
+            this.createOrganization = this.createOrganization.bind(this)
+            this.createOrganizationRole = this.createOrganizationRole.bind(this)
+            this.deleteOrganizationRole = this.deleteOrganizationRole.bind(this)
+            this.deleteUser = this.deleteUser.bind(this)
+            this.deleteUserCallback = this.deleteUserCallback.bind(this)
+            this.errorInfo = this.errorInfo.bind(this)
+            this.forgotPassword = this.forgotPassword.bind(this)
+            this.getAccessToken = this.getAccessToken.bind(this)
+            this.getAccountInfo = this.getAccountInfo.bind(this)
+            this.getActiveMember = this.getActiveMember.bind(this)
+            this.getFullOrganization = this.getFullOrganization.bind(this)
+            this.getInvitation = this.getInvitation.bind(this)
+            this.getOrganizationRole = this.getOrganizationRole.bind(this)
+            this.getSession = this.getSession.bind(this)
+            this.hasOrganizationPermission = this.hasOrganizationPermission.bind(this)
+            this.healthCheck = this.healthCheck.bind(this)
+            this.inviteMemberAuth = this.inviteMemberAuth.bind(this)
+            this.leaveOrganization = this.leaveOrganization.bind(this)
+            this.linkSocial = this.linkSocial.bind(this)
+            this.listAccounts = this.listAccounts.bind(this)
+            this.listDeviceSessions = this.listDeviceSessions.bind(this)
+            this.listInvitations = this.listInvitations.bind(this)
+            this.listMembersAuth = this.listMembersAuth.bind(this)
+            this.listOrganizationRoles = this.listOrganizationRoles.bind(this)
+            this.listOrganizations = this.listOrganizations.bind(this)
+            this.listSessions = this.listSessions.bind(this)
+            this.listUserInvitations = this.listUserInvitations.bind(this)
+            this.me = this.me.bind(this)
+            this.oauthCallback = this.oauthCallback.bind(this)
+            this.passkeyAuthenticate = this.passkeyAuthenticate.bind(this)
+            this.passkeyAuthenticateOptions = this.passkeyAuthenticateOptions.bind(this)
+            this.passkeyDelete = this.passkeyDelete.bind(this)
+            this.passkeyList = this.passkeyList.bind(this)
+            this.passkeyReauthOptions = this.passkeyReauthOptions.bind(this)
+            this.passkeyRegister = this.passkeyRegister.bind(this)
+            this.passkeyRegisterOptions = this.passkeyRegisterOptions.bind(this)
+            this.passkeyUpdateName = this.passkeyUpdateName.bind(this)
+            this.refreshOAuthToken = this.refreshOAuthToken.bind(this)
+            this.refreshToken = this.refreshToken.bind(this)
+            this.rejectInvitation = this.rejectInvitation.bind(this)
+            this.removeMember = this.removeMember.bind(this)
+            this.resetPassword = this.resetPassword.bind(this)
+            this.resetPasswordCallback = this.resetPasswordCallback.bind(this)
+            this.revokeDeviceSession = this.revokeDeviceSession.bind(this)
+            this.revokeOtherSessions = this.revokeOtherSessions.bind(this)
+            this.revokeSession = this.revokeSession.bind(this)
+            this.revokeSessions = this.revokeSessions.bind(this)
+            this.sendVerificationEmail = this.sendVerificationEmail.bind(this)
+            this.setActiveOrganization = this.setActiveOrganization.bind(this)
+            this.setActiveSession = this.setActiveSession.bind(this)
+            this.setPassword = this.setPassword.bind(this)
+            this.signInEmail = this.signInEmail.bind(this)
+            this.signInSocial = this.signInSocial.bind(this)
+            this.signOut = this.signOut.bind(this)
+            this.signUpEmail = this.signUpEmail.bind(this)
+            this.twoFactorDisable = this.twoFactorDisable.bind(this)
+            this.twoFactorEnable = this.twoFactorEnable.bind(this)
+            this.twoFactorGenerateBackupCodes = this.twoFactorGenerateBackupCodes.bind(this)
+            this.twoFactorGetTotpUri = this.twoFactorGetTotpUri.bind(this)
+            this.twoFactorSendOtp = this.twoFactorSendOtp.bind(this)
+            this.twoFactorVerifyBackupCode = this.twoFactorVerifyBackupCode.bind(this)
+            this.twoFactorVerifyOtp = this.twoFactorVerifyOtp.bind(this)
+            this.twoFactorVerifyTotp = this.twoFactorVerifyTotp.bind(this)
+            this.twoFactorViewBackupCodes = this.twoFactorViewBackupCodes.bind(this)
+            this.unlinkAccount = this.unlinkAccount.bind(this)
+            this.updateMemberRole = this.updateMemberRole.bind(this)
+            this.updateOrganizationRole = this.updateOrganizationRole.bind(this)
+            this.updateUser = this.updateUser.bind(this)
+            this.verifyEmail = this.verifyEmail.bind(this)
+        }
+
+        /**
+         * Accept invitation
+         * NOTE: Better Auth SDK automatically sets the joined organization as active
+         * NOTE: User accepting invitation doesn't need org permission - they're being invited
+         */
+        public async acceptInvitation(organizationId: string, invitationId: string): Promise<{
+    success: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/invitations/${encodeURIComponent(invitationId)}/accept`)
+            return await resp.json() as {
+    success: boolean
+}
+        }
+
+        /**
+         * Add member directly to organization (without invitation)
+         * SDK returns member object directly (not wrapped)
+         */
+        public async addMember(organizationId: string, params: {
+    userId: string
+    role: "owner" | "admin" | "member"
+}): Promise<types.MemberResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/members`, JSON.stringify(params))
+            return await resp.json() as types.MemberResponse
+        }
+
+        /**
+         * Ban user (admin only).
+         * 
+         * Better Auth endpoint: POST /admin/ban-user
+         * Method: auth.api.banUser()
+         * Body: { userId, banReason?, banExpiresIn? }
+         */
+        public async adminBanUser(params: {
+    userId: string
+    banReason?: string
+    banExpiresIn?: number
+}): Promise<{
+    success: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/admin/ban-user`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+}
+        }
+
+        /**
+         * Create user (admin only).
+         * 
+         * Better Auth endpoint: POST /admin/create-user
+         * Method: auth.api.createUser()
+         * Body: { name, email, password, role?, data? }
+         */
+        public async adminCreateUser(params: {
+    name: string
+    email: string
+    password: string
+    role?: string | string[]
+    data?: endpoints.AdminUserData
+}): Promise<{
+    user: types.UserResponse
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/admin/create-user`, JSON.stringify(params))
+            return await resp.json() as {
+    user: types.UserResponse
+}
+        }
+
+        /**
+         * Get user by ID (admin only).
+         * 
+         * Better Auth endpoint: GET /admin/get-user
+         * Method: auth.api.getUser()
+         * Query: { id }
+         */
+        public async adminGetUser(params: {
+    userId: string
+}): Promise<{
+    user: types.UserResponse | null
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                userId: params.userId,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/auth/admin/get-user`, undefined, {query})
+            return await resp.json() as {
+    user: types.UserResponse | null
+}
+        }
+
+        /**
+         * Check admin permission.
+         * 
+         * Better Auth endpoint: POST /admin/has-permission
+         * Method: auth.api.userHasPermission()
+         * Body: { userId?, role?, permission?, permissions? }
+         */
+        public async adminHasPermission(params: {
+    userId?: string
+    role?: string
+    permission?: { [key: string]: string[] }
+    permissions?: { [key: string]: string[] }
+}): Promise<{
+    error: null
+    success: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/admin/has-permission`, JSON.stringify(params))
+            return await resp.json() as {
+    error: null
+    success: boolean
+}
+        }
+
+        /**
+         * Impersonate user (admin only).
+         * 
+         * Better Auth endpoint: POST /admin/impersonate-user
+         * Method: auth.api.impersonateUser()
+         * Body: { userId }
+         * Returns: { session, user }
+         */
+        public async adminImpersonateUser(params: {
+    userId: string
+}): Promise<{
+    session: types.SessionResponse
+    user: types.UserResponse
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/admin/impersonate-user`, JSON.stringify(params))
+            return await resp.json() as {
+    session: types.SessionResponse
+    user: types.UserResponse
+}
+        }
+
+        /**
+         * List user sessions (admin only).
+         * 
+         * Better Auth endpoint: POST /admin/list-user-sessions
+         * Method: auth.api.listUserSessions()
+         * Body: { userId }
+         */
+        public async adminListUserSessions(params: {
+    userId: string
+}): Promise<{
+    sessions: types.SessionResponse[]
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/admin/list-user-sessions`, JSON.stringify(params))
+            return await resp.json() as {
+    sessions: types.SessionResponse[]
+}
+        }
+
+        /**
+         * List users (admin only).
+         * 
+         * Better Auth endpoint: GET /admin/list-users
+         * Method: auth.api.listUsers()
+         * Query: { limit?, offset?, searchField?, searchValue? }
+         */
+        public async adminListUsers(params: {
+    limit?: number
+    offset?: number
+    searchField?: "email" | "name"
+    searchValue?: string
+}): Promise<{
+    users: types.UserResponse[]
+    total: number
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                limit:       params.limit === undefined ? undefined : String(params.limit),
+                offset:      params.offset === undefined ? undefined : String(params.offset),
+                searchField: params.searchField === undefined ? undefined : String(params.searchField),
+                searchValue: params.searchValue,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/auth/admin/list-users`, undefined, {query})
+            return await resp.json() as {
+    users: types.UserResponse[]
+    total: number
+}
+        }
+
+        /**
+         * Remove user (admin only).
+         * 
+         * Better Auth endpoint: POST /admin/remove-user
+         * Method: auth.api.removeUser()
+         * Body: { userId }
+         */
+        public async adminRemoveUser(params: {
+    userId: string
+}): Promise<{
+    success: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/admin/remove-user`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+}
+        }
+
+        /**
+         * Revoke user session (admin only).
+         * 
+         * Better Auth endpoint: POST /admin/revoke-user-session
+         * Method: auth.api.revokeUserSession()
+         * Body: { sessionToken }
+         */
+        public async adminRevokeUserSession(params: {
+    sessionToken: string
+}): Promise<{
+    success: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/admin/revoke-user-session`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+}
+        }
+
+        /**
+         * Revoke all user sessions (admin only).
+         * 
+         * Better Auth endpoint: POST /admin/revoke-user-sessions
+         * Method: auth.api.revokeUserSessions()
+         * Body: { userId }
+         */
+        public async adminRevokeUserSessions(params: {
+    userId: string
+}): Promise<{
+    success: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/admin/revoke-user-sessions`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+}
+        }
+
+        /**
+         * Set user role (admin only).
+         * 
+         * Better Auth endpoint: POST /admin/set-role
+         * Method: auth.api.setRole()
+         * Body: { userId, role }
+         */
+        public async adminSetRole(params: {
+    userId: string
+    role: string | string[]
+}): Promise<{
+    success: boolean
+    user?: types.UserResponse
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/admin/set-role`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    user?: types.UserResponse
+}
+        }
+
+        /**
+         * Set user password (admin only).
+         * 
+         * Better Auth endpoint: POST /admin/set-user-password
+         * Method: auth.api.setUserPassword()
+         * Body: { userId, newPassword }
+         */
+        public async adminSetUserPassword(params: {
+    userId: string
+    newPassword: string
+}): Promise<{
+    status: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/admin/set-user-password`, JSON.stringify(params))
+            return await resp.json() as {
+    status: boolean
+}
+        }
+
+        /**
+         * Stop impersonating (admin only).
+         * 
+         * Better Auth endpoint: POST /admin/stop-impersonating
+         * Method: auth.api.stopImpersonating()
+         */
+        public async adminStopImpersonating(): Promise<{
+    success: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/admin/stop-impersonating`)
+            return await resp.json() as {
+    success: boolean
+}
+        }
+
+        /**
+         * Unban user (admin only).
+         * 
+         * Better Auth endpoint: POST /admin/unban-user
+         * Method: auth.api.unbanUser()
+         * Body: { userId }
+         */
+        public async adminUnbanUser(params: {
+    userId: string
+}): Promise<{
+    success: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/admin/unban-user`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+}
+        }
+
+        /**
+         * Update user (admin only).
+         * 
+         * Better Auth endpoint: POST /admin/update-user
+         * Method: auth.api.adminUpdateUser()
+         * Body: { userId, data }
+         */
+        public async adminUpdateUser(params: {
+    userId: string
+    data: {
+        name?: string
+        email?: string
+        role?: string | string[]
+        additionalFields?: endpoints.AdminUpdateUserAdditionalFields
+    }
+}): Promise<{
+    user: types.UserResponse
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/admin/update-user`, JSON.stringify(params))
+            return await resp.json() as {
+    user: types.UserResponse
+}
+        }
+
+        /**
+         * Cancel invitation
+         */
+        public async cancelInvitation(organizationId: string, invitationId: string): Promise<{
+    success: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/invitations/${encodeURIComponent(invitationId)}/cancel`)
+            return await resp.json() as {
+    success: boolean
+}
+        }
+
+        /**
+         * Change user email address
+         * FIX BUG-028: Wrap with callBetterAuth for proper error handling (disabled feature → 403, not 500)
+         */
+        public async changeEmail(params: {
+    newEmail: string
+    callbackURL?: string
+}): Promise<{
+    status: boolean
+    message?: string
+    user?: types.UserResponse
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/change-email`, JSON.stringify(params))
+            return await resp.json() as {
+    status: boolean
+    message?: string
+    user?: types.UserResponse
+}
+        }
+
+        /**
+         * Change password
+         */
+        public async changePassword(params: {
+    currentPassword: string
+    newPassword: string
+    revokeOtherSessions?: boolean
+}): Promise<{
+    success: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/change-password`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+}
+        }
+
+        /**
+         * Check if slug is available
+         * SDK returns { status: boolean } where true = available
+         */
+        public async checkSlug(params: {
+    slug: string
+}): Promise<{
+    status: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/slug/check`, JSON.stringify(params))
+            return await resp.json() as {
+    status: boolean
+}
+        }
+
+        /**
+         * POST /organizations
+         * Create organization with optional passkey verification.
+         * 
+         * If phoneNumber is provided → passkeyResponse is required (identity verification).
+         * If phoneNumber is NOT provided → creates org directly (no verification needed).
+         * 
+         * Single-step flow replaces the previous 2-step OTP flow.
+         */
+        public async createOrganization(params: endpoints.CreateOrganizationRequest): Promise<endpoints.CreateOrganizationResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations`, JSON.stringify(params))
+            return await resp.json() as endpoints.CreateOrganizationResponse
+        }
+
+        /**
+         * Create custom organization role
+         * FIX: Better Auth expects 'role' and 'permission' (not 'name' and 'permissions')
+         */
+        public async createOrganizationRole(organizationId: string, params: {
+    role: string
+    permission?: { [key: string]: string[] }
+}): Promise<{
+    success: boolean
+    role: types.RoleResponse
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/roles`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    role: types.RoleResponse
+}
+        }
+
+        /**
+         * Delete organization role
+         */
+        public async deleteOrganizationRole(organizationId: string, roleId: string): Promise<{
+    success: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("DELETE", `/organizations/${encodeURIComponent(organizationId)}/roles/${encodeURIComponent(roleId)}`)
+            return await resp.json() as {
+    success: boolean
+}
+        }
+
+        /**
+         * Delete user account
+         * FIX BUG-035: Use callBetterAuth wrapper for proper error handling
+         */
+        public async deleteUser(params: {
+    password?: string
+    callbackURL?: string
+}): Promise<{
+    success: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/delete-user`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+}
+        }
+
+        /**
+         * Delete user callback (completes deletion with verification token)
+         * FIX BUG-005: Use callBetterAuth wrapper for proper error handling
+         */
+        public async deleteUserCallback(params: {
+    deleteToken: string
+    callbackURL?: string
+}): Promise<{
+    success: boolean
+    message: string
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                callbackURL: params.callbackURL,
+                deleteToken: params.deleteToken,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/auth/delete-user/callback`, undefined, {query})
+            return await resp.json() as {
+    success: boolean
+    message: string
+}
+        }
+
+        /**
+         * Error info endpoint
+         * FIX BUG-028: Don't call SDK's error() method - it fails with URL parsing errors
+         * This endpoint is used by OAuth callbacks to display error information
+         * The error and message come from query params (e.g., /auth/error?error=access_denied&message=User%20denied)
+         */
+        public async errorInfo(params: {
+    error?: string
+    message?: string
+}): Promise<{
+    error: string
+    message: string
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                error:   params.error,
+                message: params.message,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/auth/error`, undefined, {query})
+            return await resp.json() as {
+    error: string
+    message: string
+}
+        }
+
+        /**
+         * Forgot password - request reset email
+         * FIX BUG-023: Changed forgetPassword -> requestPasswordReset (correct SDK method name)
+         */
+        public async forgotPassword(params: {
+    email: string
+    redirectTo?: string
+}): Promise<{
+    success: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/request-password-reset`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+}
+        }
+
+        /**
+         * Get access token for a linked OAuth provider.
+         * 
+         * Better Auth endpoint: POST /get-access-token
+         * Method: auth.api.getAccessToken()
+         * Body: { providerId, accountId?, userId? }
+         * Returns: { accessToken, accessTokenExpiresAt?, scopes, idToken? }
+         */
+        public async getAccessToken(params: {
+    providerId: string
+    accountId?: string
+    userId?: string
+}): Promise<{
+    accessToken: string
+    idToken?: string
+    scopes: string[]
+    accessTokenExpiresAt?: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/get-access-token`, JSON.stringify(params))
+            return await resp.json() as {
+    accessToken: string
+    idToken?: string
+    scopes: string[]
+    accessTokenExpiresAt?: string
+}
+        }
+
+        /**
+         * Get account info from provider.
+         * 
+         * Better Auth endpoint: GET /account-info
+         * Method: auth.api.accountInfo()
+         * Returns: { user, data }
+         */
+        public async getAccountInfo(): Promise<{
+    user: {
+        id: string
+        name: string
+        email: string
+        image: string | null
+        emailVerified: boolean
+    }
+    data: endpoints.AccountInfoData
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/auth/account-info`)
+            return await resp.json() as {
+    user: {
+        id: string
+        name: string
+        email: string
+        image: string | null
+        emailVerified: boolean
+    }
+    data: endpoints.AccountInfoData
+}
+        }
+
+        /**
+         * Get current user's member record for an organization.
+         * Uses explicit organizationId — does NOT depend on session's activeOrganizationId.
+         * This supports URL-based multitenancy where the org comes from the URL, not the session.
+         */
+        public async getActiveMember(organizationId: string): Promise<types.ActiveMemberResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/members/active`)
+            return await resp.json() as types.ActiveMemberResponse
+        }
+
+        /**
+         * Get full organization details - Returns ALL business fields from database
+         * NOTE: Better Auth SDK's getFullOrganization only returns basic fields (id, name, slug, logo, createdAt)
+         * So we bypass it and query the database directly to get all additionalFields
+         */
+        public async getFullOrganization(organizationId: string, params: {
+    membersLimit?: number
+}): Promise<{
+    id: string
+    name: string
+    slug: string
+    logo: string | null
+    createdAt: string
+    updatedAt: string
+    /**
+     * Business details
+     */
+    description: string | null
+
+    website: string | null
+    businessType: string | null
+    industryCategory: string | null
+    contactPerson: string | null
+    phoneNumber: string | null
+    email: string | null
+    /**
+     * Address
+     */
+    address: string | null
+
+    city: string | null
+    state: string | null
+    country: string | null
+    postalCode: string | null
+    /**
+     * GST details
+     */
+    gstNumber: string | null
+
+    gstVerified: boolean
+    gstLegalName: string | null
+    gstTradeName: string | null
+    /**
+     * Status (3-state model: onboarding → active → suspended)
+     */
+    status: "onboarding" | "active" | "suspended"
+
+    accountTier: string
+    /**
+     * Setup progress (tracks which setup steps are complete)
+     */
+    setupProgress: {
+        gstVerified: boolean
+        walletCreated: boolean
+        depositAccountCreated: boolean
+        zohoSynced: boolean
+        enrichmentCompleted: boolean
+    }
+
+    isSetupComplete: boolean
+    requiresManualReview: boolean
+    /**
+     * Financial
+     */
+    creditLimit: number | null
+
+    tdsRate: string
+    /**
+     * Readiness flags
+     */
+    paymentInReady: boolean
+
+    payoutReady: boolean
+    members: types.MemberResponse[]
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                membersLimit: params.membersLimit === undefined ? undefined : String(params.membersLimit),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/full`, undefined, {query})
+            return await resp.json() as {
+    id: string
+    name: string
+    slug: string
+    logo: string | null
+    createdAt: string
+    updatedAt: string
+    /**
+     * Business details
+     */
+    description: string | null
+
+    website: string | null
+    businessType: string | null
+    industryCategory: string | null
+    contactPerson: string | null
+    phoneNumber: string | null
+    email: string | null
+    /**
+     * Address
+     */
+    address: string | null
+
+    city: string | null
+    state: string | null
+    country: string | null
+    postalCode: string | null
+    /**
+     * GST details
+     */
+    gstNumber: string | null
+
+    gstVerified: boolean
+    gstLegalName: string | null
+    gstTradeName: string | null
+    /**
+     * Status (3-state model: onboarding → active → suspended)
+     */
+    status: "onboarding" | "active" | "suspended"
+
+    accountTier: string
+    /**
+     * Setup progress (tracks which setup steps are complete)
+     */
+    setupProgress: {
+        gstVerified: boolean
+        walletCreated: boolean
+        depositAccountCreated: boolean
+        zohoSynced: boolean
+        enrichmentCompleted: boolean
+    }
+
+    isSetupComplete: boolean
+    requiresManualReview: boolean
+    /**
+     * Financial
+     */
+    creditLimit: number | null
+
+    tdsRate: string
+    /**
+     * Readiness flags
+     */
+    paymentInReady: boolean
+
+    payoutReady: boolean
+    members: types.MemberResponse[]
+}
+        }
+
+        /**
+         * Get invitation details (public - allows invitees to view invitation before accepting)
+         * FIX BUG-004: Add headers: {} to prevent "Headers is required" error
+         */
+        public async getInvitation(params: {
+    invitationId: string
+}): Promise<{
+    invitation: types.InvitationResponse | null
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                invitationId: params.invitationId,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/auth/organization/get-invitation`, undefined, {query})
+            return await resp.json() as {
+    invitation: types.InvitationResponse | null
+}
+        }
+
+        /**
+         * Get specific organization role
+         */
+        public async getOrganizationRole(organizationId: string, roleId: string): Promise<{
+    role: types.RoleResponse
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/roles/${encodeURIComponent(roleId)}`)
+            return await resp.json() as {
+    role: types.RoleResponse
+}
+        }
+
+        /**
+         * Get the current session and user.
+         * 
+         * Better Auth endpoint: GET /get-session
+         * Method: auth.api.getSession()
+         * Returns: { session, user }
+         */
+        public async getSession(): Promise<{
+    session: types.SessionResponse | null
+    user: types.UserResponse | null
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/auth/get-session`)
+            return await resp.json() as {
+    session: types.SessionResponse | null
+    user: types.UserResponse | null
+}
+        }
+
+        /**
+         * Check if user has specific permission in organization
+         */
+        public async hasOrganizationPermission(organizationId: string, params: {
+    permission: { [key: string]: string[] }
+}): Promise<{
+    hasPermission: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/permissions/check`, JSON.stringify(params))
+            return await resp.json() as {
+    hasPermission: boolean
+}
+        }
+
+        /**
+         * Health check
+         */
+        public async healthCheck(): Promise<{
+    ok: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/auth/ok`)
+            return await resp.json() as {
+    ok: boolean
+}
+        }
+
+        /**
+         * Invite member to organization
+         */
+        public async inviteMemberAuth(organizationId: string, params: {
+    email: string
+    role: "owner" | "admin" | "member"
+}): Promise<{
+    invitation: types.InvitationResponse
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/invitations`, JSON.stringify(params))
+            return await resp.json() as {
+    invitation: types.InvitationResponse
+}
+        }
+
+        /**
+         * Leave organization
+         */
+        public async leaveOrganization(organizationId: string): Promise<{
+    success: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/leave`)
+            return await resp.json() as {
+    success: boolean
+}
+        }
+
+        /**
+         * Link a social account to the current user.
+         * 
+         * Better Auth endpoint: POST /link-social
+         * Method: auth.api.linkSocialAccount()
+         * Returns: { url?, redirect?, status? }
+         */
+        public async linkSocial(params: {
+    provider: string
+    callbackURL?: string
+    errorCallbackURL?: string
+    disableRedirect?: boolean
+    idToken?: endpoints.IdToken
+    scopes?: string[]
+}): Promise<{
+    url?: string
+    redirect: boolean
+    status?: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/link-social`, JSON.stringify(params))
+            return await resp.json() as {
+    url?: string
+    redirect: boolean
+    status?: boolean
+}
+        }
+
+        /**
+         * List all linked accounts for the current user.
+         * 
+         * Better Auth endpoint: GET /list-user-accounts
+         * Method: auth.api.listUserAccounts()
+         * Returns: Account[]
+         */
+        public async listAccounts(): Promise<{
+    accounts: types.LinkedAccountResponse[]
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/auth/list-accounts`)
+            return await resp.json() as {
+    accounts: types.LinkedAccountResponse[]
+}
+        }
+
+        /**
+         * List all device sessions for the current user.
+         * 
+         * Better Auth endpoint: GET /multi-session/list-device-sessions
+         * Method: auth.api.listDeviceSessions()
+         * Returns: Array of { session, user } pairs
+         */
+        public async listDeviceSessions(): Promise<{
+    sessions: endpoints.DeviceSession[]
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/auth/multi-session/list-device-sessions`)
+            return await resp.json() as {
+    sessions: endpoints.DeviceSession[]
+}
+        }
+
+        /**
+         * List invitations for organization
+         * SDK returns array directly
+         */
+        public async listInvitations(organizationId: string): Promise<types.InvitationsListResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/invitations`)
+            return await resp.json() as types.InvitationsListResponse
+        }
+
+        /**
+         * List members of organization
+         * SDK returns { members: [...], total: number }
+         */
+        public async listMembersAuth(organizationId: string): Promise<{
+    members: types.MemberResponse[]
+    total: number
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/members`)
+            return await resp.json() as {
+    members: types.MemberResponse[]
+    total: number
+}
+        }
+
+        /**
+         * List organization roles
+         */
+        public async listOrganizationRoles(organizationId: string): Promise<{
+    roles: types.RoleResponse[]
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/roles`)
+            return await resp.json() as {
+    roles: types.RoleResponse[]
+}
+        }
+
+        /**
+         * List user's organizations
+         */
+        public async listOrganizations(): Promise<{
+    organizations: {
+        id: string
+        name: string
+        slug: string
+        logo: string | null
+        createdAt: string
+        status?: string
+        isSetupComplete?: boolean
+        requiresManualReview?: boolean
+    }[]
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations`)
+            return await resp.json() as {
+    organizations: {
+        id: string
+        name: string
+        slug: string
+        logo: string | null
+        createdAt: string
+        status?: string
+        isSetupComplete?: boolean
+        requiresManualReview?: boolean
+    }[]
+}
+        }
+
+        /**
+         * List all sessions for the current user.
+         * 
+         * Better Auth endpoint: GET /list-sessions
+         * Method: auth.api.listSessions()
+         * Returns: Session[]
+         */
+        public async listSessions(): Promise<{
+    sessions: types.SessionResponse[]
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/auth/list-sessions`)
+            return await resp.json() as {
+    sessions: types.SessionResponse[]
+}
+        }
+
+        /**
+         * List user's invitations
+         * SDK returns array directly
+         */
+        public async listUserInvitations(): Promise<types.InvitationsListResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/user/invitations`)
+            return await resp.json() as types.InvitationsListResponse
+        }
+
+        /**
+         * Get current authenticated user info (includes display fields for frontend)
+         * All data is cached in authData from the auth handler - no extra DB queries needed!
+         */
+        public async me(): Promise<MeResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/auth/me`)
+            return await resp.json() as MeResponse
+        }
+
+        /**
+         * OAuth provider callback - handles Google, GitHub, etc redirects.
+         * This is a raw endpoint because it needs to handle redirects and various response types.
+         */
+        public async oauthCallback(method: "GET" | "POST" | "PATCH" | "PUT" | "DELETE" | "HEAD" | "OPTIONS" | "TRACE", id: string, body?: RequestInit["body"], options?: CallParameters): Promise<globalThis.Response> {
+            return this.baseClient.callAPI(method, `/auth/callback/${encodeURIComponent(id)}`, body, options)
+        }
+
+        /**
+         * Authenticate with a passkey credential.
+         * Returns a session token upon successful authentication.
+         * 
+         * Better Auth endpoint: POST /passkey/verify-authentication
+         * Uses auth.handler() HTTP passthrough with challenge cookie from step 1.
+         * 
+         * Flow:
+         * 1. Client gets options + challengeCookie from passkeyAuthenticateOptions
+         * 2. Client calls navigator.credentials.get(options)
+         * 3. Client sends credential + challengeCookie here
+         * 4. Server validates and returns session
+         * 
+         * Note: This is a public endpoint (no auth required) for login flow.
+         */
+        public async passkeyAuthenticate(params: {
+    response: any
+    challengeCookie: string
+}): Promise<{
+    success: boolean
+    token: string | null
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/passkey/authenticate`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    token: string | null
+}
+        }
+
+        /**
+         * Get authentication options for signing in with a passkey.
+         * Returns WebAuthn PublicKeyCredentialRequestOptionsJSON.
+         * 
+         * Better Auth endpoint: GET /passkey/generate-authenticate-options
+         * Uses auth.handler() HTTP passthrough so the challenge cookie flows properly.
+         * 
+         * Flow:
+         * 1. Client calls this endpoint to get authentication options + challengeCookie
+         * 2. Client uses navigator.credentials.get() with options
+         * 3. Client sends credential + challengeCookie to passkeyAuthenticate endpoint
+         * 
+         * Note: This is a public endpoint (no auth required) for login flow.
+         */
+        public async passkeyAuthenticateOptions(): Promise<{
+    options: { [key: string]: any }
+    challengeCookie: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/auth/passkey/authenticate-options`)
+            return await resp.json() as {
+    options: { [key: string]: any }
+    challengeCookie: string
+}
+        }
+
+        /**
+         * Delete a passkey by ID.
+         * 
+         * Better Auth endpoint: POST /passkey/delete-passkey
+         * Method: auth.api.deletePasskey()
+         * Body: { id: string }
+         * Returns: { status: boolean }
+         */
+        public async passkeyDelete(params: {
+    id: string
+}): Promise<{
+    success: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/passkey/delete`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+}
+        }
+
+        /**
+         * List all passkeys for the authenticated user.
+         * 
+         * Better Auth endpoint: GET /passkey/list-user-passkeys
+         * Method: auth.api.listPasskeys()
+         * Returns: Passkey[]
+         */
+        public async passkeyList(): Promise<{
+    passkeys: endpoints.PasskeyRecord[]
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/auth/passkey/list`)
+            return await resp.json() as {
+    passkeys: endpoints.PasskeyRecord[]
+}
+        }
+
+        /**
+         * Get re-authentication options for verifying a passkey before a sensitive operation.
+         * Returns WebAuthn PublicKeyCredentialRequestOptionsJSON + a challengeId.
+         * 
+         * Unlike passkeyAuthenticateOptions (public, for login), this endpoint:
+         * - Requires authentication (knows the user)
+         * - Scopes allowCredentials to the user's passkeys only
+         * - Stores challenge in DB with challengeId (no cookie dependency)
+         * - Does NOT create a new session on verify
+         * 
+         * Flow:
+         * 1. Client calls this endpoint → { options, challengeId }
+         * 2. Client calls navigator.credentials.get(options)
+         * 3. Client sends assertion + challengeId to the protected endpoint
+         * 4. Backend verifies via verifyPasskeyForUser(response, userId, challengeId)
+         */
+        public async passkeyReauthOptions(): Promise<{
+    options: { [key: string]: any }
+    challengeId: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/auth/passkey/reauth-options`)
+            return await resp.json() as {
+    options: { [key: string]: any }
+    challengeId: string
+}
+        }
+
+        /**
+         * Complete passkey registration with the credential from navigator.credentials.create().
+         * 
+         * Better Auth endpoint: POST /passkey/verify-registration
+         * Uses auth.handler() HTTP passthrough with the challenge cookie from step 1.
+         * 
+         * Flow:
+         * 1. Client gets options + challengeCookie from passkeyRegisterOptions
+         * 2. Client calls navigator.credentials.create(options)
+         * 3. Client sends credential + challengeCookie here
+         */
+        public async passkeyRegister(params: {
+    response: any
+    name?: string
+    challengeCookie: string
+}): Promise<{
+    success: boolean
+    passkey: endpoints.PasskeyRecord | null
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/passkey/register`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    passkey: endpoints.PasskeyRecord | null
+}
+        }
+
+        /**
+         * Get registration options for creating a new passkey.
+         * Returns WebAuthn PublicKeyCredentialCreationOptionsJSON.
+         * 
+         * Better Auth endpoint: GET /passkey/generate-register-options
+         * Uses auth.handler() HTTP passthrough so the challenge cookie flows properly.
+         * The challenge cookie is returned to the client and must be passed back in passkeyRegister.
+         * 
+         * Flow:
+         * 1. Client calls this endpoint to get registration options + challengeCookie
+         * 2. Client uses navigator.credentials.create() with options
+         * 3. Client sends credential + challengeCookie to passkeyRegister endpoint
+         */
+        public async passkeyRegisterOptions(params: {
+    name?: string
+    authenticatorAttachment?: "platform" | "cross-platform"
+}): Promise<{
+    options: { [key: string]: any }
+    challengeCookie: string
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                authenticatorAttachment: params.authenticatorAttachment === undefined ? undefined : String(params.authenticatorAttachment),
+                name:                    params.name,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/auth/passkey/register-options`, undefined, {query})
+            return await resp.json() as {
+    options: { [key: string]: any }
+    challengeCookie: string
+}
+        }
+
+        /**
+         * Update a passkey's name.
+         * 
+         * Better Auth endpoint: POST /passkey/update-passkey
+         * Method: auth.api.updatePasskey()
+         * Body: { id: string, name: string }
+         * Returns: { passkey: Passkey }
+         */
+        public async passkeyUpdateName(params: {
+    id: string
+    name: string
+}): Promise<{
+    success: boolean
+    passkey: endpoints.PasskeyRecord
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/passkey/update-name`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    passkey: endpoints.PasskeyRecord
+}
+        }
+
+        /**
+         * Refresh OAuth provider access token using the stored refresh token.
+         * 
+         * Better Auth endpoint: POST /refresh-token
+         * Method: auth.api.refreshToken()
+         * Body: { providerId }
+         * Returns: { accessToken?, refreshToken?, accessTokenExpiresAt?, refreshTokenExpiresAt? }
+         */
+        public async refreshOAuthToken(params: {
+    providerId: string
+}): Promise<{
+    accessToken?: string
+    refreshToken?: string
+    accessTokenExpiresAt?: string
+    refreshTokenExpiresAt?: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/refresh-oauth-token`, JSON.stringify(params))
+            return await resp.json() as {
+    accessToken?: string
+    refreshToken?: string
+    accessTokenExpiresAt?: string
+    refreshTokenExpiresAt?: string
+}
+        }
+
+        /**
+         * Refresh session token
+         * FIX BUG-009: Use getSession with disableCookieCache to force session refresh from database
+         * Note: auth.api.refreshToken is for OAuth provider tokens (requires providerId), not session tokens
+         */
+        public async refreshToken(): Promise<{
+    token: string | null
+    expiresAt: string | null
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/refresh-token`)
+            return await resp.json() as {
+    token: string | null
+    expiresAt: string | null
+}
+        }
+
+        /**
+         * Reject invitation
+         * NOTE: User rejecting invitation doesn't need org permission - they're being invited
+         */
+        public async rejectInvitation(organizationId: string, invitationId: string): Promise<{
+    success: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/invitations/${encodeURIComponent(invitationId)}/reject`)
+            return await resp.json() as {
+    success: boolean
+}
+        }
+
+        /**
+         * Remove member from organization
+         * SECURITY: Removing owner/admin members requires passkey re-authentication
+         */
+        public async removeMember(organizationId: string, memberIdOrEmail: string, params: {
+    /**
+     * WebAuthn assertion response — required when removing owner/admin members
+     */
+    passkeyResponse?: any
+
+    /**
+     * Challenge ID from GET /auth/passkey/reauth-options — required when passkeyResponse is provided
+     */
+    challengeId?: string
+}): Promise<{
+    success: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/members/${encodeURIComponent(memberIdOrEmail)}/remove`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+}
+        }
+
+        /**
+         * Reset password with token
+         * FIX BUG-002: Use callBetterAuth wrapper for proper error handling
+         */
+        public async resetPassword(params: {
+    token: string
+    newPassword: string
+}): Promise<{
+    success: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/reset-password`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+}
+        }
+
+        /**
+         * Password reset callback (GET with token in path)
+         * Note: Better Auth SDK's resetPassword requires body with newPassword.
+         * This endpoint validates a reset token via the handler for token verification.
+         */
+        public async resetPasswordCallback(token: string): Promise<{
+    valid: boolean
+    email?: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/auth/reset-password/${encodeURIComponent(token)}`)
+            return await resp.json() as {
+    valid: boolean
+    email?: string
+}
+        }
+
+        /**
+         * Revoke a specific device session.
+         * 
+         * Better Auth endpoint: POST /multi-session/revoke
+         * Method: auth.api.revokeDeviceSession()
+         * Body: { sessionToken: string }
+         * Returns: { status: boolean }
+         */
+        public async revokeDeviceSession(params: {
+    sessionToken: string
+}): Promise<{
+    success: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/multi-session/revoke`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+}
+        }
+
+        /**
+         * Revoke all other sessions except the current one.
+         * 
+         * Better Auth endpoint: POST /revoke-other-sessions
+         * Method: auth.api.revokeOtherSessions()
+         * Returns: { status: boolean }
+         */
+        public async revokeOtherSessions(): Promise<{
+    status: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/revoke-other-sessions`)
+            return await resp.json() as {
+    status: boolean
+}
+        }
+
+        /**
+         * Revoke a specific session by token.
+         * 
+         * Better Auth endpoint: POST /revoke-session
+         * Method: auth.api.revokeSession()
+         * Body: { token: string }
+         * Returns: { status: boolean }
+         */
+        public async revokeSession(params: {
+    token: string
+}): Promise<{
+    status: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/revoke-session`, JSON.stringify(params))
+            return await resp.json() as {
+    status: boolean
+}
+        }
+
+        /**
+         * Revoke all sessions for the current user.
+         * 
+         * Better Auth endpoint: POST /revoke-sessions
+         * Method: auth.api.revokeSessions()
+         * Returns: { status: boolean }
+         */
+        public async revokeSessions(): Promise<{
+    status: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/revoke-sessions`)
+            return await resp.json() as {
+    status: boolean
+}
+        }
+
+        /**
+         * Send verification email
+         * FIX BUG-026: Wrap with callBetterAuth for proper error handling
+         */
+        public async sendVerificationEmail(params: {
+    email: string
+    callbackURL?: string
+}): Promise<{
+    status: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/send-verification-email`, JSON.stringify(params))
+            return await resp.json() as {
+    status: boolean
+}
+        }
+
+        /**
+         * Set active organization
+         * SDK already validates membership - throws FORBIDDEN if not a member
+         */
+        public async setActiveOrganization(params: {
+    organizationId: string | null
+}): Promise<{
+    success: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/active`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+}
+        }
+
+        /**
+         * Set active session (switch between multi-sessions).
+         * 
+         * Better Auth endpoint: POST /multi-session/set-active
+         * Method: auth.api.setActiveSession()
+         * Body: { sessionToken: string }
+         * Returns: { session, user }
+         */
+        public async setActiveSession(params: {
+    sessionToken: string
+}): Promise<{
+    success: boolean
+    token: string | null
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/multi-session/set-active`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    token: string | null
+}
+        }
+
+        /**
+         * Set password (for OAuth users who don't have a password)
+         * FIX BUG-027: Wrap with callBetterAuth for proper error handling (already has password → 400, not 500)
+         */
+        public async setPassword(params: {
+    newPassword: string
+}): Promise<{
+    success: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/set-password`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+}
+        }
+
+        /**
+         * Sign in with email and password
+         */
+        public async signInEmail(params: {
+    email: string
+    password: string
+    rememberMe?: boolean
+    callbackURL?: string
+}): Promise<{
+    redirect: boolean
+    token: string | null
+    url: string | null
+    user: types.UserResponse | null
+    twoFactorRedirect?: boolean
+    twoFactorToken?: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/sign-in/email`, JSON.stringify(params))
+            return await resp.json() as {
+    redirect: boolean
+    token: string | null
+    url: string | null
+    user: types.UserResponse | null
+    twoFactorRedirect?: boolean
+    twoFactorToken?: string
+}
+        }
+
+        /**
+         * Sign in with a social provider (OAuth).
+         * 
+         * Better Auth endpoint: POST /sign-in/social
+         * Method: auth.api.signInSocial()
+         * Returns: { user?, token?, url?, redirect? }
+         */
+        public async signInSocial(params: {
+    provider: string
+    callbackURL?: string
+    newUserCallbackURL?: string
+    errorCallbackURL?: string
+    disableRedirect?: boolean
+    idToken?: endpoints.IdToken
+    scopes?: string[]
+    requestSignUp?: boolean
+    loginHint?: string
+}): Promise<endpoints.SocialSignInResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/sign-in/social`, JSON.stringify(params))
+            return await resp.json() as endpoints.SocialSignInResponse
+        }
+
+        /**
+         * Sign out
+         */
+        public async signOut(): Promise<{
+    success: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/sign-out`)
+            return await resp.json() as {
+    success: boolean
+}
+        }
+
+        /**
+         * Sign up with email and password
+         */
+        public async signUpEmail(params: {
+    name: string
+    email: string
+    password: string
+    image?: string
+    callbackURL?: string
+    rememberMe?: boolean
+}): Promise<{
+    token: string | null
+    user: types.UserResponse
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/sign-up/email`, JSON.stringify(params))
+            return await resp.json() as {
+    token: string | null
+    user: types.UserResponse
+}
+        }
+
+        /**
+         * Disable two-factor authentication (auth: true)
+         */
+        public async twoFactorDisable(params: {
+    password: string
+}): Promise<{
+    success: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/two-factor/disable`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+}
+        }
+
+        /**
+         * Enable two-factor authentication (auth: true)
+         */
+        public async twoFactorEnable(params: {
+    password: string
+    issuer?: string
+}): Promise<{
+    success: boolean
+    backupCodes?: string[]
+    totpURI?: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/two-factor/enable`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    backupCodes?: string[]
+    totpURI?: string
+}
+        }
+
+        /**
+         * Generate backup codes (auth: true)
+         */
+        public async twoFactorGenerateBackupCodes(params: {
+    password: string
+}): Promise<{
+    backupCodes: string[]
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/two-factor/generate-backup-codes`, JSON.stringify(params))
+            return await resp.json() as {
+    backupCodes: string[]
+}
+        }
+
+        /**
+         * Get TOTP URI for setup (auth: true)
+         * SDK path: /two-factor/get-totp-uri
+         */
+        public async twoFactorGetTotpUri(params: {
+    password: string
+}): Promise<{
+    totpURI: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/two-factor/get-totp-uri`, JSON.stringify(params))
+            return await resp.json() as {
+    totpURI: string
+}
+        }
+
+        /**
+         * Send OTP for 2FA verification (public - uses twoFactorToken)
+         * NOTE: Prefer passkey authentication (POST /auth/passkey/authenticate) over 2FA OTP.
+         * Passkeys provide stronger security (phishing-resistant) and better UX (no code entry).
+         * These OTP endpoints remain as fallback for users without passkeys.
+         * FIX BUG-006: Use auth.api.sendTwoFactorOTP() - actual endpoint name from Better Auth source
+         */
+        public async twoFactorSendOtp(params: {
+    twoFactorToken: string
+    trustDevice?: boolean
+}): Promise<{
+    success: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/two-factor/send-otp`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+}
+        }
+
+        /**
+         * Verify backup code during 2FA flow (public - uses twoFactorToken)
+         * SDK Compatible: Sets session cookie after successful backup code verification
+         */
+        public async twoFactorVerifyBackupCode(params: {
+    twoFactorToken: string
+    code: string
+    trustDevice?: boolean
+    disableSession?: boolean
+}): Promise<{
+    success: boolean
+    token: string | null
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/two-factor/verify-backup-code`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    token: string | null
+}
+        }
+
+        /**
+         * Verify OTP for 2FA (public - uses twoFactorToken)
+         * FIX BUG-007: Use auth.api.verifyOTP() - documented in Better Auth source (line 404)
+         * GitHub: better-auth/dist/index-Drqkvf7w.d.mts line 404 shows auth.api.verifyOTP
+         * SDK Compatible: Sets session cookie after successful OTP verification
+         */
+        public async twoFactorVerifyOtp(params: {
+    twoFactorToken: string
+    otp: string
+    trustDevice?: boolean
+}): Promise<{
+    success: boolean
+    token: string | null
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/two-factor/verify-otp`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    token: string | null
+}
+        }
+
+        /**
+         * Verify TOTP code during 2FA flow (public - uses twoFactorToken)
+         * SDK Compatible: Sets session cookie after successful 2FA verification
+         */
+        public async twoFactorVerifyTotp(params: {
+    twoFactorToken: string
+    code: string
+    trustDevice?: boolean
+}): Promise<{
+    success: boolean
+    token: string | null
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/two-factor/verify-totp`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    token: string | null
+}
+        }
+
+        /**
+         * View existing backup codes (requires password verification)
+         * FIX BUG-014: Use callBetterAuth wrapper - handles "Invalid UUID" when 2FA not enabled
+         */
+        public async twoFactorViewBackupCodes(params: {
+    password: string
+}): Promise<{
+    backupCodes: string[]
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/two-factor/view-backup-codes`, JSON.stringify(params))
+            return await resp.json() as {
+    backupCodes: string[]
+}
+        }
+
+        /**
+         * Unlink a social account from the current user.
+         * 
+         * Better Auth endpoint: POST /unlink-account
+         * Method: auth.api.unlinkAccount()
+         * Body: { providerId, accountId? }
+         * Returns: { status: boolean }
+         */
+        public async unlinkAccount(params: {
+    providerId: string
+    accountId?: string
+}): Promise<{
+    status: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/unlink-account`, JSON.stringify(params))
+            return await resp.json() as {
+    status: boolean
+}
+        }
+
+        /**
+         * Update member role
+         * SECURITY: Promoting to or demoting from owner requires passkey re-authentication
+         */
+        public async updateMemberRole(organizationId: string, memberId: string, params: {
+    role: "owner" | "admin" | "member"
+    /**
+     * WebAuthn assertion response — required when promoting to or demoting from owner
+     */
+    passkeyResponse?: any
+
+    /**
+     * Challenge ID from GET /auth/passkey/reauth-options — required when passkeyResponse is provided
+     */
+    challengeId?: string
+}): Promise<{
+    success: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("PATCH", `/organizations/${encodeURIComponent(organizationId)}/members/${encodeURIComponent(memberId)}/role`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+}
+        }
+
+        /**
+         * Update organization role
+         * FIX: Better Auth expects 'roleId' and 'data.permission' (Record format)
+         */
+        public async updateOrganizationRole(organizationId: string, roleId: string, params: {
+    permission?: { [key: string]: string[] }
+}): Promise<{
+    success: boolean
+    role: types.RoleResponse
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("PATCH", `/organizations/${encodeURIComponent(organizationId)}/roles/${encodeURIComponent(roleId)}`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    role: types.RoleResponse
+}
+        }
+
+        /**
+         * Update user profile
+         */
+        public async updateUser(params: {
+    name?: string
+    image?: string
+}): Promise<{
+    success: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/auth/update-user`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+}
+        }
+
+        /**
+         * Verify email
+         * FIX BUG-025: Wrap with callBetterAuth for proper error handling (invalid token → 400, not 500)
+         */
+        public async verifyEmail(params: {
+    token: string
+    callbackURL?: string
+}): Promise<{
+    success: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                callbackURL: params.callbackURL,
+                token:       params.token,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/auth/verify-email`, undefined, {query})
+            return await resp.json() as {
+    success: boolean
+}
+        }
+    }
 }
 
 export namespace brand {
-	export interface ActiveHold {
-		id: string;
-		enrollmentId: string;
-		campaignId: string;
-		campaignTitle: string;
-		/**
-		 * Hold amount in smallest units
-		 */
-		amount: number;
-
-		/**
-		 * Decimal string (e.g., "254.90")
-		 */
-		amountDecimal: string;
-
-		/**
-		 * Currency code (ISO 4217)
-		 */
-		currency: string;
-
-		createdAt: string;
-		expiresAt?: string;
-	}
-
-	export interface ActivityLogEntry {
-		id: string;
-		action: string;
-		entityType: string;
-		entityId: string;
-		details: OrgActivityDetails | null;
-		adminName: string | null;
-		createdAt: string;
-	}
-
-	export interface AddBankAccountRequest {
-		accountHolderName: string;
-		accountNumber: string;
-		bankName: string;
-		ifscCode: string;
-		accountType: "current" | "savings";
-		/**
-		 * Validation ID from Step 1 (verify endpoint) - proves verification was done
-		 */
-		validationId: string;
-	}
-
-	export interface BankVerificationResult {
-		isVerified: boolean;
-		registeredName: string | null;
-		accountStatus: "active" | "inactive" | "unknown";
-		validationId: string;
-		message: string;
-	}
-
-	export interface BrandSearchFacets {
-		campaigns: number;
-		enrollments: number;
-		invoices: number;
-		listings: number;
-	}
-
-	export interface BrandSearchResult {
-		/**
-		 * Result type
-		 */
-		resultType: "campaign" | "enrollment" | "invoice" | "listing";
-
-		/**
-		 * Resource ID
-		 */
-		id: string;
-
-		/**
-		 * Short display ID (e.g., ENR-K7X4FA9B) — present for enrollments
-		 */
-		displayId?: string;
-
-		/**
-		 * Display title
-		 */
-		title: string;
-
-		/**
-		 * Optional description
-		 */
-		description?: string;
-
-		/**
-		 * Status string
-		 */
-		status: string;
-
-		/**
-		 * Created timestamp
-		 */
-		createdAt: string;
-
-		/**
-		 * Primary amount in decimal format
-		 */
-		amountDecimal?: string;
-
-		/**
-		 * Secondary amount
-		 */
-		secondaryAmountDecimal?: string;
-
-		/**
-		 * For campaigns: current enrollments
-		 */
-		currentCount?: number;
-
-		/**
-		 * For campaigns: max enrollments
-		 */
-		maxCount?: number;
-
-		/**
-		 * Processed timestamp (approval, issue date, etc.)
-		 */
-		processedAt?: string;
-
-		/**
-		 * Expiry timestamp
-		 */
-		expiresAt?: string;
-
-		/**
-		 * Listing info
-		 */
-		listing?: SearchListingInfo;
-
-		/**
-		 * Platform info
-		 */
-		platform?: SearchPlatformInfo;
-
-		/**
-		 * Campaign info (for enrollments)
-		 */
-		campaign?: SearchCampaignInfo;
-
-		/**
-		 * Creator info (for enrollments — limited PII)
-		 */
-		creator?: SearchCreatorInfo;
-
-		/**
-		 * Invoice number (for invoices)
-		 */
-		invoiceNumber?: string;
-
-		/**
-		 * Fields that matched the search query
-		 */
-		matchedFields: string[];
-	}
-
-	export interface BrandUnifiedSearchParams {
-		/**
-		 * Search query (2-200 chars)
-		 */
-		q: string;
-
-		/**
-		 * Pagination cursor (base64 encoded)
-		 */
-		cursor?: string;
-
-		/**
-		 * Page size (1-50)
-		 */
-		limit?: number;
-	}
-
-	export interface BrandUnifiedSearchResponse {
-		data: BrandSearchResult[];
-		nextCursor: string | null;
-		hasMore: boolean;
-		facets: BrandSearchFacets;
-		query: string;
-	}
-
-	export interface CSVExportResponse {
-		csv: string;
-		totalCount: number;
-		campaignTitle: string;
-		exportedAt: string;
-		filename: string;
-	}
-
-	export interface Campaign {
-		id: string;
-		/**
-		 * Short display ID for UI (e.g., CPG-A3B7XWFK)
-		 */
-		displayId: string;
-
-		organizationId: string;
-		listingId: string;
-		title: string;
-		description?: string;
-		startDate: string;
-		endDate: string;
-		/**
-		 * Brand-relevant pricing only
-		 */
-		billRate?: number;
-
-		platformFee?: number;
-		maxEnrollments: number;
-		status: db.CampaignStatus;
-		campaignType: db.CampaignType;
-		isPublic: boolean;
-		slug?: string;
-		enrollmentExpiryDays: number;
-		/**
-		 * Rejection reason (only present when status is 'rejected')
-		 */
-		rejectionReason?: string;
-
-		/**
-		 * Actions the brand can take from the current status
-		 */
-		allowedActions: actions.CampaignEventType[];
-
-		createdAt: string;
-		updatedAt: string;
-	}
-
-	export type CampaignStateAction =
-		| "submit"
-		| "activate"
-		| "pause"
-		| "resume"
-		| "end"
-		| "cancel"
-		| "archive"
-		| "unarchive";
-
-	export interface CampaignStats {
-		campaignId: string;
-		totalEnrollments: number;
-		pendingEnrollments: number;
-		approvedEnrollments: number;
-		rejectedEnrollments: number;
-		cancelledEnrollments: number;
-		/**
-		 * Total order value in smallest units (paise)
-		 */
-		totalOrderValue: number;
-
-		/**
-		 * Decimal total order value for display
-		 */
-		totalOrderValueDecimal: string;
-
-		/**
-		 * Average order value in smallest units (paise)
-		 */
-		averageOrderValue: number;
-
-		/**
-		 * Decimal average order value for display
-		 */
-		averageOrderValueDecimal: string;
-
-		enrollmentRate: number;
-		approvalRate: number;
-		/**
-		 * Daily performance data - only included if startDate/endDate provided
-		 */
-		performance?: DailyPerformance[];
-	}
-
-	export interface CampaignTaskItem {
-		id: string;
-		taskTemplateId: string;
-		name: string;
-		slug: string;
-		category: string;
-		platformId?: string;
-		platformName?: string;
-		requireLink: boolean;
-		requireScreenshot: boolean;
-		instructions?: string;
-		isRequired: boolean;
-		sortOrder: number;
-		/**
-		 * Per-task platform fee in PAISE (brand sees their cost)
-		 */
-		platformFee: number;
-
-		/**
-		 * Per-task platform fee for display (e.g., "99.00")
-		 */
-		platformFeeDecimal: string;
-	}
-
-	export interface CampaignTaskResponse {
-		id: string;
-		campaignId: string;
-		taskTemplateId: string;
-		taskTemplate?: TaskTemplateResponse;
-		instructions?: string;
-		isRequired: boolean;
-		sortOrder: number;
-		requirements?: db.TaskRequirements;
-		createdAt: string;
-		updatedAt: string;
-	}
-
-	export interface CampaignWithStats {
-		currentEnrollments: number;
-		approvedCount: number;
-		rejectedCount: number;
-		pendingCount: number;
-		listing?: {
-			id: string;
-			name: string;
-			/**
-			 * Listing price in smallest units (paise)
-			 */
-			price: number;
-
-			/**
-			 * Decimal listing price for display
-			 */
-			priceDecimal: string;
-
-			listingImages: utils.ListingImageItem[];
-		};
-		tasks?: CampaignTaskItem[];
-		id: string;
-		/**
-		 * Short display ID for UI (e.g., CPG-A3B7XWFK)
-		 */
-		displayId: string;
-
-		organizationId: string;
-		listingId: string;
-		title: string;
-		description?: string;
-		startDate: string;
-		endDate: string;
-		/**
-		 * Brand-relevant pricing only
-		 */
-		billRate?: number;
-
-		platformFee?: number;
-		maxEnrollments: number;
-		status: db.CampaignStatus;
-		campaignType: db.CampaignType;
-		isPublic: boolean;
-		slug?: string;
-		enrollmentExpiryDays: number;
-		/**
-		 * Rejection reason (only present when status is 'rejected')
-		 */
-		rejectionReason?: string;
-
-		/**
-		 * Actions the brand can take from the current status
-		 */
-		allowedActions: actions.CampaignEventType[];
-
-		createdAt: string;
-		updatedAt: string;
-	}
-
-	export interface CreateAndSubmitRequest {
-		listingId: string;
-		title: string;
-		description?: string;
-		startDate: string;
-		endDate: string;
-		maxEnrollments: number;
-		campaignType?: db.CampaignType;
-		isPublic?: boolean;
-		termsAndConditions?: string;
-		/**
-		 * Tasks required for immediate submission — at least one
-		 */
-		tasks: CreateCampaignTask[];
-	}
-
-	export interface CreateCampaignRequest {
-		listingId: string;
-		title: string;
-		description?: string;
-		startDate: string;
-		endDate: string;
-		maxEnrollments: number;
-		campaignType?: db.CampaignType;
-		isPublic?: boolean;
-		termsAndConditions?: string;
-		/**
-		 * Tasks to add during creation (optional — at least one required before submission)
-		 */
-		tasks?: CreateCampaignTask[];
-	}
-
-	export interface CreateCampaignTask {
-		taskTemplateId: string;
-		isRequired?: boolean;
-		sortOrder?: number;
-		instructions?: string;
-	}
-
-	export interface CreateListingRequest {
-		name: string;
-		description?: string;
-		identifier: string;
-		categoryId?: string;
-		platformId?: string;
-		price: number;
-		currency?: utils.CurrencyCode;
-		link: string;
-		listingImages?: ListingImageInput[];
-		listingType?: db.ListingType;
-	}
-
-	export interface CreateOrgWithdrawalRequest {
-		amount: number;
-		notes?: string;
-		/**
-		 * WebAuthn assertion response from navigator.credentials.get() for passkey verification
-		 */
-		passkeyResponse: any;
-
-		/**
-		 * Challenge ID from GET /auth/passkey/reauth-options
-		 */
-		challengeId: string;
-	}
-
-	export interface DailyPerformance {
-		date: string;
-		enrollments: number;
-		approvals: number;
-		rejections: number;
-		orderValue: number;
-	}
-
-	export interface DashboardOverviewResponse {
-		stats: DashboardStats;
-		enrollmentChart: EnrollmentChartDataPoint[];
-		topCampaigns: TopCampaign[];
-		enrollmentDistribution: EnrollmentDistribution;
-		pendingEnrollments: PendingEnrollmentItem[];
-	}
-
-	export interface DashboardStats {
-		/**
-		 * Wallet balance in smallest units (paise)
-		 */
-		walletBalance: number;
-
-		/**
-		 * Decimal wallet balance for display
-		 */
-		walletBalanceDecimal: string;
-
-		/**
-		 * Held amount in smallest units (paise)
-		 */
-		heldAmount: number;
-
-		/**
-		 * Decimal held amount for display
-		 */
-		heldAmountDecimal: string;
-
-		/**
-		 * Average daily spend in smallest units (paise)
-		 */
-		avgDailySpend: number;
-
-		/**
-		 * Decimal average daily spend for display
-		 */
-		avgDailySpendDecimal: string;
-
-		/**
-		 * Low balance threshold in smallest units (paise)
-		 */
-		lowBalanceThreshold: number;
-
-		/**
-		 * Decimal low balance threshold for display
-		 */
-		lowBalanceThresholdDecimal: string;
-
-		/**
-		 * Credit limit in paise
-		 */
-		creditLimit: number;
-
-		/**
-		 * Credit limit for display
-		 */
-		creditLimitDecimal: string;
-
-		/**
-		 * Credit utilized in paise
-		 */
-		creditUtilized: number;
-
-		/**
-		 * Credit utilized for display
-		 */
-		creditUtilizedDecimal: string;
-
-		/**
-		 * Available balance (balance - held + credit available) in paise
-		 */
-		availableBalance: number;
-
-		/**
-		 * Available balance for display
-		 */
-		availableBalanceDecimal: string;
-
-		/**
-		 * Payment mode for the organization
-		 * - prefund: Brand funds wallet BEFORE enrollments (holds created at enrollment time)
-		 * - post_submission: Brand pays AFTER creator submits (no holds, direct transfer at approval)
-		 */
-		paymentMode: "prefund" | "post_submission";
-
-		/**
-		 * Pending commitments for post_submission mode (total value of pending enrollments)
-		 */
-		pendingCommitments?: number;
-
-		/**
-		 * Pending commitments for display
-		 */
-		pendingCommitmentsDecimal?: string;
-
-		/**
-		 * True when ledger service was unavailable — wallet values may be stale
-		 */
-		walletBalanceStale?: boolean;
-
-		/**
-		 * Campaigns
-		 */
-		totalCampaigns: number;
-
-		activeCampaigns: number;
-		draftCampaigns: number;
-		pausedCampaigns: number;
-		endedCampaigns: number;
-		endingSoon: number;
-		/**
-		 * Enrollments
-		 */
-		totalEnrollments: number;
-
-		pendingEnrollments: number;
-		approvedEnrollments: number;
-		rejectedEnrollments: number;
-		overdueEnrollments: number;
-		highValuePending: number;
-		/**
-		 * Trends
-		 */
-		enrollmentTrend: number;
-
-		approvalRateTrend: number;
-	}
-
-	export interface DepositAccountDetails {
-		id: string;
-		provider: string;
-		externalId: string;
-		accountNumber?: string;
-		ifsc?: string;
-		beneficiaryName?: string;
-		bankName?: string;
-		status: string;
-		isPrimary: boolean;
-	}
-
-	export interface DepositTransaction {
-		id: string;
-		amount: number;
-		amountDecimal: string;
-		currency: string;
-		status: "pending" | "completed" | "voided";
-		reference?: string;
-		description: string;
-		createdAt: string;
-	}
-
-	export interface EnrollmentChartDataPoint {
-		date: string;
-		enrollments: number;
-		approved: number;
-		rejected: number;
-		pending: number;
-	}
-
-	export interface EnrollmentDetail {
-		/**
-		 * Creator info - SECURITY: Only profileName and city, no real name/email/avatar
-		 */
-		creator: {
-			id: string;
-			displayId: string;
-			profileName: string;
-			city?: string;
-			approvalRate: number;
-			previousEnrollments: number;
-		};
-
-		/**
-		 * Campaign info
-		 */
-		campaign: {
-			id: string;
-			title: string;
-			status: string;
-			type: string;
-			listingName?: string;
-			listingImage?: string;
-		};
-
-		/**
-		 * Platform info
-		 */
-		platform?: {
-			id: string;
-			name: string;
-			type?: string;
-		};
-
-		/**
-		 * OCR scan data (if available)
-		 */
-		ocrData?: {
-			id: string;
-			screenshotUrl: string;
-			extractedOrderId?: string;
-			extractedOrderValue?: number;
-			extractedOrderValueDecimal?: string;
-			extractedPurchaseDate?: string;
-			extractedProductName?: string;
-			extractedSellerName?: string;
-			extractedPlatform?: string;
-			confidence?: number;
-			validationPassed?: boolean;
-			validationErrors?: OCRValidationErrors;
-		};
-
-		/**
-		 * Enrollment tasks with submissions
-		 */
-		tasks: {
-			enrollmentTaskId: string;
-			submissionId?: string;
-			taskName: string;
-			taskDescription?: string;
-			category: string;
-			isRequired: boolean;
-			requireLink: boolean;
-			requireScreenshot: boolean;
-			instructions?: string;
-			proofLink?: string;
-			proofScreenshot?: string;
-			submittedAt?: string;
-			feedback?: string;
-			platformName?: string;
-		}[];
-
-		/**
-		 * Per-task platform fee breakdown (brand sees their cost only, NOT bonus)
-		 */
-		taskFees?: {
-			taskId: string;
-			taskName: string;
-			platformFee: number;
-			platformFeeDecimal: string;
-		}[];
-
-		/**
-		 * Status history
-		 */
-		history: {
-			id: string;
-			fromStatus?: string;
-			toStatus: string;
-			changedBy?: string;
-			changedByName?: string;
-			reason?: string;
-			changedAt: string;
-		}[];
-
-		/**
-		 * Brand cost breakdown (what the brand pays - NO creator payout info)
-		 * SECURITY: Creator earnings are confidential between platform and creators
-		 */
-		brandCost: {
-			orderValue: number;
-			orderValueDecimal: string;
-			billRate: number;
-			platformFee: number;
-			platformFeeDecimal: string;
-			/**
-			 * Total amount brand pays (bill amount + platform fee + GST)
-			 */
-			totalCharge: number;
-
-			totalChargeDecimal: string;
-			gstAmount: number;
-			gstAmountDecimal: string;
-		};
-
-		/**
-		 * Rejection info (if rejected/changes requested)
-		 */
-		rejection?: {
-			reason: string;
-			feedback?: { [key: string]: string };
-			lastRejectedAt?: string;
-		};
-
-		id: string;
-		/**
-		 * Short display ID for UI (e.g., ENR-K7X4FA9B)
-		 */
-		displayId: string;
-
-		campaignId: string;
-		creatorId: string;
-		orderId: string;
-		currency: string;
-		/**
-		 * Order value in smallest units (paise)
-		 */
-		orderValue: number;
-
-		/**
-		 * Decimal order value for display
-		 */
-		orderValueDecimal: string;
-
-		purchaseDate?: string;
-		/**
-		 * Brand-relevant pricing (what brand pays)
-		 */
-		lockedBillRate: number;
-
-		/**
-		 * Platform fee in smallest units (paise)
-		 */
-		lockedPlatformFee: number;
-
-		/**
-		 * Decimal platform fee for display
-		 */
-		lockedPlatformFeeDecimal: string;
-
-		/**
-		 * Payment mode: prefund (hold created) or post_submission (pay at approval)
-		 */
-		paymentMode: db.PaymentMode;
-
-		status: db.EnrollmentStatus;
-		submittedAt?: string;
-		approvedAt?: string;
-		/**
-		 * Actions the brand can take on this enrollment
-		 */
-		allowedActions: internal.BrandAction[];
-
-		expiresAt?: string;
-		createdAt: string;
-		updatedAt: string;
-	}
-
-	export interface EnrollmentDistribution {
-		total: number;
-		approved: number;
-		rejected: number;
-		pending: number;
-	}
-
-	export type EnrollmentReviewAction = "approve" | "reject" | "request_changes";
-
-	export interface EnrollmentWithRelations {
-		creator?: {
-			id: string;
-			displayId: string;
-			profileName: string;
-			city?: string;
-			approvalRate: number;
-			previousEnrollments: number;
-		};
-		campaign?: {
-			id: string;
-			title: string;
-			status: string;
-		};
-		platform?: {
-			id: string;
-			name: string;
-		};
-		id: string;
-		/**
-		 * Short display ID for UI (e.g., ENR-K7X4FA9B)
-		 */
-		displayId: string;
-
-		campaignId: string;
-		creatorId: string;
-		orderId: string;
-		currency: string;
-		/**
-		 * Order value in smallest units (paise)
-		 */
-		orderValue: number;
-
-		/**
-		 * Decimal order value for display
-		 */
-		orderValueDecimal: string;
-
-		purchaseDate?: string;
-		/**
-		 * Brand-relevant pricing (what brand pays)
-		 */
-		lockedBillRate: number;
-
-		/**
-		 * Platform fee in smallest units (paise)
-		 */
-		lockedPlatformFee: number;
-
-		/**
-		 * Decimal platform fee for display
-		 */
-		lockedPlatformFeeDecimal: string;
-
-		/**
-		 * Payment mode: prefund (hold created) or post_submission (pay at approval)
-		 */
-		paymentMode: db.PaymentMode;
-
-		status: db.EnrollmentStatus;
-		submittedAt?: string;
-		approvedAt?: string;
-		/**
-		 * Actions the brand can take on this enrollment
-		 */
-		allowedActions: internal.BrandAction[];
-
-		expiresAt?: string;
-		createdAt: string;
-		updatedAt: string;
-		/**
-		 * Tasks (simplified for list view)
-		 */
-		tasks?: {
-			enrollmentTaskId: string;
-			taskName: string;
-			requireLink: boolean;
-			requireScreenshot: boolean;
-			isRequired: boolean;
-			instructions?: string;
-			proofLink?: string;
-			proofScreenshot?: string;
-		}[];
-	}
-
-	export interface FundWalletResponse {
-		walletId: string;
-		organizationId: string;
-		transactionId: string;
-		amount: number;
-		reason: string;
-		reference: string;
-		newBalance: number;
-		newBalanceDecimal: string;
-		currency: string;
-		fundedBy: string;
-		fundedAt: string;
-		message: string;
-	}
-
-	export interface GSTDetails {
-		gstNumber: string;
-		legalName: string;
-		tradeName?: string;
-		registrationDate?: string;
-		gstStatus: string;
-		businessType?: string;
-		address?: string;
-		isVerified: boolean;
-		verifiedAt?: string;
-	}
-
-	export interface GSTDetailsResponse {
-		gstDetails: GSTDetails | null;
-	}
-
-	export interface GSTPreviewResult {
-		gstNumber: string;
-		legalName: string;
-		tradeName?: string;
-		gstStatus: string;
-		address?: string;
-		phone?: string;
-		email?: string;
-		city?: string;
-		state?: string;
-		pinCode?: string;
-		businessType?: string;
-		registrationDate?: string;
-		stateCode: string;
-		isValid: boolean;
-	}
-
-	export interface Invoice {
-		id: string;
-		organizationId: string;
-		invoiceNumber: string;
-		issuedAt?: string;
-		dueDate: string;
-		periodStart?: string;
-		periodEnd?: string;
-		/**
-		 * Subtotal in smallest units (paise)
-		 */
-		subtotal: number;
-
-		/**
-		 * Decimal subtotal for display
-		 */
-		subtotalDecimal: string;
-
-		/**
-		 * GST amount in smallest units (paise)
-		 */
-		gstAmount: number;
-
-		/**
-		 * Decimal GST amount for display
-		 */
-		gstAmountDecimal: string;
-
-		gstRate: number;
-		tdsRate: number;
-		/**
-		 * TDS amount in smallest units (paise)
-		 */
-		tdsAmount: number;
-
-		/**
-		 * Decimal TDS amount for display
-		 */
-		tdsAmountDecimal: string;
-
-		/**
-		 * Total amount in smallest units (paise)
-		 */
-		totalAmount: number;
-
-		/**
-		 * Decimal total amount for display
-		 */
-		totalAmountDecimal: string;
-
-		/**
-		 * Amount paid in smallest units (paise)
-		 */
-		amountPaid: number;
-
-		/**
-		 * Decimal amount paid for display
-		 */
-		amountPaidDecimal: string;
-
-		status: db.InvoiceStatus;
-		pdfUrl?: string;
-		notes?: string;
-		createdAt: string;
-		/**
-		 * UI-required fields
-		 */
-		enrollmentCount: number;
-
-		paidAt?: string;
-		/**
-		 * Line items included in getInvoice response
-		 */
-		lineItems?: InvoiceLineItem[];
-	}
-
-	export interface InvoiceLineItem {
-		id: string;
-		invoiceId: string;
-		enrollmentId?: string;
-		description: string;
-		quantity: number;
-		/**
-		 * Rate in smallest units (paise)
-		 */
-		rate: number;
-
-		/**
-		 * Decimal rate for display
-		 */
-		rateDecimal: string;
-
-		/**
-		 * Amount in smallest units (paise)
-		 */
-		amount: number;
-
-		/**
-		 * Decimal amount for display
-		 */
-		amountDecimal: string;
-	}
-
-	export interface ListCampaignsParams {
-		skip?: number;
-		take?: number;
-		/**
-		 * Single status or comma-separated statuses (e.g., "active,paused")
-		 */
-		status?: string;
-
-		listingId?: string;
-		platformId?: string;
-		categoryId?: string;
-		search?: string;
-		startDateFrom?: string;
-		startDateTo?: string;
-		sortBy?: "createdAt" | "startDate" | "endDate" | "title";
-		sortOrder?: "asc" | "desc";
-	}
-
-	export interface ListInvoicesParams {
-		skip?: number;
-		take?: number;
-		status?: db.InvoiceStatus;
-		/**
-		 * Search by invoice number or notes
-		 */
-		q?: string;
-
-		issuedDateFrom?: string;
-		issuedDateTo?: string;
-		dueDateFrom?: string;
-		dueDateTo?: string;
-		amountMin?: number;
-		amountMax?: number;
-		sortBy?: "createdAt" | "issuedAt" | "dueDate" | "totalAmount";
-		sortOrder?: "asc" | "desc";
-	}
-
-	export interface ListOrganizationListingsParams {
-		skip?: number;
-		take?: number;
-		categoryId?: string;
-		platformId?: string;
-		search?: string;
-		priceMin?: number;
-		priceMax?: number;
-		sortBy?: "createdAt" | "name" | "price";
-		sortOrder?: "asc" | "desc";
-	}
-
-	export interface Listing {
-		id: string;
-		organizationId: string;
-		categoryId?: string;
-		platformId?: string;
-		name: string;
-		slug?: string;
-		description?: string;
-		identifier?: string;
-		price: number;
-		priceDecimal: string;
-		currency: string;
-		link: string;
-		listingImages: utils.ListingImageItem[];
-		views: number;
-		createdBy: string;
-		updatedBy?: string;
-		createdAt: string;
-		updatedAt: string;
-	}
-
-	export interface ListingImageInput {
-		imageUrl: string;
-		sortOrder?: number;
-		altText?: string;
-		isPrimary?: boolean;
-	}
-
-	export interface ListingWithStats {
-		isActive: boolean;
-		campaignCount: number;
-		id: string;
-		organizationId: string;
-		categoryId?: string;
-		platformId?: string;
-		name: string;
-		slug?: string;
-		description?: string;
-		identifier?: string;
-		price: number;
-		priceDecimal: string;
-		currency: string;
-		link: string;
-		listingImages: utils.ListingImageItem[];
-		views: number;
-		createdBy: string;
-		updatedBy?: string;
-		createdAt: string;
-		updatedAt: string;
-	}
-
-	export interface OCRValidationErrors {
-		orderIdMismatch?: boolean;
-		orderValueMismatch?: boolean;
-		purchaseDateMismatch?: boolean;
-		listingNameMismatch?: boolean;
-		sellerNameMismatch?: boolean;
-		platformMismatch?: boolean;
-		dateOutOfRange?: boolean;
-		amountBelowMinimum?: boolean;
-		amountAboveMaximum?: boolean;
-		duplicateOrder?: boolean;
-		invalidFormat?: boolean;
-		unreadableImage?: boolean;
-		missingRequiredFields?: string[];
-		extractionFailed?: boolean;
-		confidenceTooLow?: boolean;
-		errorMessage?: string;
-		errorCode?: string;
-	}
-
-	export interface OrgActivityDetails {
-		reason?: string;
-		status?: string;
-		previousStatus?: string;
-		newStatus?: string;
-		campaignId?: string;
-		campaignTitle?: string;
-		enrollmentId?: string;
-		memberId?: string;
-		memberEmail?: string;
-		memberRole?: string;
-		amount?: number;
-		currency?: string;
-		invoiceId?: string;
-		invoiceNumber?: string;
-		errorMessage?: string;
-		metadata?: string;
-	}
-
-	export interface Organization {
-		id: string;
-		name: string;
-		slug: string;
-		logo?: string;
-		description?: string;
-		website?: string;
-		/**
-		 * GST details
-		 */
-		gstNumber?: string;
-
-		gstVerified: boolean;
-		gstLegalName?: string;
-		gstTradeName?: string;
-		/**
-		 * Business details
-		 */
-		businessType?: string;
-
-		industryCategory?: string;
-		/**
-		 * Contact
-		 */
-		contactPerson?: string;
-
-		phoneNumber?: string;
-		email?: string;
-		/**
-		 * Status/tier
-		 */
-		status: db.OrganizationStatus;
-
-		accountTier: db.AccountTier;
-		/**
-		 * Payment mode: prefund (wallet must have balance) or post_submission (pay after approval)
-		 */
-		paymentMode: db.PaymentMode;
-
-		/**
-		 * Credit limit in smallest units (paise)
-		 */
-		creditLimit?: number;
-
-		/**
-		 * Decimal credit limit for display
-		 */
-		creditLimitDecimal?: string;
-
-		/**
-		 * Payment readiness flags
-		 */
-		paymentInReady: boolean;
-
-		payoutReady: boolean;
-		/**
-		 * Address
-		 */
-		address?: string;
-
-		city?: string;
-		state?: string;
-		country?: string;
-		postalCode?: string;
-		/**
-		 * Timestamps
-		 */
-		createdAt: string;
-
-		updatedAt: string;
-	}
-
-	export interface OrganizationBankAccount {
-		id: string;
-		organizationId: string;
-		accountHolderName: string;
-		accountNumber: string;
-		accountNumberFull?: string;
-		bankName: string;
-		ifscCode: string;
-		accountType: "current" | "savings";
-		isVerified: boolean;
-		/**
-		 * NOTE: isDefault removed - orgs can only have 1 bank account, so always default
-		 */
-		verifiedAt?: string;
-
-		createdAt: string;
-		updatedAt: string;
-	}
-
-	export interface OrganizationWalletResponse {
-		id: string;
-		organizationId: string;
-		ledgerAccountId?: string;
-		currency: string;
-		/**
-		 * Balance in smallest units
-		 */
-		balance: number;
-
-		/**
-		 * Decimal balance for display
-		 */
-		balanceDecimal: string;
-
-		/**
-		 * Pending balance in smallest units
-		 */
-		pendingBalance: number;
-
-		/**
-		 * Decimal pending balance for display
-		 */
-		pendingBalanceDecimal: string;
-
-		/**
-		 * Available balance in smallest units
-		 */
-		availableBalance: number;
-
-		/**
-		 * Decimal available balance for display
-		 */
-		availableBalanceDecimal: string;
-
-		createdAt: string;
-		/**
-		 * Credit limit in smallest units
-		 */
-		creditLimit?: number;
-
-		/**
-		 * Decimal credit limit for display
-		 */
-		creditLimitDecimal?: string;
-
-		/**
-		 * Credit utilized in smallest units
-		 */
-		creditUtilized?: number;
-
-		/**
-		 * Decimal credit utilized for display
-		 */
-		creditUtilizedDecimal?: string;
-
-		/**
-		 * True when ledger service was unavailable — balance/pending values may be stale
-		 */
-		balanceStale?: boolean;
-
-		/**
-		 * Payment mode: prefund (holds at enrollment) or post_submission (pay after submission)
-		 */
-		paymentMode?: "prefund" | "post_submission";
-
-		/**
-		 * Pending commitments in smallest units (post_submission only — total value of pending enrollments)
-		 */
-		pendingCommitments?: number;
-
-		/**
-		 * Decimal pending commitments for display
-		 */
-		pendingCommitmentsDecimal?: string;
-
-		/**
-		 * True when wallet is frozen by admin — operations will be rejected
-		 */
-		isFrozen?: boolean;
-
-		depositAccount?: DepositAccountDetails;
-	}
-
-	export interface OrganizationWithdrawalStats {
-		currency: string;
-		totalAmount: number;
-		totalAmountDecimal: string;
-		totalCount: number;
-		countByStatus: { [key: string]: number };
-		amountByStatus: { [key: string]: number };
-		amountByStatusDecimal: { [key: string]: string };
-		averageAmount: number;
-		averageAmountDecimal: string;
-		pendingApprovalCount: number;
-		pendingApprovalAmount: number;
-		pendingApprovalAmountDecimal: string;
-	}
-
-	export interface PendingEnrollmentItem {
-		id: string;
-		orderId: string;
-		/**
-		 * Order value in smallest units (paise)
-		 */
-		orderValue: number;
-
-		/**
-		 * Decimal order value for display
-		 */
-		orderValueDecimal: string;
-
-		createdAt: string;
-		campaign: {
-			id: string;
-			title: string;
-			listing: {
-				image: string | null;
-			} | null;
-		};
-		creator: {
-			id: string;
-			name: string;
-		};
-	}
-
-	export interface SearchCampaignInfo {
-		id: string;
-		title: string;
-	}
-
-	export interface SearchCreatorInfo {
-		id: string;
-		displayId: string;
-		displayName: string;
-	}
-
-	export interface SearchListingInfo {
-		id: string;
-		name: string;
-		priceDecimal?: string;
-		primaryImage?: string;
-	}
-
-	export interface SearchPlatformInfo {
-		id: string;
-		name: string;
-		icon?: string;
-	}
-
-	export interface TaskFeedbackItem {
-		/**
-		 * Task submission ID
-		 */
-		submissionId: string;
-
-		/**
-		 * Feedback text for this specific task
-		 */
-		feedback: string;
-	}
-
-	export interface TaskTemplateResponse {
-		id: string;
-		name: string;
-		slug: string;
-		description?: string;
-		category: db.TaskCategory;
-		platformId?: string;
-		platformName?: string;
-		requireLink: boolean;
-		requireScreenshot: boolean;
-		defaultRequirements?: db.TaskRequirements;
-		exampleUrl?: string;
-		status: db.TaskTemplateStatus;
-		createdAt: string;
-		updatedAt: string;
-	}
-
-	export interface TopCampaign {
-		id: string;
-		name: string;
-		listingImage: string | null;
-		enrollments: number;
-		approvalRate: number;
-		status: "active" | "ending" | "paused";
-		daysLeft: number;
-	}
-
-	export interface UpdateListingRequest {
-		name?: string;
-		description?: string;
-		identifier?: string;
-		categoryId?: string;
-		platformId?: string;
-		price?: number;
-		currency?: utils.CurrencyCode;
-		link?: string;
-		listingImages?: ListingImageInput[];
-	}
-
-	export interface VerifyBankAccountDetailsRequest {
-		accountNumber: string;
-		ifscCode: string;
-	}
-
-	export interface VirtualAccountResponse {
-		organizationId: string;
-		virtualAccount: {
-			accountNumber: string;
-			ifscCode: string;
-			bankName: string;
-			accountHolderName: string;
-			upiId?: string;
-			createdAt: string;
-		} | null;
-		status: "not_provisioned" | "pending" | "active";
-	}
-
-	export interface WalletTransaction {
-		id: string;
-		walletId: string;
-		type: "credit" | "debit";
-		/**
-		 * Transaction status: pending (inflight hold), completed (applied), or voided (expired)
-		 */
-		status: "pending" | "completed" | "voided";
-
-		/**
-		 * Amount in smallest units
-		 */
-		amount: number;
-
-		/**
-		 * Decimal string (e.g., "254.90")
-		 */
-		amountDecimal: string;
-
-		/**
-		 * Currency code (ISO 4217)
-		 */
-		currency: string;
-
-		description: string;
-		/**
-		 * Transaction reference ID (for debugging and reconciliation)
-		 */
-		reference?: string;
-
-		/**
-		 * Enrollment ID if this is an enrollment-related transaction
-		 */
-		enrollmentId?: string;
-
-		/**
-		 * Transaction category for better UX
-		 */
-		category?: "enrollment_hold" | "deposit" | "payout" | "refund" | "admin_credit" | "other";
-
-		createdAt: string;
-	}
-
-	export interface Withdrawal {
-		id: string;
-		displayId: string;
-		holderId: string;
-		holderType: "organization" | "creator";
-		/**
-		 * Amount in smallest units
-		 */
-		amount: number;
-
-		/**
-		 * Decimal string (e.g., "254.90")
-		 */
-		amountDecimal: string;
-
-		/**
-		 * Currency code (ISO 4217)
-		 */
-		currency: string;
-
-		status: db.WithdrawalStatus;
-		withdrawalMethodId?: string;
-		requiresApproval: boolean;
-		approvedBy?: string;
-		approvedAt?: string;
-		rejectionReason?: string;
-		/**
-		 * Bank UTR (Unique Transaction Reference) for completed withdrawals
-		 */
-		utr?: string;
-
-		/**
-		 * Reason for failure from payment gateway
-		 */
-		failureReason?: string;
-
-		requestedAt: string;
-		processedAt?: string;
-	}
-
-	export class ServiceClient {
-		private baseClient: BaseClient;
-
-		constructor(baseClient: BaseClient) {
-			this.baseClient = baseClient;
-			this.addBankAccount = this.addBankAccount.bind(this);
-			this.addCampaignTask = this.addCampaignTask.bind(this);
-			this.archiveNotifications = this.archiveNotifications.bind(this);
-			this.batchEnrollments = this.batchEnrollments.bind(this);
-			this.cancelCampaign = this.cancelCampaign.bind(this);
-			this.cancelWithdrawalRequest = this.cancelWithdrawalRequest.bind(this);
-			this.changeOrgPhone = this.changeOrgPhone.bind(this);
-			this.createAndSubmitCampaign = this.createAndSubmitCampaign.bind(this);
-			this.createCampaign = this.createCampaign.bind(this);
-			this.createListing = this.createListing.bind(this);
-			this.createWithdrawalRequest = this.createWithdrawalRequest.bind(this);
-			this.deleteAllNotifications = this.deleteAllNotifications.bind(this);
-			this.deleteBankAccount = this.deleteBankAccount.bind(this);
-			this.deleteListing = this.deleteListing.bind(this);
-			this.deleteNotifications = this.deleteNotifications.bind(this);
-			this.duplicateCampaign = this.duplicateCampaign.bind(this);
-			this.exportEnrollments = this.exportEnrollments.bind(this);
-			this.exportOrganizationEnrollments = this.exportOrganizationEnrollments.bind(this);
-			this.generateInvoicePDF = this.generateInvoicePDF.bind(this);
-			this.getCampaign = this.getCampaign.bind(this);
-			this.getCampaignStats = this.getCampaignStats.bind(this);
-			this.getDashboardOverview = this.getDashboardOverview.bind(this);
-			this.getEnrollment = this.getEnrollment.bind(this);
-			this.getGSTDetails = this.getGSTDetails.bind(this);
-			this.getInvoice = this.getInvoice.bind(this);
-			this.getOrganization = this.getOrganization.bind(this);
-			this.getOrganizationActivity = this.getOrganizationActivity.bind(this);
-			this.getOrganizationBankAccount = this.getOrganizationBankAccount.bind(this);
-			this.getOrganizationListing = this.getOrganizationListing.bind(this);
-			this.getOrganizationWallet = this.getOrganizationWallet.bind(this);
-			this.getOrganizationWalletTransactions = this.getOrganizationWalletTransactions.bind(this);
-			this.getOrganizationWithdrawalStats = this.getOrganizationWithdrawalStats.bind(this);
-			this.getPreferences = this.getPreferences.bind(this);
-			this.getSetupProgress = this.getSetupProgress.bind(this);
-			this.getUnreadCount = this.getUnreadCount.bind(this);
-			this.getVirtualAccount = this.getVirtualAccount.bind(this);
-			this.getWalletHolds = this.getWalletHolds.bind(this);
-			this.getWithdrawalRequest = this.getWithdrawalRequest.bind(this);
-			this.listCampaignTasks = this.listCampaignTasks.bind(this);
-			this.listCampaigns = this.listCampaigns.bind(this);
-			this.listDeposits = this.listDeposits.bind(this);
-			this.listInvoices = this.listInvoices.bind(this);
-			this.listNotifications = this.listNotifications.bind(this);
-			this.listOrganizationEnrollments = this.listOrganizationEnrollments.bind(this);
-			this.listOrganizationListings = this.listOrganizationListings.bind(this);
-			this.listTokens = this.listTokens.bind(this);
-			this.listWithdrawalRequests = this.listWithdrawalRequests.bind(this);
-			this.markAllRead = this.markAllRead.bind(this);
-			this.markRead = this.markRead.bind(this);
-			this.registerToken = this.registerToken.bind(this);
-			this.removeCampaignTask = this.removeCampaignTask.bind(this);
-			this.removeToken = this.removeToken.bind(this);
-			this.streamSetupProgress = this.streamSetupProgress.bind(this);
-			this.unifiedSearch = this.unifiedSearch.bind(this);
-			this.updateCampaign = this.updateCampaign.bind(this);
-			this.updateCampaignState = this.updateCampaignState.bind(this);
-			this.updateCampaignTask = this.updateCampaignTask.bind(this);
-			this.updateEnrollmentReview = this.updateEnrollmentReview.bind(this);
-			this.updateListing = this.updateListing.bind(this);
-			this.updateOrganization = this.updateOrganization.bind(this);
-			this.updatePreferences = this.updatePreferences.bind(this);
-			this.verifyBankAccountDetails = this.verifyBankAccountDetails.bind(this);
-			this.verifyGSTPreview = this.verifyGSTPreview.bind(this);
-		}
-
-		/**
-		 * =============================================================================
-		 * STEP 2: Add verified bank account (requires validationId from Step 1)
-		 * =============================================================================
-		 */
-		public async addBankAccount(
-			organizationId: string,
-			params: AddBankAccountRequest
-		): Promise<OrganizationBankAccount> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/organizations/${encodeURIComponent(organizationId)}/bank-accounts`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as OrganizationBankAccount;
-		}
-
-		/**
-		 * Add task to campaign (draft/paused only)
-		 */
-		public async addCampaignTask(
-			organizationId: string,
-			campaignId: string,
-			params: {
-				taskTemplateId: string;
-				isRequired?: boolean;
-				sortOrder?: number;
-				instructions?: string;
-				requirements?: db.TaskRequirements;
-			}
-		): Promise<CampaignTaskResponse> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/organizations/${encodeURIComponent(organizationId)}/campaigns/${encodeURIComponent(campaignId)}/tasks`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as CampaignTaskResponse;
-		}
-
-		public async archiveNotifications(
-			organizationId: string,
-			params: {
-				ids: string[];
-			}
-		): Promise<void> {
-			await this.baseClient.callTypedAPI(
-				"POST",
-				`/organizations/${encodeURIComponent(organizationId)}/notifications/archive`,
-				JSON.stringify(params)
-			);
-		}
-
-		/**
-		 * POST /organizations/:organizationId/enrollments/batch
-		 * Unified batch operations for enrollments
-		 * Replaces: bulkApproveEnrollments, bulkRejectEnrollments
-		 */
-		public async batchEnrollments(
-			organizationId: string,
-			params: {
-				action: "approve" | "reject" | "request_changes";
-				ids: string[];
-				reason?: string;
-				remarks?: string;
-			}
-		): Promise<{
-			processed: number;
-			failed: number;
-			errors: { [key: string]: string };
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/organizations/${encodeURIComponent(organizationId)}/enrollments/batch`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as {
-				processed: number;
-				failed: number;
-				errors: { [key: string]: string };
-			};
-		}
-
-		/**
-		 * Cancel or delete campaign
-		 * - Draft/rejected with 0 enrollments → hard delete (campaign + tasks removed from DB)
-		 * - Non-draft with enrollments → cancel (status → cancelled) to preserve audit trail
-		 */
-		public async cancelCampaign(
-			organizationId: string,
-			id: string
-		): Promise<{
-			success: boolean;
-			action: "deleted" | "cancelled";
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/organizations/${encodeURIComponent(organizationId)}/campaigns/${encodeURIComponent(id)}/cancel`
-			);
-			return (await resp.json()) as {
-				success: boolean;
-				action: "deleted" | "cancelled";
-			};
-		}
-
-		/**
-		 * POST /organizations/:organizationId/withdrawals/:withdrawalId/cancel
-		 * Cancel withdrawal request (brand)
-		 * Only pending requests that haven't been processed can be cancelled
-		 */
-		public async cancelWithdrawalRequest(
-			organizationId: string,
-			withdrawalId: string,
-			params: {
-				reason?: string;
-			}
-		): Promise<Withdrawal> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/organizations/${encodeURIComponent(organizationId)}/withdrawals/${encodeURIComponent(withdrawalId)}/cancel`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as Withdrawal;
-		}
-
-		/**
-		 * POST /organizations/:organizationId/change-phone
-		 * Change organization phone number with passkey re-authentication.
-		 *
-		 * Single-step flow: verifies passkey, then updates phone number.
-		 * Replaces the previous 2-step OTP flow (request-phone-change → verify-phone-change).
-		 */
-		public async changeOrgPhone(
-			organizationId: string,
-			params: {
-				phoneNumber: string;
-				/**
-				 * WebAuthn assertion response from navigator.credentials.get()
-				 */
-				passkeyResponse: any;
-
-				/**
-				 * Challenge ID from GET /auth/passkey/reauth-options
-				 */
-				challengeId: string;
-			}
-		): Promise<Organization> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/organizations/${encodeURIComponent(organizationId)}/change-phone`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as Organization;
-		}
-
-		/**
-		 * POST /organizations/:organizationId/campaigns/submit
-		 * Creates a campaign AND submits it for approval in a single call.
-		 * Tasks are required (at least one) since submission validates task count.
-		 * Returns the campaign in pending_approval status.
-		 */
-		public async createAndSubmitCampaign(
-			organizationId: string,
-			params: CreateAndSubmitRequest
-		): Promise<Campaign> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/organizations/${encodeURIComponent(organizationId)}/campaigns/submit`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as Campaign;
-		}
-
-		/**
-		 * Create a new campaign (requires organization membership)
-		 */
-		public async createCampaign(
-			organizationId: string,
-			params: CreateCampaignRequest
-		): Promise<Campaign> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/organizations/${encodeURIComponent(organizationId)}/campaigns`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as Campaign;
-		}
-
-		/**
-		 * Create a new listing
-		 */
-		public async createListing(
-			organizationId: string,
-			params: CreateListingRequest
-		): Promise<Listing> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/organizations/${encodeURIComponent(organizationId)}/listings`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as Listing;
-		}
-
-		/**
-		 * POST /organizations/:organizationId/withdrawals
-		 * Create withdrawal request with passkey verification (brand).
-		 *
-		 * Single-step flow: validates balance, verifies passkey, creates withdrawal + hold atomically.
-		 * NOTE: Organizations can only have ONE bank account (closed-loop policy).
-		 * Withdrawals go to the same bank account they use for deposits.
-		 */
-		public async createWithdrawalRequest(
-			organizationId: string,
-			params: CreateOrgWithdrawalRequest
-		): Promise<Withdrawal> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/organizations/${encodeURIComponent(organizationId)}/withdrawals`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as Withdrawal;
-		}
-
-		public async deleteAllNotifications(organizationId: string): Promise<void> {
-			await this.baseClient.callTypedAPI(
-				"POST",
-				`/organizations/${encodeURIComponent(organizationId)}/notifications/delete-all`
-			);
-		}
-
-		/**
-		 * Delete organization's bank account (soft delete, singular - only 1 per org)
-		 * URL-based multi-tenancy: organizationId comes from URL path
-		 */
-		public async deleteBankAccount(organizationId: string): Promise<{
-			success: boolean;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"DELETE",
-				`/organizations/${encodeURIComponent(organizationId)}/bank-accounts`
-			);
-			return (await resp.json()) as {
-				success: boolean;
-			};
-		}
-
-		/**
-		 * Delete listing
-		 */
-		public async deleteListing(
-			organizationId: string,
-			id: string
-		): Promise<{
-			success: boolean;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"DELETE",
-				`/organizations/${encodeURIComponent(organizationId)}/listings/${encodeURIComponent(id)}`
-			);
-			return (await resp.json()) as {
-				success: boolean;
-			};
-		}
-
-		public async deleteNotifications(
-			organizationId: string,
-			params: {
-				ids: string[];
-			}
-		): Promise<void> {
-			await this.baseClient.callTypedAPI(
-				"POST",
-				`/organizations/${encodeURIComponent(organizationId)}/notifications/delete`,
-				JSON.stringify(params)
-			);
-		}
-
-		/**
-		 * Duplicate campaign (creates a copy in draft status)
-		 */
-		public async duplicateCampaign(
-			organizationId: string,
-			id: string,
-			params: {
-				newTitle?: string;
-			}
-		): Promise<Campaign> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/organizations/${encodeURIComponent(organizationId)}/campaigns/${encodeURIComponent(id)}/duplicate`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as Campaign;
-		}
-
-		/**
-		 * Export enrollments data as CSV
-		 * SECURITY: Creator payout data and PII NOT included in brand exports
-		 * Only profileName and city exposed - no real name/email
-		 */
-		public async exportEnrollments(
-			organizationId: string,
-			campaignId: string,
-			params: {
-				status?: db.EnrollmentStatus;
-			}
-		): Promise<CSVExportResponse> {
-			// Convert our params into the objects we need for the request
-			const query = makeRecord<string, string | string[]>({
-				status: params.status === undefined ? undefined : String(params.status),
-			});
-
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/campaigns/${encodeURIComponent(campaignId)}/enrollments/export`,
-				undefined,
-				{ query }
-			);
-			return (await resp.json()) as CSVExportResponse;
-		}
-
-		/**
-		 * Org-wide enrollment export (all campaigns)
-		 */
-		public async exportOrganizationEnrollments(
-			organizationId: string,
-			params: {
-				status?: db.EnrollmentStatus;
-				campaignId?: string;
-				createdFrom?: string;
-				createdTo?: string;
-			}
-		): Promise<{
-			csv: string;
-			totalCount: number;
-			exportedAt: string;
-			filename: string;
-		}> {
-			// Convert our params into the objects we need for the request
-			const query = makeRecord<string, string | string[]>({
-				campaignId: params.campaignId,
-				createdFrom: params.createdFrom,
-				createdTo: params.createdTo,
-				status: params.status === undefined ? undefined : String(params.status),
-			});
-
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/enrollments/export`,
-				undefined,
-				{ query }
-			);
-			return (await resp.json()) as {
-				csv: string;
-				totalCount: number;
-				exportedAt: string;
-				filename: string;
-			};
-		}
-
-		/**
-		 * Generate invoice PDF
-		 */
-		public async generateInvoicePDF(
-			organizationId: string,
-			id: string
-		): Promise<{
-			pdfUrl: string;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/invoices/${encodeURIComponent(id)}/pdf`
-			);
-			return (await resp.json()) as {
-				pdfUrl: string;
-			};
-		}
-
-		/**
-		 * Get campaign by ID - secured endpoint for campaign owners/org members (brand-only, creators use getPublicCampaign)
-		 */
-		public async getCampaign(organizationId: string, id: string): Promise<CampaignWithStats> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/campaigns/${encodeURIComponent(id)}`
-			);
-			return (await resp.json()) as CampaignWithStats;
-		}
-
-		/**
-		 * Get campaign statistics (with optional daily performance data)
-		 * Pass startDate and endDate query params to include daily performance breakdown
-		 */
-		public async getCampaignStats(
-			organizationId: string,
-			id: string,
-			params: {
-				/**
-				 * Optional: Include daily performance from this date (YYYY-MM-DD)
-				 */
-				startDate?: string;
-
-				/**
-				 * Optional: Include daily performance until this date (YYYY-MM-DD)
-				 */
-				endDate?: string;
-			}
-		): Promise<CampaignStats> {
-			// Convert our params into the objects we need for the request
-			const query = makeRecord<string, string | string[]>({
-				endDate: params.endDate,
-				startDate: params.startDate,
-			});
-
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/campaigns/${encodeURIComponent(id)}/stats`,
-				undefined,
-				{ query }
-			);
-			return (await resp.json()) as CampaignStats;
-		}
-
-		/**
-		 * Get comprehensive dashboard overview for organization
-		 */
-		public async getDashboardOverview(
-			organizationId: string,
-			params: {
-				days?: number;
-			}
-		): Promise<DashboardOverviewResponse> {
-			// Convert our params into the objects we need for the request
-			const query = makeRecord<string, string | string[]>({
-				days: params.days === undefined ? undefined : String(params.days),
-			});
-
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/dashboard`,
-				undefined,
-				{ query }
-			);
-			return (await resp.json()) as DashboardOverviewResponse;
-		}
-
-		/**
-		 * GET /organizations/:organizationId/enrollments/:id
-		 * Get enrollment with full details - SINGLE endpoint for all brand enrollment fetches
-		 * No campaignId required - validates via campaign relationship
-		 * Always returns full detail (creator, campaign, platform, OCR, tasks, history, pricing)
-		 */
-		public async getEnrollment(organizationId: string, id: string): Promise<EnrollmentDetail> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/enrollments/${encodeURIComponent(id)}`
-			);
-			return (await resp.json()) as EnrollmentDetail;
-		}
-
-		/**
-		 * Get GST details
-		 * URL-based multi-tenancy: organizationId comes from URL path
-		 */
-		public async getGSTDetails(organizationId: string): Promise<GSTDetailsResponse> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/gst`
-			);
-			return (await resp.json()) as GSTDetailsResponse;
-		}
-
-		/**
-		 * Get invoice by ID (with enrollment count)
-		 */
-		public async getInvoice(organizationId: string, id: string): Promise<Invoice> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/invoices/${encodeURIComponent(id)}`
-			);
-			return (await resp.json()) as Invoice;
-		}
-
-		/**
-		 * Get organization profile
-		 */
-		public async getOrganization(organizationId: string): Promise<Organization> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}`
-			);
-			return (await resp.json()) as Organization;
-		}
-
-		/**
-		 * Get organization activity timeline - CURSOR PAGINATION
-		 * URL-based multi-tenancy: organizationId comes from URL path
-		 * Uses cursor for infinite scroll in activity feed
-		 */
-		public async getOrganizationActivity(
-			organizationId: string,
-			params: {
-				cursor?: string;
-				limit?: number;
-				entityType?:
-					| "organization"
-					| "campaign"
-					| "enrollment"
-					| "withdrawal"
-					| "listing"
-					| "invoice";
-			}
-		): Promise<{
-			data: ActivityLogEntry[];
-			nextCursor: string | null;
-			hasMore: boolean;
-		}> {
-			// Convert our params into the objects we need for the request
-			const query = makeRecord<string, string | string[]>({
-				cursor: params.cursor,
-				entityType: params.entityType === undefined ? undefined : String(params.entityType),
-				limit: params.limit === undefined ? undefined : String(params.limit),
-			});
-
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/activity`,
-				undefined,
-				{ query }
-			);
-			return (await resp.json()) as {
-				data: ActivityLogEntry[];
-				nextCursor: string | null;
-				hasMore: boolean;
-			};
-		}
-
-		/**
-		 * Get organization's bank account (singular - only 1 allowed per org)
-		 * URL-based multi-tenancy: organizationId comes from URL path
-		 * showFull query param: if true, includes full account number (owner/admin only)
-		 */
-		public async getOrganizationBankAccount(
-			organizationId: string,
-			params: {
-				showFull?: boolean;
-			}
-		): Promise<{
-			bankAccount: OrganizationBankAccount | null;
-		}> {
-			// Convert our params into the objects we need for the request
-			const query = makeRecord<string, string | string[]>({
-				showFull: params.showFull === undefined ? undefined : String(params.showFull),
-			});
-
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/bank-accounts`,
-				undefined,
-				{ query }
-			);
-			return (await resp.json()) as {
-				bankAccount: OrganizationBankAccount | null;
-			};
-		}
-
-		/**
-		 * Get organization listing by ID (brand-only)
-		 * Organization-scoped endpoint for brands to view their own listing details
-		 */
-		public async getOrganizationListing(
-			organizationId: string,
-			id: string
-		): Promise<ListingWithStats> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/listings/${encodeURIComponent(id)}`
-			);
-			return (await resp.json()) as ListingWithStats;
-		}
-
-		/**
-		 * Get organization wallet
-		 */
-		public async getOrganizationWallet(
-			organizationId: string
-		): Promise<OrganizationWalletResponse> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/wallet`
-			);
-			return (await resp.json()) as OrganizationWalletResponse;
-		}
-
-		/**
-		 * Get organization wallet transactions (brand)
-		 * Uses ledger's native page/per_page pagination for efficient fetching.
-		 */
-		public async getOrganizationWalletTransactions(
-			organizationId: string,
-			params: {
-				skip?: number;
-				take?: number;
-				/**
-				 * Filter by transaction status: pending (inflight hold), completed (posted), voided
-				 */
-				status?: "pending" | "completed" | "voided";
-
-				/**
-				 * Filter by transaction category: enrollment_hold, deposit, payout, refund, admin_credit
-				 */
-				category?: "enrollment_hold" | "deposit" | "payout" | "refund" | "admin_credit";
-
-				/**
-				 * Filter by transaction type: credit (money in), debit (money out)
-				 */
-				type?: "credit" | "debit";
-
-				/**
-				 * Filter transactions from this date (ISO 8601)
-				 */
-				dateFrom?: string;
-
-				/**
-				 * Filter transactions until this date (ISO 8601)
-				 */
-				dateTo?: string;
-
-				/**
-				 * Filter transactions with amount >= this value (smallest units)
-				 */
-				amountMin?: number;
-
-				/**
-				 * Filter transactions with amount <= this value (smallest units)
-				 */
-				amountMax?: number;
-
-				sortBy?: "createdAt" | "amount";
-				sortOrder?: "asc" | "desc";
-			}
-		): Promise<{
-			data: WalletTransaction[];
-			total: number;
-			skip: number;
-			take: number;
-			hasMore: boolean;
-		}> {
-			// Convert our params into the objects we need for the request
-			const query = makeRecord<string, string | string[]>({
-				amountMax: params.amountMax === undefined ? undefined : String(params.amountMax),
-				amountMin: params.amountMin === undefined ? undefined : String(params.amountMin),
-				category: params.category === undefined ? undefined : String(params.category),
-				dateFrom: params.dateFrom,
-				dateTo: params.dateTo,
-				skip: params.skip === undefined ? undefined : String(params.skip),
-				sortBy: params.sortBy === undefined ? undefined : String(params.sortBy),
-				sortOrder: params.sortOrder === undefined ? undefined : String(params.sortOrder),
-				status: params.status === undefined ? undefined : String(params.status),
-				take: params.take === undefined ? undefined : String(params.take),
-				type: params.type === undefined ? undefined : String(params.type),
-			});
-
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/wallet/transactions`,
-				undefined,
-				{ query }
-			);
-			return (await resp.json()) as {
-				data: WalletTransaction[];
-				total: number;
-				skip: number;
-				take: number;
-				hasMore: boolean;
-			};
-		}
-
-		/**
-		 * GET /organizations/:organizationId/withdrawals/stats
-		 * Get organization's withdrawal statistics
-		 */
-		public async getOrganizationWithdrawalStats(
-			organizationId: string
-		): Promise<OrganizationWithdrawalStats> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/withdrawals/stats`
-			);
-			return (await resp.json()) as OrganizationWithdrawalStats;
-		}
-
-		public async getPreferences(organizationId: string): Promise<void> {
-			await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/notifications/preferences`
-			);
-		}
-
-		/**
-		 * GET /organizations/:organizationId/setup-progress
-		 * Returns current onboarding checklist state in a single request.
-		 * Use this for page loads, dashboard widgets, and setup wizard state.
-		 * For real-time updates during onboarding, use the SSE stream endpoint instead.
-		 */
-		public async getSetupProgress(organizationId: string): Promise<internal.SetupProgressResponse> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/setup-progress`
-			);
-			return (await resp.json()) as internal.SetupProgressResponse;
-		}
-
-		public async getUnreadCount(organizationId: string): Promise<void> {
-			await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/notifications/unread-count`
-			);
-		}
-
-		/**
-		 * GET /organizations/:organizationId/virtual-account
-		 * Get organization's virtual account details for deposits
-		 */
-		public async getVirtualAccount(organizationId: string): Promise<VirtualAccountResponse> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/virtual-account`
-			);
-			return (await resp.json()) as VirtualAccountResponse;
-		}
-
-		/**
-		 * Get organization wallet active holds (enrollment holds)
-		 */
-		public async getWalletHolds(
-			organizationId: string,
-			params: {
-				skip?: number;
-				take?: number;
-				/**
-				 * Filter by campaign
-				 */
-				campaignId?: string;
-
-				/**
-				 * Filter holds created from this date (ISO 8601)
-				 */
-				createdFrom?: string;
-
-				/**
-				 * Filter holds created until this date (ISO 8601)
-				 */
-				createdTo?: string;
-
-				/**
-				 * Filter holds expiring from this date (ISO 8601)
-				 */
-				expiresFrom?: string;
-
-				/**
-				 * Filter holds expiring until this date (ISO 8601)
-				 */
-				expiresTo?: string;
-
-				sortBy?: "createdAt" | "expiresAt" | "amount";
-				sortOrder?: "asc" | "desc";
-			}
-		): Promise<{
-			data: ActiveHold[];
-			total: number;
-			skip: number;
-			take: number;
-			hasMore: boolean;
-		}> {
-			// Convert our params into the objects we need for the request
-			const query = makeRecord<string, string | string[]>({
-				campaignId: params.campaignId,
-				createdFrom: params.createdFrom,
-				createdTo: params.createdTo,
-				expiresFrom: params.expiresFrom,
-				expiresTo: params.expiresTo,
-				skip: params.skip === undefined ? undefined : String(params.skip),
-				sortBy: params.sortBy === undefined ? undefined : String(params.sortBy),
-				sortOrder: params.sortOrder === undefined ? undefined : String(params.sortOrder),
-				take: params.take === undefined ? undefined : String(params.take),
-			});
-
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/wallet/holds`,
-				undefined,
-				{ query }
-			);
-			return (await resp.json()) as {
-				data: ActiveHold[];
-				total: number;
-				skip: number;
-				take: number;
-				hasMore: boolean;
-			};
-		}
-
-		/**
-		 * GET /organizations/:organizationId/withdrawals/:requestId
-		 * Get single withdrawal request (brand)
-		 */
-		public async getWithdrawalRequest(
-			organizationId: string,
-			withdrawalId: string
-		): Promise<Withdrawal> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/withdrawals/${encodeURIComponent(withdrawalId)}`
-			);
-			return (await resp.json()) as Withdrawal;
-		}
-
-		/**
-		 * List campaign tasks
-		 */
-		public async listCampaignTasks(
-			organizationId: string,
-			campaignId: string,
-			params: {
-				skip?: number;
-				take?: number;
-			}
-		): Promise<{
-			data: CampaignTaskResponse[];
-			total: number;
-		}> {
-			// Convert our params into the objects we need for the request
-			const query = makeRecord<string, string | string[]>({
-				skip: params.skip === undefined ? undefined : String(params.skip),
-				take: params.take === undefined ? undefined : String(params.take),
-			});
-
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/campaigns/${encodeURIComponent(campaignId)}/tasks`,
-				undefined,
-				{ query }
-			);
-			return (await resp.json()) as {
-				data: CampaignTaskResponse[];
-				total: number;
-			};
-		}
-
-		/**
-		 * List campaigns with pagination and filters (includes stats via SQL subqueries) - brand-only
-		 */
-		public async listCampaigns(
-			organizationId: string,
-			params: ListCampaignsParams
-		): Promise<{
-			data: CampaignWithStats[];
-			total: number;
-			skip: number;
-			take: number;
-			hasMore: boolean;
-		}> {
-			// Convert our params into the objects we need for the request
-			const query = makeRecord<string, string | string[]>({
-				categoryId: params.categoryId,
-				listingId: params.listingId,
-				platformId: params.platformId,
-				search: params.search,
-				skip: params.skip === undefined ? undefined : String(params.skip),
-				sortBy: params.sortBy === undefined ? undefined : String(params.sortBy),
-				sortOrder: params.sortOrder === undefined ? undefined : String(params.sortOrder),
-				startDateFrom: params.startDateFrom,
-				startDateTo: params.startDateTo,
-				status: params.status,
-				take: params.take === undefined ? undefined : String(params.take),
-			});
-
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/campaigns`,
-				undefined,
-				{ query }
-			);
-			return (await resp.json()) as {
-				data: CampaignWithStats[];
-				total: number;
-				skip: number;
-				take: number;
-				hasMore: boolean;
-			};
-		}
-
-		/**
-		 * GET /organizations/:organizationId/deposits
-		 * List deposit history from ledger (category=deposit)
-		 */
-		public async listDeposits(
-			organizationId: string,
-			params: {
-				skip?: number;
-				take?: number;
-				sortOrder?: "asc" | "desc";
-			}
-		): Promise<{
-			data: DepositTransaction[];
-			total: number;
-			skip: number;
-			take: number;
-			hasMore: boolean;
-		}> {
-			// Convert our params into the objects we need for the request
-			const query = makeRecord<string, string | string[]>({
-				skip: params.skip === undefined ? undefined : String(params.skip),
-				sortOrder: params.sortOrder === undefined ? undefined : String(params.sortOrder),
-				take: params.take === undefined ? undefined : String(params.take),
-			});
-
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/deposits`,
-				undefined,
-				{ query }
-			);
-			return (await resp.json()) as {
-				data: DepositTransaction[];
-				total: number;
-				skip: number;
-				take: number;
-				hasMore: boolean;
-			};
-		}
-
-		/**
-		 * List organization invoices (with enrollment counts)
-		 * Pure client-side multi-tenancy: organizationId from URL path
-		 */
-		public async listInvoices(
-			organizationId: string,
-			params: ListInvoicesParams
-		): Promise<{
-			data: Invoice[];
-			total: number;
-			skip: number;
-			take: number;
-			hasMore: boolean;
-		}> {
-			// Convert our params into the objects we need for the request
-			const query = makeRecord<string, string | string[]>({
-				amountMax: params.amountMax === undefined ? undefined : String(params.amountMax),
-				amountMin: params.amountMin === undefined ? undefined : String(params.amountMin),
-				dueDateFrom: params.dueDateFrom,
-				dueDateTo: params.dueDateTo,
-				issuedDateFrom: params.issuedDateFrom,
-				issuedDateTo: params.issuedDateTo,
-				q: params.q,
-				skip: params.skip === undefined ? undefined : String(params.skip),
-				sortBy: params.sortBy === undefined ? undefined : String(params.sortBy),
-				sortOrder: params.sortOrder === undefined ? undefined : String(params.sortOrder),
-				status: params.status === undefined ? undefined : String(params.status),
-				take: params.take === undefined ? undefined : String(params.take),
-			});
-
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/invoices`,
-				undefined,
-				{ query }
-			);
-			return (await resp.json()) as {
-				data: Invoice[];
-				total: number;
-				skip: number;
-				take: number;
-				hasMore: boolean;
-			};
-		}
-
-		public async listNotifications(
-			organizationId: string,
-			params: {
-				limit?: number;
-				offset?: number;
-				unreadOnly?: boolean;
-			}
-		): Promise<void> {
-			// Convert our params into the objects we need for the request
-			const query = makeRecord<string, string | string[]>({
-				limit: params.limit === undefined ? undefined : String(params.limit),
-				offset: params.offset === undefined ? undefined : String(params.offset),
-				unreadOnly: params.unreadOnly === undefined ? undefined : String(params.unreadOnly),
-			});
-
-			await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/notifications`,
-				undefined,
-				{ query }
-			);
-		}
-
-		/**
-		 * List organization enrollments (for brand - all enrollments across all campaigns)
-		 * Pure client-side multi-tenancy: organizationId from URL path
-		 */
-		public async listOrganizationEnrollments(
-			organizationId: string,
-			params: {
-				skip?: number;
-				take?: number;
-				/**
-				 * Single status or comma-separated statuses (e.g., "awaiting_review,awaiting_submission")
-				 */
-				status?: string;
-
-				campaignId?: string;
-				creatorId?: string;
-				search?: string;
-				createdFrom?: string;
-				createdTo?: string;
-				sortBy?: "createdAt" | "orderValue" | "status" | "submittedAt" | "expiresAt";
-				sortOrder?: "asc" | "desc";
-			}
-		): Promise<{
-			data: EnrollmentWithRelations[];
-			total: number;
-			skip: number;
-			take: number;
-			hasMore: boolean;
-		}> {
-			// Convert our params into the objects we need for the request
-			const query = makeRecord<string, string | string[]>({
-				campaignId: params.campaignId,
-				createdFrom: params.createdFrom,
-				createdTo: params.createdTo,
-				creatorId: params.creatorId,
-				search: params.search,
-				skip: params.skip === undefined ? undefined : String(params.skip),
-				sortBy: params.sortBy === undefined ? undefined : String(params.sortBy),
-				sortOrder: params.sortOrder === undefined ? undefined : String(params.sortOrder),
-				status: params.status,
-				take: params.take === undefined ? undefined : String(params.take),
-			});
-
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/enrollments`,
-				undefined,
-				{ query }
-			);
-			return (await resp.json()) as {
-				data: EnrollmentWithRelations[];
-				total: number;
-				skip: number;
-				take: number;
-				hasMore: boolean;
-			};
-		}
-
-		/**
-		 * List organization listings (with stats)
-		 */
-		public async listOrganizationListings(
-			organizationId: string,
-			params: ListOrganizationListingsParams
-		): Promise<{
-			data: ListingWithStats[];
-			total: number;
-			skip: number;
-			take: number;
-			hasMore: boolean;
-		}> {
-			// Convert our params into the objects we need for the request
-			const query = makeRecord<string, string | string[]>({
-				categoryId: params.categoryId,
-				platformId: params.platformId,
-				priceMax: params.priceMax === undefined ? undefined : String(params.priceMax),
-				priceMin: params.priceMin === undefined ? undefined : String(params.priceMin),
-				search: params.search,
-				skip: params.skip === undefined ? undefined : String(params.skip),
-				sortBy: params.sortBy === undefined ? undefined : String(params.sortBy),
-				sortOrder: params.sortOrder === undefined ? undefined : String(params.sortOrder),
-				take: params.take === undefined ? undefined : String(params.take),
-			});
-
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/listings`,
-				undefined,
-				{ query }
-			);
-			return (await resp.json()) as {
-				data: ListingWithStats[];
-				total: number;
-				skip: number;
-				take: number;
-				hasMore: boolean;
-			};
-		}
-
-		public async listTokens(organizationId: string): Promise<void> {
-			await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/notifications/tokens`
-			);
-		}
-
-		/**
-		 * GET /organizations/:organizationId/withdrawals
-		 * List withdrawal requests (brand)
-		 */
-		public async listWithdrawalRequests(
-			organizationId: string,
-			params: {
-				skip?: number;
-				take?: number;
-				status?: db.WithdrawalStatus;
-				requestedFrom?: string;
-				requestedTo?: string;
-				amountMin?: number;
-				amountMax?: number;
-				sortBy?: "requestedAt" | "amount" | "status";
-				sortOrder?: "asc" | "desc";
-			}
-		): Promise<{
-			data: Withdrawal[];
-			total: number;
-			skip: number;
-			take: number;
-			hasMore: boolean;
-		}> {
-			// Convert our params into the objects we need for the request
-			const query = makeRecord<string, string | string[]>({
-				amountMax: params.amountMax === undefined ? undefined : String(params.amountMax),
-				amountMin: params.amountMin === undefined ? undefined : String(params.amountMin),
-				requestedFrom: params.requestedFrom,
-				requestedTo: params.requestedTo,
-				skip: params.skip === undefined ? undefined : String(params.skip),
-				sortBy: params.sortBy === undefined ? undefined : String(params.sortBy),
-				sortOrder: params.sortOrder === undefined ? undefined : String(params.sortOrder),
-				status: params.status === undefined ? undefined : String(params.status),
-				take: params.take === undefined ? undefined : String(params.take),
-			});
-
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/withdrawals`,
-				undefined,
-				{ query }
-			);
-			return (await resp.json()) as {
-				data: Withdrawal[];
-				total: number;
-				skip: number;
-				take: number;
-				hasMore: boolean;
-			};
-		}
-
-		public async markAllRead(organizationId: string): Promise<void> {
-			await this.baseClient.callTypedAPI(
-				"POST",
-				`/organizations/${encodeURIComponent(organizationId)}/notifications/read-all`
-			);
-		}
-
-		public async markRead(
-			organizationId: string,
-			params: {
-				ids: string[];
-			}
-		): Promise<void> {
-			await this.baseClient.callTypedAPI(
-				"POST",
-				`/organizations/${encodeURIComponent(organizationId)}/notifications/read`,
-				JSON.stringify(params)
-			);
-		}
-
-		public async registerToken(
-			organizationId: string,
-			params: {
-				token: string;
-				platform: notifications.PushPlatform;
-			}
-		): Promise<void> {
-			await this.baseClient.callTypedAPI(
-				"POST",
-				`/organizations/${encodeURIComponent(organizationId)}/notifications/tokens`,
-				JSON.stringify(params)
-			);
-		}
-
-		/**
-		 * Remove task from campaign (draft only, no enrollments)
-		 */
-		public async removeCampaignTask(
-			organizationId: string,
-			campaignId: string,
-			id: string
-		): Promise<{
-			success: boolean;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"DELETE",
-				`/organizations/${encodeURIComponent(organizationId)}/campaigns/${encodeURIComponent(campaignId)}/tasks/${encodeURIComponent(id)}`
-			);
-			return (await resp.json()) as {
-				success: boolean;
-			};
-		}
-
-		public async removeToken(
-			organizationId: string,
-			params: {
-				token: string;
-			}
-		): Promise<void> {
-			await this.baseClient.callTypedAPI(
-				"POST",
-				`/organizations/${encodeURIComponent(organizationId)}/notifications/tokens/remove`,
-				JSON.stringify(params)
-			);
-		}
-
-		/**
-		 * Stream setup progress updates via Server-Sent Events.
-		 * Client connects and receives real-time updates as setup jobs complete.
-		 *
-		 * Flow:
-		 * 1. Client connects after org creation with organizationId
-		 * 2. Server sends initial progress state
-		 * 3. Server polls for changes every 2 seconds
-		 * 4. Stream closes when org is activated OR after timeout (5 min)
-		 *
-		 * @example
-		 * const stream = await organizations.streamSetupProgress({ organizationId: "..." });
-		 * for await (const update of stream) {
-		 * console.log(update.progress);
-		 * if (update.isComplete) break;
-		 * }
-		 */
-		public async streamSetupProgress(
-			organizationId: string
-		): Promise<StreamIn<internal.SetupProgressUpdate>> {
-			return await this.baseClient.createStreamIn(
-				`/organizations/${encodeURIComponent(organizationId)}/setup-progress/stream`
-			);
-		}
-
-		/**
-		 * GET /organizations/:organizationId/search
-		 *
-		 * Unified search across campaigns, enrollments, invoices, and listings.
-		 * - Campaigns: Search by title, description, listing name (all statuses)
-		 * - Enrollments: Search by order ID, campaign title, creator name (org's campaigns)
-		 * - Invoices: Search by invoice number, notes
-		 * - Listings: Search by name, description
-		 *
-		 * Results are interleaved in round-robin fashion for balanced display.
-		 * Returns facet counts for each resource type.
-		 */
-		public async unifiedSearch(
-			organizationId: string,
-			params: BrandUnifiedSearchParams
-		): Promise<BrandUnifiedSearchResponse> {
-			// Convert our params into the objects we need for the request
-			const query = makeRecord<string, string | string[]>({
-				cursor: params.cursor,
-				limit: params.limit === undefined ? undefined : String(params.limit),
-				q: params.q,
-			});
-
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"GET",
-				`/organizations/${encodeURIComponent(organizationId)}/search`,
-				undefined,
-				{ query }
-			);
-			return (await resp.json()) as BrandUnifiedSearchResponse;
-		}
-
-		/**
-		 * PATCH /organizations/:organizationId/campaigns/:id
-		 * Update campaign fields.
-		 *
-		 * Edit rules by status:
-		 * - draft/rejected: Full edit (title, dates, description, T&C, visibility, maxEnrollments)
-		 * - approved/active/paused: Safe edits only (description, T&C, visibility, maxEnrollments increase)
-		 * - pending_approval/ended/cancelled/archived: Locked — no edits allowed
-		 *
-		 * Rejected campaigns auto-transition to draft on edit.
-		 */
-		public async updateCampaign(
-			organizationId: string,
-			id: string,
-			params: {
-				title?: string;
-				description?: string;
-				startDate?: string;
-				endDate?: string;
-				maxEnrollments?: number;
-				isPublic?: boolean;
-				termsAndConditions?: string;
-			}
-		): Promise<Campaign> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"PATCH",
-				`/organizations/${encodeURIComponent(organizationId)}/campaigns/${encodeURIComponent(id)}`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as Campaign;
-		}
-
-		/**
-		 * PATCH /organizations/:organizationId/campaigns/:id/state
-		 * Unified endpoint for all campaign state transitions
-		 */
-		public async updateCampaignState(
-			organizationId: string,
-			id: string,
-			params: {
-				action: CampaignStateAction;
-				reason?: string;
-			}
-		): Promise<Campaign> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"PATCH",
-				`/organizations/${encodeURIComponent(organizationId)}/campaigns/${encodeURIComponent(id)}/state`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as Campaign;
-		}
-
-		/**
-		 * Update campaign task (includes sortOrder for reordering)
-		 */
-		public async updateCampaignTask(
-			organizationId: string,
-			campaignId: string,
-			id: string,
-			params: {
-				isRequired?: boolean;
-				sortOrder?: number;
-				instructions?: string;
-				requirements?: db.TaskRequirements;
-			}
-		): Promise<CampaignTaskResponse> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"PATCH",
-				`/organizations/${encodeURIComponent(organizationId)}/campaigns/${encodeURIComponent(campaignId)}/tasks/${encodeURIComponent(id)}`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as CampaignTaskResponse;
-		}
-
-		/**
-		 * PATCH /organizations/:organizationId/enrollments/:id/review
-		 * Unified enrollment review endpoint - replaces 4 separate POST endpoints
-		 * Actions: approve, reject, request_changes, extend_deadline
-		 *
-		 * For request_changes: Use taskFeedback array to provide per-task feedback
-		 */
-		public async updateEnrollmentReview(
-			organizationId: string,
-			id: string,
-			params: {
-				action: EnrollmentReviewAction;
-				/**
-				 * Reason for rejection or changes requested (required for reject/request_changes)
-				 */
-				reason?: string;
-
-				/**
-				 * Remarks for approval
-				 */
-				remarks?: string;
-
-				/**
-				 * Structured feedback for rejection (enrollment-level)
-				 */
-				feedback?: { [key: string]: string };
-
-				/**
-				 * Per-task feedback (only for request_changes) - saves to individual task submissions
-				 */
-				taskFeedback?: TaskFeedbackItem[];
-			}
-		): Promise<EnrollmentDetail> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"PATCH",
-				`/organizations/${encodeURIComponent(organizationId)}/enrollments/${encodeURIComponent(id)}/review`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as EnrollmentDetail;
-		}
-
-		/**
-		 * Update listing
-		 */
-		public async updateListing(
-			organizationId: string,
-			id: string,
-			params: UpdateListingRequest
-		): Promise<Listing> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"PATCH",
-				`/organizations/${encodeURIComponent(organizationId)}/listings/${encodeURIComponent(id)}`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as Listing;
-		}
-
-		/**
-		 * Update organization (general PATCH - can update multiple fields)
-		 * Brands can update their profile, logo, contact info, and address
-		 */
-		public async updateOrganization(
-			organizationId: string,
-			params: {
-				/**
-				 * Profile fields
-				 */
-				name?: string;
-
-				description?: string;
-				website?: string;
-				logo?: string;
-				/**
-				 * Contact fields (phoneNumber requires passkey — use POST /organizations/:id/change-phone)
-				 */
-				contactPerson?: string;
-
-				email?: string;
-				/**
-				 * Address fields
-				 */
-				address?: string;
-
-				city?: string;
-				state?: string;
-				country?: string;
-				postalCode?: string;
-				/**
-				 * Business info
-				 */
-				businessType?:
-					| "pvt_ltd"
-					| "llp"
-					| "partnership"
-					| "proprietorship"
-					| "public_ltd"
-					| "trust"
-					| "society";
-
-				industryCategory?: string;
-			}
-		): Promise<Organization> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"PATCH",
-				`/organizations/${encodeURIComponent(organizationId)}`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as Organization;
-		}
-
-		public async updatePreferences(
-			organizationId: string,
-			params: {
-				emailEnabled?: boolean;
-				smsEnabled?: boolean;
-				pushEnabled?: boolean;
-				inAppEnabled?: boolean;
-				whatsappEnabled?: boolean;
-				email?: string;
-				phone?: string;
-				whatsappPhone?: string;
-			}
-		): Promise<void> {
-			await this.baseClient.callTypedAPI(
-				"POST",
-				`/organizations/${encodeURIComponent(organizationId)}/notifications/preferences`,
-				JSON.stringify(params)
-			);
-		}
-
-		/**
-		 * =============================================================================
-		 * STEP 1: Verify bank account details (penny drop) - NO SAVE
-		 * User can review the registered name before confirming
-		 * =============================================================================
-		 */
-		public async verifyBankAccountDetails(
-			organizationId: string,
-			params: VerifyBankAccountDetailsRequest
-		): Promise<BankVerificationResult> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/organizations/${encodeURIComponent(organizationId)}/bank-accounts/verify`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as BankVerificationResult;
-		}
-
-		public async verifyGSTPreview(params: { gstNumber: string }): Promise<GSTPreviewResult> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/gst/verify-preview`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as GSTPreviewResult;
-		}
-	}
+    export interface ActiveHold {
+        id: string
+        enrollmentId: string
+        campaignId: string
+        campaignTitle: string
+        /**
+         * Hold amount in smallest units
+         */
+        amount: number
+
+        /**
+         * Decimal string (e.g., "254.90")
+         */
+        amountDecimal: string
+
+        /**
+         * Currency code (ISO 4217)
+         */
+        currency: string
+
+        createdAt: string
+        expiresAt?: string
+    }
+
+    export interface ActivityLogEntry {
+        id: string
+        action: string
+        entityType: string
+        entityId: string
+        details: OrgActivityDetails | null
+        adminName: string | null
+        createdAt: string
+    }
+
+    export interface AddBankAccountRequest {
+        accountHolderName: string
+        accountNumber: string
+        bankName: string
+        ifscCode: string
+        accountType: "current" | "savings"
+        /**
+         * Validation ID from Step 1 (verify endpoint) - proves verification was done
+         */
+        validationId: string
+    }
+
+    export interface BankVerificationResult {
+        isVerified: boolean
+        registeredName: string | null
+        accountStatus: "active" | "inactive" | "unknown"
+        validationId: string
+        message: string
+    }
+
+    export interface BrandSearchFacets {
+        campaigns: number
+        enrollments: number
+        invoices: number
+        listings: number
+    }
+
+    export interface BrandSearchResult {
+        /**
+         * Result type
+         */
+        resultType: "campaign" | "enrollment" | "invoice" | "listing"
+
+        /**
+         * Resource ID
+         */
+        id: string
+
+        /**
+         * Short display ID (e.g., ENR-K7X4FA9B) — present for enrollments
+         */
+        displayId?: string
+
+        /**
+         * Display title
+         */
+        title: string
+
+        /**
+         * Optional description
+         */
+        description?: string
+
+        /**
+         * Status string
+         */
+        status: string
+
+        /**
+         * Created timestamp
+         */
+        createdAt: string
+
+        /**
+         * Primary amount in decimal format
+         */
+        amountDecimal?: string
+
+        /**
+         * Secondary amount
+         */
+        secondaryAmountDecimal?: string
+
+        /**
+         * For campaigns: current enrollments
+         */
+        currentCount?: number
+
+        /**
+         * For campaigns: max enrollments
+         */
+        maxCount?: number
+
+        /**
+         * Processed timestamp (approval, issue date, etc.)
+         */
+        processedAt?: string
+
+        /**
+         * Expiry timestamp
+         */
+        expiresAt?: string
+
+        /**
+         * Listing info
+         */
+        listing?: SearchListingInfo
+
+        /**
+         * Platform info
+         */
+        platform?: SearchPlatformInfo
+
+        /**
+         * Campaign info (for enrollments)
+         */
+        campaign?: SearchCampaignInfo
+
+        /**
+         * Creator info (for enrollments — limited PII)
+         */
+        creator?: SearchCreatorInfo
+
+        /**
+         * Invoice number (for invoices)
+         */
+        invoiceNumber?: string
+
+        /**
+         * Fields that matched the search query
+         */
+        matchedFields: string[]
+    }
+
+    export interface BrandUnifiedSearchParams {
+        /**
+         * Search query (2-200 chars)
+         */
+        q: string
+
+        /**
+         * Pagination cursor (base64 encoded)
+         */
+        cursor?: string
+
+        /**
+         * Page size (1-50)
+         */
+        limit?: number
+    }
+
+    export interface BrandUnifiedSearchResponse {
+        data: BrandSearchResult[]
+        nextCursor: string | null
+        hasMore: boolean
+        facets: BrandSearchFacets
+        query: string
+    }
+
+    export interface CSVExportResponse {
+        csv: string
+        totalCount: number
+        campaignTitle: string
+        exportedAt: string
+        filename: string
+    }
+
+    export interface Campaign {
+        id: string
+        /**
+         * Short display ID for UI (e.g., CPG-A3B7XWFK)
+         */
+        displayId: string
+
+        organizationId: string
+        listingId: string
+        title: string
+        description?: string
+        startDate: string
+        endDate: string
+        /**
+         * Brand-relevant pricing only
+         */
+        billRate?: number
+
+        /**
+         * Bill rate as display string (e.g., "1.01")
+         */
+        billRateDecimal?: string
+
+        platformFee?: number
+        /**
+         * Platform fee decimal for display
+         */
+        platformFeeDecimal?: string
+
+        maxEnrollments: number
+        status: db.CampaignStatus
+        campaignType: db.CampaignType
+        isPublic: boolean
+        slug?: string
+        enrollmentExpiryDays: number
+        /**
+         * Rejection reason (only present when status is 'rejected')
+         */
+        rejectionReason?: string
+
+        /**
+         * Actions the brand can take from the current status
+         */
+        allowedActions: actions.CampaignEventType[]
+
+        createdAt: string
+        updatedAt: string
+    }
+
+    export type CampaignStateAction = "submit" | "activate" | "pause" | "resume" | "end" | "cancel" | "archive" | "unarchive"
+
+    export interface CampaignStats {
+        campaignId: string
+        totalEnrollments: number
+        pendingEnrollments: number
+        approvedEnrollments: number
+        rejectedEnrollments: number
+        cancelledEnrollments: number
+        /**
+         * Total order value in smallest units (paise)
+         */
+        totalOrderValue: number
+
+        /**
+         * Decimal total order value for display
+         */
+        totalOrderValueDecimal: string
+
+        /**
+         * Average order value in smallest units (paise)
+         */
+        averageOrderValue: number
+
+        /**
+         * Decimal average order value for display
+         */
+        averageOrderValueDecimal: string
+
+        enrollmentRate: number
+        approvalRate: number
+        /**
+         * Daily performance data - only included if startDate/endDate provided
+         */
+        performance?: DailyPerformance[]
+    }
+
+    export interface CampaignTaskItem {
+        id: string
+        taskTemplateId: string
+        name: string
+        slug: string
+        category: string
+        platformId?: string
+        platformName?: string
+        requireLink: boolean
+        requireScreenshot: boolean
+        instructions?: string
+        isRequired: boolean
+        sortOrder: number
+        /**
+         * Per-task platform fee in PAISE (brand sees their cost)
+         */
+        platformFee: number
+
+        /**
+         * Per-task platform fee for display (e.g., "99.00")
+         */
+        platformFeeDecimal: string
+    }
+
+    export interface CampaignTaskResponse {
+        id: string
+        campaignId: string
+        taskTemplateId: string
+        taskTemplate?: TaskTemplateResponse
+        instructions?: string
+        isRequired: boolean
+        sortOrder: number
+        requirements?: db.TaskRequirements
+        createdAt: string
+        updatedAt: string
+    }
+
+    export interface CampaignWithStats {
+        currentEnrollments: number
+        approvedCount: number
+        rejectedCount: number
+        pendingCount: number
+        listing?: {
+            id: string
+            name: string
+            /**
+             * Listing price in smallest units (paise)
+             */
+            price: number
+
+            /**
+             * Decimal listing price for display
+             */
+            priceDecimal: string
+
+            listingImages: utils.ListingImageItem[]
+        }
+        tasks?: CampaignTaskItem[]
+        id: string
+        /**
+         * Short display ID for UI (e.g., CPG-A3B7XWFK)
+         */
+        displayId: string
+
+        organizationId: string
+        listingId: string
+        title: string
+        description?: string
+        startDate: string
+        endDate: string
+        /**
+         * Brand-relevant pricing only
+         */
+        billRate?: number
+
+        /**
+         * Bill rate as display string (e.g., "1.01")
+         */
+        billRateDecimal?: string
+
+        platformFee?: number
+        /**
+         * Platform fee decimal for display
+         */
+        platformFeeDecimal?: string
+
+        maxEnrollments: number
+        status: db.CampaignStatus
+        campaignType: db.CampaignType
+        isPublic: boolean
+        slug?: string
+        enrollmentExpiryDays: number
+        /**
+         * Rejection reason (only present when status is 'rejected')
+         */
+        rejectionReason?: string
+
+        /**
+         * Actions the brand can take from the current status
+         */
+        allowedActions: actions.CampaignEventType[]
+
+        createdAt: string
+        updatedAt: string
+    }
+
+    export interface CreateAndSubmitRequest {
+        listingId: string
+        title: string
+        description?: string
+        startDate: string
+        endDate: string
+        maxEnrollments: number
+        campaignType?: db.CampaignType
+        isPublic?: boolean
+        termsAndConditions?: string
+        /**
+         * Tasks required for immediate submission — at least one
+         */
+        tasks: CreateCampaignTask[]
+    }
+
+    export interface CreateCampaignRequest {
+        listingId: string
+        title: string
+        description?: string
+        startDate: string
+        endDate: string
+        maxEnrollments: number
+        campaignType?: db.CampaignType
+        isPublic?: boolean
+        termsAndConditions?: string
+        /**
+         * Tasks to add during creation (optional — at least one required before submission)
+         */
+        tasks?: CreateCampaignTask[]
+    }
+
+    export interface CreateCampaignTask {
+        taskTemplateId: string
+        isRequired?: boolean
+        sortOrder?: number
+        instructions?: string
+        requirements?: db.TaskRequirements
+    }
+
+    export interface CreateListingRequest {
+        name: string
+        description?: string
+        identifier: string
+        categoryId?: string
+        platformId?: string
+        price: number
+        currency?: utils.CurrencyCode
+        link: string
+        listingImages?: ListingImageInput[]
+        listingType?: db.ListingType
+    }
+
+    export interface CreateOrgWithdrawalRequest {
+        amount: number
+        notes?: string
+        /**
+         * WebAuthn assertion response from navigator.credentials.get() for passkey verification
+         */
+        passkeyResponse: any
+
+        /**
+         * Challenge ID from GET /auth/passkey/reauth-options
+         */
+        challengeId: string
+    }
+
+    export interface DailyPerformance {
+        date: string
+        enrollments: number
+        approvals: number
+        rejections: number
+        orderValue: number
+    }
+
+    export interface DashboardOverviewResponse {
+        stats: DashboardStats
+        enrollmentChart: EnrollmentChartDataPoint[]
+        topCampaigns: TopCampaign[]
+        enrollmentDistribution: EnrollmentDistribution
+        pendingEnrollments: PendingEnrollmentItem[]
+    }
+
+    export interface DashboardStats {
+        /**
+         * Wallet balance in smallest units (paise)
+         */
+        walletBalance: number
+
+        /**
+         * Decimal wallet balance for display
+         */
+        walletBalanceDecimal: string
+
+        /**
+         * Held amount in smallest units (paise)
+         */
+        heldAmount: number
+
+        /**
+         * Decimal held amount for display
+         */
+        heldAmountDecimal: string
+
+        /**
+         * Average daily spend in smallest units (paise)
+         */
+        avgDailySpend: number
+
+        /**
+         * Decimal average daily spend for display
+         */
+        avgDailySpendDecimal: string
+
+        /**
+         * Low balance threshold in smallest units (paise)
+         */
+        lowBalanceThreshold: number
+
+        /**
+         * Decimal low balance threshold for display
+         */
+        lowBalanceThresholdDecimal: string
+
+        /**
+         * Credit limit in paise
+         */
+        creditLimit: number
+
+        /**
+         * Credit limit for display
+         */
+        creditLimitDecimal: string
+
+        /**
+         * Credit utilized in paise
+         */
+        creditUtilized: number
+
+        /**
+         * Credit utilized for display
+         */
+        creditUtilizedDecimal: string
+
+        /**
+         * Available balance (withdrawable = balance - holds, excludes credit) in paise
+         */
+        availableBalance: number
+
+        /**
+         * Available balance for display
+         */
+        availableBalanceDecimal: string
+
+        /**
+         * Payment mode for the organization
+         * - prefund: Brand funds wallet BEFORE enrollments (holds created at enrollment time)
+         * - post_submission: Brand pays AFTER creator submits (no holds, direct transfer at approval)
+         */
+        paymentMode: "prefund" | "post_submission"
+
+        /**
+         * Pending commitments for post_submission mode (total value of pending enrollments)
+         */
+        pendingCommitments?: number
+
+        /**
+         * Pending commitments for display
+         */
+        pendingCommitmentsDecimal?: string
+
+        /**
+         * True when ledger service was unavailable — wallet values may be stale
+         */
+        walletBalanceStale?: boolean
+
+        /**
+         * Campaigns
+         */
+        totalCampaigns: number
+
+        activeCampaigns: number
+        draftCampaigns: number
+        pausedCampaigns: number
+        endedCampaigns: number
+        endingSoon: number
+        /**
+         * Enrollments
+         */
+        totalEnrollments: number
+
+        pendingEnrollments: number
+        approvedEnrollments: number
+        rejectedEnrollments: number
+        overdueEnrollments: number
+        highValuePending: number
+        /**
+         * Trends
+         */
+        enrollmentTrend: number
+
+        approvalRateTrend: number
+    }
+
+    export interface DepositAccountDetails {
+        id: string
+        provider: string
+        externalId: string
+        accountNumber?: string
+        ifsc?: string
+        beneficiaryName?: string
+        bankName?: string
+        status: string
+        isPrimary: boolean
+    }
+
+    export interface DepositTransaction {
+        id: string
+        amount: number
+        amountDecimal: string
+        currency: string
+        status: "pending" | "completed" | "voided"
+        reference?: string
+        description: string
+        createdAt: string
+    }
+
+    export interface EnrollmentChartDataPoint {
+        date: string
+        enrollments: number
+        approved: number
+        rejected: number
+        pending: number
+    }
+
+    export interface EnrollmentDetail {
+        /**
+         * Creator info - SECURITY: Only profileName and city, no real name/email/avatar
+         */
+        creator: {
+            id: string
+            displayId: string
+            profileName: string
+            city?: string
+            approvalRate: number
+            previousEnrollments: number
+        }
+
+        /**
+         * Campaign info
+         */
+        campaign: {
+            id: string
+            title: string
+            status: string
+            type: string
+            listingName?: string
+            listingImage?: string
+        }
+
+        /**
+         * Platform info
+         */
+        platform?: {
+            id: string
+            name: string
+            type?: string
+        }
+
+        /**
+         * OCR scan data (if available)
+         */
+        ocrData?: {
+            id: string
+            screenshotUrl: string
+            extractedOrderId?: string
+            extractedOrderValue?: number
+            extractedOrderValueDecimal?: string
+            extractedPurchaseDate?: string
+            extractedProductName?: string
+            extractedSellerName?: string
+            extractedPlatform?: string
+            confidence?: number
+            validationPassed?: boolean
+            validationErrors?: OCRValidationErrors
+        }
+
+        /**
+         * Enrollment tasks with submissions
+         */
+        tasks: {
+            enrollmentTaskId: string
+            submissionId?: string
+            taskName: string
+            taskDescription?: string
+            category: string
+            isRequired: boolean
+            requireLink: boolean
+            requireScreenshot: boolean
+            instructions?: string
+            proofLink?: string
+            proofScreenshot?: string
+            submittedAt?: string
+            feedback?: string
+            platformName?: string
+        }[]
+
+        /**
+         * Per-task platform fee breakdown (brand sees their cost only, NOT bonus)
+         */
+        taskFees?: {
+            taskId: string
+            taskName: string
+            platformFee: number
+            platformFeeDecimal: string
+        }[]
+
+        /**
+         * Status history
+         */
+        history: {
+            id: string
+            fromStatus?: string
+            toStatus: string
+            changedBy?: string
+            changedByName?: string
+            reason?: string
+            changedAt: string
+        }[]
+
+        /**
+         * Brand cost breakdown (what the brand pays - NO creator payout info)
+         * SECURITY: Creator earnings are confidential between platform and creators
+         */
+        brandCost: {
+            orderValue: number
+            orderValueDecimal: string
+            billRate: number
+            platformFee: number
+            platformFeeDecimal: string
+            /**
+             * Total amount brand pays (bill amount + platform fee + GST)
+             */
+            totalCharge: number
+
+            totalChargeDecimal: string
+            gstAmount: number
+            gstAmountDecimal: string
+        }
+
+        /**
+         * Rejection info (if rejected/changes requested)
+         */
+        rejection?: {
+            reason: string
+            feedback?: { [key: string]: string }
+            lastRejectedAt?: string
+        }
+
+        id: string
+        /**
+         * Short display ID for UI (e.g., ENR-K7X4FA9B)
+         */
+        displayId: string
+
+        campaignId: string
+        creatorId: string
+        orderId: string
+        currency: string
+        /**
+         * Order value in smallest units (paise)
+         */
+        orderValue: number
+
+        /**
+         * Decimal order value for display
+         */
+        orderValueDecimal: string
+
+        purchaseDate?: string
+        /**
+         * Brand-relevant pricing (what brand pays)
+         */
+        lockedBillRate: number
+
+        /**
+         * Platform fee in smallest units (paise)
+         */
+        lockedPlatformFee: number
+
+        /**
+         * Decimal platform fee for display
+         */
+        lockedPlatformFeeDecimal: string
+
+        /**
+         * Payment mode: prefund (hold created) or post_submission (pay at approval)
+         */
+        paymentMode: db.PaymentMode
+
+        status: db.EnrollmentStatus
+        submittedAt?: string
+        approvedAt?: string
+        /**
+         * Actions the brand can take on this enrollment
+         */
+        allowedActions: internal.BrandAction[]
+
+        expiresAt?: string
+        createdAt: string
+        updatedAt: string
+    }
+
+    export interface EnrollmentDistribution {
+        total: number
+        approved: number
+        rejected: number
+        pending: number
+    }
+
+    export type EnrollmentReviewAction = "approve" | "reject" | "request_changes"
+
+    export interface EnrollmentWithRelations {
+        creator?: {
+            id: string
+            displayId: string
+            profileName: string
+            city?: string
+            approvalRate: number
+            previousEnrollments: number
+        }
+        campaign?: {
+            id: string
+            title: string
+            status: string
+        }
+        platform?: {
+            id: string
+            name: string
+        }
+        id: string
+        /**
+         * Short display ID for UI (e.g., ENR-K7X4FA9B)
+         */
+        displayId: string
+
+        campaignId: string
+        creatorId: string
+        orderId: string
+        currency: string
+        /**
+         * Order value in smallest units (paise)
+         */
+        orderValue: number
+
+        /**
+         * Decimal order value for display
+         */
+        orderValueDecimal: string
+
+        purchaseDate?: string
+        /**
+         * Brand-relevant pricing (what brand pays)
+         */
+        lockedBillRate: number
+
+        /**
+         * Platform fee in smallest units (paise)
+         */
+        lockedPlatformFee: number
+
+        /**
+         * Decimal platform fee for display
+         */
+        lockedPlatformFeeDecimal: string
+
+        /**
+         * Payment mode: prefund (hold created) or post_submission (pay at approval)
+         */
+        paymentMode: db.PaymentMode
+
+        status: db.EnrollmentStatus
+        submittedAt?: string
+        approvedAt?: string
+        /**
+         * Actions the brand can take on this enrollment
+         */
+        allowedActions: internal.BrandAction[]
+
+        expiresAt?: string
+        createdAt: string
+        updatedAt: string
+        /**
+         * Tasks (simplified for list view)
+         */
+        tasks?: {
+            enrollmentTaskId: string
+            taskName: string
+            requireLink: boolean
+            requireScreenshot: boolean
+            isRequired: boolean
+            instructions?: string
+            proofLink?: string
+            proofScreenshot?: string
+        }[]
+    }
+
+    export interface FundWalletResponse {
+        walletId: string
+        organizationId: string
+        transactionId: string
+        amount: number
+        amountDecimal: string
+        reason: string
+        reference: string
+        newBalance: number
+        newBalanceDecimal: string
+        currency: string
+        fundedBy: string
+        fundedAt: string
+        message: string
+    }
+
+    export interface GSTDetails {
+        gstNumber: string
+        legalName: string
+        tradeName?: string
+        registrationDate?: string
+        gstStatus: string
+        businessType?: string
+        address?: string
+        isVerified: boolean
+        verifiedAt?: string
+    }
+
+    export interface GSTDetailsResponse {
+        gstDetails: GSTDetails | null
+    }
+
+    export interface GSTPreviewResult {
+        gstNumber: string
+        legalName: string
+        tradeName?: string
+        gstStatus: string
+        address?: string
+        phone?: string
+        email?: string
+        city?: string
+        state?: string
+        pinCode?: string
+        businessType?: string
+        registrationDate?: string
+        stateCode: string
+        isValid: boolean
+    }
+
+    export interface Invoice {
+        id: string
+        organizationId: string
+        invoiceNumber: string
+        issuedAt?: string
+        dueDate: string
+        periodStart?: string
+        periodEnd?: string
+        /**
+         * Subtotal in smallest units (paise)
+         */
+        subtotal: number
+
+        /**
+         * Decimal subtotal for display
+         */
+        subtotalDecimal: string
+
+        /**
+         * GST amount in smallest units (paise)
+         */
+        gstAmount: number
+
+        /**
+         * Decimal GST amount for display
+         */
+        gstAmountDecimal: string
+
+        gstRate: number
+        tdsRate: number
+        /**
+         * TDS amount in smallest units (paise)
+         */
+        tdsAmount: number
+
+        /**
+         * Decimal TDS amount for display
+         */
+        tdsAmountDecimal: string
+
+        /**
+         * Total amount in smallest units (paise)
+         */
+        totalAmount: number
+
+        /**
+         * Decimal total amount for display
+         */
+        totalAmountDecimal: string
+
+        /**
+         * Amount paid in smallest units (paise)
+         */
+        amountPaid: number
+
+        /**
+         * Decimal amount paid for display
+         */
+        amountPaidDecimal: string
+
+        status: db.InvoiceStatus
+        pdfUrl?: string
+        notes?: string
+        createdAt: string
+        /**
+         * UI-required fields
+         */
+        enrollmentCount: number
+
+        paidAt?: string
+        /**
+         * Line items included in getInvoice response
+         */
+        lineItems?: InvoiceLineItem[]
+    }
+
+    export interface InvoiceLineItem {
+        id: string
+        invoiceId: string
+        enrollmentId?: string
+        description: string
+        quantity: number
+        /**
+         * Rate in smallest units (paise)
+         */
+        rate: number
+
+        /**
+         * Decimal rate for display
+         */
+        rateDecimal: string
+
+        /**
+         * Amount in smallest units (paise)
+         */
+        amount: number
+
+        /**
+         * Decimal amount for display
+         */
+        amountDecimal: string
+    }
+
+    export interface ListCampaignsParams {
+        skip?: number
+        take?: number
+        /**
+         * Single status or comma-separated statuses (e.g., "active,paused")
+         */
+        status?: string
+
+        listingId?: string
+        platformId?: string
+        categoryId?: string
+        search?: string
+        startDateFrom?: string
+        startDateTo?: string
+        sortBy?: "createdAt" | "startDate" | "endDate" | "title"
+        sortOrder?: "asc" | "desc"
+    }
+
+    export interface ListInvoicesParams {
+        skip?: number
+        take?: number
+        status?: db.InvoiceStatus
+        /**
+         * Search by invoice number or notes
+         */
+        q?: string
+
+        issuedDateFrom?: string
+        issuedDateTo?: string
+        dueDateFrom?: string
+        dueDateTo?: string
+        amountMin?: number
+        amountMax?: number
+        sortBy?: "createdAt" | "issuedAt" | "dueDate" | "totalAmount"
+        sortOrder?: "asc" | "desc"
+    }
+
+    export interface ListOrganizationListingsParams {
+        skip?: number
+        take?: number
+        categoryId?: string
+        platformId?: string
+        search?: string
+        priceMin?: number
+        priceMax?: number
+        sortBy?: "createdAt" | "name" | "price"
+        sortOrder?: "asc" | "desc"
+    }
+
+    export interface Listing {
+        id: string
+        organizationId: string
+        categoryId?: string
+        platformId?: string
+        name: string
+        slug?: string
+        description?: string
+        identifier?: string
+        price: number
+        priceDecimal: string
+        currency: string
+        link: string
+        listingImages: utils.ListingImageItem[]
+        views: number
+        createdBy: string
+        updatedBy?: string
+        createdAt: string
+        updatedAt: string
+    }
+
+    export interface ListingImageInput {
+        imageUrl: string
+        sortOrder?: number
+        altText?: string
+        isPrimary?: boolean
+    }
+
+    export interface ListingWithStats {
+        isActive: boolean
+        campaignCount: number
+        id: string
+        organizationId: string
+        categoryId?: string
+        platformId?: string
+        name: string
+        slug?: string
+        description?: string
+        identifier?: string
+        price: number
+        priceDecimal: string
+        currency: string
+        link: string
+        listingImages: utils.ListingImageItem[]
+        views: number
+        createdBy: string
+        updatedBy?: string
+        createdAt: string
+        updatedAt: string
+    }
+
+    export interface OCRValidationErrors {
+        orderIdMismatch?: boolean
+        orderValueMismatch?: boolean
+        purchaseDateMismatch?: boolean
+        listingNameMismatch?: boolean
+        sellerNameMismatch?: boolean
+        platformMismatch?: boolean
+        dateOutOfRange?: boolean
+        amountBelowMinimum?: boolean
+        amountAboveMaximum?: boolean
+        duplicateOrder?: boolean
+        invalidFormat?: boolean
+        unreadableImage?: boolean
+        missingRequiredFields?: string[]
+        extractionFailed?: boolean
+        confidenceTooLow?: boolean
+        errorMessage?: string
+        errorCode?: string
+    }
+
+    export interface OrgActivityDetails {
+        reason?: string
+        status?: string
+        previousStatus?: string
+        newStatus?: string
+        campaignId?: string
+        campaignTitle?: string
+        enrollmentId?: string
+        memberId?: string
+        memberEmail?: string
+        memberRole?: string
+        amount?: number
+        currency?: string
+        invoiceId?: string
+        invoiceNumber?: string
+        errorMessage?: string
+        metadata?: string
+    }
+
+    export interface Organization {
+        id: string
+        name: string
+        slug: string
+        logo?: string
+        description?: string
+        website?: string
+        /**
+         * GST details
+         */
+        gstNumber?: string
+
+        gstVerified: boolean
+        gstLegalName?: string
+        gstTradeName?: string
+        /**
+         * Business details
+         */
+        businessType?: string
+
+        industryCategory?: string
+        /**
+         * Contact
+         */
+        contactPerson?: string
+
+        phoneNumber?: string
+        email?: string
+        /**
+         * Status/tier
+         */
+        status: db.OrganizationStatus
+
+        accountTier: db.AccountTier
+        /**
+         * Payment mode: prefund (wallet must have balance) or post_submission (pay after approval)
+         */
+        paymentMode: db.PaymentMode
+
+        /**
+         * Credit limit in smallest units (paise)
+         */
+        creditLimit?: number
+
+        /**
+         * Decimal credit limit for display
+         */
+        creditLimitDecimal?: string
+
+        /**
+         * Payment readiness flags
+         */
+        paymentInReady: boolean
+
+        payoutReady: boolean
+        /**
+         * Address
+         */
+        address?: string
+
+        city?: string
+        state?: string
+        country?: string
+        postalCode?: string
+        /**
+         * Timestamps
+         */
+        createdAt: string
+
+        updatedAt: string
+    }
+
+    export interface OrganizationBankAccount {
+        id: string
+        organizationId: string
+        accountHolderName: string
+        accountNumber: string
+        accountNumberFull?: string
+        bankName: string
+        ifscCode: string
+        accountType: "current" | "savings"
+        isVerified: boolean
+        /**
+         * NOTE: isDefault removed - orgs can only have 1 bank account, so always default
+         */
+        verifiedAt?: string
+
+        createdAt: string
+        updatedAt: string
+    }
+
+    export interface OrganizationWalletResponse {
+        id: string
+        organizationId: string
+        ledgerAccountId?: string
+        currency: string
+        /**
+         * Balance in smallest units
+         */
+        balance: number
+
+        /**
+         * Decimal balance for display
+         */
+        balanceDecimal: string
+
+        /**
+         * Pending balance in smallest units
+         */
+        pendingBalance: number
+
+        /**
+         * Decimal pending balance for display
+         */
+        pendingBalanceDecimal: string
+
+        /**
+         * Available balance in smallest units (withdrawable = balance - holds, excludes credit)
+         */
+        availableBalance: number
+
+        /**
+         * Decimal available balance for display
+         */
+        availableBalanceDecimal: string
+
+        createdAt: string
+        /**
+         * Credit limit in smallest units
+         */
+        creditLimit?: number
+
+        /**
+         * Decimal credit limit for display
+         */
+        creditLimitDecimal?: string
+
+        /**
+         * Credit utilized in smallest units
+         */
+        creditUtilized?: number
+
+        /**
+         * Decimal credit utilized for display
+         */
+        creditUtilizedDecimal?: string
+
+        /**
+         * True when ledger service was unavailable — balance/pending values may be stale
+         */
+        balanceStale?: boolean
+
+        /**
+         * Payment mode: prefund (holds at enrollment) or post_submission (pay after submission)
+         */
+        paymentMode?: "prefund" | "post_submission"
+
+        /**
+         * Pending commitments in smallest units (post_submission only — total value of pending enrollments)
+         */
+        pendingCommitments?: number
+
+        /**
+         * Decimal pending commitments for display
+         */
+        pendingCommitmentsDecimal?: string
+
+        /**
+         * True when wallet is frozen by admin — operations will be rejected
+         */
+        isFrozen?: boolean
+
+        depositAccount?: DepositAccountDetails
+    }
+
+    export interface OrganizationWithdrawalStats {
+        currency: string
+        totalAmount: number
+        totalAmountDecimal: string
+        totalCount: number
+        countByStatus: { [key: string]: number }
+        amountByStatus: { [key: string]: number }
+        amountByStatusDecimal: { [key: string]: string }
+        averageAmount: number
+        averageAmountDecimal: string
+        pendingApprovalCount: number
+        pendingApprovalAmount: number
+        pendingApprovalAmountDecimal: string
+    }
+
+    export interface PendingEnrollmentItem {
+        id: string
+        orderId: string
+        /**
+         * Order value in smallest units (paise)
+         */
+        orderValue: number
+
+        /**
+         * Decimal order value for display
+         */
+        orderValueDecimal: string
+
+        createdAt: string
+        campaign: {
+            id: string
+            title: string
+            listing: {
+                image: string | null
+            } | null
+        }
+        creator: {
+            id: string
+            name: string
+        }
+    }
+
+    export interface SearchCampaignInfo {
+        id: string
+        title: string
+    }
+
+    export interface SearchCreatorInfo {
+        id: string
+        displayId: string
+        displayName: string
+    }
+
+    export interface SearchListingInfo {
+        id: string
+        name: string
+        priceDecimal?: string
+        primaryImage?: string
+    }
+
+    export interface SearchPlatformInfo {
+        id: string
+        name: string
+        icon?: string
+    }
+
+    export interface TaskFeedbackItem {
+        /**
+         * Task submission ID
+         */
+        submissionId: string
+
+        /**
+         * Feedback text for this specific task
+         */
+        feedback: string
+    }
+
+    export interface TaskTemplateResponse {
+        id: string
+        name: string
+        slug: string
+        description?: string
+        category: db.TaskCategory
+        platformId?: string
+        platformName?: string
+        requireLink: boolean
+        requireScreenshot: boolean
+        defaultRequirements?: db.TaskRequirements
+        exampleUrl?: string
+        status: db.TaskTemplateStatus
+        createdAt: string
+        updatedAt: string
+    }
+
+    export interface TopCampaign {
+        id: string
+        name: string
+        listingImage: string | null
+        enrollments: number
+        approvalRate: number
+        status: "active" | "ending" | "paused"
+        daysLeft: number
+    }
+
+    export interface UpdateListingRequest {
+        name?: string
+        description?: string
+        identifier?: string
+        categoryId?: string
+        platformId?: string
+        price?: number
+        currency?: utils.CurrencyCode
+        link?: string
+        listingImages?: ListingImageInput[]
+    }
+
+    export interface VerifyBankAccountDetailsRequest {
+        accountNumber: string
+        ifscCode: string
+    }
+
+    export interface VirtualAccountResponse {
+        organizationId: string
+        virtualAccount: {
+            accountNumber: string
+            ifscCode: string
+            bankName: string
+            accountHolderName: string
+            upiId?: string
+            createdAt: string
+        } | null
+        status: "not_provisioned" | "pending" | "active"
+    }
+
+    export interface WalletTransaction {
+        id: string
+        walletId: string
+        type: "credit" | "debit"
+        /**
+         * Transaction status: pending (inflight hold), completed (applied), or voided (expired)
+         */
+        status: "pending" | "completed" | "voided"
+
+        /**
+         * Amount in smallest units
+         */
+        amount: number
+
+        /**
+         * Decimal string (e.g., "254.90")
+         */
+        amountDecimal: string
+
+        /**
+         * Currency code (ISO 4217)
+         */
+        currency: string
+
+        description: string
+        /**
+         * Transaction reference ID (for debugging and reconciliation)
+         */
+        reference?: string
+
+        /**
+         * Enrollment ID if this is an enrollment-related transaction
+         */
+        enrollmentId?: string
+
+        /**
+         * Transaction category for better UX
+         */
+        category?: "enrollment_hold" | "deposit" | "payout" | "refund" | "admin_credit" | "other"
+
+        createdAt: string
+    }
+
+    export interface Withdrawal {
+        id: string
+        displayId: string
+        holderId: string
+        holderType: "organization" | "creator"
+        /**
+         * Amount in smallest units
+         */
+        amount: number
+
+        /**
+         * Decimal string (e.g., "254.90")
+         */
+        amountDecimal: string
+
+        /**
+         * Currency code (ISO 4217)
+         */
+        currency: string
+
+        status: db.WithdrawalStatus
+        withdrawalMethodId?: string
+        requiresApproval: boolean
+        approvedBy?: string
+        approvedAt?: string
+        rejectionReason?: string
+        /**
+         * Bank UTR (Unique Transaction Reference) for completed withdrawals
+         */
+        utr?: string
+
+        /**
+         * Reason for failure from payment gateway
+         */
+        failureReason?: string
+
+        requestedAt: string
+        processedAt?: string
+    }
+
+    export class ServiceClient {
+        private baseClient: BaseClient
+
+        constructor(baseClient: BaseClient) {
+            this.baseClient = baseClient
+            this.addBankAccount = this.addBankAccount.bind(this)
+            this.addCampaignTask = this.addCampaignTask.bind(this)
+            this.archiveNotifications = this.archiveNotifications.bind(this)
+            this.batchEnrollments = this.batchEnrollments.bind(this)
+            this.cancelWithdrawalRequest = this.cancelWithdrawalRequest.bind(this)
+            this.changeOrgPhone = this.changeOrgPhone.bind(this)
+            this.createAndSubmitCampaign = this.createAndSubmitCampaign.bind(this)
+            this.createCampaign = this.createCampaign.bind(this)
+            this.createListing = this.createListing.bind(this)
+            this.createWithdrawalRequest = this.createWithdrawalRequest.bind(this)
+            this.deleteAllNotifications = this.deleteAllNotifications.bind(this)
+            this.deleteBankAccount = this.deleteBankAccount.bind(this)
+            this.deleteListing = this.deleteListing.bind(this)
+            this.deleteNotifications = this.deleteNotifications.bind(this)
+            this.duplicateCampaign = this.duplicateCampaign.bind(this)
+            this.exportEnrollments = this.exportEnrollments.bind(this)
+            this.exportOrganizationEnrollments = this.exportOrganizationEnrollments.bind(this)
+            this.fundOrganizationWallet = this.fundOrganizationWallet.bind(this)
+            this.generateInvoicePDF = this.generateInvoicePDF.bind(this)
+            this.getCampaign = this.getCampaign.bind(this)
+            this.getCampaignStats = this.getCampaignStats.bind(this)
+            this.getDashboardOverview = this.getDashboardOverview.bind(this)
+            this.getEnrollment = this.getEnrollment.bind(this)
+            this.getGSTDetails = this.getGSTDetails.bind(this)
+            this.getInvoice = this.getInvoice.bind(this)
+            this.getOrganization = this.getOrganization.bind(this)
+            this.getOrganizationActivity = this.getOrganizationActivity.bind(this)
+            this.getOrganizationBankAccount = this.getOrganizationBankAccount.bind(this)
+            this.getOrganizationListing = this.getOrganizationListing.bind(this)
+            this.getOrganizationWallet = this.getOrganizationWallet.bind(this)
+            this.getOrganizationWalletTransactions = this.getOrganizationWalletTransactions.bind(this)
+            this.getOrganizationWithdrawalStats = this.getOrganizationWithdrawalStats.bind(this)
+            this.getPreferences = this.getPreferences.bind(this)
+            this.getSetupProgress = this.getSetupProgress.bind(this)
+            this.getUnreadCount = this.getUnreadCount.bind(this)
+            this.getVirtualAccount = this.getVirtualAccount.bind(this)
+            this.getWalletHolds = this.getWalletHolds.bind(this)
+            this.getWithdrawalRequest = this.getWithdrawalRequest.bind(this)
+            this.listCampaignTasks = this.listCampaignTasks.bind(this)
+            this.listCampaigns = this.listCampaigns.bind(this)
+            this.listDeposits = this.listDeposits.bind(this)
+            this.listInvoices = this.listInvoices.bind(this)
+            this.listNotifications = this.listNotifications.bind(this)
+            this.listOrganizationEnrollments = this.listOrganizationEnrollments.bind(this)
+            this.listOrganizationListings = this.listOrganizationListings.bind(this)
+            this.listTokens = this.listTokens.bind(this)
+            this.listWithdrawalRequests = this.listWithdrawalRequests.bind(this)
+            this.markAllRead = this.markAllRead.bind(this)
+            this.markRead = this.markRead.bind(this)
+            this.registerToken = this.registerToken.bind(this)
+            this.removeCampaignTask = this.removeCampaignTask.bind(this)
+            this.removeToken = this.removeToken.bind(this)
+            this.streamSetupProgress = this.streamSetupProgress.bind(this)
+            this.unifiedSearch = this.unifiedSearch.bind(this)
+            this.updateCampaign = this.updateCampaign.bind(this)
+            this.updateCampaignState = this.updateCampaignState.bind(this)
+            this.updateCampaignTask = this.updateCampaignTask.bind(this)
+            this.updateEnrollmentReview = this.updateEnrollmentReview.bind(this)
+            this.updateListing = this.updateListing.bind(this)
+            this.updateOrganization = this.updateOrganization.bind(this)
+            this.updatePreferences = this.updatePreferences.bind(this)
+            this.verifyBankAccountDetails = this.verifyBankAccountDetails.bind(this)
+            this.verifyGSTPreview = this.verifyGSTPreview.bind(this)
+        }
+
+        /**
+         * =============================================================================
+         * STEP 2: Add verified bank account (requires validationId from Step 1)
+         * =============================================================================
+         */
+        public async addBankAccount(organizationId: string, params: AddBankAccountRequest): Promise<OrganizationBankAccount> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/bank-accounts`, JSON.stringify(params))
+            return await resp.json() as OrganizationBankAccount
+        }
+
+        /**
+         * Add task to campaign (draft/paused only)
+         */
+        public async addCampaignTask(organizationId: string, campaignId: string, params: {
+    taskTemplateId: string
+    isRequired?: boolean
+    sortOrder?: number
+    instructions?: string
+    requirements?: db.TaskRequirements
+}): Promise<CampaignTaskResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/campaigns/${encodeURIComponent(campaignId)}/tasks`, JSON.stringify(params))
+            return await resp.json() as CampaignTaskResponse
+        }
+
+        public async archiveNotifications(organizationId: string, params: {
+    ids: string[]
+}): Promise<void> {
+            await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/notifications/archive`, JSON.stringify(params))
+        }
+
+        /**
+         * POST /organizations/:organizationId/enrollments/batch
+         * Unified batch operations for enrollments
+         * Replaces: bulkApproveEnrollments, bulkRejectEnrollments
+         */
+        public async batchEnrollments(organizationId: string, params: {
+    action: "approve" | "reject" | "request_changes"
+    ids: string[]
+    reason?: string
+    remarks?: string
+}): Promise<{
+    processed: number
+    failed: number
+    errors: { [key: string]: string }
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/enrollments/batch`, JSON.stringify(params))
+            return await resp.json() as {
+    processed: number
+    failed: number
+    errors: { [key: string]: string }
+}
+        }
+
+        /**
+         * POST /organizations/:organizationId/withdrawals/:withdrawalId/cancel
+         * Cancel withdrawal request (brand)
+         * Only pending requests that haven't been processed can be cancelled
+         */
+        public async cancelWithdrawalRequest(organizationId: string, withdrawalId: string, params: {
+    reason?: string
+}): Promise<Withdrawal> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/withdrawals/${encodeURIComponent(withdrawalId)}/cancel`, JSON.stringify(params))
+            return await resp.json() as Withdrawal
+        }
+
+        /**
+         * POST /organizations/:organizationId/change-phone
+         * Change organization phone number with passkey re-authentication.
+         * 
+         * Single-step flow: verifies passkey, then updates phone number.
+         * Replaces the previous 2-step OTP flow (request-phone-change → verify-phone-change).
+         */
+        public async changeOrgPhone(organizationId: string, params: {
+    phoneNumber: string
+    /**
+     * WebAuthn assertion response from navigator.credentials.get()
+     */
+    passkeyResponse: any
+
+    /**
+     * Challenge ID from GET /auth/passkey/reauth-options
+     */
+    challengeId: string
+}): Promise<Organization> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/change-phone`, JSON.stringify(params))
+            return await resp.json() as Organization
+        }
+
+        /**
+         * POST /organizations/:organizationId/campaigns/submit
+         * Creates a campaign AND submits it for approval in a single call.
+         * Tasks are required (at least one) since submission validates task count.
+         * Returns the campaign in pending_approval status.
+         */
+        public async createAndSubmitCampaign(organizationId: string, params: CreateAndSubmitRequest): Promise<Campaign> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/campaigns/submit`, JSON.stringify(params))
+            return await resp.json() as Campaign
+        }
+
+        /**
+         * Create a new campaign (requires organization membership)
+         */
+        public async createCampaign(organizationId: string, params: CreateCampaignRequest): Promise<Campaign> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/campaigns`, JSON.stringify(params))
+            return await resp.json() as Campaign
+        }
+
+        /**
+         * Create a new listing
+         */
+        public async createListing(organizationId: string, params: CreateListingRequest): Promise<Listing> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/listings`, JSON.stringify(params))
+            return await resp.json() as Listing
+        }
+
+        /**
+         * POST /organizations/:organizationId/withdrawals
+         * Create withdrawal request with passkey verification (brand).
+         * 
+         * Single-step flow: validates balance, verifies passkey, creates withdrawal + hold atomically.
+         * NOTE: Organizations can only have ONE bank account (closed-loop policy).
+         * Withdrawals go to the same bank account they use for deposits.
+         */
+        public async createWithdrawalRequest(organizationId: string, params: CreateOrgWithdrawalRequest): Promise<Withdrawal> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/withdrawals`, JSON.stringify(params))
+            return await resp.json() as Withdrawal
+        }
+
+        public async deleteAllNotifications(organizationId: string): Promise<void> {
+            await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/notifications/delete-all`)
+        }
+
+        /**
+         * Delete organization's bank account (soft delete, singular - only 1 per org)
+         * URL-based multi-tenancy: organizationId comes from URL path
+         */
+        public async deleteBankAccount(organizationId: string): Promise<{
+    success: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("DELETE", `/organizations/${encodeURIComponent(organizationId)}/bank-accounts`)
+            return await resp.json() as {
+    success: boolean
+}
+        }
+
+        /**
+         * Delete listing
+         */
+        public async deleteListing(organizationId: string, id: string): Promise<{
+    success: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("DELETE", `/organizations/${encodeURIComponent(organizationId)}/listings/${encodeURIComponent(id)}`)
+            return await resp.json() as {
+    success: boolean
+}
+        }
+
+        public async deleteNotifications(organizationId: string, params: {
+    ids: string[]
+}): Promise<void> {
+            await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/notifications/delete`, JSON.stringify(params))
+        }
+
+        /**
+         * Duplicate campaign (creates a copy in draft status)
+         */
+        public async duplicateCampaign(organizationId: string, id: string, params: {
+    newTitle?: string
+}): Promise<Campaign> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/campaigns/${encodeURIComponent(id)}/duplicate`, JSON.stringify(params))
+            return await resp.json() as Campaign
+        }
+
+        /**
+         * Export enrollments data as CSV
+         * SECURITY: Creator payout data and PII NOT included in brand exports
+         * Only profileName and city exposed - no real name/email
+         */
+        public async exportEnrollments(organizationId: string, campaignId: string, params: {
+    status?: db.EnrollmentStatus
+}): Promise<CSVExportResponse> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                status: params.status === undefined ? undefined : String(params.status),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/campaigns/${encodeURIComponent(campaignId)}/enrollments/export`, undefined, {query})
+            return await resp.json() as CSVExportResponse
+        }
+
+        /**
+         * Org-wide enrollment export (all campaigns)
+         */
+        public async exportOrganizationEnrollments(organizationId: string, params: {
+    status?: db.EnrollmentStatus
+    campaignId?: string
+    createdFrom?: string
+    createdTo?: string
+}): Promise<{
+    csv: string
+    totalCount: number
+    exportedAt: string
+    filename: string
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                campaignId:  params.campaignId,
+                createdFrom: params.createdFrom,
+                createdTo:   params.createdTo,
+                status:      params.status === undefined ? undefined : String(params.status),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/enrollments/export`, undefined, {query})
+            return await resp.json() as {
+    csv: string
+    totalCount: number
+    exportedAt: string
+    filename: string
+}
+        }
+
+        /**
+         * Fund organization wallet (admin only - credits org wallet directly)
+         */
+        public async fundOrganizationWallet(organizationId: string, params: {
+    amount: number
+    reason: string
+    /**
+     * Unique reference for this funding transaction.
+     * REQUIRED for idempotency - prevents duplicate funding on retry.
+     * Should be unique per funding operation (e.g., "FUND-ORG-2024-001")
+     */
+    reference: string
+}): Promise<FundWalletResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/wallet/fund`, JSON.stringify(params))
+            return await resp.json() as FundWalletResponse
+        }
+
+        /**
+         * Generate invoice PDF
+         */
+        public async generateInvoicePDF(organizationId: string, id: string): Promise<{
+    pdfUrl: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/invoices/${encodeURIComponent(id)}/pdf`)
+            return await resp.json() as {
+    pdfUrl: string
+}
+        }
+
+        /**
+         * Get campaign by ID - secured endpoint for campaign owners/org members (brand-only, creators use getPublicCampaign)
+         */
+        public async getCampaign(organizationId: string, id: string): Promise<CampaignWithStats> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/campaigns/${encodeURIComponent(id)}`)
+            return await resp.json() as CampaignWithStats
+        }
+
+        /**
+         * Get campaign statistics (with optional daily performance data)
+         * Pass startDate and endDate query params to include daily performance breakdown
+         */
+        public async getCampaignStats(organizationId: string, id: string, params: {
+    /**
+     * Optional: Include daily performance from this date (YYYY-MM-DD)
+     */
+    startDate?: string
+
+    /**
+     * Optional: Include daily performance until this date (YYYY-MM-DD)
+     */
+    endDate?: string
+}): Promise<CampaignStats> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                endDate:   params.endDate,
+                startDate: params.startDate,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/campaigns/${encodeURIComponent(id)}/stats`, undefined, {query})
+            return await resp.json() as CampaignStats
+        }
+
+        /**
+         * Get comprehensive dashboard overview for organization
+         */
+        public async getDashboardOverview(organizationId: string, params: {
+    days?: number
+}): Promise<DashboardOverviewResponse> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                days: params.days === undefined ? undefined : String(params.days),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/dashboard`, undefined, {query})
+            return await resp.json() as DashboardOverviewResponse
+        }
+
+        /**
+         * GET /organizations/:organizationId/enrollments/:id
+         * Get enrollment with full details - SINGLE endpoint for all brand enrollment fetches
+         * No campaignId required - validates via campaign relationship
+         * Always returns full detail (creator, campaign, platform, OCR, tasks, history, pricing)
+         */
+        public async getEnrollment(organizationId: string, id: string): Promise<EnrollmentDetail> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/enrollments/${encodeURIComponent(id)}`)
+            return await resp.json() as EnrollmentDetail
+        }
+
+        /**
+         * Get GST details
+         * URL-based multi-tenancy: organizationId comes from URL path
+         */
+        public async getGSTDetails(organizationId: string): Promise<GSTDetailsResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/gst`)
+            return await resp.json() as GSTDetailsResponse
+        }
+
+        /**
+         * Get invoice by ID (with enrollment count)
+         */
+        public async getInvoice(organizationId: string, id: string): Promise<Invoice> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/invoices/${encodeURIComponent(id)}`)
+            return await resp.json() as Invoice
+        }
+
+        /**
+         * Get organization profile
+         */
+        public async getOrganization(organizationId: string): Promise<Organization> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}`)
+            return await resp.json() as Organization
+        }
+
+        /**
+         * Get organization activity timeline - CURSOR PAGINATION
+         * URL-based multi-tenancy: organizationId comes from URL path
+         * Uses cursor for infinite scroll in activity feed
+         */
+        public async getOrganizationActivity(organizationId: string, params: {
+    cursor?: string
+    limit?: number
+    entityType?: "organization" | "campaign" | "enrollment" | "withdrawal" | "listing" | "invoice"
+}): Promise<{
+    data: ActivityLogEntry[]
+    nextCursor: string | null
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                cursor:     params.cursor,
+                entityType: params.entityType === undefined ? undefined : String(params.entityType),
+                limit:      params.limit === undefined ? undefined : String(params.limit),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/activity`, undefined, {query})
+            return await resp.json() as {
+    data: ActivityLogEntry[]
+    nextCursor: string | null
+    hasMore: boolean
+}
+        }
+
+        /**
+         * Get organization's bank account (singular - only 1 allowed per org)
+         * URL-based multi-tenancy: organizationId comes from URL path
+         * showFull query param: if true, includes full account number (owner/admin only)
+         */
+        public async getOrganizationBankAccount(organizationId: string, params: {
+    showFull?: boolean
+}): Promise<{
+    bankAccount: OrganizationBankAccount | null
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                showFull: params.showFull === undefined ? undefined : String(params.showFull),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/bank-accounts`, undefined, {query})
+            return await resp.json() as {
+    bankAccount: OrganizationBankAccount | null
+}
+        }
+
+        /**
+         * Get organization listing by ID (brand-only)
+         * Organization-scoped endpoint for brands to view their own listing details
+         */
+        public async getOrganizationListing(organizationId: string, id: string): Promise<ListingWithStats> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/listings/${encodeURIComponent(id)}`)
+            return await resp.json() as ListingWithStats
+        }
+
+        /**
+         * Get organization wallet
+         */
+        public async getOrganizationWallet(organizationId: string): Promise<OrganizationWalletResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/wallet`)
+            return await resp.json() as OrganizationWalletResponse
+        }
+
+        /**
+         * Get organization wallet transactions (brand)
+         * Uses ledger's native page/per_page pagination for efficient fetching.
+         */
+        public async getOrganizationWalletTransactions(organizationId: string, params: {
+    skip?: number
+    take?: number
+    /**
+     * Filter by transaction status: pending (inflight hold), completed (posted), voided
+     */
+    status?: "pending" | "completed" | "voided"
+
+    /**
+     * Filter by transaction category: enrollment_hold, deposit, payout, refund, admin_credit
+     */
+    category?: "enrollment_hold" | "deposit" | "payout" | "refund" | "admin_credit"
+
+    /**
+     * Filter by transaction type: credit (money in), debit (money out)
+     */
+    type?: "credit" | "debit"
+
+    /**
+     * Filter transactions from this date (ISO 8601)
+     */
+    dateFrom?: string
+
+    /**
+     * Filter transactions until this date (ISO 8601)
+     */
+    dateTo?: string
+
+    /**
+     * Filter transactions with amount >= this value (smallest units)
+     */
+    amountMin?: number
+
+    /**
+     * Filter transactions with amount <= this value (smallest units)
+     */
+    amountMax?: number
+
+    sortBy?: "createdAt" | "amount"
+    sortOrder?: "asc" | "desc"
+}): Promise<{
+    data: WalletTransaction[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                amountMax: params.amountMax === undefined ? undefined : String(params.amountMax),
+                amountMin: params.amountMin === undefined ? undefined : String(params.amountMin),
+                category:  params.category === undefined ? undefined : String(params.category),
+                dateFrom:  params.dateFrom,
+                dateTo:    params.dateTo,
+                skip:      params.skip === undefined ? undefined : String(params.skip),
+                sortBy:    params.sortBy === undefined ? undefined : String(params.sortBy),
+                sortOrder: params.sortOrder === undefined ? undefined : String(params.sortOrder),
+                status:    params.status === undefined ? undefined : String(params.status),
+                take:      params.take === undefined ? undefined : String(params.take),
+                type:      params.type === undefined ? undefined : String(params.type),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/wallet/transactions`, undefined, {query})
+            return await resp.json() as {
+    data: WalletTransaction[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+
+        /**
+         * GET /organizations/:organizationId/withdrawals/stats
+         * Get organization's withdrawal statistics
+         */
+        public async getOrganizationWithdrawalStats(organizationId: string): Promise<OrganizationWithdrawalStats> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/withdrawals/stats`)
+            return await resp.json() as OrganizationWithdrawalStats
+        }
+
+        public async getPreferences(organizationId: string): Promise<void> {
+            await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/notifications/preferences`)
+        }
+
+        /**
+         * GET /organizations/:organizationId/setup-progress
+         * Returns current onboarding checklist state in a single request.
+         * Use this for page loads, dashboard widgets, and setup wizard state.
+         * For real-time updates during onboarding, use the SSE stream endpoint instead.
+         */
+        public async getSetupProgress(organizationId: string): Promise<internal.SetupProgressResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/setup-progress`)
+            return await resp.json() as internal.SetupProgressResponse
+        }
+
+        public async getUnreadCount(organizationId: string): Promise<void> {
+            await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/notifications/unread-count`)
+        }
+
+        /**
+         * GET /organizations/:organizationId/virtual-account
+         * Get organization's virtual account details for deposits
+         */
+        public async getVirtualAccount(organizationId: string): Promise<VirtualAccountResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/virtual-account`)
+            return await resp.json() as VirtualAccountResponse
+        }
+
+        /**
+         * Get organization wallet active holds (enrollment holds)
+         */
+        public async getWalletHolds(organizationId: string, params: {
+    skip?: number
+    take?: number
+    /**
+     * Filter by campaign
+     */
+    campaignId?: string
+
+    /**
+     * Filter holds created from this date (ISO 8601)
+     */
+    createdFrom?: string
+
+    /**
+     * Filter holds created until this date (ISO 8601)
+     */
+    createdTo?: string
+
+    /**
+     * Filter holds expiring from this date (ISO 8601)
+     */
+    expiresFrom?: string
+
+    /**
+     * Filter holds expiring until this date (ISO 8601)
+     */
+    expiresTo?: string
+
+    sortBy?: "createdAt" | "expiresAt" | "amount"
+    sortOrder?: "asc" | "desc"
+}): Promise<{
+    data: ActiveHold[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                campaignId:  params.campaignId,
+                createdFrom: params.createdFrom,
+                createdTo:   params.createdTo,
+                expiresFrom: params.expiresFrom,
+                expiresTo:   params.expiresTo,
+                skip:        params.skip === undefined ? undefined : String(params.skip),
+                sortBy:      params.sortBy === undefined ? undefined : String(params.sortBy),
+                sortOrder:   params.sortOrder === undefined ? undefined : String(params.sortOrder),
+                take:        params.take === undefined ? undefined : String(params.take),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/wallet/holds`, undefined, {query})
+            return await resp.json() as {
+    data: ActiveHold[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+
+        /**
+         * GET /organizations/:organizationId/withdrawals/:requestId
+         * Get single withdrawal request (brand)
+         */
+        public async getWithdrawalRequest(organizationId: string, withdrawalId: string): Promise<Withdrawal> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/withdrawals/${encodeURIComponent(withdrawalId)}`)
+            return await resp.json() as Withdrawal
+        }
+
+        /**
+         * List campaign tasks
+         */
+        public async listCampaignTasks(organizationId: string, campaignId: string, params: {
+    skip?: number
+    take?: number
+}): Promise<{
+    data: CampaignTaskResponse[]
+    total: number
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                skip: params.skip === undefined ? undefined : String(params.skip),
+                take: params.take === undefined ? undefined : String(params.take),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/campaigns/${encodeURIComponent(campaignId)}/tasks`, undefined, {query})
+            return await resp.json() as {
+    data: CampaignTaskResponse[]
+    total: number
+}
+        }
+
+        /**
+         * List campaigns with pagination and filters (includes stats via SQL subqueries) - brand-only
+         */
+        public async listCampaigns(organizationId: string, params: ListCampaignsParams): Promise<{
+    data: CampaignWithStats[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                categoryId:    params.categoryId,
+                listingId:     params.listingId,
+                platformId:    params.platformId,
+                search:        params.search,
+                skip:          params.skip === undefined ? undefined : String(params.skip),
+                sortBy:        params.sortBy === undefined ? undefined : String(params.sortBy),
+                sortOrder:     params.sortOrder === undefined ? undefined : String(params.sortOrder),
+                startDateFrom: params.startDateFrom,
+                startDateTo:   params.startDateTo,
+                status:        params.status,
+                take:          params.take === undefined ? undefined : String(params.take),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/campaigns`, undefined, {query})
+            return await resp.json() as {
+    data: CampaignWithStats[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+
+        /**
+         * GET /organizations/:organizationId/deposits
+         * List deposit history from ledger (category=deposit)
+         */
+        public async listDeposits(organizationId: string, params: {
+    skip?: number
+    take?: number
+    sortOrder?: "asc" | "desc"
+}): Promise<{
+    data: DepositTransaction[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                skip:      params.skip === undefined ? undefined : String(params.skip),
+                sortOrder: params.sortOrder === undefined ? undefined : String(params.sortOrder),
+                take:      params.take === undefined ? undefined : String(params.take),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/deposits`, undefined, {query})
+            return await resp.json() as {
+    data: DepositTransaction[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+
+        /**
+         * List organization invoices (with enrollment counts)
+         * Pure client-side multi-tenancy: organizationId from URL path
+         */
+        public async listInvoices(organizationId: string, params: ListInvoicesParams): Promise<{
+    data: Invoice[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                amountMax:      params.amountMax === undefined ? undefined : String(params.amountMax),
+                amountMin:      params.amountMin === undefined ? undefined : String(params.amountMin),
+                dueDateFrom:    params.dueDateFrom,
+                dueDateTo:      params.dueDateTo,
+                issuedDateFrom: params.issuedDateFrom,
+                issuedDateTo:   params.issuedDateTo,
+                q:              params.q,
+                skip:           params.skip === undefined ? undefined : String(params.skip),
+                sortBy:         params.sortBy === undefined ? undefined : String(params.sortBy),
+                sortOrder:      params.sortOrder === undefined ? undefined : String(params.sortOrder),
+                status:         params.status === undefined ? undefined : String(params.status),
+                take:           params.take === undefined ? undefined : String(params.take),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/invoices`, undefined, {query})
+            return await resp.json() as {
+    data: Invoice[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+
+        public async listNotifications(organizationId: string, params: {
+    limit?: number
+    offset?: number
+    unreadOnly?: boolean
+}): Promise<void> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                limit:      params.limit === undefined ? undefined : String(params.limit),
+                offset:     params.offset === undefined ? undefined : String(params.offset),
+                unreadOnly: params.unreadOnly === undefined ? undefined : String(params.unreadOnly),
+            })
+
+            await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/notifications`, undefined, {query})
+        }
+
+        /**
+         * List organization enrollments (for brand - all enrollments across all campaigns)
+         * Pure client-side multi-tenancy: organizationId from URL path
+         */
+        public async listOrganizationEnrollments(organizationId: string, params: {
+    skip?: number
+    take?: number
+    /**
+     * Single status or comma-separated statuses (e.g., "awaiting_review,awaiting_submission")
+     */
+    status?: string
+
+    campaignId?: string
+    creatorId?: string
+    search?: string
+    createdFrom?: string
+    createdTo?: string
+    sortBy?: "createdAt" | "orderValue" | "status" | "submittedAt" | "expiresAt"
+    sortOrder?: "asc" | "desc"
+}): Promise<{
+    data: EnrollmentWithRelations[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                campaignId:  params.campaignId,
+                createdFrom: params.createdFrom,
+                createdTo:   params.createdTo,
+                creatorId:   params.creatorId,
+                search:      params.search,
+                skip:        params.skip === undefined ? undefined : String(params.skip),
+                sortBy:      params.sortBy === undefined ? undefined : String(params.sortBy),
+                sortOrder:   params.sortOrder === undefined ? undefined : String(params.sortOrder),
+                status:      params.status,
+                take:        params.take === undefined ? undefined : String(params.take),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/enrollments`, undefined, {query})
+            return await resp.json() as {
+    data: EnrollmentWithRelations[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+
+        /**
+         * List organization listings (with stats)
+         */
+        public async listOrganizationListings(organizationId: string, params: ListOrganizationListingsParams): Promise<{
+    data: ListingWithStats[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                categoryId: params.categoryId,
+                platformId: params.platformId,
+                priceMax:   params.priceMax === undefined ? undefined : String(params.priceMax),
+                priceMin:   params.priceMin === undefined ? undefined : String(params.priceMin),
+                search:     params.search,
+                skip:       params.skip === undefined ? undefined : String(params.skip),
+                sortBy:     params.sortBy === undefined ? undefined : String(params.sortBy),
+                sortOrder:  params.sortOrder === undefined ? undefined : String(params.sortOrder),
+                take:       params.take === undefined ? undefined : String(params.take),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/listings`, undefined, {query})
+            return await resp.json() as {
+    data: ListingWithStats[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+
+        public async listTokens(organizationId: string): Promise<void> {
+            await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/notifications/tokens`)
+        }
+
+        /**
+         * GET /organizations/:organizationId/withdrawals
+         * List withdrawal requests (brand)
+         */
+        public async listWithdrawalRequests(organizationId: string, params: {
+    skip?: number
+    take?: number
+    status?: db.WithdrawalStatus
+    requestedFrom?: string
+    requestedTo?: string
+    amountMin?: number
+    amountMax?: number
+    sortBy?: "requestedAt" | "amount" | "status"
+    sortOrder?: "asc" | "desc"
+}): Promise<{
+    data: Withdrawal[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                amountMax:     params.amountMax === undefined ? undefined : String(params.amountMax),
+                amountMin:     params.amountMin === undefined ? undefined : String(params.amountMin),
+                requestedFrom: params.requestedFrom,
+                requestedTo:   params.requestedTo,
+                skip:          params.skip === undefined ? undefined : String(params.skip),
+                sortBy:        params.sortBy === undefined ? undefined : String(params.sortBy),
+                sortOrder:     params.sortOrder === undefined ? undefined : String(params.sortOrder),
+                status:        params.status === undefined ? undefined : String(params.status),
+                take:          params.take === undefined ? undefined : String(params.take),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/withdrawals`, undefined, {query})
+            return await resp.json() as {
+    data: Withdrawal[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+
+        public async markAllRead(organizationId: string): Promise<void> {
+            await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/notifications/read-all`)
+        }
+
+        public async markRead(organizationId: string, params: {
+    ids: string[]
+}): Promise<void> {
+            await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/notifications/read`, JSON.stringify(params))
+        }
+
+        public async registerToken(organizationId: string, params: {
+    token: string
+    platform: notifications.PushPlatform
+}): Promise<void> {
+            await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/notifications/tokens`, JSON.stringify(params))
+        }
+
+        /**
+         * Remove task from campaign (draft only, no enrollments)
+         */
+        public async removeCampaignTask(organizationId: string, campaignId: string, id: string): Promise<{
+    success: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("DELETE", `/organizations/${encodeURIComponent(organizationId)}/campaigns/${encodeURIComponent(campaignId)}/tasks/${encodeURIComponent(id)}`)
+            return await resp.json() as {
+    success: boolean
+}
+        }
+
+        public async removeToken(organizationId: string, params: {
+    token: string
+}): Promise<void> {
+            await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/notifications/tokens/remove`, JSON.stringify(params))
+        }
+
+        /**
+         * Stream setup progress updates via Server-Sent Events.
+         * Client connects and receives real-time updates as setup jobs complete.
+         * 
+         * Flow:
+         * 1. Client connects after org creation with organizationId
+         * 2. Server sends initial progress state
+         * 3. Server polls for changes every 2 seconds
+         * 4. Stream closes when org is activated OR after timeout (5 min)
+         * 
+         * @example
+         * const stream = await organizations.streamSetupProgress({ organizationId: "..." });
+         * for await (const update of stream) {
+         * console.log(update.progress);
+         * if (update.isComplete) break;
+         * }
+         */
+        public async streamSetupProgress(organizationId: string): Promise<StreamIn<internal.SetupProgressUpdate>> {
+            return await this.baseClient.createStreamIn(`/organizations/${encodeURIComponent(organizationId)}/setup-progress/stream`)
+        }
+
+        /**
+         * GET /organizations/:organizationId/search
+         * 
+         * Unified search across campaigns, enrollments, invoices, and listings.
+         * - Campaigns: Search by title, description, listing name (all statuses)
+         * - Enrollments: Search by order ID, campaign title, creator name (org's campaigns)
+         * - Invoices: Search by invoice number, notes
+         * - Listings: Search by name, description
+         * 
+         * Results are interleaved in round-robin fashion for balanced display.
+         * Returns facet counts for each resource type.
+         */
+        public async unifiedSearch(organizationId: string, params: BrandUnifiedSearchParams): Promise<BrandUnifiedSearchResponse> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                cursor: params.cursor,
+                limit:  params.limit === undefined ? undefined : String(params.limit),
+                q:      params.q,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/search`, undefined, {query})
+            return await resp.json() as BrandUnifiedSearchResponse
+        }
+
+        /**
+         * PATCH /organizations/:organizationId/campaigns/:id
+         * Update campaign fields.
+         * 
+         * Edit rules by status:
+         * - draft/rejected: Full edit (title, dates, description, T&C, visibility, maxEnrollments)
+         * - approved/active/paused: Safe edits only (description, T&C, visibility, maxEnrollments increase)
+         * - pending_approval/ended/cancelled/archived: Locked — no edits allowed
+         * 
+         * Rejected campaigns auto-transition to draft on edit.
+         */
+        public async updateCampaign(organizationId: string, id: string, params: {
+    title?: string
+    description?: string
+    startDate?: string
+    endDate?: string
+    maxEnrollments?: number
+    isPublic?: boolean
+    termsAndConditions?: string
+}): Promise<Campaign> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("PATCH", `/organizations/${encodeURIComponent(organizationId)}/campaigns/${encodeURIComponent(id)}`, JSON.stringify(params))
+            return await resp.json() as Campaign
+        }
+
+        /**
+         * PATCH /organizations/:organizationId/campaigns/:id/state
+         * Unified endpoint for all campaign state transitions
+         */
+        public async updateCampaignState(organizationId: string, id: string, params: {
+    action: CampaignStateAction
+    reason?: string
+}): Promise<Campaign> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("PATCH", `/organizations/${encodeURIComponent(organizationId)}/campaigns/${encodeURIComponent(id)}/state`, JSON.stringify(params))
+            return await resp.json() as Campaign
+        }
+
+        /**
+         * Update campaign task (includes sortOrder for reordering)
+         */
+        public async updateCampaignTask(organizationId: string, campaignId: string, id: string, params: {
+    isRequired?: boolean
+    sortOrder?: number
+    instructions?: string
+    requirements?: db.TaskRequirements
+}): Promise<CampaignTaskResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("PATCH", `/organizations/${encodeURIComponent(organizationId)}/campaigns/${encodeURIComponent(campaignId)}/tasks/${encodeURIComponent(id)}`, JSON.stringify(params))
+            return await resp.json() as CampaignTaskResponse
+        }
+
+        /**
+         * PATCH /organizations/:organizationId/enrollments/:id/review
+         * Unified enrollment review endpoint - replaces 4 separate POST endpoints
+         * Actions: approve, reject, request_changes, extend_deadline
+         * 
+         * For request_changes: Use taskFeedback array to provide per-task feedback
+         */
+        public async updateEnrollmentReview(organizationId: string, id: string, params: {
+    action: EnrollmentReviewAction
+    /**
+     * Reason for rejection or changes requested (required for reject/request_changes)
+     */
+    reason?: string
+
+    /**
+     * Remarks for approval
+     */
+    remarks?: string
+
+    /**
+     * Structured feedback for rejection (enrollment-level)
+     */
+    feedback?: { [key: string]: string }
+
+    /**
+     * Per-task feedback (only for request_changes) - saves to individual task submissions
+     */
+    taskFeedback?: TaskFeedbackItem[]
+}): Promise<EnrollmentDetail> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("PATCH", `/organizations/${encodeURIComponent(organizationId)}/enrollments/${encodeURIComponent(id)}/review`, JSON.stringify(params))
+            return await resp.json() as EnrollmentDetail
+        }
+
+        /**
+         * Update listing
+         */
+        public async updateListing(organizationId: string, id: string, params: UpdateListingRequest): Promise<Listing> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("PATCH", `/organizations/${encodeURIComponent(organizationId)}/listings/${encodeURIComponent(id)}`, JSON.stringify(params))
+            return await resp.json() as Listing
+        }
+
+        /**
+         * Update organization (general PATCH - can update multiple fields)
+         * Brands can update their profile, logo, contact info, and address
+         */
+        public async updateOrganization(organizationId: string, params: {
+    /**
+     * Profile fields
+     */
+    name?: string
+
+    description?: string
+    website?: string
+    logo?: string
+    /**
+     * Contact fields (phoneNumber requires passkey — use POST /organizations/:id/change-phone)
+     */
+    contactPerson?: string
+
+    email?: string
+    /**
+     * Address fields
+     */
+    address?: string
+
+    city?: string
+    state?: string
+    country?: string
+    postalCode?: string
+    /**
+     * Business info
+     */
+    businessType?: "pvt_ltd" | "llp" | "partnership" | "proprietorship" | "public_ltd" | "trust" | "society"
+
+    industryCategory?: string
+}): Promise<Organization> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("PATCH", `/organizations/${encodeURIComponent(organizationId)}`, JSON.stringify(params))
+            return await resp.json() as Organization
+        }
+
+        public async updatePreferences(organizationId: string, params: {
+    emailEnabled?: boolean
+    smsEnabled?: boolean
+    pushEnabled?: boolean
+    inAppEnabled?: boolean
+    whatsappEnabled?: boolean
+    email?: string
+    phone?: string
+    whatsappPhone?: string
+}): Promise<void> {
+            await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/notifications/preferences`, JSON.stringify(params))
+        }
+
+        /**
+         * =============================================================================
+         * STEP 1: Verify bank account details (penny drop) - NO SAVE
+         * User can review the registered name before confirming
+         * =============================================================================
+         */
+        public async verifyBankAccountDetails(organizationId: string, params: VerifyBankAccountDetailsRequest): Promise<BankVerificationResult> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/bank-accounts/verify`, JSON.stringify(params))
+            return await resp.json() as BankVerificationResult
+        }
+
+        public async verifyGSTPreview(params: {
+    gstNumber: string
+}): Promise<GSTPreviewResult> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/gst/verify-preview`, JSON.stringify(params))
+            return await resp.json() as GSTPreviewResult
+        }
+    }
 }
 
 export namespace catalog {
-	export interface Category {
-		id: string;
-		name: string;
-		description?: string;
-		icon?: string;
-		logo?: string;
-		createdBy: string;
-		updatedBy?: string;
-		createdAt: string;
-		updatedAt: string;
-	}
+    export interface Category {
+        id: string
+        name: string
+        description?: string
+        icon?: string
+        logo?: string
+        createdBy: string
+        updatedBy?: string
+        createdAt: string
+        updatedAt: string
+    }
 
-	export interface ListCategoriesParams {
-		skip?: number;
-		take?: number;
-		search?: string;
-		sortBy?: "name" | "createdAt";
-		sortOrder?: "asc" | "desc";
-	}
+    export interface ListCategoriesParams {
+        skip?: number
+        take?: number
+        search?: string
+        sortBy?: "name" | "createdAt"
+        sortOrder?: "asc" | "desc"
+    }
 
-	export interface ListPlatformsParams {
-		skip?: number;
-		take?: number;
-		type?: PlatformType;
-		status?: PlatformStatus;
-	}
+    export interface ListPlatformsParams {
+        skip?: number
+        take?: number
+        type?: PlatformType
+        status?: PlatformStatus
+    }
 
-	export interface Platform {
-		id: string;
-		name: string;
-		description?: string;
-		type: PlatformType;
-		websiteUrl?: string;
-		logo?: string;
-		icon?: string;
-		status: PlatformStatus;
-		createdBy: string;
-		updatedBy?: string;
-		createdAt: string;
-		updatedAt: string;
-	}
+    export interface Platform {
+        id: string
+        name: string
+        description?: string
+        type: PlatformType
+        websiteUrl?: string
+        logo?: string
+        icon?: string
+        status: PlatformStatus
+        createdBy: string
+        updatedBy?: string
+        createdAt: string
+        updatedAt: string
+    }
 
-	export type PlatformStatus = "active" | "inactive" | "maintenance";
+    export type PlatformStatus = "active" | "inactive" | "maintenance"
 
-	export type PlatformType =
-		| "marketplace"
-		| "social"
-		| "ecommerce"
-		| "delivery"
-		| "grocery"
-		| "fashion"
-		| "electronics"
-		| "beauty"
-		| "food"
-		| "quick_commerce"
-		| "other";
+    export type PlatformType = "marketplace" | "social" | "ecommerce" | "delivery" | "grocery" | "fashion" | "electronics" | "beauty" | "food" | "quick_commerce" | "other"
 
-	export interface TaskTemplateResponse {
-		id: string;
-		name: string;
-		slug: string;
-		description?: string;
-		category: db.TaskCategory;
-		platformId?: string;
-		platformName?: string;
-		requireLink: boolean;
-		requireScreenshot: boolean;
-		defaultRequirements?: db.TaskRequirements;
-		exampleUrl?: string;
-		status: db.TaskTemplateStatus;
-		createdAt: string;
-		updatedAt: string;
-	}
+    export interface TaskTemplateResponse {
+        id: string
+        name: string
+        slug: string
+        description?: string
+        category: db.TaskCategory
+        platformId?: string
+        platformName?: string
+        requireLink: boolean
+        requireScreenshot: boolean
+        defaultRequirements?: db.TaskRequirements
+        exampleUrl?: string
+        status: db.TaskTemplateStatus
+        createdAt: string
+        updatedAt: string
+    }
 
-	export class ServiceClient {
-		private baseClient: BaseClient;
+    export class ServiceClient {
+        private baseClient: BaseClient
 
-		constructor(baseClient: BaseClient) {
-			this.baseClient = baseClient;
-		}
-	}
+        constructor(baseClient: BaseClient) {
+            this.baseClient = baseClient
+            this.getPlatform = this.getPlatform.bind(this)
+            this.getTaskTemplate = this.getTaskTemplate.bind(this)
+            this.listCategories = this.listCategories.bind(this)
+            this.listPlatforms = this.listPlatforms.bind(this)
+            this.listTaskTemplates = this.listTaskTemplates.bind(this)
+        }
+
+        /**
+         * Get platform by ID
+         */
+        public async getPlatform(id: string): Promise<Platform> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/catalog/platforms/${encodeURIComponent(id)}`)
+            return await resp.json() as Platform
+        }
+
+        /**
+         * Get task template by ID
+         */
+        public async getTaskTemplate(id: string): Promise<TaskTemplateResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/catalog/task-templates/${encodeURIComponent(id)}`)
+            return await resp.json() as TaskTemplateResponse
+        }
+
+        /**
+         * List categories with pagination
+         */
+        public async listCategories(params: ListCategoriesParams): Promise<{
+    data: Category[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                search:    params.search,
+                skip:      params.skip === undefined ? undefined : String(params.skip),
+                sortBy:    params.sortBy === undefined ? undefined : String(params.sortBy),
+                sortOrder: params.sortOrder === undefined ? undefined : String(params.sortOrder),
+                take:      params.take === undefined ? undefined : String(params.take),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/catalog/categories`, undefined, {query})
+            return await resp.json() as {
+    data: Category[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+
+        /**
+         * List all platforms (for dropdowns/filters)
+         */
+        public async listPlatforms(params: ListPlatformsParams): Promise<{
+    data: Platform[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                skip:   params.skip === undefined ? undefined : String(params.skip),
+                status: params.status === undefined ? undefined : String(params.status),
+                take:   params.take === undefined ? undefined : String(params.take),
+                type:   params.type === undefined ? undefined : String(params.type),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/catalog/platforms`, undefined, {query})
+            return await resp.json() as {
+    data: Platform[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+
+        /**
+         * List all task templates
+         */
+        public async listTaskTemplates(params: {
+    skip?: number
+    take?: number
+    platformId?: string
+    category?: db.TaskCategory
+    status?: db.TaskTemplateStatus
+}): Promise<{
+    data: TaskTemplateResponse[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                category:   params.category === undefined ? undefined : String(params.category),
+                platformId: params.platformId,
+                skip:       params.skip === undefined ? undefined : String(params.skip),
+                status:     params.status === undefined ? undefined : String(params.status),
+                take:       params.take === undefined ? undefined : String(params.take),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/catalog/task-templates`, undefined, {query})
+            return await resp.json() as {
+    data: TaskTemplateResponse[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+    }
 }
 
 export namespace core {
-	export interface CheckResult {
-		status: "ok" | "degraded" | "error";
-		latencyMs?: number;
-		message?: string;
-	}
+    export interface CheckResult {
+        status: "ok" | "degraded" | "error"
+        latencyMs?: number
+        message?: string
+    }
 
-	export interface DetailedHealthResponse {
-		status: "healthy" | "degraded" | "unhealthy";
-		timestamp: string;
-		version: string;
-		uptime: number;
-		checks: {
-			database: CheckResult;
-			memory: CheckResult;
-		};
-		system: {
-			nodeVersion: string;
-			platform: string;
-			memoryUsageMB: number;
-			memoryLimitMB: number;
-		};
-	}
+    export interface DetailedHealthResponse {
+        status: "healthy" | "degraded" | "unhealthy"
+        timestamp: string
+        version: string
+        uptime: number
+        checks: {
+            database: CheckResult
+            memory: CheckResult
+        }
+        system: {
+            nodeVersion: string
+            platform: string
+            memoryUsageMB: number
+            memoryLimitMB: number
+        }
+    }
 
-	export interface HealthResponse {
-		status: "healthy" | "unhealthy";
-		timestamp: string;
-		version: string;
-		uptime: number;
-	}
+    export interface HealthResponse {
+        status: "healthy" | "unhealthy"
+        timestamp: string
+        version: string
+        uptime: number
+    }
 
-	export interface ReadinessResponse {
-		ready: boolean;
-		checks: {
-			database: CheckResult;
-			memory: CheckResult;
-		};
-		timestamp: string;
-	}
+    export interface ReadinessResponse {
+        ready: boolean
+        checks: {
+            database: CheckResult
+            memory: CheckResult
+        }
+        timestamp: string
+    }
 
-	export class ServiceClient {
-		private baseClient: BaseClient;
+    export class ServiceClient {
+        private baseClient: BaseClient
 
-		constructor(baseClient: BaseClient) {
-			this.baseClient = baseClient;
-		}
-	}
+        constructor(baseClient: BaseClient) {
+            this.baseClient = baseClient
+            this.health = this.health.bind(this)
+            this.healthDetails = this.healthDetails.bind(this)
+            this.live = this.live.bind(this)
+            this.ready = this.ready.bind(this)
+        }
+
+        public async health(): Promise<HealthResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/health`)
+            return await resp.json() as HealthResponse
+        }
+
+        public async healthDetails(): Promise<DetailedHealthResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/health/details`)
+            return await resp.json() as DetailedHealthResponse
+        }
+
+        /**
+         * Alias for k8s compatibility
+         */
+        public async live(): Promise<HealthResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/live`)
+            return await resp.json() as HealthResponse
+        }
+
+        public async ready(): Promise<ReadinessResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/ready`)
+            return await resp.json() as ReadinessResponse
+        }
+    }
 }
 
 export namespace creator {
-	export interface AddWithdrawalMethodRequest {
-		accountType: "bank_account" | "upi";
-		accountHolderName?: string;
-		accountNumber?: string;
-		bankName?: string;
-		ifscCode?: string;
-		upiId?: string;
-	}
-
-	export type AddressLabel = "home" | "office" | "shipping" | "billing" | "other";
-
-	export interface CampaignPricing {
-		campaignId: string;
-		rebateRate: number;
-		billRate: number;
-		platformFee: number;
-		platformFeeDecimal: string;
-		bonus: number;
-		bonusDecimal: string;
-		tdsRate: number;
-		gstRate: number;
-		estimatedCostPerEnrollment: number;
-		estimatedCostPerEnrollmentDecimal: string;
-	}
-
-	export interface ConnectedAccount {
-		providerId: string;
-		providerAccountId: string;
-		/**
-		 * Whether we have profile data synced
-		 */
-		isSynced: boolean;
-
-		/**
-		 * When profile data was last synced
-		 */
-		lastSyncedAt?: string;
-	}
-
-	export interface Coupon {
-		id: string;
-		code: string;
-		createdBy: string;
-		/**
-		 * Bonus type: 'fixed' for fixed amount, 'percentage' for percentage of order value
-		 */
-		bonusType: CouponBonusType;
-
-		/**
-		 * Bonus amount in smallest units (paise). Used when bonusType='fixed'
-		 */
-		bonus: number;
-
-		/**
-		 * Decimal bonus amount for display
-		 */
-		bonusDecimal: string;
-
-		/**
-		 * Bonus percentage (0-100). Used when bonusType='percentage'
-		 */
-		bonusRate?: number;
-
-		/**
-		 * Maximum bonus cap in paise for percentage coupons
-		 */
-		maxBonus?: number;
-
-		/**
-		 * Decimal max bonus for display
-		 */
-		maxBonusDecimal?: string;
-
-		/**
-		 * Minimum order value in paise required to use coupon
-		 */
-		minOrderValue?: number;
-
-		/**
-		 * Decimal min order value for display
-		 */
-		minOrderValueDecimal?: string;
-
-		currency: string;
-		usageLimit?: number;
-		oneTimeUse: boolean;
-		specificCampaignId?: string;
-		status: CouponStatus;
-		validFrom: string;
-		validUntil: string;
-		timesUsed: number;
-		createdAt: string;
-		updatedAt: string;
-	}
-
-	export type CouponBonusType = "fixed" | "percentage";
-
-	export type CouponStatus = "active" | "inactive" | "expired";
-
-	export interface CreateEnrollmentRequest {
-		/**
-		 * The scan ID from a completed pre-enrollment OCR scan
-		 */
-		scanId: string;
-
-		/**
-		 * Optional coupon code to apply extra bonus
-		 */
-		couponCode?: string;
-
-		/**
-		 * Whether this order is from mediator's network (not mediator's own purchase)
-		 */
-		isMediatorOrder?: boolean;
-
-		/**
-		 * Buyer's name for mediator orders (shown to brand)
-		 */
-		buyerName?: string;
-
-		/**
-		 * Buyer's city for mediator orders (shown to brand)
-		 */
-		buyerCity?: string;
-	}
-
-	export interface CreateWithdrawalRequest {
-		amount: number;
-		withdrawalMethodId: string;
-		notes?: string;
-		/**
-		 * WebAuthn assertion response from navigator.credentials.get() for passkey verification
-		 */
-		passkeyResponse: any;
-
-		/**
-		 * Challenge ID from GET /auth/passkey/reauth-options
-		 */
-		challengeId: string;
-	}
-
-	export interface Creator {
-		id: string;
-		displayId: string;
-		userId: string;
-		firstName: string;
-		lastName: string;
-		displayName?: string;
-		bio?: string;
-		avatarUrl?: string;
-		kycStatus: KYCStatus;
-		panNumber?: string;
-		panVerified: boolean;
-		bankVerified: boolean;
-		/**
-		 * KYC rejection reason (if status is rejected)
-		 */
-		kycRejectionReason?: string;
-
-		/**
-		 * Mediators can enroll multiple times per campaign with different order IDs
-		 */
-		isMediator: boolean;
-
-		/**
-		 * Connected social media profiles (Instagram, YouTube, etc.)
-		 */
-		socialProfiles?: instagram.SocialProfiles;
-
-		createdAt: string;
-		updatedAt: string;
-	}
-
-	export interface CreatorAddressResponse {
-		id: string;
-		label: string;
-		addressLine1: string;
-		addressLine2?: string;
-		city: string;
-		state: string;
-		postalCode: string;
-		country: string;
-		isDefault: boolean;
-		createdAt: string;
-		updatedAt: string;
-	}
-
-	export interface CreatorCampaign {
-		/**
-		 * Current enrollment count
-		 */
-		currentEnrollments: number;
-
-		/**
-		 * Bonus amount formatted as decimal string (e.g., "100.00")
-		 */
-		bonusDecimal: string;
-
-		/**
-		 * Listing details
-		 */
-		listing: {
-			id: string;
-			name: string;
-			/**
-			 * Listing price in paise
-			 */
-			price: number;
-
-			/**
-			 * Listing price formatted as decimal string
-			 */
-			priceDecimal: string;
-
-			/**
-			 * Listing link URL
-			 */
-			link: string;
-
-			/**
-			 * Primary listing image URL
-			 */
-			primaryImage?: string;
-
-			/**
-			 * All listing images
-			 */
-			listingImages: utils.ListingImageItem[];
-		};
-
-		/**
-		 * Organization details
-		 */
-		organization: {
-			id: string;
-			name: string;
-			/**
-			 * Organization logo URL
-			 */
-			logo?: string;
-
-			/**
-			 * Payment mode: prefund (wallet funded) or post_submission (pay after approval)
-			 */
-			paymentMode: db.PaymentMode;
-		};
-
-		/**
-		 * Platform details (where listing is sold)
-		 */
-		platform?: {
-			id: string;
-			name: string;
-			/**
-			 * Platform logo URL
-			 */
-			logo?: string;
-
-			/**
-			 * Platform icon URL
-			 */
-			icon?: string;
-		};
-
-		/**
-		 * Campaign tasks that creators need to complete
-		 */
-		tasks: CreatorCampaignTask[];
-
-		id: string;
-		/**
-		 * Short display ID for UI (e.g., CPG-A3B7XWFK)
-		 */
-		displayId: string;
-
-		organizationId: string;
-		listingId: string;
-		title: string;
-		description?: string;
-		startDate: string;
-		endDate: string;
-		rebateRate?: number;
-		billRate?: number;
-		/**
-		 * Platform fee in smallest units (paise)
-		 */
-		platformFee?: number;
-
-		/**
-		 * Platform fee formatted as decimal string (e.g., "100.00")
-		 */
-		platformFeeDecimal?: string;
-
-		/**
-		 * Bonus amount in smallest units (paise)
-		 */
-		bonus?: number;
-
-		maxEnrollments: number;
-		status: db.CampaignStatus;
-		campaignType: db.CampaignType;
-		isPublic: boolean;
-		slug?: string;
-		enrollmentExpiryDays: number;
-		/**
-		 * Affiliate link for creators to use when purchasing (set by admin)
-		 */
-		affiliateLink?: string;
-
-		/**
-		 * Affiliate network source
-		 */
-		affiliateSource?: db.AffiliateSource;
-
-		createdAt: string;
-		updatedAt: string;
-	}
-
-	export interface CreatorCampaignTask {
-		id: string;
-		name: string;
-		description?: string;
-		category: string;
-		platformName?: string;
-		requireLink: boolean;
-		requireScreenshot: boolean;
-		instructions?: string;
-		isRequired: boolean;
-		sortOrder: number;
-		/**
-		 * Per-task bonus in smallest units (paise) — creator earning
-		 */
-		bonus: number;
-
-		/**
-		 * Per-task bonus formatted as decimal string (e.g., "50.00")
-		 */
-		bonusDecimal: string;
-	}
-
-	export interface CreatorEarningsSummary {
-		period: string;
-		enrollments: number;
-		/**
-		 * Earnings in smallest units (paise)
-		 */
-		earnings: number;
-
-		/**
-		 * Decimal earnings for display
-		 */
-		earningsDecimal: string;
-
-		/**
-		 * Withdrawn amount in smallest units (paise)
-		 */
-		withdrawn: number;
-
-		/**
-		 * Decimal withdrawn amount for display
-		 */
-		withdrawnDecimal: string;
-	}
-
-	export interface CreatorProfile {
-		user: User;
-		creator: Creator;
-		addresses: CreatorAddressResponse[];
-		/**
-		 * Wallet balance in smallest units (paise)
-		 */
-		walletBalance: number;
-
-		/**
-		 * Decimal wallet balance for display
-		 */
-		walletBalanceDecimal: string;
-
-		/**
-		 * Pending payouts in smallest units (paise)
-		 */
-		pendingPayouts: number;
-
-		/**
-		 * Decimal pending payouts for display
-		 */
-		pendingPayoutsDecimal: string;
-
-		platformAccounts: number;
-		activeEnrollments: number;
-		/**
-		 * Optional detailed stats (included when ?includeStats=true)
-		 */
-		stats?: CreatorStats;
-	}
-
-	export interface CreatorStats {
-		totalEnrollments: number;
-		awaitingSubmission: number;
-		awaitingReview: number;
-		approved: number;
-		rejected: number;
-		/**
-		 * Total earnings in smallest units (paise)
-		 */
-		totalEarnings: number;
-
-		/**
-		 * Decimal total earnings for display
-		 */
-		totalEarningsDecimal: string;
-
-		/**
-		 * Pending earnings in smallest units (paise)
-		 */
-		pendingEarnings: number;
-
-		/**
-		 * Decimal pending earnings for display
-		 */
-		pendingEarningsDecimal: string;
-
-		/**
-		 * Withdrawn amount in smallest units (paise)
-		 */
-		withdrawnAmount: number;
-
-		/**
-		 * Decimal withdrawn amount for display
-		 */
-		withdrawnAmountDecimal: string;
-
-		/**
-		 * Average order value in smallest units (paise)
-		 */
-		averageOrderValue: number;
-
-		/**
-		 * Decimal average order value for display
-		 */
-		averageOrderValueDecimal: string;
-
-		approvalRate: number;
-	}
-
-	export interface CreatorWalletResponse {
-		id: string;
-		creatorId: string;
-		ledgerAccountId?: string;
-		currency: string;
-		/**
-		 * Balance in smallest units (e.g., 25490 = ₹254.90)
-		 */
-		balance: number;
-
-		/**
-		 * Decimal balance for display (e.g., "₹254.90")
-		 */
-		balanceDecimal: string;
-
-		/**
-		 * Pending balance in smallest units
-		 */
-		pendingBalance: number;
-
-		/**
-		 * Decimal pending balance for display
-		 */
-		pendingBalanceDecimal: string;
-
-		/**
-		 * Available balance in smallest units
-		 */
-		availableBalance: number;
-
-		/**
-		 * Decimal available balance for display
-		 */
-		availableBalanceDecimal: string;
-
-		createdAt: string;
-	}
-
-	export interface EarningsHistoryResponse {
-		/**
-		 * Applied aggregation period
-		 */
-		period: "daily" | "weekly" | "monthly";
-
-		earnings: CreatorEarningsSummary[];
-	}
-
-	export interface Enrollment {
-		id: string;
-		/**
-		 * Short display ID for UI (e.g., ENR-K7X4FA9B)
-		 */
-		displayId: string;
-
-		campaignId: string;
-		creatorId: string;
-		orderId: string;
-		currency: string;
-		/**
-		 * Order value in smallest units (paise)
-		 */
-		orderValue: number;
-
-		/**
-		 * Decimal order value for display
-		 */
-		orderValueDecimal: string;
-
-		purchaseDate?: string;
-		lockedRebateRate: number;
-		lockedBillRate: number;
-		/**
-		 * Platform fee in smallest units (paise)
-		 */
-		lockedPlatformFee: number;
-
-		/**
-		 * Decimal platform fee for display
-		 */
-		lockedPlatformFeeDecimal: string;
-
-		/**
-		 * Bonus amount in smallest units (paise)
-		 */
-		lockedBonus?: number;
-
-		/**
-		 * Decimal bonus amount for display
-		 */
-		lockedBonusDecimal?: string;
-
-		/**
-		 * Payment mode: prefund (funds held) or post_submission (pay at approval)
-		 */
-		paymentMode: db.PaymentMode;
-
-		status: db.EnrollmentStatus;
-		submittedAt?: string;
-		approvedAt?: string;
-		/**
-		 * Actions the creator can take on this enrollment
-		 */
-		allowedActions: internal.CreatorAction[];
-
-		expiresAt?: string;
-		createdAt: string;
-		updatedAt: string;
-		/**
-		 * Tasks (simplified for list view)
-		 */
-		tasks?: {
-			enrollmentTaskId: string;
-			taskName: string;
-			requireLink: boolean;
-			requireScreenshot: boolean;
-			isRequired: boolean;
-			instructions?: string;
-			proofLink?: string;
-			proofScreenshot?: string;
-			platformName?: string;
-		}[];
-
-		/**
-		 * Embedded campaign data for list view (avoids N+1 API calls)
-		 */
-		campaign?: {
-			title: string;
-			listing?: {
-				name: string;
-				primaryImage?: string;
-			};
-			platform?: {
-				name: string;
-				icon?: string;
-			};
-		};
-	}
-
-	export interface EnrollmentDetail {
-		/**
-		 * Base enrollment fields
-		 */
-		id: string;
-
-		/**
-		 * Short display ID for UI (e.g., ENR-K7X4FA9B)
-		 */
-		displayId: string;
-
-		campaignId: string;
-		creatorId: string;
-		orderId: string;
-		currency: string;
-		/**
-		 * Order value in smallest units (paise)
-		 */
-		orderValue: number;
-
-		/**
-		 * Decimal order value for display
-		 */
-		orderValueDecimal: string;
-
-		purchaseDate?: string;
-		lockedRebateRate: number;
-		lockedBillRate: number;
-		/**
-		 * Platform fee in smallest units (paise)
-		 */
-		lockedPlatformFee: number;
-
-		/**
-		 * Decimal platform fee for display
-		 */
-		lockedPlatformFeeDecimal: string;
-
-		/**
-		 * Bonus amount in smallest units (paise)
-		 */
-		lockedBonus?: number;
-
-		/**
-		 * Decimal bonus amount for display
-		 */
-		lockedBonusDecimal?: string;
-
-		/**
-		 * Payment mode: prefund (funds held) or post_submission (pay at approval)
-		 */
-		paymentMode: db.PaymentMode;
-
-		status: db.EnrollmentStatus;
-		submittedAt?: string;
-		approvedAt?: string;
-		/**
-		 * Actions the creator can take on this enrollment
-		 */
-		allowedActions: internal.CreatorAction[];
-
-		expiresAt?: string;
-		createdAt: string;
-		updatedAt: string;
-		/**
-		 * Creator info
-		 */
-		creator: {
-			id: string;
-			displayName: string;
-			email?: string;
-			avatarUrl?: string;
-			approvalRate: number;
-			previousEnrollments: number;
-		};
-
-		/**
-		 * Campaign info (required, with full details)
-		 */
-		campaign: {
-			id: string;
-			title: string;
-			status: string;
-			type: string;
-			listingName?: string;
-			listingImage?: string;
-		};
-
-		/**
-		 * Platform info
-		 */
-		platform?: {
-			id: string;
-			name: string;
-			type?: string;
-		};
-
-		/**
-		 * OCR scan data (if available)
-		 */
-		ocrData?: {
-			id: string;
-			screenshotUrl: string;
-			extractedOrderId?: string;
-			extractedOrderValue?: number;
-			extractedOrderValueDecimal?: string;
-			extractedPurchaseDate?: string;
-			extractedProductName?: string;
-			extractedSellerName?: string;
-			extractedPlatform?: string;
-			confidence?: number;
-			validationPassed?: boolean;
-			validationErrors?: OCRValidationErrors;
-		};
-
-		/**
-		 * Enrollment tasks with submissions
-		 */
-		tasks: {
-			enrollmentTaskId: string;
-			submissionId?: string;
-			taskName: string;
-			taskDescription?: string;
-			category: string;
-			isRequired: boolean;
-			requireLink: boolean;
-			requireScreenshot: boolean;
-			instructions?: string;
-			proofLink?: string;
-			proofScreenshot?: string;
-			submittedAt?: string;
-			feedback?: string;
-			/**
-			 * Platform info for task chip icons
-			 */
-			platformName?: string;
-		}[];
-
-		/**
-		 * Per-task bonus breakdown (from financialBreakdown — creator sees bonus only, not platformFee)
-		 */
-		taskFees?: {
-			taskId: string;
-			taskName: string;
-			bonus: number;
-			bonusDecimal: string;
-		}[];
-
-		/**
-		 * Status history
-		 */
-		history: {
-			id: string;
-			fromStatus?: string;
-			toStatus: string;
-			changedBy?: string;
-			changedByName?: string;
-			reason?: string;
-			changedAt: string;
-		}[];
-
-		/**
-		 * Pricing breakdown (calculated from locked rates)
-		 */
-		pricing: {
-			orderValue: number;
-			orderValueDecimal: string;
-			rebateRate: number;
-			billRate: number;
-			platformFee: number;
-			platformFeeDecimal: string;
-			bonus: number;
-			bonusDecimal: string;
-			creatorPayout: number;
-			creatorPayoutDecimal: string;
-			brandCost: number;
-			brandCostDecimal: string;
-			gstAmount: number;
-			gstAmountDecimal: string;
-			tdsAmount: number;
-			tdsAmountDecimal: string;
-			netBrandCharge: number;
-			netBrandChargeDecimal: string;
-			platformRevenue: number;
-			platformRevenueDecimal: string;
-		};
-
-		/**
-		 * Rejection info (if rejected/changes requested)
-		 */
-		rejection?: {
-			reason: string;
-			feedback?: { [key: string]: string };
-			lastRejectedAt?: string;
-		};
-	}
-
-	export type EnrollmentStatusFilter =
-		| "awaiting_submission"
-		| "awaiting_review"
-		| "changes_requested"
-		| "approved"
-		| "permanently_rejected"
-		| "cancelled"
-		| "expired";
-
-	export interface EnrollmentTaskSubmission {
-		id: string;
-		enrollmentTaskId: string;
-		proofLink?: string;
-		proofScreenshot?: string;
-		submittedAt?: string;
-		feedback?: string;
-	}
-
-	export type KYCStatus = "not_started" | "pending" | "verified" | "rejected";
-
-	export interface ListConnectedAccountsResponse {
-		accounts: ConnectedAccount[];
-	}
-
-	export interface ListingWithStats {
-		isActive: boolean;
-		campaignCount: number;
-		id: string;
-		organizationId: string;
-		categoryId?: string;
-		platformId?: string;
-		name: string;
-		slug?: string;
-		description?: string;
-		identifier: string;
-		price: number;
-		priceDecimal: string;
-		currency: string;
-		link: string;
-		listingImages: utils.ListingImageItem[];
-		views: number;
-		createdBy: string;
-		updatedBy?: string;
-		createdAt: string;
-		updatedAt: string;
-	}
-
-	export interface OCRExtractedData {
-		orderId?: string;
-		orderValue?: number;
-		purchaseDate?: string;
-		listingName?: string;
-		sellerName?: string;
-		platform?: string;
-	}
-
-	export interface OCRScanResult {
-		scanId: string;
-		enrollmentId?: string;
-		campaignId?: string;
-		status: OCRScanStatus;
-		extractedData?: OCRExtractedData;
-		confidence?: number;
-		errorMessage?: string;
-		createdAt: string;
-		completedAt?: string;
-	}
-
-	export type OCRScanStatus = "pending" | "processing" | "completed" | "failed";
-
-	export interface OCRValidation {
-		listingMatch: number;
-		amountValid: boolean;
-		dateValid: boolean;
-		passed: boolean;
-		errors: string[];
-	}
-
-	export interface OCRValidationErrors {
-		orderIdMismatch?: boolean;
-		orderValueMismatch?: boolean;
-		purchaseDateMismatch?: boolean;
-		listingNameMismatch?: boolean;
-		sellerNameMismatch?: boolean;
-		platformMismatch?: boolean;
-		dateOutOfRange?: boolean;
-		amountBelowMinimum?: boolean;
-		amountAboveMaximum?: boolean;
-		duplicateOrder?: boolean;
-		invalidFormat?: boolean;
-		unreadableImage?: boolean;
-		missingRequiredFields?: string[];
-		extractionFailed?: boolean;
-		confidenceTooLow?: boolean;
-		errorMessage?: string;
-		errorCode?: string;
-	}
-
-	export interface PANVerificationResult {
-		isVerified: boolean;
-		registeredName: string | null;
-		validationId: string;
-		message: string;
-	}
-
-	export interface SavePANRequest {
-		panNumber: string;
-		/**
-		 * Validation ID from Step 1 (verify endpoint) - proves verification was done
-		 */
-		validationId: string;
-	}
-
-	export interface ScanOrderResult {
-		scanId: string;
-		campaignId: string;
-		status: OCRScanStatus;
-		extractedData?: OCRExtractedData;
-		validation?: OCRValidation;
-		confidence?: number;
-		errorMessage?: string;
-		createdAt: string;
-	}
-
-	export interface SearchCampaignInfo {
-		id: string;
-		title: string;
-	}
-
-	export interface SearchFacets {
-		campaigns: number;
-		enrollments: number;
-		transactions: number;
-	}
-
-	export interface SearchListingInfo {
-		id: string;
-		name: string;
-		priceDecimal?: string;
-		primaryImage?: string;
-	}
-
-	export interface SearchOrganizationInfo {
-		id: string;
-		name: string;
-		logo?: string;
-	}
-
-	export interface SearchPlatformInfo {
-		id: string;
-		name: string;
-		icon?: string;
-	}
-
-	export interface SearchResult {
-		/**
-		 * Result type: campaign, enrollment, or transaction
-		 */
-		resultType: "campaign" | "enrollment" | "transaction";
-
-		/**
-		 * Resource ID
-		 */
-		id: string;
-
-		/**
-		 * Short display ID (e.g., ENR-K7X4FA9B) — present for enrollments
-		 */
-		displayId?: string;
-
-		/**
-		 * Display title (campaign title, order ID, or transaction description)
-		 */
-		title: string;
-
-		/**
-		 * Optional description
-		 */
-		description?: string;
-
-		/**
-		 * Status string
-		 */
-		status: string;
-
-		/**
-		 * Created/requested timestamp
-		 */
-		createdAt: string;
-
-		/**
-		 * Amount in decimal format (bonus, order value, or transaction amount)
-		 */
-		amountDecimal?: string;
-
-		/**
-		 * Secondary amount (e.g., listing price for campaigns, bonus for enrollments)
-		 */
-		secondaryAmountDecimal?: string;
-
-		/**
-		 * For campaigns: current enrollments
-		 */
-		currentCount?: number;
-
-		/**
-		 * For campaigns: max enrollments
-		 */
-		maxCount?: number;
-
-		/**
-		 * Processed/approved timestamp
-		 */
-		processedAt?: string;
-
-		/**
-		 * Expiry timestamp
-		 */
-		expiresAt?: string;
-
-		/**
-		 * Listing info (for campaigns and enrollments)
-		 */
-		listing?: SearchListingInfo;
-
-		/**
-		 * Organization info (for campaigns)
-		 */
-		organization?: SearchOrganizationInfo;
-
-		/**
-		 * Platform info (for campaigns)
-		 */
-		platform?: SearchPlatformInfo;
-
-		/**
-		 * Campaign info (for enrollments and transactions)
-		 */
-		campaign?: SearchCampaignInfo;
-
-		/**
-		 * Fields that matched the search query
-		 */
-		matchedFields: string[];
-
-		/**
-		 * Transaction type: credit or debit (for transactions)
-		 */
-		transactionType?: "credit" | "debit";
-
-		/**
-		 * Transaction category (for transactions)
-		 */
-		transactionCategory?:
-			| "enrollment_hold"
-			| "deposit"
-			| "payout"
-			| "refund"
-			| "admin_credit"
-			| "other";
-	}
-
-	export interface SocialProfilesResponse {
-		instagram?: instagram.StoredInstagramProfile;
-		youtube?: youtube.StoredYouTubeProfile;
-	}
-
-	export interface SubmitTasksRequest {
-		submissions: {
-			enrollmentTaskId: string;
-			proofLink?: string;
-			proofScreenshot?: string;
-		}[];
-	}
-
-	export interface SyncProfileResponse {
-		success: boolean;
-		message: string;
-		profile?: instagram.StoredInstagramProfile;
-	}
-
-	export interface UnifiedSearchParams {
-		/**
-		 * Search query - searches across all resource types (2-200 chars)
-		 */
-		q: string;
-
-		/**
-		 * Pagination cursor (base64 encoded)
-		 */
-		cursor?: string;
-
-		/**
-		 * Page size (1-50)
-		 */
-		limit?: number;
-
-		/**
-		 * Filter enrollments by status (optional)
-		 */
-		enrollmentStatus?: EnrollmentStatusFilter;
-	}
-
-	export interface UnifiedSearchResponse {
-		data: SearchResult[];
-		nextCursor: string | null;
-		hasMore: boolean;
-		facets: SearchFacets;
-		query: string;
-	}
-
-	export interface UpdateCreatorProfileRequest {
-		displayName?: string;
-		bio?: string;
-		avatarUrl?: string;
-	}
-
-	export interface User {
-		id: string;
-		email: string;
-		name?: string;
-		image?: string;
-		emailVerified: boolean;
-		role: string;
-		phoneNumber?: string;
-		phoneNumberVerified: boolean;
-		createdAt: string;
-		updatedAt: string;
-	}
-
-	export interface ValidateCouponRequest {
-		code: string;
-	}
-
-	export interface ValidateCouponResponse {
-		isValid: boolean;
-		coupon?: Coupon;
-		/**
-		 * Bonus type: 'fixed' or 'percentage'
-		 */
-		bonusType?: CouponBonusType;
-
-		/**
-		 * Bonus amount in smallest units (paise) - for fixed coupons
-		 */
-		bonus?: number;
-
-		/**
-		 * Decimal bonus amount for display
-		 */
-		bonusDecimal?: string;
-
-		/**
-		 * Bonus percentage (1-100) - for percentage coupons
-		 */
-		bonusRate?: number;
-
-		/**
-		 * Maximum bonus cap in paise - for percentage coupons
-		 */
-		maxBonus?: number;
-
-		/**
-		 * Decimal max bonus for display
-		 */
-		maxBonusDecimal?: string;
-
-		/**
-		 * Minimum order value in paise required
-		 */
-		minOrderValue?: number;
-
-		/**
-		 * Decimal min order value for display
-		 */
-		minOrderValueDecimal?: string;
-
-		errorMessage?: string;
-	}
-
-	export interface VerifyPANRequest {
-		panNumber: string;
-	}
-
-	export interface WalletTransaction {
-		id: string;
-		walletId: string;
-		type: "credit" | "debit";
-		status: "pending" | "completed" | "voided";
-		amount: number;
-		amountDecimal: string;
-		currency: string;
-		description: string;
-		reference?: string;
-		enrollmentId?: string;
-		category?: "enrollment_hold" | "deposit" | "payout" | "refund" | "admin_credit" | "other";
-		createdAt: string;
-	}
-
-	export interface Withdrawal {
-		id: string;
-		displayId: string;
-		holderId: string;
-		holderType: "organization" | "creator";
-		amount: number;
-		amountDecimal: string;
-		currency: string;
-		status: db.WithdrawalStatus;
-		withdrawalMethodId?: string;
-		requiresApproval: boolean;
-		approvedBy?: string;
-		approvedAt?: string;
-		rejectionReason?: string;
-		/**
-		 * Bank UTR (Unique Transaction Reference) for completed withdrawals
-		 */
-		utr?: string;
-
-		/**
-		 * Reason for failure from payment gateway
-		 */
-		failureReason?: string;
-
-		requestedAt: string;
-		processedAt?: string;
-	}
-
-	export interface WithdrawalMethod {
-		id: string;
-		creatorId: string;
-		accountType: "bank_account" | "upi";
-		accountHolderName?: string;
-		accountNumber?: string;
-		bankName?: string;
-		ifscCode?: string;
-		upiId?: string;
-		isVerified: boolean;
-		isDefault: boolean;
-		createdAt: string;
-	}
-
-	export interface WithdrawalMethodsResponse {
-		methods: WithdrawalMethod[];
-	}
-
-	export interface WithdrawalWithApprovalInfo {
-		statusMessage: string;
-		approvalThreshold?: number;
-		approvalThresholdDecimal?: string;
-		queuePosition?: number;
-		estimatedProcessingMessage?: string;
-		id: string;
-		displayId: string;
-		holderId: string;
-		holderType: "organization" | "creator";
-		amount: number;
-		amountDecimal: string;
-		currency: string;
-		status: db.WithdrawalStatus;
-		withdrawalMethodId?: string;
-		requiresApproval: boolean;
-		approvedBy?: string;
-		approvedAt?: string;
-		rejectionReason?: string;
-		/**
-		 * Bank UTR (Unique Transaction Reference) for completed withdrawals
-		 */
-		utr?: string;
-
-		/**
-		 * Reason for failure from payment gateway
-		 */
-		failureReason?: string;
-
-		requestedAt: string;
-		processedAt?: string;
-	}
-
-	export class ServiceClient {
-		private baseClient: BaseClient;
-
-		constructor(baseClient: BaseClient) {
-			this.baseClient = baseClient;
-		}
-	}
+    export interface AddWithdrawalMethodRequest {
+        accountType: "bank_account" | "upi"
+        accountHolderName?: string
+        accountNumber?: string
+        bankName?: string
+        ifscCode?: string
+        upiId?: string
+    }
+
+    export type AddressLabel = "home" | "office" | "shipping" | "billing" | "other"
+
+    export interface CampaignPricing {
+        campaignId: string
+        rebateRate: number
+        billRate: number
+        platformFee: number
+        platformFeeDecimal: string
+        bonus: number
+        bonusDecimal: string
+        tdsRate: number
+        gstRate: number
+        estimatedCostPerEnrollment: number
+        estimatedCostPerEnrollmentDecimal: string
+    }
+
+    export interface ConnectedAccount {
+        providerId: string
+        providerAccountId: string
+        /**
+         * Whether we have profile data synced
+         */
+        isSynced: boolean
+
+        /**
+         * When profile data was last synced
+         */
+        lastSyncedAt?: string
+    }
+
+    export interface Coupon {
+        id: string
+        code: string
+        createdBy: string
+        /**
+         * Bonus type: 'fixed' for fixed amount, 'percentage' for percentage of order value
+         */
+        bonusType: CouponBonusType
+
+        /**
+         * Bonus amount in smallest units (paise). Used when bonusType='fixed'
+         */
+        bonus: number
+
+        /**
+         * Decimal bonus amount for display
+         */
+        bonusDecimal: string
+
+        /**
+         * Bonus percentage (0-100). Used when bonusType='percentage'
+         */
+        bonusRate?: number
+
+        /**
+         * Maximum bonus cap in paise for percentage coupons
+         */
+        maxBonus?: number
+
+        /**
+         * Decimal max bonus for display
+         */
+        maxBonusDecimal?: string
+
+        /**
+         * Minimum order value in paise required to use coupon
+         */
+        minOrderValue?: number
+
+        /**
+         * Decimal min order value for display
+         */
+        minOrderValueDecimal?: string
+
+        currency: string
+        usageLimit?: number
+        oneTimeUse: boolean
+        specificCampaignId?: string
+        status: CouponStatus
+        validFrom: string
+        validUntil: string
+        timesUsed: number
+        createdAt: string
+        updatedAt: string
+    }
+
+    export type CouponBonusType = "fixed" | "percentage"
+
+    export type CouponStatus = "active" | "inactive" | "expired"
+
+    export interface CreateEnrollmentRequest {
+        /**
+         * The scan ID from a completed pre-enrollment OCR scan
+         */
+        scanId: string
+
+        /**
+         * Optional coupon code to apply extra bonus
+         */
+        couponCode?: string
+
+        /**
+         * Whether this order is from mediator's network (not mediator's own purchase)
+         */
+        isMediatorOrder?: boolean
+
+        /**
+         * Buyer's name for mediator orders (shown to brand)
+         */
+        buyerName?: string
+
+        /**
+         * Buyer's city for mediator orders (shown to brand)
+         */
+        buyerCity?: string
+    }
+
+    export interface CreateWithdrawalRequest {
+        amount: number
+        withdrawalMethodId: string
+        notes?: string
+        /**
+         * WebAuthn assertion response from navigator.credentials.get() for passkey verification
+         */
+        passkeyResponse: any
+
+        /**
+         * Challenge ID from GET /auth/passkey/reauth-options
+         */
+        challengeId: string
+    }
+
+    export interface Creator {
+        id: string
+        displayId: string
+        userId: string
+        firstName: string
+        lastName: string
+        displayName?: string
+        bio?: string
+        avatarUrl?: string
+        kycStatus: KYCStatus
+        panNumber?: string
+        panVerified: boolean
+        bankVerified: boolean
+        /**
+         * KYC rejection reason (if status is rejected)
+         */
+        kycRejectionReason?: string
+
+        /**
+         * Mediators can enroll multiple times per campaign with different order IDs
+         */
+        isMediator: boolean
+
+        /**
+         * Connected social media profiles (Instagram, YouTube, etc.)
+         */
+        socialProfiles?: instagram.SocialProfiles
+
+        createdAt: string
+        updatedAt: string
+    }
+
+    export interface CreatorAddressResponse {
+        id: string
+        label: string
+        addressLine1: string
+        addressLine2?: string
+        city: string
+        state: string
+        postalCode: string
+        country: string
+        isDefault: boolean
+        createdAt: string
+        updatedAt: string
+    }
+
+    export interface CreatorCampaign {
+        /**
+         * Current enrollment count
+         */
+        currentEnrollments: number
+
+        /**
+         * Bonus amount formatted as decimal string (e.g., "100.00")
+         */
+        bonusDecimal: string
+
+        /**
+         * Listing details
+         */
+        listing: {
+            id: string
+            name: string
+            /**
+             * Listing price in paise
+             */
+            price: number
+
+            /**
+             * Listing price formatted as decimal string
+             */
+            priceDecimal: string
+
+            /**
+             * Listing link URL
+             */
+            link: string
+
+            /**
+             * Primary listing image URL
+             */
+            primaryImage?: string
+
+            /**
+             * All listing images
+             */
+            listingImages: utils.ListingImageItem[]
+        }
+
+        /**
+         * Organization details
+         */
+        organization: {
+            id: string
+            name: string
+            /**
+             * Organization logo URL
+             */
+            logo?: string
+
+            /**
+             * Payment mode: prefund (wallet funded) or post_submission (pay after approval)
+             */
+            paymentMode: db.PaymentMode
+        }
+
+        /**
+         * Platform details (where listing is sold)
+         */
+        platform?: {
+            id: string
+            name: string
+            /**
+             * Platform logo URL
+             */
+            logo?: string
+
+            /**
+             * Platform icon URL
+             */
+            icon?: string
+        }
+
+        /**
+         * Campaign tasks that creators need to complete
+         */
+        tasks: CreatorCampaignTask[]
+
+        id: string
+        /**
+         * Short display ID for UI (e.g., CPG-A3B7XWFK)
+         */
+        displayId: string
+
+        organizationId: string
+        listingId: string
+        title: string
+        description?: string
+        startDate: string
+        endDate: string
+        rebateRate?: number
+        billRate?: number
+        /**
+         * Platform fee in smallest units (paise)
+         */
+        platformFee?: number
+
+        /**
+         * Platform fee formatted as decimal string (e.g., "100.00")
+         */
+        platformFeeDecimal?: string
+
+        /**
+         * Bonus amount in smallest units (paise)
+         */
+        bonus?: number
+
+        maxEnrollments: number
+        status: db.CampaignStatus
+        campaignType: db.CampaignType
+        isPublic: boolean
+        slug?: string
+        enrollmentExpiryDays: number
+        /**
+         * Affiliate link for creators to use when purchasing (set by admin)
+         */
+        affiliateLink?: string
+
+        /**
+         * Affiliate network source
+         */
+        affiliateSource?: db.AffiliateSource
+
+        createdAt: string
+        updatedAt: string
+    }
+
+    export interface CreatorCampaignTask {
+        id: string
+        name: string
+        description?: string
+        category: string
+        platformName?: string
+        requireLink: boolean
+        requireScreenshot: boolean
+        instructions?: string
+        isRequired: boolean
+        sortOrder: number
+        /**
+         * Per-task bonus in smallest units (paise) — creator earning
+         */
+        bonus: number
+
+        /**
+         * Per-task bonus formatted as decimal string (e.g., "50.00")
+         */
+        bonusDecimal: string
+    }
+
+    export interface CreatorEarningsSummary {
+        period: string
+        enrollments: number
+        /**
+         * Earnings in smallest units (paise)
+         */
+        earnings: number
+
+        /**
+         * Decimal earnings for display
+         */
+        earningsDecimal: string
+
+        /**
+         * Withdrawn amount in smallest units (paise)
+         */
+        withdrawn: number
+
+        /**
+         * Decimal withdrawn amount for display
+         */
+        withdrawnDecimal: string
+    }
+
+    export interface CreatorProfile {
+        user: User
+        creator: Creator
+        addresses: CreatorAddressResponse[]
+        /**
+         * Wallet balance in smallest units (paise)
+         */
+        walletBalance: number
+
+        /**
+         * Decimal wallet balance for display
+         */
+        walletBalanceDecimal: string
+
+        /**
+         * Pending payouts in smallest units (paise)
+         */
+        pendingPayouts: number
+
+        /**
+         * Decimal pending payouts for display
+         */
+        pendingPayoutsDecimal: string
+
+        platformAccounts: number
+        activeEnrollments: number
+        /**
+         * Optional detailed stats (included when ?includeStats=true)
+         */
+        stats?: CreatorStats
+    }
+
+    export interface CreatorStats {
+        totalEnrollments: number
+        awaitingSubmission: number
+        awaitingReview: number
+        approved: number
+        rejected: number
+        /**
+         * Total earnings in smallest units (paise)
+         */
+        totalEarnings: number
+
+        /**
+         * Decimal total earnings for display
+         */
+        totalEarningsDecimal: string
+
+        /**
+         * Pending earnings in smallest units (paise)
+         */
+        pendingEarnings: number
+
+        /**
+         * Decimal pending earnings for display
+         */
+        pendingEarningsDecimal: string
+
+        /**
+         * Withdrawn amount in smallest units (paise)
+         */
+        withdrawnAmount: number
+
+        /**
+         * Decimal withdrawn amount for display
+         */
+        withdrawnAmountDecimal: string
+
+        /**
+         * Average order value in smallest units (paise)
+         */
+        averageOrderValue: number
+
+        /**
+         * Decimal average order value for display
+         */
+        averageOrderValueDecimal: string
+
+        approvalRate: number
+    }
+
+    export interface CreatorWalletResponse {
+        id: string
+        creatorId: string
+        ledgerAccountId?: string
+        currency: string
+        /**
+         * Balance in smallest units (e.g., 25490 = ₹254.90)
+         */
+        balance: number
+
+        /**
+         * Decimal balance for display (e.g., "₹254.90")
+         */
+        balanceDecimal: string
+
+        /**
+         * Pending balance in smallest units
+         */
+        pendingBalance: number
+
+        /**
+         * Decimal pending balance for display
+         */
+        pendingBalanceDecimal: string
+
+        /**
+         * Available balance in smallest units
+         */
+        availableBalance: number
+
+        /**
+         * Decimal available balance for display
+         */
+        availableBalanceDecimal: string
+
+        createdAt: string
+    }
+
+    export interface EarningsHistoryResponse {
+        /**
+         * Applied aggregation period
+         */
+        period: "daily" | "weekly" | "monthly"
+
+        earnings: CreatorEarningsSummary[]
+    }
+
+    export interface Enrollment {
+        id: string
+        /**
+         * Short display ID for UI (e.g., ENR-K7X4FA9B)
+         */
+        displayId: string
+
+        campaignId: string
+        creatorId: string
+        orderId: string
+        currency: string
+        /**
+         * Order value in smallest units (paise)
+         */
+        orderValue: number
+
+        /**
+         * Decimal order value for display
+         */
+        orderValueDecimal: string
+
+        purchaseDate?: string
+        lockedRebateRate: number
+        lockedBillRate: number
+        /**
+         * Platform fee in smallest units (paise)
+         */
+        lockedPlatformFee: number
+
+        /**
+         * Decimal platform fee for display
+         */
+        lockedPlatformFeeDecimal: string
+
+        /**
+         * Bonus amount in smallest units (paise)
+         */
+        lockedBonus?: number
+
+        /**
+         * Decimal bonus amount for display
+         */
+        lockedBonusDecimal?: string
+
+        /**
+         * Payment mode: prefund (funds held) or post_submission (pay at approval)
+         */
+        paymentMode: db.PaymentMode
+
+        status: db.EnrollmentStatus
+        submittedAt?: string
+        approvedAt?: string
+        /**
+         * Actions the creator can take on this enrollment
+         */
+        allowedActions: internal.CreatorAction[]
+
+        expiresAt?: string
+        createdAt: string
+        updatedAt: string
+        /**
+         * Tasks (simplified for list view)
+         */
+        tasks?: {
+            enrollmentTaskId: string
+            taskName: string
+            requireLink: boolean
+            requireScreenshot: boolean
+            isRequired: boolean
+            instructions?: string
+            proofLink?: string
+            proofScreenshot?: string
+            platformName?: string
+        }[]
+
+        /**
+         * Embedded campaign data for list view (avoids N+1 API calls)
+         */
+        campaign?: {
+            title: string
+            listing?: {
+                name: string
+                primaryImage?: string
+            }
+            platform?: {
+                name: string
+                icon?: string
+            }
+        }
+    }
+
+    export interface EnrollmentDetail {
+        /**
+         * Base enrollment fields
+         */
+        id: string
+
+        /**
+         * Short display ID for UI (e.g., ENR-K7X4FA9B)
+         */
+        displayId: string
+
+        campaignId: string
+        creatorId: string
+        orderId: string
+        currency: string
+        /**
+         * Order value in smallest units (paise)
+         */
+        orderValue: number
+
+        /**
+         * Decimal order value for display
+         */
+        orderValueDecimal: string
+
+        purchaseDate?: string
+        lockedRebateRate: number
+        lockedBillRate: number
+        /**
+         * Platform fee in smallest units (paise)
+         */
+        lockedPlatformFee: number
+
+        /**
+         * Decimal platform fee for display
+         */
+        lockedPlatformFeeDecimal: string
+
+        /**
+         * Bonus amount in smallest units (paise)
+         */
+        lockedBonus?: number
+
+        /**
+         * Decimal bonus amount for display
+         */
+        lockedBonusDecimal?: string
+
+        /**
+         * Payment mode: prefund (funds held) or post_submission (pay at approval)
+         */
+        paymentMode: db.PaymentMode
+
+        status: db.EnrollmentStatus
+        submittedAt?: string
+        approvedAt?: string
+        /**
+         * Actions the creator can take on this enrollment
+         */
+        allowedActions: internal.CreatorAction[]
+
+        expiresAt?: string
+        createdAt: string
+        updatedAt: string
+        /**
+         * Creator info
+         */
+        creator: {
+            id: string
+            displayName: string
+            email?: string
+            avatarUrl?: string
+            approvalRate: number
+            previousEnrollments: number
+        }
+
+        /**
+         * Campaign info (required, with full details)
+         */
+        campaign: {
+            id: string
+            title: string
+            status: string
+            type: string
+            listingName?: string
+            listingImage?: string
+        }
+
+        /**
+         * Platform info
+         */
+        platform?: {
+            id: string
+            name: string
+            type?: string
+        }
+
+        /**
+         * OCR scan data (if available)
+         */
+        ocrData?: {
+            id: string
+            screenshotUrl: string
+            extractedOrderId?: string
+            extractedOrderValue?: number
+            extractedOrderValueDecimal?: string
+            extractedPurchaseDate?: string
+            extractedProductName?: string
+            extractedSellerName?: string
+            extractedPlatform?: string
+            confidence?: number
+            validationPassed?: boolean
+            validationErrors?: OCRValidationErrors
+        }
+
+        /**
+         * Enrollment tasks with submissions
+         */
+        tasks: {
+            enrollmentTaskId: string
+            submissionId?: string
+            taskName: string
+            taskDescription?: string
+            category: string
+            isRequired: boolean
+            requireLink: boolean
+            requireScreenshot: boolean
+            instructions?: string
+            proofLink?: string
+            proofScreenshot?: string
+            submittedAt?: string
+            feedback?: string
+            /**
+             * Platform info for task chip icons
+             */
+            platformName?: string
+        }[]
+
+        /**
+         * Per-task bonus breakdown (from financialBreakdown — creator sees bonus only, not platformFee)
+         */
+        taskFees?: {
+            taskId: string
+            taskName: string
+            bonus: number
+            bonusDecimal: string
+        }[]
+
+        /**
+         * Status history
+         */
+        history: {
+            id: string
+            fromStatus?: string
+            toStatus: string
+            changedBy?: string
+            changedByName?: string
+            reason?: string
+            changedAt: string
+        }[]
+
+        /**
+         * Pricing breakdown (calculated from locked rates)
+         */
+        pricing: {
+            orderValue: number
+            orderValueDecimal: string
+            rebateRate: number
+            billRate: number
+            platformFee: number
+            platformFeeDecimal: string
+            bonus: number
+            bonusDecimal: string
+            creatorPayout: number
+            creatorPayoutDecimal: string
+            brandCost: number
+            brandCostDecimal: string
+            gstAmount: number
+            gstAmountDecimal: string
+            tdsAmount: number
+            tdsAmountDecimal: string
+            netBrandCharge: number
+            netBrandChargeDecimal: string
+            platformRevenue: number
+            platformRevenueDecimal: string
+        }
+
+        /**
+         * Rejection info (if rejected/changes requested)
+         */
+        rejection?: {
+            reason: string
+            feedback?: { [key: string]: string }
+            lastRejectedAt?: string
+        }
+    }
+
+    export type EnrollmentStatusFilter = "awaiting_submission" | "awaiting_review" | "changes_requested" | "approved" | "permanently_rejected" | "cancelled" | "expired"
+
+    export interface EnrollmentTaskSubmission {
+        id: string
+        enrollmentTaskId: string
+        proofLink?: string
+        proofScreenshot?: string
+        submittedAt?: string
+        feedback?: string
+    }
+
+    export type KYCStatus = "not_started" | "pending" | "verified" | "rejected"
+
+    export interface ListConnectedAccountsResponse {
+        accounts: ConnectedAccount[]
+    }
+
+    export interface ListingWithStats {
+        isActive: boolean
+        campaignCount: number
+        id: string
+        organizationId: string
+        categoryId?: string
+        platformId?: string
+        name: string
+        slug?: string
+        description?: string
+        identifier: string
+        price: number
+        priceDecimal: string
+        currency: string
+        link: string
+        listingImages: utils.ListingImageItem[]
+        views: number
+        createdBy: string
+        updatedBy?: string
+        createdAt: string
+        updatedAt: string
+    }
+
+    export interface OCRExtractedData {
+        orderId?: string
+        orderValue?: number
+        purchaseDate?: string
+        listingName?: string
+        sellerName?: string
+        platform?: string
+    }
+
+    export interface OCRScanResult {
+        scanId: string
+        enrollmentId?: string
+        campaignId?: string
+        status: OCRScanStatus
+        extractedData?: OCRExtractedData
+        confidence?: number
+        errorMessage?: string
+        createdAt: string
+        completedAt?: string
+    }
+
+    export type OCRScanStatus = "pending" | "processing" | "completed" | "failed"
+
+    export interface OCRValidation {
+        listingMatch: number
+        amountValid: boolean
+        dateValid: boolean
+        passed: boolean
+        errors: string[]
+    }
+
+    export interface OCRValidationErrors {
+        orderIdMismatch?: boolean
+        orderValueMismatch?: boolean
+        purchaseDateMismatch?: boolean
+        listingNameMismatch?: boolean
+        sellerNameMismatch?: boolean
+        platformMismatch?: boolean
+        dateOutOfRange?: boolean
+        amountBelowMinimum?: boolean
+        amountAboveMaximum?: boolean
+        duplicateOrder?: boolean
+        invalidFormat?: boolean
+        unreadableImage?: boolean
+        missingRequiredFields?: string[]
+        extractionFailed?: boolean
+        confidenceTooLow?: boolean
+        errorMessage?: string
+        errorCode?: string
+    }
+
+    export interface PANVerificationResult {
+        isVerified: boolean
+        registeredName: string | null
+        validationId: string
+        message: string
+    }
+
+    export interface SavePANRequest {
+        panNumber: string
+        /**
+         * Validation ID from Step 1 (verify endpoint) - proves verification was done
+         */
+        validationId: string
+    }
+
+    export interface ScanOrderResult {
+        scanId: string
+        campaignId: string
+        status: OCRScanStatus
+        extractedData?: OCRExtractedData
+        validation?: OCRValidation
+        confidence?: number
+        errorMessage?: string
+        createdAt: string
+    }
+
+    export interface SearchCampaignInfo {
+        id: string
+        title: string
+    }
+
+    export interface SearchFacets {
+        campaigns: number
+        enrollments: number
+        transactions: number
+    }
+
+    export interface SearchListingInfo {
+        id: string
+        name: string
+        priceDecimal?: string
+        primaryImage?: string
+    }
+
+    export interface SearchOrganizationInfo {
+        id: string
+        name: string
+        logo?: string
+    }
+
+    export interface SearchPlatformInfo {
+        id: string
+        name: string
+        icon?: string
+    }
+
+    export interface SearchResult {
+        /**
+         * Result type: campaign, enrollment, or transaction
+         */
+        resultType: "campaign" | "enrollment" | "transaction"
+
+        /**
+         * Resource ID
+         */
+        id: string
+
+        /**
+         * Short display ID (e.g., ENR-K7X4FA9B) — present for enrollments
+         */
+        displayId?: string
+
+        /**
+         * Display title (campaign title, order ID, or transaction description)
+         */
+        title: string
+
+        /**
+         * Optional description
+         */
+        description?: string
+
+        /**
+         * Status string
+         */
+        status: string
+
+        /**
+         * Created/requested timestamp
+         */
+        createdAt: string
+
+        /**
+         * Amount in decimal format (bonus, order value, or transaction amount)
+         */
+        amountDecimal?: string
+
+        /**
+         * Secondary amount (e.g., listing price for campaigns, bonus for enrollments)
+         */
+        secondaryAmountDecimal?: string
+
+        /**
+         * For campaigns: current enrollments
+         */
+        currentCount?: number
+
+        /**
+         * For campaigns: max enrollments
+         */
+        maxCount?: number
+
+        /**
+         * Processed/approved timestamp
+         */
+        processedAt?: string
+
+        /**
+         * Expiry timestamp
+         */
+        expiresAt?: string
+
+        /**
+         * Listing info (for campaigns and enrollments)
+         */
+        listing?: SearchListingInfo
+
+        /**
+         * Organization info (for campaigns)
+         */
+        organization?: SearchOrganizationInfo
+
+        /**
+         * Platform info (for campaigns)
+         */
+        platform?: SearchPlatformInfo
+
+        /**
+         * Campaign info (for enrollments and transactions)
+         */
+        campaign?: SearchCampaignInfo
+
+        /**
+         * Fields that matched the search query
+         */
+        matchedFields: string[]
+
+        /**
+         * Transaction type: credit or debit (for transactions)
+         */
+        transactionType?: "credit" | "debit"
+
+        /**
+         * Transaction category (for transactions)
+         */
+        transactionCategory?: "enrollment_hold" | "deposit" | "payout" | "refund" | "admin_credit" | "other"
+    }
+
+    export interface SocialProfilesResponse {
+        instagram?: instagram.StoredInstagramProfile
+        youtube?: youtube.StoredYouTubeProfile
+    }
+
+    export interface SubmitTasksRequest {
+        submissions: {
+            enrollmentTaskId: string
+            proofLink?: string
+            proofScreenshot?: string
+        }[]
+    }
+
+    export interface SyncProfileResponse {
+        success: boolean
+        message: string
+        profile?: instagram.StoredInstagramProfile
+    }
+
+    export interface UnifiedSearchParams {
+        /**
+         * Search query - searches across all resource types (2-200 chars)
+         */
+        q: string
+
+        /**
+         * Pagination cursor (base64 encoded)
+         */
+        cursor?: string
+
+        /**
+         * Page size (1-50)
+         */
+        limit?: number
+
+        /**
+         * Filter enrollments by status (optional)
+         */
+        enrollmentStatus?: EnrollmentStatusFilter
+    }
+
+    export interface UnifiedSearchResponse {
+        data: SearchResult[]
+        nextCursor: string | null
+        hasMore: boolean
+        facets: SearchFacets
+        query: string
+    }
+
+    export interface UpdateCreatorProfileRequest {
+        displayName?: string
+        bio?: string
+        avatarUrl?: string
+    }
+
+    export interface User {
+        id: string
+        email: string
+        name?: string
+        image?: string
+        emailVerified: boolean
+        role: string
+        phoneNumber?: string
+        phoneNumberVerified: boolean
+        createdAt: string
+        updatedAt: string
+    }
+
+    export interface ValidateCouponRequest {
+        code: string
+    }
+
+    export interface ValidateCouponResponse {
+        isValid: boolean
+        coupon?: Coupon
+        /**
+         * Bonus type: 'fixed' or 'percentage'
+         */
+        bonusType?: CouponBonusType
+
+        /**
+         * Bonus amount in smallest units (paise) - for fixed coupons
+         */
+        bonus?: number
+
+        /**
+         * Decimal bonus amount for display
+         */
+        bonusDecimal?: string
+
+        /**
+         * Bonus percentage (1-100) - for percentage coupons
+         */
+        bonusRate?: number
+
+        /**
+         * Maximum bonus cap in paise - for percentage coupons
+         */
+        maxBonus?: number
+
+        /**
+         * Decimal max bonus for display
+         */
+        maxBonusDecimal?: string
+
+        /**
+         * Minimum order value in paise required
+         */
+        minOrderValue?: number
+
+        /**
+         * Decimal min order value for display
+         */
+        minOrderValueDecimal?: string
+
+        errorMessage?: string
+    }
+
+    export interface VerifyPANRequest {
+        panNumber: string
+    }
+
+    export interface WalletTransaction {
+        id: string
+        walletId: string
+        type: "credit" | "debit"
+        status: "pending" | "completed" | "voided"
+        amount: number
+        amountDecimal: string
+        currency: string
+        description: string
+        reference?: string
+        enrollmentId?: string
+        category?: "enrollment_hold" | "deposit" | "payout" | "refund" | "admin_credit" | "other"
+        createdAt: string
+    }
+
+    export interface Withdrawal {
+        id: string
+        displayId: string
+        holderId: string
+        holderType: "organization" | "creator"
+        amount: number
+        amountDecimal: string
+        currency: string
+        status: db.WithdrawalStatus
+        withdrawalMethodId?: string
+        requiresApproval: boolean
+        approvedBy?: string
+        approvedAt?: string
+        rejectionReason?: string
+        /**
+         * Bank UTR (Unique Transaction Reference) for completed withdrawals
+         */
+        utr?: string
+
+        /**
+         * Reason for failure from payment gateway
+         */
+        failureReason?: string
+
+        requestedAt: string
+        processedAt?: string
+    }
+
+    export interface WithdrawalMethod {
+        id: string
+        creatorId: string
+        accountType: "bank_account" | "upi"
+        accountHolderName?: string
+        accountNumber?: string
+        bankName?: string
+        ifscCode?: string
+        upiId?: string
+        isVerified: boolean
+        isDefault: boolean
+        createdAt: string
+    }
+
+    export interface WithdrawalMethodsResponse {
+        methods: WithdrawalMethod[]
+    }
+
+    export interface WithdrawalWithApprovalInfo {
+        statusMessage: string
+        approvalThreshold?: number
+        approvalThresholdDecimal?: string
+        queuePosition?: number
+        estimatedProcessingMessage?: string
+        id: string
+        displayId: string
+        holderId: string
+        holderType: "organization" | "creator"
+        amount: number
+        amountDecimal: string
+        currency: string
+        status: db.WithdrawalStatus
+        withdrawalMethodId?: string
+        requiresApproval: boolean
+        approvedBy?: string
+        approvedAt?: string
+        rejectionReason?: string
+        /**
+         * Bank UTR (Unique Transaction Reference) for completed withdrawals
+         */
+        utr?: string
+
+        /**
+         * Reason for failure from payment gateway
+         */
+        failureReason?: string
+
+        requestedAt: string
+        processedAt?: string
+    }
+
+    export class ServiceClient {
+        private baseClient: BaseClient
+
+        constructor(baseClient: BaseClient) {
+            this.baseClient = baseClient
+            this.addAddress = this.addAddress.bind(this)
+            this.addWithdrawalMethod = this.addWithdrawalMethod.bind(this)
+            this.archiveNotifications = this.archiveNotifications.bind(this)
+            this.calculatePayoutEstimate = this.calculatePayoutEstimate.bind(this)
+            this.cancelEnrollment = this.cancelEnrollment.bind(this)
+            this.cancelWithdrawal = this.cancelWithdrawal.bind(this)
+            this.changePhone = this.changePhone.bind(this)
+            this.clearTaskSubmission = this.clearTaskSubmission.bind(this)
+            this.createEnrollment = this.createEnrollment.bind(this)
+            this.createWithdrawal = this.createWithdrawal.bind(this)
+            this.deleteAddress = this.deleteAddress.bind(this)
+            this.deleteAllNotifications = this.deleteAllNotifications.bind(this)
+            this.deleteNotifications = this.deleteNotifications.bind(this)
+            this.deleteWithdrawalMethod = this.deleteWithdrawalMethod.bind(this)
+            this.disconnectSocialAccount = this.disconnectSocialAccount.bind(this)
+            this.getCampaign = this.getCampaign.bind(this)
+            this.getCampaignBySlug = this.getCampaignBySlug.bind(this)
+            this.getCampaignPricing = this.getCampaignPricing.bind(this)
+            this.getEarningsHistory = this.getEarningsHistory.bind(this)
+            this.getEnrollment = this.getEnrollment.bind(this)
+            this.getListing = this.getListing.bind(this)
+            this.getMyCreatorProfile = this.getMyCreatorProfile.bind(this)
+            this.getMyWallet = this.getMyWallet.bind(this)
+            this.getPreferences = this.getPreferences.bind(this)
+            this.getScanStatus = this.getScanStatus.bind(this)
+            this.getSocialProfiles = this.getSocialProfiles.bind(this)
+            this.getUnreadCount = this.getUnreadCount.bind(this)
+            this.getWalletTransaction = this.getWalletTransaction.bind(this)
+            this.getWalletTransactions = this.getWalletTransactions.bind(this)
+            this.getWithdrawal = this.getWithdrawal.bind(this)
+            this.getWithdrawalMethod = this.getWithdrawalMethod.bind(this)
+            this.listCampaigns = this.listCampaigns.bind(this)
+            this.listConnectedAccounts = this.listConnectedAccounts.bind(this)
+            this.listEnrollments = this.listEnrollments.bind(this)
+            this.listListings = this.listListings.bind(this)
+            this.listMyWithdrawals = this.listMyWithdrawals.bind(this)
+            this.listNotifications = this.listNotifications.bind(this)
+            this.listTokens = this.listTokens.bind(this)
+            this.listWithdrawalMethods = this.listWithdrawalMethods.bind(this)
+            this.markAllRead = this.markAllRead.bind(this)
+            this.markRead = this.markRead.bind(this)
+            this.register = this.register.bind(this)
+            this.registerToken = this.registerToken.bind(this)
+            this.removeToken = this.removeToken.bind(this)
+            this.resubmitEnrollment = this.resubmitEnrollment.bind(this)
+            this.savePAN = this.savePAN.bind(this)
+            this.scanOrder = this.scanOrder.bind(this)
+            this.setDefaultAddress = this.setDefaultAddress.bind(this)
+            this.setDefaultWithdrawalMethod = this.setDefaultWithdrawalMethod.bind(this)
+            this.submitTasks = this.submitTasks.bind(this)
+            this.syncInstagramProfile = this.syncInstagramProfile.bind(this)
+            this.syncYouTubeProfile = this.syncYouTubeProfile.bind(this)
+            this.unifiedSearch = this.unifiedSearch.bind(this)
+            this.updateAddress = this.updateAddress.bind(this)
+            this.updateCreatorProfile = this.updateCreatorProfile.bind(this)
+            this.updatePreferences = this.updatePreferences.bind(this)
+            this.updateTaskSubmission = this.updateTaskSubmission.bind(this)
+            this.validateCoupon = this.validateCoupon.bind(this)
+            this.verifyPAN = this.verifyPAN.bind(this)
+            this.verifyWithdrawalMethod = this.verifyWithdrawalMethod.bind(this)
+        }
+
+        /**
+         * Add a new address
+         */
+        public async addAddress(params: {
+    label: AddressLabel
+    addressLine1: string
+    addressLine2?: string
+    city: string
+    state: string
+    postalCode: string
+    country?: string
+    isDefault?: boolean
+}): Promise<CreatorAddressResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/creators/me/addresses`, JSON.stringify(params))
+            return await resp.json() as CreatorAddressResponse
+        }
+
+        /**
+         * POST /withdrawal-methods
+         * Add a new withdrawal method
+         */
+        public async addWithdrawalMethod(params: AddWithdrawalMethodRequest): Promise<WithdrawalMethod> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/withdrawal-methods`, JSON.stringify(params))
+            return await resp.json() as WithdrawalMethod
+        }
+
+        public async archiveNotifications(params: {
+    ids: string[]
+}): Promise<void> {
+            await this.baseClient.callTypedAPI("POST", `/creators/me/notifications/archive`, JSON.stringify(params))
+        }
+
+        /**
+         * POST /campaigns/:id/payout-estimate
+         * Calculate estimated payout for order value
+         */
+        public async calculatePayoutEstimate(id: string, params: {
+    orderValue: number
+}): Promise<{
+    creatorPayout: number
+    creatorPayoutDecimal: string
+    brandCost: number
+    brandCostDecimal: string
+    gstAmount: number
+    gstAmountDecimal: string
+    platformFee: number
+    platformFeeDecimal: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/campaigns/${encodeURIComponent(id)}/payout-estimate`, JSON.stringify(params))
+            return await resp.json() as {
+    creatorPayout: number
+    creatorPayoutDecimal: string
+    brandCost: number
+    brandCostDecimal: string
+    gstAmount: number
+    gstAmountDecimal: string
+    platformFee: number
+    platformFeeDecimal: string
+}
+        }
+
+        /**
+         * POST /enrollments/:id/cancel
+         * Cancel enrollment (creator action)
+         */
+        public async cancelEnrollment(id: string): Promise<Enrollment> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/enrollments/${encodeURIComponent(id)}/cancel`)
+            return await resp.json() as Enrollment
+        }
+
+        /**
+         * POST /withdrawals/:id/cancel
+         * Cancel a pending withdrawal
+         */
+        public async cancelWithdrawal(id: string): Promise<Withdrawal> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/withdrawals/${encodeURIComponent(id)}/cancel`)
+            return await resp.json() as Withdrawal
+        }
+
+        /**
+         * POST /creators/me/change-phone
+         * Change phone number with passkey re-authentication.
+         * 
+         * Single-step flow: verifies passkey, then updates phone number.
+         * Replaces the previous direct-update flow (no verification) and the planned OTP flow.
+         */
+        public async changePhone(params: {
+    phoneNumber: string
+    /**
+     * WebAuthn assertion response from navigator.credentials.get()
+     */
+    passkeyResponse: any
+
+    /**
+     * Challenge ID from GET /auth/passkey/reauth-options
+     */
+    challengeId: string
+}): Promise<Creator> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/creators/me/change-phone`, JSON.stringify(params))
+            return await resp.json() as Creator
+        }
+
+        /**
+         * DELETE /enrollments/:enrollmentId/tasks/:taskId
+         * Clear task submission proof
+         */
+        public async clearTaskSubmission(enrollmentId: string, taskId: string): Promise<{
+    success: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("DELETE", `/enrollments/${encodeURIComponent(enrollmentId)}/tasks/${encodeURIComponent(taskId)}`)
+            return await resp.json() as {
+    success: boolean
+}
+        }
+
+        /**
+         * Create enrollment (creator joins campaign)
+         * Requires a completed OCR scan - OCR-first flow
+         */
+        public async createEnrollment(params: CreateEnrollmentRequest): Promise<Enrollment> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/enrollments`, JSON.stringify(params))
+            return await resp.json() as Enrollment
+        }
+
+        /**
+         * POST /withdrawals
+         * Create a withdrawal request with passkey verification.
+         * 
+         * Single-step flow: validates balance, verifies passkey, creates withdrawal + hold atomically.
+         * Frontend must call GET /auth/passkey/reauth-options first to get WebAuthn challenge + challengeId,
+         * then navigator.credentials.get() to get assertion, then send both passkeyResponse + challengeId here.
+         */
+        public async createWithdrawal(params: CreateWithdrawalRequest): Promise<WithdrawalWithApprovalInfo> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/withdrawals`, JSON.stringify(params))
+            return await resp.json() as WithdrawalWithApprovalInfo
+        }
+
+        /**
+         * Delete an address
+         */
+        public async deleteAddress(addressId: string): Promise<{
+    success: boolean
+    message: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("DELETE", `/creators/me/addresses/${encodeURIComponent(addressId)}`)
+            return await resp.json() as {
+    success: boolean
+    message: string
+}
+        }
+
+        public async deleteAllNotifications(): Promise<void> {
+            await this.baseClient.callTypedAPI("POST", `/creators/me/notifications/delete-all`)
+        }
+
+        public async deleteNotifications(params: {
+    ids: string[]
+}): Promise<void> {
+            await this.baseClient.callTypedAPI("POST", `/creators/me/notifications/delete`, JSON.stringify(params))
+        }
+
+        /**
+         * DELETE /withdrawal-methods/:id
+         * Delete a withdrawal method
+         */
+        public async deleteWithdrawalMethod(id: string): Promise<{
+    success: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("DELETE", `/withdrawal-methods/${encodeURIComponent(id)}`)
+            return await resp.json() as {
+    success: boolean
+}
+        }
+
+        /**
+         * Disconnect a social account
+         * 
+         * Removes the OAuth connection and clears stored profile data.
+         * User will need to reconnect to restore the integration.
+         */
+        public async disconnectSocialAccount(provider: string): Promise<{
+    success: boolean
+    message: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("DELETE", `/creators/me/social-profiles/${encodeURIComponent(provider)}`)
+            return await resp.json() as {
+    success: boolean
+    message: string
+}
+        }
+
+        /**
+         * GET /campaigns/:id
+         * Get public campaign by ID
+         */
+        public async getCampaign(id: string): Promise<CreatorCampaign> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/campaigns/${encodeURIComponent(id)}`)
+            return await resp.json() as CreatorCampaign
+        }
+
+        /**
+         * GET /campaigns/slug/:slug
+         * Get public campaign by slug - for deep linking and SEO-friendly URLs
+         */
+        public async getCampaignBySlug(slug: string): Promise<CreatorCampaign> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/campaigns/slug/${encodeURIComponent(slug)}`)
+            return await resp.json() as CreatorCampaign
+        }
+
+        /**
+         * GET /campaigns/:id/pricing
+         * Get campaign pricing details
+         */
+        public async getCampaignPricing(id: string): Promise<CampaignPricing> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/campaigns/${encodeURIComponent(id)}/pricing`)
+            return await resp.json() as CampaignPricing
+        }
+
+        /**
+         * Get creator earnings history
+         */
+        public async getEarningsHistory(params: {
+    period?: "daily" | "weekly" | "monthly"
+}): Promise<EarningsHistoryResponse> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                period: params.period === undefined ? undefined : String(params.period),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/creators/me/earnings`, undefined, {query})
+            return await resp.json() as EarningsHistoryResponse
+        }
+
+        /**
+         * Get enrollment by ID (Creator-only) - CONSOLIDATED with getEnrollmentDetail
+         * Returns full enrollment detail with all relations (campaign, listing, platform, pricing, history)
+         * Brands should use GET /organizations/:organizationId/enrollments/:id
+         */
+        public async getEnrollment(id: string): Promise<EnrollmentDetail> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/enrollments/${encodeURIComponent(id)}`)
+            return await resp.json() as EnrollmentDetail
+        }
+
+        /**
+         * GET /listings/:slug
+         * Get listing by slug (public catalog for creators)
+         * Only returns listings from approved organizations
+         */
+        public async getListing(slug: string): Promise<ListingWithStats> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/listings/${encodeURIComponent(slug)}`)
+            return await resp.json() as ListingWithStats
+        }
+
+        /**
+         * Get creator profile (full profile with optional stats)
+         * Use ?includeStats=true to include detailed enrollment/earnings stats in single request
+         */
+        public async getMyCreatorProfile(params: {
+    /**
+     * Include detailed enrollment and earnings stats (avoids separate /creators/me/stats call)
+     */
+    includeStats?: boolean
+}): Promise<CreatorProfile> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                includeStats: params.includeStats === undefined ? undefined : String(params.includeStats),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/creators/me`, undefined, {query})
+            return await resp.json() as CreatorProfile
+        }
+
+        /**
+         * GET /wallets/me
+         * Get creator's wallet with balance
+         */
+        public async getMyWallet(): Promise<CreatorWalletResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/wallets/me`)
+            return await resp.json() as CreatorWalletResponse
+        }
+
+        public async getPreferences(): Promise<void> {
+            await this.baseClient.callTypedAPI("GET", `/creators/me/notifications/preferences`)
+        }
+
+        /**
+         * GET /enrollments/scans/:scanId
+         * Get OCR scan status
+         */
+        public async getScanStatus(scanId: string): Promise<OCRScanResult> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/enrollments/scans/${encodeURIComponent(scanId)}`)
+            return await resp.json() as OCRScanResult
+        }
+
+        /**
+         * Get creator's connected social profiles
+         * 
+         * Returns the stored social profile data for all connected platforms.
+         * Use this to display social stats on the creator's profile.
+         */
+        public async getSocialProfiles(): Promise<SocialProfilesResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/creators/me/social-profiles`)
+            return await resp.json() as SocialProfilesResponse
+        }
+
+        public async getUnreadCount(): Promise<void> {
+            await this.baseClient.callTypedAPI("GET", `/creators/me/notifications/unread-count`)
+        }
+
+        /**
+         * GET /wallets/me/transactions/:transactionId
+         * Get single wallet transaction by ID
+         */
+        public async getWalletTransaction(transactionId: string): Promise<WalletTransaction> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/wallets/me/transactions/${encodeURIComponent(transactionId)}`)
+            return await resp.json() as WalletTransaction
+        }
+
+        /**
+         * GET /wallets/me/transactions
+         * Get creator's wallet transactions
+         */
+        public async getWalletTransactions(params: {
+    skip?: number
+    take?: number
+    /**
+     * Filter by transaction status: pending (inflight hold), completed (posted), voided
+     */
+    status?: "pending" | "completed" | "voided"
+
+    /**
+     * Filter by transaction category: enrollment_hold, deposit, payout, refund, admin_credit
+     */
+    category?: "enrollment_hold" | "deposit" | "payout" | "refund" | "admin_credit"
+
+    /**
+     * Filter by transaction type: credit (money in), debit (money out)
+     */
+    type?: "credit" | "debit"
+
+    /**
+     * Filter transactions from this date (ISO 8601)
+     */
+    dateFrom?: string
+
+    /**
+     * Filter transactions until this date (ISO 8601)
+     */
+    dateTo?: string
+
+    /**
+     * Filter transactions with amount >= this value (smallest units)
+     */
+    amountMin?: number
+
+    /**
+     * Filter transactions with amount <= this value (smallest units)
+     */
+    amountMax?: number
+}): Promise<{
+    data: WalletTransaction[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                amountMax: params.amountMax === undefined ? undefined : String(params.amountMax),
+                amountMin: params.amountMin === undefined ? undefined : String(params.amountMin),
+                category:  params.category === undefined ? undefined : String(params.category),
+                dateFrom:  params.dateFrom,
+                dateTo:    params.dateTo,
+                skip:      params.skip === undefined ? undefined : String(params.skip),
+                status:    params.status === undefined ? undefined : String(params.status),
+                take:      params.take === undefined ? undefined : String(params.take),
+                type:      params.type === undefined ? undefined : String(params.type),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/wallets/me/transactions`, undefined, {query})
+            return await resp.json() as {
+    data: WalletTransaction[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+
+        /**
+         * GET /withdrawals/:id
+         * Get withdrawal by ID
+         */
+        public async getWithdrawal(id: string): Promise<Withdrawal> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/withdrawals/${encodeURIComponent(id)}`)
+            return await resp.json() as Withdrawal
+        }
+
+        /**
+         * GET /withdrawal-methods/:id
+         * Get specific withdrawal method
+         */
+        public async getWithdrawalMethod(id: string): Promise<WithdrawalMethod> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/withdrawal-methods/${encodeURIComponent(id)}`)
+            return await resp.json() as WithdrawalMethod
+        }
+
+        /**
+         * GET /campaigns
+         * List public campaigns for creators with unified filtering
+         * Returns enriched campaign data with listing, organization, and platform details
+         */
+        public async listCampaigns(params: {
+    cursor?: string
+    limit?: number
+    platformId?: string
+    categoryId?: string
+    organizationId?: string
+    priceMin?: number
+    priceMax?: number
+    bonusMin?: number
+    bonusMax?: number
+    hasCapacity?: boolean
+    q?: string
+    featured?: boolean
+    sort?: "trending" | "recent"
+    status?: "active" | "ended"
+}): Promise<{
+    data: CreatorCampaign[]
+    nextCursor: string | null
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                bonusMax:       params.bonusMax === undefined ? undefined : String(params.bonusMax),
+                bonusMin:       params.bonusMin === undefined ? undefined : String(params.bonusMin),
+                categoryId:     params.categoryId,
+                cursor:         params.cursor,
+                featured:       params.featured === undefined ? undefined : String(params.featured),
+                hasCapacity:    params.hasCapacity === undefined ? undefined : String(params.hasCapacity),
+                limit:          params.limit === undefined ? undefined : String(params.limit),
+                organizationId: params.organizationId,
+                platformId:     params.platformId,
+                priceMax:       params.priceMax === undefined ? undefined : String(params.priceMax),
+                priceMin:       params.priceMin === undefined ? undefined : String(params.priceMin),
+                q:              params.q,
+                sort:           params.sort === undefined ? undefined : String(params.sort),
+                status:         params.status === undefined ? undefined : String(params.status),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/campaigns`, undefined, {query})
+            return await resp.json() as {
+    data: CreatorCampaign[]
+    nextCursor: string | null
+    hasMore: boolean
+}
+        }
+
+        /**
+         * List all connected social accounts
+         * 
+         * Returns which social platforms are connected via OAuth.
+         * Different from getSocialProfiles - this shows OAuth connection status,
+         * not the synced profile data.
+         */
+        public async listConnectedAccounts(): Promise<ListConnectedAccountsResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/creators/me/connected-accounts`)
+            return await resp.json() as ListConnectedAccountsResponse
+        }
+
+        /**
+         * GET /enrollments
+         * List creator's own enrollments - CURSOR PAGINATION
+         * Uses cursor for infinite scroll experience on mobile
+         * Query params:
+         * - q: string - Search by campaign title, listing name, order ID
+         * - status: EnrollmentStatus - Filter by enrollment status
+         * - campaignId: string - Filter by specific campaign
+         * - dateFrom: string - Filter enrollments from date
+         * - dateTo: string - Filter enrollments until date
+         * - orderValueMin: number - Filter by minimum order value (paise)
+         * - orderValueMax: number - Filter by maximum order value (paise)
+         * - sortBy: "createdAt" | "orderValue" | "payout" | "submittedAt" | "expiresAt" - Sort field
+         * - sortOrder: "asc" | "desc" - Sort direction
+         */
+        public async listEnrollments(params: {
+    cursor?: string
+    limit?: number
+    /**
+     * Single status or comma-separated statuses (e.g., "awaiting_submission,changes_requested")
+     */
+    status?: string
+
+    campaignId?: string
+    q?: string
+    dateFrom?: string
+    dateTo?: string
+    orderValueMin?: number
+    orderValueMax?: number
+    sortBy?: "createdAt" | "orderValue" | "payout" | "submittedAt" | "expiresAt"
+    sortOrder?: "asc" | "desc"
+}): Promise<{
+    data: Enrollment[]
+    nextCursor: string | null
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                campaignId:    params.campaignId,
+                cursor:        params.cursor,
+                dateFrom:      params.dateFrom,
+                dateTo:        params.dateTo,
+                limit:         params.limit === undefined ? undefined : String(params.limit),
+                orderValueMax: params.orderValueMax === undefined ? undefined : String(params.orderValueMax),
+                orderValueMin: params.orderValueMin === undefined ? undefined : String(params.orderValueMin),
+                q:             params.q,
+                sortBy:        params.sortBy === undefined ? undefined : String(params.sortBy),
+                sortOrder:     params.sortOrder === undefined ? undefined : String(params.sortOrder),
+                status:        params.status,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/enrollments/me`, undefined, {query})
+            return await resp.json() as {
+    data: Enrollment[]
+    nextCursor: string | null
+    hasMore: boolean
+}
+        }
+
+        /**
+         * GET /listings
+         * List listings with pagination and filters (public access)
+         * Only returns listings from approved organizations
+         */
+        public async listListings(params: {
+    skip?: number
+    take?: number
+    categoryId?: string
+    platformId?: string
+    search?: string
+    priceMin?: number
+    priceMax?: number
+    sortBy?: "createdAt" | "name" | "price"
+    sortOrder?: "asc" | "desc"
+}): Promise<{
+    data: ListingWithStats[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                categoryId: params.categoryId,
+                platformId: params.platformId,
+                priceMax:   params.priceMax === undefined ? undefined : String(params.priceMax),
+                priceMin:   params.priceMin === undefined ? undefined : String(params.priceMin),
+                search:     params.search,
+                skip:       params.skip === undefined ? undefined : String(params.skip),
+                sortBy:     params.sortBy === undefined ? undefined : String(params.sortBy),
+                sortOrder:  params.sortOrder === undefined ? undefined : String(params.sortOrder),
+                take:       params.take === undefined ? undefined : String(params.take),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/listings`, undefined, {query})
+            return await resp.json() as {
+    data: ListingWithStats[]
+    total: number
+    skip: number
+    take: number
+    hasMore: boolean
+}
+        }
+
+        /**
+         * GET /withdrawals/me
+         * List creator's own withdrawals
+         */
+        public async listMyWithdrawals(params: {
+    cursor?: string
+    limit?: number
+    status?: db.WithdrawalStatus
+    q?: string
+    amountMin?: number
+    amountMax?: number
+    methodType?: "bank" | "upi"
+    requestedFrom?: string
+    requestedTo?: string
+    sortBy?: "requestedAt" | "amount"
+    sortOrder?: "asc" | "desc"
+}): Promise<{
+    data: Withdrawal[]
+    nextCursor: string | null
+    hasMore: boolean
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                amountMax:     params.amountMax === undefined ? undefined : String(params.amountMax),
+                amountMin:     params.amountMin === undefined ? undefined : String(params.amountMin),
+                cursor:        params.cursor,
+                limit:         params.limit === undefined ? undefined : String(params.limit),
+                methodType:    params.methodType === undefined ? undefined : String(params.methodType),
+                q:             params.q,
+                requestedFrom: params.requestedFrom,
+                requestedTo:   params.requestedTo,
+                sortBy:        params.sortBy === undefined ? undefined : String(params.sortBy),
+                sortOrder:     params.sortOrder === undefined ? undefined : String(params.sortOrder),
+                status:        params.status === undefined ? undefined : String(params.status),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/withdrawals/me`, undefined, {query})
+            return await resp.json() as {
+    data: Withdrawal[]
+    nextCursor: string | null
+    hasMore: boolean
+}
+        }
+
+        public async listNotifications(params: {
+    limit?: number
+    offset?: number
+    unreadOnly?: boolean
+}): Promise<void> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                limit:      params.limit === undefined ? undefined : String(params.limit),
+                offset:     params.offset === undefined ? undefined : String(params.offset),
+                unreadOnly: params.unreadOnly === undefined ? undefined : String(params.unreadOnly),
+            })
+
+            await this.baseClient.callTypedAPI("GET", `/creators/me/notifications`, undefined, {query})
+        }
+
+        public async listTokens(): Promise<void> {
+            await this.baseClient.callTypedAPI("GET", `/creators/me/notifications/tokens`)
+        }
+
+        /**
+         * GET /withdrawal-methods
+         * List creator's withdrawal methods
+         */
+        public async listWithdrawalMethods(): Promise<WithdrawalMethodsResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/withdrawal-methods`)
+            return await resp.json() as WithdrawalMethodsResponse
+        }
+
+        public async markAllRead(): Promise<void> {
+            await this.baseClient.callTypedAPI("POST", `/creators/me/notifications/read-all`)
+        }
+
+        public async markRead(params: {
+    ids: string[]
+}): Promise<void> {
+            await this.baseClient.callTypedAPI("POST", `/creators/me/notifications/read`, JSON.stringify(params))
+        }
+
+        /**
+         * POST /creators/register
+         * Create creator profile + wallet in a single step.
+         * 
+         * If `passkeyResponse` is provided, phone is verified via passkey re-authentication.
+         * Otherwise, phone is saved unverified (for users without passkeys yet).
+         * Idempotent — if creator already exists, returns existing profile.
+         */
+        public async register(params: {
+    firstName: string
+    lastName: string
+    dob: string
+    phoneNumber: string
+    /**
+     * Optional passkey assertion — if provided, phone is marked as verified
+     */
+    passkeyResponse?: any
+
+    /**
+     * Challenge ID from GET /auth/passkey/reauth-options — required when passkeyResponse is provided
+     */
+    challengeId?: string
+}): Promise<Creator> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/creators/register`, JSON.stringify(params))
+            return await resp.json() as Creator
+        }
+
+        public async registerToken(params: {
+    token: string
+    platform: notifications.PushPlatform
+}): Promise<void> {
+            await this.baseClient.callTypedAPI("POST", `/creators/me/notifications/tokens`, JSON.stringify(params))
+        }
+
+        public async removeToken(params: {
+    token: string
+}): Promise<void> {
+            await this.baseClient.callTypedAPI("POST", `/creators/me/notifications/tokens/remove`, JSON.stringify(params))
+        }
+
+        /**
+         * POST /enrollments/:id/resubmit
+         * Resubmit enrollment after changes requested (changes_requested → awaiting_review)
+         */
+        public async resubmitEnrollment(id: string): Promise<Enrollment> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/enrollments/${encodeURIComponent(id)}/resubmit`)
+            return await resp.json() as Enrollment
+        }
+
+        /**
+         * =============================================================================
+         * STEP 2: Save verified PAN (requires validationId from Step 1)
+         * SECURITY FIX: Now validates that PAN matches the one that was verified
+         * =============================================================================
+         */
+        public async savePAN(params: SavePANRequest): Promise<{
+    success: boolean
+    message: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/creators/me/kyc/pan`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+    message: string
+}
+        }
+
+        /**
+         * POST /enrollments/scans
+         * Scan order screenshot before enrollment (Step 2 of enrollment flow)
+         */
+        public async scanOrder(params: {
+    campaignId: string
+    screenshotUrl: string
+}): Promise<ScanOrderResult> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/enrollments/scans`, JSON.stringify(params))
+            return await resp.json() as ScanOrderResult
+        }
+
+        /**
+         * Set an address as default
+         */
+        public async setDefaultAddress(addressId: string): Promise<CreatorAddressResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/creators/me/addresses/${encodeURIComponent(addressId)}/set-default`)
+            return await resp.json() as CreatorAddressResponse
+        }
+
+        /**
+         * POST /withdrawal-methods/:id/set-default
+         * Set a withdrawal method as default
+         */
+        public async setDefaultWithdrawalMethod(id: string): Promise<WithdrawalMethod> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/withdrawal-methods/${encodeURIComponent(id)}/set-default`)
+            return await resp.json() as WithdrawalMethod
+        }
+
+        /**
+         * POST /enrollments/:id/tasks
+         * Submit tasks for enrollment
+         */
+        public async submitTasks(id: string, params: SubmitTasksRequest): Promise<Enrollment> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/enrollments/${encodeURIComponent(id)}/tasks`, JSON.stringify(params))
+            return await resp.json() as Enrollment
+        }
+
+        /**
+         * Sync Instagram profile data
+         * 
+         * Fetches latest profile data from Instagram Graph API using the stored OAuth token.
+         * Call this after connecting Instagram or to refresh stale data.
+         * 
+         * Rate limit: Instagram allows 200 requests/hour per user
+         */
+        public async syncInstagramProfile(): Promise<SyncProfileResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/creators/me/social-profiles/instagram/sync`)
+            return await resp.json() as SyncProfileResponse
+        }
+
+        /**
+         * Sync YouTube profile data
+         * 
+         * Fetches latest channel data from YouTube Data API using the stored OAuth token.
+         * Call this after connecting YouTube or to refresh stale data.
+         * 
+         * Rate limit: YouTube allows 10,000 units/day (channel.list costs ~3 units)
+         */
+        public async syncYouTubeProfile(): Promise<{
+    success: boolean
+    message: string
+    profile?: youtube.StoredYouTubeProfile
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/creators/me/social-profiles/youtube/sync`)
+            return await resp.json() as {
+    success: boolean
+    message: string
+    profile?: youtube.StoredYouTubeProfile
+}
+        }
+
+        /**
+         * GET /search
+         * 
+         * Unified search across campaigns, enrollments, and transactions.
+         * - Campaigns: Search by title, description, listing name, organization name
+         * - Enrollments: Search by order ID, campaign title, listing name (own only)
+         * - Transactions: Search by description, reference (own wallet only)
+         * 
+         * Results are interleaved in round-robin fashion for balanced display.
+         * Returns facet counts for each resource type.
+         */
+        public async unifiedSearch(params: UnifiedSearchParams): Promise<UnifiedSearchResponse> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                cursor:           params.cursor,
+                enrollmentStatus: params.enrollmentStatus === undefined ? undefined : String(params.enrollmentStatus),
+                limit:            params.limit === undefined ? undefined : String(params.limit),
+                q:                params.q,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/search`, undefined, {query})
+            return await resp.json() as UnifiedSearchResponse
+        }
+
+        /**
+         * Update an existing address
+         */
+        public async updateAddress(addressId: string, params: {
+    label?: AddressLabel
+    addressLine1?: string
+    addressLine2?: string
+    city?: string
+    state?: string
+    postalCode?: string
+    country?: string
+}): Promise<CreatorAddressResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("PATCH", `/creators/me/addresses/${encodeURIComponent(addressId)}`, JSON.stringify(params))
+            return await resp.json() as CreatorAddressResponse
+        }
+
+        /**
+         * Update creator profile
+         */
+        public async updateCreatorProfile(params: UpdateCreatorProfileRequest): Promise<Creator> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("PATCH", `/creators/me`, JSON.stringify(params))
+            return await resp.json() as Creator
+        }
+
+        public async updatePreferences(params: {
+    emailEnabled?: boolean
+    smsEnabled?: boolean
+    pushEnabled?: boolean
+    inAppEnabled?: boolean
+    whatsappEnabled?: boolean
+    email?: string
+    phone?: string
+    whatsappPhone?: string
+}): Promise<void> {
+            await this.baseClient.callTypedAPI("POST", `/creators/me/notifications/preferences`, JSON.stringify(params))
+        }
+
+        /**
+         * PATCH /enrollments/:enrollmentId/tasks/:taskId
+         * Update task submission proof
+         */
+        public async updateTaskSubmission(enrollmentId: string, taskId: string, params: {
+    proofLink?: string
+    proofScreenshot?: string
+}): Promise<EnrollmentTaskSubmission> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("PATCH", `/enrollments/${encodeURIComponent(enrollmentId)}/tasks/${encodeURIComponent(taskId)}`, JSON.stringify(params))
+            return await resp.json() as EnrollmentTaskSubmission
+        }
+
+        /**
+         * Validate coupon for use (preview before enrollment)
+         */
+        public async validateCoupon(params: ValidateCouponRequest): Promise<ValidateCouponResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/creators/coupons/validate`, JSON.stringify(params))
+            return await resp.json() as ValidateCouponResponse
+        }
+
+        /**
+         * =============================================================================
+         * STEP 1: Verify PAN details (Surepass API) - NO SAVE
+         * User can review the registered name before confirming
+         * =============================================================================
+         */
+        public async verifyPAN(params: VerifyPANRequest): Promise<PANVerificationResult> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/creators/me/kyc/pan/verify`, JSON.stringify(params))
+            return await resp.json() as PANVerificationResult
+        }
+
+        /**
+         * POST /withdrawal-methods/:id/verify
+         * Verify withdrawal method via penny drop
+         */
+        public async verifyWithdrawalMethod(id: string): Promise<WithdrawalMethod> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/withdrawal-methods/${encodeURIComponent(id)}/verify`)
+            return await resp.json() as WithdrawalMethod
+        }
+    }
 }
 
 export namespace enrichment {
-	export interface EnrichPreviewRequest {
-		/**
-		 * Company domain (e.g. "razorpay.com")
-		 */
-		domain: string;
-
-		/**
-		 * Company name — used as fallback for Wikidata/Wikipedia search
-		 */
-		name?: string;
-	}
-
-	export interface EnrichmentBackdrop {
-		url: string;
-		width: number | null;
-		height: number | null;
-	}
-
-	export interface EnrichmentBranding {
-		/**
-		 * Primary logo URL (best single logo from all sources)
-		 */
-		logoUrl: string | null;
-
-		/**
-		 * Google favicon URL (always available)
-		 */
-		faviconUrl: string;
-
-		/**
-		 * All discovered logos with metadata
-		 */
-		logos: EnrichmentLogo[];
-
-		/**
-		 * Brand colors extracted from CSS, meta tags, and image analysis
-		 */
-		colors: EnrichmentColor[];
-
-		/**
-		 * Hero/backdrop images (e.g. OG image)
-		 */
-		backdrops: EnrichmentBackdrop[];
-	}
-
-	export interface EnrichmentBusiness {
-		/**
-		 * Primary industry label (normalized taxonomy)
-		 */
-		industry: string | null;
-
-		/**
-		 * All detected industries with sub-categories
-		 */
-		industries: EnrichmentIndustry[];
-
-		/**
-		 * Year the company was founded
-		 */
-		foundedYear: number | null;
-
-		/**
-		 * Approximate employee count
-		 */
-		employeeCount: number | null;
-
-		/**
-		 * Company type: "Public", "Private", "Subsidiary", "Nonprofit", etc.
-		 */
-		companyType: string | null;
-
-		/**
-		 * Current CEO name
-		 */
-		ceoName: string | null;
-
-		/**
-		 * Founder name
-		 */
-		founderName: string | null;
-
-		/**
-		 * Parent organization name (if subsidiary)
-		 */
-		parentOrg: string | null;
-	}
-
-	export interface EnrichmentColor {
-		hex: string;
-		name: string | null;
-	}
-
-	export interface EnrichmentContact {
-		/**
-		 * Primary phone number
-		 */
-		phone: string | null;
-
-		/**
-		 * Primary email address
-		 */
-		email: string | null;
-
-		/**
-		 * Social media profile links
-		 */
-		socials: EnrichmentSocials;
-	}
-
-	export interface EnrichmentDomainInfo {
-		/**
-		 * Human-readable domain age (e.g. "12 years")
-		 */
-		domainAge: string | null;
-
-		/**
-		 * ISO date when domain was first registered
-		 */
-		domainCreated: string | null;
-
-		/**
-		 * ISO date when domain registration expires
-		 */
-		domainExpires: string | null;
-
-		/**
-		 * Domain registrar name
-		 */
-		registrar: string | null;
-
-		/**
-		 * WHOIS registrant organization
-		 */
-		registrantOrg: string | null;
-
-		/**
-		 * Detected email provider from MX records (e.g. "Google Workspace")
-		 */
-		emailProvider: string | null;
-
-		/**
-		 * Detected technologies, frameworks, CDNs
-		 */
-		techStack: string[];
-	}
-
-	export interface EnrichmentExtracted {
-		/**
-		 * People names mentioned on the page
-		 */
-		people: string[];
-
-		/**
-		 * Topic keywords extracted via NLP
-		 */
-		topics: string[];
-	}
-
-	export interface EnrichmentFinancial {
-		stockTicker: string | null;
-		stockExchange: string | null;
-		revenue: string | null;
-		marketCap: string | null;
-	}
-
-	export interface EnrichmentHeadquarters {
-		city: string | null;
-		state: string | null;
-		country: string | null;
-		countryCode: string | null;
-		postalCode: string | null;
-		address: string | null;
-		latitude: number | null;
-		longitude: number | null;
-	}
-
-	export interface EnrichmentIdentity {
-		/**
-		 * Display name (e.g. "Razorpay")
-		 */
-		name: string | null;
-
-		/**
-		 * Registered legal name from certificate/WHOIS
-		 */
-		legalName: string | null;
-
-		/**
-		 * Short description — 1-2 sentences
-		 */
-		description: string | null;
-
-		/**
-		 * Long-form description — typically from Wikipedia
-		 */
-		detailedDescription: string | null;
-
-		/**
-		 * Company tagline or slogan
-		 */
-		slogan: string | null;
-	}
-
-	export interface EnrichmentIndustry {
-		industry: string;
-		subindustry: string | null;
-	}
-
-	export interface EnrichmentLinks {
-		blog: string | null;
-		careers: string | null;
-		privacy: string | null;
-		terms: string | null;
-		contact: string | null;
-		pricing: string | null;
-	}
-
-	export interface EnrichmentLogo {
-		url: string;
-		type: "icon" | "logo" | "og_image" | "touch_icon" | "manifest_icon" | "favicon" | "svg";
-		width: number | null;
-		height: number | null;
-	}
-
-	export interface EnrichmentMeta {
-		/**
-		 * List of source identifiers that contributed data
-		 */
-		sources: string[];
-
-		/**
-		 * Number of sources that returned data
-		 */
-		sourceCount: number;
-
-		/**
-		 * ISO timestamp when enrichment was performed
-		 */
-		enrichedAt: string;
-
-		/**
-		 * Overall confidence level based on source count
-		 */
-		confidence: "high" | "medium" | "low";
-
-		/**
-		 * Phase 1 duration in milliseconds (parallel independent sources)
-		 */
-		p1Ms: number;
-
-		/**
-		 * Phase 2 duration in milliseconds (dependent sources)
-		 */
-		p2Ms: number;
-
-		/**
-		 * Total pipeline duration in milliseconds
-		 */
-		totalMs: number;
-
-		/**
-		 * Number of populated fields in the result
-		 */
-		fieldsPopulated: number;
-	}
-
-	export interface EnrichmentResult {
-		/**
-		 * The domain that was enriched
-		 */
-		domain: string;
-
-		/**
-		 * Company identity — name, legal name, description, slogan
-		 */
-		identity: EnrichmentIdentity;
-
-		/**
-		 * Visual branding assets — logos, colors, backdrops, favicon
-		 */
-		branding: EnrichmentBranding;
-
-		/**
-		 * Business profile — industry, founding, employees, leadership
-		 */
-		business: EnrichmentBusiness;
-
-		/**
-		 * Physical location
-		 */
-		headquarters: EnrichmentHeadquarters;
-
-		/**
-		 * Contact information — phone, email, social media links
-		 */
-		contact: EnrichmentContact;
-
-		/**
-		 * Domain registration, WHOIS, and technical infrastructure
-		 */
-		domainInfo: EnrichmentDomainInfo;
-
-		/**
-		 * Website characteristics — links, scale, mobile, content
-		 */
-		site: EnrichmentSite;
-
-		/**
-		 * Financial data (public companies only)
-		 */
-		financial: EnrichmentFinancial | null;
-
-		/**
-		 * NLP-extracted entities from page content
-		 */
-		extracted: EnrichmentExtracted;
-
-		/**
-		 * Enrichment metadata — sources, timing, confidence
-		 */
-		meta: EnrichmentMeta;
-	}
-
-	export interface EnrichmentSite {
-		/**
-		 * Important page links discovered on the site
-		 */
-		links: EnrichmentLinks;
-
-		/**
-		 * Whether the company has a mobile app
-		 */
-		hasMobileApp: boolean;
-
-		/**
-		 * Whether the site contains NSFW content
-		 */
-		isNsfw: boolean;
-
-		/**
-		 * Estimated site scale based on sitemap/robots.txt complexity
-		 */
-		siteScale: "tiny" | "small" | "medium" | "large" | null;
-
-		/**
-		 * Detected content languages (ISO 639-1 codes)
-		 */
-		languages: string[];
-
-		/**
-		 * Approximate word count of main page content
-		 */
-		contentWordCount: number | null;
-
-		/**
-		 * Site publisher name (from meta tags)
-		 */
-		publisher: string | null;
-	}
-
-	export interface EnrichmentSocials {
-		linkedin: string | null;
-		twitter: string | null;
-		facebook: string | null;
-		instagram: string | null;
-		youtube: string | null;
-		github: string | null;
-	}
-
-	export class ServiceClient {
-		private baseClient: BaseClient;
-
-		constructor(baseClient: BaseClient) {
-			this.baseClient = baseClient;
-			this.enrichPreview = this.enrichPreview.bind(this);
-		}
-
-		/**
-		 * Preview enrichment for a domain.
-		 * Exposed endpoint — used by frontend during org creation form.
-		 * Shows what data we can auto-fill before the org is actually created.
-		 */
-		public async enrichPreview(params: EnrichPreviewRequest): Promise<EnrichmentResult> {
-			// Convert our params into the objects we need for the request
-			const query = makeRecord<string, string | string[]>({
-				domain: params.domain,
-				name: params.name,
-			});
-
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI("GET", `/enrichment/preview`, undefined, {
-				query,
-			});
-			return (await resp.json()) as EnrichmentResult;
-		}
-	}
+    export interface EnrichPreviewRequest {
+        /**
+         * Company domain (e.g. "razorpay.com")
+         */
+        domain: string
+
+        /**
+         * Company name — used as fallback for Wikidata/Wikipedia search
+         */
+        name?: string
+    }
+
+    export interface EnrichmentBackdrop {
+        url: string
+        width: number | null
+        height: number | null
+    }
+
+    export interface EnrichmentBranding {
+        /**
+         * Primary logo URL (best single logo from all sources)
+         */
+        logoUrl: string | null
+
+        /**
+         * Google favicon URL (always available)
+         */
+        faviconUrl: string
+
+        /**
+         * All discovered logos with metadata
+         */
+        logos: EnrichmentLogo[]
+
+        /**
+         * Brand colors extracted from CSS, meta tags, and image analysis
+         */
+        colors: EnrichmentColor[]
+
+        /**
+         * Hero/backdrop images (e.g. OG image)
+         */
+        backdrops: EnrichmentBackdrop[]
+    }
+
+    export interface EnrichmentBusiness {
+        /**
+         * Primary industry label (normalized taxonomy)
+         */
+        industry: string | null
+
+        /**
+         * All detected industries with sub-categories
+         */
+        industries: EnrichmentIndustry[]
+
+        /**
+         * Year the company was founded
+         */
+        foundedYear: number | null
+
+        /**
+         * Approximate employee count
+         */
+        employeeCount: number | null
+
+        /**
+         * Company type: "Public", "Private", "Subsidiary", "Nonprofit", etc.
+         */
+        companyType: string | null
+
+        /**
+         * Current CEO name
+         */
+        ceoName: string | null
+
+        /**
+         * Founder name
+         */
+        founderName: string | null
+
+        /**
+         * Parent organization name (if subsidiary)
+         */
+        parentOrg: string | null
+    }
+
+    export interface EnrichmentColor {
+        hex: string
+        name: string | null
+    }
+
+    export interface EnrichmentContact {
+        /**
+         * Primary phone number
+         */
+        phone: string | null
+
+        /**
+         * Primary email address
+         */
+        email: string | null
+
+        /**
+         * Social media profile links
+         */
+        socials: EnrichmentSocials
+    }
+
+    export interface EnrichmentDomainInfo {
+        /**
+         * Human-readable domain age (e.g. "12 years")
+         */
+        domainAge: string | null
+
+        /**
+         * ISO date when domain was first registered
+         */
+        domainCreated: string | null
+
+        /**
+         * ISO date when domain registration expires
+         */
+        domainExpires: string | null
+
+        /**
+         * Domain registrar name
+         */
+        registrar: string | null
+
+        /**
+         * WHOIS registrant organization
+         */
+        registrantOrg: string | null
+
+        /**
+         * Detected email provider from MX records (e.g. "Google Workspace")
+         */
+        emailProvider: string | null
+
+        /**
+         * Detected technologies, frameworks, CDNs
+         */
+        techStack: string[]
+    }
+
+    export interface EnrichmentExtracted {
+        /**
+         * People names mentioned on the page
+         */
+        people: string[]
+
+        /**
+         * Topic keywords extracted via NLP
+         */
+        topics: string[]
+    }
+
+    export interface EnrichmentFinancial {
+        stockTicker: string | null
+        stockExchange: string | null
+        revenue: string | null
+        marketCap: string | null
+    }
+
+    export interface EnrichmentHeadquarters {
+        city: string | null
+        state: string | null
+        country: string | null
+        countryCode: string | null
+        postalCode: string | null
+        address: string | null
+        latitude: number | null
+        longitude: number | null
+    }
+
+    export interface EnrichmentIdentity {
+        /**
+         * Display name (e.g. "Razorpay")
+         */
+        name: string | null
+
+        /**
+         * Registered legal name from certificate/WHOIS
+         */
+        legalName: string | null
+
+        /**
+         * Short description — 1-2 sentences
+         */
+        description: string | null
+
+        /**
+         * Long-form description — typically from Wikipedia
+         */
+        detailedDescription: string | null
+
+        /**
+         * Company tagline or slogan
+         */
+        slogan: string | null
+    }
+
+    export interface EnrichmentIndustry {
+        industry: string
+        subindustry: string | null
+    }
+
+    export interface EnrichmentLinks {
+        blog: string | null
+        careers: string | null
+        privacy: string | null
+        terms: string | null
+        contact: string | null
+        pricing: string | null
+    }
+
+    export interface EnrichmentLogo {
+        url: string
+        type: "icon" | "logo" | "og_image" | "touch_icon" | "manifest_icon" | "favicon" | "svg"
+        width: number | null
+        height: number | null
+    }
+
+    export interface EnrichmentMeta {
+        /**
+         * List of source identifiers that contributed data
+         */
+        sources: string[]
+
+        /**
+         * Number of sources that returned data
+         */
+        sourceCount: number
+
+        /**
+         * ISO timestamp when enrichment was performed
+         */
+        enrichedAt: string
+
+        /**
+         * Overall confidence level based on source count
+         */
+        confidence: "high" | "medium" | "low"
+
+        /**
+         * Phase 1 duration in milliseconds (parallel independent sources)
+         */
+        p1Ms: number
+
+        /**
+         * Phase 2 duration in milliseconds (dependent sources)
+         */
+        p2Ms: number
+
+        /**
+         * Total pipeline duration in milliseconds
+         */
+        totalMs: number
+
+        /**
+         * Number of populated fields in the result
+         */
+        fieldsPopulated: number
+    }
+
+    export interface EnrichmentResult {
+        /**
+         * The domain that was enriched
+         */
+        domain: string
+
+        /**
+         * Company identity — name, legal name, description, slogan
+         */
+        identity: EnrichmentIdentity
+
+        /**
+         * Visual branding assets — logos, colors, backdrops, favicon
+         */
+        branding: EnrichmentBranding
+
+        /**
+         * Business profile — industry, founding, employees, leadership
+         */
+        business: EnrichmentBusiness
+
+        /**
+         * Physical location
+         */
+        headquarters: EnrichmentHeadquarters
+
+        /**
+         * Contact information — phone, email, social media links
+         */
+        contact: EnrichmentContact
+
+        /**
+         * Domain registration, WHOIS, and technical infrastructure
+         */
+        domainInfo: EnrichmentDomainInfo
+
+        /**
+         * Website characteristics — links, scale, mobile, content
+         */
+        site: EnrichmentSite
+
+        /**
+         * Financial data (public companies only)
+         */
+        financial: EnrichmentFinancial | null
+
+        /**
+         * NLP-extracted entities from page content
+         */
+        extracted: EnrichmentExtracted
+
+        /**
+         * Enrichment metadata — sources, timing, confidence
+         */
+        meta: EnrichmentMeta
+    }
+
+    export interface EnrichmentSite {
+        /**
+         * Important page links discovered on the site
+         */
+        links: EnrichmentLinks
+
+        /**
+         * Whether the company has a mobile app
+         */
+        hasMobileApp: boolean
+
+        /**
+         * Whether the site contains NSFW content
+         */
+        isNsfw: boolean
+
+        /**
+         * Estimated site scale based on sitemap/robots.txt complexity
+         */
+        siteScale: "tiny" | "small" | "medium" | "large" | null
+
+        /**
+         * Detected content languages (ISO 639-1 codes)
+         */
+        languages: string[]
+
+        /**
+         * Approximate word count of main page content
+         */
+        contentWordCount: number | null
+
+        /**
+         * Site publisher name (from meta tags)
+         */
+        publisher: string | null
+    }
+
+    export interface EnrichmentSocials {
+        linkedin: string | null
+        twitter: string | null
+        facebook: string | null
+        instagram: string | null
+        youtube: string | null
+        github: string | null
+    }
+
+    export class ServiceClient {
+        private baseClient: BaseClient
+
+        constructor(baseClient: BaseClient) {
+            this.baseClient = baseClient
+            this.enrichPreview = this.enrichPreview.bind(this)
+        }
+
+        /**
+         * Preview enrichment for a domain.
+         * Exposed endpoint — used by frontend during org creation form.
+         * Shows what data we can auto-fill before the org is actually created.
+         */
+        public async enrichPreview(params: EnrichPreviewRequest): Promise<EnrichmentResult> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                domain: params.domain,
+                name:   params.name,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/enrichment/preview`, undefined, {query})
+            return await resp.json() as EnrichmentResult
+        }
+    }
 }
 
 export namespace incoming_webhooks {
-	export class ServiceClient {
-		private baseClient: BaseClient;
 
-		constructor(baseClient: BaseClient) {
-			this.baseClient = baseClient;
-		}
-	}
+    export class ServiceClient {
+        private baseClient: BaseClient
+
+        constructor(baseClient: BaseClient) {
+            this.baseClient = baseClient
+            this.receiveWebhook = this.receiveWebhook.bind(this)
+        }
+
+        public async receiveWebhook(method: "POST", sourceSlug: string, body?: RequestInit["body"], options?: CallParameters): Promise<globalThis.Response> {
+            return this.baseClient.callAPI(method, `/incoming-webhooks/${encodeURIComponent(sourceSlug)}`, body, options)
+        }
+    }
 }
 
 export namespace ledger {
-	export class ServiceClient {
-		private baseClient: BaseClient;
 
-		constructor(baseClient: BaseClient) {
-			this.baseClient = baseClient;
-		}
-	}
+    export class ServiceClient {
+        private baseClient: BaseClient
+
+        constructor(baseClient: BaseClient) {
+            this.baseClient = baseClient
+            this.health = this.health.bind(this)
+        }
+
+        public async health(): Promise<api.HealthResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/ledger/health`)
+            return await resp.json() as api.HealthResponse
+        }
+    }
 }
 
 export namespace notifications {
-	export type Channel = "email" | "sms" | "push" | "in_app" | "whatsapp";
+    export type Channel = "email" | "sms" | "push" | "in_app" | "whatsapp"
 
-	export interface EmailTemplateConfig {
-		/**
-		 * Override subject (uses title if not set)
-		 */
-		subject?: string;
+    export interface EmailTemplateConfig {
+        /**
+         * Override subject (uses title if not set)
+         */
+        subject?: string
 
-		/**
-		 * Emailit template alias (for transactional emails)
-		 */
-		template?: string;
+        /**
+         * Emailit template alias (for transactional emails)
+         */
+        template?: string
 
-		/**
-		 * Override body for email
-		 */
-		body?: string;
-	}
+        /**
+         * Override body for email
+         */
+        body?: string
+    }
 
-	export interface NotificationTemplate {
-		/**
-		 * Unique notification type identifier
-		 */
-		type: string;
+    export interface NotificationTemplate {
+        /**
+         * Unique notification type identifier
+         */
+        type: string
 
-		/**
-		 * Human-readable name for admin UI
-		 */
-		name: string;
+        /**
+         * Human-readable name for admin UI
+         */
+        name: string
 
-		/**
-		 * Description of when this notification is sent
-		 */
-		description: string;
+        /**
+         * Description of when this notification is sent
+         */
+        description: string
 
-		/**
-		 * Channels to send this notification on
-		 */
-		channels: Channel[];
+        /**
+         * Channels to send this notification on
+         */
+        channels: Channel[]
 
-		/**
-		 * Title template - supports {{variable}} syntax
-		 */
-		title: string;
+        /**
+         * Title template - supports {{variable}} syntax
+         */
+        title: string
 
-		/**
-		 * Body template - supports {{variable}} syntax
-		 */
-		body?: string;
+        /**
+         * Body template - supports {{variable}} syntax
+         */
+        body?: string
 
-		/**
-		 * Action URL template - supports {{variable}} syntax
-		 */
-		actionUrl?: string;
+        /**
+         * Action URL template - supports {{variable}} syntax
+         */
+        actionUrl?: string
 
-		/**
-		 * Image URL for rich notifications
-		 */
-		imageUrl?: string;
+        /**
+         * Image URL for rich notifications
+         */
+        imageUrl?: string
 
-		/**
-		 * Required data fields for this template
-		 */
-		requiredFields?: string[];
+        /**
+         * Required data fields for this template
+         */
+        requiredFields?: string[]
 
-		/**
-		 * Email-specific config
-		 */
-		email?: EmailTemplateConfig;
+        /**
+         * Email-specific config
+         */
+        email?: EmailTemplateConfig
 
-		/**
-		 * SMS-specific config
-		 */
-		sms?: SmsTemplateConfig;
+        /**
+         * SMS-specific config
+         */
+        sms?: SmsTemplateConfig
 
-		/**
-		 * WhatsApp-specific config
-		 */
-		whatsapp?: WhatsAppTemplateConfig;
+        /**
+         * WhatsApp-specific config
+         */
+        whatsapp?: WhatsAppTemplateConfig
 
-		/**
-		 * Push-specific config
-		 */
-		push?: PushTemplateConfig;
+        /**
+         * Push-specific config
+         */
+        push?: PushTemplateConfig
 
-		/**
-		 * Is this template active?
-		 */
-		isActive?: boolean;
-	}
+        /**
+         * Is this template active?
+         */
+        isActive?: boolean
+    }
 
-	export interface NotificationUpdate {
-		type: "notification" | "unread_count" | "heartbeat";
-		/**
-		 * For notification type
-		 */
-		id?: string;
+    export interface NotificationUpdate {
+        type: "notification" | "unread_count" | "heartbeat"
+        /**
+         * For notification type
+         */
+        id?: string
 
-		notificationType?: string;
-		title?: string;
-		body?: string | null;
-		data?: { [key: string]: any } | null;
-		actionUrl?: string | null;
-		imageUrl?: string | null;
-		isRead?: boolean;
-		createdAt?: string;
-		/**
-		 * For unread_count type
-		 */
-		unreadCount?: number;
-	}
+        notificationType?: string
+        title?: string
+        body?: string | null
+        data?: { [key: string]: any } | null
+        actionUrl?: string | null
+        imageUrl?: string | null
+        isRead?: boolean
+        createdAt?: string
+        /**
+         * For unread_count type
+         */
+        unreadCount?: number
+    }
 
-	export type PushPlatform = "ios" | "android" | "web";
+    export type PushPlatform = "ios" | "android" | "web"
 
-	export interface PushTemplateConfig {
-		/**
-		 * Override title for push
-		 */
-		title?: string;
+    export interface PushTemplateConfig {
+        /**
+         * Override title for push
+         */
+        title?: string
 
-		/**
-		 * Override body for push
-		 */
-		body?: string;
-	}
+        /**
+         * Override body for push
+         */
+        body?: string
+    }
 
-	export interface SmsTemplateConfig {
-		/**
-		 * DLT Template ID (required for sending SMS in India)
-		 */
-		dltTemplateId: string;
+    export interface SmsTemplateConfig {
+        /**
+         * DLT Template ID (required for sending SMS in India)
+         */
+        dltTemplateId: string
 
-		/**
-		 * Override message (uses body if not set)
-		 */
-		message?: string;
-	}
+        /**
+         * Override message (uses body if not set)
+         */
+        message?: string
+    }
 
-	export interface WhatsAppTemplateConfig {
-		/**
-		 * Meta-approved template name
-		 */
-		templateName: string;
+    export interface WhatsAppTemplateConfig {
+        /**
+         * Meta-approved template name
+         */
+        templateName: string
 
-		/**
-		 * Language code (default: "en")
-		 */
-		language?: string;
+        /**
+         * Language code (default: "en")
+         */
+        language?: string
 
-		/**
-		 * Maps WhatsApp positional variables to data keys
-		 * Example: { "1": "amount", "2": "utr" }
-		 * WhatsApp uses {{1}}, {{2}} etc. This maps them to your data.
-		 */
-		variableMapping: { [key: string]: string };
-	}
+        /**
+         * Maps WhatsApp positional variables to data keys
+         * Example: { "1": "amount", "2": "utr" }
+         * WhatsApp uses {{1}}, {{2}} etc. This maps them to your data.
+         */
+        variableMapping: { [key: string]: string }
+    }
 
-	export class ServiceClient {
-		private baseClient: BaseClient;
+    export class ServiceClient {
+        private baseClient: BaseClient
 
-		constructor(baseClient: BaseClient) {
-			this.baseClient = baseClient;
-		}
-	}
+        constructor(baseClient: BaseClient) {
+            this.baseClient = baseClient
+            this.emailitWebhook = this.emailitWebhook.bind(this)
+            this.stream = this.stream.bind(this)
+        }
+
+        /**
+         * =============================================================================
+         * EMAILIT WEBHOOK (Email delivery status)
+         * =============================================================================
+         */
+        public async emailitWebhook(method: "POST", body?: RequestInit["body"], options?: CallParameters): Promise<globalThis.Response> {
+            return this.baseClient.callAPI(method, `/webhooks/emailit`, body, options)
+        }
+
+        /**
+         * =============================================================================
+         * SSE STREAM ENDPOINT
+         * =============================================================================
+         */
+        public async stream(params: {
+    /**
+     * =============================================================================
+     * SSE STREAM ENDPOINT
+     * =============================================================================
+     */
+    lastEventId?: string
+}): Promise<StreamIn<NotificationUpdate>> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                lastEventId: params.lastEventId,
+            })
+
+            return await this.baseClient.createStreamIn(`/notifications/stream`, {query})
+        }
+    }
 }
 
 export namespace ocr {
-	export interface ExtractedOrderData {
-		orderId?: string;
-		merchantName?: string;
-		orderDate?: string;
-		totalAmount?: number;
-		currency?: utils.CurrencyCode;
-		listingName?: string;
-		listingCategory?: string;
-		listingPrice?: number;
-		confidence: number;
-		rawText?: string;
-		/**
-		 * Fraud detection fields
-		 */
-		isSuspicious?: boolean;
+    export interface ExtractedOrderData {
+        orderId?: string
+        merchantName?: string
+        orderDate?: string
+        totalAmount?: number
+        currency?: utils.CurrencyCode
+        listingName?: string
+        listingCategory?: string
+        listingPrice?: number
+        confidence: number
+        rawText?: string
+        /**
+         * Fraud detection fields
+         */
+        isSuspicious?: boolean
 
-		fraudSignals?: string[];
-		imageQualityScore?: number;
-		/**
-		 * AI semantic listing matching fields (only present when campaignListingName provided)
-		 */
-		listingMatchScore?: number;
+        fraudSignals?: string[]
+        imageQualityScore?: number
+        /**
+         * AI semantic listing matching fields (only present when campaignListingName provided)
+         */
+        listingMatchScore?: number
 
-		listingMatchReason?: string;
-		/**
-		 * AI-driven validation results (when validation options provided)
-		 */
-		validationPassed?: boolean;
+        listingMatchReason?: string
+        /**
+         * AI-driven validation results (when validation options provided)
+         */
+        validationPassed?: boolean
 
-		validationErrors?: string[];
-		amountDeviationPercent?: number;
-		orderAgeDays?: number;
-	}
+        validationErrors?: string[]
+        amountDeviationPercent?: number
+        orderAgeDays?: number
+    }
 
-	export class ServiceClient {
-		private baseClient: BaseClient;
+    export class ServiceClient {
+        private baseClient: BaseClient
 
-		constructor(baseClient: BaseClient) {
-			this.baseClient = baseClient;
-		}
-	}
+        constructor(baseClient: BaseClient) {
+            this.baseClient = baseClient
+            this.health = this.health.bind(this)
+        }
+
+        public async health(): Promise<api.HealthResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/ocr/health`)
+            return await resp.json() as api.HealthResponse
+        }
+    }
 }
 
 export namespace storage {
-	export interface DownloadUrlRequest {
-		key: string;
-		folder?: StorageFolder;
-	}
+    export interface DownloadUrlRequest {
+        key: string
+        folder?: StorageFolder
+    }
 
-	export interface DownloadUrlResponse {
-		downloadUrl: string;
-		expiresIn: number;
-	}
+    export interface DownloadUrlResponse {
+        downloadUrl: string
+        expiresIn: number
+    }
 
-	export type StorageFolder = "uploads" | "profile-pictures" | "kyc-documents" | "org-logos";
+    export type StorageFolder = "uploads" | "profile-pictures" | "kyc-documents" | "org-logos"
 
-	export interface UploadUrlRequest {
-		filename: string;
-		contentType?: string;
-		folder: StorageFolder;
-		/**
-		 * Required for org-logos folder - organization ID
-		 */
-		resourceId?: string;
-	}
+    export interface UploadUrlRequest {
+        filename: string
+        contentType?: string
+        folder: StorageFolder
+        /**
+         * Required for org-logos folder - organization ID
+         */
+        resourceId?: string
+    }
 
-	export interface UploadUrlResponse {
-		uploadUrl: string;
-		fileUrl: string;
-		key: string;
-		expiresIn: number;
-	}
+    export interface UploadUrlResponse {
+        uploadUrl: string
+        fileUrl: string
+        key: string
+        expiresIn: number
+    }
 
-	export class ServiceClient {
-		private baseClient: BaseClient;
+    export class ServiceClient {
+        private baseClient: BaseClient
 
-		constructor(baseClient: BaseClient) {
-			this.baseClient = baseClient;
-			this.deleteFile = this.deleteFile.bind(this);
-			this.listFiles = this.listFiles.bind(this);
-			this.previewLogoByDomain = this.previewLogoByDomain.bind(this);
-			this.requestDownloadUrl = this.requestDownloadUrl.bind(this);
-			this.requestUploadUrl = this.requestUploadUrl.bind(this);
-		}
+        constructor(baseClient: BaseClient) {
+            this.baseClient = baseClient
+            this.deleteFile = this.deleteFile.bind(this)
+            this.listFiles = this.listFiles.bind(this)
+            this.previewLogoByDomain = this.previewLogoByDomain.bind(this)
+            this.requestDownloadUrl = this.requestDownloadUrl.bind(this)
+            this.requestUploadUrl = this.requestUploadUrl.bind(this)
+        }
 
-		/**
-		 * Delete file from uploads bucket
-		 */
-		public async deleteFile(key: string): Promise<{
-			success: boolean;
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"DELETE",
-				`/storage/files/${encodeURIComponent(key)}`
-			);
-			return (await resp.json()) as {
-				success: boolean;
-			};
-		}
+        /**
+         * Delete file from uploads bucket
+         */
+        public async deleteFile(key: string): Promise<{
+    success: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("DELETE", `/storage/files/${encodeURIComponent(key)}`)
+            return await resp.json() as {
+    success: boolean
+}
+        }
 
-		/**
-		 * List user's files in uploads bucket
-		 */
-		public async listFiles(): Promise<{
-			files: string[];
-		}> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI("GET", `/storage/files`);
-			return (await resp.json()) as {
-				files: string[];
-			};
-		}
+        /**
+         * List user's files in uploads bucket
+         */
+        public async listFiles(): Promise<{
+    files: string[]
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/storage/files`)
+            return await resp.json() as {
+    files: string[]
+}
+        }
 
-		/**
-		 * Preview logo for a domain (before org creation)
-		 * Returns CompanyEnrich logo URL directly without saving to S3
-		 * Used in org creation form to show logo preview before actually creating the org
-		 */
-		public async previewLogoByDomain(params: { domain: string }): Promise<{
-			logoUrl: string | null;
-			found: boolean;
-			source: "companyenrich" | "fallback";
-		}> {
-			// Convert our params into the objects we need for the request
-			const query = makeRecord<string, string | string[]>({
-				domain: params.domain,
-			});
+        /**
+         * Preview logo for a domain (before org creation)
+         * Returns CompanyEnrich logo URL directly without saving to S3
+         * Used in org creation form to show logo preview before actually creating the org
+         */
+        public async previewLogoByDomain(params: {
+    domain: string
+}): Promise<{
+    logoUrl: string | null
+    found: boolean
+    source: "companyenrich" | "fallback"
+}> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                domain: params.domain,
+            })
 
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI("GET", `/storage/logo-preview`, undefined, {
-				query,
-			});
-			return (await resp.json()) as {
-				logoUrl: string | null;
-				found: boolean;
-				source: "companyenrich" | "fallback";
-			};
-		}
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/storage/logo-preview`, undefined, {query})
+            return await resp.json() as {
+    logoUrl: string | null
+    found: boolean
+    source: "companyenrich" | "fallback"
+}
+        }
 
-		/**
-		 * Download URL endpoint for uploads bucket
-		 * Key format: "uploads/userId/fileId.ext" or just "userId/fileId.ext"
-		 */
-		public async requestDownloadUrl(params: DownloadUrlRequest): Promise<DownloadUrlResponse> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/storage/download-url`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as DownloadUrlResponse;
-		}
+        /**
+         * Download URL endpoint for uploads bucket
+         * Key format: "uploads/userId/fileId.ext" or just "userId/fileId.ext"
+         */
+        public async requestDownloadUrl(params: DownloadUrlRequest): Promise<DownloadUrlResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/storage/download-url`, JSON.stringify(params))
+            return await resp.json() as DownloadUrlResponse
+        }
 
-		/**
-		 * Unified upload URL endpoint - handles all folder types with proper authorization
-		 *
-		 * Folders:
-		 * - uploads: General uploads (receipts, screenshots) - user-scoped
-		 * - profile-pictures: Profile pictures (public CDN) - user-scoped
-		 * - kyc-documents: KYC documents (private) - user-scoped
-		 * - org-logos: Organization logos (public CDN) - requires org permission + resourceId
-		 */
-		public async requestUploadUrl(params: UploadUrlRequest): Promise<UploadUrlResponse> {
-			// Now make the actual call to the API
-			const resp = await this.baseClient.callTypedAPI(
-				"POST",
-				`/storage/upload-url`,
-				JSON.stringify(params)
-			);
-			return (await resp.json()) as UploadUrlResponse;
-		}
-	}
+        /**
+         * Unified upload URL endpoint - handles all folder types with proper authorization
+         * 
+         * Folders:
+         * - uploads: General uploads (receipts, screenshots) - user-scoped
+         * - profile-pictures: Profile pictures (public CDN) - user-scoped
+         * - kyc-documents: KYC documents (private) - user-scoped
+         * - org-logos: Organization logos (public CDN) - requires org permission + resourceId
+         */
+        public async requestUploadUrl(params: UploadUrlRequest): Promise<UploadUrlResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/storage/upload-url`, JSON.stringify(params))
+            return await resp.json() as UploadUrlResponse
+        }
+    }
 }
 
 export namespace actions {
-	export type CampaignEventType =
-		| "SUBMIT_FOR_APPROVAL"
-		| "APPROVE"
-		| "REJECT"
-		| "ACTIVATE"
-		| "PAUSE"
-		| "RESUME"
-		| "END"
-		| "CANCEL"
-		| "ARCHIVE"
-		| "UNARCHIVE"
-		| "EDIT";
+    export type CampaignEventType = "SUBMIT_FOR_APPROVAL" | "APPROVE" | "REJECT" | "ACTIVATE" | "PAUSE" | "RESUME" | "END" | "CANCEL" | "ARCHIVE" | "UNARCHIVE" | "EDIT"
 }
 
 export namespace api {
-	export interface HealthResponse {
-		status: string;
-		service: string;
-	}
+    export interface HealthResponse {
+        status: string
+        service: string
+    }
 
-	export interface HealthResponse {
-		status: string;
-		service: string;
-		providers: { [key: string]: boolean };
-	}
+    export interface HealthResponse {
+        status: string
+        service: string
+        providers: { [key: string]: boolean }
+    }
 }
 
 export namespace db {
-	export type AccountTier = "standard" | "verified" | "premium" | "enterprise";
+    export type AccountTier = "standard" | "verified" | "premium" | "enterprise"
 
-	export type AdminRole =
-		| "super_admin"
-		| "admin"
-		| "manager"
-		| "analyst"
-		| "support"
-		| "content_moderator";
+    export type AdminRole = "super_admin" | "admin" | "manager" | "analyst" | "support" | "content_moderator"
 
-	export type AffiliateSource =
-		| "amazon_associates"
-		| "flipkart_affiliate"
-		| "myntra_affiliate"
-		| "cuelinks"
-		| "vcommission"
-		| "earnkaro"
-		| "admitad"
-		| "custom";
+    export type AffiliateSource = "amazon_associates" | "flipkart_affiliate" | "myntra_affiliate" | "cuelinks" | "vcommission" | "earnkaro" | "admitad" | "custom"
 
-	export type CampaignStatus =
-		| "draft"
-		| "pending_approval"
-		| "approved"
-		| "active"
-		| "paused"
-		| "ended"
-		| "cancelled"
-		| "rejected"
-		| "archived";
+    export type CampaignStatus = "draft" | "pending_approval" | "approved" | "active" | "paused" | "ended" | "cancelled" | "rejected" | "archived"
 
-	export type CampaignType = "cashback";
+    export type CampaignType = "cashback"
 
-	export interface CursorPaginationParams {
-		cursor?: string;
-		limit?: number;
-	}
+    export interface CursorPaginationParams {
+        cursor?: string
+        limit?: number
+    }
 
-	export type EnrollmentStatus =
-		| "awaiting_submission"
-		| "awaiting_review"
-		| "changes_requested"
-		| "approved"
-		| "permanently_rejected"
-		| "cancelled"
-		| "expired";
+    export type EnrollmentStatus = "awaiting_submission" | "awaiting_review" | "changes_requested" | "approved" | "permanently_rejected" | "cancelled" | "expired"
 
-	export type InvoiceStatus =
-		| "draft"
-		| "sent"
-		| "viewed"
-		| "paid"
-		| "overdue"
-		| "cancelled"
-		| "unpaid"
-		| "partially_paid";
+    export type InvoiceStatus = "draft" | "sent" | "viewed" | "paid" | "overdue" | "cancelled" | "unpaid" | "partially_paid"
 
-	export type ListingType =
-		| "physical_product"
-		| "mobile_app"
-		| "food_restaurant"
-		| "service"
-		| "event"
-		| "course"
-		| "financial_product"
-		| "travel"
-		| "entertainment"
-		| "brand";
+    export type ListingType = "physical_product" | "mobile_app" | "food_restaurant" | "service" | "event" | "course" | "financial_product" | "travel" | "entertainment" | "brand"
 
-	export interface OrganizationSetupProgress {
-		/**
-		 * GST verified via SurePass (REQUIRED for activation)
-		 */
-		gstVerified: boolean;
+    export interface OrganizationSetupProgress {
+        /**
+         * GST verified via SurePass (REQUIRED for activation)
+         */
+        gstVerified: boolean
 
-		/**
-		 * Ledger wallet created (REQUIRED for activation)
-		 */
-		walletCreated: boolean;
+        /**
+         * Ledger wallet created (REQUIRED for activation)
+         */
+        walletCreated: boolean
 
-		/**
-		 * Razorpay virtual account created (OPTIONAL - for receiving deposits)
-		 */
-		depositAccountCreated: boolean;
+        /**
+         * Razorpay virtual account created (OPTIONAL - for receiving deposits)
+         */
+        depositAccountCreated: boolean
 
-		/**
-		 * Zoho Books customer synced (OPTIONAL - for invoicing)
-		 */
-		zohoSynced: boolean;
+        /**
+         * Zoho Books customer synced (OPTIONAL - for invoicing)
+         */
+        zohoSynced: boolean
 
-		/**
-		 * Website enrichment completed (OPTIONAL - auto-fills description, industry, socials)
-		 */
-		enrichmentCompleted: boolean;
-	}
+        /**
+         * Website enrichment completed (OPTIONAL - auto-fills description, industry, socials)
+         */
+        enrichmentCompleted: boolean
+    }
 
-	export interface OrganizationSetupProgress {
-		/**
-		 * GST verified via SurePass (REQUIRED for activation)
-		 */
-		gstVerified: boolean;
+    export interface OrganizationSetupProgress {
+        /**
+         * GST verified via SurePass (REQUIRED for activation)
+         */
+        gstVerified: boolean
 
-		/**
-		 * Ledger account created (REQUIRED for activation)
-		 */
-		walletCreated: boolean;
+        /**
+         * Ledger account created (REQUIRED for activation)
+         */
+        walletCreated: boolean
 
-		/**
-		 * Razorpay virtual account created (OPTIONAL - for receiving deposits)
-		 */
-		depositAccountCreated: boolean;
+        /**
+         * Razorpay virtual account created (OPTIONAL - for receiving deposits)
+         */
+        depositAccountCreated: boolean
 
-		/**
-		 * Zoho Books customer synced (OPTIONAL - for invoicing)
-		 */
-		zohoSynced: boolean;
+        /**
+         * Zoho Books customer synced (OPTIONAL - for invoicing)
+         */
+        zohoSynced: boolean
 
-		/**
-		 * Website enrichment completed (OPTIONAL - auto-fills description, industry, socials)
-		 */
-		enrichmentCompleted: boolean;
-	}
+        /**
+         * Website enrichment completed (OPTIONAL - auto-fills description, industry, socials)
+         */
+        enrichmentCompleted: boolean
+    }
 
-	export type OrganizationStatus = "onboarding" | "active" | "suspended";
+    export type OrganizationStatus = "onboarding" | "active" | "suspended"
 
-	export type PaymentMode = "prefund" | "post_submission";
+    export type PaymentMode = "prefund" | "post_submission"
 
-	export interface SuccessResponse {
-		success: true;
-		message?: string;
-	}
+    export interface SuccessResponse {
+        success: true
+        message?: string
+    }
 
-	export type TaskCategory = "social" | "review" | "photo" | "video" | "feedback";
+    export type TaskCategory = "social" | "review" | "photo" | "video" | "feedback"
 
-	export interface TaskRequirements {
-		/**
-		 * Hashtags that MUST be included in the post
-		 */
-		requiredHashtags?: string[];
+    export interface TaskRequirements {
+        /**
+         * Hashtags that MUST be included in the post
+         */
+        requiredHashtags?: string[]
 
-		/**
-		 * Handles that MUST be mentioned/tagged
-		 */
-		requiredMentions?: string[];
+        /**
+         * Handles that MUST be mentioned/tagged
+         */
+        requiredMentions?: string[]
 
-		/**
-		 * Minimum star rating required (1-5)
-		 */
-		minRating?: number;
+        /**
+         * Minimum star rating required (1-5)
+         */
+        minRating?: number
 
-		/**
-		 * Minimum word count for review text
-		 */
-		minWordCount?: number;
+        /**
+         * Minimum word count for review text
+         */
+        minWordCount?: number
 
-		/**
-		 * Must include photos IN the review itself
-		 */
-		requirePhotosInReview?: boolean;
+        /**
+         * Must include photos IN the review itself
+         */
+        requirePhotosInReview?: boolean
 
-		/**
-		 * Must include video IN the review itself
-		 */
-		requireVideosInReview?: boolean;
+        /**
+         * Must include video IN the review itself
+         */
+        requireVideosInReview?: boolean
 
-		/**
-		 * Minimum number of photos to submit
-		 */
-		minPhotos?: number;
+        /**
+         * Minimum number of photos to submit
+         */
+        minPhotos?: number
 
-		/**
-		 * Minimum number of videos to submit
-		 */
-		minVideos?: number;
+        /**
+         * Minimum number of videos to submit
+         */
+        minVideos?: number
 
-		/**
-		 * Minimum video duration in seconds
-		 */
-		minDuration?: number;
+        /**
+         * Minimum video duration in seconds
+         */
+        minDuration?: number
 
-		/**
-		 * Maximum video duration in seconds
-		 */
-		maxDuration?: number;
+        /**
+         * Maximum video duration in seconds
+         */
+        maxDuration?: number
 
-		/**
-		 * Additional text instructions from brand/seller
-		 */
-		sellerInstructions?: string;
-	}
+        /**
+         * Additional text instructions from brand/seller
+         */
+        sellerInstructions?: string
+    }
 
-	export interface TaskRequirements {
-		/**
-		 * Social Media Requirements
-		 */
-		requiredHashtags?: string[];
+    export interface TaskRequirements {
+        /**
+         * Social Media Requirements
+         */
+        requiredHashtags?: string[]
 
-		requiredMentions?: string[];
-		/**
-		 * Review Requirements
-		 */
-		minRating?: number;
+        requiredMentions?: string[]
+        /**
+         * Review Requirements
+         */
+        minRating?: number
 
-		minWordCount?: number;
-		requirePhotosInReview?: boolean;
-		requireVideosInReview?: boolean;
-		/**
-		 * Media Requirements
-		 */
-		minPhotos?: number;
+        minWordCount?: number
+        requirePhotosInReview?: boolean
+        requireVideosInReview?: boolean
+        /**
+         * Media Requirements
+         */
+        minPhotos?: number
 
-		minVideos?: number;
-		minDuration?: number;
-		maxDuration?: number;
-		/**
-		 * Seller Instructions
-		 */
-		sellerInstructions?: string;
-	}
+        minVideos?: number
+        minDuration?: number
+        maxDuration?: number
+        /**
+         * Seller Instructions
+         */
+        sellerInstructions?: string
+    }
 
-	export type TaskTemplateStatus = "active" | "inactive" | "deprecated";
+    export type TaskTemplateStatus = "active" | "inactive" | "deprecated"
 
-	export type WithdrawalStatus =
-		| "otp_pending"
-		| "pending"
-		| "approved"
-		| "rejected"
-		| "queued"
-		| "processing"
-		| "completed"
-		| "failed"
-		| "cancelled"
-		| "reversed";
+    export type WithdrawalStatus = "otp_pending" | "pending" | "approved" | "rejected" | "queued" | "processing" | "completed" | "failed" | "cancelled" | "reversed"
 }
 
 export namespace endpoints {
-	export interface AccountInfoData {
-		providerId?: string;
-		providerAccountId?: string;
-		accessToken?: string;
-		refreshToken?: string;
-		accessTokenExpiresAt?: string;
-		scope?: string;
-		idToken?: string;
-		profileUrl?: string;
-		username?: string;
-		firstName?: string;
-		lastName?: string;
-		displayName?: string;
-		locale?: string;
-		timezone?: string;
-		verifiedEmail?: boolean;
-		createdAt?: string;
-		updatedAt?: string;
-	}
+    export interface AccountInfoData {
+        providerId?: string
+        providerAccountId?: string
+        accessToken?: string
+        refreshToken?: string
+        accessTokenExpiresAt?: string
+        scope?: string
+        idToken?: string
+        profileUrl?: string
+        username?: string
+        firstName?: string
+        lastName?: string
+        displayName?: string
+        locale?: string
+        timezone?: string
+        verifiedEmail?: boolean
+        createdAt?: string
+        updatedAt?: string
+    }
 
-	export interface AdminUpdateUserAdditionalFields {
-		phone?: string;
-		address?: string;
-		city?: string;
-		state?: string;
-		country?: string;
-		postalCode?: string;
-		timezone?: string;
-		locale?: string;
-		notes?: string;
-		department?: string;
-		title?: string;
-		employeeId?: string;
-		managerId?: string;
-		startDate?: string;
-		customField1?: string;
-		customField2?: string;
-		customField3?: string;
-	}
+    export interface AdminUpdateUserAdditionalFields {
+        phone?: string
+        address?: string
+        city?: string
+        state?: string
+        country?: string
+        postalCode?: string
+        timezone?: string
+        locale?: string
+        notes?: string
+        department?: string
+        title?: string
+        employeeId?: string
+        managerId?: string
+        startDate?: string
+        customField1?: string
+        customField2?: string
+        customField3?: string
+    }
 
-	export interface AdminUserData {
-		phone?: string;
-		address?: string;
-		city?: string;
-		state?: string;
-		country?: string;
-		postalCode?: string;
-		timezone?: string;
-		locale?: string;
-		notes?: string;
-		department?: string;
-		title?: string;
-		employeeId?: string;
-		managerId?: string;
-		startDate?: string;
-		customField1?: string;
-		customField2?: string;
-		customField3?: string;
-	}
+    export interface AdminUserData {
+        phone?: string
+        address?: string
+        city?: string
+        state?: string
+        country?: string
+        postalCode?: string
+        timezone?: string
+        locale?: string
+        notes?: string
+        department?: string
+        title?: string
+        employeeId?: string
+        managerId?: string
+        startDate?: string
+        customField1?: string
+        customField2?: string
+        customField3?: string
+    }
 
-	export interface CreateOrganizationRequest {
-		/**
-		 * Required fields
-		 */
-		name: string;
+    export interface CreateOrganizationRequest {
+        /**
+         * Required fields
+         */
+        name: string
 
-		/**
-		 * Optional basic fields
-		 */
-		slug?: string;
+        /**
+         * Optional basic fields
+         */
+        slug?: string
 
-		logo?: string;
-		description?: string;
-		website?: string;
-		/**
-		 * Business details
-		 */
-		businessType?: string;
+        logo?: string
+        description?: string
+        website?: string
+        /**
+         * Business details
+         */
+        businessType?: string
 
-		industryCategory?: string;
-		contactPerson?: string;
-		phoneNumber?: string;
-		/**
-		 * Address
-		 */
-		address?: string;
+        industryCategory?: string
+        contactPerson?: string
+        phoneNumber?: string
+        /**
+         * Address
+         */
+        address?: string
 
-		city?: string;
-		state?: string;
-		country?: string;
-		postalCode?: string;
-		/**
-		 * GST (ALWAYS pre-verified by frontend via /gst/verify-preview)
-		 */
-		gstNumber: string;
+        city?: string
+        state?: string
+        country?: string
+        postalCode?: string
+        /**
+         * GST (ALWAYS pre-verified by frontend via /gst/verify-preview)
+         */
+        gstNumber: string
 
-		gstLegalName: string;
-		gstTradeName?: string;
-		/**
-		 * Better Auth options
-		 */
-		keepCurrentActiveOrganization?: boolean;
+        gstLegalName: string
+        gstTradeName?: string
+        /**
+         * Better Auth options
+         */
+        keepCurrentActiveOrganization?: boolean
 
-		/**
-		 * WebAuthn assertion response — required when phoneNumber is provided (identity verification)
-		 */
-		passkeyResponse?: any;
+        /**
+         * WebAuthn assertion response — required when phoneNumber is provided (identity verification)
+         */
+        passkeyResponse?: any
 
-		/**
-		 * Challenge ID from GET /auth/passkey/reauth-options — required when passkeyResponse is provided
-		 */
-		challengeId?: string;
-	}
+        /**
+         * Challenge ID from GET /auth/passkey/reauth-options — required when passkeyResponse is provided
+         */
+        challengeId?: string
+    }
 
-	export interface CreateOrganizationResponse {
-		members: types.MemberResponse[];
-		/**
-		 * Organization status: onboarding → active → suspended
-		 */
-		status: string;
+    export interface CreateOrganizationResponse {
+        members: types.MemberResponse[]
+        /**
+         * Organization status: onboarding → active → suspended
+         */
+        status: string
 
-		/**
-		 * Setup progress tracking
-		 */
-		setupProgress: {
-			gstVerified: boolean;
-			walletCreated: boolean;
-			depositAccountCreated: boolean;
-			zohoSynced: boolean;
-			enrichmentCompleted: boolean;
-		};
+        /**
+         * Setup progress tracking
+         */
+        setupProgress: {
+            gstVerified: boolean
+            walletCreated: boolean
+            depositAccountCreated: boolean
+            zohoSynced: boolean
+            enrichmentCompleted: boolean
+        }
 
-		/**
-		 * Whether org requires manual admin review (e.g., duplicate GST)
-		 */
-		requiresManualReview: boolean;
+        /**
+         * Whether org requires manual admin review (e.g., duplicate GST)
+         */
+        requiresManualReview: boolean
 
-		id: string;
-		name: string;
-		slug: string;
-		logo: string | null;
-		createdAt: string;
-	}
+        id: string
+        name: string
+        slug: string
+        logo: string | null
+        createdAt: string
+    }
 
-	export interface DeviceSession {
-		id: string;
-		userId: string;
-		token: string;
-		expiresAt: string;
-		createdAt: string;
-		updatedAt: string;
-		ipAddress: string | null;
-		userAgent: string | null;
-		current: boolean;
-		/**
-		 * Device info fields
-		 */
-		device?: string;
+    export interface DeviceSession {
+        id: string
+        userId: string
+        token: string
+        expiresAt: string
+        createdAt: string
+        updatedAt: string
+        ipAddress: string | null
+        userAgent: string | null
+        current: boolean
+        /**
+         * Device info fields
+         */
+        device?: string
 
-		browser?: string;
-		location?: string;
-		lastActive?: string;
-		iconType?: "computer" | "smartphone" | "mac";
-	}
+        browser?: string
+        location?: string
+        lastActive?: string
+        iconType?: "computer" | "smartphone" | "mac"
+    }
 
-	export interface IdToken {
-		token: string;
-		nonce?: string;
-		accessToken?: string;
-		refreshToken?: string;
-		expiresAt?: number;
-	}
+    export interface IdToken {
+        token: string
+        nonce?: string
+        accessToken?: string
+        refreshToken?: string
+        expiresAt?: number
+    }
 
-	export interface PasskeyRecord {
-		id: string;
-		name?: string;
-		publicKey: string;
-		userId: string;
-		credentialID: string;
-		counter: number;
-		deviceType: string;
-		backedUp: boolean;
-		transports?: string;
-		createdAt: string;
-	}
+    export interface PasskeyRecord {
+        id: string
+        name?: string
+        publicKey: string
+        userId: string
+        credentialID: string
+        counter: number
+        deviceType: string
+        backedUp: boolean
+        transports?: string
+        createdAt: string
+    }
 
-	export interface SocialSignInResponse {
-		user?: types.UserResponse;
-		token?: string;
-		url?: string;
-		redirect: boolean;
-	}
+    export interface SocialSignInResponse {
+        user?: types.UserResponse
+        token?: string
+        url?: string
+        redirect: boolean
+    }
 }
 
 export namespace instagram {
-	export interface SocialProfiles {
-		instagram?: StoredInstagramProfile;
-		youtube?: youtube.StoredYouTubeProfile;
-		twitter?: StoredTwitterProfile;
-	}
+    export interface SocialProfiles {
+        instagram?: StoredInstagramProfile
+        youtube?: youtube.StoredYouTubeProfile
+        twitter?: StoredTwitterProfile
+    }
 
-	export interface StoredInstagramProfile {
-		/**
-		 * Instagram user ID
-		 */
-		userId: string;
+    export interface StoredInstagramProfile {
+        /**
+         * Instagram user ID
+         */
+        userId: string
 
-		/**
-		 * Instagram username (handle without @)
-		 */
-		username: string;
+        /**
+         * Instagram username (handle without @)
+         */
+        username: string
 
-		/**
-		 * Display name
-		 */
-		name?: string;
+        /**
+         * Display name
+         */
+        name?: string
 
-		/**
-		 * Bio/description
-		 */
-		biography?: string;
+        /**
+         * Bio/description
+         */
+        biography?: string
 
-		/**
-		 * Profile picture URL
-		 */
-		profilePictureUrl?: string;
+        /**
+         * Profile picture URL
+         */
+        profilePictureUrl?: string
 
-		/**
-		 * Number of followers
-		 */
-		followersCount: number;
+        /**
+         * Number of followers
+         */
+        followersCount: number
 
-		/**
-		 * Number of accounts following
-		 */
-		followsCount?: number;
+        /**
+         * Number of accounts following
+         */
+        followsCount?: number
 
-		/**
-		 * Number of posts/media
-		 */
-		mediaCount: number;
+        /**
+         * Number of posts/media
+         */
+        mediaCount: number
 
-		/**
-		 * Website link
-		 */
-		website?: string;
+        /**
+         * Website link
+         */
+        website?: string
 
-		/**
-		 * Account type (business/creator)
-		 */
-		accountType?: "BUSINESS" | "MEDIA_CREATOR";
+        /**
+         * Account type (business/creator)
+         */
+        accountType?: "BUSINESS" | "MEDIA_CREATOR"
 
-		/**
-		 * Is verified (blue checkmark)
-		 */
-		isVerified: boolean;
+        /**
+         * Is verified (blue checkmark)
+         */
+        isVerified: boolean
 
-		/**
-		 * Engagement metrics calculated from recent posts
-		 */
-		engagementMetrics?: {
-			/**
-			 * Total likes across recent posts
-			 */
-			totalLikes: number;
+        /**
+         * Engagement metrics calculated from recent posts
+         */
+        engagementMetrics?: {
+            /**
+             * Total likes across recent posts
+             */
+            totalLikes: number
 
-			/**
-			 * Total comments across recent posts
-			 */
-			totalComments: number;
+            /**
+             * Total comments across recent posts
+             */
+            totalComments: number
 
-			/**
-			 * Number of posts analyzed
-			 */
-			mediaCount: number;
+            /**
+             * Number of posts analyzed
+             */
+            mediaCount: number
 
-			/**
-			 * Engagement rate: (likes + comments) / followers * 100
-			 */
-			engagementRate: number;
-		};
+            /**
+             * Engagement rate: (likes + comments) / followers * 100
+             */
+            engagementRate: number
+        }
 
-		/**
-		 * When this data was last fetched
-		 */
-		lastSyncedAt: string;
+        /**
+         * When this data was last fetched
+         */
+        lastSyncedAt: string
 
-		/**
-		 * OAuth provider account ID (from Better Auth accounts table)
-		 */
-		providerAccountId?: string;
-	}
+        /**
+         * OAuth provider account ID (from Better Auth accounts table)
+         */
+        providerAccountId?: string
+    }
 
-	export interface StoredTwitterProfile {
-		userId: string;
-		username: string;
-		name?: string;
-		biography?: string;
-		profilePictureUrl?: string;
-		followersCount: number;
-		followingCount?: number;
-		tweetCount?: number;
-		isVerified: boolean;
-		lastSyncedAt: string;
-		providerAccountId?: string;
-	}
+    export interface StoredTwitterProfile {
+        userId: string
+        username: string
+        name?: string
+        biography?: string
+        profilePictureUrl?: string
+        followersCount: number
+        followingCount?: number
+        tweetCount?: number
+        isVerified: boolean
+        lastSyncedAt: string
+        providerAccountId?: string
+    }
 }
 
 export namespace internal {
-	export type AdminAction = BrandAction | "cancel" | "extend";
+    export type AdminAction = BrandAction | "cancel" | "extend"
 
-	export type BrandAction = "approve" | "request_changes" | "reject";
+    export type BrandAction = "approve" | "request_changes" | "reject"
 
-	export type CreatorAction = "submit" | "resubmit" | "cancel";
+    export type CreatorAction = "submit" | "resubmit" | "cancel"
 
-	export interface SetupProgressResponse {
-		organizationId: string;
-		status: string;
-		isComplete: boolean;
-		isActivated: boolean;
-		steps: SetupStep[];
-		completedCount: number;
-		totalCount: number;
-		requiredComplete: boolean;
-	}
+    export interface SetupProgressResponse {
+        organizationId: string
+        status: string
+        isComplete: boolean
+        isActivated: boolean
+        steps: SetupStep[]
+        completedCount: number
+        totalCount: number
+        requiredComplete: boolean
+    }
 
-	export interface SetupProgressUpdate {
-		/**
-		 * Current setup step status
-		 */
-		progress: db.OrganizationSetupProgress;
+    export interface SetupProgressUpdate {
+        /**
+         * Current setup step status
+         */
+        progress: db.OrganizationSetupProgress
 
-		/**
-		 * Overall status: onboarding, active, suspended
-		 */
-		status: string;
+        /**
+         * Overall status: onboarding, active, suspended
+         */
+        status: string
 
-		/**
-		 * Whether all required steps are complete
-		 */
-		isComplete: boolean;
+        /**
+         * Whether all required steps are complete
+         */
+        isComplete: boolean
 
-		/**
-		 * Step that just completed (if any)
-		 */
-		completedStep?: "gst" | "wallet" | "deposit" | "zoho" | "enrichment";
+        /**
+         * Step that just completed (if any)
+         */
+        completedStep?: "gst" | "wallet" | "deposit" | "zoho" | "enrichment"
 
-		/**
-		 * Step that failed (if any)
-		 */
-		failedStep?: "gst" | "wallet" | "deposit" | "zoho" | "enrichment";
+        /**
+         * Step that failed (if any)
+         */
+        failedStep?: "gst" | "wallet" | "deposit" | "zoho" | "enrichment"
 
-		/**
-		 * Error message if a step failed
-		 */
-		error?: string;
+        /**
+         * Error message if a step failed
+         */
+        error?: string
 
-		/**
-		 * Timestamp of update
-		 */
-		timestamp: string;
-	}
+        /**
+         * Timestamp of update
+         */
+        timestamp: string
+    }
 
-	export interface SetupStep {
-		key: string;
-		label: string;
-		completed: boolean;
-		required: boolean;
-	}
+    export interface SetupStep {
+        key: string
+        label: string
+        completed: boolean
+        required: boolean
+    }
 }
 
 export namespace types {
-	export interface ActiveMemberResponse {
-		member: MemberResponse | null;
-	}
+    export interface ActiveMemberResponse {
+        member: MemberResponse | null
+    }
 
-	export interface InvitationResponse {
-		id: string;
-		email: string;
-		organizationId: string;
-		role: string;
-		status: string;
-		inviterId: string;
-		expiresAt: string;
-		createdAt: string;
-	}
+    export interface InvitationResponse {
+        id: string
+        email: string
+        organizationId: string
+        role: string
+        status: string
+        inviterId: string
+        expiresAt: string
+        createdAt: string
+    }
 
-	export interface InvitationsListResponse {
-		invitations: InvitationResponse[];
-	}
+    export interface InvitationsListResponse {
+        invitations: InvitationResponse[]
+    }
 
-	export interface LinkedAccountResponse {
-		id: string;
-		providerId: string;
-		accountId: string;
-		userId: string;
-		scopes: string[];
-		createdAt: string;
-		updatedAt: string;
-	}
+    export interface LinkedAccountResponse {
+        id: string
+        providerId: string
+        accountId: string
+        userId: string
+        scopes: string[]
+        createdAt: string
+        updatedAt: string
+    }
 
-	export interface MemberResponse {
-		id: string;
-		userId: string;
-		organizationId: string;
-		role: string;
-		createdAt: string;
-		/**
-		 * User info (optional - populated when available)
-		 */
-		user?: {
-			id: string;
-			name: string;
-			email: string;
-			image?: string | null;
-		};
-	}
+    export interface MemberResponse {
+        id: string
+        userId: string
+        organizationId: string
+        role: string
+        createdAt: string
+        /**
+         * User info (optional - populated when available)
+         */
+        user?: {
+            id: string
+            name: string
+            email: string
+            image?: string | null
+        }
+    }
 
-	export interface RoleResponse {
-		id: string;
-		role: string;
-		permission: { [key: string]: string[] };
-		organizationId: string;
-		createdAt: string;
-		updatedAt?: string;
-	}
+    export interface RoleResponse {
+        id: string
+        role: string
+        permission: { [key: string]: string[] }
+        organizationId: string
+        createdAt: string
+        updatedAt?: string
+    }
 
-	export interface SessionResponse {
-		id: string;
-		token: string;
-		userId: string;
-		expiresAt: string;
-		createdAt: string;
-		updatedAt: string;
-		ipAddress: string | null;
-		userAgent: string | null;
-		/**
-		 * Device info fields
-		 */
-		device?: string;
+    export interface SessionResponse {
+        id: string
+        token: string
+        userId: string
+        expiresAt: string
+        createdAt: string
+        updatedAt: string
+        ipAddress: string | null
+        userAgent: string | null
+        /**
+         * Device info fields
+         */
+        device?: string
 
-		browser?: string;
-		location?: string;
-		lastActive?: string;
-		current?: boolean;
-		iconType?: "computer" | "smartphone" | "mac";
-	}
+        browser?: string
+        location?: string
+        lastActive?: string
+        current?: boolean
+        iconType?: "computer" | "smartphone" | "mac"
+    }
 
-	export interface UserResponse {
-		id: string;
-		email: string;
-		name: string;
-		image: string | null;
-		emailVerified: boolean;
-		createdAt: string;
-		updatedAt: string;
-		role: string;
-		banned: boolean;
-		banReason: string | null;
-		banExpires: string | null;
-		twoFactorEnabled: boolean;
-	}
+    export interface UserResponse {
+        id: string
+        email: string
+        name: string
+        image: string | null
+        emailVerified: boolean
+        createdAt: string
+        updatedAt: string
+        role: string
+        banned: boolean
+        banReason: string | null
+        banExpires: string | null
+        twoFactorEnabled: boolean
+    }
 }
 
 export namespace utils {
-	export type CurrencyCode = "INR" | "USD" | "EUR" | "GBP";
+    export type CurrencyCode = "INR" | "USD" | "EUR" | "GBP"
 
-	export interface ListingImageItem {
-		id: string;
-		imageUrl: string;
-		sortOrder: number;
-		altText?: string;
-		isPrimary: boolean;
-	}
+    export interface ListingImageItem {
+        id: string
+        imageUrl: string
+        sortOrder: number
+        altText?: string
+        isPrimary: boolean
+    }
 }
 
 export namespace youtube {
-	export interface StoredYouTubeProfile {
-		/**
-		 * YouTube channel ID
-		 */
-		channelId: string;
+    export interface StoredYouTubeProfile {
+        /**
+         * YouTube channel ID
+         */
+        channelId: string
 
-		/**
-		 * Channel title/name
-		 */
-		channelTitle: string;
+        /**
+         * Channel title/name
+         */
+        channelTitle: string
 
-		/**
-		 * Custom URL (handle without @)
-		 */
-		customUrl?: string;
+        /**
+         * Custom URL (handle without @)
+         */
+        customUrl?: string
 
-		/**
-		 * Channel description
-		 */
-		description?: string;
+        /**
+         * Channel description
+         */
+        description?: string
 
-		/**
-		 * Thumbnail URL
-		 */
-		thumbnailUrl?: string;
+        /**
+         * Thumbnail URL
+         */
+        thumbnailUrl?: string
 
-		/**
-		 * Number of subscribers
-		 */
-		subscriberCount: number;
+        /**
+         * Number of subscribers
+         */
+        subscriberCount: number
 
-		/**
-		 * Is subscriber count hidden
-		 */
-		hiddenSubscriberCount: boolean;
+        /**
+         * Is subscriber count hidden
+         */
+        hiddenSubscriberCount: boolean
 
-		/**
-		 * Number of videos
-		 */
-		videoCount: number;
+        /**
+         * Number of videos
+         */
+        videoCount: number
 
-		/**
-		 * Total view count
-		 */
-		viewCount?: number;
+        /**
+         * Total view count
+         */
+        viewCount?: number
 
-		/**
-		 * Country
-		 */
-		country?: string;
+        /**
+         * Country
+         */
+        country?: string
 
-		/**
-		 * When this data was last fetched
-		 */
-		lastSyncedAt: string;
+        /**
+         * When this data was last fetched
+         */
+        lastSyncedAt: string
 
-		/**
-		 * OAuth provider account ID (from Better Auth accounts table)
-		 */
-		providerAccountId?: string;
-	}
+        /**
+         * OAuth provider account ID (from Better Auth accounts table)
+         */
+        providerAccountId?: string
+    }
 }
 
+
+
 function encodeQuery(parts: Record<string, string | string[]>): string {
-	const pairs: string[] = [];
-	for (const key in parts) {
-		const val = (Array.isArray(parts[key]) ? parts[key] : [parts[key]]) as string[];
-		for (const v of val) {
-			pairs.push(`${key}=${encodeURIComponent(v)}`);
-		}
-	}
-	return pairs.join("&");
+    const pairs: string[] = []
+    for (const key in parts) {
+        const val = (Array.isArray(parts[key]) ?  parts[key] : [parts[key]]) as string[]
+        for (const v of val) {
+            pairs.push(`${key}=${encodeURIComponent(v)}`)
+        }
+    }
+    return pairs.join("&")
 }
 
 // makeRecord takes a record and strips any undefined values from it,
 // and returns the same record with a narrower type.
-// @ts-expect-error - TS ignore because makeRecord is not always used
-function makeRecord<K extends string | number | symbol, V>(
-	record: Record<K, V | undefined>
-): Record<K, V> {
-	for (const key in record) {
-		if (record[key] === undefined) {
-			delete record[key];
-		}
-	}
-	return record as Record<K, V>;
+// @ts-ignore - TS ignore because makeRecord is not always used
+function makeRecord<K extends string | number | symbol, V>(record: Record<K, V | undefined>): Record<K, V> {
+    for (const key in record) {
+        if (record[key] === undefined) {
+            delete record[key]
+        }
+    }
+    return record as Record<K, V>
 }
 
 function encodeWebSocketHeaders(headers: Record<string, string>) {
-	// url safe, no pad
-	const base64encoded = btoa(JSON.stringify(headers))
-		.replaceAll("=", "")
-		.replaceAll("+", "-")
-		.replaceAll("/", "_");
-	return "encore.dev.headers." + base64encoded;
+    // url safe, no pad
+    const base64encoded = btoa(JSON.stringify(headers))
+      .replaceAll("=", "")
+      .replaceAll("+", "-")
+      .replaceAll("/", "_");
+    return "encore.dev.headers." + base64encoded;
 }
 
 class WebSocketConnection {
-	public ws: WebSocket;
+    public ws: WebSocket;
 
-	private hasUpdateHandlers: (() => void)[] = [];
+    private hasUpdateHandlers: (() => void)[] = [];
 
-	constructor(url: string, headers?: Record<string, string>) {
-		const protocols = ["encore-ws"];
-		if (headers) {
-			protocols.push(encodeWebSocketHeaders(headers));
-		}
+    constructor(url: string, headers?: Record<string, string>) {
+        let protocols = ["encore-ws"];
+        if (headers) {
+            protocols.push(encodeWebSocketHeaders(headers))
+        }
 
-		this.ws = new WebSocket(url, protocols);
+        this.ws = new WebSocket(url, protocols)
 
-		this.on("error", () => {
-			this.resolveHasUpdateHandlers();
-		});
+        this.on("error", () => {
+            this.resolveHasUpdateHandlers();
+        });
 
-		this.on("close", () => {
-			this.resolveHasUpdateHandlers();
-		});
-	}
+        this.on("close", () => {
+            this.resolveHasUpdateHandlers();
+        });
+    }
 
-	resolveHasUpdateHandlers() {
-		const handlers = this.hasUpdateHandlers;
-		this.hasUpdateHandlers = [];
+    resolveHasUpdateHandlers() {
+        const handlers = this.hasUpdateHandlers;
+        this.hasUpdateHandlers = [];
 
-		for (const handler of handlers) {
-			handler();
-		}
-	}
+        for (const handler of handlers) {
+            handler()
+        }
+    }
 
-	async hasUpdate() {
-		// await until a new message have been received, or the socket is closed
-		await new Promise((resolve) => {
-			this.hasUpdateHandlers.push(() => resolve(null));
-		});
-	}
+    async hasUpdate() {
+        // await until a new message have been received, or the socket is closed
+        await new Promise((resolve) => {
+            this.hasUpdateHandlers.push(() => resolve(null))
+        });
+    }
 
-	on(type: "error" | "close" | "message" | "open", handler: (event: any) => void) {
-		this.ws.addEventListener(type, handler);
-	}
+    on(type: "error" | "close" | "message" | "open", handler: (event: any) => void) {
+        this.ws.addEventListener(type, handler);
+    }
 
-	off(type: "error" | "close" | "message" | "open", handler: (event: any) => void) {
-		this.ws.removeEventListener(type, handler);
-	}
+    off(type: "error" | "close" | "message" | "open", handler: (event: any) => void) {
+        this.ws.removeEventListener(type, handler);
+    }
 
-	close() {
-		this.ws.close();
-	}
+    close() {
+        this.ws.close();
+    }
 }
 
 export class StreamInOut<Request, Response> {
-	public socket: WebSocketConnection;
-	private buffer: Response[] = [];
+    public socket: WebSocketConnection;
+    private buffer: Response[] = [];
 
-	constructor(url: string, headers?: Record<string, string>) {
-		this.socket = new WebSocketConnection(url, headers);
-		this.socket.on("message", (event: any) => {
-			this.buffer.push(JSON.parse(event.data));
-			this.socket.resolveHasUpdateHandlers();
-		});
-	}
+    constructor(url: string, headers?: Record<string, string>) {
+        this.socket = new WebSocketConnection(url, headers);
+        this.socket.on("message", (event: any) => {
+            this.buffer.push(JSON.parse(event.data));
+            this.socket.resolveHasUpdateHandlers();
+        });
+    }
 
-	close() {
-		this.socket.close();
-	}
+    close() {
+        this.socket.close();
+    }
 
-	async send(msg: Request) {
-		if (this.socket.ws.readyState === WebSocket.CONNECTING) {
-			// await that the socket is opened
-			await new Promise((resolve) => {
-				this.socket.ws.addEventListener("open", resolve, { once: true });
-			});
-		}
+    async send(msg: Request) {
+        if (this.socket.ws.readyState === WebSocket.CONNECTING) {
+            // await that the socket is opened
+            await new Promise((resolve) => {
+                this.socket.ws.addEventListener("open", resolve, { once: true });
+            });
+        }
 
-		return this.socket.ws.send(JSON.stringify(msg));
-	}
+        return this.socket.ws.send(JSON.stringify(msg));
+    }
 
-	async next(): Promise<Response | undefined> {
-		for await (const next of this) return next;
-		return undefined;
-	}
+    async next(): Promise<Response | undefined> {
+        for await (const next of this) return next;
+        return undefined;
+    }
 
-	async *[Symbol.asyncIterator](): AsyncGenerator<Response, undefined, void> {
-		while (true) {
-			if (this.buffer.length > 0) {
-				yield this.buffer.shift() as Response;
-			} else {
-				if (this.socket.ws.readyState === WebSocket.CLOSED) return;
-				await this.socket.hasUpdate();
-			}
-		}
-	}
+    async *[Symbol.asyncIterator](): AsyncGenerator<Response, undefined, void> {
+        while (true) {
+            if (this.buffer.length > 0) {
+                yield this.buffer.shift() as Response;
+            } else {
+                if (this.socket.ws.readyState === WebSocket.CLOSED) return;
+                await this.socket.hasUpdate();
+            }
+        }
+    }
 }
 
 export class StreamIn<Response> {
-	public socket: WebSocketConnection;
-	private buffer: Response[] = [];
+    public socket: WebSocketConnection;
+    private buffer: Response[] = [];
 
-	constructor(url: string, headers?: Record<string, string>) {
-		this.socket = new WebSocketConnection(url, headers);
-		this.socket.on("message", (event: any) => {
-			this.buffer.push(JSON.parse(event.data));
-			this.socket.resolveHasUpdateHandlers();
-		});
-	}
+    constructor(url: string, headers?: Record<string, string>) {
+        this.socket = new WebSocketConnection(url, headers);
+        this.socket.on("message", (event: any) => {
+            this.buffer.push(JSON.parse(event.data));
+            this.socket.resolveHasUpdateHandlers();
+        });
+    }
 
-	close() {
-		this.socket.close();
-	}
+    close() {
+        this.socket.close();
+    }
 
-	async next(): Promise<Response | undefined> {
-		for await (const next of this) return next;
-		return undefined;
-	}
+    async next(): Promise<Response | undefined> {
+        for await (const next of this) return next;
+        return undefined;
+    }
 
-	async *[Symbol.asyncIterator](): AsyncGenerator<Response, undefined, void> {
-		while (true) {
-			if (this.buffer.length > 0) {
-				yield this.buffer.shift() as Response;
-			} else {
-				if (this.socket.ws.readyState === WebSocket.CLOSED) return;
-				await this.socket.hasUpdate();
-			}
-		}
-	}
+    async *[Symbol.asyncIterator](): AsyncGenerator<Response, undefined, void> {
+        while (true) {
+            if (this.buffer.length > 0) {
+                yield this.buffer.shift() as Response;
+            } else {
+                if (this.socket.ws.readyState === WebSocket.CLOSED) return;
+                await this.socket.hasUpdate();
+            }
+        }
+    }
 }
 
 export class StreamOut<Request, Response> {
-	public socket: WebSocketConnection;
-	private responseValue: Promise<Response>;
+    public socket: WebSocketConnection;
+    private responseValue: Promise<Response>;
 
-	constructor(url: string, headers?: Record<string, string>) {
-		let responseResolver: (_: any) => void;
-		this.responseValue = new Promise((resolve) => (responseResolver = resolve));
+    constructor(url: string, headers?: Record<string, string>) {
+        let responseResolver: (_: any) => void;
+        this.responseValue = new Promise((resolve) => responseResolver = resolve);
 
-		this.socket = new WebSocketConnection(url, headers);
-		this.socket.on("message", (event: any) => {
-			responseResolver(JSON.parse(event.data));
-		});
-	}
+        this.socket = new WebSocketConnection(url, headers);
+        this.socket.on("message", (event: any) => {
+            responseResolver(JSON.parse(event.data))
+        });
+    }
 
-	async response(): Promise<Response> {
-		return this.responseValue;
-	}
+    async response(): Promise<Response> {
+        return this.responseValue;
+    }
 
-	close() {
-		this.socket.close();
-	}
+    close() {
+        this.socket.close();
+    }
 
-	async send(msg: Request) {
-		if (this.socket.ws.readyState === WebSocket.CONNECTING) {
-			// await that the socket is opened
-			await new Promise((resolve) => {
-				this.socket.ws.addEventListener("open", resolve, { once: true });
-			});
-		}
+    async send(msg: Request) {
+        if (this.socket.ws.readyState === WebSocket.CONNECTING) {
+            // await that the socket is opened
+            await new Promise((resolve) => {
+                this.socket.ws.addEventListener("open", resolve, { once: true });
+            });
+        }
 
-		return this.socket.ws.send(JSON.stringify(msg));
-	}
+        return this.socket.ws.send(JSON.stringify(msg));
+    }
 }
 // CallParameters is the type of the parameters to a method call, but require headers to be a Record type
 type CallParameters = Omit<RequestInit, "method" | "body" | "headers"> & {
-	/** Headers to be sent with the request */
-	headers?: Record<string, string>;
+    /** Headers to be sent with the request */
+    headers?: Record<string, string>
 
-	/** Query parameters to be sent with the request */
-	query?: Record<string, string | string[]>;
-};
+    /** Query parameters to be sent with the request */
+    query?: Record<string, string | string[]>
+}
 
 // AuthDataGenerator is a function that returns a new instance of the authentication data required by this API
 export type AuthDataGenerator = () =>
-	| auth.AuthParams
-	| Promise<auth.AuthParams | undefined>
-	| undefined;
+  | auth.AuthParams
+  | Promise<auth.AuthParams | undefined>
+  | undefined;
 
 // A fetcher is the prototype for the inbuilt Fetch function
 export type Fetcher = typeof fetch;
@@ -11092,492 +16063,469 @@ export type Fetcher = typeof fetch;
 const boundFetch = fetch.bind(this);
 
 class BaseClient {
-	readonly baseURL: string;
-	readonly fetcher: Fetcher;
-	readonly headers: Record<string, string>;
-	readonly requestInit: Omit<RequestInit, "headers"> & { headers?: Record<string, string> };
-	readonly authGenerator?: AuthDataGenerator;
+    readonly baseURL: string
+    readonly fetcher: Fetcher
+    readonly headers: Record<string, string>
+    readonly requestInit: Omit<RequestInit, "headers"> & { headers?: Record<string, string> }
+    readonly authGenerator?: AuthDataGenerator
 
-	constructor(baseURL: string, options: ClientOptions) {
-		this.baseURL = baseURL;
-		this.headers = {};
+    constructor(baseURL: string, options: ClientOptions) {
+        this.baseURL = baseURL
+        this.headers = {}
 
-		// Add User-Agent header if the script is running in the server
-		// because browsers do not allow setting User-Agent headers to requests
-		if (!BROWSER) {
-			this.headers["User-Agent"] = "hypedrive-wiei-Generated-TS-Client (Encore/v1.54.2)";
-		}
+        // Add User-Agent header if the script is running in the server
+        // because browsers do not allow setting User-Agent headers to requests
+        if (!BROWSER) {
+            this.headers["User-Agent"] = "hypedrive-wiei-Generated-TS-Client (Encore/v1.54.2)";
+        }
 
-		this.requestInit = options.requestInit ?? {};
+        this.requestInit = options.requestInit ?? {};
 
-		// Setup what fetch function we'll be using in the base client
-		if (options.fetcher !== undefined) {
-			this.fetcher = options.fetcher;
-		} else {
-			this.fetcher = boundFetch;
-		}
+        // Setup what fetch function we'll be using in the base client
+        if (options.fetcher !== undefined) {
+            this.fetcher = options.fetcher
+        } else {
+            this.fetcher = boundFetch
+        }
 
-		// Setup an authentication data generator using the auth data token option
-		if (options.auth !== undefined) {
-			const auth = options.auth;
-			if (typeof auth === "function") {
-				this.authGenerator = auth;
-			} else {
-				this.authGenerator = () => auth;
-			}
-		}
-	}
+        // Setup an authentication data generator using the auth data token option
+        if (options.auth !== undefined) {
+            const auth = options.auth
+            if (typeof auth === "function") {
+                this.authGenerator = auth
+            } else {
+                this.authGenerator = () => auth
+            }
+        }
+    }
 
-	async getAuthData(): Promise<CallParameters | undefined> {
-		let authData: auth.AuthParams | undefined;
+    async getAuthData(): Promise<CallParameters | undefined> {
+        let authData: auth.AuthParams | undefined;
 
-		// If authorization data generator is present, call it and add the returned data to the request
-		if (this.authGenerator) {
-			const mayBePromise = this.authGenerator();
-			if (mayBePromise instanceof Promise) {
-				authData = await mayBePromise;
-			} else {
-				authData = mayBePromise;
-			}
-		}
+        // If authorization data generator is present, call it and add the returned data to the request
+        if (this.authGenerator) {
+            const mayBePromise = this.authGenerator();
+            if (mayBePromise instanceof Promise) {
+                authData = await mayBePromise;
+            } else {
+                authData = mayBePromise;
+            }
+        }
 
-		if (authData) {
-			const data: CallParameters = {};
+        if (authData) {
+            const data: CallParameters = {};
 
-			data.headers = makeRecord<string, string>({
-				authorization: authData.authorization,
-			});
+            data.headers = makeRecord<string, string>({
+                authorization: authData.authorization,
+            });
 
-			return data;
-		}
+            return data;
+        }
 
-		return undefined;
-	}
+        return undefined;
+    }
 
-	// createStreamInOut sets up a stream to a streaming API endpoint.
-	async createStreamInOut<Request, Response>(
-		path: string,
-		params?: CallParameters
-	): Promise<StreamInOut<Request, Response>> {
-		let { query, headers } = params ?? {};
+    // createStreamInOut sets up a stream to a streaming API endpoint.
+    async createStreamInOut<Request, Response>(path: string, params?: CallParameters): Promise<StreamInOut<Request, Response>> {
+        let { query, headers } = params ?? {};
 
-		// Fetch auth data if there is any
-		const authData = await this.getAuthData();
+        // Fetch auth data if there is any
+        const authData = await this.getAuthData();
 
-		// If we now have authentication data, add it to the request
-		if (authData) {
-			if (authData.query) {
-				query = { ...query, ...authData.query };
-			}
-			if (authData.headers) {
-				headers = { ...headers, ...authData.headers };
-			}
-		}
+        // If we now have authentication data, add it to the request
+        if (authData) {
+            if (authData.query) {
+                query = {...query, ...authData.query};
+            }
+            if (authData.headers) {
+                headers = {...headers, ...authData.headers};
+            }
+        }
 
-		const queryString = query ? "?" + encodeQuery(query) : "";
-		return new StreamInOut(this.baseURL + path + queryString, headers);
-	}
+        const queryString = query ? '?' + encodeQuery(query) : ''
+        return new StreamInOut(this.baseURL + path + queryString, headers);
+    }
 
-	// createStreamIn sets up a stream to a streaming API endpoint.
-	async createStreamIn<Response>(
-		path: string,
-		params?: CallParameters
-	): Promise<StreamIn<Response>> {
-		let { query, headers } = params ?? {};
+    // createStreamIn sets up a stream to a streaming API endpoint.
+    async createStreamIn<Response>(path: string, params?: CallParameters): Promise<StreamIn<Response>> {
+        let { query, headers } = params ?? {};
 
-		// Fetch auth data if there is any
-		const authData = await this.getAuthData();
+        // Fetch auth data if there is any
+        const authData = await this.getAuthData();
 
-		// If we now have authentication data, add it to the request
-		if (authData) {
-			if (authData.query) {
-				query = { ...query, ...authData.query };
-			}
-			if (authData.headers) {
-				headers = { ...headers, ...authData.headers };
-			}
-		}
+        // If we now have authentication data, add it to the request
+        if (authData) {
+            if (authData.query) {
+                query = {...query, ...authData.query};
+            }
+            if (authData.headers) {
+                headers = {...headers, ...authData.headers};
+            }
+        }
 
-		const queryString = query ? "?" + encodeQuery(query) : "";
-		return new StreamIn(this.baseURL + path + queryString, headers);
-	}
+        const queryString = query ? '?' + encodeQuery(query) : ''
+        return new StreamIn(this.baseURL + path + queryString, headers);
+    }
 
-	// createStreamOut sets up a stream to a streaming API endpoint.
-	async createStreamOut<Request, Response>(
-		path: string,
-		params?: CallParameters
-	): Promise<StreamOut<Request, Response>> {
-		let { query, headers } = params ?? {};
+    // createStreamOut sets up a stream to a streaming API endpoint.
+    async createStreamOut<Request, Response>(path: string, params?: CallParameters): Promise<StreamOut<Request, Response>> {
+        let { query, headers } = params ?? {};
 
-		// Fetch auth data if there is any
-		const authData = await this.getAuthData();
+        // Fetch auth data if there is any
+        const authData = await this.getAuthData();
 
-		// If we now have authentication data, add it to the request
-		if (authData) {
-			if (authData.query) {
-				query = { ...query, ...authData.query };
-			}
-			if (authData.headers) {
-				headers = { ...headers, ...authData.headers };
-			}
-		}
+        // If we now have authentication data, add it to the request
+        if (authData) {
+            if (authData.query) {
+                query = {...query, ...authData.query};
+            }
+            if (authData.headers) {
+                headers = {...headers, ...authData.headers};
+            }
+        }
 
-		const queryString = query ? "?" + encodeQuery(query) : "";
-		return new StreamOut(this.baseURL + path + queryString, headers);
-	}
+        const queryString = query ? '?' + encodeQuery(query) : ''
+        return new StreamOut(this.baseURL + path + queryString, headers);
+    }
 
-	// callTypedAPI makes an API call, defaulting content type to "application/json"
-	public async callTypedAPI(
-		method: string,
-		path: string,
-		body?: RequestInit["body"],
-		params?: CallParameters
-	): Promise<Response> {
-		return this.callAPI(method, path, body, {
-			...params,
-			headers: { "Content-Type": "application/json", ...params?.headers },
-		});
-	}
+    // callTypedAPI makes an API call, defaulting content type to "application/json"
+    public async callTypedAPI(method: string, path: string, body?: RequestInit["body"], params?: CallParameters): Promise<Response> {
+        return this.callAPI(method, path, body, {
+            ...params,
+            headers: { "Content-Type": "application/json", ...params?.headers }
+        });
+    }
 
-	// callAPI is used by each generated API method to actually make the request
-	public async callAPI(
-		method: string,
-		path: string,
-		body?: RequestInit["body"],
-		params?: CallParameters
-	): Promise<Response> {
-		let { query, headers, ...rest } = params ?? {};
-		const init = {
-			...this.requestInit,
-			...rest,
-			method,
-			body: body ?? null,
-		};
+    // callAPI is used by each generated API method to actually make the request
+    public async callAPI(method: string, path: string, body?: RequestInit["body"], params?: CallParameters): Promise<Response> {
+        let { query, headers, ...rest } = params ?? {}
+        const init = {
+            ...this.requestInit,
+            ...rest,
+            method,
+            body: body ?? null,
+        }
 
-		// Merge our headers with any predefined headers
-		init.headers = { ...this.headers, ...init.headers, ...headers };
+        // Merge our headers with any predefined headers
+        init.headers = {...this.headers, ...init.headers, ...headers}
 
-		// Fetch auth data if there is any
-		const authData = await this.getAuthData();
+        // Fetch auth data if there is any
+        const authData = await this.getAuthData();
 
-		// If we now have authentication data, add it to the request
-		if (authData) {
-			if (authData.query) {
-				query = { ...query, ...authData.query };
-			}
-			if (authData.headers) {
-				init.headers = { ...init.headers, ...authData.headers };
-			}
-		}
+        // If we now have authentication data, add it to the request
+        if (authData) {
+            if (authData.query) {
+                query = {...query, ...authData.query};
+            }
+            if (authData.headers) {
+                init.headers = {...init.headers, ...authData.headers};
+            }
+        }
 
-		// Make the actual request
-		const queryString = query ? "?" + encodeQuery(query) : "";
-		const response = await this.fetcher(this.baseURL + path + queryString, init);
+        // Make the actual request
+        const queryString = query ? '?' + encodeQuery(query) : ''
+        const response = await this.fetcher(this.baseURL+path+queryString, init)
 
-		// handle any error responses
-		if (!response.ok) {
-			// try and get the error message from the response body
-			let body: APIErrorResponse = {
-				code: ErrCode.Unknown,
-				message: `request failed: status ${response.status}`,
-			};
+        // handle any error responses
+        if (!response.ok) {
+            // try and get the error message from the response body
+            let body: APIErrorResponse = { code: ErrCode.Unknown, message: `request failed: status ${response.status}` }
 
-			// if we can get the structured error we should, otherwise give a best effort
-			try {
-				const text = await response.text();
+            // if we can get the structured error we should, otherwise give a best effort
+            try {
+                const text = await response.text()
 
-				try {
-					const jsonBody = JSON.parse(text);
-					if (isAPIErrorResponse(jsonBody)) {
-						body = jsonBody;
-					} else {
-						body.message += ": " + JSON.stringify(jsonBody);
-					}
-				} catch {
-					body.message += ": " + text;
-				}
-			} catch (e) {
-				// otherwise we just append the text to the error message
-				body.message += ": " + String(e);
-			}
+                try {
+                    const jsonBody = JSON.parse(text)
+                    if (isAPIErrorResponse(jsonBody)) {
+                        body = jsonBody
+                    } else {
+                        body.message += ": " + JSON.stringify(jsonBody)
+                    }
+                } catch {
+                    body.message += ": " + text
+                }
+            } catch (e) {
+                // otherwise we just append the text to the error message
+                body.message += ": " + String(e)
+            }
 
-			throw new APIError(response.status, body);
-		}
+            throw new APIError(response.status, body)
+        }
 
-		return response;
-	}
+        return response
+    }
 }
 
 /**
  * APIErrorDetails represents the response from an Encore API in the case of an error
  */
 interface APIErrorResponse {
-	code: ErrCode;
-	message: string;
-	details?: any;
+    code: ErrCode
+    message: string
+    details?: any
 }
 
 function isAPIErrorResponse(err: any): err is APIErrorResponse {
-	return (
-		err !== undefined &&
-		err !== null &&
-		isErrCode(err.code) &&
-		typeof err.message === "string" &&
-		(err.details === undefined || err.details === null || typeof err.details === "object")
-	);
+    return (
+        err !== undefined && err !== null &&
+        isErrCode(err.code) &&
+        typeof(err.message) === "string" &&
+        (err.details === undefined || err.details === null || typeof(err.details) === "object")
+    )
 }
 
 function isErrCode(code: any): code is ErrCode {
-	return code !== undefined && Object.values(ErrCode).includes(code);
+    return code !== undefined && Object.values(ErrCode).includes(code)
 }
 
 /**
  * APIError represents a structured error as returned from an Encore application.
  */
 export class APIError extends Error {
-	/**
-	 * The HTTP status code associated with the error.
-	 */
-	public readonly status: number;
+    /**
+     * The HTTP status code associated with the error.
+     */
+    public readonly status: number
 
-	/**
-	 * The Encore error code
-	 */
-	public readonly code: ErrCode;
+    /**
+     * The Encore error code
+     */
+    public readonly code: ErrCode
 
-	/**
-	 * The error details
-	 */
-	public readonly details?: any;
+    /**
+     * The error details
+     */
+    public readonly details?: any
 
-	constructor(status: number, response: APIErrorResponse) {
-		// extending errors causes issues after you construct them, unless you apply the following fixes
-		super(response.message);
+    constructor(status: number, response: APIErrorResponse) {
+        // extending errors causes issues after you construct them, unless you apply the following fixes
+        super(response.message);
 
-		// set error name as constructor name, make it not enumerable to keep native Error behavior
-		// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/new.target#new.target_in_constructors
-		Object.defineProperty(this, "name", {
-			value: "APIError",
-			enumerable: false,
-			configurable: true,
-		});
+        // set error name as constructor name, make it not enumerable to keep native Error behavior
+        // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/new.target#new.target_in_constructors
+        Object.defineProperty(this, 'name', {
+            value:        'APIError',
+            enumerable:   false,
+            configurable: true,
+        })
 
-		// fix the prototype chain
-		if ((Object as any).setPrototypeOf == undefined) {
-			(this as any).__proto__ = APIError.prototype;
-		} else {
-			Object.setPrototypeOf(this, APIError.prototype);
-		}
+        // fix the prototype chain
+        if ((Object as any).setPrototypeOf == undefined) {
+            (this as any).__proto__ = APIError.prototype
+        } else {
+            Object.setPrototypeOf(this, APIError.prototype);
+        }
 
-		// capture a stack trace
-		if ((Error as any).captureStackTrace !== undefined) {
-			(Error as any).captureStackTrace(this, this.constructor);
-		}
+        // capture a stack trace
+        if ((Error as any).captureStackTrace !== undefined) {
+            (Error as any).captureStackTrace(this, this.constructor);
+        }
 
-		this.status = status;
-		this.code = response.code;
-		this.details = response.details;
-	}
+        this.status = status
+        this.code = response.code
+        this.details = response.details
+    }
 }
 
 /**
  * Typeguard allowing use of an APIError's fields'
  */
 export function isAPIError(err: any): err is APIError {
-	return err instanceof APIError;
+    return err instanceof APIError;
 }
 
 export enum ErrCode {
-	/**
-	 * OK indicates the operation was successful.
-	 */
-	OK = "ok",
+    /**
+     * OK indicates the operation was successful.
+     */
+    OK = "ok",
 
-	/**
-	 * Canceled indicates the operation was canceled (typically by the caller).
-	 *
-	 * Encore will generate this error code when cancellation is requested.
-	 */
-	Canceled = "canceled",
+    /**
+     * Canceled indicates the operation was canceled (typically by the caller).
+     *
+     * Encore will generate this error code when cancellation is requested.
+     */
+    Canceled = "canceled",
 
-	/**
-	 * Unknown error. An example of where this error may be returned is
-	 * if a Status value received from another address space belongs to
-	 * an error-space that is not known in this address space. Also
-	 * errors raised by APIs that do not return enough error information
-	 * may be converted to this error.
-	 *
-	 * Encore will generate this error code in the above two mentioned cases.
-	 */
-	Unknown = "unknown",
+    /**
+     * Unknown error. An example of where this error may be returned is
+     * if a Status value received from another address space belongs to
+     * an error-space that is not known in this address space. Also
+     * errors raised by APIs that do not return enough error information
+     * may be converted to this error.
+     *
+     * Encore will generate this error code in the above two mentioned cases.
+     */
+    Unknown = "unknown",
 
-	/**
-	 * InvalidArgument indicates client specified an invalid argument.
-	 * Note that this differs from FailedPrecondition. It indicates arguments
-	 * that are problematic regardless of the state of the system
-	 * (e.g., a malformed file name).
-	 *
-	 * This error code will not be generated by the gRPC framework.
-	 */
-	InvalidArgument = "invalid_argument",
+    /**
+     * InvalidArgument indicates client specified an invalid argument.
+     * Note that this differs from FailedPrecondition. It indicates arguments
+     * that are problematic regardless of the state of the system
+     * (e.g., a malformed file name).
+     *
+     * This error code will not be generated by the gRPC framework.
+     */
+    InvalidArgument = "invalid_argument",
 
-	/**
-	 * DeadlineExceeded means operation expired before completion.
-	 * For operations that change the state of the system, this error may be
-	 * returned even if the operation has completed successfully. For
-	 * example, a successful response from a server could have been delayed
-	 * long enough for the deadline to expire.
-	 *
-	 * The gRPC framework will generate this error code when the deadline is
-	 * exceeded.
-	 */
-	DeadlineExceeded = "deadline_exceeded",
+    /**
+     * DeadlineExceeded means operation expired before completion.
+     * For operations that change the state of the system, this error may be
+     * returned even if the operation has completed successfully. For
+     * example, a successful response from a server could have been delayed
+     * long enough for the deadline to expire.
+     *
+     * The gRPC framework will generate this error code when the deadline is
+     * exceeded.
+     */
+    DeadlineExceeded = "deadline_exceeded",
 
-	/**
-	 * NotFound means some requested entity (e.g., file or directory) was
-	 * not found.
-	 *
-	 * This error code will not be generated by the gRPC framework.
-	 */
-	NotFound = "not_found",
+    /**
+     * NotFound means some requested entity (e.g., file or directory) was
+     * not found.
+     *
+     * This error code will not be generated by the gRPC framework.
+     */
+    NotFound = "not_found",
 
-	/**
-	 * AlreadyExists means an attempt to create an entity failed because one
-	 * already exists.
-	 *
-	 * This error code will not be generated by the gRPC framework.
-	 */
-	AlreadyExists = "already_exists",
+    /**
+     * AlreadyExists means an attempt to create an entity failed because one
+     * already exists.
+     *
+     * This error code will not be generated by the gRPC framework.
+     */
+    AlreadyExists = "already_exists",
 
-	/**
-	 * PermissionDenied indicates the caller does not have permission to
-	 * execute the specified operation. It must not be used for rejections
-	 * caused by exhausting some resource (use ResourceExhausted
-	 * instead for those errors). It must not be
-	 * used if the caller cannot be identified (use Unauthenticated
-	 * instead for those errors).
-	 *
-	 * This error code will not be generated by the gRPC core framework,
-	 * but expect authentication middleware to use it.
-	 */
-	PermissionDenied = "permission_denied",
+    /**
+     * PermissionDenied indicates the caller does not have permission to
+     * execute the specified operation. It must not be used for rejections
+     * caused by exhausting some resource (use ResourceExhausted
+     * instead for those errors). It must not be
+     * used if the caller cannot be identified (use Unauthenticated
+     * instead for those errors).
+     *
+     * This error code will not be generated by the gRPC core framework,
+     * but expect authentication middleware to use it.
+     */
+    PermissionDenied = "permission_denied",
 
-	/**
-	 * ResourceExhausted indicates some resource has been exhausted, perhaps
-	 * a per-user quota, or perhaps the entire file system is out of space.
-	 *
-	 * This error code will be generated by the gRPC framework in
-	 * out-of-memory and server overload situations, or when a message is
-	 * larger than the configured maximum size.
-	 */
-	ResourceExhausted = "resource_exhausted",
+    /**
+     * ResourceExhausted indicates some resource has been exhausted, perhaps
+     * a per-user quota, or perhaps the entire file system is out of space.
+     *
+     * This error code will be generated by the gRPC framework in
+     * out-of-memory and server overload situations, or when a message is
+     * larger than the configured maximum size.
+     */
+    ResourceExhausted = "resource_exhausted",
 
-	/**
-	 * FailedPrecondition indicates operation was rejected because the
-	 * system is not in a state required for the operation's execution.
-	 * For example, directory to be deleted may be non-empty, an rmdir
-	 * operation is applied to a non-directory, etc.
-	 *
-	 * A litmus test that may help a service implementor in deciding
-	 * between FailedPrecondition, Aborted, and Unavailable:
-	 *  (a) Use Unavailable if the client can retry just the failing call.
-	 *  (b) Use Aborted if the client should retry at a higher-level
-	 *      (e.g., restarting a read-modify-write sequence).
-	 *  (c) Use FailedPrecondition if the client should not retry until
-	 *      the system state has been explicitly fixed. E.g., if an "rmdir"
-	 *      fails because the directory is non-empty, FailedPrecondition
-	 *      should be returned since the client should not retry unless
-	 *      they have first fixed up the directory by deleting files from it.
-	 *  (d) Use FailedPrecondition if the client performs conditional
-	 *      REST Get/Update/Delete on a resource and the resource on the
-	 *      server does not match the condition. E.g., conflicting
-	 *      read-modify-write on the same resource.
-	 *
-	 * This error code will not be generated by the gRPC framework.
-	 */
-	FailedPrecondition = "failed_precondition",
+    /**
+     * FailedPrecondition indicates operation was rejected because the
+     * system is not in a state required for the operation's execution.
+     * For example, directory to be deleted may be non-empty, an rmdir
+     * operation is applied to a non-directory, etc.
+     *
+     * A litmus test that may help a service implementor in deciding
+     * between FailedPrecondition, Aborted, and Unavailable:
+     *  (a) Use Unavailable if the client can retry just the failing call.
+     *  (b) Use Aborted if the client should retry at a higher-level
+     *      (e.g., restarting a read-modify-write sequence).
+     *  (c) Use FailedPrecondition if the client should not retry until
+     *      the system state has been explicitly fixed. E.g., if an "rmdir"
+     *      fails because the directory is non-empty, FailedPrecondition
+     *      should be returned since the client should not retry unless
+     *      they have first fixed up the directory by deleting files from it.
+     *  (d) Use FailedPrecondition if the client performs conditional
+     *      REST Get/Update/Delete on a resource and the resource on the
+     *      server does not match the condition. E.g., conflicting
+     *      read-modify-write on the same resource.
+     *
+     * This error code will not be generated by the gRPC framework.
+     */
+    FailedPrecondition = "failed_precondition",
 
-	/**
-	 * Aborted indicates the operation was aborted, typically due to a
-	 * concurrency issue like sequencer check failures, transaction aborts,
-	 * etc.
-	 *
-	 * See litmus test above for deciding between FailedPrecondition,
-	 * Aborted, and Unavailable.
-	 */
-	Aborted = "aborted",
+    /**
+     * Aborted indicates the operation was aborted, typically due to a
+     * concurrency issue like sequencer check failures, transaction aborts,
+     * etc.
+     *
+     * See litmus test above for deciding between FailedPrecondition,
+     * Aborted, and Unavailable.
+     */
+    Aborted = "aborted",
 
-	/**
-	 * OutOfRange means operation was attempted past the valid range.
-	 * E.g., seeking or reading past end of file.
-	 *
-	 * Unlike InvalidArgument, this error indicates a problem that may
-	 * be fixed if the system state changes. For example, a 32-bit file
-	 * system will generate InvalidArgument if asked to read at an
-	 * offset that is not in the range [0,2^32-1], but it will generate
-	 * OutOfRange if asked to read from an offset past the current
-	 * file size.
-	 *
-	 * There is a fair bit of overlap between FailedPrecondition and
-	 * OutOfRange. We recommend using OutOfRange (the more specific
-	 * error) when it applies so that callers who are iterating through
-	 * a space can easily look for an OutOfRange error to detect when
-	 * they are done.
-	 *
-	 * This error code will not be generated by the gRPC framework.
-	 */
-	OutOfRange = "out_of_range",
+    /**
+     * OutOfRange means operation was attempted past the valid range.
+     * E.g., seeking or reading past end of file.
+     *
+     * Unlike InvalidArgument, this error indicates a problem that may
+     * be fixed if the system state changes. For example, a 32-bit file
+     * system will generate InvalidArgument if asked to read at an
+     * offset that is not in the range [0,2^32-1], but it will generate
+     * OutOfRange if asked to read from an offset past the current
+     * file size.
+     *
+     * There is a fair bit of overlap between FailedPrecondition and
+     * OutOfRange. We recommend using OutOfRange (the more specific
+     * error) when it applies so that callers who are iterating through
+     * a space can easily look for an OutOfRange error to detect when
+     * they are done.
+     *
+     * This error code will not be generated by the gRPC framework.
+     */
+    OutOfRange = "out_of_range",
 
-	/**
-	 * Unimplemented indicates operation is not implemented or not
-	 * supported/enabled in this service.
-	 *
-	 * This error code will be generated by the gRPC framework. Most
-	 * commonly, you will see this error code when a method implementation
-	 * is missing on the server. It can also be generated for unknown
-	 * compression algorithms or a disagreement as to whether an RPC should
-	 * be streaming.
-	 */
-	Unimplemented = "unimplemented",
+    /**
+     * Unimplemented indicates operation is not implemented or not
+     * supported/enabled in this service.
+     *
+     * This error code will be generated by the gRPC framework. Most
+     * commonly, you will see this error code when a method implementation
+     * is missing on the server. It can also be generated for unknown
+     * compression algorithms or a disagreement as to whether an RPC should
+     * be streaming.
+     */
+    Unimplemented = "unimplemented",
 
-	/**
-	 * Internal errors. Means some invariants expected by underlying
-	 * system has been broken. If you see one of these errors,
-	 * something is very broken.
-	 *
-	 * This error code will be generated by the gRPC framework in several
-	 * internal error conditions.
-	 */
-	Internal = "internal",
+    /**
+     * Internal errors. Means some invariants expected by underlying
+     * system has been broken. If you see one of these errors,
+     * something is very broken.
+     *
+     * This error code will be generated by the gRPC framework in several
+     * internal error conditions.
+     */
+    Internal = "internal",
 
-	/**
-	 * Unavailable indicates the service is currently unavailable.
-	 * This is a most likely a transient condition and may be corrected
-	 * by retrying with a backoff. Note that it is not always safe to retry
-	 * non-idempotent operations.
-	 *
-	 * See litmus test above for deciding between FailedPrecondition,
-	 * Aborted, and Unavailable.
-	 *
-	 * This error code will be generated by the gRPC framework during
-	 * abrupt shutdown of a server process or network connection.
-	 */
-	Unavailable = "unavailable",
+    /**
+     * Unavailable indicates the service is currently unavailable.
+     * This is a most likely a transient condition and may be corrected
+     * by retrying with a backoff. Note that it is not always safe to retry
+     * non-idempotent operations.
+     *
+     * See litmus test above for deciding between FailedPrecondition,
+     * Aborted, and Unavailable.
+     *
+     * This error code will be generated by the gRPC framework during
+     * abrupt shutdown of a server process or network connection.
+     */
+    Unavailable = "unavailable",
 
-	/**
-	 * DataLoss indicates unrecoverable data loss or corruption.
-	 *
-	 * This error code will not be generated by the gRPC framework.
-	 */
-	DataLoss = "data_loss",
+    /**
+     * DataLoss indicates unrecoverable data loss or corruption.
+     *
+     * This error code will not be generated by the gRPC framework.
+     */
+    DataLoss = "data_loss",
 
-	/**
-	 * Unauthenticated indicates the request does not have valid
-	 * authentication credentials for the operation.
-	 *
-	 * The gRPC framework will generate this error code when the
-	 * authentication metadata is invalid or a Credentials callback fails,
-	 * but also expect authentication middleware to generate it.
-	 */
-	Unauthenticated = "unauthenticated",
+    /**
+     * Unauthenticated indicates the request does not have valid
+     * authentication credentials for the operation.
+     *
+     * The gRPC framework will generate this error code when the
+     * authentication metadata is invalid or a Credentials callback fails,
+     * but also expect authentication middleware to generate it.
+     */
+    Unauthenticated = "unauthenticated",
 }

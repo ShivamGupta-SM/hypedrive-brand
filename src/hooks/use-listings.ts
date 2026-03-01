@@ -107,10 +107,7 @@ export function useUpdateListing(organizationId: string | undefined) {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: async ({
-			listingId,
-			...params
-		}: { listingId: string } & brand.UpdateListingRequest) => {
+		mutationFn: async ({ listingId, ...params }: { listingId: string } & brand.UpdateListingRequest) => {
 			const client = getAuthenticatedClient();
 			return client.brand.updateListing(organizationId as string, listingId, params);
 		},

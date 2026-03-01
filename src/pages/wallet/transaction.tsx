@@ -1,11 +1,10 @@
 import {
-	ArrowDownTrayIcon,
+	ArrowDownLeftIcon,
 	ArrowLeftIcon,
 	ArrowPathIcon,
-	ArrowUpTrayIcon,
+	ArrowUpRightIcon,
 	BanknotesIcon,
 	CalendarIcon,
-	ClockIcon,
 	CurrencyRupeeIcon,
 	DocumentTextIcon,
 	ExclamationTriangleIcon,
@@ -16,9 +15,9 @@ import { useMemo } from "react";
 import { Badge } from "@/components/badge";
 import { Button } from "@/components/button";
 import { Heading } from "@/components/heading";
-import { Link } from "@/components/link";
 import { CopyButton } from "@/components/shared";
-import { Card, CardGrid, StatCard } from "@/components/shared/card";
+import { Card } from "@/components/shared/card";
+import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
 import { Skeleton } from "@/components/skeleton";
 import { Text } from "@/components/text";
 import { useCurrentOrganization, useWalletTransactions } from "@/hooks";
@@ -33,7 +32,7 @@ const routeApi = getRouteApi("/_app/$orgSlug/wallet_/transactions_/$id");
 
 function getTransactionTypeConfig(type: string): {
 	label: string;
-	icon: typeof ArrowDownTrayIcon;
+	icon: typeof ArrowDownLeftIcon;
 	color: "emerald" | "red" | "amber" | "sky" | "zinc";
 	bgClass: string;
 } {
@@ -41,20 +40,20 @@ function getTransactionTypeConfig(type: string): {
 		string,
 		{
 			label: string;
-			icon: typeof ArrowDownTrayIcon;
+			icon: typeof ArrowDownLeftIcon;
 			color: "emerald" | "red" | "amber" | "sky" | "zinc";
 			bgClass: string;
 		}
 	> = {
 		credit: {
 			label: "Credit",
-			icon: ArrowDownTrayIcon,
+			icon: ArrowDownLeftIcon,
 			color: "emerald",
 			bgClass: "bg-emerald-50 dark:bg-emerald-950/30",
 		},
 		debit: {
 			label: "Debit",
-			icon: ArrowUpTrayIcon,
+			icon: ArrowUpRightIcon,
 			color: "red",
 			bgClass: "bg-red-50 dark:bg-red-950/30",
 		},
@@ -79,9 +78,7 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
 			<div className="flex size-16 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-950/30">
 				<ExclamationTriangleIcon className="size-8 text-red-400" />
 			</div>
-			<p className="mt-4 text-lg font-semibold text-zinc-900 dark:text-white">
-				Transaction not found
-			</p>
+			<p className="mt-4 text-lg font-semibold text-zinc-900 dark:text-white">Transaction not found</p>
 			<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
 				The transaction you're looking for doesn't exist or has been removed.
 			</p>
@@ -137,12 +134,7 @@ export function TransactionShow() {
 	const orgSlug = useOrgSlug();
 
 	// Fetch transactions — limit to a smaller page size since we only need one
-	const {
-		data: transactions,
-		loading,
-		error,
-		refetch,
-	} = useWalletTransactions(organizationId, { take: 20 });
+	const { data: transactions, loading, error, refetch } = useWalletTransactions(organizationId, { take: 20 });
 
 	const transaction = useMemo(() => {
 		return transactions.find((t) => t.id === transactionId) || null;
@@ -164,21 +156,16 @@ export function TransactionShow() {
 	return (
 		<div className="space-y-6">
 			{/* Back Button */}
-			<Link
-				href={`/${orgSlug}/wallet`}
-				className="inline-flex items-center gap-2 text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-			>
+			<Button href={`/${orgSlug}/wallet`} color="zinc">
 				<ArrowLeftIcon className="size-4" />
-				Back to Wallet
-			</Link>
+				Wallet
+			</Button>
 
 			{/* Header */}
 			<div className="flex flex-wrap items-start justify-between gap-4">
 				<div className="flex items-start gap-4">
 					{/* Transaction Icon */}
-					<div
-						className={`flex size-20 shrink-0 items-center justify-center rounded-2xl ${typeConfig.bgClass}`}
-					>
+					<div className={`flex size-20 shrink-0 items-center justify-center rounded-2xl ${typeConfig.bgClass}`}>
 						<TypeIcon
 							className={`size-10 ${
 								typeConfig.color === "emerald"
@@ -198,7 +185,7 @@ export function TransactionShow() {
 						<div className="flex items-center gap-2">
 							<Heading>
 								{isCredit ? "+" : isDebit ? "-" : ""}
-								{formatCurrency(transaction.amount)}
+								{formatCurrency(transaction.amountDecimal)}
 							</Heading>
 						</div>
 						<Text className="mt-1">{transaction.description || typeConfig.label}</Text>
@@ -213,43 +200,35 @@ export function TransactionShow() {
 			</div>
 
 			{/* Stats Row */}
-			<CardGrid columns={4} gap="md">
-				<StatCard
-					icon={<CurrencyRupeeIcon className="size-5" />}
-					label="Amount"
-					value={formatCurrency(transaction.amount)}
-					variant={isCredit ? "success" : isDebit ? "danger" : "default"}
-				/>
-				<StatCard
-					icon={<BanknotesIcon className="size-5" />}
-					label="Type"
-					value={typeConfig.label}
-				/>
-				<StatCard
-					icon={<CalendarIcon className="size-5" />}
-					label="Date"
-					value={new Date(transaction.createdAt).toLocaleDateString("en-IN", {
-						month: "short",
-						day: "numeric",
-						year: "numeric",
-					})}
-				/>
-				<StatCard
-					icon={<ClockIcon className="size-5" />}
-					label="Time"
-					value={new Date(transaction.createdAt).toLocaleTimeString("en-IN", {
-						hour: "2-digit",
-						minute: "2-digit",
-					})}
-				/>
-			</CardGrid>
+			<FinancialStatsGridBordered
+				stats={[
+					{
+						name: "Amount",
+						value: formatCurrency(transaction.amountDecimal),
+						change: isCredit ? "credit" : isDebit ? "debit" : undefined,
+						changeType: isCredit ? "positive" : isDebit ? "negative" : undefined,
+					},
+					{ name: "Type", value: typeConfig.label },
+					{
+						name: "Date",
+						value: new Date(transaction.createdAt).toLocaleDateString("en-IN", {
+							month: "short",
+							day: "numeric",
+							year: "numeric",
+						}),
+					},
+					{
+						name: "Time",
+						value: new Date(transaction.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }),
+					},
+				]}
+				columns={4}
+			/>
 
 			{/* Transaction Details */}
 			<Card>
 				<div className="p-6">
-					<h3 className="text-lg font-semibold text-zinc-900 dark:text-white">
-						Transaction Details
-					</h3>
+					<h3 className="text-lg font-semibold text-zinc-900 dark:text-white">Transaction Details</h3>
 
 					<div className="mt-6 space-y-4">
 						{/* Transaction ID */}
@@ -259,9 +238,7 @@ export function TransactionShow() {
 									<HashtagIcon className="size-5 text-zinc-500" />
 								</div>
 								<div>
-									<p className="text-sm font-medium text-zinc-900 dark:text-white">
-										Transaction ID
-									</p>
+									<p className="text-sm font-medium text-zinc-900 dark:text-white">Transaction ID</p>
 									<p className="text-sm text-zinc-500 dark:text-zinc-400">Unique identifier</p>
 								</div>
 							</div>
@@ -295,9 +272,7 @@ export function TransactionShow() {
 						{/* Amount */}
 						<div className="flex items-center justify-between border-b border-zinc-200 pb-4 dark:border-zinc-700">
 							<div className="flex items-center gap-3">
-								<div
-									className={`flex size-10 items-center justify-center rounded-lg ${typeConfig.bgClass}`}
-								>
+								<div className={`flex size-10 items-center justify-center rounded-lg ${typeConfig.bgClass}`}>
 									<CurrencyRupeeIcon
 										className={`size-5 ${
 											typeConfig.color === "emerald"
@@ -323,7 +298,7 @@ export function TransactionShow() {
 								}`}
 							>
 								{isCredit ? "+" : isDebit ? "-" : ""}
-								{formatCurrency(transaction.amount)}
+								{formatCurrency(transaction.amountDecimal)}
 							</span>
 						</div>
 
@@ -372,9 +347,7 @@ export function TransactionShow() {
 								</div>
 								<div>
 									<p className="text-sm font-medium text-zinc-900 dark:text-white">Created</p>
-									<p className="text-sm text-zinc-500 dark:text-zinc-400">
-										{formatDateTime(transaction.createdAt)}
-									</p>
+									<p className="text-sm text-zinc-500 dark:text-zinc-400">{formatDateTime(transaction.createdAt)}</p>
 								</div>
 							</div>
 						</div>

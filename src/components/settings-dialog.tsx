@@ -9,7 +9,7 @@
 import * as Headless from "@headlessui/react";
 import {
 	AdjustmentsHorizontalIcon,
-	BuildingOffice2Icon,
+	BuildingStorefrontIcon,
 	ChevronLeftIcon,
 	Cog6ToothIcon,
 	ComputerDesktopIcon,
@@ -132,7 +132,7 @@ const NAV_ITEMS: NavItem[] = [
 		section: "profile" as OrgSettingsSection,
 		label: "Organization",
 		description: "Profile & contact details",
-		icon: BuildingOffice2Icon,
+		icon: BuildingStorefrontIcon,
 		iconColor: "text-sky-600 dark:text-sky-400",
 		iconBgActive: "bg-sky-100 dark:bg-sky-900/50",
 	},
@@ -306,11 +306,21 @@ export function SettingsDialog({ open, onClose, initialTab = "org" }: SettingsDi
 					<div
 						className={`flex w-full shrink-0 flex-col bg-zinc-50/80 dark:bg-zinc-900 sm:flex sm:w-58 ${mobilePane === "nav" ? "flex" : "hidden"}`}
 					>
-						<div className="flex h-14 shrink-0 items-center gap-2.5 border-b border-zinc-200/80 px-4 dark:border-zinc-800">
-							<div className="flex size-7 items-center justify-center rounded-lg bg-zinc-900 dark:bg-zinc-100">
-								<Cog6ToothIcon className="size-3.5 text-white dark:text-zinc-900" />
+						<div className="flex h-14 shrink-0 items-center justify-between border-b border-zinc-200/80 px-4 dark:border-zinc-800">
+							<div className="flex items-center gap-2.5">
+								<div className="flex size-7 items-center justify-center rounded-lg bg-zinc-900 dark:bg-zinc-100">
+									<Cog6ToothIcon className="size-3.5 text-white dark:text-zinc-900" />
+								</div>
+								<span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Settings</span>
 							</div>
-							<span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Settings</span>
+							<button
+								type="button"
+								onClick={onClose}
+								className="flex size-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-500 sm:hidden dark:hover:bg-red-950/40 dark:hover:text-red-400"
+								aria-label="Close settings"
+							>
+								<XMarkIcon className="size-4" />
+							</button>
 						</div>
 
 						<nav className="flex-1 overflow-y-auto px-2 py-3">
@@ -361,12 +371,12 @@ export function SettingsDialog({ open, onClose, initialTab = "org" }: SettingsDi
 							className={`flex min-w-0 flex-1 flex-col border-l border-zinc-200/80 dark:border-zinc-800 ${mobilePane === "content" ? "flex" : "hidden"} sm:flex`}
 						>
 							{/* Header */}
-							<div className="flex h-14 shrink-0 items-center justify-between border-b border-zinc-200/80 px-6 dark:border-zinc-800">
+							<div className="flex h-14 shrink-0 items-center justify-between border-b border-zinc-200/80 px-4 sm:px-6 dark:border-zinc-800">
 								{activePanel ? (
 									<button
 										type="button"
 										onClick={() => setActivePanel(null)}
-										className="flex items-center gap-2 rounded-lg px-1 py-1 text-sm font-semibold text-zinc-800 transition-colors hover:text-zinc-500 dark:text-zinc-100 dark:hover:text-zinc-400"
+										className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-semibold text-zinc-800 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:text-zinc-100 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
 									>
 										<ChevronLeftIcon className="size-4 text-zinc-400" />
 										<span>{activePanel.title}</span>
@@ -409,7 +419,7 @@ export function SettingsDialog({ open, onClose, initialTab = "org" }: SettingsDi
 							{/* Scrollable content */}
 							<div className="flex-1 overflow-y-auto">
 								{activePanel ? (
-									<div key={activePanel.id} className="px-6 py-5 pb-10">
+									<div key={activePanel.id} className="px-4 py-5 pb-10 sm:px-6">
 										{activePanel.content}
 									</div>
 								) : activeTab === "org" ? (

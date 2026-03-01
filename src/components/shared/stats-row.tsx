@@ -148,24 +148,15 @@ function DefaultStat({ stat }: { stat: StatItemConfig }) {
 		<>
 			<div className="flex items-center gap-2">
 				{stat.icon && (
-					<div
-						className={clsx(
-							"flex size-8 shrink-0 items-center justify-center rounded-lg",
-							colors.iconBg
-						)}
-					>
+					<div className={clsx("flex size-8 shrink-0 items-center justify-center rounded-lg", colors.iconBg)}>
 						<span className={clsx("size-4", colors.iconColor)}>{stat.icon}</span>
 					</div>
 				)}
 			</div>
 			<div className="mt-auto pt-2">
-				<span className={clsx("text-lg font-bold sm:text-xl", colors.valueColor)}>
-					{stat.value}
-				</span>
+				<span className={clsx("text-lg font-bold sm:text-xl", colors.valueColor)}>{stat.value}</span>
 				<div className="flex items-center gap-2">
-					<span className="truncate text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
-						{stat.label}
-					</span>
+					<span className="truncate text-[11px] font-medium text-zinc-500 dark:text-zinc-400">{stat.label}</span>
 					{stat.trend && (
 						<span
 							className={clsx(
@@ -185,9 +176,7 @@ function DefaultStat({ stat }: { stat: StatItemConfig }) {
 					)}
 				</div>
 			</div>
-			{stat.sublabel && (
-				<span className="mt-0.5 text-[10px] text-zinc-400 dark:text-zinc-500">{stat.sublabel}</span>
-			)}
+			{stat.sublabel && <span className="mt-0.5 text-[10px] text-zinc-400 dark:text-zinc-500">{stat.sublabel}</span>}
 		</>
 	);
 
@@ -220,18 +209,14 @@ function DefaultStat({ stat }: { stat: StatItemConfig }) {
 function CompactStat({ stat }: { stat: StatItemConfig }) {
 	return (
 		<div className="flex items-center gap-2">
-			{stat.icon && (
-				<span className={clsx("size-4", iconColors[stat.iconColor || "zinc"])}>{stat.icon}</span>
-			)}
+			{stat.icon && <span className={clsx("size-4", iconColors[stat.iconColor || "zinc"])}>{stat.icon}</span>}
 			<span className="text-sm text-zinc-500 dark:text-zinc-400">{stat.label}:</span>
 			<span className="font-semibold text-zinc-900 dark:text-white">{stat.value}</span>
 			{stat.trend && (
 				<span
 					className={clsx(
 						"flex items-center gap-0.5 text-xs font-medium",
-						stat.trend.direction === "up"
-							? "text-emerald-600 dark:text-emerald-400"
-							: "text-red-600 dark:text-red-400"
+						stat.trend.direction === "up" ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"
 					)}
 				>
 					{stat.trend.direction === "up" ? (
@@ -252,19 +237,12 @@ function StatCard({ stat }: { stat: StatItemConfig }) {
 	const content = (
 		<>
 			{stat.icon && (
-				<div
-					className={clsx(
-						"flex size-10 shrink-0 items-center justify-center rounded-lg",
-						colors.iconBg
-					)}
-				>
+				<div className={clsx("flex size-10 shrink-0 items-center justify-center rounded-lg", colors.iconBg)}>
 					<span className={clsx("size-5", colors.iconColor)}>{stat.icon}</span>
 				</div>
 			)}
 			<div className="min-w-0">
-				<div className="truncate text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
-					{stat.label}
-				</div>
+				<div className="truncate text-[11px] font-medium text-zinc-500 dark:text-zinc-400">{stat.label}</div>
 				<div className="flex items-baseline gap-1.5">
 					<span className={clsx("text-lg font-bold", colors.valueColor)}>{stat.value}</span>
 					{stat.trend && (
@@ -288,8 +266,7 @@ function StatCard({ stat }: { stat: StatItemConfig }) {
 	const baseClassName = clsx(
 		"flex h-full items-center gap-3 rounded-xl p-3 ring-1 ring-zinc-200 dark:ring-zinc-800",
 		colors.bg,
-		(stat.href || stat.onClick) &&
-			"cursor-pointer transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800"
+		(stat.href || stat.onClick) && "cursor-pointer transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800"
 	);
 
 	if (stat.href) {
@@ -322,12 +299,7 @@ export interface QuickStatsProps {
 
 export function QuickStats({ children, className }: QuickStatsProps) {
 	return (
-		<div
-			className={clsx(
-				"flex flex-wrap items-center gap-6 rounded-xl bg-zinc-50 p-4 dark:bg-zinc-800/50",
-				className
-			)}
-		>
+		<div className={clsx("flex flex-wrap items-center gap-6 rounded-xl bg-zinc-50 p-4 dark:bg-zinc-800/50", className)}>
 			{children}
 		</div>
 	);
@@ -356,11 +328,7 @@ export function QuickStatItem({
 		<>
 			{divider && <div className="h-8 w-px bg-zinc-200 dark:bg-zinc-700" />}
 			<div className="flex items-center gap-2">
-				{icon && (
-					<div className={clsx("flex size-8 items-center justify-center rounded-lg", iconBg)}>
-						{icon}
-					</div>
-				)}
+				{icon && <div className={clsx("flex size-8 items-center justify-center rounded-lg", iconBg)}>{icon}</div>}
 				<div>
 					<div className="text-xs text-zinc-500 dark:text-zinc-400">{label}</div>
 					<div className="font-medium text-zinc-900 dark:text-white">{value}</div>

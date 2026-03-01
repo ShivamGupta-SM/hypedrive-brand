@@ -19,31 +19,23 @@ export function Rejected() {
 					</div>
 
 					{/* Title */}
-					<h1 className="text-2xl font-bold text-zinc-900 dark:text-white">
-						Application Not Approved
-					</h1>
+					<h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Application Not Approved</h1>
 
 					{/* Organization name */}
 					{organization && (
-						<p className="mt-2 text-lg font-medium text-zinc-600 dark:text-zinc-400">
-							{organization.name}
-						</p>
+						<p className="mt-2 text-lg font-medium text-zinc-600 dark:text-zinc-400">{organization.name}</p>
 					)}
 
 					{/* Description */}
 					<p className="mt-4 text-[15px] leading-relaxed text-zinc-500 dark:text-zinc-400">
-						Unfortunately, your organization application was not approved at this time. Please
-						review the details below.
+						Unfortunately, your organization application was not approved at this time. Please review the details below.
 					</p>
 
 					{/* Rejection notice */}
 					<div className="mt-6 rounded-xl bg-red-50 p-5 text-left dark:bg-red-950/30">
-						<h3 className="text-sm font-semibold text-red-800 dark:text-red-300">
-							Application Status
-						</h3>
+						<h3 className="text-sm font-semibold text-red-800 dark:text-red-300">Application Status</h3>
 						<p className="mt-2 text-sm text-red-700 dark:text-red-400">
-							Your application has been reviewed and was not approved. Please contact support for
-							more details.
+							Your application has been reviewed and was not approved. Please contact support for more details.
 						</p>
 					</div>
 

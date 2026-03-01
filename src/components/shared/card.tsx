@@ -50,6 +50,7 @@ export function Card({
 	return (
 		<Component
 			className={clsx(
+				"min-w-0 overflow-hidden",
 				variant === "hero" ? "rounded-2xl" : "rounded-xl",
 				variantStyles[variant],
 				paddingStyles[padding],
@@ -90,9 +91,7 @@ export function CardHeader({
 	size = "md",
 }: CardHeaderProps) {
 	if (children) {
-		return (
-			<div className={clsx("flex items-start justify-between gap-4", className)}>{children}</div>
-		);
+		return <div className={clsx("flex items-start justify-between gap-4", className)}>{children}</div>;
 	}
 
 	return (
@@ -110,14 +109,7 @@ export function CardHeader({
 						) : size === "md" ? (
 							<Subheading className={titleClassName}>{title}</Subheading>
 						) : (
-							<h4
-								className={clsx(
-									"text-sm font-semibold text-zinc-900 dark:text-white",
-									titleClassName
-								)}
-							>
-								{title}
-							</h4>
+							<h4 className={clsx("text-sm font-semibold text-zinc-900 dark:text-white", titleClassName)}>{title}</h4>
 						))}
 					{description && <Text className="mt-1 text-sm text-zinc-500">{description}</Text>}
 				</div>
@@ -198,9 +190,7 @@ const gapStyles = {
 };
 
 export function CardGrid({ children, columns = 3, gap = "md", className }: CardGridProps) {
-	return (
-		<div className={clsx("grid", columnStyles[columns], gapStyles[gap], className)}>{children}</div>
-	);
+	return <div className={clsx("grid", columnStyles[columns], gapStyles[gap], className)}>{children}</div>;
 }
 
 // =============================================================================
@@ -229,7 +219,7 @@ export interface StatCardProps {
 
 const statVariantStyles = {
 	default: {
-		card: "bg-white ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10",
+		card: "bg-white ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800",
 		icon: "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400",
 		value: "text-zinc-900 dark:text-white",
 		label: "text-zinc-500 dark:text-zinc-400",
@@ -367,11 +357,7 @@ export function StatCard({
 
 			<div className="flex items-start justify-between">
 				{icon && (
-					<div
-						className={clsx("flex items-center justify-center rounded-xl", sizes.icon, styles.icon)}
-					>
-						{icon}
-					</div>
+					<div className={clsx("flex items-center justify-center rounded-xl", sizes.icon, styles.icon)}>{icon}</div>
 				)}
 				{trend && !badge && (
 					<div
@@ -402,12 +388,7 @@ export function StatCard({
 			<div className="mt-1 flex items-center gap-2">
 				<span className={clsx(sizes.label, styles.label)}>{label}</span>
 				{sublabel && (
-					<span
-						className={clsx(
-							"text-xs",
-							styles.isPrimary ? "text-white/60" : "text-zinc-400 dark:text-zinc-500"
-						)}
-					>
+					<span className={clsx("text-xs", styles.isPrimary ? "text-white/60" : "text-zinc-400 dark:text-zinc-500")}>
 						{sublabel}
 					</span>
 				)}
@@ -421,7 +402,9 @@ export function StatCard({
 							href={action.href}
 							className={clsx(
 								"text-xs font-medium underline-offset-2 hover:underline",
-								styles.isPrimary ? "text-white/90" : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+								styles.isPrimary
+									? "text-white/90"
+									: "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
 							)}
 							onClick={(e) => e.stopPropagation()}
 						>
@@ -432,9 +415,14 @@ export function StatCard({
 							type="button"
 							className={clsx(
 								"text-xs font-medium underline-offset-2 hover:underline",
-								styles.isPrimary ? "text-white/90" : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+								styles.isPrimary
+									? "text-white/90"
+									: "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
 							)}
-							onClick={(e) => { e.stopPropagation(); action.onClick?.(); }}
+							onClick={(e) => {
+								e.stopPropagation();
+								action.onClick?.();
+							}}
 						>
 							{action.label}
 						</button>
@@ -467,18 +455,11 @@ const miniIconColors = {
 	red: "text-red-500",
 };
 
-export function MiniStat({
-	icon,
-	iconColor = "zinc",
-	label,
-	value,
-	sublabel,
-	className,
-}: MiniStatProps) {
+export function MiniStat({ icon, iconColor = "zinc", label, value, sublabel, className }: MiniStatProps) {
 	return (
 		<div
 			className={clsx(
-				"rounded-xl bg-white p-4 ring-1 ring-inset ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10",
+				"rounded-xl bg-white p-4 ring-1 ring-inset ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800",
 				className
 			)}
 		>

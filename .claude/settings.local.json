@@ -1,7 +1,21 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx vite build)",
+      "Bash(python3 -c \":*)",
+      "Bash(pnpm install)",
+      "Bash(pnpm dev --port 3000)",
+      "Bash(node -e \"require\\(''satori''\\); require\\(''@resvg/resvg-wasm''\\); console.log\\(''ok''\\)\")",
+      "Bash(npx biome check --write src/components/app-layout.tsx src/components/sidebar-layout.tsx src/components/sidebar.tsx src/components/search-dialog.tsx src/components/organization-switcher.tsx src/components/account-dropdown-menu.tsx)",
+      "Bash(npx biome check --write src/components/app-layout.tsx)",
+      "Bash(npx biome check --write src/components/sidebar.tsx src/components/app-layout.tsx)",
+      "Bash(pnpm check --write)",
+      "Bash(pnpm biome check src/pages/listings/create-listing-modal.tsx src/pages/campaigns/create-campaign-modal.tsx src/pages/listings/list.tsx src/pages/campaigns/list.tsx)",
+      "Bash(pnpm biome check src/pages/campaigns/create-campaign-modal.tsx src/pages/listings/create-listing-modal.tsx)",
+      "Bash(pnpm check)"
     ]
   }
 }

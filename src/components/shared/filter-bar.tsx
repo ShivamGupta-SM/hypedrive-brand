@@ -3,13 +3,7 @@
  * Standardized search and filter UI for list pages
  */
 
-import {
-	FunnelIcon,
-	ListBulletIcon,
-	MagnifyingGlassIcon,
-	Squares2X2Icon,
-	XMarkIcon,
-} from "@heroicons/react/20/solid";
+import { FunnelIcon, ListBulletIcon, MagnifyingGlassIcon, Squares2X2Icon, XMarkIcon } from "@heroicons/react/20/solid";
 import clsx from "clsx";
 import { Button } from "@/components/button";
 import { Input, InputGroup } from "@/components/input";
@@ -197,20 +191,12 @@ export function FilterBar({
 						<Text className="text-sm text-zinc-500">
 							{hasActiveFilters && totalCount !== undefined ? (
 								<>
-									Showing{" "}
-									<span className="font-medium text-zinc-700 dark:text-zinc-300">
-										{resultCount}
-									</span>{" "}
-									of{" "}
-									<span className="font-medium text-zinc-700 dark:text-zinc-300">{totalCount}</span>{" "}
-									results
+									Showing <span className="font-medium text-zinc-700 dark:text-zinc-300">{resultCount}</span> of{" "}
+									<span className="font-medium text-zinc-700 dark:text-zinc-300">{totalCount}</span> results
 								</>
 							) : (
 								<>
-									<span className="font-medium text-zinc-700 dark:text-zinc-300">
-										{resultCount}
-									</span>{" "}
-									results
+									<span className="font-medium text-zinc-700 dark:text-zinc-300">{resultCount}</span> results
 								</>
 							)}
 						</Text>
@@ -239,13 +225,7 @@ export interface FilterPillsProps {
 	allLabel?: string;
 }
 
-export function FilterPills({
-	className,
-	options,
-	value,
-	onChange,
-	allLabel = "All",
-}: FilterPillsProps) {
+export function FilterPills({ className, options, value, onChange, allLabel = "All" }: FilterPillsProps) {
 	return (
 		<div className={clsx("flex flex-wrap gap-2", className)}>
 			<button
@@ -273,9 +253,7 @@ export function FilterPills({
 					)}
 				>
 					{option.label}
-					{option.count !== undefined && (
-						<span className="ml-1.5 text-xs opacity-70">({option.count})</span>
-					)}
+					{option.count !== undefined && <span className="ml-1.5 text-xs opacity-70">({option.count})</span>}
 				</button>
 			))}
 		</div>
@@ -312,9 +290,7 @@ export function ActiveFilters({ className, filters, onRemove, onClearAll }: Acti
 					className="inline-flex items-center gap-1.5 rounded-full bg-zinc-100 py-1 pl-3 pr-1.5 text-sm dark:bg-zinc-800"
 				>
 					<span className="text-zinc-500 dark:text-zinc-400">{filter.label}:</span>
-					<span className="font-medium text-zinc-700 dark:text-zinc-300">
-						{filter.displayValue}
-					</span>
+					<span className="font-medium text-zinc-700 dark:text-zinc-300">{filter.displayValue}</span>
 					<button
 						type="button"
 						onClick={() => onRemove(filter.field)}

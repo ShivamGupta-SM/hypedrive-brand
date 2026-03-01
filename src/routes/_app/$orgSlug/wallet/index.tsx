@@ -1,6 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { WalletOverview } from "@/pages/wallet";
+import { WalletTransactions } from "@/pages/wallet";
 
 export const Route = createFileRoute("/_app/$orgSlug/wallet/")({
-	component: WalletOverview,
+	head: () => ({
+		meta: [{ title: "Transactions | Wallet | Hypedrive" }],
+	}),
+	component: WalletTransactions,
 });

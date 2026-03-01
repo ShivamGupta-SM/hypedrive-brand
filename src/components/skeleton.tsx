@@ -125,24 +125,12 @@ export function ButtonSkeleton({
 }
 
 /** Card skeleton */
-export function CardSkeleton({
-	height = 200,
-	className,
-}: {
-	height?: string | number;
-	className?: string;
-}) {
+export function CardSkeleton({ height = 200, className }: { height?: string | number; className?: string }) {
 	return <Skeleton width="100%" height={height} borderRadius={12} className={className} />;
 }
 
 /** Table row skeleton */
-export function TableRowSkeleton({
-	columns = 4,
-	className,
-}: {
-	columns?: number;
-	className?: string;
-}) {
+export function TableRowSkeleton({ columns = 4, className }: { columns?: number; className?: string }) {
 	return (
 		<div className={clsx("flex items-center gap-4 py-3", className)}>
 			{Array.from({ length: columns }).map((_, i) => (
@@ -162,10 +150,7 @@ export function TableRowSkeleton({
 export function StatCardSkeleton({ className }: { className?: string }) {
 	return (
 		<div
-			className={clsx(
-				"rounded-xl bg-white p-4 ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800",
-				className
-			)}
+			className={clsx("rounded-xl bg-white p-4 ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800", className)}
 		>
 			<Skeleton width={40} height={40} borderRadius={8} />
 			<Skeleton width={80} height={28} className="mt-4" />
@@ -218,9 +203,7 @@ interface SkeletonProviderProps {
  * Colors are auto-detected based on dark class on html element
  */
 export function SkeletonProvider({ children, darkMode }: SkeletonProviderProps) {
-	const isDark =
-		darkMode ??
-		(typeof document !== "undefined" && document.documentElement.classList.contains("dark"));
+	const isDark = darkMode ?? (typeof document !== "undefined" && document.documentElement.classList.contains("dark"));
 
 	return (
 		<SkeletonTheme

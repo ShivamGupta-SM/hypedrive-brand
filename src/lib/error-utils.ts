@@ -107,10 +107,7 @@ export function isAPIError(error: unknown): error is APIError {
  * Get user-friendly error message from any error
  * Checks error code first, then message patterns, then fallback
  */
-export function getErrorMessage(
-	error: unknown,
-	fallback = "Something went wrong. Please try again."
-): string {
+export function getErrorMessage(error: unknown, fallback = "Something went wrong. Please try again."): string {
 	if (!error) return fallback;
 
 	// Check error code mapping first
@@ -129,20 +126,14 @@ export function getErrorMessage(
 	// Auth patterns
 	if (
 		lowerMessage.includes("invalid") &&
-		(lowerMessage.includes("credentials") ||
-			lowerMessage.includes("password") ||
-			lowerMessage.includes("email"))
+		(lowerMessage.includes("credentials") || lowerMessage.includes("password") || lowerMessage.includes("email"))
 	) {
 		return "Invalid email or password. Please check and try again.";
 	}
 	if (lowerMessage.includes("not found") || lowerMessage.includes("no user")) {
 		return "No account found with this email. Please sign up first.";
 	}
-	if (
-		lowerMessage.includes("locked") ||
-		lowerMessage.includes("disabled") ||
-		lowerMessage.includes("suspended")
-	) {
+	if (lowerMessage.includes("locked") || lowerMessage.includes("disabled") || lowerMessage.includes("suspended")) {
 		return "Your account has been suspended. Please contact support.";
 	}
 	if (lowerMessage.includes("verify") || lowerMessage.includes("unverified")) {
@@ -150,36 +141,23 @@ export function getErrorMessage(
 	}
 	if (
 		lowerMessage.includes("email") &&
-		(lowerMessage.includes("exist") ||
-			lowerMessage.includes("taken") ||
-			lowerMessage.includes("already"))
+		(lowerMessage.includes("exist") || lowerMessage.includes("taken") || lowerMessage.includes("already"))
 	) {
 		return "This email is already registered.";
 	}
 
 	// Password patterns
-	if (
-		lowerMessage.includes("password") &&
-		(lowerMessage.includes("weak") || lowerMessage.includes("short"))
-	) {
+	if (lowerMessage.includes("password") && (lowerMessage.includes("weak") || lowerMessage.includes("short"))) {
 		return "Password must be at least 8 characters with letters and numbers.";
 	}
 
 	// Rate limiting
-	if (
-		lowerMessage.includes("rate") ||
-		lowerMessage.includes("limit") ||
-		lowerMessage.includes("too many")
-	) {
+	if (lowerMessage.includes("rate") || lowerMessage.includes("limit") || lowerMessage.includes("too many")) {
 		return "Too many attempts. Please wait a moment and try again.";
 	}
 
 	// Network
-	if (
-		lowerMessage.includes("network") ||
-		lowerMessage.includes("connection") ||
-		lowerMessage.includes("fetch")
-	) {
+	if (lowerMessage.includes("network") || lowerMessage.includes("connection") || lowerMessage.includes("fetch")) {
 		return "Network error. Please check your connection and try again.";
 	}
 
@@ -204,8 +182,7 @@ export function isUserExistsError(error: unknown): boolean {
 
 	const message = extractErrorMessage(error).toLowerCase();
 	return (
-		message.includes("email") &&
-		(message.includes("exist") || message.includes("taken") || message.includes("already"))
+		message.includes("email") && (message.includes("exist") || message.includes("taken") || message.includes("already"))
 	);
 }
 
@@ -217,9 +194,7 @@ export function isInvalidCredentialsError(error: unknown): boolean {
 	if (code === "invalid_credentials") return true;
 
 	const message = extractErrorMessage(error).toLowerCase();
-	return (
-		message.includes("invalid") && (message.includes("credentials") || message.includes("password"))
-	);
+	return message.includes("invalid") && (message.includes("credentials") || message.includes("password"));
 }
 
 /**
@@ -241,11 +216,7 @@ export function isNetworkError(error: unknown): boolean {
 	if (code === "network_error") return true;
 
 	const message = extractErrorMessage(error).toLowerCase();
-	return (
-		message.includes("network") ||
-		message.includes("connection") ||
-		message.includes("fetch failed")
-	);
+	return message.includes("network") || message.includes("connection") || message.includes("fetch failed");
 }
 
 /**

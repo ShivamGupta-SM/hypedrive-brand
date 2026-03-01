@@ -129,8 +129,7 @@ export const cardStyles = {
 	default: "rounded-xl bg-white ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800",
 
 	/** Elevated card with shadow */
-	elevated:
-		"rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800",
+	elevated: "rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800",
 
 	/** Interactive card with hover state */
 	interactive:
@@ -301,8 +300,7 @@ export const containerStyles = {
 	card: "rounded-xl bg-white ring-1 ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10",
 
 	// Card with shadow for elevated appearance
-	cardElevated:
-		"rounded-xl bg-white shadow-sm ring-1 ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10",
+	cardElevated: "rounded-xl bg-white shadow-sm ring-1 ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10",
 
 	// Bordered container (for form sections, etc.)
 	bordered: "rounded-lg border border-zinc-200 dark:border-zinc-700",
@@ -311,8 +309,7 @@ export const containerStyles = {
 	subtle: "rounded-lg bg-zinc-50 dark:bg-zinc-800/50",
 
 	// Dashed border (for empty states, drop zones)
-	dashed:
-		"rounded-xl border-2 border-dashed border-zinc-200 bg-zinc-50/50 dark:border-zinc-700 dark:bg-zinc-800/30",
+	dashed: "rounded-xl border-2 border-dashed border-zinc-200 bg-zinc-50/50 dark:border-zinc-700 dark:bg-zinc-800/30",
 
 	// Info boxes by variant
 	infoBox: {
@@ -396,10 +393,7 @@ export function card(variant: keyof typeof containerStyles = "card", className?:
 /**
  * Get info box style by variant
  */
-export function infoBox(
-	variant: keyof typeof containerStyles.infoBox = "neutral",
-	className?: string
-): string {
+export function infoBox(variant: keyof typeof containerStyles.infoBox = "neutral", className?: string): string {
 	return clsx(containerStyles.infoBox[variant], className);
 }
 

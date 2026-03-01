@@ -13,12 +13,14 @@ import {
 	canPerformAnyOrgAction,
 	canPerformOrgAction,
 	canWriteOrgResource,
+	clearCustomRolePermissions,
 	getOrgAllowedActions,
 	hasAnyOrgPermission,
 	isReadOnlyOrgResource,
 	type OrgAction,
 	type OrgResource,
 	type OrgRole,
+	registerCustomRolePermissions,
 } from "@/lib/permissions/access-control-client";
 
 // =============================================================================
@@ -30,6 +32,7 @@ export type { OrgResource, OrgAction, OrgRole };
 export interface PermissionContext {
 	userId: string;
 	organizationRole?: string;
+	customPermissions?: Record<string, string[]> | null;
 }
 
 // =============================================================================
@@ -46,10 +49,14 @@ export const usePermissionsStore = create<PermissionsState>((set) => ({
 	context: null,
 
 	setPermissions: (context) => {
+		registerCustomRolePermissions(context.customPermissions ?? null);
 		set({ context });
 	},
 
-	clearPermissions: () => set({ context: null }),
+	clearPermissions: () => {
+		clearCustomRolePermissions();
+		set({ context: null });
+	},
 }));
 
 // =============================================================================

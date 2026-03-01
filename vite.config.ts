@@ -17,6 +17,9 @@ export default defineConfig({
 		react(),
 		tailwindcss(),
 	],
+	optimizeDeps: {
+		include: ["use-sync-external-store/shim/with-selector.js"],
+	},
 	build: {
 		// Split large vendor libraries into separate chunks for better caching
 		rollupOptions: {

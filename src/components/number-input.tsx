@@ -5,29 +5,30 @@
 
 import clsx from "clsx";
 import { forwardRef } from "react";
-import {
-	NumericFormat,
-	type NumericFormatProps,
-	PatternFormat,
-	type PatternFormatProps,
-} from "react-number-format";
+import { NumericFormat, type NumericFormatProps, PatternFormat, type PatternFormatProps } from "react-number-format";
 
 // =============================================================================
-// BASE STYLES
+// CATALYST-MATCHING STYLES (mirrors src/components/input.tsx)
 // =============================================================================
 
-const baseInputStyles = (size: "sm" | "md" | "lg", error?: boolean) =>
+const wrapperStyles = (error?: boolean) =>
 	clsx(
-		"w-full rounded-lg border bg-transparent outline-none transition-colors",
-		"text-zinc-900 placeholder:text-zinc-400 dark:text-white dark:placeholder:text-zinc-500",
+		"relative block w-full",
+		"before:absolute before:inset-px before:rounded-[calc(var(--radius-lg)-1px)] before:bg-white before:shadow-sm",
+		"dark:before:hidden",
+		"after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:ring-transparent after:ring-inset sm:focus-within:after:ring-2 sm:focus-within:after:ring-blue-500",
+		error && "after:ring-red-500 sm:focus-within:after:ring-red-500"
+	);
+
+const inputStyles = (error?: boolean) =>
+	clsx(
+		"relative block w-full appearance-none rounded-lg px-[calc(--spacing(3.5)-1px)] py-[calc(--spacing(2.5)-1px)] sm:px-[calc(--spacing(3)-1px)] sm:py-[calc(--spacing(1.5)-1px)]",
+		"text-base/6 text-zinc-950 placeholder:text-zinc-500 sm:text-sm/6 dark:text-white",
 		error
-			? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
-			: "border-zinc-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-white/10 dark:focus:border-blue-500",
-		size === "sm"
-			? "h-8 px-2 text-sm"
-			: size === "lg"
-				? "h-11 px-4 text-base"
-				: "h-[38px] px-3 text-sm"
+			? "border border-red-500 hover:border-red-500 dark:border-red-600 dark:hover:border-red-600"
+			: "border border-zinc-950/10 hover:border-zinc-950/20 dark:border-white/10 dark:hover:border-white/20",
+		"bg-transparent dark:bg-white/5",
+		"focus:outline-hidden"
 	);
 
 // =============================================================================
@@ -35,8 +36,6 @@ const baseInputStyles = (size: "sm" | "md" | "lg", error?: boolean) =>
 // =============================================================================
 
 export interface NumberInputProps extends Omit<NumericFormatProps, "customInput" | "size"> {
-	/** Size variant */
-	size?: "sm" | "md" | "lg";
 	/** Error state */
 	error?: boolean;
 	/** Container class name */
@@ -44,15 +43,11 @@ export interface NumberInputProps extends Omit<NumericFormatProps, "customInput"
 }
 
 export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
-	({ size = "md", error, className, containerClassName, ...props }, ref) => {
+	({ error, className, containerClassName, ...props }, ref) => {
 		return (
-			<div className={containerClassName}>
-				<NumericFormat
-					getInputRef={ref}
-					className={clsx(baseInputStyles(size, error), className)}
-					{...props}
-				/>
-			</div>
+			<span data-slot="control" className={clsx(wrapperStyles(error), containerClassName)}>
+				<NumericFormat getInputRef={ref} className={clsx(inputStyles(error), className)} {...props} />
+			</span>
 		);
 	}
 );
@@ -64,10 +59,7 @@ NumberInput.displayName = "NumberInput";
 // =============================================================================
 
 export interface CurrencyInputProps
-	extends Omit<
-		NumberInputProps,
-		"prefix" | "thousandSeparator" | "decimalScale" | "fixedDecimalScale"
-	> {
+	extends Omit<NumberInputProps, "prefix" | "thousandSeparator" | "decimalScale" | "fixedDecimalScale"> {
 	/** Currency symbol */
 	currency?: string;
 	/** Number of decimal places */
@@ -103,15 +95,7 @@ export interface PercentageInputProps extends Omit<NumberInputProps, "suffix" | 
 
 export const PercentageInput = forwardRef<HTMLInputElement, PercentageInputProps>(
 	({ decimals = 1, placeholder = "0", ...props }, ref) => {
-		return (
-			<NumberInput
-				ref={ref}
-				suffix="%"
-				decimalScale={decimals}
-				placeholder={`${placeholder}%`}
-				{...props}
-			/>
-		);
+		return <NumberInput ref={ref} suffix="%" decimalScale={decimals} placeholder={`${placeholder}%`} {...props} />;
 	}
 );
 
@@ -122,8 +106,6 @@ PercentageInput.displayName = "PercentageInput";
 // =============================================================================
 
 export interface PatternInputProps extends Omit<PatternFormatProps, "customInput" | "size"> {
-	/** Size variant */
-	size?: "sm" | "md" | "lg";
 	/** Error state */
 	error?: boolean;
 	/** Container class name */
@@ -131,15 +113,11 @@ export interface PatternInputProps extends Omit<PatternFormatProps, "customInput
 }
 
 export const PatternInput = forwardRef<HTMLInputElement, PatternInputProps>(
-	({ size = "md", error, className, containerClassName, ...props }, ref) => {
+	({ error, className, containerClassName, ...props }, ref) => {
 		return (
-			<div className={containerClassName}>
-				<PatternFormat
-					getInputRef={ref}
-					className={clsx(baseInputStyles(size, error), className)}
-					{...props}
-				/>
-			</div>
+			<span data-slot="control" className={clsx(wrapperStyles(error), containerClassName)}>
+				<PatternFormat getInputRef={ref} className={clsx(inputStyles(error), className)} {...props} />
+			</span>
 		);
 	}
 );
@@ -157,16 +135,7 @@ export interface PhoneInputProps extends Omit<PatternInputProps, "format" | "mas
 
 export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
 	({ format = "(###) ###-####", placeholder = "(555) 123-4567", ...props }, ref) => {
-		return (
-			<PatternInput
-				ref={ref}
-				format={format}
-				mask="_"
-				placeholder={placeholder}
-				type="tel"
-				{...props}
-			/>
-		);
+		return <PatternInput ref={ref} format={format} mask="_" placeholder={placeholder} type="tel" {...props} />;
 	}
 );
 
@@ -180,15 +149,7 @@ export interface CreditCardInputProps extends Omit<PatternInputProps, "format" |
 
 export const CreditCardInput = forwardRef<HTMLInputElement, CreditCardInputProps>(
 	({ placeholder = "1234 5678 9012 3456", ...props }, ref) => {
-		return (
-			<PatternInput
-				ref={ref}
-				format="#### #### #### ####"
-				mask="_"
-				placeholder={placeholder}
-				{...props}
-			/>
-		);
+		return <PatternInput ref={ref} format="#### #### #### ####" mask="_" placeholder={placeholder} {...props} />;
 	}
 );
 
@@ -202,15 +163,7 @@ export interface ExpiryDateInputProps extends Omit<PatternInputProps, "format" |
 
 export const ExpiryDateInput = forwardRef<HTMLInputElement, ExpiryDateInputProps>(
 	({ placeholder = "MM/YY", ...props }, ref) => {
-		return (
-			<PatternInput
-				ref={ref}
-				format="##/##"
-				mask={["M", "M", "Y", "Y"]}
-				placeholder={placeholder}
-				{...props}
-			/>
-		);
+		return <PatternInput ref={ref} format="##/##" mask={["M", "M", "Y", "Y"]} placeholder={placeholder} {...props} />;
 	}
 );
 
@@ -225,20 +178,18 @@ export interface CvvInputProps extends Omit<PatternInputProps, "format" | "mask"
 	length?: 3 | 4;
 }
 
-export const CvvInput = forwardRef<HTMLInputElement, CvvInputProps>(
-	({ length = 3, placeholder, ...props }, ref) => {
-		return (
-			<PatternInput
-				ref={ref}
-				format={length === 4 ? "####" : "###"}
-				mask="_"
-				placeholder={placeholder || (length === 4 ? "0000" : "000")}
-				type="password"
-				{...props}
-			/>
-		);
-	}
-);
+export const CvvInput = forwardRef<HTMLInputElement, CvvInputProps>(({ length = 3, placeholder, ...props }, ref) => {
+	return (
+		<PatternInput
+			ref={ref}
+			format={length === 4 ? "####" : "###"}
+			mask="_"
+			placeholder={placeholder || (length === 4 ? "0000" : "000")}
+			type="password"
+			{...props}
+		/>
+	);
+});
 
 CvvInput.displayName = "CvvInput";
 

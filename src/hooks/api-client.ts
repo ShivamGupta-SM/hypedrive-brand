@@ -65,11 +65,7 @@ interface APIError {
 }
 
 export function isAPIError(error: unknown): error is APIError {
-	return (
-		typeof error === "object" &&
-		error !== null &&
-		("code" in error || "message" in error || "status" in error)
-	);
+	return typeof error === "object" && error !== null && ("code" in error || "message" in error || "status" in error);
 }
 
 export function getAPIErrorMessage(error: unknown, fallback = "Something went wrong"): string {
@@ -93,24 +89,16 @@ export const queryKeys = {
 	organizationActivity: (orgId: string, params?: Record<string, unknown>) =>
 		["organization", orgId, "activity", params] as const,
 	dashboard: (orgId: string) => ["dashboard", orgId] as const,
-	campaigns: (orgId: string, params?: Record<string, unknown>) =>
-		["campaigns", orgId, params] as const,
+	campaigns: (orgId: string, params?: Record<string, unknown>) => ["campaigns", orgId, params] as const,
 	campaign: (orgId: string, campaignId: string) => ["campaigns", orgId, campaignId] as const,
-	campaignStats: (orgId: string, campaignId: string) =>
-		["campaigns", orgId, campaignId, "stats"] as const,
-	infiniteCampaigns: (orgId: string, params?: Record<string, unknown>) =>
-		["infiniteCampaigns", orgId, params] as const,
-	campaignTasks: (orgId: string, campaignId: string) =>
-		["campaignTasks", orgId, campaignId] as const,
-	listings: (orgId: string, params?: Record<string, unknown>) =>
-		["listings", orgId, params] as const,
+	campaignStats: (orgId: string, campaignId: string) => ["campaigns", orgId, campaignId, "stats"] as const,
+	infiniteCampaigns: (orgId: string, params?: Record<string, unknown>) => ["infiniteCampaigns", orgId, params] as const,
+	campaignTasks: (orgId: string, campaignId: string) => ["campaignTasks", orgId, campaignId] as const,
+	listings: (orgId: string, params?: Record<string, unknown>) => ["listings", orgId, params] as const,
 	listing: (orgId: string, listingId: string) => ["listings", orgId, listingId] as const,
-	infiniteListings: (orgId: string, params?: Record<string, unknown>) =>
-		["infiniteListings", orgId, params] as const,
-	enrollments: (orgId: string, params?: Record<string, unknown>) =>
-		["enrollments", orgId, params] as const,
-	enrollment: (orgId: string, enrollmentId: string) =>
-		["enrollments", orgId, enrollmentId] as const,
+	infiniteListings: (orgId: string, params?: Record<string, unknown>) => ["infiniteListings", orgId, params] as const,
+	enrollments: (orgId: string, params?: Record<string, unknown>) => ["enrollments", orgId, params] as const,
+	enrollment: (orgId: string, enrollmentId: string) => ["enrollments", orgId, enrollmentId] as const,
 	infiniteEnrollments: (orgId: string, params?: Record<string, unknown>) =>
 		["infiniteEnrollments", orgId, params] as const,
 	wallet: (orgId: string) => ["wallet", orgId] as const,
@@ -119,18 +107,14 @@ export const queryKeys = {
 	walletHolds: (orgId: string) => ["wallet", orgId, "holds"] as const,
 	infiniteWalletTransactions: (orgId: string, params?: Record<string, unknown>) =>
 		["infiniteWalletTransactions", orgId, params] as const,
-	withdrawals: (orgId: string, params?: Record<string, unknown>) =>
-		["wallet", orgId, "withdrawals", params] as const,
+	withdrawals: (orgId: string, params?: Record<string, unknown>) => ["wallet", orgId, "withdrawals", params] as const,
 	withdrawalStats: (orgId: string) => ["wallet", orgId, "withdrawalStats"] as const,
-	deposits: (orgId: string, params?: Record<string, unknown>) =>
-		["wallet", orgId, "deposits", params] as const,
+	deposits: (orgId: string, params?: Record<string, unknown>) => ["wallet", orgId, "deposits", params] as const,
 	virtualAccount: (orgId: string) => ["wallet", orgId, "virtualAccount"] as const,
 	bankAccount: (orgId: string) => ["bankAccount", orgId] as const,
-	invoices: (orgId: string, params?: Record<string, unknown>) =>
-		["invoices", orgId, params] as const,
+	invoices: (orgId: string, params?: Record<string, unknown>) => ["invoices", orgId, params] as const,
 	invoice: (orgId: string, invoiceId: string) => ["invoices", orgId, invoiceId] as const,
-	infiniteInvoices: (orgId: string, params?: Record<string, unknown>) =>
-		["infiniteInvoices", orgId, params] as const,
+	infiniteInvoices: (orgId: string, params?: Record<string, unknown>) => ["infiniteInvoices", orgId, params] as const,
 	gstDetails: (orgId: string) => ["gst", orgId] as const,
 	members: (orgId: string) => ["members", orgId] as const,
 	invitations: (orgId: string) => ["invitations", orgId] as const,
@@ -142,19 +126,18 @@ export const queryKeys = {
 	fullOrganization: (orgId: string) => ["fullOrganization", orgId] as const,
 	deviceSessions: () => ["deviceSessions"] as const,
 	passkeys: () => ["passkeys"] as const,
-	notifications: (orgId: string, params?: Record<string, unknown>) =>
-		["notifications", orgId, params] as const,
+	notifications: (orgId: string, params?: Record<string, unknown>) => ["notifications", orgId, params] as const,
 	unreadCount: (orgId: string) => ["notifications", orgId, "unreadCount"] as const,
 	files: () => ["files"] as const,
-	withdrawal: (orgId: string, withdrawalId: string) =>
-		["wallet", orgId, "withdrawal", withdrawalId] as const,
+	withdrawal: (orgId: string, withdrawalId: string) => ["wallet", orgId, "withdrawal", withdrawalId] as const,
 	organizationRoles: (orgId: string) => ["organizationRoles", orgId] as const,
 	enrichment: (params?: Record<string, unknown>) => ["enrichment", params] as const,
 	logoPreview: (domain: string) => ["logoPreview", domain] as const,
 	linkedAccounts: () => ["linkedAccounts"] as const,
 	userInvitations: () => ["userInvitations"] as const,
-	organizationRole: (orgId: string, roleId: string) =>
-		["organizationRoles", orgId, roleId] as const,
+	organizationRole: (orgId: string, roleId: string) => ["organizationRoles", orgId, roleId] as const,
+	platforms: () => ["platforms"] as const,
+	taskTemplates: (params?: Record<string, unknown>) => ["taskTemplates", params] as const,
 };
 
 export const DEFAULT_PAGE_SIZE = 20;

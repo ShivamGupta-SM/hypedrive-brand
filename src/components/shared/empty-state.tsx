@@ -104,10 +104,7 @@ function CollageCards({ preset = "generic" }: { preset?: PresetType }) {
 				)}
 			>
 				<LeftIcon
-					className={clsx(
-						"size-5 transition-transform duration-500 group-hover:scale-110",
-						cards[0].iconColor
-					)}
+					className={clsx("size-5 transition-transform duration-500 group-hover:scale-110", cards[0].iconColor)}
 				/>
 			</div>
 
@@ -122,10 +119,7 @@ function CollageCards({ preset = "generic" }: { preset?: PresetType }) {
 				)}
 			>
 				<CenterIcon
-					className={clsx(
-						"size-6 transition-transform duration-500 group-hover:scale-110",
-						cards[1].iconColor
-					)}
+					className={clsx("size-6 transition-transform duration-500 group-hover:scale-110", cards[1].iconColor)}
 				/>
 			</div>
 
@@ -140,10 +134,7 @@ function CollageCards({ preset = "generic" }: { preset?: PresetType }) {
 				)}
 			>
 				<RightIcon
-					className={clsx(
-						"size-5 transition-transform duration-500 group-hover:scale-110",
-						cards[2].iconColor
-					)}
+					className={clsx("size-5 transition-transform duration-500 group-hover:scale-110", cards[2].iconColor)}
 				/>
 			</div>
 		</div>

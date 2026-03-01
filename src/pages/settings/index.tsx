@@ -1,6 +1,6 @@
 import {
 	BanknotesIcon,
-	BuildingOffice2Icon,
+	BuildingStorefrontIcon,
 	CameraIcon,
 	CheckCircleIcon,
 	CreditCardIcon,
@@ -15,9 +15,11 @@ import {
 } from "@heroicons/react/16/solid";
 import { startAuthentication } from "@simplewebauthn/browser";
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Badge } from "@/components/badge";
 import { Button } from "@/components/button";
+import { Combobox, ComboboxLabel, ComboboxOption } from "@/components/combobox";
+import { CountryFlag } from "@/components/country-flag";
 import { Field, Label } from "@/components/fieldset";
 import { Heading } from "@/components/heading";
 import { Input } from "@/components/input";
@@ -44,6 +46,13 @@ import {
 	useVerifyBankAccount,
 } from "@/hooks";
 import { useOrgSlug } from "@/hooks/use-org-slug";
+import {
+	getAllCountries,
+	getCitiesForState,
+	getStatesForCountry,
+	resolveCountryIsoCode,
+	resolveStateIsoCode,
+} from "@/lib/location-data";
 import { showToast } from "@/lib/toast";
 import { useCan } from "@/store/permissions-store";
 
@@ -98,14 +107,14 @@ function OrganizationProfileCard({
 
 	return (
 		<div className="overflow-hidden rounded-2xl bg-zinc-900 ring-1 ring-white/5 dark:bg-zinc-800">
-			<div className="flex items-center justify-between px-5 py-4">
-				<div className="flex items-center gap-4">
-					<div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-zinc-700 text-lg font-bold text-white ring-1 ring-white/10 dark:bg-zinc-600">
+			<div className="flex items-center justify-between px-4 py-4 sm:px-5">
+				<div className="flex items-center gap-3 sm:gap-4">
+					<div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-zinc-700 text-base font-bold text-white ring-1 ring-white/10 sm:size-14 sm:rounded-2xl sm:text-lg dark:bg-zinc-600">
 						{logoUrl ? <img src={logoUrl} alt={name} className="size-full object-cover" /> : initials}
 					</div>
 					<div className="min-w-0">
-						<h2 className="truncate text-base font-semibold text-white">{name}</h2>
-						<p className="mt-0.5 truncate text-sm text-zinc-400">Organization</p>
+						<h2 className="truncate text-sm font-semibold text-white sm:text-base">{name}</h2>
+						<p className="mt-0.5 truncate text-xs text-zinc-400 sm:text-sm">Organization</p>
 					</div>
 				</div>
 				{canEdit && (
@@ -122,9 +131,9 @@ function OrganizationProfileCard({
 			{/* Stats strip */}
 			<div className="grid grid-cols-3 divide-x divide-white/8 border-t border-white/8">
 				{stats.map((stat) => (
-					<div key={stat.label} className="px-4 py-3 text-center">
-						<p className="text-base font-bold text-white">{stat.value}</p>
-						<p className="mt-0.5 text-[11px] font-medium text-zinc-400">{stat.label}</p>
+					<div key={stat.label} className="px-3 py-2.5 text-center sm:px-4 sm:py-3">
+						<p className="text-sm font-bold text-white sm:text-base">{stat.value}</p>
+						<p className="mt-0.5 text-[10px] font-medium text-zinc-400 sm:text-[11px]">{stat.label}</p>
 					</div>
 				))}
 			</div>
@@ -161,6 +170,26 @@ function EditOrganizationPanel({
 	const [error, setError] = useState<string | null>(null);
 	const [logoPreview, setLogoPreview] = useState<string | null>(null);
 	const [logoFile, setLogoFile] = useState<File | null>(null);
+
+	const countries = useMemo(() => getAllCountries(), []);
+	const selectedCountry = useMemo(() => {
+		if (!formData.country) return null;
+		const val = formData.country.trim().toLowerCase();
+		return countries.find((c) => c.name.toLowerCase() === val || c.isoCode.toLowerCase() === val) ?? null;
+	}, [countries, formData.country]);
+	const countryCode = selectedCountry?.isoCode ?? resolveCountryIsoCode(formData.country || "");
+	const stateOptions = useMemo(() => (countryCode ? getStatesForCountry(countryCode) : []), [countryCode]);
+	const selectedState = useMemo(() => {
+		if (!formData.state) return null;
+		const val = formData.state.trim().toLowerCase();
+		return stateOptions.find((s) => s.name.toLowerCase() === val || s.isoCode.toLowerCase() === val) ?? null;
+	}, [stateOptions, formData.state]);
+	const stateCode =
+		selectedState?.isoCode ?? (countryCode ? resolveStateIsoCode(countryCode, formData.state || "") : null);
+	const cityOptions = useMemo(
+		() => (countryCode && stateCode ? getCitiesForState(countryCode, stateCode) : []),
+		[countryCode, stateCode]
+	);
 
 	const updateOrg = useUpdateOrganizationSettings(organizationId);
 	const fileUpload = useFileUpload();
@@ -211,7 +240,7 @@ function EditOrganizationPanel({
 				address: formData.address?.trim() || undefined,
 				city: formData.city?.trim() || undefined,
 				state: formData.state?.trim() || undefined,
-				country: formData.country?.trim() || undefined,
+				country: countryCode || undefined,
 				postalCode: formData.postalCode?.trim() || undefined,
 			});
 			showToast.success("Organization updated");
@@ -282,7 +311,7 @@ function EditOrganizationPanel({
 					/>
 				</Field>
 
-				<div className="grid grid-cols-2 gap-3">
+				<div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
 					<Field>
 						<Label>Website</Label>
 						<Input
@@ -310,43 +339,96 @@ function EditOrganizationPanel({
 					/>
 				</Field>
 
-				<div className="grid grid-cols-2 gap-3">
-					<Field>
-						<Label>City</Label>
-						<Input
-							value={formData.city || ""}
-							onChange={(e) => setFormData((p) => ({ ...p, city: e.target.value }))}
-							placeholder="City"
-						/>
-					</Field>
+				<Field>
+					<Label>Country</Label>
+					<Combobox
+						options={countries}
+						value={selectedCountry}
+						onChange={(c) => {
+							setFormData((p) => ({
+								...p,
+								country: c?.name || "",
+								state: "",
+								city: "",
+							}));
+						}}
+						displayValue={(c) => c?.name ?? ""}
+						placeholder="Search country..."
+					>
+						{(option) => (
+							<ComboboxOption key={option.isoCode} value={option}>
+								<CountryFlag country={option.isoCode} size="s" />
+								<ComboboxLabel>{option.name}</ComboboxLabel>
+							</ComboboxOption>
+						)}
+					</Combobox>
+				</Field>
+
+				<div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
 					<Field>
 						<Label>State</Label>
-						<Input
-							value={formData.state || ""}
-							onChange={(e) => setFormData((p) => ({ ...p, state: e.target.value }))}
-							placeholder="State"
-						/>
+						{stateOptions.length > 0 ? (
+							<Combobox
+								options={stateOptions}
+								value={selectedState}
+								onChange={(s) => {
+									setFormData((p) => ({
+										...p,
+										state: s?.name || "",
+										city: "",
+									}));
+								}}
+								displayValue={(s) => s?.name ?? ""}
+								placeholder="Search state..."
+							>
+								{(option) => (
+									<ComboboxOption key={option.isoCode} value={option}>
+										<ComboboxLabel>{option.name}</ComboboxLabel>
+									</ComboboxOption>
+								)}
+							</Combobox>
+						) : (
+							<Input
+								value={formData.state || ""}
+								onChange={(e) => setFormData((p) => ({ ...p, state: e.target.value }))}
+								placeholder="State / Province"
+							/>
+						)}
+					</Field>
+					<Field>
+						<Label>City</Label>
+						{cityOptions.length > 0 ? (
+							<Combobox
+								options={cityOptions}
+								value={formData.city || null}
+								onChange={(c) => setFormData((p) => ({ ...p, city: c || "" }))}
+								displayValue={(c) => c ?? ""}
+								placeholder="Search city..."
+							>
+								{(option) => (
+									<ComboboxOption key={option} value={option}>
+										<ComboboxLabel>{option}</ComboboxLabel>
+									</ComboboxOption>
+								)}
+							</Combobox>
+						) : (
+							<Input
+								value={formData.city || ""}
+								onChange={(e) => setFormData((p) => ({ ...p, city: e.target.value }))}
+								placeholder="City"
+							/>
+						)}
 					</Field>
 				</div>
 
-				<div className="grid grid-cols-2 gap-3">
-					<Field>
-						<Label>Country</Label>
-						<Input
-							value={formData.country || ""}
-							onChange={(e) => setFormData((p) => ({ ...p, country: e.target.value }))}
-							placeholder="India"
-						/>
-					</Field>
-					<Field>
-						<Label>Postal Code</Label>
-						<Input
-							value={formData.postalCode || ""}
-							onChange={(e) => setFormData((p) => ({ ...p, postalCode: e.target.value }))}
-							placeholder="400001"
-						/>
-					</Field>
-				</div>
+				<Field>
+					<Label>Postal Code</Label>
+					<Input
+						value={formData.postalCode || ""}
+						onChange={(e) => setFormData((p) => ({ ...p, postalCode: e.target.value }))}
+						placeholder="400001"
+					/>
+				</Field>
 			</form>
 
 			<div className="flex justify-end gap-3 border-t border-zinc-100 pt-4 dark:border-zinc-800">
@@ -630,12 +712,15 @@ export function Settings({ section = "all" }: { section?: OrgSettingsSection } =
 	const stats = dashboardData?.stats;
 
 	const canUpdateOrganization = useCan("organization", "update");
+	const canCreateBankAccount = useCan("bankAccount", "create");
+	const canDeleteBankAccount = useCan("bankAccount", "delete");
 	const orgSlug = useOrgSlug();
 	const panelNav = usePanelNav();
 
-	const formatSpent = (amountInPaise: number | undefined) => {
-		if (!amountInPaise) return "₹0";
-		const amount = amountInPaise / 100;
+	const formatSpent = (decimal: string | undefined) => {
+		if (!decimal) return "₹0";
+		const amount = parseFloat(decimal);
+		if (Number.isNaN(amount) || amount === 0) return "₹0";
 		if (amount >= 100000) return `₹${(amount / 100000).toFixed(1)}L`;
 		if (amount >= 1000) return `₹${(amount / 1000).toFixed(1)}K`;
 		return `₹${amount.toFixed(0)}`;
@@ -710,7 +795,7 @@ export function Settings({ section = "all" }: { section?: OrgSettingsSection } =
 				stats={[
 					{ label: "Campaigns", value: stats?.activeCampaigns ?? 0 },
 					{ label: "Enrollments", value: stats?.totalEnrollments ?? 0 },
-					{ label: "Balance", value: formatSpent(stats?.walletBalance) },
+					{ label: "Balance", value: formatSpent(stats?.walletBalanceDecimal) },
 				]}
 				onEditProfile={openEditOrg}
 				canEdit={canUpdateOrganization}
@@ -719,7 +804,7 @@ export function Settings({ section = "all" }: { section?: OrgSettingsSection } =
 				<MenuSectionHeader>Organization Details</MenuSectionHeader>
 				<MenuSection>
 					<MenuRow
-						icon={BuildingOffice2Icon}
+						icon={BuildingStorefrontIcon}
 						iconColor="sky"
 						label="Organization Name"
 						value={organization?.name || "—"}
@@ -828,7 +913,7 @@ export function Settings({ section = "all" }: { section?: OrgSettingsSection } =
 							<CheckCircleIcon className="size-3" />
 							Verified
 						</Badge>
-						{canUpdateOrganization && (
+						{canDeleteBankAccount && (
 							<Button
 								plain
 								onClick={handleDeleteBank}
@@ -850,7 +935,7 @@ export function Settings({ section = "all" }: { section?: OrgSettingsSection } =
 						<p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">No bank account added</p>
 						<p className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500">Add a bank account to enable withdrawals</p>
 					</div>
-					{canUpdateOrganization && (
+					{canCreateBankAccount && (
 						<Button color="dark/zinc" onClick={openAddBank}>
 							Add Bank Account
 						</Button>
@@ -879,7 +964,7 @@ export function Settings({ section = "all" }: { section?: OrgSettingsSection } =
 	);
 
 	return (
-		<div className={isDialog ? "space-y-6 px-6 py-5 pb-10" : "space-y-6 pb-20"}>
+		<div className={isDialog ? "space-y-6 px-4 py-5 pb-10 sm:px-6" : "space-y-6 pb-20"}>
 			{section === "all" && (
 				<div>
 					<Heading>Organization Settings</Heading>

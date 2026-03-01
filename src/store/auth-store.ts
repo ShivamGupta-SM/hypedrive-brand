@@ -39,6 +39,7 @@ export interface AuthUser {
 interface LoginParams {
 	email: string;
 	password: string;
+	rememberMe?: boolean;
 }
 
 interface RegisterParams {
@@ -96,7 +97,9 @@ export function useLogin() {
 	) => {
 		setIsPending(true);
 		try {
-			const result = await loginAction({ data: params });
+			const result = await loginAction({
+				data: { email: params.email, password: params.password, rememberMe: params.rememberMe },
+			});
 			if (result.success && "user" in result && result.user) {
 				useAuthStore.getState().setUser(result.user);
 				useAuthStore.getState().setAuthenticated(true);

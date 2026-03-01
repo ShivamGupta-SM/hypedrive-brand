@@ -1,9 +1,4 @@
-import {
-	EyeIcon,
-	EyeSlashIcon,
-	KeyIcon,
-	ShieldCheckIcon,
-} from "@heroicons/react/16/solid";
+import { EyeIcon, EyeSlashIcon, KeyIcon, ShieldCheckIcon } from "@heroicons/react/16/solid";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { startAuthentication } from "@simplewebauthn/browser";
 import { useNavigate } from "@tanstack/react-router";
@@ -29,6 +24,7 @@ import { FormError } from "./components";
 const loginSchema = z.object({
 	email: z.string().min(1, "Please enter your email").email("Please enter a valid email address"),
 	password: z.string().min(1, "Please enter your password"),
+	rememberMe: z.boolean(),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -38,10 +34,22 @@ type LoginFormData = z.infer<typeof loginSchema>;
 function GoogleIcon() {
 	return (
 		<svg className="size-4.5" viewBox="0 0 24 24" aria-hidden="true">
-			<path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
-			<path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-			<path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-			<path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+			<path
+				d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+				fill="#4285F4"
+			/>
+			<path
+				d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+				fill="#34A853"
+			/>
+			<path
+				d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+				fill="#FBBC05"
+			/>
+			<path
+				d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+				fill="#EA4335"
+			/>
 		</svg>
 	);
 }
@@ -102,22 +110,32 @@ export function Login() {
 	const handleSocialLogin = useCallback(
 		(provider: "google" | "apple") => {
 			socialLogin(provider, {
-				onSuccess: (redirectUrl) => { if (redirectUrl) window.location.href = redirectUrl; },
+				onSuccess: (redirectUrl) => {
+					if (redirectUrl) window.location.href = redirectUrl;
+				},
 				onError: (err) => setServerError(err.message || "Social login failed."),
 			});
 		},
 		[socialLogin]
 	);
 
-	const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
+	const {
+		register,
+		handleSubmit,
+		setValue,
+		watch,
+		formState: { errors },
+	} = useForm<LoginFormData>({
 		resolver: zodResolver(loginSchema),
-		defaultValues: { email: "", password: "" },
+		defaultValues: { email: "", password: "", rememberMe: false },
 	});
+
+	const rememberMe = watch("rememberMe");
 
 	const onSubmit = async (data: LoginFormData) => {
 		setServerError(null);
 		const result = await login(
-			{ email: data.email, password: data.password },
+			{ email: data.email, password: data.password, rememberMe: data.rememberMe },
 			{
 				onSuccess: () => navigate({ to: "/" }),
 				onError: (err) => {
@@ -140,17 +158,17 @@ export function Login() {
 		setTwoFactorError(null);
 		try {
 			const args = { twoFactorToken, code: twoFactorCode.trim(), trustDevice: true };
-			const result = twoFactorMode === "totp"
-				? await verifyTotp.mutateAsync(args)
-				: await verifyBackupCode.mutateAsync(args);
+			const result =
+				twoFactorMode === "totp" ? await verifyTotp.mutateAsync(args) : await verifyBackupCode.mutateAsync(args);
 			if (result.token) {
 				await setServerAuthCookie({ data: { token: result.token } });
 				useAuthStore.getState().setAuthenticated(true);
 				navigate({ to: "/" });
 			}
 		} catch (err) {
-			setTwoFactorError(err instanceof Error ? err.message
-				: twoFactorMode === "totp" ? "Invalid code." : "Invalid backup code.");
+			setTwoFactorError(
+				err instanceof Error ? err.message : twoFactorMode === "totp" ? "Invalid code." : "Invalid backup code."
+			);
 		}
 	};
 
@@ -221,7 +239,11 @@ export function Login() {
 				<div className="mt-4 flex items-center justify-between">
 					<button
 						type="button"
-						onClick={() => { setTwoFactorMode(twoFactorMode === "totp" ? "backup" : "totp"); setTwoFactorCode(""); setTwoFactorError(null); }}
+						onClick={() => {
+							setTwoFactorMode(twoFactorMode === "totp" ? "backup" : "totp");
+							setTwoFactorCode("");
+							setTwoFactorError(null);
+						}}
 						className="flex items-center gap-1 text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
 					>
 						<KeyIcon className="size-3.5" />
@@ -229,7 +251,11 @@ export function Login() {
 					</button>
 					<button
 						type="button"
-						onClick={() => { setTwoFactorToken(null); setTwoFactorCode(""); setTwoFactorError(null); }}
+						onClick={() => {
+							setTwoFactorToken(null);
+							setTwoFactorCode("");
+							setTwoFactorError(null);
+						}}
 						className="text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
 					>
 						Back to login
@@ -245,7 +271,9 @@ export function Login() {
 			footer={
 				<p className="text-center text-sm text-zinc-500 dark:text-zinc-400">
 					Don't have an account?{" "}
-					<TextLink href="/register"><Strong>Sign up</Strong></TextLink>
+					<TextLink href="/register">
+						<Strong>Sign up</Strong>
+					</TextLink>
 				</p>
 			}
 		>
@@ -253,13 +281,25 @@ export function Login() {
 			<div>
 				<Logo className="mb-4 h-7 w-auto text-zinc-950 dark:text-white" />
 				<h1 className="text-xl font-semibold text-zinc-900 dark:text-white">Sign in</h1>
-				<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Welcome back — manage your campaigns and enrollments</p>
+				<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+					Welcome back — manage your campaigns and enrollments
+				</p>
 			</div>
 
 			{/* OAuth — 2 col, full label */}
 			<div className="grid grid-cols-2 gap-2">
-				<OAuthButton disabled={anyPending} onClick={() => handleSocialLogin("google")} icon={<GoogleIcon />} label="Google" />
-				<OAuthButton disabled={anyPending} onClick={() => handleSocialLogin("apple")} icon={<AppleIcon />} label="Apple" />
+				<OAuthButton
+					disabled={anyPending}
+					onClick={() => handleSocialLogin("google")}
+					icon={<GoogleIcon />}
+					label="Google"
+				/>
+				<OAuthButton
+					disabled={anyPending}
+					onClick={() => handleSocialLogin("apple")}
+					icon={<AppleIcon />}
+					label="Apple"
+				/>
 			</div>
 
 			{/* Divider */}
@@ -268,12 +308,14 @@ export function Login() {
 					<div className="w-full border-t border-zinc-200 dark:border-zinc-700" />
 				</div>
 				<div className="relative flex justify-center">
-					<span className="bg-white px-2 text-xs text-zinc-400 dark:bg-zinc-900 dark:text-zinc-500">or continue with email</span>
+					<span className="bg-white px-2 text-xs text-zinc-400 dark:bg-zinc-900 dark:text-zinc-500">
+						or continue with email
+					</span>
 				</div>
 			</div>
 
 			{/* Form fields — tighter gap than sections */}
-			<form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+			<form onSubmit={handleSubmit(onSubmit)} className="space-y-3" autoComplete="on">
 				<FormError message={errors.email?.message || errors.password?.message || serverError} />
 
 				<Field>
@@ -282,7 +324,7 @@ export function Login() {
 						type="email"
 						{...register("email")}
 						disabled={anyPending}
-						autoComplete="username email"
+						autoComplete="username"
 						autoCapitalize="none"
 						inputMode="email"
 						placeholder="you@example.com"
@@ -293,7 +335,10 @@ export function Login() {
 				<Field>
 					<div className="flex items-center justify-between">
 						<Label>Password</Label>
-						<TextLink href="/forgot-password" className="text-xs text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200">
+						<TextLink
+							href="/forgot-password"
+							className="text-xs text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+						>
 							Forgot password?
 						</TextLink>
 					</div>
@@ -319,7 +364,11 @@ export function Login() {
 				</Field>
 
 				<CheckboxField>
-					<Checkbox name="remember" disabled={anyPending} />
+					<Checkbox
+						checked={rememberMe}
+						onChange={(checked) => setValue("rememberMe", checked)}
+						disabled={anyPending}
+					/>
 					<Label className="text-sm font-normal text-zinc-600 dark:text-zinc-400">Keep me signed in</Label>
 				</CheckboxField>
 
@@ -346,25 +395,13 @@ export function Login() {
 
 // ─── AuthShell ────────────────────────────────────────────────────────────────
 
-export function AuthShell({
-	children,
-	footer,
-}: {
-	children: React.ReactNode;
-	footer?: React.ReactNode;
-}) {
+export function AuthShell({ children, footer }: { children: React.ReactNode; footer?: React.ReactNode }) {
 	return (
 		<div className="flex min-h-dvh flex-col items-center justify-center bg-zinc-50 px-4 py-12 dark:bg-zinc-950">
 			<div className="w-full max-w-95">
 				<div className="rounded-xl border border-zinc-200 bg-white shadow-xs dark:border-zinc-800 dark:bg-zinc-900">
-					<div className="space-y-5 p-8">
-						{children}
-					</div>
-					{footer && (
-						<div className="border-t border-zinc-100 px-8 py-4 dark:border-zinc-800">
-							{footer}
-						</div>
-					)}
+					<div className="space-y-5 p-8">{children}</div>
+					{footer && <div className="border-t border-zinc-100 px-8 py-4 dark:border-zinc-800">{footer}</div>}
 				</div>
 				<p className="mt-6 text-center text-xs text-zinc-400 dark:text-zinc-600">
 					© {new Date().getFullYear()} Hypedrive, Inc.

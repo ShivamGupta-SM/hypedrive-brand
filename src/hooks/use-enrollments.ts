@@ -160,6 +160,36 @@ export function useRejectEnrollment(organizationId: string | undefined) {
 	});
 }
 
+export function useRequestChangesEnrollment(organizationId: string | undefined) {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: async ({
+			enrollmentId,
+			reason,
+			taskFeedback,
+		}: {
+			enrollmentId: string;
+			reason: string;
+			taskFeedback?: { submissionId: string; feedback: string }[];
+		}) => {
+			const client = getAuthenticatedClient();
+			return client.brand.updateEnrollmentReview(organizationId as string, enrollmentId, {
+				action: "request_changes",
+				reason,
+				taskFeedback,
+			});
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: queryKeys.enrollments(organizationId || "") });
+			queryClient.invalidateQueries({
+				queryKey: queryKeys.infiniteEnrollments(organizationId || ""),
+			});
+			queryClient.invalidateQueries({ queryKey: queryKeys.dashboard(organizationId || "") });
+		},
+	});
+}
+
 export function useBatchEnrollments(organizationId: string | undefined) {
 	const queryClient = useQueryClient();
 
@@ -217,13 +247,7 @@ export function useBulkRejectEnrollments(organizationId: string | undefined) {
 
 export function useExportEnrollments(organizationId: string | undefined) {
 	return useMutation({
-		mutationFn: async ({
-			campaignId,
-			status,
-		}: {
-			campaignId: string;
-			status?: db.EnrollmentStatus;
-		}) => {
+		mutationFn: async ({ campaignId, status }: { campaignId: string; status?: db.EnrollmentStatus }) => {
 			const client = getAuthenticatedClient();
 			return client.brand.exportEnrollments(organizationId as string, campaignId, { status });
 		},

@@ -33,12 +33,11 @@ import { Route as AppOrgSlugSettingsRouteImport } from './routes/_app/$orgSlug/s
 import { Route as AppOrgSlugListingsRouteImport } from './routes/_app/$orgSlug/listings'
 import { Route as AppOrgSlugInvoicesRouteImport } from './routes/_app/$orgSlug/invoices'
 import { Route as AppOrgSlugEnrollmentsRouteImport } from './routes/_app/$orgSlug/enrollments'
-import { Route as AppOrgSlugChangelogRouteImport } from './routes/_app/$orgSlug/changelog'
 import { Route as AppOrgSlugCampaignsRouteImport } from './routes/_app/$orgSlug/campaigns'
 import { Route as AppOrgSlugWalletIndexRouteImport } from './routes/_app/$orgSlug/wallet/index'
 import { Route as AppOrgSlugTeamIndexRouteImport } from './routes/_app/$orgSlug/team/index'
 import { Route as AppOrgSlugWalletWithdrawalsRouteImport } from './routes/_app/$orgSlug/wallet/withdrawals'
-import { Route as AppOrgSlugWalletTransactionsRouteImport } from './routes/_app/$orgSlug/wallet/transactions'
+import { Route as AppOrgSlugWalletHoldsRouteImport } from './routes/_app/$orgSlug/wallet/holds'
 import { Route as AppOrgSlugWalletDepositsRouteImport } from './routes/_app/$orgSlug/wallet/deposits'
 import { Route as AppOrgSlugTeamRolesRouteImport } from './routes/_app/$orgSlug/team/roles'
 import { Route as AppOrgSlugTeamInvitationsRouteImport } from './routes/_app/$orgSlug/team/invitations'
@@ -165,11 +164,6 @@ const AppOrgSlugEnrollmentsRoute = AppOrgSlugEnrollmentsRouteImport.update({
   path: '/enrollments',
   getParentRoute: () => AppOrgSlugRoute,
 } as any)
-const AppOrgSlugChangelogRoute = AppOrgSlugChangelogRouteImport.update({
-  id: '/changelog',
-  path: '/changelog',
-  getParentRoute: () => AppOrgSlugRoute,
-} as any)
 const AppOrgSlugCampaignsRoute = AppOrgSlugCampaignsRouteImport.update({
   id: '/campaigns',
   path: '/campaigns',
@@ -191,12 +185,11 @@ const AppOrgSlugWalletWithdrawalsRoute =
     path: '/withdrawals',
     getParentRoute: () => AppOrgSlugWalletRoute,
   } as any)
-const AppOrgSlugWalletTransactionsRoute =
-  AppOrgSlugWalletTransactionsRouteImport.update({
-    id: '/transactions',
-    path: '/transactions',
-    getParentRoute: () => AppOrgSlugWalletRoute,
-  } as any)
+const AppOrgSlugWalletHoldsRoute = AppOrgSlugWalletHoldsRouteImport.update({
+  id: '/holds',
+  path: '/holds',
+  getParentRoute: () => AppOrgSlugWalletRoute,
+} as any)
 const AppOrgSlugWalletDepositsRoute =
   AppOrgSlugWalletDepositsRouteImport.update({
     id: '/deposits',
@@ -262,7 +255,6 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingOnboardingRoute
   '/api/og': typeof ApiOgRoute
   '/$orgSlug/campaigns': typeof AppOrgSlugCampaignsRoute
-  '/$orgSlug/changelog': typeof AppOrgSlugChangelogRoute
   '/$orgSlug/enrollments': typeof AppOrgSlugEnrollmentsRoute
   '/$orgSlug/invoices': typeof AppOrgSlugInvoicesRoute
   '/$orgSlug/listings': typeof AppOrgSlugListingsRoute
@@ -278,7 +270,7 @@ export interface FileRoutesByFullPath {
   '/$orgSlug/team/invitations': typeof AppOrgSlugTeamInvitationsRoute
   '/$orgSlug/team/roles': typeof AppOrgSlugTeamRolesRoute
   '/$orgSlug/wallet/deposits': typeof AppOrgSlugWalletDepositsRoute
-  '/$orgSlug/wallet/transactions': typeof AppOrgSlugWalletTransactionsRoute
+  '/$orgSlug/wallet/holds': typeof AppOrgSlugWalletHoldsRoute
   '/$orgSlug/wallet/withdrawals': typeof AppOrgSlugWalletWithdrawalsRoute
   '/$orgSlug/team/': typeof AppOrgSlugTeamIndexRoute
   '/$orgSlug/wallet/': typeof AppOrgSlugWalletIndexRoute
@@ -298,7 +290,6 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingOnboardingRoute
   '/api/og': typeof ApiOgRoute
   '/$orgSlug/campaigns': typeof AppOrgSlugCampaignsRoute
-  '/$orgSlug/changelog': typeof AppOrgSlugChangelogRoute
   '/$orgSlug/enrollments': typeof AppOrgSlugEnrollmentsRoute
   '/$orgSlug/invoices': typeof AppOrgSlugInvoicesRoute
   '/$orgSlug/listings': typeof AppOrgSlugListingsRoute
@@ -312,7 +303,7 @@ export interface FileRoutesByTo {
   '/$orgSlug/team/invitations': typeof AppOrgSlugTeamInvitationsRoute
   '/$orgSlug/team/roles': typeof AppOrgSlugTeamRolesRoute
   '/$orgSlug/wallet/deposits': typeof AppOrgSlugWalletDepositsRoute
-  '/$orgSlug/wallet/transactions': typeof AppOrgSlugWalletTransactionsRoute
+  '/$orgSlug/wallet/holds': typeof AppOrgSlugWalletHoldsRoute
   '/$orgSlug/wallet/withdrawals': typeof AppOrgSlugWalletWithdrawalsRoute
   '/$orgSlug/team': typeof AppOrgSlugTeamIndexRoute
   '/$orgSlug/wallet': typeof AppOrgSlugWalletIndexRoute
@@ -338,7 +329,6 @@ export interface FileRoutesById {
   '/api/og': typeof ApiOgRoute
   '/_app/': typeof AppIndexRoute
   '/_app/$orgSlug/campaigns': typeof AppOrgSlugCampaignsRoute
-  '/_app/$orgSlug/changelog': typeof AppOrgSlugChangelogRoute
   '/_app/$orgSlug/enrollments': typeof AppOrgSlugEnrollmentsRoute
   '/_app/$orgSlug/invoices': typeof AppOrgSlugInvoicesRoute
   '/_app/$orgSlug/listings': typeof AppOrgSlugListingsRoute
@@ -354,7 +344,7 @@ export interface FileRoutesById {
   '/_app/$orgSlug/team/invitations': typeof AppOrgSlugTeamInvitationsRoute
   '/_app/$orgSlug/team/roles': typeof AppOrgSlugTeamRolesRoute
   '/_app/$orgSlug/wallet/deposits': typeof AppOrgSlugWalletDepositsRoute
-  '/_app/$orgSlug/wallet/transactions': typeof AppOrgSlugWalletTransactionsRoute
+  '/_app/$orgSlug/wallet/holds': typeof AppOrgSlugWalletHoldsRoute
   '/_app/$orgSlug/wallet/withdrawals': typeof AppOrgSlugWalletWithdrawalsRoute
   '/_app/$orgSlug/team/': typeof AppOrgSlugTeamIndexRoute
   '/_app/$orgSlug/wallet/': typeof AppOrgSlugWalletIndexRoute
@@ -377,7 +367,6 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/api/og'
     | '/$orgSlug/campaigns'
-    | '/$orgSlug/changelog'
     | '/$orgSlug/enrollments'
     | '/$orgSlug/invoices'
     | '/$orgSlug/listings'
@@ -393,7 +382,7 @@ export interface FileRouteTypes {
     | '/$orgSlug/team/invitations'
     | '/$orgSlug/team/roles'
     | '/$orgSlug/wallet/deposits'
-    | '/$orgSlug/wallet/transactions'
+    | '/$orgSlug/wallet/holds'
     | '/$orgSlug/wallet/withdrawals'
     | '/$orgSlug/team/'
     | '/$orgSlug/wallet/'
@@ -413,7 +402,6 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/api/og'
     | '/$orgSlug/campaigns'
-    | '/$orgSlug/changelog'
     | '/$orgSlug/enrollments'
     | '/$orgSlug/invoices'
     | '/$orgSlug/listings'
@@ -427,7 +415,7 @@ export interface FileRouteTypes {
     | '/$orgSlug/team/invitations'
     | '/$orgSlug/team/roles'
     | '/$orgSlug/wallet/deposits'
-    | '/$orgSlug/wallet/transactions'
+    | '/$orgSlug/wallet/holds'
     | '/$orgSlug/wallet/withdrawals'
     | '/$orgSlug/team'
     | '/$orgSlug/wallet'
@@ -452,7 +440,6 @@ export interface FileRouteTypes {
     | '/api/og'
     | '/_app/'
     | '/_app/$orgSlug/campaigns'
-    | '/_app/$orgSlug/changelog'
     | '/_app/$orgSlug/enrollments'
     | '/_app/$orgSlug/invoices'
     | '/_app/$orgSlug/listings'
@@ -468,7 +455,7 @@ export interface FileRouteTypes {
     | '/_app/$orgSlug/team/invitations'
     | '/_app/$orgSlug/team/roles'
     | '/_app/$orgSlug/wallet/deposits'
-    | '/_app/$orgSlug/wallet/transactions'
+    | '/_app/$orgSlug/wallet/holds'
     | '/_app/$orgSlug/wallet/withdrawals'
     | '/_app/$orgSlug/team/'
     | '/_app/$orgSlug/wallet/'
@@ -654,13 +641,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppOrgSlugEnrollmentsRouteImport
       parentRoute: typeof AppOrgSlugRoute
     }
-    '/_app/$orgSlug/changelog': {
-      id: '/_app/$orgSlug/changelog'
-      path: '/changelog'
-      fullPath: '/$orgSlug/changelog'
-      preLoaderRoute: typeof AppOrgSlugChangelogRouteImport
-      parentRoute: typeof AppOrgSlugRoute
-    }
     '/_app/$orgSlug/campaigns': {
       id: '/_app/$orgSlug/campaigns'
       path: '/campaigns'
@@ -689,11 +669,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppOrgSlugWalletWithdrawalsRouteImport
       parentRoute: typeof AppOrgSlugWalletRoute
     }
-    '/_app/$orgSlug/wallet/transactions': {
-      id: '/_app/$orgSlug/wallet/transactions'
-      path: '/transactions'
-      fullPath: '/$orgSlug/wallet/transactions'
-      preLoaderRoute: typeof AppOrgSlugWalletTransactionsRouteImport
+    '/_app/$orgSlug/wallet/holds': {
+      id: '/_app/$orgSlug/wallet/holds'
+      path: '/holds'
+      fullPath: '/$orgSlug/wallet/holds'
+      preLoaderRoute: typeof AppOrgSlugWalletHoldsRouteImport
       parentRoute: typeof AppOrgSlugWalletRoute
     }
     '/_app/$orgSlug/wallet/deposits': {
@@ -780,14 +760,14 @@ const AppOrgSlugTeamRouteWithChildren = AppOrgSlugTeamRoute._addFileChildren(
 
 interface AppOrgSlugWalletRouteChildren {
   AppOrgSlugWalletDepositsRoute: typeof AppOrgSlugWalletDepositsRoute
-  AppOrgSlugWalletTransactionsRoute: typeof AppOrgSlugWalletTransactionsRoute
+  AppOrgSlugWalletHoldsRoute: typeof AppOrgSlugWalletHoldsRoute
   AppOrgSlugWalletWithdrawalsRoute: typeof AppOrgSlugWalletWithdrawalsRoute
   AppOrgSlugWalletIndexRoute: typeof AppOrgSlugWalletIndexRoute
 }
 
 const AppOrgSlugWalletRouteChildren: AppOrgSlugWalletRouteChildren = {
   AppOrgSlugWalletDepositsRoute: AppOrgSlugWalletDepositsRoute,
-  AppOrgSlugWalletTransactionsRoute: AppOrgSlugWalletTransactionsRoute,
+  AppOrgSlugWalletHoldsRoute: AppOrgSlugWalletHoldsRoute,
   AppOrgSlugWalletWithdrawalsRoute: AppOrgSlugWalletWithdrawalsRoute,
   AppOrgSlugWalletIndexRoute: AppOrgSlugWalletIndexRoute,
 }
@@ -797,7 +777,6 @@ const AppOrgSlugWalletRouteWithChildren =
 
 interface AppOrgSlugRouteChildren {
   AppOrgSlugCampaignsRoute: typeof AppOrgSlugCampaignsRoute
-  AppOrgSlugChangelogRoute: typeof AppOrgSlugChangelogRoute
   AppOrgSlugEnrollmentsRoute: typeof AppOrgSlugEnrollmentsRoute
   AppOrgSlugInvoicesRoute: typeof AppOrgSlugInvoicesRoute
   AppOrgSlugListingsRoute: typeof AppOrgSlugListingsRoute
@@ -816,7 +795,6 @@ interface AppOrgSlugRouteChildren {
 
 const AppOrgSlugRouteChildren: AppOrgSlugRouteChildren = {
   AppOrgSlugCampaignsRoute: AppOrgSlugCampaignsRoute,
-  AppOrgSlugChangelogRoute: AppOrgSlugChangelogRoute,
   AppOrgSlugEnrollmentsRoute: AppOrgSlugEnrollmentsRoute,
   AppOrgSlugInvoicesRoute: AppOrgSlugInvoicesRoute,
   AppOrgSlugListingsRoute: AppOrgSlugListingsRoute,

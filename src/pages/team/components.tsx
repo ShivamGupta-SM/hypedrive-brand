@@ -19,19 +19,14 @@ import {
 } from "@heroicons/react/16/solid";
 import clsx from "clsx";
 import { useCallback, useState } from "react";
-import { showToast } from "@/lib/toast";
 import { Badge } from "@/components/badge";
 import { Button } from "@/components/button";
-import {
-	Dialog,
-	DialogActions,
-	DialogBody,
-	DialogDescription,
-	DialogTitle,
-} from "@/components/dialog";
+import { Dialog, DialogActions, DialogBody, DialogDescription, DialogTitle } from "@/components/dialog";
 import { Dropdown, DropdownButton, DropdownItem, DropdownMenu } from "@/components/dropdown";
 import { Input } from "@/components/input";
 import { EmptyState } from "@/components/shared/empty-state";
+import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
+import { Skeleton } from "@/components/skeleton";
 import {
 	getAPIErrorMessage,
 	useAddMember,
@@ -44,12 +39,9 @@ import {
 	useUpdateOrganizationRole,
 } from "@/hooks";
 import type { types } from "@/lib/brand-client";
-import {
-	ACTION_LABELS,
-	ORG_RESOURCE_LABELS,
-	ORG_STATEMENT,
-} from "@/lib/permissions/definitions";
 import type { OrgResource } from "@/lib/permissions/definitions";
+import { ACTION_LABELS, ORG_RESOURCE_LABELS, ORG_STATEMENT } from "@/lib/permissions/definitions";
+import { showToast } from "@/lib/toast";
 
 export type Member = types.MemberResponse;
 
@@ -71,29 +63,46 @@ export type MemberRole = "owner" | "admin" | "member";
 export function TeamSkeleton() {
 	return (
 		<div className="space-y-6 pb-20">
-			<div className="flex items-center justify-between">
-				<div>
-					<div className="h-8 w-32 animate-pulse rounded-lg bg-zinc-200 skeleton-shimmer dark:bg-zinc-800" />
-					<div className="mt-2 h-4 w-48 animate-pulse rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-800" />
+			{/* Header */}
+			<div>
+				<Skeleton width={96} height={28} borderRadius={8} />
+				<Skeleton width={224} height={16} borderRadius={6} className="mt-2" />
+			</div>
+
+			{/* Stats — matches FinancialStatsGridBordered loading */}
+			<FinancialStatsGridBordered
+				stats={[
+					{ name: "Members", value: "" },
+					{ name: "Admins", value: "" },
+					{ name: "Members", value: "" },
+					{ name: "Pending", value: "" },
+				]}
+				loading
+				columns={4}
+			/>
+
+			{/* Tab nav */}
+			<div className="flex gap-1.5">
+				<Skeleton width={80} height={36} borderRadius={999} />
+				<Skeleton width={96} height={36} borderRadius={999} />
+				<Skeleton width={64} height={36} borderRadius={999} />
+			</div>
+
+			{/* Member rows */}
+			<div className="overflow-hidden rounded-xl bg-white ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
+				<div className="border-b border-zinc-100 px-4 py-3 dark:border-zinc-800">
+					<Skeleton width={80} height={16} borderRadius={6} />
 				</div>
-				<div className="h-10 w-32 animate-pulse rounded-lg bg-zinc-200 skeleton-shimmer dark:bg-zinc-800" />
-			</div>
-			<div className="grid grid-cols-3 gap-4">
-				{[1, 2, 3].map((i) => (
-					<div
-						key={i}
-						className="h-20 animate-pulse rounded-xl bg-zinc-200 skeleton-shimmer dark:bg-zinc-800"
-					/>
-				))}
-			</div>
-			<div className="space-y-2">
-				<div className="h-4 w-20 animate-pulse rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-800" />
-				<div className="space-y-2">
+				<div className="space-y-px p-3 sm:p-4">
 					{[1, 2, 3].map((i) => (
-						<div
-							key={i}
-							className="h-16 animate-pulse rounded-xl bg-zinc-100 skeleton-shimmer dark:bg-zinc-800"
-						/>
+						<div key={i} className="flex items-center gap-3 rounded-lg px-3 py-3">
+							<div className="size-9 shrink-0 animate-pulse rounded-full bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+							<div className="flex-1 space-y-1.5">
+								<Skeleton width={112} height={14} borderRadius={6} />
+								<Skeleton width={160} height={12} borderRadius={6} />
+							</div>
+							<Skeleton width={56} height={20} borderRadius={999} />
+						</div>
 					))}
 				</div>
 			</div>
@@ -147,16 +156,18 @@ export function MemberRow({
 		: member.userId.slice(0, 2).toUpperCase();
 
 	return (
-		<div className="flex items-center gap-4 rounded-xl bg-zinc-50 p-4 dark:bg-zinc-800/50">
-			<div className="flex size-10 items-center justify-center rounded-full bg-zinc-200 text-sm font-medium text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">
+		<div className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/40">
+			<div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-xs font-semibold text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
 				{initials}
 			</div>
 			<div className="min-w-0 flex-1">
 				<div className="flex items-center gap-2">
-					<p className="truncate font-medium text-zinc-900 dark:text-white">{displayName}</p>
-					{isCurrentUser && <span className="text-xs text-zinc-500">(You)</span>}
+					<p className="truncate text-sm font-medium text-zinc-900 dark:text-white">{displayName}</p>
+					{isCurrentUser && (
+						<span className="shrink-0 text-[11px] text-zinc-400 dark:text-zinc-500">you</span>
+					)}
 				</div>
-				<p className="truncate text-sm text-zinc-500 dark:text-zinc-400">{displayEmail}</p>
+				<p className="truncate text-xs text-zinc-500 dark:text-zinc-400">{displayEmail}</p>
 			</div>
 			<Badge color={roleConfig.color}>{roleConfig.label}</Badge>
 			{canManage && !isCurrentUser && member.role !== "owner" && (
@@ -204,17 +215,17 @@ export function InvitationRow({
 	const isExpired = expiresAt && expiresAt < new Date();
 
 	return (
-		<div className="flex items-center gap-4 rounded-xl border-2 border-dashed border-zinc-200 bg-zinc-50/50 p-4 dark:border-zinc-700 dark:bg-zinc-800/30">
-			<div className="flex size-10 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
-				<EnvelopeIcon className="size-5 text-amber-600 dark:text-amber-400" />
+		<div className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/40">
+			<div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
+				<EnvelopeIcon className="size-4 text-amber-600 dark:text-amber-400" />
 			</div>
 			<div className="min-w-0 flex-1">
-				<p className="truncate font-medium text-zinc-900 dark:text-white">{invitation.email}</p>
-				<div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
-					<ClockIcon className="size-3.5" />
+				<p className="truncate text-sm font-medium text-zinc-900 dark:text-white">{invitation.email}</p>
+				<div className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+					<ClockIcon className="size-3" />
 					<span>
 						{isExpired
-							? "Invitation expired"
+							? "Expired"
 							: expiresAt
 								? `Expires ${expiresAt.toLocaleDateString("en-IN", { month: "short", day: "numeric" })}`
 								: "Pending"}
@@ -224,11 +235,7 @@ export function InvitationRow({
 			<Badge color={roleConfig.color}>{roleConfig.label}</Badge>
 			{canManage && (
 				<Button plain onClick={onCancel} disabled={isCancelling} className="text-zinc-400 hover:text-red-500">
-					{isCancelling ? (
-						<ArrowPathIcon className="size-4 animate-spin" />
-					) : (
-						<XMarkIcon className="size-5" />
-					)}
+					{isCancelling ? <ArrowPathIcon className="size-4 animate-spin" /> : <XMarkIcon className="size-5" />}
 				</Button>
 			)}
 		</div>
@@ -304,9 +311,7 @@ export function InviteMemberModal({
 								<Headless.DialogTitle className="text-lg font-semibold text-zinc-900 dark:text-white">
 									Invite Team Member
 								</Headless.DialogTitle>
-								<p className="mt-0.5 text-sm text-zinc-500">
-									Send an invitation to join your organization
-								</p>
+								<p className="mt-0.5 text-sm text-zinc-500">Send an invitation to join your organization</p>
 							</div>
 							<button
 								type="button"
@@ -324,7 +329,10 @@ export function InviteMemberModal({
 								</div>
 							)}
 							<div>
-								<label htmlFor="invite-email" className="mb-1.5 block text-sm font-medium text-zinc-900 dark:text-white">
+								<label
+									htmlFor="invite-email"
+									className="mb-1.5 block text-sm font-medium text-zinc-900 dark:text-white"
+								>
 									Email Address
 								</label>
 								<Input
@@ -357,7 +365,12 @@ export function InviteMemberModal({
 												{r === "admin" ? <ShieldCheckIcon className="size-5" /> : <UserIcon className="size-5" />}
 												<div>
 													<p className="text-sm font-medium">{config.label}</p>
-													<p className={clsx("text-xs", role === r ? "text-zinc-400 dark:text-zinc-600" : "text-zinc-500")}>
+													<p
+														className={clsx(
+															"text-xs",
+															role === r ? "text-zinc-400 dark:text-zinc-600" : "text-zinc-500"
+														)}
+													>
 														{r === "admin" ? "Can manage team" : "Standard access"}
 													</p>
 												</div>
@@ -368,12 +381,20 @@ export function InviteMemberModal({
 							</div>
 						</div>
 						<div className="flex justify-end gap-2 border-t border-zinc-200 px-5 py-4 dark:border-zinc-800">
-							<Button outline onClick={handleClose}>Cancel</Button>
+							<Button outline onClick={handleClose}>
+								Cancel
+							</Button>
 							<Button color="emerald" onClick={handleSubmit} disabled={inviteMember.isPending || !email.trim()}>
 								{inviteMember.isPending ? (
-									<><ArrowPathIcon className="size-4 animate-spin" />Sending...</>
+									<>
+										<ArrowPathIcon className="size-4 animate-spin" />
+										Sending...
+									</>
 								) : (
-									<><EnvelopeIcon className="size-4" />Send Invitation</>
+									<>
+										<EnvelopeIcon className="size-4" />
+										Send Invitation
+									</>
 								)}
 							</Button>
 						</div>
@@ -440,7 +461,12 @@ export function ChangeRoleDialog({
 								{r === "admin" ? <ShieldCheckIcon className="size-5" /> : <UserIcon className="size-5" />}
 								<div>
 									<p className="font-medium">{config.label}</p>
-									<p className={clsx("text-sm", selectedRole === r ? "text-zinc-400 dark:text-zinc-600" : "text-zinc-500")}>
+									<p
+										className={clsx(
+											"text-sm",
+											selectedRole === r ? "text-zinc-400 dark:text-zinc-600" : "text-zinc-500"
+										)}
+									>
 										{r === "admin" ? "Can manage team and settings" : "Standard access to resources"}
 									</p>
 								</div>
@@ -450,7 +476,9 @@ export function ChangeRoleDialog({
 				</div>
 			</DialogBody>
 			<DialogActions>
-				<Button plain onClick={onClose}>Cancel</Button>
+				<Button plain onClick={onClose}>
+					Cancel
+				</Button>
 				<Button color="dark/zinc" onClick={handleSubmit} disabled={updateRole.isPending}>
 					{updateRole.isPending ? "Saving..." : "Save Changes"}
 				</Button>
@@ -495,11 +523,12 @@ export function RemoveMemberDialog({
 		<Dialog open={open} onClose={onClose} size="sm">
 			<DialogTitle>Remove Team Member</DialogTitle>
 			<DialogDescription>
-				Are you sure you want to remove this team member from the organization? This action cannot
-				be undone.
+				Are you sure you want to remove this team member from the organization? This action cannot be undone.
 			</DialogDescription>
 			<DialogActions>
-				<Button plain onClick={onClose}>Cancel</Button>
+				<Button plain onClick={onClose}>
+					Cancel
+				</Button>
 				<Button color="red" onClick={handleRemove} disabled={removeMember.isPending}>
 					{removeMember.isPending ? "Removing..." : "Remove Member"}
 				</Button>
@@ -568,7 +597,10 @@ export function AddMemberDialog({
 						</div>
 					)}
 					<div>
-						<label htmlFor="add-member-user-id" className="mb-1.5 block text-sm font-medium text-zinc-900 dark:text-white">
+						<label
+							htmlFor="add-member-user-id"
+							className="mb-1.5 block text-sm font-medium text-zinc-900 dark:text-white"
+						>
 							User ID
 						</label>
 						<Input
@@ -607,7 +639,9 @@ export function AddMemberDialog({
 				</div>
 			</DialogBody>
 			<DialogActions>
-				<Button plain onClick={handleClose}>Cancel</Button>
+				<Button plain onClick={handleClose}>
+					Cancel
+				</Button>
 				<Button color="dark/zinc" onClick={handleSubmit} disabled={addMember.isPending || !userId.trim()}>
 					{addMember.isPending ? "Adding..." : "Add Member"}
 				</Button>
@@ -653,13 +687,10 @@ export function RolesSection({ organizationId }: { organizationId: string | unde
 		}
 	}, [newRoleName, createRole]);
 
-	const handleEditRole = useCallback(
-		(role: { id: string; role: string; permission: { [key: string]: string[] } }) => {
-			setEditingRole(role);
-			setEditPermissions(role.permission || {});
-		},
-		[]
-	);
+	const handleEditRole = useCallback((role: { id: string; role: string; permission: { [key: string]: string[] } }) => {
+		setEditingRole(role);
+		setEditPermissions(role.permission || {});
+	}, []);
 
 	const togglePermission = useCallback((resource: string, action: string) => {
 		setEditPermissions((prev) => {
@@ -726,13 +757,13 @@ export function RolesSection({ organizationId }: { organizationId: string | unde
 	}
 
 	return (
-		<div className="overflow-hidden rounded-xl bg-white ring-1 ring-inset ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10">
+		<div className="overflow-hidden rounded-xl bg-white ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
 			<div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3 dark:border-zinc-800">
 				<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">
 					Roles
 					<span className="ml-2 text-xs font-normal text-zinc-500">{roles.length}</span>
 				</h3>
-				<Button plain onClick={() => setShowCreateDialog(true)} className="text-sm">
+				<Button color="dark/zinc" onClick={() => setShowCreateDialog(true)}>
 					<PlusIcon className="size-4" />
 					Add Role
 				</Button>
@@ -746,37 +777,38 @@ export function RolesSection({ organizationId }: { organizationId: string | unde
 						action={{ label: "Create Role", onClick: () => setShowCreateDialog(true) }}
 					/>
 				) : (
-					<div className="space-y-2">
-						{roles.map((role) => (
-							<div key={role.id} className="flex items-center gap-4 rounded-xl bg-zinc-50 p-4 dark:bg-zinc-800/50">
-								<div className="flex size-10 items-center justify-center rounded-xl bg-violet-100 dark:bg-violet-900/30">
-									<ShieldCheckIcon className="size-5 text-violet-600 dark:text-violet-400" />
+					<div className="space-y-px">
+						{roles.map((role) => {
+							const permCount = Object.keys(role.permission || {}).length;
+							return (
+								<div key={role.id} className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/40">
+									<div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-violet-100 dark:bg-violet-900/30">
+										<ShieldCheckIcon className="size-4 text-violet-600 dark:text-violet-400" />
+									</div>
+									<div className="min-w-0 flex-1">
+										<p className="text-sm font-medium capitalize text-zinc-900 dark:text-white">{role.role}</p>
+										<p className="text-xs text-zinc-500 dark:text-zinc-400">
+											{permCount} permission group{permCount !== 1 ? "s" : ""}
+										</p>
+									</div>
+									<Button plain onClick={() => handleEditRole(role)} className="text-zinc-400 hover:text-zinc-600">
+										<PencilIcon className="size-4" />
+									</Button>
+									<Button
+										plain
+										onClick={() => handleDeleteRole(role.id)}
+										disabled={deletingRoleId === role.id}
+										className="text-zinc-400 hover:text-red-500"
+									>
+										{deletingRoleId === role.id ? (
+											<ArrowPathIcon className="size-4 animate-spin" />
+										) : (
+											<TrashIcon className="size-4" />
+										)}
+									</Button>
 								</div>
-								<div className="min-w-0 flex-1">
-									<p className="font-medium capitalize text-zinc-900 dark:text-white">{role.role}</p>
-									<p className="text-sm text-zinc-500 dark:text-zinc-400">
-										{Object.keys(role.permission || {}).length} permission group
-										{Object.keys(role.permission || {}).length !== 1 ? "s" : ""}
-									</p>
-								</div>
-								<Badge color="zinc">{role.role}</Badge>
-								<Button plain onClick={() => handleEditRole(role)} className="text-zinc-400 hover:text-zinc-600">
-									<PencilIcon className="size-4" />
-								</Button>
-								<Button
-									plain
-									onClick={() => handleDeleteRole(role.id)}
-									disabled={deletingRoleId === role.id}
-									className="text-zinc-400 hover:text-red-500"
-								>
-									{deletingRoleId === role.id ? (
-										<ArrowPathIcon className="size-4 animate-spin" />
-									) : (
-										<TrashIcon className="size-4" />
-									)}
-								</Button>
-							</div>
-						))}
+							);
+						})}
 					</div>
 				)}
 			</div>
@@ -807,7 +839,14 @@ export function RolesSection({ organizationId }: { organizationId: string | unde
 					</div>
 				</DialogBody>
 				<DialogActions>
-					<Button plain onClick={() => { setShowCreateDialog(false); setNewRoleName(""); setCreateError(null); }}>
+					<Button
+						plain
+						onClick={() => {
+							setShowCreateDialog(false);
+							setNewRoleName("");
+							setCreateError(null);
+						}}
+					>
 						Cancel
 					</Button>
 					<Button color="dark/zinc" onClick={handleCreateRole} disabled={createRole.isPending || !newRoleName.trim()}>
@@ -846,7 +885,13 @@ export function RolesSection({ organizationId }: { organizationId: string | unde
 										>
 											{allSelected && (
 												<svg className="size-3" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-													<path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+													<path
+														d="M2 6l3 3 5-5"
+														stroke="currentColor"
+														strokeWidth="2"
+														strokeLinecap="round"
+														strokeLinejoin="round"
+													/>
 												</svg>
 											)}
 											{someSelected && <div className="h-0.5 w-2.5 rounded-full bg-emerald-500" />}
@@ -886,7 +931,9 @@ export function RolesSection({ organizationId }: { organizationId: string | unde
 					</div>
 				</DialogBody>
 				<DialogActions>
-					<Button plain onClick={() => setEditingRole(null)}>Cancel</Button>
+					<Button plain onClick={() => setEditingRole(null)}>
+						Cancel
+					</Button>
 					<Button color="dark/zinc" onClick={handleSaveRole} disabled={updateRole.isPending}>
 						{updateRole.isPending ? "Saving..." : "Save Permissions"}
 					</Button>

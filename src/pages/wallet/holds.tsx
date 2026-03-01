@@ -1,0 +1,43 @@
+import { EmptyState } from "@/components/shared/empty-state";
+import { Skeleton } from "@/components/skeleton";
+import { useCurrentOrganization, useWalletHolds } from "@/hooks";
+import { HoldRow } from "./components";
+
+export function WalletHolds() {
+	const organization = useCurrentOrganization();
+	const organizationId = organization?.id;
+
+	const { data: holds, loading } = useWalletHolds(organizationId);
+
+	return (
+		<div className="overflow-hidden rounded-xl bg-white ring-1 ring-inset ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10">
+			<div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3 dark:border-zinc-800">
+				<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">
+					Active Holds
+					{holds.length > 0 && <span className="ml-2 text-xs font-normal text-zinc-500">{holds.length}</span>}
+				</h3>
+			</div>
+			{loading ? (
+				<div className="space-y-2 p-4">
+					{[1, 2, 3].map((i) => (
+						<Skeleton key={i} width="100%" height={56} borderRadius={8} />
+					))}
+				</div>
+			) : holds.length === 0 ? (
+				<div className="p-4">
+					<EmptyState
+						preset="generic"
+						title="No active holds"
+						description="Funds held for active campaigns will appear here."
+					/>
+				</div>
+			) : (
+				<div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+					{holds.map((hold) => (
+						<HoldRow key={hold.id} hold={hold} />
+					))}
+				</div>
+			)}
+		</div>
+	);
+}

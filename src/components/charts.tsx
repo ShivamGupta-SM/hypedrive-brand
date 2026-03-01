@@ -119,8 +119,7 @@ export function LineChart({
 	showTooltip = true,
 	curved = true,
 }: LineChartProps) {
-	const isDark =
-		typeof document !== "undefined" && document.documentElement.classList.contains("dark");
+	const isDark = typeof document !== "undefined" && document.documentElement.classList.contains("dark");
 
 	return (
 		<div className={clsx("w-full min-w-0", className)} style={{ height, minHeight: height }}>
@@ -196,8 +195,7 @@ export function AreaChart({
 	stacked = false,
 	gradient = true,
 }: AreaChartProps) {
-	const isDark =
-		typeof document !== "undefined" && document.documentElement.classList.contains("dark");
+	const isDark = typeof document !== "undefined" && document.documentElement.classList.contains("dark");
 
 	return (
 		<div className={clsx("w-full min-w-0", className)} style={{ height, minHeight: height }}>
@@ -207,14 +205,7 @@ export function AreaChart({
 						{series.map((s, index) => {
 							const color = s.color || chartColorPalette[index % chartColorPalette.length];
 							return (
-								<linearGradient
-									key={s.dataKey}
-									id={`gradient-${s.dataKey}`}
-									x1="0"
-									y1="0"
-									x2="0"
-									y2="1"
-								>
+								<linearGradient key={s.dataKey} id={`gradient-${s.dataKey}`} x1="0" y1="0" x2="0" y2="1">
 									<stop offset="5%" stopColor={color} stopOpacity={0.3} />
 									<stop offset="95%" stopColor={color} stopOpacity={0} />
 								</linearGradient>
@@ -297,8 +288,7 @@ export function BarChart({
 	horizontal = false,
 	barSize = 20,
 }: BarChartProps) {
-	const isDark =
-		typeof document !== "undefined" && document.documentElement.classList.contains("dark");
+	const isDark = typeof document !== "undefined" && document.documentElement.classList.contains("dark");
 
 	return (
 		<div className={clsx("w-full min-w-0", className)} style={{ height, minHeight: height }}>
@@ -349,9 +339,7 @@ export function BarChart({
 								fontSize={12}
 								tickLine={false}
 								axisLine={false}
-								tickFormatter={(value) =>
-									typeof value === "number" ? value.toLocaleString() : value
-								}
+								tickFormatter={(value) => (typeof value === "number" ? value.toLocaleString() : value)}
 							/>
 						</>
 					)}
@@ -405,8 +393,7 @@ export function PieChart({
 	outerRadius = 80,
 	label = false,
 }: PieChartProps) {
-	const isDark =
-		typeof document !== "undefined" && document.documentElement.classList.contains("dark");
+	const isDark = typeof document !== "undefined" && document.documentElement.classList.contains("dark");
 
 	return (
 		<div className={clsx("w-full min-w-0", className)} style={{ height, minHeight: height }}>
@@ -433,9 +420,7 @@ export function PieChart({
 						{data.map((entry) => (
 							<Cell
 								key={entry.name}
-								fill={
-									entry.color || chartColorPalette[data.indexOf(entry) % chartColorPalette.length]
-								}
+								fill={entry.color || chartColorPalette[data.indexOf(entry) % chartColorPalette.length]}
 							/>
 						))}
 					</Pie>
@@ -481,10 +466,7 @@ export function Sparkline({
 	const chartData = data.map((value, index) => ({ value, index }));
 
 	return (
-		<div
-			className={clsx("min-w-0", className)}
-			style={{ width, height, minWidth: width, minHeight: height }}
-		>
+		<div className={clsx("min-w-0", className)} style={{ width, height, minWidth: width, minHeight: height }}>
 			<ResponsiveContainer width={width} height={height} debounce={50}>
 				{showArea ? (
 					<RechartsAreaChart data={chartData} margin={{ top: 2, right: 2, bottom: 2, left: 2 }}>
@@ -494,13 +476,7 @@ export function Sparkline({
 								<stop offset="95%" stopColor={color} stopOpacity={0} />
 							</linearGradient>
 						</defs>
-						<Area
-							type="monotone"
-							dataKey="value"
-							stroke={color}
-							strokeWidth={1.5}
-							fill="url(#sparkline-gradient)"
-						/>
+						<Area type="monotone" dataKey="value" stroke={color} strokeWidth={1.5} fill="url(#sparkline-gradient)" />
 					</RechartsAreaChart>
 				) : (
 					<RechartsLineChart data={chartData} margin={{ top: 2, right: 2, bottom: 2, left: 2 }}>

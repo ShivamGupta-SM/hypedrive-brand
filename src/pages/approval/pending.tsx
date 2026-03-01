@@ -47,22 +47,18 @@ export function PendingApproval() {
 
 					{/* Organization name */}
 					{organization && (
-						<p className="mt-2 text-lg font-medium text-zinc-600 dark:text-zinc-400">
-							{organization.name}
-						</p>
+						<p className="mt-2 text-lg font-medium text-zinc-600 dark:text-zinc-400">{organization.name}</p>
 					)}
 
 					{/* Description */}
 					<p className="mt-4 text-[15px] leading-relaxed text-zinc-500 dark:text-zinc-400">
-						Your organization is currently being reviewed by our team. This usually takes 1-2
-						business days. We'll notify you by email once your account has been approved.
+						Your organization is currently being reviewed by our team. This usually takes 1-2 business days. We'll
+						notify you by email once your account has been approved.
 					</p>
 
 					{/* What happens next */}
 					<div className="mt-8 rounded-xl bg-zinc-50 p-6 text-left dark:bg-zinc-900">
-						<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">
-							What happens next?
-						</h3>
+						<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">What happens next?</h3>
 						<ul className="mt-3 space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
 							<li className="flex items-start gap-2">
 								<span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-amber-500" />
@@ -81,12 +77,7 @@ export function PendingApproval() {
 
 					{/* Actions */}
 					<div className="mt-8 flex flex-col gap-3">
-						<Button
-							onClick={handleCheckStatus}
-							disabled={loading}
-							color="dark/zinc"
-							className="w-full"
-						>
+						<Button onClick={handleCheckStatus} disabled={loading} color="dark/zinc" className="w-full">
 							<ArrowPathIcon className={`size-4 ${loading ? "animate-spin" : ""}`} />
 							{loading ? "Checking..." : "Check Status"}
 						</Button>

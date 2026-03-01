@@ -94,14 +94,7 @@ export function useUpdateOrganization() {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: async ({
-			organizationId,
-			...params
-		}: {
-			organizationId: string;
-			name?: string;
-			logo?: string;
-		}) => {
+		mutationFn: async ({ organizationId, ...params }: { organizationId: string; name?: string; logo?: string }) => {
 			const client = getAuthenticatedClient();
 			return client.brand.updateOrganization(organizationId, params);
 		},
@@ -117,11 +110,7 @@ export function useUpdateOrganization() {
 
 export function useChangePassword() {
 	return useMutation({
-		mutationFn: async (params: {
-			currentPassword: string;
-			newPassword: string;
-			revokeOtherSessions?: boolean;
-		}) => {
+		mutationFn: async (params: { currentPassword: string; newPassword: string; revokeOtherSessions?: boolean }) => {
 			const client = getAuthenticatedClient();
 			return client.auth.changePassword(params);
 		},
@@ -332,10 +321,7 @@ export function usePasskeyList() {
 
 export function usePasskeyRegisterOptions() {
 	return useMutation({
-		mutationFn: async (params: {
-			name?: string;
-			authenticatorAttachment?: "platform" | "cross-platform";
-		}) => {
+		mutationFn: async (params: { name?: string; authenticatorAttachment?: "platform" | "cross-platform" }) => {
 			const client = getAuthenticatedClient();
 			return client.auth.passkeyRegisterOptions(params);
 		},
@@ -629,10 +615,7 @@ export function useCheckSlug() {
 // ORGANIZATION ROLE (get + update)
 // =============================================================================
 
-export function useOrganizationRole(
-	organizationId: string | undefined,
-	roleId: string | undefined
-) {
+export function useOrganizationRole(organizationId: string | undefined, roleId: string | undefined) {
 	const query = useQuery({
 		queryKey: queryKeys.organizationRole(organizationId || "", roleId || ""),
 		queryFn: async () => {
