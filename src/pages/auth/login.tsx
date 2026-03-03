@@ -12,16 +12,15 @@ import { Field, Label } from "@/components/fieldset";
 import { Input } from "@/components/input";
 import { Logo } from "@/components/logo";
 import { Strong, TextLink } from "@/components/text";
+import { useLogin, useSocialLogin } from "@/features/auth/hooks";
 import {
 	usePasskeyAuthenticate,
 	usePasskeyAuthenticateOptions,
 	useTwoFactorVerifyBackupCode,
 	useTwoFactorVerifyTotp,
 } from "@/hooks";
-import { useLogin, useSocialLogin } from "@/hooks/use-auth";
 import { useAutofillSync } from "@/hooks/use-autofill-sync";
-import { setServerAuthCookie } from "@/lib/server-auth";
-import { useAuthStore } from "@/store/auth-store";
+import { setServerAuthCookie } from "@/server/auth-queries";
 import { FormError } from "./components";
 
 const loginSchema = z.object({
@@ -172,7 +171,6 @@ export function Login() {
 				twoFactorMode === "totp" ? await verifyTotp.mutateAsync(args) : await verifyBackupCode.mutateAsync(args);
 			if (result.token) {
 				await setServerAuthCookie({ data: { token: result.token } });
-				useAuthStore.getState().setAuthenticated(true);
 				queryClient.removeQueries({ queryKey: ["auth", "session-with-orgs"] });
 				navigate({ to: "/" });
 			}
@@ -193,13 +191,11 @@ export function Login() {
 			const result = await passkeyAuth.mutateAsync({ response: assertion, challengeCookie });
 			if (result.token) {
 				await setServerAuthCookie({ data: { token: result.token } });
-				useAuthStore.getState().setAuthenticated(true);
 				queryClient.removeQueries({ queryKey: ["auth", "session-with-orgs"] });
 				navigate({ to: "/" });
 			} else if (result.success) {
 				// Authenticated but no token returned — try navigating anyway
 				// (the server may have set the session cookie directly)
-				useAuthStore.getState().setAuthenticated(true);
 				queryClient.removeQueries({ queryKey: ["auth", "session-with-orgs"] });
 				navigate({ to: "/" });
 			} else {

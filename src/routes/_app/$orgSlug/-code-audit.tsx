@@ -24,7 +24,6 @@ import {
 	TrashIcon,
 	UsersIcon,
 } from "@heroicons/react/24/outline";
-import { createFileRoute } from "@tanstack/react-router";
 import { type ReactNode, useState } from "react";
 import { Alert, AlertActions, AlertDescription, AlertTitle } from "@/components/alert";
 import { Badge } from "@/components/badge";
@@ -72,15 +71,11 @@ import { formatCurrency, formatStatus, getStatusColor } from "@/lib/design-token
 import { statusColors as themeStatusColors } from "@/lib/theme";
 
 // ═══════════════════════════════════════════════════════════════
-// ROUTE
+// NOTE: This file is prefixed with `-` so TanStack Router excludes it
+// from the route tree. It's a visual reference only — not a navigable route.
 // ═══════════════════════════════════════════════════════════════
 
-export const Route = createFileRoute("/_app/$orgSlug/code-audit")({
-	component: CodeAuditPage,
-	head: () => ({
-		meta: [{ title: "Dead Code Audit - Hypedrive" }],
-	}),
-});
+export default CodeAuditPage;
 
 // ═══════════════════════════════════════════════════════════════
 // HELPER COMPONENTS

@@ -1,10 +1,19 @@
 import { XCircleIcon } from "@heroicons/react/24/outline";
+import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/button";
 import { Logo } from "@/components/logo";
-import { useCurrentOrganization } from "@/store/organization-store";
+import { useLogout } from "@/features/auth/hooks";
 
-export function Rejected() {
-	const organization = useCurrentOrganization();
+export function Rejected({ organization }: { organization: { name: string } | null }) {
+	const logout = useLogout();
+	const navigate = useNavigate();
+
+	const handleSignOut = async () => {
+		const result = await logout.mutateAsync();
+		if (result.success && result.redirectTo) {
+			navigate({ to: result.redirectTo as "/" | "/login" });
+		}
+	};
 
 	return (
 		<div className="flex min-h-dvh flex-col bg-white dark:bg-zinc-950">
@@ -64,7 +73,7 @@ export function Rejected() {
 							Submit New Application
 						</Button>
 
-						<Button href="/login" outline className="w-full">
+						<Button onClick={handleSignOut} outline className="w-full">
 							Sign Out
 						</Button>
 					</div>

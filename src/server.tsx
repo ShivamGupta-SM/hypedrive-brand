@@ -5,11 +5,16 @@ import { createStartHandler, defaultStreamHandler } from "@tanstack/react-start/
 // cancels in-flight queries. The resulting CancelledError is intentionally silent
 // (silent: true) but goes unhandled at the process level, crashing Node.
 // Catch it here so dev server stays alive across HMR reloads.
-process.on("unhandledRejection", (reason) => {
-	if (isCancelledError(reason)) return;
-	// Re-throw non-CancelledError rejections so they surface normally
-	console.error("Unhandled rejection:", reason);
-});
+// Guard against duplicate listeners from repeated SSR module evaluations.
+const GUARD = Symbol.for("__hdCancelledErrorHandler");
+const g = globalThis as Record<symbol, boolean>;
+if (!g[GUARD]) {
+	g[GUARD] = true;
+	process.on("unhandledRejection", (reason) => {
+		if (isCancelledError(reason)) return;
+		console.error("Unhandled rejection:", reason);
+	});
+}
 
 const handler = createStartHandler(defaultStreamHandler);
 

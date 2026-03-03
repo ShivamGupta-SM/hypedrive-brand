@@ -1,8 +1,7 @@
 import { dehydrate, hydrate, QueryClient } from "@tanstack/react-query";
 import { createRouter as createTanStackRouter } from "@tanstack/react-router";
 
-import { clearAuthCache, isAPIError } from "@/hooks/api-client";
-import { clearServerAuthCookie } from "@/lib/server-auth";
+import { isAPIError } from "@/hooks/api-client";
 import { routeTree } from "./routeTree.gen";
 
 // Shared queryClient reference - accessible outside React tree
@@ -17,8 +16,13 @@ export function getQueryClient(): QueryClient | null {
  * Called from QueryClient retry and can be called from anywhere.
  */
 export async function handleAuthError() {
-	clearServerAuthCookie(); // fire-and-forget
-	clearAuthCache(); // drop stale in-memory token
+	// Clear the public cookie from JS (the httpOnly cookie will expire or be
+	// cleared on the next server round-trip when getServerAuthWithOrgs sees an
+	// invalid token). This avoids importing server-auth which triggers import-protection.
+	if (typeof document !== "undefined") {
+		// biome-ignore lint: intentional cookie clear on 401
+		document.cookie = "hd_auth_pub=; path=/; max-age=0";
+	}
 	// clear() wipes the entire QueryClient cache including auth+orgs
 	_queryClient?.clear();
 }
@@ -59,7 +63,7 @@ export function getRouter() {
 			auth: { isAuthenticated: false, user: null, token: null },
 		},
 		defaultPreload: "intent",
-		defaultPreloadStaleTime: 0,
+		defaultPreloadStaleTime: 30_000,
 		scrollRestoration: true,
 		// Dehydrate QueryClient state into SSR HTML so the client can rehydrate
 		// without re-fetching — eliminates the flash caused by empty client cache.

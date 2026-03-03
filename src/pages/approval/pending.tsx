@@ -3,11 +3,9 @@ import { useNavigate, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "@/components/button";
 import { Logo } from "@/components/logo";
-import { useLogout } from "@/hooks/use-auth";
-import { useCurrentOrganization } from "@/store/organization-store";
+import { useLogout } from "@/features/auth/hooks";
 
-export function PendingApproval() {
-	const organization = useCurrentOrganization();
+export function PendingApproval({ organization }: { organization: { name: string } | null }) {
 	const logout = useLogout();
 	const navigate = useNavigate();
 	const router = useRouter();

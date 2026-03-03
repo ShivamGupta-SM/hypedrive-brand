@@ -13,6 +13,7 @@ import { Button } from "@/components/button";
 import { Input } from "@/components/input";
 import { Logo } from "@/components/logo";
 import { Textarea } from "@/components/textarea";
+import { useLogout } from "@/features/auth/hooks";
 import {
 	getAPIErrorMessage,
 	useCheckSlug,
@@ -23,7 +24,6 @@ import {
 	useSetupProgressStream,
 	useVerifyGSTPreview,
 } from "@/hooks";
-import { useLogout } from "@/hooks/use-auth";
 
 // =============================================================================
 // STEP INDICATOR

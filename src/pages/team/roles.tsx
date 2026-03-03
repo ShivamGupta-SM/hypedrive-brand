@@ -1,6 +1,6 @@
+import { useCan } from "@/components/shared/can";
 import { EmptyState } from "@/components/shared/empty-state";
 import { useOrgContext } from "@/hooks";
-import { useCan } from "@/store/permissions-store";
 import { RolesSection } from "./components";
 
 export function TeamRoles() {

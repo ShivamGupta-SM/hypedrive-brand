@@ -14,7 +14,7 @@ import { Field, Label } from "@/components/fieldset";
 import { Input } from "@/components/input";
 import { Logo } from "@/components/logo";
 import { Strong, TextLink } from "@/components/text";
-import { useForgotPassword } from "@/hooks/use-auth";
+import { useForgotPassword } from "@/features/auth/hooks";
 import { FormError } from "./components";
 import { AuthShell } from "./login";
 

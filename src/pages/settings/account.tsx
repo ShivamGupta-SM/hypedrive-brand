@@ -20,7 +20,8 @@ import {
 	XMarkIcon,
 } from "@heroicons/react/16/solid";
 import { startRegistration } from "@simplewebauthn/browser";
-import { useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/button";
 import { AvatarUpload } from "@/components/file-dropzone";
@@ -38,6 +39,7 @@ import {
 	MenuToggleRow,
 } from "@/components/shared/menu-list";
 import { Text } from "@/components/text";
+import { useLogout } from "@/features/auth/hooks";
 import {
 	getAPIErrorMessage,
 	useAcceptInvitation,
@@ -73,9 +75,7 @@ import {
 	useUserInfo,
 	useUserInvitations,
 } from "@/hooks";
-import { useLogout } from "@/hooks/use-auth";
 import { useOrgContext } from "@/hooks/use-org-context";
-import { useAuthStore } from "@/store/auth-store";
 
 // =============================================================================
 // USER PROFILE HEADER CARD
@@ -584,6 +584,8 @@ function ActiveSessionsPanel() {
 
 function EditUserProfilePanel({ initialName, initialImage }: { initialName: string; initialImage?: string | null }) {
 	const panelNav = usePanelNav();
+	const queryClient = useQueryClient();
+	const router = useRouter();
 	const [name, setName] = useState(initialName);
 	const [avatarFile, setAvatarFile] = useState<File | null>(null);
 	const [avatarPreview, setAvatarPreview] = useState<string | null>(initialImage || null);
@@ -639,14 +641,23 @@ function EditUserProfilePanel({ initialName, initialImage }: { initialName: stri
 				...(imageUrl ? { image: imageUrl } : {}),
 			});
 
-			const currentUser = useAuthStore.getState().user;
-			if (currentUser) {
-				useAuthStore.getState().setUser({
-					...currentUser,
-					name: name.trim(),
-					...(imageUrl ? { image: imageUrl } : {}),
-				});
-			}
+			// Optimistic update — patch the auth session cache so sidebar/avatar
+			// reflects the new name/image immediately without a full refetch.
+			queryClient.setQueryData(["auth", "session-with-orgs"], (old: Record<string, unknown> | undefined) => {
+				if (!old?.user) return old;
+				const prevUser = old.user as Record<string, unknown>;
+				return {
+					...old,
+					user: {
+						...prevUser,
+						name: name.trim(),
+						...(imageUrl ? { image: imageUrl } : {}),
+					},
+				};
+			});
+			// Re-run router beforeLoad so context.auth.user reflects the update
+			router.invalidate();
+
 			setSuccess(true);
 			setTimeout(() => handleClose(), 1500);
 		} catch (err) {
@@ -1744,14 +1755,13 @@ function PendingInvitationsSection() {
 export type AccountSettingsSection = "profile" | "security" | "passkeys" | "preferences" | "all";
 
 export function AccountSettings({ section = "all" }: { section?: AccountSettingsSection } = {}) {
-	const user = useAuthStore((state) => state.user);
+	const { user, organization, organizationId } = useOrgContext();
 	const logout = useLogout();
 	const navigate = useNavigate();
 	const { data: sessions } = useDeviceSessions();
 	const panelNav = usePanelNav();
 
 	// Notification preferences — local optimistic state for toggles
-	const { organization, organizationId } = useOrgContext();
 	const updateNotifPrefs = useUpdateNotificationPreferences(organizationId);
 	const [emailNotifications, setEmailNotifications] = useState(true);
 	const [pushNotifications, setPushNotifications] = useState(() => {

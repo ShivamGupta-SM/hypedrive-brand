@@ -21,9 +21,9 @@ import { Description, ErrorMessage, Field, FieldGroup, Label } from "@/component
 import { FileDropzone } from "@/components/file-dropzone";
 import { Input, InputGroup } from "@/components/input";
 import { CurrencyInput } from "@/components/number-input";
+import { Select } from "@/components/select";
 import { WizardStepper } from "@/components/shared/wizard-stepper";
 import { Textarea } from "@/components/textarea";
-import { Select } from "@/components/select";
 import { useCreateListing, useFileUpload, useOrgSlug, usePlatforms } from "@/hooks";
 import { showToast } from "@/lib/toast";
 

@@ -17,6 +17,7 @@ import { Button } from "@/components/button";
 import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/dialog";
 import { Input, InputGroup } from "@/components/input";
 import { PageHeader } from "@/components/page-header";
+import { useCan } from "@/components/shared/can";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
 import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
@@ -33,7 +34,6 @@ import {
 import type { brand, db } from "@/lib/brand-client";
 import { downloadCSV } from "@/lib/download";
 import { showToast } from "@/lib/toast";
-import { useCan } from "@/store/permissions-store";
 import { CampaignCard, CampaignCardSkeleton, getStatusConfig } from "./campaign-card";
 import { CreateCampaignModal } from "./create-campaign-modal";
 
@@ -354,10 +354,34 @@ export function CampaignsList() {
 				{(
 					[
 						{ value: "all", label: "All", count: statusCounts.all, icon: Squares2X2Icon, iconColor: "text-sky-500" },
-						{ value: "active", label: "Active", count: statusCounts.active, icon: CheckCircleIcon, iconColor: "text-emerald-500" },
-						{ value: "paused", label: "Paused", count: statusCounts.paused, icon: PauseCircleIcon, iconColor: "text-amber-500" },
-						{ value: "ended", label: "Ended", count: statusCounts.ended, icon: NoSymbolIcon, iconColor: "text-red-500" },
-						{ value: "draft", label: "Draft", count: statusCounts.draft, icon: DocumentTextIcon, iconColor: "text-zinc-400" },
+						{
+							value: "active",
+							label: "Active",
+							count: statusCounts.active,
+							icon: CheckCircleIcon,
+							iconColor: "text-emerald-500",
+						},
+						{
+							value: "paused",
+							label: "Paused",
+							count: statusCounts.paused,
+							icon: PauseCircleIcon,
+							iconColor: "text-amber-500",
+						},
+						{
+							value: "ended",
+							label: "Ended",
+							count: statusCounts.ended,
+							icon: NoSymbolIcon,
+							iconColor: "text-red-500",
+						},
+						{
+							value: "draft",
+							label: "Draft",
+							count: statusCounts.draft,
+							icon: DocumentTextIcon,
+							iconColor: "text-zinc-400",
+						},
 					] as { value: StatusFilter; label: string; count: number; icon: typeof Squares2X2Icon; iconColor: string }[]
 				).map((tab) => {
 					const isActive = statusFilter === tab.value;

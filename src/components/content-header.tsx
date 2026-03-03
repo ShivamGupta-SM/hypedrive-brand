@@ -1,7 +1,7 @@
 import { ChevronRightIcon, HomeIcon } from "@heroicons/react/20/solid";
 import { Link, useLocation } from "@tanstack/react-router";
 import { NotificationBell } from "@/components/notification-popover";
-import { useOrgSlug } from "@/hooks";
+import { useOrgContext } from "@/hooks";
 import { useBreadcrumbStore } from "@/hooks/use-breadcrumb";
 
 const ROUTE_LABELS: Record<string, string> = {
@@ -23,7 +23,7 @@ const ROUTE_LABELS: Record<string, string> = {
 
 function useBreadcrumbs() {
 	const { pathname } = useLocation();
-	const orgSlug = useOrgSlug();
+	const { orgSlug } = useOrgContext();
 	const pageTitle = useBreadcrumbStore((s) => s.pageTitle);
 
 	// Strip org slug prefix: /my-org/campaigns/123 → ["campaigns", "123"]
@@ -50,7 +50,7 @@ function useBreadcrumbs() {
 }
 
 export function ContentHeader() {
-	const orgSlug = useOrgSlug();
+	const { orgSlug, organizationId } = useOrgContext();
 	const crumbs = useBreadcrumbs();
 
 	return (
@@ -83,7 +83,7 @@ export function ContentHeader() {
 
 			{/* Actions */}
 			<div className="flex items-center gap-1">
-				<NotificationBell />
+				<NotificationBell organizationId={organizationId} />
 			</div>
 		</div>
 	);

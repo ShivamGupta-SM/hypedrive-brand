@@ -6,7 +6,8 @@
 
 import { createFileRoute, isRedirect, Outlet, redirect } from "@tanstack/react-router";
 
-import { getOrganizationsFromServer } from "@/lib/server-auth";
+import { queryKeys } from "@/hooks/api-client";
+import { getOrganizationsFromServer } from "@/server/auth-queries";
 
 export const Route = createFileRoute("/_approval")({
 	beforeLoad: async ({ context }) => {
@@ -15,10 +16,18 @@ export const Route = createFileRoute("/_approval")({
 			throw redirect({ to: "/login" });
 		}
 
-		// Fetch orgs fresh — no cache, so Check Status always gets latest state
+		// Fetch orgs fresh — staleTime: 0 so Check Status always gets latest state
+		let approvalOrganization: {
+			id: string;
+			name: string;
+			slug: string;
+			logo?: string | null;
+			createdAt: string;
+			approvalStatus?: string;
+		} | null = null;
 		try {
 			const { organizations } = await context.queryClient.fetchQuery({
-				queryKey: ["server", "organizations"],
+				queryKey: [...queryKeys.organizationProfile(), "approval"],
 				queryFn: () => getOrganizationsFromServer(),
 				staleTime: 0,
 			});
@@ -33,12 +42,15 @@ export const Route = createFileRoute("/_approval")({
 			if (org.approvalStatus === "active") {
 				throw redirect({ to: "/$orgSlug", params: { orgSlug: org.slug } });
 			}
+
+			approvalOrganization = org;
 		} catch (error) {
 			// Re-throw redirects, swallow fetch errors (show approval page as-is)
 			if (isRedirect(error)) throw error;
 		}
 
-		// Pending/rejected — allow access to approval pages
+		// Pending/rejected — pass org to approval pages via context
+		return { approvalOrganization };
 	},
 	component: ApprovalLayoutWrapper,
 });

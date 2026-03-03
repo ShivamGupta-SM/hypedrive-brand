@@ -25,8 +25,21 @@ export function TeamLayout() {
 	const pendingInvitations = invitations.length;
 
 	const tabs: TabNavItem[] = [
-		{ label: "Members", to: orgPath("/team"), exact: true, count: totalMembers, icon: UsersIcon, iconColor: "text-sky-500" },
-		{ label: "Invitations", to: orgPath("/team/invitations"), count: pendingInvitations, icon: EnvelopeIcon, iconColor: "text-amber-500" },
+		{
+			label: "Members",
+			to: orgPath("/team"),
+			exact: true,
+			count: totalMembers,
+			icon: UsersIcon,
+			iconColor: "text-sky-500",
+		},
+		{
+			label: "Invitations",
+			to: orgPath("/team/invitations"),
+			count: pendingInvitations,
+			icon: EnvelopeIcon,
+			iconColor: "text-amber-500",
+		},
 		{ label: "Roles", to: orgPath("/team/roles"), icon: ShieldCheckIcon, iconColor: "text-violet-500" },
 	];
 

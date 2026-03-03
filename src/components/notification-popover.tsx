@@ -8,17 +8,14 @@ import {
 	ShieldCheckIcon,
 	UserGroupIcon,
 } from "@heroicons/react/20/solid";
-import { useCallback, useEffect, useRef, useState } from "react";
-
-import { getAuthenticatedClient } from "@/hooks/api-client";
+import { useEffect, useRef, useState } from "react";
+import { useNotificationStream } from "@/components/notification-stream-provider";
 import {
 	useArchiveNotifications,
 	useDeleteNotifications,
 	useMarkAllNotificationsRead,
 	useMarkNotificationRead,
-} from "@/hooks/use-notifications";
-import type { notifications } from "@/lib/brand-client";
-import { useOrganizationId } from "@/store/organization-store";
+} from "@/features/notifications/hooks";
 
 // =============================================================================
 // TYPES
@@ -34,114 +31,6 @@ type Notification = {
 	isRead?: boolean;
 	createdAt?: string;
 };
-
-// =============================================================================
-// SSE STREAM HOOK
-// =============================================================================
-
-function useNotificationStream(organizationId: string | undefined) {
-	const [items, setItems] = useState<Notification[]>([]);
-	const [unreadCount, setUnreadCount] = useState(0);
-	const [connected, setConnected] = useState(false);
-	const streamRef = useRef<{ close: () => void } | null>(null);
-
-	useEffect(() => {
-		if (!organizationId) return;
-
-		let cancelled = false;
-
-		async function connect() {
-			try {
-				const client = getAuthenticatedClient();
-				const stream = await client.notifications.stream({});
-				if (cancelled) {
-					stream.close();
-					return;
-				}
-				streamRef.current = stream;
-				setConnected(true);
-
-				for await (const event of stream) {
-					if (cancelled) break;
-
-					if (event.type === "notification" && event.id) {
-						const notification: Notification = {
-							id: event.id,
-							type: event.notificationType,
-							title: event.title,
-							body: event.body,
-							actionUrl: event.actionUrl,
-							imageUrl: event.imageUrl,
-							isRead: event.isRead,
-							createdAt: event.createdAt,
-						};
-						setItems((prev) => {
-							// Avoid duplicates
-							if (prev.some((n) => n.id === notification.id)) {
-								return prev.map((n) => (n.id === notification.id ? notification : n));
-							}
-							return [notification, ...prev];
-						});
-
-						// Show browser notification if permission granted
-						if (
-							typeof window !== "undefined" &&
-							"Notification" in window &&
-							Notification.permission === "granted" &&
-							!notification.isRead &&
-							document.hidden
-						) {
-							new Notification(notification.title || "Hypedrive", {
-								body: notification.body || undefined,
-								icon: "/favicon.ico",
-								tag: notification.id,
-							});
-						}
-					} else if (event.type === "unread_count") {
-						const count = (event as notifications.NotificationUpdate & { count?: number }).count;
-						if (typeof count === "number") {
-							setUnreadCount(count);
-						}
-					}
-				}
-			} catch {
-				// Stream disconnected — will reconnect on next mount
-				setConnected(false);
-			}
-		}
-
-		connect();
-
-		return () => {
-			cancelled = true;
-			streamRef.current?.close();
-			streamRef.current = null;
-			setConnected(false);
-		};
-	}, [organizationId]);
-
-	const markRead = useCallback((ids: string[]) => {
-		setItems((prev) => prev.map((n) => (ids.includes(n.id) ? { ...n, isRead: true } : n)));
-		setUnreadCount((prev) => Math.max(0, prev - ids.length));
-	}, []);
-
-	const markAllRead = useCallback(() => {
-		setItems((prev) => prev.map((n) => ({ ...n, isRead: true })));
-		setUnreadCount(0);
-	}, []);
-
-	const removeItems = useCallback(
-		(ids: string[]) => {
-			setItems((prev) => prev.filter((n) => !ids.includes(n.id)));
-			setUnreadCount((prev) =>
-				Math.max(0, prev - ids.filter((id) => items.some((n) => n.id === id && !n.isRead)).length)
-			);
-		},
-		[items]
-	);
-
-	return { items, unreadCount, connected, markRead, markAllRead, removeItems };
-}
 
 // =============================================================================
 // NOTIFICATION ICON BY TYPE
@@ -286,14 +175,12 @@ function NotificationItem({
 }
 
 // =============================================================================
-// SHARED HOOK
+// SHARED POPOVER HOOK (click-outside to close)
 // =============================================================================
 
-function useNotificationPopover() {
+function usePopover() {
 	const [open, setOpen] = useState(false);
 	const ref = useRef<HTMLDivElement>(null);
-	const orgId = useOrganizationId();
-	const stream = useNotificationStream(orgId);
 
 	useEffect(() => {
 		if (!open) return;
@@ -304,15 +191,16 @@ function useNotificationPopover() {
 		return () => document.removeEventListener("mousedown", handleClick);
 	}, [open]);
 
-	return { open, setOpen, ref, stream };
+	return { open, setOpen, ref };
 }
 
 // =============================================================================
 // NOTIFICATION POPOVER (Mobile Navbar)
 // =============================================================================
 
-export function NotificationPopoverNavbar() {
-	const { open, setOpen, ref, stream } = useNotificationPopover();
+export function NotificationPopoverNavbar({ organizationId }: { organizationId: string }) {
+	const { open, setOpen, ref } = usePopover();
+	const stream = useNotificationStream();
 
 	return (
 		<div ref={ref} className="relative">
@@ -328,6 +216,7 @@ export function NotificationPopoverNavbar() {
 			{open && (
 				<div className="absolute right-0 top-full z-50 mt-2 w-80 rounded-xl bg-white shadow-lg ring-1 ring-zinc-950/10 dark:bg-zinc-800 dark:ring-white/10">
 					<NotificationPanelContent
+						organizationId={organizationId}
 						notifications={stream.items}
 						unreadCount={stream.unreadCount}
 						onMarkRead={stream.markRead}
@@ -345,8 +234,9 @@ export function NotificationPopoverNavbar() {
 // NOTIFICATION BELL (Desktop Content Header)
 // =============================================================================
 
-export function NotificationBell() {
-	const { open, setOpen, ref, stream } = useNotificationPopover();
+export function NotificationBell({ organizationId }: { organizationId: string }) {
+	const { open, setOpen, ref } = usePopover();
+	const stream = useNotificationStream();
 
 	return (
 		<div ref={ref} className="relative">
@@ -362,6 +252,7 @@ export function NotificationBell() {
 			{open && (
 				<div className="absolute right-0 top-full z-50 mt-2 w-80 rounded-xl bg-white shadow-lg ring-1 ring-zinc-950/10 dark:bg-zinc-800 dark:ring-white/10">
 					<NotificationPanelContent
+						organizationId={organizationId}
 						notifications={stream.items}
 						unreadCount={stream.unreadCount}
 						onMarkRead={stream.markRead}
@@ -380,6 +271,7 @@ export function NotificationBell() {
 // =============================================================================
 
 function NotificationPanelContent({
+	organizationId,
 	notifications,
 	unreadCount,
 	onMarkRead,
@@ -387,6 +279,7 @@ function NotificationPanelContent({
 	onRemove,
 	onClose: _onClose,
 }: {
+	organizationId: string;
 	notifications: Notification[];
 	unreadCount: number;
 	onMarkRead: (ids: string[]) => void;
@@ -394,11 +287,10 @@ function NotificationPanelContent({
 	onRemove: (ids: string[]) => void;
 	onClose: () => void;
 }) {
-	const orgId = useOrganizationId();
-	const markReadMutation = useMarkNotificationRead(orgId);
-	const markAllReadMutation = useMarkAllNotificationsRead(orgId);
-	const archiveMutation = useArchiveNotifications(orgId);
-	const deleteMutation = useDeleteNotifications(orgId);
+	const markReadMutation = useMarkNotificationRead(organizationId);
+	const markAllReadMutation = useMarkAllNotificationsRead(organizationId);
+	const archiveMutation = useArchiveNotifications(organizationId);
+	const deleteMutation = useDeleteNotifications(organizationId);
 
 	const handleMarkRead = (id: string) => {
 		onMarkRead([id]);

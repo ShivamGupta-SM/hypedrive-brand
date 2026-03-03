@@ -6,23 +6,23 @@
  * 2. Organization to exist and user has access
  * 3. Organization to be approved
  *
- * Organization resolution is fully server-side — no Zustand access in beforeLoad.
- * The component syncs resolved data to client stores for reactive UI.
+ * Permissions data (role + custom permissions) is resolved in beforeLoad
+ * and passed via router context. The `can()` closure is built in
+ * useOrgContext() from this serializable data — SSR-safe, no Zustand.
+ *
+ * Renders AppLayout here so all sidebar components (OrganizationSwitcher,
+ * NotificationPopover, SearchDialog) have direct access to org data
+ * via props from router context.
  */
 
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { AppLayout } from "@/components/app-layout";
+import { NotificationStreamProvider } from "@/components/notification-stream-provider";
 import { NotFoundPage } from "@/components/shared/not-found-page";
+import { RouteErrorComponent } from "@/components/shared/route-error";
 import { CACHE, queryKeys } from "@/hooks/api-client";
-import {
-	clearCustomRolePermissions,
-	ORG_ROLE_PERMISSIONS,
-	registerCustomRolePermissions,
-} from "@/lib/permissions/access-control-client";
-import { getActiveMemberFromServer, getOrgRolesFromServer } from "@/lib/server-auth";
-import { useAuthStore } from "@/store/auth-store";
-import { useOrganizationStore } from "@/store/organization-store";
-import { usePermissionsStore } from "@/store/permissions-store";
+import { ORG_ROLE_PERMISSIONS } from "@/lib/permissions/definitions";
+import { getActiveMemberFromServer, getOrgRolesFromServer } from "@/server/auth-queries";
 
 export const Route = createFileRoute("/_app/$orgSlug")({
 	beforeLoad: async ({ params, context }) => {
@@ -51,10 +51,8 @@ export const Route = createFileRoute("/_app/$orgSlug")({
 		}
 
 		// Fetch active member + org roles in parallel for RBAC, cached per org.
-		// Both are fired concurrently — roles are only used if the member has a custom role,
-		// but fetching speculatively avoids a sequential waterfall.
 		// Wrapped in try-catch so a transient fetch error during client hydration
-		// doesn't bubble up to the root error boundary and flash "Something went wrong".
+		// doesn't bubble up to the root error boundary.
 		let member: { role: string } | null = null;
 		let customPermissions: Record<string, string[]> | null = null;
 
@@ -76,15 +74,13 @@ export const Route = createFileRoute("/_app/$orgSlug")({
 			// If member has a custom role (not in the hardcoded matrix), resolve its permissions
 			if (member?.role && !(member.role in ORG_ROLE_PERMISSIONS)) {
 				const memberRole = member.role;
-				const match = rolesResult.roles.find((r) => r.role === memberRole);
+				const match = rolesResult.roles.find(
+					(r: { role: string; permission?: Record<string, string[]> }) => r.role === memberRole
+				);
 				customPermissions = match?.permission ?? null;
-
-				// Register immediately for SSR-time rendering
-				registerCustomRolePermissions(customPermissions);
 			}
 		} catch {
-			// Transient error — clear any stale custom role permissions from previous org
-			clearCustomRolePermissions();
+			// Transient error — permissions default to deny-all (can() returns false)
 		}
 
 		return {
@@ -95,6 +91,7 @@ export const Route = createFileRoute("/_app/$orgSlug")({
 		};
 	},
 	component: OrgLayoutWrapper,
+	errorComponent: RouteErrorComponent,
 	notFoundComponent: OrgNotFound,
 });
 
@@ -104,31 +101,14 @@ function OrgNotFound() {
 }
 
 function OrgLayoutWrapper() {
-	const { organization, organizations, activeMember, customPermissions } = Route.useRouteContext();
-	const userId = useAuthStore((s) => s.user?.id);
+	const { auth, organization, organizations } = Route.useRouteContext();
 
-	// Sync server-resolved data to client stores for reactive UI (dropdowns, permissions, etc.)
-	useEffect(() => {
-		if (organization) {
-			useOrganizationStore.getState().setCurrentOrganization(organization);
-		}
-		if (organizations) {
-			useOrganizationStore.getState().setOrganizations(organizations);
-		}
-	}, [organization, organizations]);
+	// organization is guaranteed by beforeLoad (redirects if not found)
+	if (!organization) return null;
 
-	// Sync permissions to store — clear if member fetch failed
-	useEffect(() => {
-		if (activeMember?.role && organization && userId) {
-			usePermissionsStore.getState().setPermissions({
-				userId,
-				organizationRole: activeMember.role,
-				customPermissions,
-			});
-		} else {
-			usePermissionsStore.getState().clearPermissions();
-		}
-	}, [activeMember, organization, userId, customPermissions]);
-
-	return <Outlet />;
+	return (
+		<NotificationStreamProvider organizationId={organization.id}>
+			<AppLayout user={auth.user ?? null} organization={organization} organizations={organizations ?? []} />
+		</NotificationStreamProvider>
+	);
 }

@@ -43,7 +43,7 @@ export function NotFoundPage({
 			className={clsx(
 				"flex items-center justify-center px-4",
 				fullScreen ? "min-h-dvh py-16" : "min-h-[calc(100dvh-8rem)] py-12",
-				className,
+				className
 			)}
 		>
 			<div className="flex flex-col items-center">
@@ -56,11 +56,7 @@ export function NotFoundPage({
 						aria-hidden="true"
 					>
 						<defs>
-							<path
-								id="stampCircle"
-								d="M 60,60 m -42,0 a 42,42 0 1,1 84,0 a 42,42 0 1,1 -84,0"
-								fill="transparent"
-							/>
+							<path id="stampCircle" d="M 60,60 m -42,0 a 42,42 0 1,1 84,0 a 42,42 0 1,1 -84,0" fill="transparent" />
 						</defs>
 						<text
 							className="fill-zinc-700 font-serif text-[10px] uppercase dark:fill-zinc-300"
@@ -88,9 +84,7 @@ export function NotFoundPage({
 								/>
 								{/* 404 overlay — gradient fade from bottom for depth */}
 								<div className="absolute inset-0 flex items-center justify-center bg-linear-to-t from-zinc-950/50 via-zinc-950/10 to-transparent">
-									<span className="font-serif text-7xl tracking-tight text-white drop-shadow-lg sm:text-8xl">
-										404
-									</span>
+									<span className="font-serif text-7xl tracking-tight text-white drop-shadow-lg sm:text-8xl">404</span>
 								</div>
 							</div>
 						</div>
@@ -134,9 +128,7 @@ export function NotFoundPage({
 					</h1>
 
 					{/* Subtext — slightly larger, generous spacing */}
-					<p className="mt-6 text-base leading-relaxed text-zinc-500 md:text-lg dark:text-zinc-400">
-						{subtext}
-					</p>
+					<p className="mt-6 text-base leading-relaxed text-zinc-500 md:text-lg dark:text-zinc-400">{subtext}</p>
 
 					<div className="mt-10">
 						<Button href={backButtonHref} color="dark/zinc">

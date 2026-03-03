@@ -6,5 +6,10 @@ export const Route = createFileRoute("/_approval/pending-approval")({
 	head: () => ({
 		meta: [{ title: "Pending Approval | Hypedrive" }],
 	}),
-	component: PendingApproval,
+	component: PendingApprovalWrapper,
 });
+
+function PendingApprovalWrapper() {
+	const { approvalOrganization } = Route.useRouteContext();
+	return <PendingApproval organization={approvalOrganization} />;
+}

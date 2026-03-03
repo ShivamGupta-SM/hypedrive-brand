@@ -1,16 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { infiniteInvoicesQueryOptions } from "@/hooks/api-client";
+import { RouteErrorComponent, RoutePendingComponent } from "@/components/shared/route-error";
+import { infiniteInvoicesQueryOptions } from "@/features/invoices/queries";
 import { InvoicesList } from "@/pages/invoices";
 
 export const Route = createFileRoute("/_app/$orgSlug/invoices")({
 	head: () => ({
 		meta: [{ title: "Invoices | Hypedrive" }],
 	}),
-	loader: ({ context }) => {
+	loader: async ({ context }) => {
 		const orgId = context.organization?.id;
 		if (!orgId) return;
-		context.queryClient.prefetchInfiniteQuery(infiniteInvoicesQueryOptions(orgId, {}));
+		await context.queryClient.prefetchInfiniteQuery(infiniteInvoicesQueryOptions(orgId, {}));
 	},
 	component: InvoicesList,
+	errorComponent: RouteErrorComponent,
+	pendingComponent: RoutePendingComponent,
 });

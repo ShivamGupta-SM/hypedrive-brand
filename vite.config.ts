@@ -44,6 +44,7 @@ export default defineConfig({
 		rollupOptions: {
 			output: {
 				manualChunks(id) {
+					if (!id.includes("node_modules")) return;
 					// Recharts + d3 (large, rarely changes)
 					if (id.includes("recharts") || id.includes("d3-") || id.includes("victory-")) {
 						return "vendor-charts";
@@ -51,14 +52,6 @@ export default defineConfig({
 					// Headless UI + Heroicons (UI primitives)
 					if (id.includes("@headlessui") || id.includes("@heroicons")) {
 						return "vendor-ui";
-					}
-					// TanStack libs (router, query, virtual)
-					if (id.includes("@tanstack")) {
-						return "vendor-tanstack";
-					}
-					// React core
-					if (id.includes("node_modules/react") || id.includes("node_modules/react-dom")) {
-						return "vendor-react";
 					}
 				},
 			},

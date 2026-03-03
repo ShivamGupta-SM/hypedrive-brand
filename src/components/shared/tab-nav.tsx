@@ -48,9 +48,7 @@ export function TabNav({ tabs, className }: TabNavProps) {
 								<tab.icon
 									className={clsx(
 										"size-3.5",
-										isActive
-											? "text-white dark:text-zinc-900"
-											: tab.iconColor || "text-zinc-400"
+										isActive ? "text-white dark:text-zinc-900" : tab.iconColor || "text-zinc-400"
 									)}
 								/>
 							)}

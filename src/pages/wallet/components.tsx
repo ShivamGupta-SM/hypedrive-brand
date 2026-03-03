@@ -25,13 +25,13 @@ import { Button } from "@/components/button";
 import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/dialog";
 import { Field, Label } from "@/components/fieldset";
 import { Input } from "@/components/input";
+import { useCan } from "@/components/shared/can";
 import { Skeleton } from "@/components/skeleton";
 import { Textarea } from "@/components/textarea";
 import { getAPIErrorMessage, useCancelWithdrawal, useCreateWithdrawal, usePasskeyReauthOptions } from "@/hooks";
 import type { brand } from "@/lib/brand-client";
 import { formatCurrency, formatDateTime } from "@/lib/design-tokens";
 import { showToast } from "@/lib/toast";
-import { useCan } from "@/store/permissions-store";
 
 type WalletTransaction = brand.WalletTransaction;
 type ActiveHold = brand.ActiveHold;

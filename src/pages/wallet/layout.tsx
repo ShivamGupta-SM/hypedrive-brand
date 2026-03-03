@@ -1,7 +1,7 @@
 import {
 	ArrowDownLeftIcon,
-	ArrowUpRightIcon,
 	ArrowsRightLeftIcon,
+	ArrowUpRightIcon,
 	BanknotesIcon,
 	LockClosedIcon,
 	WalletIcon,
@@ -10,6 +10,7 @@ import { Outlet } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/button";
 import { PageHeader } from "@/components/page-header";
+import { useCan } from "@/components/shared/can";
 import { ErrorState } from "@/components/shared/error-state";
 import { IconButton } from "@/components/shared/icon-button";
 import { TabNav, type TabNavItem } from "@/components/shared/tab-nav";
@@ -24,7 +25,6 @@ import {
 } from "@/hooks";
 import { useOrgPath } from "@/hooks/use-org-slug";
 import { formatCurrency } from "@/lib/design-tokens";
-import { useCan } from "@/store/permissions-store";
 import { DepositAccountDialog, LoadingSkeleton, WithdrawDialog } from "./components";
 
 export function WalletLayout() {
@@ -78,10 +78,35 @@ export function WalletLayout() {
 		);
 
 	const tabs: TabNavItem[] = [
-		{ label: "Transactions", to: orgPath("/wallet"), exact: true, count: transactions?.length ?? 0, icon: ArrowsRightLeftIcon, iconColor: "text-sky-500" },
-		{ label: "Holds", to: orgPath("/wallet/holds"), count: holds?.length ?? 0, icon: LockClosedIcon, iconColor: "text-amber-500" },
-		{ label: "Withdrawals", to: orgPath("/wallet/withdrawals"), count: withdrawals?.length ?? 0, icon: WalletIcon, iconColor: "text-violet-500" },
-		{ label: "Deposits", to: orgPath("/wallet/deposits"), count: deposits?.length ?? 0, icon: BanknotesIcon, iconColor: "text-emerald-500" },
+		{
+			label: "Transactions",
+			to: orgPath("/wallet"),
+			exact: true,
+			count: transactions?.length ?? 0,
+			icon: ArrowsRightLeftIcon,
+			iconColor: "text-sky-500",
+		},
+		{
+			label: "Holds",
+			to: orgPath("/wallet/holds"),
+			count: holds?.length ?? 0,
+			icon: LockClosedIcon,
+			iconColor: "text-amber-500",
+		},
+		{
+			label: "Withdrawals",
+			to: orgPath("/wallet/withdrawals"),
+			count: withdrawals?.length ?? 0,
+			icon: WalletIcon,
+			iconColor: "text-violet-500",
+		},
+		{
+			label: "Deposits",
+			to: orgPath("/wallet/deposits"),
+			count: deposits?.length ?? 0,
+			icon: BanknotesIcon,
+			iconColor: "text-emerald-500",
+		},
 	];
 
 	const balanceNum = parseFloat(stats.balance);

@@ -6,5 +6,10 @@ export const Route = createFileRoute("/_approval/rejected")({
 	head: () => ({
 		meta: [{ title: "Application Status | Hypedrive" }],
 	}),
-	component: Rejected,
+	component: RejectedWrapper,
 });
+
+function RejectedWrapper() {
+	const { approvalOrganization } = Route.useRouteContext();
+	return <Rejected organization={approvalOrganization} />;
+}

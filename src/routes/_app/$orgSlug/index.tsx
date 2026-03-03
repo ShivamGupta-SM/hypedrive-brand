@@ -1,19 +1,27 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { dashboardQueryOptions, organizationActivityQueryOptions, setupProgressQueryOptions } from "@/hooks/api-client";
+import { RouteErrorComponent, RoutePendingComponent } from "@/components/shared/route-error";
+import {
+	dashboardQueryOptions,
+	organizationActivityQueryOptions,
+	setupProgressQueryOptions,
+} from "@/features/organization/queries";
 import { Dashboard } from "@/pages/dashboard";
 
 export const Route = createFileRoute("/_app/$orgSlug/")({
 	head: () => ({
 		meta: [{ title: "Dashboard | Hypedrive" }],
 	}),
-	loader: ({ context }) => {
+	loader: async ({ context }) => {
 		const orgId = context.organization?.id;
 		if (!orgId) return;
-		// Fire all three in parallel — don't await, just prime the cache
-		context.queryClient.ensureQueryData(dashboardQueryOptions(orgId));
-		context.queryClient.ensureQueryData(organizationActivityQueryOptions(orgId, { limit: 6 }));
-		context.queryClient.ensureQueryData(setupProgressQueryOptions(orgId));
+		await Promise.all([
+			context.queryClient.ensureQueryData(dashboardQueryOptions(orgId)),
+			context.queryClient.ensureQueryData(organizationActivityQueryOptions(orgId, { limit: 6 })),
+			context.queryClient.ensureQueryData(setupProgressQueryOptions(orgId)),
+		]);
 	},
 	component: Dashboard,
+	errorComponent: RouteErrorComponent,
+	pendingComponent: RoutePendingComponent,
 });

@@ -17,7 +17,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Badge } from "@/components/badge";
 import { Skeleton, SkeletonProvider } from "@/components/skeleton";
-import { useCurrentOrganization, useUnifiedSearch } from "@/hooks";
+import { useUnifiedSearch } from "@/hooks";
 import type { brand } from "@/lib/brand-client";
 import { formatRelativeTime, formatStatus, getStatusColor } from "@/lib/design-tokens";
 import { HighlightText } from "@/lib/highlight-text";
@@ -277,13 +277,22 @@ function SearchResultRow({
 // SEARCH DIALOG
 // =============================================================================
 
-export function SearchDialog({ isOpen, onClose, orgSlug }: { isOpen: boolean; onClose: () => void; orgSlug: string }) {
+export function SearchDialog({
+	isOpen,
+	onClose,
+	orgSlug,
+	organizationId,
+}: {
+	isOpen: boolean;
+	onClose: () => void;
+	orgSlug: string;
+	organizationId: string;
+}) {
 	const [query, setQuery] = useState("");
 	const [filter, setFilter] = useState<SearchFilterType>("all");
 	const [focusedIndex, setFocusedIndex] = useState(-1);
 	const inputRef = useRef<HTMLInputElement>(null);
 	const listRef = useRef<HTMLDivElement>(null);
-	const organization = useCurrentOrganization();
 	const navigate = useNavigate();
 	const debouncedQuery = useDebounce(query, 300);
 	const { recentSearches, addRecentSearch, removeRecentSearch, clearRecentSearches } = useRecentSearches();
@@ -295,7 +304,7 @@ export function SearchDialog({ isOpen, onClose, orgSlug }: { isOpen: boolean; on
 		loading,
 		isFetching,
 		error: searchError,
-	} = useUnifiedSearch(hasQuery ? organization?.id : undefined, {
+	} = useUnifiedSearch(hasQuery ? organizationId : undefined, {
 		q: debouncedQuery,
 		limit: 50,
 	});

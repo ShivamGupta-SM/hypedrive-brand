@@ -43,9 +43,9 @@ import {
 import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import clsx from "clsx";
 import { useCallback, useEffect, useState } from "react";
+import { useCan } from "@/components/shared/can";
 import { formatCurrency } from "@/lib/design-tokens";
 import { showToast } from "@/lib/toast";
-import { useCan } from "@/store/permissions-store";
 
 const routeApi = getRouteApi("/_app/$orgSlug/listings_/$id");
 

@@ -271,7 +271,10 @@ export interface FormSectionProps {
 export function FormSection({ children, className, icon, title, description }: FormSectionProps) {
 	return (
 		<div
-			className={clsx("rounded-xl bg-white p-6 shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800", className)}
+			className={clsx(
+				"rounded-xl bg-white p-6 shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800",
+				className
+			)}
 		>
 			<div className="flex items-start gap-3 border-b border-zinc-200 pb-4 dark:border-zinc-700">
 				{icon && (

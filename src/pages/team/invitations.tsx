@@ -1,9 +1,9 @@
 import { EnvelopeIcon } from "@heroicons/react/16/solid";
 import { useCallback, useState } from "react";
 import { Button } from "@/components/button";
+import { useCan } from "@/components/shared/can";
 import { EmptyState } from "@/components/shared/empty-state";
 import { getAPIErrorMessage, useCancelInvitation, useInvitations, useOrgContext } from "@/hooks";
-import { useCan } from "@/store/permissions-store";
 import type { Invitation } from "./components";
 import { InvitationRow, InviteMemberModal } from "./components";
 

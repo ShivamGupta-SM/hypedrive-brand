@@ -1,31 +1,19 @@
 /**
- * Authenticated App Layout
+ * Authenticated App Layout — Auth guard only.
  *
- * This is the parent layout for all authenticated routes.
- * Child routes are under /$orgSlug/* for URL-based multi-tenancy.
- *
- * Flow:
- * 1. Check auth + organizations from router context (set by root beforeLoad in one parallel call)
- * 2. Render AppLayout with Outlet for child routes
- *
- * Organization validation happens in the /$orgSlug child route.
+ * Redirects unauthenticated users to /login.
+ * AppLayout rendering moved to $orgSlug.tsx so all sidebar components
+ * (OrganizationSwitcher, NotificationPopover, SearchDialog) have direct
+ * access to router context with org data — no Zustand bridge needed.
  */
 
-import { createFileRoute, redirect } from "@tanstack/react-router";
-
-import { AppLayout } from "@/components/app-layout";
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_app")({
 	beforeLoad: ({ context }) => {
 		if (!context.auth.isAuthenticated) {
 			throw redirect({ to: "/login" });
 		}
-		// organizations already in context from root beforeLoad — no async work needed
 	},
-	component: AppLayoutWrapper,
+	component: () => <Outlet />,
 });
-
-function AppLayoutWrapper() {
-	const { auth, organizations } = Route.useRouteContext();
-	return <AppLayout serverAuth={auth} serverOrganizations={organizations ?? []} />;
-}

@@ -42,6 +42,7 @@ import { Input } from "@/components/input";
 import { Link } from "@/components/link";
 import { NumberInput } from "@/components/number-input";
 import { Select } from "@/components/select";
+import { useCan } from "@/components/shared/can";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
 import { FilterChip } from "@/components/shared/filter-chip";
@@ -76,7 +77,6 @@ import { usePageTitle } from "@/hooks/use-breadcrumb";
 import type { brand, db } from "@/lib/brand-client";
 import { formatCurrency } from "@/lib/design-tokens";
 import { showToast } from "@/lib/toast";
-import { useCan } from "@/store/permissions-store";
 
 const routeApi = getRouteApi("/_app/$orgSlug/campaigns_/$id");
 
@@ -1024,8 +1024,20 @@ export function CampaignShow() {
 
 	const tabs = [
 		{ key: "overview" as const, label: "Overview", icon: ChartBarIcon, iconColor: "text-sky-500" },
-		{ key: "enrollments" as const, label: "Enrollments", icon: UserGroupIcon, count: enrollments.length, iconColor: "text-emerald-500" },
-		{ key: "tasks" as const, label: "Tasks", icon: ClipboardDocumentListIcon, count: tasks.length, iconColor: "text-amber-500" },
+		{
+			key: "enrollments" as const,
+			label: "Enrollments",
+			icon: UserGroupIcon,
+			count: enrollments.length,
+			iconColor: "text-emerald-500",
+		},
+		{
+			key: "tasks" as const,
+			label: "Tasks",
+			icon: ClipboardDocumentListIcon,
+			count: tasks.length,
+			iconColor: "text-amber-500",
+		},
 	];
 
 	return (

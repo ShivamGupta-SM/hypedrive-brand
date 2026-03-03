@@ -137,9 +137,7 @@ function EnrollmentCardFull({
 					<div className="min-w-0 flex-1">
 						{/* Row 1: Name + Status */}
 						<div className="flex items-center justify-between gap-2">
-							<h3 className="truncate text-sm font-semibold text-zinc-900 dark:text-white">
-								{creatorName}
-							</h3>
+							<h3 className="truncate text-sm font-semibold text-zinc-900 dark:text-white">{creatorName}</h3>
 							<Badge color={statusConfig.color} className="inline-flex shrink-0 items-center gap-1 text-[11px]!">
 								<StatusIcon className="size-3" />
 								{statusConfig.label}

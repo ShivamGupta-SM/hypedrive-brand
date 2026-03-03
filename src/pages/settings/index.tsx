@@ -30,6 +30,7 @@ import { Input } from "@/components/input";
 import { Logo } from "@/components/logo";
 import { usePanelNav } from "@/components/settings-dialog";
 import { CopyButton } from "@/components/shared";
+import { useCan } from "@/components/shared/can";
 import { MenuRow, MenuSection, MenuSectionHeader, MenuSeparator } from "@/components/shared/menu-list";
 import { Text } from "@/components/text";
 import { Textarea } from "@/components/textarea";
@@ -43,15 +44,14 @@ import {
 	useDeleteBankAccount,
 	useFileUpload,
 	useGSTDetails,
-	useOrganizationProfile,
 	useOrganizationSettings,
+	useOrgContext,
 	usePasskeyReauthOptions,
 	useUpdateOrganizationSettings,
 	useVerifyBankAccount,
 	useVerifyGST,
 	useVerifyGSTPreview,
 } from "@/hooks";
-import { useOrgSlug } from "@/hooks/use-org-slug";
 import {
 	getAllCountries,
 	getCitiesForState,
@@ -60,7 +60,6 @@ import {
 	resolveStateIsoCode,
 } from "@/lib/location-data";
 import { showToast } from "@/lib/toast";
-import { useCan } from "@/store/permissions-store";
 
 // =============================================================================
 // SKELETON LOADING
@@ -720,7 +719,15 @@ interface GSTPreview {
 	stateCode: string;
 }
 
-function GSTPreviewDetail({ label, value, icon: Icon }: { label: string; value?: string; icon: React.ComponentType<{ className?: string }> }) {
+function GSTPreviewDetail({
+	label,
+	value,
+	icon: Icon,
+}: {
+	label: string;
+	value?: string;
+	icon: React.ComponentType<{ className?: string }>;
+}) {
 	if (!value) return null;
 	return (
 		<div className="flex items-start gap-2.5 py-1.5">
@@ -735,13 +742,7 @@ function GSTPreviewDetail({ label, value, icon: Icon }: { label: string; value?:
 	);
 }
 
-function VerifyGSTPanel({
-	organizationId,
-	currentGST,
-}: {
-	organizationId: string | undefined;
-	currentGST?: string;
-}) {
+function VerifyGSTPanel({ organizationId, currentGST }: { organizationId: string | undefined; currentGST?: string }) {
 	const panelNav = usePanelNav();
 	const pop = () => panelNav?.popPanel();
 
@@ -821,11 +822,7 @@ function VerifyGSTPanel({
 							disabled={!!previewData}
 						/>
 						{!previewData ? (
-							<Button
-								color="dark/zinc"
-								onClick={handlePreview}
-								disabled={isPending || !isValidGST}
-							>
+							<Button color="dark/zinc" onClick={handlePreview} disabled={isPending || !isValidGST}>
 								{verifyPreview.isPending ? "Checking..." : "Verify"}
 							</Button>
 						) : (
@@ -879,11 +876,7 @@ function VerifyGSTPanel({
 				<Button plain onClick={pop} disabled={isPending}>
 					Cancel
 				</Button>
-				<Button
-					color="emerald"
-					onClick={handleSave}
-					disabled={isPending || !previewData}
-				>
+				<Button color="emerald" onClick={handleSave} disabled={isPending || !previewData}>
 					{verifyGST.isPending ? "Saving..." : isChanged ? "Save New GST" : "Confirm & Save"}
 				</Button>
 			</div>
@@ -898,8 +891,7 @@ function VerifyGSTPanel({
 export type OrgSettingsSection = "profile" | "gst" | "bank" | "billing" | "all";
 
 export function Settings({ section = "all" }: { section?: OrgSettingsSection } = {}) {
-	const { organization, loading: isLoadingOrg } = useOrganizationProfile();
-	const organizationId = organization?.id;
+	const { organization, organizationId, orgSlug } = useOrgContext();
 	const { data: orgDetails } = useOrganizationSettings(organizationId);
 	const { data: dashboardData, loading: isLoadingStats } = useDashboard(organizationId);
 	const { data: bankAccount, loading: isBankLoading, refetch: refetchBank } = useBankAccount(organizationId);
@@ -910,7 +902,6 @@ export function Settings({ section = "all" }: { section?: OrgSettingsSection } =
 	const canUpdateOrganization = useCan("organization", "update");
 	const canCreateBankAccount = useCan("bankAccount", "create");
 	const canDeleteBankAccount = useCan("bankAccount", "delete");
-	const orgSlug = useOrgSlug();
 	const panelNav = usePanelNav();
 
 	const formatSpent = (decimal: string | undefined) => {
@@ -982,7 +973,7 @@ export function Settings({ section = "all" }: { section?: OrgSettingsSection } =
 		}
 	};
 
-	const loading = isLoadingOrg || isLoadingStats;
+	const loading = isLoadingStats;
 
 	if (loading) {
 		return <OrganizationSettingsSkeleton />;
@@ -1051,7 +1042,9 @@ export function Settings({ section = "all" }: { section?: OrgSettingsSection } =
 	const gst = gstDetails?.gstDetails;
 	const gstIsVerified = gst?.isVerified === true;
 	const hasGST = !!gst?.gstNumber;
-	const billingAddress = [orgData?.address, orgData?.city, orgData?.state, orgData?.postalCode].filter(Boolean).join(", ");
+	const billingAddress = [orgData?.address, orgData?.city, orgData?.state, orgData?.postalCode]
+		.filter(Boolean)
+		.join(", ");
 
 	const gstSection = (
 		<div className="space-y-1.5">
@@ -1083,35 +1076,37 @@ export function Settings({ section = "all" }: { section?: OrgSettingsSection } =
 				/* ── GST Details Card ── */
 				<div className="overflow-hidden rounded-xl ring-1 ring-zinc-200/80 dark:ring-zinc-700/60">
 					{/* Status Banner */}
-					<div className={`flex items-center justify-between px-4 py-2 ${
-						gstIsVerified
-							? "bg-emerald-50 dark:bg-emerald-950/20"
-							: "bg-amber-50 dark:bg-amber-950/20"
-					}`}>
+					<div
+						className={`flex items-center justify-between px-4 py-2 ${
+							gstIsVerified ? "bg-emerald-50 dark:bg-emerald-950/20" : "bg-amber-50 dark:bg-amber-950/20"
+						}`}
+					>
 						<div className="flex items-center gap-2">
 							{gstIsVerified ? (
 								<ShieldCheckIcon className="size-4 text-emerald-600 dark:text-emerald-400" />
 							) : (
 								<ExclamationTriangleIcon className="size-4 text-amber-600 dark:text-amber-400" />
 							)}
-							<span className={`text-xs font-semibold uppercase tracking-wide ${
-								gstIsVerified
-									? "text-emerald-700 dark:text-emerald-300"
-									: "text-amber-700 dark:text-amber-300"
-							}`}>
+							<span
+								className={`text-xs font-semibold uppercase tracking-wide ${
+									gstIsVerified ? "text-emerald-700 dark:text-emerald-300" : "text-amber-700 dark:text-amber-300"
+								}`}
+							>
 								{gstIsVerified ? "Verified" : "Pending Verification"}
 							</span>
 							{gst.verifiedAt && (
 								<span className="text-[10px] text-zinc-400 dark:text-zinc-500">
-									· {new Date(gst.verifiedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+									·{" "}
+									{new Date(gst.verifiedAt).toLocaleDateString("en-IN", {
+										day: "numeric",
+										month: "short",
+										year: "numeric",
+									})}
 								</span>
 							)}
 						</div>
 						{canUpdateOrganization && (
-							<BadgeButton
-								color={gstIsVerified ? "zinc" : "amber"}
-								onClick={openVerifyGST}
-							>
+							<BadgeButton color={gstIsVerified ? "zinc" : "amber"} onClick={openVerifyGST}>
 								{gstIsVerified ? "Change" : "Verify Now"}
 							</BadgeButton>
 						)}
@@ -1146,7 +1141,11 @@ export function Settings({ section = "all" }: { section?: OrgSettingsSection } =
 								) : (
 									<p className="mt-0.5 text-sm italic text-zinc-400 dark:text-zinc-500">
 										Not set — update in{" "}
-										<button type="button" className="underline" onClick={canUpdateOrganization ? openEditOrg : undefined}>
+										<button
+											type="button"
+											className="underline"
+											onClick={canUpdateOrganization ? openEditOrg : undefined}
+										>
 											Organization Details
 										</button>
 									</p>

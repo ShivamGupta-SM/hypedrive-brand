@@ -11,11 +11,10 @@ import { BuildingStorefrontIcon } from "@heroicons/react/20/solid";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import clsx from "clsx";
 import { useCallback, useState } from "react";
+import type { Organization } from "@/components/app-layout";
 import { Avatar } from "@/components/avatar";
 import { SidebarItem } from "@/components/sidebar";
 import { getInitials } from "@/lib/design-tokens";
-import type { Organization } from "@/store/organization-store";
-import { useOrganizationStore } from "@/store/organization-store";
 
 /** Richer palette — each org gets a distinct but professional color */
 const ORG_COLORS = [
@@ -309,32 +308,24 @@ function MobileOrgSheet({
 	);
 }
 
-/** Shared hook for org switching logic */
+/** Shared hook for org switching logic — pure props, no Zustand */
 function useOrgSwitching({
-	serverOrganizations,
-	serverCurrentOrg,
+	organizations,
+	currentOrganization,
 	onOpenOrgSettings,
 }: {
-	serverOrganizations: Organization[];
-	serverCurrentOrg: Organization | null;
+	organizations: Organization[];
+	currentOrganization: Organization;
 	onOpenOrgSettings: () => void;
 }) {
-	const { currentOrganization: storeOrg, organizations: storeOrgs, switchOrganization } = useOrganizationStore();
-	const currentOrganization = storeOrg || serverCurrentOrg;
-	const organizations = storeOrgs.length > 0 ? storeOrgs : serverOrganizations;
 	const navigate = useNavigate();
 	const location = useLocation();
 	const [mobileOpen, setMobileOpen] = useState(false);
 
 	const performSwitch = useCallback(
 		(org: Organization) => {
-			if (org.id !== currentOrganization?.id) {
-				// Optimistic UI update for the switcher dropdown only.
-				// Do NOT clear permissions here — OrgLayoutWrapper's useEffect
-				// will sync permissions after beforeLoad resolves the new org.
-				switchOrganization(org.id);
-
-				const currentSlug = currentOrganization?.slug;
+			if (org.id !== currentOrganization.id) {
+				const currentSlug = currentOrganization.slug;
 				if (currentSlug && location.pathname.startsWith(`/${currentSlug}`)) {
 					const subPath = location.pathname.slice(`/${currentSlug}`.length);
 					navigate({ to: `/${org.slug}${subPath || ""}` });
@@ -343,7 +334,7 @@ function useOrgSwitching({
 				}
 			}
 		},
-		[currentOrganization, switchOrganization, navigate, location.pathname]
+		[currentOrganization, navigate, location.pathname]
 	);
 
 	const handleDesktopSelect = useCallback(
@@ -380,13 +371,10 @@ function useOrgSwitching({
 		[onOpenOrgSettings]
 	);
 
-	const fallbackOrg: Organization = { id: "fallback", name: "Select Org", slug: "", createdAt: "" };
-	const displayOrg = currentOrganization || fallbackOrg;
-
 	return {
 		organizations,
 		currentOrganization,
-		displayOrg,
+		displayOrg: currentOrganization,
 		mobileOpen,
 		setMobileOpen,
 		handleDesktopSelect,
@@ -397,17 +385,15 @@ function useOrgSwitching({
 }
 
 export function OrganizationSwitcher({
-	serverOrganizations,
-	serverCurrentOrg,
+	organizations,
+	currentOrganization,
 	onOpenOrgSettings,
 }: {
-	serverOrganizations: Organization[];
-	serverCurrentOrg: Organization | null;
+	organizations: Organization[];
+	currentOrganization: Organization;
 	onOpenOrgSettings: () => void;
 }) {
 	const {
-		organizations,
-		currentOrganization,
 		displayOrg,
 		mobileOpen,
 		setMobileOpen,
@@ -415,7 +401,7 @@ export function OrganizationSwitcher({
 		handleMobileSelect,
 		handleNewOrg,
 		handleSettings,
-	} = useOrgSwitching({ serverOrganizations, serverCurrentOrg, onOpenOrgSettings });
+	} = useOrgSwitching({ organizations, currentOrganization, onOpenOrgSettings });
 
 	return (
 		<>
@@ -481,24 +467,19 @@ export function OrganizationSwitcher({
 
 /** Compact org switcher trigger for mobile header bar */
 export function MobileOrgSwitcher({
-	serverOrganizations,
-	serverCurrentOrg,
+	organizations,
+	currentOrganization,
 	onOpenOrgSettings,
 }: {
-	serverOrganizations: Organization[];
-	serverCurrentOrg: Organization | null;
+	organizations: Organization[];
+	currentOrganization: Organization;
 	onOpenOrgSettings: () => void;
 }) {
-	const {
+	const { displayOrg, mobileOpen, setMobileOpen, handleMobileSelect, handleNewOrg, handleSettings } = useOrgSwitching({
 		organizations,
 		currentOrganization,
-		displayOrg,
-		mobileOpen,
-		setMobileOpen,
-		handleMobileSelect,
-		handleNewOrg,
-		handleSettings,
-	} = useOrgSwitching({ serverOrganizations, serverCurrentOrg, onOpenOrgSettings });
+		onOpenOrgSettings,
+	});
 
 	return (
 		<>

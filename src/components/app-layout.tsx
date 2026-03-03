@@ -23,6 +23,7 @@ import { NotificationPopoverNavbar } from "@/components/notification-popover";
 import { MobileOrgSwitcher, OrganizationSwitcher } from "@/components/organization-switcher";
 import { SearchDialog } from "@/components/search-dialog";
 import { SettingsDialog } from "@/components/settings-dialog";
+import { Can } from "@/components/shared/can";
 import {
 	Sidebar,
 	SidebarBody,
@@ -36,39 +37,28 @@ import {
 	SidebarSpacer,
 } from "@/components/sidebar";
 import { SidebarLayout } from "@/components/sidebar-layout";
-import { useOrgSlug } from "@/hooks";
-import { Can } from "@/providers/ability-provider";
-import { useAuthStore } from "@/store/auth-store";
-import type { Organization } from "@/store/organization-store";
+
+export interface Organization {
+	id: string;
+	name: string;
+	slug: string;
+	logo?: string | null;
+	createdAt: string;
+	approvalStatus?: string;
+}
 
 export function AppLayout({
-	serverOrganizations,
-	serverAuth,
+	user,
+	organization,
+	organizations,
 }: {
-	serverOrganizations: Organization[];
-	serverAuth: {
-		isAuthenticated: boolean;
-		user?: { id: string; name: string; email: string; image?: string | null } | null;
-		token: string | null;
-	};
+	user: { id: string; name: string; email: string; image?: string | null } | null;
+	organization: Organization;
+	organizations: Organization[];
 }) {
 	const location = useLocation();
 	const pathname = location.pathname;
-	const orgSlug = useOrgSlug();
-	const serverCurrentOrg = serverOrganizations.find((o) => o.slug === orgSlug) ?? serverOrganizations[0] ?? null;
-
-	// User from router context (SSR) — Zustand overrides after login or profile edit
-	const storeUser = useAuthStore((state) => state.user);
-	const user = storeUser ?? serverAuth.user ?? null;
-
-	// Sync server user into Zustand on initial mount so other consumers
-	// (settings, team page) can read from the store
-	useEffect(() => {
-		if (serverAuth.user && !storeUser) {
-			useAuthStore.getState().setUser(serverAuth.user);
-			useAuthStore.getState().setAuthenticated(true);
-		}
-	}, [serverAuth.user, storeUser]);
+	const orgSlug = organization.slug;
 
 	const [showSettings, setShowSettings] = useState(false);
 	const [settingsTab, setSettingsTab] = useState<"org" | "account">("org");
@@ -104,8 +94,8 @@ export function AppLayout({
 				contentHeader={<ContentHeader />}
 				mobileOrgSwitcher={
 					<MobileOrgSwitcher
-						serverOrganizations={serverOrganizations}
-						serverCurrentOrg={serverCurrentOrg}
+						organizations={organizations}
+						currentOrganization={organization}
 						onOpenOrgSettings={openOrgSettings}
 					/>
 				}
@@ -116,7 +106,7 @@ export function AppLayout({
 							<NavbarItem onClick={() => setShowSearch(true)} aria-label="Search">
 								<MagnifyingGlassIcon />
 							</NavbarItem>
-							<NotificationPopoverNavbar />
+							<NotificationPopoverNavbar organizationId={organization.id} />
 							<Dropdown>
 								<DropdownButton as={NavbarItem}>
 									{user?.image ? (
@@ -143,7 +133,7 @@ export function AppLayout({
 						>
 							<MagnifyingGlassIcon className="size-5" />
 						</button>
-						<NotificationPopoverNavbar />
+						<NotificationPopoverNavbar organizationId={organization.id} />
 						<Dropdown>
 							<DropdownButton
 								as="button"
@@ -170,8 +160,8 @@ export function AppLayout({
 								<Logo className="h-6 w-auto self-start text-zinc-950 dark:text-white" />
 							</Link>
 							<OrganizationSwitcher
-								serverOrganizations={serverOrganizations}
-								serverCurrentOrg={serverCurrentOrg}
+								organizations={organizations}
+								currentOrganization={organization}
 								onOpenOrgSettings={openOrgSettings}
 							/>
 						</SidebarHeader>
@@ -288,7 +278,12 @@ export function AppLayout({
 				<Outlet />
 			</SidebarLayout>
 
-			<SearchDialog isOpen={showSearch} onClose={() => setShowSearch(false)} orgSlug={orgSlug} />
+			<SearchDialog
+				isOpen={showSearch}
+				onClose={() => setShowSearch(false)}
+				orgSlug={orgSlug}
+				organizationId={organization.id}
+			/>
 			<SettingsDialog open={showSettings} onClose={() => setShowSettings(false)} initialTab={settingsTab} />
 		</>
 	);

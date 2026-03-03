@@ -15,6 +15,7 @@ import { Button } from "@/components/button";
 import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/dialog";
 import { Input, InputGroup } from "@/components/input";
 import { PageHeader } from "@/components/page-header";
+import { useCan } from "@/components/shared/can";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
 import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
@@ -23,7 +24,6 @@ import { useGenerateInvoicePDF, useInfiniteInvoices, useInvoice, useOrgContext }
 import type { brand } from "@/lib/brand-client";
 import { formatCurrency, formatDate } from "@/lib/design-tokens";
 import { showToast } from "@/lib/toast";
-import { useCan } from "@/store/permissions-store";
 
 type Invoice = brand.Invoice;
 
@@ -421,7 +421,9 @@ export function InvoicesList() {
 										: "bg-white text-zinc-600 ring-zinc-200 hover:bg-zinc-50 dark:bg-zinc-900 dark:text-zinc-400 dark:ring-zinc-800 dark:hover:bg-zinc-800"
 								}`}
 							>
-								<filter.icon className={`size-3.5 ${periodFilter === filter.value ? "text-white dark:text-zinc-900" : filter.iconColor}`} />
+								<filter.icon
+									className={`size-3.5 ${periodFilter === filter.value ? "text-white dark:text-zinc-900" : filter.iconColor}`}
+								/>
 								{filter.label}
 							</button>
 						))}

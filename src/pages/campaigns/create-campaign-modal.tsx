@@ -101,11 +101,6 @@ const CAMPAIGN_TYPES = [
 	{ value: "hybrid", label: "Hybrid", icon: SparklesIcon, desc: "Cash + product" },
 ] as const;
 
-let taskIdCounter = 0;
-function nextTaskId() {
-	return `local-task-${++taskIdCounter}`;
-}
-
 // =============================================================================
 // INLINE HELPERS
 // =============================================================================
@@ -544,6 +539,8 @@ export function CreateCampaignModal({
 	const [listingSearch, setListingSearch] = useState("");
 	const [completedSteps, setCompletedSteps] = useState<boolean[]>(() => Array(STEPS.length).fill(false));
 	const stepTopRef = useRef<HTMLDivElement>(null);
+	const taskIdCounter = useRef(0);
+	const nextTaskId = () => `local-task-${++taskIdCounter.current}`;
 
 	const { data: listings, loading: listingsLoading } = useListings(organizationId, {
 		search: listingSearch || undefined,
@@ -788,12 +785,7 @@ export function CreateCampaignModal({
 					if (e.key === "Enter" && e.target instanceof HTMLInputElement) e.preventDefault();
 				}}
 			>
-				<DialogHeader
-					icon={MegaphoneIcon}
-					iconColor="emerald"
-					title="Create Campaign"
-					onClose={handleClose}
-				/>
+				<DialogHeader icon={MegaphoneIcon} iconColor="emerald" title="Create Campaign" onClose={handleClose} />
 
 				{/* Stepper */}
 				<div className="mt-3 border-t border-zinc-100 pt-4 dark:border-zinc-800" ref={stepTopRef}>
@@ -844,43 +836,45 @@ export function CreateCampaignModal({
 											<CubeIcon className="size-6 text-zinc-400 dark:text-zinc-500" />
 										</div>
 										<p className="mt-3 text-sm font-medium text-zinc-500">No listings found</p>
-										<p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">Create a product listing first, then come back to create a campaign.</p>
+										<p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
+											Create a product listing first, then come back to create a campaign.
+										</p>
 									</div>
 								) : (
 									<div className="divide-y divide-zinc-100 p-1 dark:divide-zinc-800">
-									{listings.map((listing) => {
-										const selected = listingId === listing.id;
-										return (
-											<button
-												key={listing.id}
-												type="button"
-												onClick={() => setValue("listingId", listing.id, { shouldValidate: true })}
-												className={clsx(
-													"flex w-full items-center gap-3 rounded-lg p-2.5 text-left transition-all",
-													selected
-														? "bg-emerald-50 ring-2 ring-emerald-500/60 dark:bg-emerald-950/30 dark:ring-emerald-500/40"
-														: "hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
-												)}
-											>
-												{listing.listingImages?.[0]?.imageUrl ? (
-													<img
-														src={getAssetUrl(listing.listingImages[0].imageUrl)}
-														alt={listing.name}
-														className="size-11 rounded-lg bg-zinc-100 object-contain dark:bg-zinc-800"
-													/>
-												) : (
-													<div className="flex size-11 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
-														<CubeIcon className="size-5 text-zinc-400" />
+										{listings.map((listing) => {
+											const selected = listingId === listing.id;
+											return (
+												<button
+													key={listing.id}
+													type="button"
+													onClick={() => setValue("listingId", listing.id, { shouldValidate: true })}
+													className={clsx(
+														"flex w-full items-center gap-3 rounded-lg p-2.5 text-left transition-all",
+														selected
+															? "bg-emerald-50 ring-2 ring-emerald-500/60 dark:bg-emerald-950/30 dark:ring-emerald-500/40"
+															: "hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+													)}
+												>
+													{listing.listingImages?.[0]?.imageUrl ? (
+														<img
+															src={getAssetUrl(listing.listingImages[0].imageUrl)}
+															alt={listing.name}
+															className="size-11 rounded-lg bg-zinc-100 object-contain dark:bg-zinc-800"
+														/>
+													) : (
+														<div className="flex size-11 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
+															<CubeIcon className="size-5 text-zinc-400" />
+														</div>
+													)}
+													<div className="min-w-0 flex-1">
+														<p className="truncate text-sm font-medium text-zinc-900 dark:text-white">{listing.name}</p>
+														<p className="text-xs text-zinc-500">{formatCurrency(listing.priceDecimal)}</p>
 													</div>
-												)}
-												<div className="min-w-0 flex-1">
-													<p className="truncate text-sm font-medium text-zinc-900 dark:text-white">{listing.name}</p>
-													<p className="text-xs text-zinc-500">{formatCurrency(listing.priceDecimal)}</p>
-												</div>
-												{selected && <CheckCircleIcon className="size-5 shrink-0 text-emerald-500" />}
-											</button>
-										);
-									})}
+													{selected && <CheckCircleIcon className="size-5 shrink-0 text-emerald-500" />}
+												</button>
+											);
+										})}
 									</div>
 								)}
 							</div>
@@ -896,107 +890,107 @@ export function CreateCampaignModal({
 								</div>
 								<p className="text-sm font-medium text-zinc-900 dark:text-white">Campaign Details</p>
 							</div>
-						<FieldGroup>
-							<Field>
-								<Label>
-									Title <span className="text-red-500">*</span>
-								</Label>
-								<Input {...register("title")} placeholder="e.g., Summer Sale Campaign" invalid={!!errors.title} />
-								{errors.title && <ErrorMessage>{errors.title.message}</ErrorMessage>}
-							</Field>
+							<FieldGroup>
+								<Field>
+									<Label>
+										Title <span className="text-red-500">*</span>
+									</Label>
+									<Input {...register("title")} placeholder="e.g., Summer Sale Campaign" invalid={!!errors.title} />
+									{errors.title && <ErrorMessage>{errors.title.message}</ErrorMessage>}
+								</Field>
 
-							<Field>
-								<div className="flex items-center justify-between">
-									<Label>Description</Label>
-									<span
-										className={clsx(
-											"text-xs tabular-nums",
-											description.length > 900 ? "text-amber-500" : "text-zinc-400 dark:text-zinc-500"
-										)}
-									>
-										{description.length}/1000
-									</span>
-								</div>
-								<Textarea
-									{...register("description")}
-									placeholder="Describe your campaign…"
-									rows={3}
-									resizable={false}
-								/>
-							</Field>
+								<Field>
+									<div className="flex items-center justify-between">
+										<Label>Description</Label>
+										<span
+											className={clsx(
+												"text-xs tabular-nums",
+												description.length > 900 ? "text-amber-500" : "text-zinc-400 dark:text-zinc-500"
+											)}
+										>
+											{description.length}/1000
+										</span>
+									</div>
+									<Textarea
+										{...register("description")}
+										placeholder="Describe your campaign…"
+										rows={3}
+										resizable={false}
+									/>
+								</Field>
 
-							{/* Campaign Type */}
-							<Field>
-								<Label>Campaign Type</Label>
-								<div className="mt-2 grid grid-cols-3 gap-1.5 sm:gap-2">
-									{CAMPAIGN_TYPES.map((ct) => {
-										const active = campaignType === ct.value;
-										const Icon = ct.icon;
-										return (
-											<button
-												key={ct.value}
-												type="button"
-												onClick={() => setValue("campaignType", ct.value)}
-												className={clsx(
-													"flex flex-col items-center gap-1 rounded-xl px-2 py-2.5 transition-all sm:gap-1.5 sm:px-3 sm:py-3",
-													active
-														? "bg-zinc-900 text-white shadow-sm dark:bg-white dark:text-zinc-900"
-														: "bg-zinc-50 text-zinc-600 hover:bg-zinc-100 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
-												)}
-											>
-												<Icon className="size-4 sm:size-5" />
-												<span className="text-[11px] font-semibold sm:text-xs">{ct.label}</span>
-											</button>
-										);
-									})}
-								</div>
-							</Field>
+								{/* Campaign Type */}
+								<Field>
+									<Label>Campaign Type</Label>
+									<div className="mt-2 grid grid-cols-3 gap-1.5 sm:gap-2">
+										{CAMPAIGN_TYPES.map((ct) => {
+											const active = campaignType === ct.value;
+											const Icon = ct.icon;
+											return (
+												<button
+													key={ct.value}
+													type="button"
+													onClick={() => setValue("campaignType", ct.value)}
+													className={clsx(
+														"flex flex-col items-center gap-1 rounded-xl px-2 py-2.5 transition-all sm:gap-1.5 sm:px-3 sm:py-3",
+														active
+															? "bg-zinc-900 text-white shadow-sm dark:bg-white dark:text-zinc-900"
+															: "bg-zinc-50 text-zinc-600 hover:bg-zinc-100 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
+													)}
+												>
+													<Icon className="size-4 sm:size-5" />
+													<span className="text-[11px] font-semibold sm:text-xs">{ct.label}</span>
+												</button>
+											);
+										})}
+									</div>
+								</Field>
 
-							{/* Visibility */}
-							<Field>
-								<Label>Visibility</Label>
-								<div className="mt-2 grid grid-cols-2 gap-1.5 sm:gap-2">
-									{[
-										{ value: true, label: "Public", desc: "Anyone can join", icon: GlobeAltIcon },
-										{
-											value: false,
-											label: "Private",
-											desc: "Invite only",
-											icon: LockClosedIcon,
-										},
-									].map((opt) => {
-										const active = isPublic === opt.value;
-										const Icon = opt.icon;
-										return (
-											<button
-												key={String(opt.value)}
-												type="button"
-												onClick={() => setValue("isPublic", opt.value)}
-												className={clsx(
-													"flex items-center gap-2 rounded-xl px-2.5 py-2.5 text-left transition-all sm:gap-2.5 sm:px-3 sm:py-3",
-													active
-														? "bg-zinc-900 text-white shadow-sm dark:bg-white dark:text-zinc-900"
-														: "bg-zinc-50 text-zinc-600 hover:bg-zinc-100 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
-												)}
-											>
-												<Icon className="size-4 shrink-0 sm:size-5" />
-												<div>
-													<p className="text-xs font-medium sm:text-sm">{opt.label}</p>
-													<p
-														className={clsx(
-															"hidden text-xs sm:block",
-															active ? "opacity-60" : "text-zinc-400 dark:text-zinc-500"
-														)}
-													>
-														{opt.desc}
-													</p>
-												</div>
-											</button>
-										);
-									})}
-								</div>
-							</Field>
-						</FieldGroup>
+								{/* Visibility */}
+								<Field>
+									<Label>Visibility</Label>
+									<div className="mt-2 grid grid-cols-2 gap-1.5 sm:gap-2">
+										{[
+											{ value: true, label: "Public", desc: "Anyone can join", icon: GlobeAltIcon },
+											{
+												value: false,
+												label: "Private",
+												desc: "Invite only",
+												icon: LockClosedIcon,
+											},
+										].map((opt) => {
+											const active = isPublic === opt.value;
+											const Icon = opt.icon;
+											return (
+												<button
+													key={String(opt.value)}
+													type="button"
+													onClick={() => setValue("isPublic", opt.value)}
+													className={clsx(
+														"flex items-center gap-2 rounded-xl px-2.5 py-2.5 text-left transition-all sm:gap-2.5 sm:px-3 sm:py-3",
+														active
+															? "bg-zinc-900 text-white shadow-sm dark:bg-white dark:text-zinc-900"
+															: "bg-zinc-50 text-zinc-600 hover:bg-zinc-100 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
+													)}
+												>
+													<Icon className="size-4 shrink-0 sm:size-5" />
+													<div>
+														<p className="text-xs font-medium sm:text-sm">{opt.label}</p>
+														<p
+															className={clsx(
+																"hidden text-xs sm:block",
+																active ? "opacity-60" : "text-zinc-400 dark:text-zinc-500"
+															)}
+														>
+															{opt.desc}
+														</p>
+													</div>
+												</button>
+											);
+										})}
+									</div>
+								</Field>
+							</FieldGroup>
 						</div>
 					)}
 
@@ -1214,10 +1208,7 @@ export function CreateCampaignModal({
 													<option>Loading…</option>
 												</Select>
 											) : (
-												<Select
-													value={selectedPlatformId}
-													onChange={(e) => setSelectedPlatformId(e.target.value)}
-												>
+												<Select value={selectedPlatformId} onChange={(e) => setSelectedPlatformId(e.target.value)}>
 													<option value="">All platforms</option>
 													{filteredPlatforms.map((p) => (
 														<option key={p.id} value={p.id}>
@@ -1237,9 +1228,7 @@ export function CreateCampaignModal({
 												</Select>
 											) : filteredTemplates.length === 0 ? (
 												<Select disabled>
-													<option>
-														{selectedPlatformId ? "No tasks available" : "Select platform first"}
-													</option>
+													<option>{selectedPlatformId ? "No tasks available" : "Select platform first"}</option>
 												</Select>
 											) : (
 												<Select
@@ -1386,7 +1375,12 @@ export function CreateCampaignModal({
 
 							{/* Tasks */}
 							{tasks.length > 0 && (
-								<ReviewCard icon={RocketLaunchIcon} title={`Creator Tasks (${tasks.length})`} color="emerald" onEdit={() => goToStep(2)}>
+								<ReviewCard
+									icon={RocketLaunchIcon}
+									title={`Creator Tasks (${tasks.length})`}
+									color="emerald"
+									onEdit={() => goToStep(2)}
+								>
 									<div className="mt-3 divide-y divide-zinc-100 overflow-hidden rounded-lg border border-zinc-100 dark:divide-zinc-700/50 dark:border-zinc-700/50">
 										{tasks.map((task, idx) => {
 											const PIcon = task.platformName ? getPlatformIcon(task.platformName) : null;

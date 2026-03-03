@@ -292,6 +292,39 @@
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
+/* ==========================================================================
+   AUTOFILL DETECTION
+   Chromium fires CSS animations on :-webkit-autofill. We use empty keyframes
+   so JS can detect autofill via animationstart events and sync values into
+   react-hook-form (which misses autofill because browsers skip onChange).
+   ========================================================================== */
+
+@keyframes onAutoFillStart {
+	from {
+		/* empty */
+	}
+	to {
+		/* empty */
+	}
+}
+
+@keyframes onAutoFillCancel {
+	from {
+		/* empty */
+	}
+	to {
+		/* empty */
+	}
+}
+
+input:-webkit-autofill {
+	animation-name: onAutoFillStart;
+}
+
+input:not(:-webkit-autofill) {
+	animation-name: onAutoFillCancel;
+}
+
 /* Hide scrollbars globally */
 * {
 	scrollbar-width: none;

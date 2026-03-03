@@ -6,7 +6,7 @@ import {
 } from "@heroicons/react/16/solid";
 import { useNavigate } from "@tanstack/react-router";
 import { DropdownDivider, DropdownItem, DropdownLabel, DropdownMenu } from "@/components/dropdown";
-import { useLogout } from "@/hooks/use-auth";
+import { useLogout } from "@/features/auth/hooks";
 
 export function AccountDropdownMenu({
 	anchor,

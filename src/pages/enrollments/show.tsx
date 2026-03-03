@@ -26,6 +26,7 @@ import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/di
 import { extractPlatformFromText, getPlatformColor, getPlatformIcon } from "@/components/icons/platform-icons";
 import { Link } from "@/components/link";
 import { ContentCard, DetailPageHeader } from "@/components/page-header";
+import { useCan } from "@/components/shared/can";
 import { CopyButton } from "@/components/shared/copy-button";
 import { ErrorState } from "@/components/shared/error-state";
 import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
@@ -43,7 +44,6 @@ import { usePageTitle } from "@/hooks/use-breadcrumb";
 import type { brand, db } from "@/lib/brand-client";
 import { formatCurrency, formatDateTime, formatRelativeTime, getInitials } from "@/lib/design-tokens";
 import { showToast } from "@/lib/toast";
-import { useCan } from "@/store/permissions-store";
 
 type EnrollmentStatus = db.EnrollmentStatus;
 

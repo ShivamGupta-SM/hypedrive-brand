@@ -1,15 +1,14 @@
 import { EnvelopeIcon, UserIcon } from "@heroicons/react/16/solid";
 import { useState } from "react";
 import { Button } from "@/components/button";
+import { useCan } from "@/components/shared/can";
 import { EmptyState } from "@/components/shared/empty-state";
 import { useMembers, useOrgContext } from "@/hooks";
-import { useAuthStore } from "@/store/auth-store";
-import { useCan } from "@/store/permissions-store";
 import type { Member, MemberRole } from "./components";
 import { AddMemberDialog, ChangeRoleDialog, InviteMemberModal, MemberRow, RemoveMemberDialog } from "./components";
 
 export function TeamMembers() {
-	const { organizationId } = useOrgContext();
+	const { organizationId, userId } = useOrgContext();
 
 	const canInviteMembers = useCan("member", "create");
 	const canManageMembers = useCan("member", "update");
@@ -21,8 +20,7 @@ export function TeamMembers() {
 	const [memberToChangeRole, setMemberToChangeRole] = useState<Member | null>(null);
 	const [memberToRemove, setMemberToRemove] = useState<Member | null>(null);
 
-	const authUser = useAuthStore((state) => state.user);
-	const currentUserId = authUser?.id || "";
+	const currentUserId = userId || "";
 
 	return (
 		<div>

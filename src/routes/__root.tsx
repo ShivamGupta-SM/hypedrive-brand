@@ -3,12 +3,11 @@ import { createRootRouteWithContext, HeadContent, Outlet, Scripts } from "@tanst
 import { useEffect, useState } from "react";
 import { SkeletonTheme } from "react-loading-skeleton";
 import { Toaster } from "sonner";
+import type { Organization } from "@/components/app-layout";
 import { NotFoundPage } from "@/components/shared/not-found-page";
 import { CACHE } from "@/hooks/api-client";
 import type { types } from "@/lib/brand-client";
-import { getServerAuthWithOrgs } from "@/lib/server-auth";
-import { AbilityProvider } from "@/providers/ability-provider";
-import type { Organization } from "@/store/organization-store";
+import { getServerAuthWithOrgs } from "@/server/auth-queries";
 
 // Import global CSS here so it's included in SSR (not just client hydration)
 import "../App.css";
@@ -176,10 +175,8 @@ function RootComponent() {
 	return (
 		<RootDocument>
 			<AppSkeletonTheme>
-				<AbilityProvider>
-					<Outlet />
-					<AppToaster />
-				</AbilityProvider>
+				<Outlet />
+				<AppToaster />
 			</AppSkeletonTheme>
 		</RootDocument>
 	);
