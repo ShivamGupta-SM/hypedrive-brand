@@ -7,7 +7,7 @@
  */
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
-import Client, { type notifications } from "@/lib/brand-client";
+import Client from "@/lib/brand-client";
 import { API_URL } from "@/lib/config";
 import { getStreamTokenServer } from "@/server/auth-queries";
 
@@ -133,9 +133,8 @@ export function NotificationStreamProvider({
 							});
 						}
 					} else if (event.type === "unread_count") {
-						const count = (event as notifications.NotificationUpdate & { count?: number }).count;
-						if (typeof count === "number") {
-							setUnreadCount(count);
+						if (typeof event.unreadCount === "number") {
+							setUnreadCount(event.unreadCount);
 						}
 					}
 				}

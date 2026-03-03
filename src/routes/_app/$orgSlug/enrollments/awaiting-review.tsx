@@ -1,29 +1,24 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { z } from "zod";
-
 import { RouteErrorComponent, RoutePendingComponent } from "@/components/shared/route-error";
 import { campaignsLookupQueryOptions } from "@/features/campaigns/queries";
 import { infiniteEnrollmentsQueryOptions } from "@/features/enrollments/queries";
-import { EnrollmentsLayout } from "@/pages/enrollments";
+import { EnrollmentsGrid } from "@/pages/enrollments/enrollments-grid";
 
-const searchSchema = z.object({
-	q: z.string().optional().catch(undefined),
-});
-
-export const Route = createFileRoute("/_app/$orgSlug/enrollments")({
+export const Route = createFileRoute("/_app/$orgSlug/enrollments/awaiting-review")({
 	head: () => ({
-		meta: [{ title: "Enrollments | Hypedrive" }],
+		meta: [{ title: "Awaiting Review | Enrollments | Hypedrive" }],
 	}),
-	validateSearch: searchSchema,
 	loader: async ({ context }) => {
 		const orgId = context.organization?.id;
 		if (!orgId) return;
 		await Promise.all([
-			context.queryClient.prefetchInfiniteQuery(infiniteEnrollmentsQueryOptions(orgId, {})),
+			context.queryClient.prefetchInfiniteQuery(
+				infiniteEnrollmentsQueryOptions(orgId, { status: "awaiting_review" }),
+			),
 			context.queryClient.ensureQueryData(campaignsLookupQueryOptions(orgId)),
 		]);
 	},
-	component: EnrollmentsLayout,
+	component: () => <EnrollmentsGrid status="awaiting_review" />,
 	errorComponent: RouteErrorComponent,
 	pendingComponent: RoutePendingComponent,
 });

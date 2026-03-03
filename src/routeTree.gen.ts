@@ -36,6 +36,8 @@ import { Route as AppOrgSlugEnrollmentsRouteImport } from './routes/_app/$orgSlu
 import { Route as AppOrgSlugCampaignsRouteImport } from './routes/_app/$orgSlug/campaigns'
 import { Route as AppOrgSlugWalletIndexRouteImport } from './routes/_app/$orgSlug/wallet/index'
 import { Route as AppOrgSlugTeamIndexRouteImport } from './routes/_app/$orgSlug/team/index'
+import { Route as AppOrgSlugEnrollmentsIndexRouteImport } from './routes/_app/$orgSlug/enrollments/index'
+import { Route as AppOrgSlugCampaignsIndexRouteImport } from './routes/_app/$orgSlug/campaigns/index'
 import { Route as AppOrgSlugWalletWithdrawalsRouteImport } from './routes/_app/$orgSlug/wallet/withdrawals'
 import { Route as AppOrgSlugWalletHoldsRouteImport } from './routes/_app/$orgSlug/wallet/holds'
 import { Route as AppOrgSlugWalletDepositsRouteImport } from './routes/_app/$orgSlug/wallet/deposits'
@@ -44,7 +46,14 @@ import { Route as AppOrgSlugTeamInvitationsRouteImport } from './routes/_app/$or
 import { Route as AppOrgSlugSettingsAccountRouteImport } from './routes/_app/$orgSlug/settings_.account'
 import { Route as AppOrgSlugListingsIdRouteImport } from './routes/_app/$orgSlug/listings_.$id'
 import { Route as AppOrgSlugEnrollmentsIdRouteImport } from './routes/_app/$orgSlug/enrollments_.$id'
+import { Route as AppOrgSlugEnrollmentsRejectedRouteImport } from './routes/_app/$orgSlug/enrollments/rejected'
+import { Route as AppOrgSlugEnrollmentsAwaitingReviewRouteImport } from './routes/_app/$orgSlug/enrollments/awaiting-review'
+import { Route as AppOrgSlugEnrollmentsApprovedRouteImport } from './routes/_app/$orgSlug/enrollments/approved'
 import { Route as AppOrgSlugCampaignsIdRouteImport } from './routes/_app/$orgSlug/campaigns_.$id'
+import { Route as AppOrgSlugCampaignsPausedRouteImport } from './routes/_app/$orgSlug/campaigns/paused'
+import { Route as AppOrgSlugCampaignsEndedRouteImport } from './routes/_app/$orgSlug/campaigns/ended'
+import { Route as AppOrgSlugCampaignsDraftRouteImport } from './routes/_app/$orgSlug/campaigns/draft'
+import { Route as AppOrgSlugCampaignsActiveRouteImport } from './routes/_app/$orgSlug/campaigns/active'
 import { Route as AppOrgSlugWalletTransactionsIdRouteImport } from './routes/_app/$orgSlug/wallet_.transactions_.$id'
 import { Route as AppOrgSlugCampaignsCampaignIdEnrollmentsIdRouteImport } from './routes/_app/$orgSlug/campaigns_.$campaignId.enrollments_.$id'
 
@@ -179,6 +188,18 @@ const AppOrgSlugTeamIndexRoute = AppOrgSlugTeamIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppOrgSlugTeamRoute,
 } as any)
+const AppOrgSlugEnrollmentsIndexRoute =
+  AppOrgSlugEnrollmentsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AppOrgSlugEnrollmentsRoute,
+  } as any)
+const AppOrgSlugCampaignsIndexRoute =
+  AppOrgSlugCampaignsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AppOrgSlugCampaignsRoute,
+  } as any)
 const AppOrgSlugWalletWithdrawalsRoute =
   AppOrgSlugWalletWithdrawalsRouteImport.update({
     id: '/withdrawals',
@@ -223,11 +244,53 @@ const AppOrgSlugEnrollmentsIdRoute = AppOrgSlugEnrollmentsIdRouteImport.update({
   path: '/enrollments/$id',
   getParentRoute: () => AppOrgSlugRoute,
 } as any)
+const AppOrgSlugEnrollmentsRejectedRoute =
+  AppOrgSlugEnrollmentsRejectedRouteImport.update({
+    id: '/rejected',
+    path: '/rejected',
+    getParentRoute: () => AppOrgSlugEnrollmentsRoute,
+  } as any)
+const AppOrgSlugEnrollmentsAwaitingReviewRoute =
+  AppOrgSlugEnrollmentsAwaitingReviewRouteImport.update({
+    id: '/awaiting-review',
+    path: '/awaiting-review',
+    getParentRoute: () => AppOrgSlugEnrollmentsRoute,
+  } as any)
+const AppOrgSlugEnrollmentsApprovedRoute =
+  AppOrgSlugEnrollmentsApprovedRouteImport.update({
+    id: '/approved',
+    path: '/approved',
+    getParentRoute: () => AppOrgSlugEnrollmentsRoute,
+  } as any)
 const AppOrgSlugCampaignsIdRoute = AppOrgSlugCampaignsIdRouteImport.update({
   id: '/campaigns_/$id',
   path: '/campaigns/$id',
   getParentRoute: () => AppOrgSlugRoute,
 } as any)
+const AppOrgSlugCampaignsPausedRoute =
+  AppOrgSlugCampaignsPausedRouteImport.update({
+    id: '/paused',
+    path: '/paused',
+    getParentRoute: () => AppOrgSlugCampaignsRoute,
+  } as any)
+const AppOrgSlugCampaignsEndedRoute =
+  AppOrgSlugCampaignsEndedRouteImport.update({
+    id: '/ended',
+    path: '/ended',
+    getParentRoute: () => AppOrgSlugCampaignsRoute,
+  } as any)
+const AppOrgSlugCampaignsDraftRoute =
+  AppOrgSlugCampaignsDraftRouteImport.update({
+    id: '/draft',
+    path: '/draft',
+    getParentRoute: () => AppOrgSlugCampaignsRoute,
+  } as any)
+const AppOrgSlugCampaignsActiveRoute =
+  AppOrgSlugCampaignsActiveRouteImport.update({
+    id: '/active',
+    path: '/active',
+    getParentRoute: () => AppOrgSlugCampaignsRoute,
+  } as any)
 const AppOrgSlugWalletTransactionsIdRoute =
   AppOrgSlugWalletTransactionsIdRouteImport.update({
     id: '/wallet_/transactions_/$id',
@@ -254,8 +317,8 @@ export interface FileRoutesByFullPath {
   '/verify-email': typeof AuthVerifyEmailRoute
   '/onboarding': typeof OnboardingOnboardingRoute
   '/api/og': typeof ApiOgRoute
-  '/$orgSlug/campaigns': typeof AppOrgSlugCampaignsRoute
-  '/$orgSlug/enrollments': typeof AppOrgSlugEnrollmentsRoute
+  '/$orgSlug/campaigns': typeof AppOrgSlugCampaignsRouteWithChildren
+  '/$orgSlug/enrollments': typeof AppOrgSlugEnrollmentsRouteWithChildren
   '/$orgSlug/invoices': typeof AppOrgSlugInvoicesRoute
   '/$orgSlug/listings': typeof AppOrgSlugListingsRoute
   '/$orgSlug/settings': typeof AppOrgSlugSettingsRoute
@@ -263,7 +326,14 @@ export interface FileRoutesByFullPath {
   '/$orgSlug/team': typeof AppOrgSlugTeamRouteWithChildren
   '/$orgSlug/wallet': typeof AppOrgSlugWalletRouteWithChildren
   '/$orgSlug/': typeof AppOrgSlugIndexRoute
+  '/$orgSlug/campaigns/active': typeof AppOrgSlugCampaignsActiveRoute
+  '/$orgSlug/campaigns/draft': typeof AppOrgSlugCampaignsDraftRoute
+  '/$orgSlug/campaigns/ended': typeof AppOrgSlugCampaignsEndedRoute
+  '/$orgSlug/campaigns/paused': typeof AppOrgSlugCampaignsPausedRoute
   '/$orgSlug/campaigns/$id': typeof AppOrgSlugCampaignsIdRoute
+  '/$orgSlug/enrollments/approved': typeof AppOrgSlugEnrollmentsApprovedRoute
+  '/$orgSlug/enrollments/awaiting-review': typeof AppOrgSlugEnrollmentsAwaitingReviewRoute
+  '/$orgSlug/enrollments/rejected': typeof AppOrgSlugEnrollmentsRejectedRoute
   '/$orgSlug/enrollments/$id': typeof AppOrgSlugEnrollmentsIdRoute
   '/$orgSlug/listings/$id': typeof AppOrgSlugListingsIdRoute
   '/$orgSlug/settings/account': typeof AppOrgSlugSettingsAccountRoute
@@ -272,6 +342,8 @@ export interface FileRoutesByFullPath {
   '/$orgSlug/wallet/deposits': typeof AppOrgSlugWalletDepositsRoute
   '/$orgSlug/wallet/holds': typeof AppOrgSlugWalletHoldsRoute
   '/$orgSlug/wallet/withdrawals': typeof AppOrgSlugWalletWithdrawalsRoute
+  '/$orgSlug/campaigns/': typeof AppOrgSlugCampaignsIndexRoute
+  '/$orgSlug/enrollments/': typeof AppOrgSlugEnrollmentsIndexRoute
   '/$orgSlug/team/': typeof AppOrgSlugTeamIndexRoute
   '/$orgSlug/wallet/': typeof AppOrgSlugWalletIndexRoute
   '/$orgSlug/wallet/transactions/$id': typeof AppOrgSlugWalletTransactionsIdRoute
@@ -289,14 +361,19 @@ export interface FileRoutesByTo {
   '/verify-email': typeof AuthVerifyEmailRoute
   '/onboarding': typeof OnboardingOnboardingRoute
   '/api/og': typeof ApiOgRoute
-  '/$orgSlug/campaigns': typeof AppOrgSlugCampaignsRoute
-  '/$orgSlug/enrollments': typeof AppOrgSlugEnrollmentsRoute
   '/$orgSlug/invoices': typeof AppOrgSlugInvoicesRoute
   '/$orgSlug/listings': typeof AppOrgSlugListingsRoute
   '/$orgSlug/settings': typeof AppOrgSlugSettingsRoute
   '/$orgSlug/support': typeof AppOrgSlugSupportRoute
   '/$orgSlug': typeof AppOrgSlugIndexRoute
+  '/$orgSlug/campaigns/active': typeof AppOrgSlugCampaignsActiveRoute
+  '/$orgSlug/campaigns/draft': typeof AppOrgSlugCampaignsDraftRoute
+  '/$orgSlug/campaigns/ended': typeof AppOrgSlugCampaignsEndedRoute
+  '/$orgSlug/campaigns/paused': typeof AppOrgSlugCampaignsPausedRoute
   '/$orgSlug/campaigns/$id': typeof AppOrgSlugCampaignsIdRoute
+  '/$orgSlug/enrollments/approved': typeof AppOrgSlugEnrollmentsApprovedRoute
+  '/$orgSlug/enrollments/awaiting-review': typeof AppOrgSlugEnrollmentsAwaitingReviewRoute
+  '/$orgSlug/enrollments/rejected': typeof AppOrgSlugEnrollmentsRejectedRoute
   '/$orgSlug/enrollments/$id': typeof AppOrgSlugEnrollmentsIdRoute
   '/$orgSlug/listings/$id': typeof AppOrgSlugListingsIdRoute
   '/$orgSlug/settings/account': typeof AppOrgSlugSettingsAccountRoute
@@ -305,6 +382,8 @@ export interface FileRoutesByTo {
   '/$orgSlug/wallet/deposits': typeof AppOrgSlugWalletDepositsRoute
   '/$orgSlug/wallet/holds': typeof AppOrgSlugWalletHoldsRoute
   '/$orgSlug/wallet/withdrawals': typeof AppOrgSlugWalletWithdrawalsRoute
+  '/$orgSlug/campaigns': typeof AppOrgSlugCampaignsIndexRoute
+  '/$orgSlug/enrollments': typeof AppOrgSlugEnrollmentsIndexRoute
   '/$orgSlug/team': typeof AppOrgSlugTeamIndexRoute
   '/$orgSlug/wallet': typeof AppOrgSlugWalletIndexRoute
   '/$orgSlug/wallet/transactions/$id': typeof AppOrgSlugWalletTransactionsIdRoute
@@ -328,8 +407,8 @@ export interface FileRoutesById {
   '/_onboarding/onboarding': typeof OnboardingOnboardingRoute
   '/api/og': typeof ApiOgRoute
   '/_app/': typeof AppIndexRoute
-  '/_app/$orgSlug/campaigns': typeof AppOrgSlugCampaignsRoute
-  '/_app/$orgSlug/enrollments': typeof AppOrgSlugEnrollmentsRoute
+  '/_app/$orgSlug/campaigns': typeof AppOrgSlugCampaignsRouteWithChildren
+  '/_app/$orgSlug/enrollments': typeof AppOrgSlugEnrollmentsRouteWithChildren
   '/_app/$orgSlug/invoices': typeof AppOrgSlugInvoicesRoute
   '/_app/$orgSlug/listings': typeof AppOrgSlugListingsRoute
   '/_app/$orgSlug/settings': typeof AppOrgSlugSettingsRoute
@@ -337,7 +416,14 @@ export interface FileRoutesById {
   '/_app/$orgSlug/team': typeof AppOrgSlugTeamRouteWithChildren
   '/_app/$orgSlug/wallet': typeof AppOrgSlugWalletRouteWithChildren
   '/_app/$orgSlug/': typeof AppOrgSlugIndexRoute
+  '/_app/$orgSlug/campaigns/active': typeof AppOrgSlugCampaignsActiveRoute
+  '/_app/$orgSlug/campaigns/draft': typeof AppOrgSlugCampaignsDraftRoute
+  '/_app/$orgSlug/campaigns/ended': typeof AppOrgSlugCampaignsEndedRoute
+  '/_app/$orgSlug/campaigns/paused': typeof AppOrgSlugCampaignsPausedRoute
   '/_app/$orgSlug/campaigns_/$id': typeof AppOrgSlugCampaignsIdRoute
+  '/_app/$orgSlug/enrollments/approved': typeof AppOrgSlugEnrollmentsApprovedRoute
+  '/_app/$orgSlug/enrollments/awaiting-review': typeof AppOrgSlugEnrollmentsAwaitingReviewRoute
+  '/_app/$orgSlug/enrollments/rejected': typeof AppOrgSlugEnrollmentsRejectedRoute
   '/_app/$orgSlug/enrollments_/$id': typeof AppOrgSlugEnrollmentsIdRoute
   '/_app/$orgSlug/listings_/$id': typeof AppOrgSlugListingsIdRoute
   '/_app/$orgSlug/settings_/account': typeof AppOrgSlugSettingsAccountRoute
@@ -346,6 +432,8 @@ export interface FileRoutesById {
   '/_app/$orgSlug/wallet/deposits': typeof AppOrgSlugWalletDepositsRoute
   '/_app/$orgSlug/wallet/holds': typeof AppOrgSlugWalletHoldsRoute
   '/_app/$orgSlug/wallet/withdrawals': typeof AppOrgSlugWalletWithdrawalsRoute
+  '/_app/$orgSlug/campaigns/': typeof AppOrgSlugCampaignsIndexRoute
+  '/_app/$orgSlug/enrollments/': typeof AppOrgSlugEnrollmentsIndexRoute
   '/_app/$orgSlug/team/': typeof AppOrgSlugTeamIndexRoute
   '/_app/$orgSlug/wallet/': typeof AppOrgSlugWalletIndexRoute
   '/_app/$orgSlug/wallet_/transactions_/$id': typeof AppOrgSlugWalletTransactionsIdRoute
@@ -375,7 +463,14 @@ export interface FileRouteTypes {
     | '/$orgSlug/team'
     | '/$orgSlug/wallet'
     | '/$orgSlug/'
+    | '/$orgSlug/campaigns/active'
+    | '/$orgSlug/campaigns/draft'
+    | '/$orgSlug/campaigns/ended'
+    | '/$orgSlug/campaigns/paused'
     | '/$orgSlug/campaigns/$id'
+    | '/$orgSlug/enrollments/approved'
+    | '/$orgSlug/enrollments/awaiting-review'
+    | '/$orgSlug/enrollments/rejected'
     | '/$orgSlug/enrollments/$id'
     | '/$orgSlug/listings/$id'
     | '/$orgSlug/settings/account'
@@ -384,6 +479,8 @@ export interface FileRouteTypes {
     | '/$orgSlug/wallet/deposits'
     | '/$orgSlug/wallet/holds'
     | '/$orgSlug/wallet/withdrawals'
+    | '/$orgSlug/campaigns/'
+    | '/$orgSlug/enrollments/'
     | '/$orgSlug/team/'
     | '/$orgSlug/wallet/'
     | '/$orgSlug/wallet/transactions/$id'
@@ -401,14 +498,19 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/onboarding'
     | '/api/og'
-    | '/$orgSlug/campaigns'
-    | '/$orgSlug/enrollments'
     | '/$orgSlug/invoices'
     | '/$orgSlug/listings'
     | '/$orgSlug/settings'
     | '/$orgSlug/support'
     | '/$orgSlug'
+    | '/$orgSlug/campaigns/active'
+    | '/$orgSlug/campaigns/draft'
+    | '/$orgSlug/campaigns/ended'
+    | '/$orgSlug/campaigns/paused'
     | '/$orgSlug/campaigns/$id'
+    | '/$orgSlug/enrollments/approved'
+    | '/$orgSlug/enrollments/awaiting-review'
+    | '/$orgSlug/enrollments/rejected'
     | '/$orgSlug/enrollments/$id'
     | '/$orgSlug/listings/$id'
     | '/$orgSlug/settings/account'
@@ -417,6 +519,8 @@ export interface FileRouteTypes {
     | '/$orgSlug/wallet/deposits'
     | '/$orgSlug/wallet/holds'
     | '/$orgSlug/wallet/withdrawals'
+    | '/$orgSlug/campaigns'
+    | '/$orgSlug/enrollments'
     | '/$orgSlug/team'
     | '/$orgSlug/wallet'
     | '/$orgSlug/wallet/transactions/$id'
@@ -448,7 +552,14 @@ export interface FileRouteTypes {
     | '/_app/$orgSlug/team'
     | '/_app/$orgSlug/wallet'
     | '/_app/$orgSlug/'
+    | '/_app/$orgSlug/campaigns/active'
+    | '/_app/$orgSlug/campaigns/draft'
+    | '/_app/$orgSlug/campaigns/ended'
+    | '/_app/$orgSlug/campaigns/paused'
     | '/_app/$orgSlug/campaigns_/$id'
+    | '/_app/$orgSlug/enrollments/approved'
+    | '/_app/$orgSlug/enrollments/awaiting-review'
+    | '/_app/$orgSlug/enrollments/rejected'
     | '/_app/$orgSlug/enrollments_/$id'
     | '/_app/$orgSlug/listings_/$id'
     | '/_app/$orgSlug/settings_/account'
@@ -457,6 +568,8 @@ export interface FileRouteTypes {
     | '/_app/$orgSlug/wallet/deposits'
     | '/_app/$orgSlug/wallet/holds'
     | '/_app/$orgSlug/wallet/withdrawals'
+    | '/_app/$orgSlug/campaigns/'
+    | '/_app/$orgSlug/enrollments/'
     | '/_app/$orgSlug/team/'
     | '/_app/$orgSlug/wallet/'
     | '/_app/$orgSlug/wallet_/transactions_/$id'
@@ -662,6 +775,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppOrgSlugTeamIndexRouteImport
       parentRoute: typeof AppOrgSlugTeamRoute
     }
+    '/_app/$orgSlug/enrollments/': {
+      id: '/_app/$orgSlug/enrollments/'
+      path: '/'
+      fullPath: '/$orgSlug/enrollments/'
+      preLoaderRoute: typeof AppOrgSlugEnrollmentsIndexRouteImport
+      parentRoute: typeof AppOrgSlugEnrollmentsRoute
+    }
+    '/_app/$orgSlug/campaigns/': {
+      id: '/_app/$orgSlug/campaigns/'
+      path: '/'
+      fullPath: '/$orgSlug/campaigns/'
+      preLoaderRoute: typeof AppOrgSlugCampaignsIndexRouteImport
+      parentRoute: typeof AppOrgSlugCampaignsRoute
+    }
     '/_app/$orgSlug/wallet/withdrawals': {
       id: '/_app/$orgSlug/wallet/withdrawals'
       path: '/withdrawals'
@@ -718,12 +845,61 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppOrgSlugEnrollmentsIdRouteImport
       parentRoute: typeof AppOrgSlugRoute
     }
+    '/_app/$orgSlug/enrollments/rejected': {
+      id: '/_app/$orgSlug/enrollments/rejected'
+      path: '/rejected'
+      fullPath: '/$orgSlug/enrollments/rejected'
+      preLoaderRoute: typeof AppOrgSlugEnrollmentsRejectedRouteImport
+      parentRoute: typeof AppOrgSlugEnrollmentsRoute
+    }
+    '/_app/$orgSlug/enrollments/awaiting-review': {
+      id: '/_app/$orgSlug/enrollments/awaiting-review'
+      path: '/awaiting-review'
+      fullPath: '/$orgSlug/enrollments/awaiting-review'
+      preLoaderRoute: typeof AppOrgSlugEnrollmentsAwaitingReviewRouteImport
+      parentRoute: typeof AppOrgSlugEnrollmentsRoute
+    }
+    '/_app/$orgSlug/enrollments/approved': {
+      id: '/_app/$orgSlug/enrollments/approved'
+      path: '/approved'
+      fullPath: '/$orgSlug/enrollments/approved'
+      preLoaderRoute: typeof AppOrgSlugEnrollmentsApprovedRouteImport
+      parentRoute: typeof AppOrgSlugEnrollmentsRoute
+    }
     '/_app/$orgSlug/campaigns_/$id': {
       id: '/_app/$orgSlug/campaigns_/$id'
       path: '/campaigns/$id'
       fullPath: '/$orgSlug/campaigns/$id'
       preLoaderRoute: typeof AppOrgSlugCampaignsIdRouteImport
       parentRoute: typeof AppOrgSlugRoute
+    }
+    '/_app/$orgSlug/campaigns/paused': {
+      id: '/_app/$orgSlug/campaigns/paused'
+      path: '/paused'
+      fullPath: '/$orgSlug/campaigns/paused'
+      preLoaderRoute: typeof AppOrgSlugCampaignsPausedRouteImport
+      parentRoute: typeof AppOrgSlugCampaignsRoute
+    }
+    '/_app/$orgSlug/campaigns/ended': {
+      id: '/_app/$orgSlug/campaigns/ended'
+      path: '/ended'
+      fullPath: '/$orgSlug/campaigns/ended'
+      preLoaderRoute: typeof AppOrgSlugCampaignsEndedRouteImport
+      parentRoute: typeof AppOrgSlugCampaignsRoute
+    }
+    '/_app/$orgSlug/campaigns/draft': {
+      id: '/_app/$orgSlug/campaigns/draft'
+      path: '/draft'
+      fullPath: '/$orgSlug/campaigns/draft'
+      preLoaderRoute: typeof AppOrgSlugCampaignsDraftRouteImport
+      parentRoute: typeof AppOrgSlugCampaignsRoute
+    }
+    '/_app/$orgSlug/campaigns/active': {
+      id: '/_app/$orgSlug/campaigns/active'
+      path: '/active'
+      fullPath: '/$orgSlug/campaigns/active'
+      preLoaderRoute: typeof AppOrgSlugCampaignsActiveRouteImport
+      parentRoute: typeof AppOrgSlugCampaignsRoute
     }
     '/_app/$orgSlug/wallet_/transactions_/$id': {
       id: '/_app/$orgSlug/wallet_/transactions_/$id'
@@ -741,6 +917,45 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AppOrgSlugCampaignsRouteChildren {
+  AppOrgSlugCampaignsActiveRoute: typeof AppOrgSlugCampaignsActiveRoute
+  AppOrgSlugCampaignsDraftRoute: typeof AppOrgSlugCampaignsDraftRoute
+  AppOrgSlugCampaignsEndedRoute: typeof AppOrgSlugCampaignsEndedRoute
+  AppOrgSlugCampaignsPausedRoute: typeof AppOrgSlugCampaignsPausedRoute
+  AppOrgSlugCampaignsIndexRoute: typeof AppOrgSlugCampaignsIndexRoute
+}
+
+const AppOrgSlugCampaignsRouteChildren: AppOrgSlugCampaignsRouteChildren = {
+  AppOrgSlugCampaignsActiveRoute: AppOrgSlugCampaignsActiveRoute,
+  AppOrgSlugCampaignsDraftRoute: AppOrgSlugCampaignsDraftRoute,
+  AppOrgSlugCampaignsEndedRoute: AppOrgSlugCampaignsEndedRoute,
+  AppOrgSlugCampaignsPausedRoute: AppOrgSlugCampaignsPausedRoute,
+  AppOrgSlugCampaignsIndexRoute: AppOrgSlugCampaignsIndexRoute,
+}
+
+const AppOrgSlugCampaignsRouteWithChildren =
+  AppOrgSlugCampaignsRoute._addFileChildren(AppOrgSlugCampaignsRouteChildren)
+
+interface AppOrgSlugEnrollmentsRouteChildren {
+  AppOrgSlugEnrollmentsApprovedRoute: typeof AppOrgSlugEnrollmentsApprovedRoute
+  AppOrgSlugEnrollmentsAwaitingReviewRoute: typeof AppOrgSlugEnrollmentsAwaitingReviewRoute
+  AppOrgSlugEnrollmentsRejectedRoute: typeof AppOrgSlugEnrollmentsRejectedRoute
+  AppOrgSlugEnrollmentsIndexRoute: typeof AppOrgSlugEnrollmentsIndexRoute
+}
+
+const AppOrgSlugEnrollmentsRouteChildren: AppOrgSlugEnrollmentsRouteChildren = {
+  AppOrgSlugEnrollmentsApprovedRoute: AppOrgSlugEnrollmentsApprovedRoute,
+  AppOrgSlugEnrollmentsAwaitingReviewRoute:
+    AppOrgSlugEnrollmentsAwaitingReviewRoute,
+  AppOrgSlugEnrollmentsRejectedRoute: AppOrgSlugEnrollmentsRejectedRoute,
+  AppOrgSlugEnrollmentsIndexRoute: AppOrgSlugEnrollmentsIndexRoute,
+}
+
+const AppOrgSlugEnrollmentsRouteWithChildren =
+  AppOrgSlugEnrollmentsRoute._addFileChildren(
+    AppOrgSlugEnrollmentsRouteChildren,
+  )
 
 interface AppOrgSlugTeamRouteChildren {
   AppOrgSlugTeamInvitationsRoute: typeof AppOrgSlugTeamInvitationsRoute
@@ -776,8 +991,8 @@ const AppOrgSlugWalletRouteWithChildren =
   AppOrgSlugWalletRoute._addFileChildren(AppOrgSlugWalletRouteChildren)
 
 interface AppOrgSlugRouteChildren {
-  AppOrgSlugCampaignsRoute: typeof AppOrgSlugCampaignsRoute
-  AppOrgSlugEnrollmentsRoute: typeof AppOrgSlugEnrollmentsRoute
+  AppOrgSlugCampaignsRoute: typeof AppOrgSlugCampaignsRouteWithChildren
+  AppOrgSlugEnrollmentsRoute: typeof AppOrgSlugEnrollmentsRouteWithChildren
   AppOrgSlugInvoicesRoute: typeof AppOrgSlugInvoicesRoute
   AppOrgSlugListingsRoute: typeof AppOrgSlugListingsRoute
   AppOrgSlugSettingsRoute: typeof AppOrgSlugSettingsRoute
@@ -794,8 +1009,8 @@ interface AppOrgSlugRouteChildren {
 }
 
 const AppOrgSlugRouteChildren: AppOrgSlugRouteChildren = {
-  AppOrgSlugCampaignsRoute: AppOrgSlugCampaignsRoute,
-  AppOrgSlugEnrollmentsRoute: AppOrgSlugEnrollmentsRoute,
+  AppOrgSlugCampaignsRoute: AppOrgSlugCampaignsRouteWithChildren,
+  AppOrgSlugEnrollmentsRoute: AppOrgSlugEnrollmentsRouteWithChildren,
   AppOrgSlugInvoicesRoute: AppOrgSlugInvoicesRoute,
   AppOrgSlugListingsRoute: AppOrgSlugListingsRoute,
   AppOrgSlugSettingsRoute: AppOrgSlugSettingsRoute,

@@ -66,23 +66,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 			{ name: "twitter:card", content: "summary_large_image" },
 			{ name: "twitter:image", content: "/api/og" },
 		],
-		links: [
-			{ rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
-			{
-				rel: "preload",
-				href: "/fonts/geist-latin-wght-normal.woff2",
-				as: "font",
-				type: "font/woff2",
-				crossOrigin: "anonymous",
-			},
-			{
-				rel: "preload",
-				href: "/fonts/instrument-serif-latin-400-normal.woff2",
-				as: "font",
-				type: "font/woff2",
-				crossOrigin: "anonymous",
-			},
-		],
+		links: [{ rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }],
 	}),
 	component: RootComponent,
 	errorComponent: RootErrorComponent,
@@ -191,6 +175,23 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<head>
+				{/* Font preloads MUST be hardcoded here, NOT in head().
+				    head() only renders after beforeLoad resolves (async auth call),
+				    which delays font discovery and causes 3 visible font swaps. */}
+				<link
+					rel="preload"
+					href="/fonts/geist-latin-wght-normal.woff2"
+					as="font"
+					type="font/woff2"
+					crossOrigin="anonymous"
+				/>
+				<link
+					rel="preload"
+					href="/fonts/instrument-serif-latin-400-normal.woff2"
+					as="font"
+					type="font/woff2"
+					crossOrigin="anonymous"
+				/>
 				<HeadContent />
 				<script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
 			</head>

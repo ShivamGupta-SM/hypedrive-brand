@@ -1,20 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { z } from "zod";
-
 import { RouteErrorComponent, RoutePendingComponent } from "@/components/shared/route-error";
 import { campaignsLookupQueryOptions } from "@/features/campaigns/queries";
 import { infiniteEnrollmentsQueryOptions } from "@/features/enrollments/queries";
-import { EnrollmentsLayout } from "@/pages/enrollments";
+import { EnrollmentsAll } from "@/pages/enrollments";
 
-const searchSchema = z.object({
-	q: z.string().optional().catch(undefined),
-});
-
-export const Route = createFileRoute("/_app/$orgSlug/enrollments")({
-	head: () => ({
-		meta: [{ title: "Enrollments | Hypedrive" }],
-	}),
-	validateSearch: searchSchema,
+export const Route = createFileRoute("/_app/$orgSlug/enrollments/")({
 	loader: async ({ context }) => {
 		const orgId = context.organization?.id;
 		if (!orgId) return;
@@ -23,7 +13,7 @@ export const Route = createFileRoute("/_app/$orgSlug/enrollments")({
 			context.queryClient.ensureQueryData(campaignsLookupQueryOptions(orgId)),
 		]);
 	},
-	component: EnrollmentsLayout,
+	component: EnrollmentsAll,
 	errorComponent: RouteErrorComponent,
 	pendingComponent: RoutePendingComponent,
 });

@@ -58,7 +58,7 @@ export function getRouter() {
 		routeTree,
 		context: {
 			queryClient,
-			auth: { isAuthenticated: false, user: null, token: null },
+			auth: { isAuthenticated: false, user: null },
 		},
 		defaultPreload: "intent",
 		defaultPreloadStaleTime: 30_000,

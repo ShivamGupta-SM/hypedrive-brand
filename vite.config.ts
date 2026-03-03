@@ -30,7 +30,6 @@ export default defineConfig({
 			"@hookform/resolvers/zod",
 			"date-fns",
 			"zod",
-			"zustand",
 			"clsx",
 			"sonner",
 			"react-day-picker",

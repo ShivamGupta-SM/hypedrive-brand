@@ -1,25 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { z } from "zod";
-
 import { RouteErrorComponent, RoutePendingComponent } from "@/components/shared/route-error";
 import { infiniteCampaignsQueryOptions } from "@/features/campaigns/queries";
-import { CampaignsLayout } from "@/pages/campaigns";
+import { CampaignsGrid } from "@/pages/campaigns/campaigns-grid";
 
-const searchSchema = z.object({
-	q: z.string().optional().catch(undefined),
-});
-
-export const Route = createFileRoute("/_app/$orgSlug/campaigns")({
+export const Route = createFileRoute("/_app/$orgSlug/campaigns/ended")({
 	head: () => ({
-		meta: [{ title: "Campaigns | Hypedrive" }],
+		meta: [{ title: "Ended Campaigns | Hypedrive" }],
 	}),
-	validateSearch: searchSchema,
 	loader: async ({ context }) => {
 		const orgId = context.organization?.id;
 		if (!orgId) return;
-		await context.queryClient.prefetchInfiniteQuery(infiniteCampaignsQueryOptions(orgId, {}));
+		await context.queryClient.prefetchInfiniteQuery(infiniteCampaignsQueryOptions(orgId, { status: "ended" }));
 	},
-	component: CampaignsLayout,
+	component: () => <CampaignsGrid status="ended" />,
 	errorComponent: RouteErrorComponent,
 	pendingComponent: RoutePendingComponent,
 });

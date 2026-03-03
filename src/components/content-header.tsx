@@ -65,7 +65,7 @@ export function ContentHeader() {
 					<HomeIcon className="size-4" />
 				</Link>
 				{crumbs.map((crumb, i) => (
-					<span key={crumb.label} className="flex items-center gap-1.5">
+					<span key={`${i}-${crumb.label}`} className="flex items-center gap-1.5">
 						<ChevronRightIcon className="size-3.5 text-zinc-300 dark:text-zinc-600" />
 						{i < crumbs.length - 1 && crumb.href ? (
 							<Link
