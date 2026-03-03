@@ -1,13 +1,11 @@
 import {
 	ArrowDownLeftIcon,
 	ArrowLeftIcon,
-	ArrowPathIcon,
 	ArrowUpRightIcon,
 	BanknotesIcon,
 	CalendarIcon,
 	CurrencyRupeeIcon,
 	DocumentTextIcon,
-	ExclamationTriangleIcon,
 	HashtagIcon,
 } from "@heroicons/react/16/solid";
 import { getRouteApi } from "@tanstack/react-router";
@@ -17,11 +15,12 @@ import { Button } from "@/components/button";
 import { Heading } from "@/components/heading";
 import { CopyButton } from "@/components/shared";
 import { Card } from "@/components/shared/card";
+import { ErrorState } from "@/components/shared/error-state";
 import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
 import { Skeleton } from "@/components/skeleton";
 import { Text } from "@/components/text";
-import { useCurrentOrganization, useWalletTransactions } from "@/hooks";
-import { useOrgSlug } from "@/hooks/use-org-slug";
+import { useOrgContext, useWalletTransactions } from "@/hooks";
+import { usePageTitle } from "@/hooks/use-breadcrumb";
 import { formatCurrency, formatDateTime } from "@/lib/design-tokens";
 
 const routeApi = getRouteApi("/_app/$orgSlug/wallet_/transactions_/$id");
@@ -69,28 +68,6 @@ function getTransactionTypeConfig(type: string): {
 }
 
 // =============================================================================
-// ERROR STATE
-// =============================================================================
-
-function ErrorState({ onRetry }: { onRetry: () => void }) {
-	return (
-		<div className="flex flex-col items-center justify-center py-16 text-center">
-			<div className="flex size-16 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-950/30">
-				<ExclamationTriangleIcon className="size-8 text-red-400" />
-			</div>
-			<p className="mt-4 text-lg font-semibold text-zinc-900 dark:text-white">Transaction not found</p>
-			<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-				The transaction you're looking for doesn't exist or has been removed.
-			</p>
-			<Button className="mt-6" onClick={onRetry} color="dark/zinc">
-				<ArrowPathIcon className="size-4" />
-				Try Again
-			</Button>
-		</div>
-	);
-}
-
-// =============================================================================
 // LOADING SKELETON
 // =============================================================================
 
@@ -129,9 +106,7 @@ function LoadingSkeleton() {
 
 export function TransactionShow() {
 	const { id: transactionId } = routeApi.useParams();
-	const organization = useCurrentOrganization();
-	const organizationId = organization?.id;
-	const orgSlug = useOrgSlug();
+	const { organizationId, orgSlug } = useOrgContext();
 
 	// Fetch transactions — limit to a smaller page size since we only need one
 	const { data: transactions, loading, error, refetch } = useWalletTransactions(organizationId, { take: 20 });
@@ -139,13 +114,20 @@ export function TransactionShow() {
 	const transaction = useMemo(() => {
 		return transactions.find((t) => t.id === transactionId) || null;
 	}, [transactions, transactionId]);
+	usePageTitle(transaction?.description || transaction?.type || null);
 
 	if (loading) {
 		return <LoadingSkeleton />;
 	}
 
 	if (error || !transaction) {
-		return <ErrorState onRetry={refetch} />;
+		return (
+			<ErrorState
+				title="Transaction not found"
+				message="The transaction you're looking for doesn't exist or has been removed."
+				onRetry={refetch}
+			/>
+		);
 	}
 
 	const typeConfig = getTransactionTypeConfig(transaction.type);

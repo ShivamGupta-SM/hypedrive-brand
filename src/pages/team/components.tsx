@@ -3,7 +3,6 @@
  * Extracted from the team monolith — used across layout and sub-pages
  */
 
-import * as Headless from "@headlessui/react";
 import {
 	ArrowPathIcon,
 	ClockIcon,
@@ -14,6 +13,7 @@ import {
 	PlusIcon,
 	ShieldCheckIcon,
 	TrashIcon,
+	UserGroupIcon,
 	UserIcon,
 	XMarkIcon,
 } from "@heroicons/react/16/solid";
@@ -21,7 +21,7 @@ import clsx from "clsx";
 import { useCallback, useState } from "react";
 import { Badge } from "@/components/badge";
 import { Button } from "@/components/button";
-import { Dialog, DialogActions, DialogBody, DialogDescription, DialogTitle } from "@/components/dialog";
+import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/dialog";
 import { Dropdown, DropdownButton, DropdownItem, DropdownMenu } from "@/components/dropdown";
 import { Input } from "@/components/input";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -163,9 +163,7 @@ export function MemberRow({
 			<div className="min-w-0 flex-1">
 				<div className="flex items-center gap-2">
 					<p className="truncate text-sm font-medium text-zinc-900 dark:text-white">{displayName}</p>
-					{isCurrentUser && (
-						<span className="shrink-0 text-[11px] text-zinc-400 dark:text-zinc-500">you</span>
-					)}
+					{isCurrentUser && <span className="shrink-0 text-[11px] text-zinc-400 dark:text-zinc-500">you</span>}
 				</div>
 				<p className="truncate text-xs text-zinc-500 dark:text-zinc-400">{displayEmail}</p>
 			</div>
@@ -292,116 +290,89 @@ export function InviteMemberModal({
 	}, [onClose]);
 
 	return (
-		<Headless.Dialog open={isOpen} onClose={handleClose} className="relative z-50">
-			<Headless.DialogBackdrop
-				transition
-				className="fixed inset-0 bg-black/40 backdrop-blur-sm transition duration-200 ease-out data-closed:opacity-0"
+		<Dialog open={isOpen} onClose={handleClose} size="md">
+			<DialogHeader
+				icon={EnvelopeIcon}
+				iconColor="emerald"
+				title="Invite Team Member"
+				description="Send an invitation to join your organization"
+				onClose={handleClose}
 			/>
-			<div className="fixed inset-0 overflow-y-auto">
-				<div className="flex min-h-full items-end justify-center sm:items-center sm:p-4">
-					<Headless.DialogPanel
-						transition
-						className="w-full max-w-md rounded-t-2xl bg-white transition duration-300 ease-out data-closed:translate-y-full sm:rounded-2xl sm:data-closed:translate-y-8 sm:data-closed:scale-95 dark:bg-zinc-900"
-					>
-						<div className="flex justify-center py-3 sm:hidden">
-							<div className="h-1 w-10 rounded-full bg-zinc-300 dark:bg-zinc-700" />
+
+			<DialogBody>
+				<div className="space-y-4">
+					{error && (
+						<div className="flex items-start gap-2.5 rounded-xl bg-red-50 p-3 dark:bg-red-950/30">
+							<ExclamationTriangleIcon className="mt-0.5 size-4 shrink-0 text-red-500" />
+							<span className="text-sm text-red-700 dark:text-red-300">{error}</span>
 						</div>
-						<div className="flex items-center justify-between border-b border-zinc-200 px-5 pb-4 pt-2 sm:pt-5 dark:border-zinc-800">
-							<div>
-								<Headless.DialogTitle className="text-lg font-semibold text-zinc-900 dark:text-white">
-									Invite Team Member
-								</Headless.DialogTitle>
-								<p className="mt-0.5 text-sm text-zinc-500">Send an invitation to join your organization</p>
-							</div>
-							<button
-								type="button"
-								onClick={handleClose}
-								className="rounded-full p-2 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-							>
-								<XMarkIcon className="size-5" />
-							</button>
+					)}
+					<div>
+						<label htmlFor="invite-email" className="mb-1.5 block text-sm font-medium text-zinc-900 dark:text-white">
+							Email Address
+						</label>
+						<Input
+							id="invite-email"
+							type="email"
+							value={email}
+							onChange={(e) => setEmail(e.target.value)}
+							placeholder="colleague@company.com"
+						/>
+					</div>
+					<div>
+						<span id="role-label" className="mb-1.5 block text-sm font-medium text-zinc-900 dark:text-white">
+							Role
+						</span>
+						{/* biome-ignore lint/a11y/useSemanticElements: styled button group, not a form fieldset */}
+						<div role="group" aria-labelledby="role-label" className="grid grid-cols-2 gap-2">
+							{(["admin", "member"] as const).map((r) => {
+								const config = getRoleBadgeConfig(r);
+								return (
+									<button
+										key={r}
+										type="button"
+										onClick={() => setRole(r)}
+										className={clsx(
+											"flex items-center gap-2.5 rounded-xl p-3 text-left ring-1 transition-all",
+											role === r
+												? "bg-zinc-900 text-white ring-zinc-900 dark:bg-white dark:text-zinc-900 dark:ring-white"
+												: "bg-white text-zinc-700 ring-zinc-200 hover:bg-zinc-50 dark:bg-zinc-800 dark:text-zinc-300 dark:ring-zinc-700 dark:hover:bg-zinc-700/60"
+										)}
+									>
+										{r === "admin" ? <ShieldCheckIcon className="size-5" /> : <UserIcon className="size-5" />}
+										<div>
+											<p className="text-sm font-medium">{config.label}</p>
+											<p className={clsx("text-xs", role === r ? "text-zinc-400 dark:text-zinc-600" : "text-zinc-500")}>
+												{r === "admin" ? "Can manage team" : "Standard access"}
+											</p>
+										</div>
+									</button>
+								);
+							})}
 						</div>
-						<div className="space-y-4 p-5">
-							{error && (
-								<div className="flex items-center gap-2 rounded-xl bg-red-50 p-3 text-sm text-red-600 dark:bg-red-950/30 dark:text-red-400">
-									<ExclamationTriangleIcon className="size-4 shrink-0" />
-									{error}
-								</div>
-							)}
-							<div>
-								<label
-									htmlFor="invite-email"
-									className="mb-1.5 block text-sm font-medium text-zinc-900 dark:text-white"
-								>
-									Email Address
-								</label>
-								<Input
-									id="invite-email"
-									type="email"
-									value={email}
-									onChange={(e) => setEmail(e.target.value)}
-									placeholder="colleague@company.com"
-								/>
-							</div>
-							<div>
-								<span id="role-label" className="mb-1.5 block text-sm font-medium text-zinc-900 dark:text-white">
-									Role
-								</span>
-								<div role="group" aria-labelledby="role-label" className="grid grid-cols-2 gap-2">
-									{(["admin", "member"] as const).map((r) => {
-										const config = getRoleBadgeConfig(r);
-										return (
-											<button
-												key={r}
-												type="button"
-												onClick={() => setRole(r)}
-												className={clsx(
-													"flex items-center gap-2 rounded-xl p-3 text-left transition-colors",
-													role === r
-														? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
-														: "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
-												)}
-											>
-												{r === "admin" ? <ShieldCheckIcon className="size-5" /> : <UserIcon className="size-5" />}
-												<div>
-													<p className="text-sm font-medium">{config.label}</p>
-													<p
-														className={clsx(
-															"text-xs",
-															role === r ? "text-zinc-400 dark:text-zinc-600" : "text-zinc-500"
-														)}
-													>
-														{r === "admin" ? "Can manage team" : "Standard access"}
-													</p>
-												</div>
-											</button>
-										);
-									})}
-								</div>
-							</div>
-						</div>
-						<div className="flex justify-end gap-2 border-t border-zinc-200 px-5 py-4 dark:border-zinc-800">
-							<Button outline onClick={handleClose}>
-								Cancel
-							</Button>
-							<Button color="emerald" onClick={handleSubmit} disabled={inviteMember.isPending || !email.trim()}>
-								{inviteMember.isPending ? (
-									<>
-										<ArrowPathIcon className="size-4 animate-spin" />
-										Sending...
-									</>
-								) : (
-									<>
-										<EnvelopeIcon className="size-4" />
-										Send Invitation
-									</>
-								)}
-							</Button>
-						</div>
-					</Headless.DialogPanel>
+					</div>
 				</div>
-			</div>
-		</Headless.Dialog>
+			</DialogBody>
+
+			<DialogActions>
+				<Button plain onClick={handleClose}>
+					Cancel
+				</Button>
+				<Button color="emerald" onClick={handleSubmit} disabled={inviteMember.isPending || !email.trim()}>
+					{inviteMember.isPending ? (
+						<>
+							<ArrowPathIcon className="size-4 animate-spin" />
+							Sending...
+						</>
+					) : (
+						<>
+							<EnvelopeIcon className="size-4" />
+							Send Invitation
+						</>
+					)}
+				</Button>
+			</DialogActions>
+		</Dialog>
 	);
 }
 
@@ -440,8 +411,13 @@ export function ChangeRoleDialog({
 
 	return (
 		<Dialog open={open} onClose={onClose} size="sm">
-			<DialogTitle>Change Role</DialogTitle>
-			<DialogDescription>Change role for this team member</DialogDescription>
+			<DialogHeader
+				icon={ShieldCheckIcon}
+				iconColor="sky"
+				title="Change Role"
+				description={`Update role for ${member.user?.name || "this member"}`}
+				onClose={onClose}
+			/>
 			<DialogBody>
 				<div className="space-y-2">
 					{(["admin", "member"] as const).map((r) => {
@@ -452,10 +428,10 @@ export function ChangeRoleDialog({
 								type="button"
 								onClick={() => setSelectedRole(r)}
 								className={clsx(
-									"flex w-full items-center gap-3 rounded-xl p-3 text-left transition-colors",
+									"flex w-full items-center gap-3 rounded-xl p-3 text-left ring-1 transition-all",
 									selectedRole === r
-										? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
-										: "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+										? "bg-zinc-900 text-white ring-zinc-900 dark:bg-white dark:text-zinc-900 dark:ring-white"
+										: "bg-white text-zinc-700 ring-zinc-200 hover:bg-zinc-50 dark:bg-zinc-800 dark:text-zinc-300 dark:ring-zinc-700 dark:hover:bg-zinc-700/60"
 								)}
 							>
 								{r === "admin" ? <ShieldCheckIcon className="size-5" /> : <UserIcon className="size-5" />}
@@ -479,8 +455,15 @@ export function ChangeRoleDialog({
 				<Button plain onClick={onClose}>
 					Cancel
 				</Button>
-				<Button color="dark/zinc" onClick={handleSubmit} disabled={updateRole.isPending}>
-					{updateRole.isPending ? "Saving..." : "Save Changes"}
+				<Button color="emerald" onClick={handleSubmit} disabled={updateRole.isPending}>
+					{updateRole.isPending ? (
+						<>
+							<ArrowPathIcon className="size-4 animate-spin" />
+							Saving...
+						</>
+					) : (
+						"Save Changes"
+					)}
 				</Button>
 			</DialogActions>
 		</Dialog>
@@ -521,16 +504,32 @@ export function RemoveMemberDialog({
 
 	return (
 		<Dialog open={open} onClose={onClose} size="sm">
-			<DialogTitle>Remove Team Member</DialogTitle>
-			<DialogDescription>
-				Are you sure you want to remove this team member from the organization? This action cannot be undone.
-			</DialogDescription>
+			<DialogHeader icon={TrashIcon} iconColor="red" title="Remove Team Member" onClose={onClose} />
+			<DialogBody>
+				<div className="flex items-start gap-2.5 rounded-xl bg-red-50 p-3 dark:bg-red-950/30">
+					<ExclamationTriangleIcon className="mt-0.5 size-4 shrink-0 text-red-500" />
+					<p className="text-sm text-red-700 dark:text-red-300">
+						Are you sure you want to remove <strong>{member.user?.name || "this member"}</strong> from the organization?
+						This action cannot be undone.
+					</p>
+				</div>
+			</DialogBody>
 			<DialogActions>
 				<Button plain onClick={onClose}>
 					Cancel
 				</Button>
 				<Button color="red" onClick={handleRemove} disabled={removeMember.isPending}>
-					{removeMember.isPending ? "Removing..." : "Remove Member"}
+					{removeMember.isPending ? (
+						<>
+							<ArrowPathIcon className="size-4 animate-spin" />
+							Removing...
+						</>
+					) : (
+						<>
+							<TrashIcon className="size-4" />
+							Remove Member
+						</>
+					)}
 				</Button>
 			</DialogActions>
 		</Dialog>
@@ -584,16 +583,19 @@ export function AddMemberDialog({
 
 	return (
 		<Dialog open={isOpen} onClose={handleClose} size="sm">
-			<DialogTitle>Add Member Directly</DialogTitle>
-			<DialogDescription>
-				Add an existing user directly to your organization without sending an invitation.
-			</DialogDescription>
+			<DialogHeader
+				icon={UserGroupIcon}
+				iconColor="violet"
+				title="Add Member Directly"
+				description="Add an existing user without sending an invitation."
+				onClose={handleClose}
+			/>
 			<DialogBody>
 				<div className="space-y-4">
 					{error && (
-						<div className="flex items-center gap-2 rounded-xl bg-red-50 p-3 text-sm text-red-600 dark:bg-red-950/30 dark:text-red-400">
-							<ExclamationTriangleIcon className="size-4 shrink-0" />
-							{error}
+						<div className="flex items-start gap-2.5 rounded-xl bg-red-50 p-3 dark:bg-red-950/30">
+							<ExclamationTriangleIcon className="mt-0.5 size-4 shrink-0 text-red-500" />
+							<span className="text-sm text-red-700 dark:text-red-300">{error}</span>
 						</div>
 					)}
 					<div>
@@ -621,10 +623,10 @@ export function AddMemberDialog({
 										type="button"
 										onClick={() => setRole(r)}
 										className={clsx(
-											"flex items-center gap-2 rounded-xl p-3 text-left transition-colors",
+											"flex items-center gap-2.5 rounded-xl p-3 text-left ring-1 transition-all",
 											role === r
-												? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
-												: "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+												? "bg-zinc-900 text-white ring-zinc-900 dark:bg-white dark:text-zinc-900 dark:ring-white"
+												: "bg-white text-zinc-700 ring-zinc-200 hover:bg-zinc-50 dark:bg-zinc-800 dark:text-zinc-300 dark:ring-zinc-700 dark:hover:bg-zinc-700/60"
 										)}
 									>
 										{r === "admin" ? <ShieldCheckIcon className="size-5" /> : <UserIcon className="size-5" />}
@@ -642,8 +644,18 @@ export function AddMemberDialog({
 				<Button plain onClick={handleClose}>
 					Cancel
 				</Button>
-				<Button color="dark/zinc" onClick={handleSubmit} disabled={addMember.isPending || !userId.trim()}>
-					{addMember.isPending ? "Adding..." : "Add Member"}
+				<Button color="emerald" onClick={handleSubmit} disabled={addMember.isPending || !userId.trim()}>
+					{addMember.isPending ? (
+						<>
+							<ArrowPathIcon className="size-4 animate-spin" />
+							Adding...
+						</>
+					) : (
+						<>
+							<UserGroupIcon className="size-4" />
+							Add Member
+						</>
+					)}
 				</Button>
 			</DialogActions>
 		</Dialog>
@@ -781,7 +793,10 @@ export function RolesSection({ organizationId }: { organizationId: string | unde
 						{roles.map((role) => {
 							const permCount = Object.keys(role.permission || {}).length;
 							return (
-								<div key={role.id} className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/40">
+								<div
+									key={role.id}
+									className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/40"
+								>
 									<div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-violet-100 dark:bg-violet-900/30">
 										<ShieldCheckIcon className="size-4 text-violet-600 dark:text-violet-400" />
 									</div>
@@ -815,14 +830,23 @@ export function RolesSection({ organizationId }: { organizationId: string | unde
 
 			{/* Create Role Dialog */}
 			<Dialog open={showCreateDialog} onClose={() => setShowCreateDialog(false)} size="sm">
-				<DialogTitle>Create Role</DialogTitle>
-				<DialogDescription>Create a new custom role for your organization</DialogDescription>
+				<DialogHeader
+					icon={PlusIcon}
+					iconColor="violet"
+					title="Create Role"
+					description="Create a new custom role for your organization"
+					onClose={() => {
+						setShowCreateDialog(false);
+						setNewRoleName("");
+						setCreateError(null);
+					}}
+				/>
 				<DialogBody>
 					<div className="space-y-4">
 						{createError && (
-							<div className="flex items-center gap-2 rounded-xl bg-red-50 p-3 text-sm text-red-600 dark:bg-red-950/30 dark:text-red-400">
-								<ExclamationTriangleIcon className="size-4 shrink-0" />
-								{createError}
+							<div className="flex items-start gap-2.5 rounded-xl bg-red-50 p-3 dark:bg-red-950/30">
+								<ExclamationTriangleIcon className="mt-0.5 size-4 shrink-0 text-red-500" />
+								<span className="text-sm text-red-700 dark:text-red-300">{createError}</span>
 							</div>
 						)}
 						<div>
@@ -849,18 +873,31 @@ export function RolesSection({ organizationId }: { organizationId: string | unde
 					>
 						Cancel
 					</Button>
-					<Button color="dark/zinc" onClick={handleCreateRole} disabled={createRole.isPending || !newRoleName.trim()}>
-						{createRole.isPending ? "Creating..." : "Create Role"}
+					<Button color="emerald" onClick={handleCreateRole} disabled={createRole.isPending || !newRoleName.trim()}>
+						{createRole.isPending ? (
+							<>
+								<ArrowPathIcon className="size-4 animate-spin" />
+								Creating…
+							</>
+						) : (
+							<>
+								<ShieldCheckIcon className="size-4" />
+								Create Role
+							</>
+						)}
 					</Button>
 				</DialogActions>
 			</Dialog>
 
 			{/* Edit Role Dialog */}
 			<Dialog open={!!editingRole} onClose={() => setEditingRole(null)} size="2xl">
-				<DialogTitle>Edit Role: {editingRole?.role}</DialogTitle>
-				<DialogDescription>
-					Toggle permissions for each resource. Changes are saved when you click Save.
-				</DialogDescription>
+				<DialogHeader
+					icon={ShieldCheckIcon}
+					iconColor="violet"
+					title={`Edit Role: ${editingRole?.role || ""}`}
+					description="Toggle permissions for each resource. Changes are saved when you click Save."
+					onClose={() => setEditingRole(null)}
+				/>
 				<DialogBody>
 					<div className="-mx-1 max-h-[60vh] space-y-1 overflow-y-auto px-1">
 						{(Object.entries(ORG_STATEMENT) as [OrgResource, readonly string[]][]).map(([resource, actions]) => {
@@ -934,8 +971,15 @@ export function RolesSection({ organizationId }: { organizationId: string | unde
 					<Button plain onClick={() => setEditingRole(null)}>
 						Cancel
 					</Button>
-					<Button color="dark/zinc" onClick={handleSaveRole} disabled={updateRole.isPending}>
-						{updateRole.isPending ? "Saving..." : "Save Permissions"}
+					<Button color="emerald" onClick={handleSaveRole} disabled={updateRole.isPending}>
+						{updateRole.isPending ? (
+							<>
+								<ArrowPathIcon className="size-4 animate-spin" />
+								Saving…
+							</>
+						) : (
+							"Save Permissions"
+						)}
 					</Button>
 				</DialogActions>
 			</Dialog>

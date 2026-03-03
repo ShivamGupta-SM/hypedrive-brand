@@ -6,33 +6,9 @@
  */
 
 import { createServerFn } from "@tanstack/react-start";
-import { deleteCookie, getCookie, setCookie } from "@tanstack/react-start/server";
 import Client from "@/lib/brand-client";
-import {
-	API_URL,
-	AUTH_COOKIE_MAX_AGE,
-	AUTH_COOKIE_NAME,
-	AUTH_COOKIE_PUBLIC_NAME,
-	AUTH_COOKIE_SESSION_MAX_AGE,
-} from "@/lib/config";
-
-const AUTH_COOKIE = AUTH_COOKIE_NAME;
-const AUTH_COOKIE_PUBLIC = AUTH_COOKIE_PUBLIC_NAME;
-const IS_PROD = process.env.NODE_ENV === "production";
-
-/** Set both auth cookies: httpOnly (SSR) + public (JS Bearer header) */
-function setAuthCookie(token: string, rememberMe = false) {
-	const maxAge = rememberMe ? AUTH_COOKIE_MAX_AGE : AUTH_COOKIE_SESSION_MAX_AGE;
-	const base = { path: "/", sameSite: "lax" as const, secure: IS_PROD, maxAge };
-	setCookie(AUTH_COOKIE, token, { ...base, httpOnly: true });
-	setCookie(AUTH_COOKIE_PUBLIC, token, base);
-}
-
-/** Clear both auth cookies */
-function clearAuthCookie() {
-	deleteCookie(AUTH_COOKIE, { path: "/" });
-	deleteCookie(AUTH_COOKIE_PUBLIC, { path: "/" });
-}
+import { API_URL } from "@/lib/config";
+import { clearAuthCookies, readAuthCookie, setAuthCookies } from "@/lib/server-auth";
 
 // =============================================================================
 // LOGIN
@@ -49,7 +25,7 @@ export const loginAction = createServerFn({ method: "POST" })
 			});
 
 			if (response.token && response.user) {
-				setAuthCookie(response.token, data.rememberMe);
+				setAuthCookies(response.token, data.rememberMe);
 				return {
 					success: true as const,
 					user: response.user,
@@ -102,11 +78,21 @@ export const registerAction = createServerFn({ method: "POST" })
 			});
 
 			if (response.token && response.user) {
-				setAuthCookie(response.token);
+				// Token available — set cookie and auto-login
+				setAuthCookies(response.token);
 				return {
 					success: true as const,
 					user: response.user,
 					redirectTo: "/onboarding",
+				};
+			}
+
+			if (response.user) {
+				// User created but no token (email verification required)
+				return {
+					success: true as const,
+					user: response.user,
+					redirectTo: null,
 				};
 			}
 
@@ -129,7 +115,7 @@ export const registerAction = createServerFn({ method: "POST" })
 // =============================================================================
 
 export const logoutAction = createServerFn({ method: "POST" }).handler(async () => {
-	const token = getCookie(AUTH_COOKIE);
+	const token = readAuthCookie();
 	if (token) {
 		try {
 			const client = new Client(API_URL, {
@@ -142,7 +128,7 @@ export const logoutAction = createServerFn({ method: "POST" }).handler(async () 
 			// Ignore errors on sign out — we clear the cookie regardless
 		}
 	}
-	clearAuthCookie();
+	clearAuthCookies();
 	return { success: true, redirectTo: "/login" };
 });
 
@@ -219,7 +205,7 @@ export const socialLoginAction = createServerFn({ method: "POST" })
 
 			// Direct token response (e.g., from ID token)
 			if (response.token && response.user) {
-				setAuthCookie(response.token);
+				setAuthCookies(response.token);
 				return { success: true as const, redirectUrl: "/" };
 			}
 

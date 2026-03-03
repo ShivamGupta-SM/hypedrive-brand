@@ -3,32 +3,33 @@ import {
 	ExclamationTriangleIcon,
 	MagnifyingGlassIcon,
 	PlusIcon,
+	TableCellsIcon,
 	XMarkIcon,
 } from "@heroicons/react/16/solid";
 import clsx from "clsx";
 import { useMemo, useState } from "react";
-import { FiTable } from "react-icons/fi";
 import { Button } from "@/components/button";
-import { Dialog, DialogActions, DialogBody, DialogDescription, DialogTitle } from "@/components/dialog";
+import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/dialog";
 import { Heading } from "@/components/heading";
 import { Input, InputGroup } from "@/components/input";
 import { EmptyState } from "@/components/shared/empty-state";
+import { ErrorState } from "@/components/shared/error-state";
 import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
 import { IconButton } from "@/components/shared/icon-button";
 import { Skeleton } from "@/components/skeleton";
 import { Text } from "@/components/text";
 import {
-	useCurrentOrganization,
 	useCancelCampaign,
 	useDuplicateCampaign,
 	useInfiniteCampaigns,
-	useOrgSlug,
+	useOrgContext,
 	usePauseCampaign,
 	useResumeCampaign,
 } from "@/hooks";
-import { useCan } from "@/store/permissions-store";
 import type { brand, db } from "@/lib/brand-client";
+import { downloadCSV } from "@/lib/download";
 import { showToast } from "@/lib/toast";
+import { useCan } from "@/store/permissions-store";
 import { CampaignCard, CampaignCardSkeleton, getStatusConfig } from "./campaign-card";
 import { CreateCampaignModal } from "./create-campaign-modal";
 
@@ -44,47 +45,16 @@ function exportCampaignsToCSV(campaigns: Campaign[]) {
 
 	const rows = campaigns.map((c) => [
 		c.id,
-		`"${c.title.replace(/"/g, '""')}"`,
+		c.title,
 		c.status,
 		c.campaignType,
 		c.startDate || "",
 		c.endDate || "",
-		c.maxEnrollments || "",
+		String(c.maxEnrollments || ""),
 		c.createdAt,
 	]);
 
-	const csvContent = [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
-
-	const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-	const link = document.createElement("a");
-	const url = URL.createObjectURL(blob);
-	link.setAttribute("href", url);
-	link.setAttribute("download", `campaigns-${new Date().toISOString().split("T")[0]}.csv`);
-	link.style.visibility = "hidden";
-	document.body.appendChild(link);
-	link.click();
-	document.body.removeChild(link);
-	URL.revokeObjectURL(url);
-}
-
-// =============================================================================
-// ERROR STATE
-// =============================================================================
-
-function ErrorState({ onRetry }: { onRetry: () => void }) {
-	return (
-		<div className="flex flex-col items-center justify-center rounded-xl bg-zinc-50 py-16 dark:bg-zinc-900/50">
-			<div className="flex size-12 items-center justify-center rounded-full bg-red-50 dark:bg-red-950/50">
-				<ExclamationTriangleIcon className="size-6 text-red-500" />
-			</div>
-			<p className="mt-4 font-semibold text-zinc-900 dark:text-white">Something went wrong</p>
-			<p className="mt-1 text-sm text-zinc-500">Unable to load campaigns</p>
-			<Button onClick={onRetry} outline className="mt-5">
-				<ArrowPathIcon className="size-4" />
-				Try again
-			</Button>
-		</div>
-	);
+	downloadCSV(headers, rows, "campaigns");
 }
 
 // =============================================================================
@@ -150,9 +120,7 @@ function CampaignsListSkeleton() {
 // =============================================================================
 
 export function CampaignsList() {
-	const organization = useCurrentOrganization();
-	const organizationId = organization?.id;
-	const orgSlug = useOrgSlug();
+	const { organizationId, orgSlug } = useOrgContext();
 
 	const [searchQuery, setSearchQuery] = useState("");
 	const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
@@ -246,7 +214,6 @@ export function CampaignsList() {
 				reason: "Paused by user",
 			});
 			showToast.success("Campaign paused");
-			refetch();
 		} catch (err) {
 			showToast.error(err, "Failed to pause campaign");
 		} finally {
@@ -260,7 +227,6 @@ export function CampaignsList() {
 		try {
 			await resumeCampaign.mutateAsync({ organizationId, campaignId });
 			showToast.success("Campaign resumed");
-			refetch();
 		} catch (err) {
 			showToast.error(err, "Failed to resume campaign");
 		} finally {
@@ -279,7 +245,6 @@ export function CampaignsList() {
 		try {
 			await cancelCampaign.mutateAsync({ organizationId, campaignId: cancelConfirm.id });
 			showToast.success("Campaign cancelled");
-			refetch();
 		} catch (err) {
 			showToast.error(err, "Failed to cancel campaign");
 		} finally {
@@ -294,7 +259,6 @@ export function CampaignsList() {
 		try {
 			await duplicateCampaign.mutateAsync({ organizationId, campaignId });
 			showToast.success("Campaign duplicated");
-			refetch();
 		} catch (err) {
 			showToast.error(err, "Failed to duplicate campaign");
 		} finally {
@@ -375,7 +339,7 @@ export function CampaignsList() {
 						onClick={() => exportCampaignsToCSV(filteredCampaigns)}
 						className="hidden sm:inline-flex"
 					>
-						<FiTable data-slot="icon" className="size-4" />
+						<TableCellsIcon data-slot="icon" className="size-4" />
 						Export
 					</Button>
 				)}
@@ -399,19 +363,19 @@ export function CampaignsList() {
 							key={tab.value}
 							onClick={() => setStatusFilter(tab.value)}
 							className={clsx(
-								"flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium ring-1 transition-all duration-200",
+								"inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-200 active:scale-95",
 								isActive
-									? "bg-zinc-900 text-white ring-zinc-900 dark:bg-white dark:text-zinc-900 dark:ring-white"
-									: "bg-white text-zinc-600 ring-zinc-200 hover:bg-zinc-50 active:bg-zinc-100 dark:bg-zinc-800 dark:text-zinc-400 dark:ring-zinc-700 dark:hover:bg-zinc-700"
+									? "bg-zinc-900 text-white shadow-sm dark:bg-white dark:text-zinc-900"
+									: "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
 							)}
 						>
 							{tab.label}
 							<span
 								className={clsx(
-									"inline-flex h-4.5 min-w-4.5 items-center justify-center rounded-full px-1 text-[10px] font-semibold",
+									"inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-semibold",
 									isActive
 										? "bg-white/20 text-white dark:bg-zinc-900/20 dark:text-zinc-900"
-										: "bg-zinc-100 text-zinc-500 dark:bg-zinc-700 dark:text-zinc-400"
+										: "bg-zinc-200 text-zinc-500 dark:bg-zinc-700 dark:text-zinc-400"
 								)}
 							>
 								{tab.count}
@@ -470,7 +434,7 @@ export function CampaignsList() {
 
 			{/* Results grid */}
 			{error ? (
-				<ErrorState onRetry={refetch} />
+				<ErrorState message="Unable to load campaigns." onRetry={refetch} />
 			) : filteredCampaigns.length > 0 ? (
 				<>
 					<div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3.5 lg:grid-cols-3">
@@ -539,12 +503,21 @@ export function CampaignsList() {
 
 			{/* Cancel Confirmation Dialog */}
 			<Dialog open={!!cancelConfirm} onClose={() => setCancelConfirm(null)} size="sm">
-				<DialogTitle>Cancel Campaign</DialogTitle>
-				<DialogDescription>
-					Are you sure you want to cancel <strong>{cancelConfirm?.title}</strong>? This action cannot be undone. No
-					new enrollments will be accepted.
-				</DialogDescription>
-				<DialogBody className="sr-only" />
+				<DialogHeader
+					icon={XMarkIcon}
+					iconColor="red"
+					title="Cancel Campaign"
+					description={`Are you sure you want to cancel "${cancelConfirm?.title}"? This action cannot be undone.`}
+					onClose={() => setCancelConfirm(null)}
+				/>
+				<DialogBody>
+					<div className="flex items-start gap-2.5 rounded-xl bg-red-50 p-3 dark:bg-red-950/20">
+						<ExclamationTriangleIcon className="mt-0.5 size-4 shrink-0 text-red-500" />
+						<p className="text-sm text-red-700 dark:text-red-300">
+							No new enrollments will be accepted after cancellation.
+						</p>
+					</div>
+				</DialogBody>
 				<DialogActions>
 					<Button plain onClick={() => setCancelConfirm(null)} disabled={!!actionPendingId}>
 						Go Back
@@ -556,7 +529,10 @@ export function CampaignsList() {
 								Cancelling...
 							</>
 						) : (
-							"Cancel Campaign"
+							<>
+								<XMarkIcon className="size-4" />
+								Cancel Campaign
+							</>
 						)}
 					</Button>
 				</DialogActions>

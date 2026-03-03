@@ -1,4 +1,4 @@
-import { QueryClient } from "@tanstack/react-query";
+import { dehydrate, hydrate, QueryClient } from "@tanstack/react-query";
 import { createRouter as createTanStackRouter } from "@tanstack/react-router";
 
 import { clearAuthCache, isAPIError } from "@/hooks/api-client";
@@ -19,9 +19,8 @@ export function getQueryClient(): QueryClient | null {
 export async function handleAuthError() {
 	clearServerAuthCookie(); // fire-and-forget
 	clearAuthCache(); // drop stale in-memory token
+	// clear() wipes the entire QueryClient cache including auth+orgs
 	_queryClient?.clear();
-	// Invalidate cached session so next navigation re-checks
-	_queryClient?.removeQueries({ queryKey: ["auth", "session"] });
 }
 
 export function getRouter() {
@@ -62,6 +61,11 @@ export function getRouter() {
 		defaultPreload: "intent",
 		defaultPreloadStaleTime: 0,
 		scrollRestoration: true,
+		// Dehydrate QueryClient state into SSR HTML so the client can rehydrate
+		// without re-fetching — eliminates the flash caused by empty client cache.
+		// biome-ignore lint/suspicious/noExplicitAny: TanStack Router and React Query dehydration types diverge slightly
+		dehydrate: () => ({ queryClientState: dehydrate(queryClient) as any }),
+		hydrate: (data) => hydrate(queryClient, data.queryClientState),
 	});
 
 	return router;

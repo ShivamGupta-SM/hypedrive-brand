@@ -1,23 +1,21 @@
 import * as Headless from "@headlessui/react";
-import { CheckIcon, ChevronDownIcon, ChevronUpDownIcon, Cog6ToothIcon, PlusIcon, XMarkIcon } from "@heroicons/react/16/solid";
+import {
+	CheckIcon,
+	ChevronDownIcon,
+	ChevronUpDownIcon,
+	Cog6ToothIcon,
+	PlusIcon,
+	XMarkIcon,
+} from "@heroicons/react/16/solid";
 import { BuildingStorefrontIcon } from "@heroicons/react/20/solid";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import clsx from "clsx";
 import { useCallback, useState } from "react";
 import { Avatar } from "@/components/avatar";
-import { SidebarItem, SidebarLabel } from "@/components/sidebar";
+import { SidebarItem } from "@/components/sidebar";
+import { getInitials } from "@/lib/design-tokens";
 import type { Organization } from "@/store/organization-store";
 import { useOrganizationStore } from "@/store/organization-store";
-import { usePermissionsStore } from "@/store/permissions-store";
-
-function getInitials(name: string) {
-	return name
-		.split(" ")
-		.map((word) => word[0])
-		.join("")
-		.toUpperCase()
-		.slice(0, 2);
-}
 
 /** Richer palette — each org gets a distinct but professional color */
 const ORG_COLORS = [
@@ -49,10 +47,7 @@ function StatusDot({ status }: { status?: string }) {
 	if (!color) return null;
 	return (
 		<span
-			className={clsx(
-				"absolute -right-0.5 -top-0.5 size-2.5 rounded-full ring-2 ring-white dark:ring-zinc-900",
-				color
-			)}
+			className={clsx("absolute -right-0.5 -top-0.5 size-2.5 rounded-full ring-2 ring-white dark:ring-zinc-900", color)}
 		/>
 	);
 }
@@ -67,19 +62,16 @@ function OrgAvatar({
 	selected?: boolean;
 }) {
 	const colors = getOrgColor(org.id);
-	const sizeClass = size === "lg" ? "size-11" : size === "md" ? "size-9" : size === "sm" ? "size-7 sm:size-6" : "size-5";
-	const textSize = size === "lg" ? "text-sm" : size === "md" ? "text-xs" : size === "sm" ? "text-[10px]" : "text-[8px]";
+	const sizeClass =
+		size === "lg" ? "size-11" : size === "md" ? "size-9" : size === "sm" ? "size-7 sm:size-6" : "size-6";
+	const textSize = size === "lg" ? "text-sm" : size === "md" ? "text-xs" : size === "sm" ? "text-[10px]" : "text-[9px]";
 
 	return (
 		<span className="relative shrink-0">
 			{org.logo ? (
 				<Avatar
 					src={org.logo}
-					className={clsx(
-						sizeClass,
-						"outline-0!",
-						selected && "ring-2 ring-zinc-900 dark:ring-white"
-					)}
+					className={clsx(sizeClass, "outline-0!", selected && "ring-2 ring-zinc-900 dark:ring-white")}
 				/>
 			) : (
 				<Avatar
@@ -337,7 +329,9 @@ function useOrgSwitching({
 	const performSwitch = useCallback(
 		(org: Organization) => {
 			if (org.id !== currentOrganization?.id) {
-				usePermissionsStore.getState().clearPermissions();
+				// Optimistic UI update for the switcher dropdown only.
+				// Do NOT clear permissions here — OrgLayoutWrapper's useEffect
+				// will sync permissions after beforeLoad resolves the new org.
 				switchOrganization(org.id);
 
 				const currentSlug = currentOrganization?.slug;
@@ -386,7 +380,7 @@ function useOrgSwitching({
 		[onOpenOrgSettings]
 	);
 
-	const fallbackOrg: Organization = { id: "", name: "O", slug: "", createdAt: "" };
+	const fallbackOrg: Organization = { id: "fallback", name: "Select Org", slug: "", createdAt: "" };
 	const displayOrg = currentOrganization || fallbackOrg;
 
 	return {
@@ -431,7 +425,7 @@ export function OrganizationSwitcher({
 					<>
 						<Headless.PopoverButton as={SidebarItem} className="w-full">
 							<OrgAvatar org={displayOrg} size="sm" />
-							<SidebarLabel>{displayOrg.name || "Select Organization"}</SidebarLabel>
+							<span className="min-w-0 flex-1 truncate text-left">{displayOrg.name || "Select Organization"}</span>
 							<ChevronUpDownIcon />
 						</Headless.PopoverButton>
 
@@ -467,7 +461,7 @@ export function OrganizationSwitcher({
 			<span className="lg:hidden">
 				<SidebarItem onClick={() => setMobileOpen(true)}>
 					<OrgAvatar org={displayOrg} size="sm" />
-					<SidebarLabel>{displayOrg.name || "Select Organization"}</SidebarLabel>
+					<span className="min-w-0 flex-1 truncate text-left">{displayOrg.name || "Select Organization"}</span>
 					<ChevronUpDownIcon />
 				</SidebarItem>
 			</span>
@@ -511,11 +505,14 @@ export function MobileOrgSwitcher({
 			<button
 				type="button"
 				onClick={() => setMobileOpen(true)}
-				className="flex items-center gap-0.5 rounded-full p-0.5 pr-1 transition-colors hover:bg-zinc-950/5 active:bg-zinc-950/8 dark:hover:bg-white/5 dark:active:bg-white/8"
+				className="flex min-w-0 items-center gap-1.5 rounded-lg px-1.5 py-1 transition-colors hover:bg-zinc-100 active:bg-zinc-100 dark:hover:bg-zinc-800 dark:active:bg-zinc-800"
 				aria-label="Switch organization"
 			>
 				<OrgAvatar org={displayOrg} size="xs" />
-				<ChevronDownIcon className="size-3 text-zinc-400 dark:text-zinc-500" />
+				<span className="truncate text-sm/5 font-semibold text-zinc-900 dark:text-white">
+					{displayOrg.name || "Select"}
+				</span>
+				<ChevronDownIcon className="-ml-0.5 size-3.5 shrink-0 text-zinc-400 dark:text-zinc-500" />
 			</button>
 
 			<MobileOrgSheet

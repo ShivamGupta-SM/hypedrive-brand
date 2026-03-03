@@ -6,7 +6,7 @@ import {
 } from "@heroicons/react/16/solid";
 import { useNavigate } from "@tanstack/react-router";
 import { DropdownDivider, DropdownItem, DropdownLabel, DropdownMenu } from "@/components/dropdown";
-import { useLogout } from "@/store/auth-store";
+import { useLogout } from "@/hooks/use-auth";
 
 export function AccountDropdownMenu({
 	anchor,
@@ -15,11 +15,11 @@ export function AccountDropdownMenu({
 	anchor: "top start" | "bottom end";
 	onOpenAccountSettings: () => void;
 }) {
-	const { mutate: logout } = useLogout();
+	const logout = useLogout();
 	const navigate = useNavigate();
 
 	const handleLogout = async () => {
-		const result = await logout();
+		const result = await logout.mutateAsync();
 		if (result.success && result.redirectTo) {
 			navigate({ to: result.redirectTo as "/" | "/login" });
 		}

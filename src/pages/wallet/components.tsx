@@ -18,10 +18,11 @@ import {
 	UserIcon,
 } from "@heroicons/react/16/solid";
 import { startAuthentication } from "@simplewebauthn/browser";
+import clsx from "clsx";
 import { useState } from "react";
 import { Badge } from "@/components/badge";
 import { Button } from "@/components/button";
-import { Dialog, DialogActions, DialogBody, DialogDescription, DialogTitle } from "@/components/dialog";
+import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/dialog";
 import { Field, Label } from "@/components/fieldset";
 import { Input } from "@/components/input";
 import { Skeleton } from "@/components/skeleton";
@@ -35,26 +36,6 @@ import { useCan } from "@/store/permissions-store";
 type WalletTransaction = brand.WalletTransaction;
 type ActiveHold = brand.ActiveHold;
 type VirtualAccountResponse = brand.VirtualAccountResponse;
-
-// =============================================================================
-// ERROR STATE
-// =============================================================================
-
-export function ErrorState({ onRetry }: { onRetry: () => void }) {
-	return (
-		<div className="flex flex-col items-center justify-center py-16 text-center">
-			<div className="flex size-16 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-950/30">
-				<ExclamationTriangleIcon className="size-8 text-red-400" />
-			</div>
-			<p className="mt-4 text-lg font-semibold text-zinc-900 dark:text-white">Something went wrong</p>
-			<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Failed to load wallet. Please try again.</p>
-			<Button className="mt-6" onClick={onRetry} color="dark/zinc">
-				<ArrowPathIcon className="size-4" />
-				Try Again
-			</Button>
-		</div>
-	);
-}
 
 // =============================================================================
 // LOADING SKELETON
@@ -134,8 +115,13 @@ export function DepositAccountDialog({
 
 	return (
 		<Dialog open={open} onClose={onClose} size="md">
-			<DialogTitle>Deposit Account</DialogTitle>
-			<DialogDescription>Transfer funds to this account to top up your wallet.</DialogDescription>
+			<DialogHeader
+				icon={BuildingLibraryIcon}
+				iconColor="sky"
+				title="Deposit Account"
+				description="Transfer funds to this account to top up your wallet."
+				onClose={onClose}
+			/>
 
 			<DialogBody>
 				{loading ? (
@@ -149,38 +135,47 @@ export function DepositAccountDialog({
 						<div className="flex size-14 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800">
 							<BuildingOffice2Icon className="size-7 text-zinc-400" />
 						</div>
-						<p className="mt-3 text-sm font-semibold text-zinc-900 dark:text-white">
-							Deposit Account Not Set Up
-						</p>
+						<p className="mt-3 text-sm font-semibold text-zinc-900 dark:text-white">Deposit Account Not Set Up</p>
 						<p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
 							Contact support to set up your deposit account.
 						</p>
 					</div>
 				) : (
-					<div className="divide-y divide-zinc-100 dark:divide-zinc-800">
-						{details.map((detail) => {
+					<div className="overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800">
+						{details.map((detail, idx) => {
 							const Icon = detail.icon;
 							return (
-							<div key={detail.key} className="group flex items-center gap-3 py-3">
-								<div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
-									<Icon className="size-4 text-zinc-500 dark:text-zinc-400" />
+								<div
+									key={detail.key}
+									className={clsx(
+										"group flex items-center gap-3 px-4 py-3 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/40",
+										idx > 0 && "border-t border-zinc-100 dark:border-zinc-800"
+									)}
+								>
+									<div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
+										<Icon className="size-4 text-zinc-500 dark:text-zinc-400" />
+									</div>
+									<div className="min-w-0 flex-1">
+										<p className="text-[11px] font-medium text-zinc-400 dark:text-zinc-500">{detail.label}</p>
+										<p
+											className={clsx(
+												"mt-0.5 truncate text-sm font-medium text-zinc-900 dark:text-white",
+												detail.mono && "font-mono tracking-wide"
+											)}
+										>
+											{detail.value}
+										</p>
+									</div>
+									{detail.value !== "—" && (
+										<button
+											type="button"
+											onClick={() => copyToClipboard(detail.value, detail.label)}
+											className="shrink-0 rounded-lg p-1.5 text-zinc-300 transition-colors hover:bg-zinc-100 hover:text-zinc-500 dark:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+										>
+											<DocumentDuplicateIcon className="size-3.5" />
+										</button>
+									)}
 								</div>
-								<div className="min-w-0 flex-1">
-									<p className="text-xs text-zinc-500 dark:text-zinc-400">{detail.label}</p>
-									<p className={`mt-0.5 truncate text-sm font-medium text-zinc-900 dark:text-white ${detail.mono ? "font-mono tracking-wide" : ""}`}>
-										{detail.value}
-									</p>
-								</div>
-								{detail.value !== "—" && (
-									<button
-										type="button"
-										onClick={() => copyToClipboard(detail.value, detail.label)}
-										className="shrink-0 rounded-md p-1.5 text-zinc-300 transition-colors hover:text-zinc-500 group-hover:text-zinc-400 dark:text-zinc-600 dark:hover:text-zinc-300 dark:group-hover:text-zinc-500"
-									>
-										<DocumentDuplicateIcon className="size-3.5" />
-									</button>
-								)}
-							</div>
 							);
 						})}
 					</div>
@@ -189,7 +184,7 @@ export function DepositAccountDialog({
 
 			<DialogActions>
 				{accountDetails && !loading && (
-					<Button outline onClick={copyAll} className="mr-auto">
+					<Button outline onClick={copyAll} className="mr-auto!">
 						<ClipboardDocumentListIcon className="size-4" />
 						Copy All
 					</Button>
@@ -341,15 +336,19 @@ export function WithdrawDialog({
 
 	return (
 		<Dialog open={open} onClose={onClose} size="md">
-			<DialogTitle>Request Withdrawal</DialogTitle>
-			<DialogDescription>
-				Request a withdrawal to your linked bank account. Available: {formatCurrency(availableBalance)}
-			</DialogDescription>
+			<DialogHeader
+				icon={ArrowUpRightIcon}
+				iconColor="emerald"
+				title="Request Withdrawal"
+				description={`Withdraw to your linked bank account. Available: ${formatCurrency(availableBalance)}`}
+				onClose={onClose}
+			/>
 
 			<DialogBody>
 				{error && (
-					<div className="mb-4 rounded-lg bg-red-50 p-3 dark:bg-red-950/30">
-						<p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+					<div className="mb-4 flex items-start gap-2.5 rounded-xl bg-red-50 p-3 dark:bg-red-950/30">
+						<ExclamationTriangleIcon className="mt-0.5 size-4 shrink-0 text-red-500" />
+						<p className="text-sm text-red-700 dark:text-red-300">{error}</p>
 					</div>
 				)}
 
@@ -381,12 +380,18 @@ export function WithdrawDialog({
 				<Button plain onClick={onClose} disabled={isPending}>
 					Cancel
 				</Button>
-				<Button color="dark/zinc" onClick={handleSubmit} disabled={isPending || !amount}>
-					{passkeyReauth.isPending
-						? "Verifying passkey..."
-						: createWithdrawal.isPending
-							? "Submitting..."
-							: "Request Withdrawal"}
+				<Button color="emerald" onClick={handleSubmit} disabled={isPending || !amount}>
+					{isPending ? (
+						<>
+							<ArrowPathIcon className="size-4 animate-spin" />
+							{passkeyReauth.isPending ? "Verifying..." : "Submitting..."}
+						</>
+					) : (
+						<>
+							<ArrowUpRightIcon className="size-4" />
+							Request Withdrawal
+						</>
+					)}
 				</Button>
 			</DialogActions>
 		</Dialog>

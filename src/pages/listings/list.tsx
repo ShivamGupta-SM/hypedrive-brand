@@ -2,23 +2,24 @@ import {
 	ArrowPathIcon,
 	CubeIcon,
 	EllipsisVerticalIcon,
-	ExclamationTriangleIcon,
 	LinkIcon,
 	MagnifyingGlassIcon,
 	PlusIcon,
 	XMarkIcon,
 } from "@heroicons/react/16/solid";
 import { useMemo, useState } from "react";
+
 import { Button } from "@/components/button";
 import { Dropdown, DropdownButton, DropdownItem, DropdownMenu } from "@/components/dropdown";
 import { Heading } from "@/components/heading";
 import { Input, InputGroup } from "@/components/input";
 import { Link } from "@/components/link";
 import { EmptyState } from "@/components/shared/empty-state";
+import { ErrorState } from "@/components/shared/error-state";
 import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
 import { IconButton } from "@/components/shared/icon-button";
 import { Text } from "@/components/text";
-import { getAssetUrl, useCurrentOrganization, useInfiniteListings, useOrgSlug } from "@/hooks";
+import { getAssetUrl, useInfiniteListings, useOrgContext } from "@/hooks";
 import type { brand } from "@/lib/brand-client";
 import { formatCurrency } from "@/lib/design-tokens";
 import { useCan } from "@/store/permissions-store";
@@ -197,26 +198,6 @@ function ListingCardSkeleton() {
 }
 
 // =============================================================================
-// ERROR STATE
-// =============================================================================
-
-function ErrorState({ onRetry }: { onRetry: () => void }) {
-	return (
-		<div className="flex flex-col items-center justify-center rounded-xl bg-zinc-50 py-16 dark:bg-zinc-900/50">
-			<div className="flex size-12 items-center justify-center rounded-full bg-red-50 dark:bg-red-950/50">
-				<ExclamationTriangleIcon className="size-6 text-red-500" />
-			</div>
-			<p className="mt-4 font-semibold text-zinc-900 dark:text-white">Something went wrong</p>
-			<p className="mt-1 text-sm text-zinc-500">Unable to load listings</p>
-			<Button onClick={onRetry} outline className="mt-5">
-				<ArrowPathIcon className="size-4" />
-				Try again
-			</Button>
-		</div>
-	);
-}
-
-// =============================================================================
 // LOADING SKELETON
 // =============================================================================
 
@@ -267,9 +248,7 @@ function ListingsListSkeleton() {
 // =============================================================================
 
 export function ListingsList() {
-	const organization = useCurrentOrganization();
-	const organizationId = organization?.id;
-	const orgSlug = useOrgSlug();
+	const { organizationId, orgSlug } = useOrgContext();
 
 	// Permission checks
 	const canCreateListing = useCan("listing", "create");
@@ -438,7 +417,7 @@ export function ListingsList() {
 
 			{/* Results Grid */}
 			{error ? (
-				<ErrorState onRetry={refetch} />
+				<ErrorState message="Unable to load listings." onRetry={refetch} />
 			) : filteredListings.length > 0 ? (
 				<>
 					<div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">

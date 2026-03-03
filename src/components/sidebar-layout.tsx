@@ -1,9 +1,7 @@
-"use client";
-
 import * as Headless from "@headlessui/react";
-import { Link } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import type React from "react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Logo } from "./logo";
 
 function MenuIcon({ className }: { className?: string }) {
@@ -45,17 +43,29 @@ function MobileSidebar({ open, close, children }: React.PropsWithChildren<{ open
 
 export function SidebarLayout({
 	navbar,
+	mobileNavbar,
 	sidebar,
 	contentHeader,
 	mobileOrgSwitcher,
+	logoHref,
 	children,
 }: React.PropsWithChildren<{
 	navbar: React.ReactNode;
+	mobileNavbar?: React.ReactNode;
 	sidebar: React.ReactNode;
 	contentHeader?: React.ReactNode;
 	mobileOrgSwitcher?: React.ReactNode;
+	logoHref?: string;
 }>) {
 	const [showSidebar, setShowSidebar] = useState(false);
+	const scrollRef = useRef<HTMLDivElement>(null);
+	const { pathname } = useLocation();
+
+	// Reset scroll position when route changes
+	// biome-ignore lint/correctness/useExhaustiveDependencies: pathname is intentionally used as a trigger
+	useEffect(() => {
+		scrollRef.current?.scrollTo(0, 0);
+	}, [pathname]);
 
 	return (
 		<div
@@ -76,17 +86,17 @@ export function SidebarLayout({
 					type="button"
 					onClick={() => setShowSidebar(true)}
 					aria-label="Open navigation"
-					className="-ml-1 rounded-lg p-1.5 text-zinc-600 active:bg-zinc-100 dark:text-zinc-300 dark:active:bg-zinc-800"
+					className="-ml-1 rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-950/5 hover:text-zinc-700 active:bg-zinc-950/5 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-zinc-200 dark:active:bg-white/5"
 				>
 					<MenuIcon className="size-5" />
 				</button>
-				<Link to="/" className="shrink-0">
+				<Link to={logoHref || "/"} className="shrink-0">
 					<Logo className="h-4.5 w-auto text-zinc-950 dark:text-white" />
 				</Link>
 				<div className="h-5 w-px bg-zinc-950/10 dark:bg-white/10" />
 				{mobileOrgSwitcher}
 				<div className="min-w-0 flex-1" />
-				<div className="flex shrink-0 items-center">{navbar}</div>
+				<div className="flex shrink-0 items-center gap-1">{mobileNavbar ?? navbar}</div>
 			</header>
 
 			{/* Main content — offset by sidebar width on desktop */}
@@ -94,7 +104,7 @@ export function SidebarLayout({
 				<div className="flex min-h-0 flex-1 flex-col lg:p-2.5 lg:pl-2">
 					<div className="flex min-h-0 flex-1 flex-col bg-white lg:rounded-2xl lg:shadow-sm lg:ring-1 lg:ring-zinc-950/5 dark:bg-zinc-900 dark:lg:ring-white/10">
 						{contentHeader}
-						<div className="min-h-0 flex-1 overflow-y-auto">
+						<div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
 							<div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-8">{children}</div>
 						</div>
 					</div>

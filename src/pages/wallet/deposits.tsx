@@ -1,11 +1,10 @@
 import { EmptyState } from "@/components/shared/empty-state";
 import { Skeleton } from "@/components/skeleton";
-import { useCurrentOrganization, useDeposits } from "@/hooks";
+import { useDeposits, useOrgContext } from "@/hooks";
 import { DepositRow } from "./components";
 
 export function WalletDeposits() {
-	const organization = useCurrentOrganization();
-	const organizationId = organization?.id;
+	const { organizationId } = useOrgContext();
 
 	const { data: deposits, loading: depositsLoading } = useDeposits(organizationId);
 

@@ -5,18 +5,13 @@
  */
 
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { getOrganizationsFromServer } from "@/lib/server-auth";
 import { AuthLayout } from "@/pages/auth/layout";
 
 export const Route = createFileRoute("/_auth")({
-	beforeLoad: async ({ context }) => {
+	beforeLoad: ({ context }) => {
 		if (context.auth.isAuthenticated) {
-			// Fetch orgs server-side to determine where to redirect, cached for 5 min
-			const { organizations } = await context.queryClient.ensureQueryData({
-				queryKey: ["server", "organizations"],
-				queryFn: () => getOrganizationsFromServer(),
-				staleTime: 5 * 60 * 1000,
-			});
+			// Organizations already in context from root beforeLoad
+			const organizations = context.organizations ?? [];
 			const approvedOrg = organizations.find((o) => o.approvalStatus === "approved");
 
 			if (approvedOrg) {

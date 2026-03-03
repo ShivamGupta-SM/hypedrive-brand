@@ -3,7 +3,11 @@
  *
  * NOT the source of truth — organizations are resolved server-side
  * in route guards (beforeLoad). This store is populated by the
- * $orgSlug route component for reactive UI (dropdowns, permissions, etc.).
+ * $orgSlug route's OrgLayoutWrapper useEffect.
+ *
+ * Only for components ABOVE the $orgSlug route tree that cannot access
+ * router context (OrganizationSwitcher, NotificationPopover, SearchDialog,
+ * approval pages). All pages INSIDE $orgSlug should use useOrgContext() instead.
  *
  * No localStorage persistence — state comes from server on every page load.
  */

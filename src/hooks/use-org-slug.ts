@@ -1,12 +1,9 @@
 /**
- * useOrgSlug Hook - Access current organization slug from URL
+ * URL-based org slug utilities.
  *
- * This hook provides the orgSlug from the URL and helpers for
- * building org-scoped paths.
- *
- * Usage:
- * const { orgSlug, orgPath } = useOrgSlug();
- * orgPath("/campaigns") => "/$orgSlug/campaigns"
+ * For the full org object (id, name, slug, activeMember), use useOrgContext()
+ * from use-org-context.ts instead. These helpers are for components that only
+ * need the slug string or path builder (e.g., AppLayout, ContentHeader).
  */
 
 import { useParams } from "@tanstack/react-router";
@@ -32,20 +29,8 @@ export function useOrgPath() {
 		// Remove leading slash if present
 		const cleanPath = path.startsWith("/") ? path.slice(1) : path;
 
-		// Return org-scoped path
+		// Guard against empty orgSlug producing //path
+		if (!orgSlug) return `/${cleanPath}`;
 		return `/${orgSlug}/${cleanPath}`;
-	};
-}
-
-/**
- * Combined hook for org slug and path builder
- */
-export function useOrg() {
-	const orgSlug = useOrgSlug();
-	const orgPath = useOrgPath();
-
-	return {
-		orgSlug,
-		orgPath,
 	};
 }

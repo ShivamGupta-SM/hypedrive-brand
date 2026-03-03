@@ -434,7 +434,8 @@ export function formatCompactNumber(num: number): string {
 /**
  * Format date for display
  */
-export function formatDate(dateStr: string, options?: Intl.DateTimeFormatOptions): string {
+export function formatDate(dateStr?: string, options?: Intl.DateTimeFormatOptions): string {
+	if (!dateStr) return "—";
 	const date = new Date(dateStr);
 	return date.toLocaleDateString("en-IN", {
 		day: "numeric",
@@ -447,7 +448,8 @@ export function formatDate(dateStr: string, options?: Intl.DateTimeFormatOptions
 /**
  * Format datetime for display
  */
-export function formatDateTime(dateStr: string): string {
+export function formatDateTime(dateStr?: string): string {
+	if (!dateStr) return "—";
 	return new Date(dateStr).toLocaleString("en-IN", {
 		day: "numeric",
 		month: "short",
@@ -455,6 +457,37 @@ export function formatDateTime(dateStr: string): string {
 		hour: "2-digit",
 		minute: "2-digit",
 	});
+}
+
+/**
+ * Format compact date (e.g., "Mar 2") — no year, for cards and lists
+ */
+export function formatDateCompact(dateStr?: string): string {
+	if (!dateStr) return "—";
+	return new Date(dateStr).toLocaleDateString("en-IN", { month: "short", day: "numeric" });
+}
+
+/**
+ * Format price from decimal string (e.g., "1500.00" → "₹1,500")
+ * Returns null if value is missing or zero
+ */
+export function formatPrice(priceDecimal?: string): string | null {
+	if (!priceDecimal) return null;
+	const num = parseFloat(priceDecimal);
+	if (Number.isNaN(num) || num === 0) return null;
+	return formatCurrency(num);
+}
+
+/**
+ * Get initials from a name (up to 2 characters)
+ */
+export function getInitials(name: string): string {
+	return name
+		.split(" ")
+		.map((word) => word[0])
+		.join("")
+		.toUpperCase()
+		.slice(0, 2);
 }
 
 /**

@@ -264,53 +264,6 @@ export function isValidAdminRole(role: string | undefined | null): role is Admin
 }
 
 // =============================================================================
-// REACT HOOKS (Optional - for React projects)
-// =============================================================================
-// Uncomment if using React. These hooks work with any auth context.
-
-/*
-import { useMemo } from 'react';
-
-interface UseOrgPermissionsOptions {
-  role: string | undefined | null;
-}
-
-export function useOrgPermissions({ role }: UseOrgPermissionsOptions) {
-  return useMemo(() => ({
-    can: <R extends OrgResource>(resource: R, action: OrgAction<R>) =>
-      canPerformOrgAction(role, resource, action),
-    canAny: (permissions: Array<{ resource: OrgResource; action: string }>) =>
-      canPerformAnyOrgAction(role, permissions),
-    canAll: (permissions: Array<{ resource: OrgResource; action: string }>) =>
-      canPerformAllOrgActions(role, permissions),
-    canWrite: (resource: OrgResource) => canWriteOrgResource(role, resource),
-    isReadOnly: (resource: OrgResource) => isReadOnlyOrgResource(role, resource),
-    hasAny: (resource: OrgResource) => hasAnyOrgPermission(role, resource),
-    getAllowedActions: <R extends OrgResource>(resource: R) =>
-      getOrgAllowedActions(role, resource),
-    role,
-    roleLabel: role ? ORG_ROLE_LABELS[role as OrgRole] : undefined,
-  }), [role]);
-}
-
-interface UseAdminPermissionsOptions {
-  role: string | undefined | null;
-}
-
-export function useAdminPermissions({ role }: UseAdminPermissionsOptions) {
-  return useMemo(() => ({
-    can: <R extends AdminResource>(resource: R, action: AdminAction<R>) =>
-      canPerformAdminAction(role, resource, action),
-    hasAny: (resource: AdminResource) => hasAnyAdminPermission(role, resource),
-    getAllowedActions: <R extends AdminResource>(resource: R) =>
-      getAdminAllowedActions(role, resource),
-    role,
-    roleLabel: role ? ADMIN_ROLE_LABELS[role as AdminRole] : undefined,
-  }), [role]);
-}
-*/
-
-// =============================================================================
 // PERMISSION MATRIX GENERATOR (for debugging/documentation)
 // =============================================================================
 

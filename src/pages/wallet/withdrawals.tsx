@@ -1,16 +1,22 @@
+import {
+	ArrowUpRightIcon,
+	CalendarIcon,
+	CheckCircleIcon,
+	ExclamationTriangleIcon,
+	HashtagIcon,
+} from "@heroicons/react/16/solid";
 import { useState } from "react";
 import { Badge } from "@/components/badge";
 import { Button } from "@/components/button";
-import { Dialog, DialogActions, DialogBody, DialogDescription, DialogTitle } from "@/components/dialog";
+import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/dialog";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Skeleton } from "@/components/skeleton";
-import { useCurrentOrganization, useWithdrawalDetail, useWithdrawalStats, useWithdrawals } from "@/hooks";
+import { useOrgContext, useWithdrawalDetail, useWithdrawalStats, useWithdrawals } from "@/hooks";
 import { formatCurrency, formatDateTime } from "@/lib/design-tokens";
 import { WithdrawalRow } from "./components";
 
 export function WalletWithdrawals() {
-	const organization = useCurrentOrganization();
-	const organizationId = organization?.id;
+	const { organizationId } = useOrgContext();
 
 	const { data: withdrawals, loading: withdrawalsLoading } = useWithdrawals(organizationId);
 	const { data: withdrawalStats } = useWithdrawalStats(organizationId);
@@ -84,8 +90,12 @@ export function WalletWithdrawals() {
 
 			{/* Withdrawal Detail Dialog */}
 			<Dialog open={!!selectedWithdrawalId} onClose={() => setSelectedWithdrawalId(null)} size="md">
-				<DialogTitle>Withdrawal Details</DialogTitle>
-				<DialogDescription>View details for this withdrawal request.</DialogDescription>
+				<DialogHeader
+					icon={ArrowUpRightIcon}
+					iconColor="zinc"
+					title="Withdrawal Details"
+					onClose={() => setSelectedWithdrawalId(null)}
+				/>
 				<DialogBody>
 					{withdrawalDetailLoading ? (
 						<div className="space-y-3">
@@ -94,16 +104,17 @@ export function WalletWithdrawals() {
 							))}
 						</div>
 					) : withdrawalDetail ? (
-						<div className="space-y-4">
-							<div className="flex items-center justify-between border-b border-zinc-200 pb-3 dark:border-zinc-700">
-								<span className="text-sm text-zinc-500">Amount</span>
-								<span className="text-lg font-bold text-zinc-900 dark:text-white">
+						<div className="space-y-5">
+							{/* Amount highlight */}
+							<div className="rounded-xl bg-zinc-50 p-4 text-center dark:bg-zinc-800/50">
+								<p className="text-[11px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+									Amount
+								</p>
+								<p className="mt-1 text-2xl font-bold tabular-nums text-zinc-900 dark:text-white">
 									{formatCurrency(withdrawalDetail.amountDecimal)}
-								</span>
-							</div>
-							<div className="flex items-center justify-between border-b border-zinc-200 pb-3 dark:border-zinc-700">
-								<span className="text-sm text-zinc-500">Status</span>
+								</p>
 								<Badge
+									className="mt-2"
 									color={
 										withdrawalDetail.status === "completed"
 											? "emerald"
@@ -117,34 +128,46 @@ export function WalletWithdrawals() {
 									{withdrawalDetail.status}
 								</Badge>
 							</div>
-							<div className="flex items-center justify-between border-b border-zinc-200 pb-3 dark:border-zinc-700">
-								<span className="text-sm text-zinc-500">Requested</span>
-								<span className="text-sm text-zinc-900 dark:text-white">
-									{formatDateTime(withdrawalDetail.requestedAt)}
-								</span>
-							</div>
-							{withdrawalDetail.processedAt && (
-								<div className="flex items-center justify-between border-b border-zinc-200 pb-3 dark:border-zinc-700">
-									<span className="text-sm text-zinc-500">Processed</span>
-									<span className="text-sm text-zinc-900 dark:text-white">
-										{formatDateTime(withdrawalDetail.processedAt)}
+
+							{/* Detail rows */}
+							<div className="overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800">
+								<div className="flex items-center gap-3 px-4 py-3">
+									<CalendarIcon className="size-4 shrink-0 text-zinc-400" />
+									<span className="flex-1 text-sm text-zinc-500 dark:text-zinc-400">Requested</span>
+									<span className="text-sm font-medium text-zinc-900 dark:text-white">
+										{formatDateTime(withdrawalDetail.requestedAt)}
 									</span>
 								</div>
-							)}
+								{withdrawalDetail.processedAt && (
+									<div className="flex items-center gap-3 border-t border-zinc-100 px-4 py-3 dark:border-zinc-800">
+										<CheckCircleIcon className="size-4 shrink-0 text-zinc-400" />
+										<span className="flex-1 text-sm text-zinc-500 dark:text-zinc-400">Processed</span>
+										<span className="text-sm font-medium text-zinc-900 dark:text-white">
+											{formatDateTime(withdrawalDetail.processedAt)}
+										</span>
+									</div>
+								)}
+								<div className="flex items-center gap-3 border-t border-zinc-100 px-4 py-3 dark:border-zinc-800">
+									<HashtagIcon className="size-4 shrink-0 text-zinc-400" />
+									<span className="flex-1 text-sm text-zinc-500 dark:text-zinc-400">ID</span>
+									<span className="max-w-40 truncate font-mono text-xs text-zinc-400">{withdrawalDetail.id}</span>
+								</div>
+							</div>
+
+							{/* Rejection / failure reason */}
 							{(withdrawalDetail.rejectionReason || withdrawalDetail.failureReason) && (
-								<div className="border-b border-zinc-200 pb-3 dark:border-zinc-700">
-									<span className="text-sm text-zinc-500">
-										{withdrawalDetail.rejectionReason ? "Rejection Reason" : "Failure Reason"}
-									</span>
-									<p className="mt-1 text-sm text-zinc-900 dark:text-white">
-										{withdrawalDetail.rejectionReason || withdrawalDetail.failureReason}
-									</p>
+								<div className="flex items-start gap-2.5 rounded-xl bg-red-50 p-3 dark:bg-red-950/30">
+									<ExclamationTriangleIcon className="mt-0.5 size-4 shrink-0 text-red-500" />
+									<div>
+										<p className="text-xs font-medium text-red-700 dark:text-red-300">
+											{withdrawalDetail.rejectionReason ? "Rejection Reason" : "Failure Reason"}
+										</p>
+										<p className="mt-0.5 text-sm text-red-600 dark:text-red-400">
+											{withdrawalDetail.rejectionReason || withdrawalDetail.failureReason}
+										</p>
+									</div>
 								</div>
 							)}
-							<div className="flex items-center justify-between">
-								<span className="text-sm text-zinc-500">ID</span>
-								<span className="max-w-50 truncate font-mono text-xs text-zinc-400">{withdrawalDetail.id}</span>
-							</div>
 						</div>
 					) : (
 						<p className="text-sm text-zinc-500">Withdrawal not found.</p>

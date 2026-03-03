@@ -5,9 +5,8 @@
  * Child routes are under /$orgSlug/* for URL-based multi-tenancy.
  *
  * Flow:
- * 1. Check auth from router context (set by root beforeLoad)
- * 2. Fetch organizations server-side
- * 3. Render AppLayout with Outlet for child routes
+ * 1. Check auth + organizations from router context (set by root beforeLoad in one parallel call)
+ * 2. Render AppLayout with Outlet for child routes
  *
  * Organization validation happens in the /$orgSlug child route.
  */
@@ -15,22 +14,13 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
 import { AppLayout } from "@/components/app-layout";
-import { getOrganizationsFromServer } from "@/lib/server-auth";
 
 export const Route = createFileRoute("/_app")({
-	beforeLoad: async ({ context }) => {
-		// Auth already validated in root beforeLoad — just check the result
+	beforeLoad: ({ context }) => {
 		if (!context.auth.isAuthenticated) {
 			throw redirect({ to: "/login" });
 		}
-
-		// Fetch organizations server-side, cached for 5 min via TanStack Query
-		const { organizations } = await context.queryClient.ensureQueryData({
-			queryKey: ["server", "organizations"],
-			queryFn: () => getOrganizationsFromServer(),
-			staleTime: 5 * 60 * 1000,
-		});
-		return { organizations };
+		// organizations already in context from root beforeLoad — no async work needed
 	},
 	component: AppLayoutWrapper,
 });

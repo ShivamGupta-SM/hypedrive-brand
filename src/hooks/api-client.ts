@@ -31,9 +31,7 @@ export function getAuthenticatedClient(): Client {
 
 	cachedToken = token;
 	cachedClient = apiClient.with({
-		requestInit: {
-			headers: { Authorization: `Bearer ${token}` },
-		},
+		auth: { authorization: `Bearer ${token}` },
 	});
 	return cachedClient;
 }
@@ -138,6 +136,7 @@ export const queryKeys = {
 	organizationRole: (orgId: string, roleId: string) => ["organizationRoles", orgId, roleId] as const,
 	platforms: () => ["platforms"] as const,
 	taskTemplates: (params?: Record<string, unknown>) => ["taskTemplates", params] as const,
+	pushTokens: (orgId: string) => ["pushTokens", orgId] as const,
 };
 
 export const DEFAULT_PAGE_SIZE = 20;

@@ -16,6 +16,7 @@ import { getPlatformColor, getPlatformIcon } from "@/components/icons/platform-i
 import { Link } from "@/components/link";
 import { Skeleton } from "@/components/skeleton";
 import type { brand, db } from "@/lib/brand-client";
+import { formatDateCompact, formatPrice } from "@/lib/design-tokens";
 
 type Campaign = brand.CampaignWithStats;
 type CampaignStatus = db.CampaignStatus;
@@ -63,18 +64,6 @@ function getDaysLeft(endDate?: string): number | null {
 	if (!endDate) return null;
 	const diff = Math.ceil((new Date(endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
 	return diff > 0 ? diff : 0;
-}
-
-function formatDateCompact(dateStr?: string): string {
-	if (!dateStr) return "\u2014";
-	return new Date(dateStr).toLocaleDateString("en-IN", { month: "short", day: "numeric" });
-}
-
-function formatPrice(priceDecimal?: string): string | null {
-	if (!priceDecimal) return null;
-	const num = parseFloat(priceDecimal);
-	if (Number.isNaN(num) || num === 0) return null;
-	return `\u20B9${num.toLocaleString("en-IN")}`;
 }
 
 // =============================================================================
@@ -199,9 +188,7 @@ export function CampaignCard({
 			</DropdownButton>
 			<DropdownMenu anchor="bottom end">
 				<DropdownItem href={`/${orgSlug}/campaigns/${campaign.id}`}>View details</DropdownItem>
-				{canDuplicateAction && (
-					<DropdownItem onClick={() => onDuplicate(campaign.id)}>Duplicate</DropdownItem>
-				)}
+				{canDuplicateAction && <DropdownItem onClick={() => onDuplicate(campaign.id)}>Duplicate</DropdownItem>}
 				{campaign.status === "active" && canPauseAction && (
 					<DropdownItem onClick={() => onPause(campaign.id)}>Pause campaign</DropdownItem>
 				)}
@@ -209,10 +196,7 @@ export function CampaignCard({
 					<DropdownItem onClick={() => onResume(campaign.id)}>Resume campaign</DropdownItem>
 				)}
 				{canDeleteAction && (
-					<DropdownItem
-						onClick={() => onDelete(campaign.id)}
-						className="text-red-600 dark:text-red-400"
-					>
+					<DropdownItem onClick={() => onDelete(campaign.id)} className="text-red-600 dark:text-red-400">
 						Cancel Campaign
 					</DropdownItem>
 				)}
@@ -233,11 +217,7 @@ export function CampaignCard({
 					<div className="relative shrink-0">
 						<div className="size-20 overflow-hidden rounded-xl bg-zinc-100 ring-1 ring-zinc-200/80 dark:bg-zinc-800 dark:ring-zinc-700">
 							{productImage ? (
-								<img
-									src={productImage}
-									alt={listingName ?? "Product"}
-									className="size-full object-contain p-1.5"
-								/>
+								<img src={productImage} alt={listingName ?? "Product"} className="size-full object-contain p-1.5" />
 							) : (
 								<div className="flex size-full items-center justify-center">
 									<MegaphoneIcon className="size-7 text-zinc-300 dark:text-zinc-600" />
@@ -254,30 +234,39 @@ export function CampaignCard({
 					{/* Title + Meta — height-matched to 80px thumbnail */}
 					<div className="min-w-0 flex-1">
 						<div className="flex items-start justify-between gap-2">
-							<h3 className="line-clamp-1 text-sm/5 font-semibold text-zinc-900 dark:text-white">
-								{campaign.title}
-							</h3>
+							<h3 className="line-clamp-1 text-sm/5 font-semibold text-zinc-900 dark:text-white">{campaign.title}</h3>
 							{dropdownMenu}
 						</div>
-						{listingName && (
-							<p className="line-clamp-1 text-xs text-zinc-500 dark:text-zinc-400">
-								{listingName}
-							</p>
-						)}
+						{listingName && <p className="line-clamp-1 text-xs text-zinc-500 dark:text-zinc-400">{listingName}</p>}
 
 						{/* Inline meta row — all chips identical structure */}
 						<div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-							<span className={clsx("inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold", chipColors[statusConfig.color])}>
+							<span
+								className={clsx(
+									"inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold",
+									chipColors[statusConfig.color]
+								)}
+							>
 								<StatusIcon className="size-3 shrink-0" />
 								{statusConfig.label}
 							</span>
 							{displayPrice && (
-								<span className={clsx("inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold", chipColors.emerald)}>
+								<span
+									className={clsx(
+										"inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold",
+										chipColors.emerald
+									)}
+								>
 									<CurrencyRupeeIcon className="size-3 shrink-0" />
 									{displayPrice.replace("₹", "")}
 								</span>
 							)}
-							<span className={clsx("inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold", chipColors.sky)}>
+							<span
+								className={clsx(
+									"inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold",
+									chipColors.sky
+								)}
+							>
 								<CalendarDaysIcon className="size-3 shrink-0" />
 								{formatDateCompact(campaign.startDate)} – {formatDateCompact(campaign.endDate)}
 							</span>
@@ -298,11 +287,7 @@ export function CampaignCard({
 							<div
 								className={clsx(
 									"h-full rounded-full transition-all duration-500",
-									progress >= 90
-										? "bg-red-500"
-										: progress >= 70
-											? "bg-amber-500"
-											: "bg-emerald-500",
+									progress >= 90 ? "bg-red-500" : progress >= 70 ? "bg-amber-500" : "bg-emerald-500"
 								)}
 								style={{ width: `${progress}%` }}
 							/>
@@ -324,9 +309,7 @@ export function CampaignCard({
 						<span className="mt-0.5 text-sm font-semibold tabular-nums text-zinc-900 dark:text-white">
 							{campaign.currentEnrollments}
 							{hasCap && (
-								<span className="text-xs font-normal text-zinc-400 dark:text-zinc-500">
-									/{campaign.maxEnrollments}
-								</span>
+								<span className="text-xs font-normal text-zinc-400 dark:text-zinc-500">/{campaign.maxEnrollments}</span>
 							)}
 						</span>
 					</div>
@@ -368,11 +351,7 @@ export function CampaignCard({
 					<div className="relative shrink-0">
 						<div className="size-16 overflow-hidden rounded-xl bg-zinc-100 ring-1 ring-zinc-200/80 dark:bg-zinc-800 dark:ring-zinc-700">
 							{productImage ? (
-								<img
-									src={productImage}
-									alt={listingName ?? "Product"}
-									className="size-full object-contain p-1"
-								/>
+								<img src={productImage} alt={listingName ?? "Product"} className="size-full object-contain p-1" />
 							) : (
 								<div className="flex size-full items-center justify-center">
 									<MegaphoneIcon className="size-6 text-zinc-300 dark:text-zinc-600" />
@@ -388,28 +367,37 @@ export function CampaignCard({
 
 					<div className="min-w-0 flex-1">
 						<div className="flex items-center justify-between gap-1">
-							<h3 className="line-clamp-1 text-sm/4 font-semibold text-zinc-900 dark:text-white">
-								{campaign.title}
-							</h3>
+							<h3 className="line-clamp-1 text-sm/4 font-semibold text-zinc-900 dark:text-white">{campaign.title}</h3>
 							{dropdownMenu}
 						</div>
-						{listingName && (
-							<p className="line-clamp-1 text-xs/4 text-zinc-500 dark:text-zinc-400">
-								{listingName}
-							</p>
-						)}
+						{listingName && <p className="line-clamp-1 text-xs/4 text-zinc-500 dark:text-zinc-400">{listingName}</p>}
 						<div className="mt-0.5 flex flex-wrap items-center gap-1">
-							<span className={clsx("inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[10px] font-semibold", chipColors[statusConfig.color])}>
+							<span
+								className={clsx(
+									"inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[10px] font-semibold",
+									chipColors[statusConfig.color]
+								)}
+							>
 								<StatusIcon className="size-2.5 shrink-0" />
 								{statusConfig.label}
 							</span>
 							{displayPrice && (
-								<span className={clsx("inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[10px] font-semibold", chipColors.emerald)}>
+								<span
+									className={clsx(
+										"inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[10px] font-semibold",
+										chipColors.emerald
+									)}
+								>
 									<CurrencyRupeeIcon className="size-2.5 shrink-0" />
 									{displayPrice.replace("₹", "")}
 								</span>
 							)}
-							<span className={clsx("inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[10px] font-semibold", chipColors.sky)}>
+							<span
+								className={clsx(
+									"inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[10px] font-semibold",
+									chipColors.sky
+								)}
+							>
 								<CalendarDaysIcon className="size-2.5 shrink-0" />
 								{formatDateCompact(campaign.startDate)} – {formatDateCompact(campaign.endDate)}
 							</span>
@@ -430,11 +418,7 @@ export function CampaignCard({
 							<div
 								className={clsx(
 									"h-full rounded-full transition-all duration-500",
-									progress >= 90
-										? "bg-red-500"
-										: progress >= 70
-											? "bg-amber-500"
-											: "bg-emerald-500",
+									progress >= 90 ? "bg-red-500" : progress >= 70 ? "bg-amber-500" : "bg-emerald-500"
 								)}
 								style={{ width: `${progress}%` }}
 							/>

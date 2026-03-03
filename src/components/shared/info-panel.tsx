@@ -251,7 +251,14 @@ export function TipBox({ children, className, title = "Tip" }: TipBoxProps) {
 		>
 			<div className="flex gap-3">
 				<div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-blue-500 text-white">
-					<svg className="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+					<svg
+						className="size-3.5"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+						strokeWidth={2.5}
+						aria-hidden="true"
+					>
 						<path
 							strokeLinecap="round"
 							strokeLinejoin="round"

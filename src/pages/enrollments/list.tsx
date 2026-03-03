@@ -3,30 +3,30 @@ import {
 	CheckCircleIcon,
 	ClockIcon,
 	ExclamationCircleIcon,
-	ExclamationTriangleIcon,
 	MagnifyingGlassIcon,
+	TableCellsIcon,
 	XCircleIcon,
 	XMarkIcon,
 } from "@heroicons/react/16/solid";
 import { useCallback, useMemo, useState } from "react";
-import { FiTable } from "react-icons/fi";
 import { Button } from "@/components/button";
 import { EnrollmentCardFull, getEnrollmentStatusConfig, isEnrollmentOverdue } from "@/components/enrollment-card";
 import { Heading } from "@/components/heading";
 import { Input, InputGroup } from "@/components/input";
 import { EmptyState } from "@/components/shared/empty-state";
+import { ErrorState } from "@/components/shared/error-state";
 import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
 import { Text } from "@/components/text";
 import {
 	useBulkApproveEnrollments,
 	useBulkRejectEnrollments,
 	useCampaigns,
-	useCurrentOrganization,
 	useExportOrganizationEnrollments,
 	useInfiniteEnrollments,
+	useOrgContext,
 } from "@/hooks";
-import { useOrgSlug } from "@/hooks/use-org-slug";
 import type { brand, db } from "@/lib/brand-client";
+import { downloadCSV } from "@/lib/download";
 import { showToast } from "@/lib/toast";
 
 type Enrollment = brand.EnrollmentWithRelations;
@@ -96,31 +96,19 @@ function exportEnrollmentsToCSV(enrollments: Enrollment[], filename = "enrollmen
 		"Created At",
 	];
 
-	const rows = enrollments.map((e) => {
-		return [
-			e.orderId,
-			getEnrollmentStatusConfig(e.status).label,
-			e.campaignId,
-			e.creatorId,
-			e.platform?.name || "",
-			e.orderValueDecimal,
-			`${e.lockedBillRate}%`,
-			e.lockedPlatformFeeDecimal,
-			new Date(e.createdAt).toISOString(),
-		];
-	});
+	const rows = enrollments.map((e) => [
+		e.orderId,
+		getEnrollmentStatusConfig(e.status).label,
+		e.campaignId,
+		e.creatorId,
+		e.platform?.name || "",
+		String(e.orderValueDecimal),
+		`${e.lockedBillRate}%`,
+		String(e.lockedPlatformFeeDecimal),
+		new Date(e.createdAt).toISOString(),
+	]);
 
-	const csvContent = [
-		headers.join(","),
-		...rows.map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")),
-	].join("\n");
-
-	const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-	const link = document.createElement("a");
-	link.href = URL.createObjectURL(blob);
-	link.download = `${filename}-${new Date().toISOString().split("T")[0]}.csv`;
-	link.click();
-	URL.revokeObjectURL(link.href);
+	downloadCSV(headers, rows, filename);
 }
 
 // =============================================================================
@@ -247,26 +235,6 @@ function EnrollmentsListSkeleton() {
 }
 
 // =============================================================================
-// ERROR STATE
-// =============================================================================
-
-function ErrorState({ onRetry }: { onRetry: () => void }) {
-	return (
-		<div className="flex flex-col items-center justify-center py-16 text-center">
-			<div className="flex size-16 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-950/30">
-				<ExclamationTriangleIcon className="size-8 text-red-400" />
-			</div>
-			<p className="mt-4 text-lg font-semibold text-zinc-900 dark:text-white">Something went wrong</p>
-			<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Failed to load enrollments. Please try again.</p>
-			<Button className="mt-6" onClick={onRetry} color="dark/zinc">
-				<ArrowPathIcon className="size-4" />
-				Try Again
-			</Button>
-		</div>
-	);
-}
-
-// =============================================================================
 // FILTER TAB
 // =============================================================================
 
@@ -287,7 +255,7 @@ function FilterTab({
 		<button
 			type="button"
 			onClick={onClick}
-			className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-medium transition-all duration-200 active:scale-95 ${
+			className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-200 active:scale-95 ${
 				isActive
 					? "bg-zinc-900 text-white shadow-sm dark:bg-white dark:text-zinc-900"
 					: "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
@@ -296,7 +264,7 @@ function FilterTab({
 			{Icon && <Icon className="size-3.5" />}
 			{label}
 			<span
-				className={`inline-flex h-4.5 min-w-4.5 items-center justify-center rounded-full px-1 text-[10px] font-semibold ${isActive ? "bg-white/20 text-white dark:bg-zinc-900/20 dark:text-zinc-900" : "bg-zinc-200 text-zinc-500 dark:bg-zinc-700 dark:text-zinc-400"}`}
+				className={`inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-semibold ${isActive ? "bg-white/20 text-white dark:bg-zinc-900/20 dark:text-zinc-900" : "bg-zinc-200 text-zinc-500 dark:bg-zinc-700 dark:text-zinc-400"}`}
 			>
 				{count}
 			</span>
@@ -309,9 +277,7 @@ function FilterTab({
 // =============================================================================
 
 export function EnrollmentsList() {
-	const organization = useCurrentOrganization();
-	const organizationId = organization?.id;
-	const orgSlug = useOrgSlug();
+	const { organizationId, orgSlug } = useOrgContext();
 
 	const [searchQuery, setSearchQuery] = useState("");
 	const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
@@ -510,7 +476,7 @@ export function EnrollmentsList() {
 	}
 
 	if (error) {
-		return <ErrorState onRetry={refetch} />;
+		return <ErrorState message="Failed to load enrollments. Please try again." onRetry={refetch} />;
 	}
 
 	// Count actionable enrollments for select all
@@ -533,7 +499,7 @@ export function EnrollmentsList() {
 					{exportEnrollments.isPending ? (
 						<ArrowPathIcon className="size-4 animate-spin" />
 					) : (
-						<FiTable data-slot="icon" className="size-4" />
+						<TableCellsIcon data-slot="icon" className="size-4" />
 					)}
 					{exportEnrollments.isPending ? "Exporting..." : "Export"}
 				</Button>

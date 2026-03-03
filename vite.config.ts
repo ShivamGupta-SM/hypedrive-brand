@@ -18,7 +18,26 @@ export default defineConfig({
 		tailwindcss(),
 	],
 	optimizeDeps: {
-		include: ["use-sync-external-store/shim/with-selector.js"],
+		include: [
+			"use-sync-external-store/shim/with-selector.js",
+			"recharts",
+			"country-state-city",
+			"@headlessui/react",
+			"@heroicons/react/16/solid",
+			"@heroicons/react/20/solid",
+			"@heroicons/react/24/outline",
+			"react-hook-form",
+			"@hookform/resolvers/zod",
+			"date-fns",
+			"zod",
+			"zustand",
+			"clsx",
+			"sonner",
+			"react-day-picker",
+			"react-dropzone",
+			"react-number-format",
+			"react-loading-skeleton",
+		],
 	},
 	build: {
 		// Split large vendor libraries into separate chunks for better caching

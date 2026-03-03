@@ -15,7 +15,13 @@
       "Bash(pnpm check --write)",
       "Bash(pnpm biome check src/pages/listings/create-listing-modal.tsx src/pages/campaigns/create-campaign-modal.tsx src/pages/listings/list.tsx src/pages/campaigns/list.tsx)",
       "Bash(pnpm biome check src/pages/campaigns/create-campaign-modal.tsx src/pages/listings/create-listing-modal.tsx)",
-      "Bash(pnpm check)"
+      "Bash(pnpm check)",
+      "Bash(npx biome check --write src/pages/campaigns/show.tsx)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(npx biome check src/components/search-dialog.tsx src/hooks/use-organization.ts --write)",
+      "Bash(npx biome check src/components/search-dialog.tsx --write)",
+      "WebFetch(domain:3dicons.com)",
+      "Bash(pnpm build)"
     ]
   }
 }

@@ -2,6 +2,7 @@ import { ChevronRightIcon, HomeIcon } from "@heroicons/react/20/solid";
 import { Link, useLocation } from "@tanstack/react-router";
 import { NotificationBell } from "@/components/notification-popover";
 import { useOrgSlug } from "@/hooks";
+import { useBreadcrumbStore } from "@/hooks/use-breadcrumb";
 
 const ROUTE_LABELS: Record<string, string> = {
 	campaigns: "Campaigns",
@@ -23,6 +24,7 @@ const ROUTE_LABELS: Record<string, string> = {
 function useBreadcrumbs() {
 	const { pathname } = useLocation();
 	const orgSlug = useOrgSlug();
+	const pageTitle = useBreadcrumbStore((s) => s.pageTitle);
 
 	// Strip org slug prefix: /my-org/campaigns/123 → ["campaigns", "123"]
 	const prefix = `/${orgSlug}`;
@@ -38,9 +40,9 @@ function useBreadcrumbs() {
 
 		if (label) {
 			crumbs.push({ label, href });
-		} else if (i > 0) {
-			// Dynamic segment (ID) — skip it in breadcrumbs, it's the current page
-			// The page header will show the actual name
+		} else if (i > 0 && pageTitle) {
+			// Dynamic segment (ID) — show page title from context
+			crumbs.push({ label: pageTitle });
 		}
 	}
 
@@ -73,7 +75,7 @@ export function ContentHeader() {
 								{crumb.label}
 							</Link>
 						) : (
-							<span className="font-medium text-zinc-700 dark:text-zinc-200">{crumb.label}</span>
+							<span className="max-w-50 truncate font-medium text-zinc-700 dark:text-zinc-200">{crumb.label}</span>
 						)}
 					</span>
 				))}

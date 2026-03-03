@@ -1,11 +1,10 @@
 import { EmptyState } from "@/components/shared/empty-state";
 import { Skeleton } from "@/components/skeleton";
-import { useCurrentOrganization, useWalletHolds } from "@/hooks";
+import { useOrgContext, useWalletHolds } from "@/hooks";
 import { HoldRow } from "./components";
 
 export function WalletHolds() {
-	const organization = useCurrentOrganization();
-	const organizationId = organization?.id;
+	const { organizationId } = useOrgContext();
 
 	const { data: holds, loading } = useWalletHolds(organizationId);
 

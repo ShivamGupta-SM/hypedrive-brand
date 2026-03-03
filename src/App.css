@@ -132,9 +132,9 @@
 	--text-subheading-xs: 0.6875rem;
 
 	/* --- Shadow tokens --- */
-	--shadow-regular: 0 1px 3px 0 rgba(9,9,11,0.08), 0 0 1px 0 rgba(9,9,11,0.04);
-	--shadow-regular-md: 0 4px 8px -2px rgba(9,9,11,0.1), 0 0 1px 0 rgba(9,9,11,0.06);
-	--shadow-regular-lg: 0 8px 16px -4px rgba(9,9,11,0.12), 0 0 1px 0 rgba(9,9,11,0.06);
+	--shadow-regular: 0 1px 3px 0 rgba(9, 9, 11, 0.08), 0 0 1px 0 rgba(9, 9, 11, 0.04);
+	--shadow-regular-md: 0 4px 8px -2px rgba(9, 9, 11, 0.1), 0 0 1px 0 rgba(9, 9, 11, 0.06);
+	--shadow-regular-lg: 0 8px 16px -4px rgba(9, 9, 11, 0.12), 0 0 1px 0 rgba(9, 9, 11, 0.06);
 
 	/* ==========================================================================
 	   HYPEDRIVE BRAND COLOR PALETTE
@@ -290,7 +290,7 @@
 	--color-status-rejected-bg-dark: rgba(248, 113, 113, 0.15);
 }
 
-@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 /* Hide scrollbars globally */
 * {

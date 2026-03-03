@@ -12,7 +12,6 @@
 - **Tables:** @tanstack/react-table v8 + @tanstack/react-virtual
 - **Charts:** Recharts 3
 - **Toasts:** Sonner
-- **Animations:** Motion (Framer Motion)
 - **Icons:** @heroicons/react (solid + outline)
 - **Linting:** Biome (format + lint)
 

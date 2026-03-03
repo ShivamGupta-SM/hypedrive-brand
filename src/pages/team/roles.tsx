@@ -1,11 +1,10 @@
 import { EmptyState } from "@/components/shared/empty-state";
-import { useCurrentOrganization } from "@/hooks";
+import { useOrgContext } from "@/hooks";
 import { useCan } from "@/store/permissions-store";
 import { RolesSection } from "./components";
 
 export function TeamRoles() {
-	const organization = useCurrentOrganization();
-	const organizationId = organization?.id;
+	const { organizationId } = useOrgContext();
 	const canManageMembers = useCan("member", "update");
 
 	if (!canManageMembers) {

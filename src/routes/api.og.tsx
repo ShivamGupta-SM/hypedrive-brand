@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import type React from "react";
 import satori from "satori";
 
 // Singleton WASM init — only runs once per server process
@@ -124,7 +125,7 @@ export const Route = createFileRoute("/api/og")({
 								},
 							],
 						},
-					},
+					} as React.ReactNode,
 					{
 						width: 1200,
 						height: 630,
@@ -151,7 +152,7 @@ export const Route = createFileRoute("/api/og")({
 				const resvg = new Resvg(svg, { fitTo: { mode: "width", value: 1200 } });
 				const png = resvg.render().asPng();
 
-				return new Response(png, {
+				return new Response(png as unknown as BodyInit, {
 					headers: {
 						"Content-Type": "image/png",
 						"Cache-Control": "public, max-age=86400, stale-while-revalidate=604800",

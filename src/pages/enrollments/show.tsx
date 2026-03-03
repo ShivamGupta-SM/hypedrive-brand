@@ -21,32 +21,31 @@ import {
 import { useParams } from "@tanstack/react-router";
 import clsx from "clsx";
 import { useMemo, useState } from "react";
-import { toast } from "sonner";
-
 import { Badge } from "@/components/badge";
 import { Button } from "@/components/button";
-import { Dialog, DialogActions, DialogBody, DialogDescription, DialogTitle } from "@/components/dialog";
+import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/dialog";
 import { Heading } from "@/components/heading";
 import { extractPlatformFromText, getPlatformColor, getPlatformIcon } from "@/components/icons/platform-icons";
 import { Link } from "@/components/link";
 import { Card } from "@/components/shared/card";
 import { CopyButton } from "@/components/shared/copy-button";
+import { ErrorState } from "@/components/shared/error-state";
 import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
 import { Skeleton } from "@/components/skeleton";
 import { Text } from "@/components/text";
 import { Textarea } from "@/components/textarea";
 import {
-	getAPIErrorMessage,
 	useApproveEnrollment,
-	useCurrentOrganization,
 	useEnrollment,
+	useOrgContext,
 	useRejectEnrollment,
 	useRequestChangesEnrollment,
 } from "@/hooks";
 import { getAssetUrl } from "@/hooks/api-client";
-import { useOrgSlug } from "@/hooks/use-org-slug";
+import { usePageTitle } from "@/hooks/use-breadcrumb";
 import type { brand, db } from "@/lib/brand-client";
-import { formatCurrency, formatRelativeTime } from "@/lib/design-tokens";
+import { formatCurrency, formatDateTime, formatRelativeTime, getInitials } from "@/lib/design-tokens";
+import { showToast } from "@/lib/toast";
 import { useCan } from "@/store/permissions-store";
 
 type EnrollmentStatus = db.EnrollmentStatus;
@@ -157,25 +156,6 @@ function calculateCosts(enrollment: brand.EnrollmentDetail) {
 	return { billAmount, gstAmount, platformFee, totalCost, orderValue };
 }
 
-// =============================================================================
-// FORMAT HELPERS
-// =============================================================================
-
-function formatDate(dateStr?: string) {
-	if (!dateStr) return "—";
-	return new Date(dateStr).toLocaleDateString("en-IN", {
-		month: "short",
-		day: "numeric",
-		year: "numeric",
-		hour: "2-digit",
-		minute: "2-digit",
-	});
-}
-
-function getInitials(name: string) {
-	return (name || "U")[0].toUpperCase();
-}
-
 function getAvatarColor(name: string): string {
 	const colors = [
 		"bg-blue-500",
@@ -189,28 +169,6 @@ function getAvatarColor(name: string): string {
 	];
 	const charCode = (name?.charAt(0) || "U").toUpperCase().charCodeAt(0);
 	return colors[charCode % colors.length];
-}
-
-// =============================================================================
-// ERROR STATE
-// =============================================================================
-
-function ErrorState({ onRetry }: { onRetry: () => void }) {
-	return (
-		<div className="flex flex-col items-center justify-center py-16 text-center">
-			<div className="flex size-16 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-950/30">
-				<ExclamationTriangleIcon className="size-8 text-red-400" />
-			</div>
-			<p className="mt-4 text-lg font-semibold text-zinc-900 dark:text-white">Something went wrong</p>
-			<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-				Failed to load enrollment details. Please try again.
-			</p>
-			<Button className="mt-6" onClick={onRetry} color="dark/zinc">
-				<ArrowPathIcon className="size-4" />
-				Try Again
-			</Button>
-		</div>
-	);
 }
 
 // =============================================================================
@@ -406,51 +364,45 @@ function ApproveDialog({
 				enrollmentId: enrollment.id,
 				remarks: remarks || undefined,
 			});
-			toast.success("Enrollment approved successfully");
+			showToast.success("Enrollment approved successfully");
 			onSuccess();
 			onClose();
 			setRemarks("");
 		} catch (err) {
-			toast.error(getAPIErrorMessage(err, "Failed to approve enrollment"));
+			showToast.error(err, "Failed to approve enrollment");
 		}
 	};
 
 	return (
 		<Dialog open={open} onClose={onClose} size="sm">
-			<DialogTitle>Approve Enrollment</DialogTitle>
-			<DialogDescription>Approve this enrollment and authorize payment to the creator.</DialogDescription>
+			<DialogHeader
+				icon={CheckCircleIcon}
+				iconColor="emerald"
+				title="Approve Enrollment"
+				description="Authorize payment to the creator."
+				onClose={onClose}
+			/>
 
 			<DialogBody>
-				<div className="mb-4 text-center">
-					<div className="mx-auto mb-3 flex size-14 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-950/30">
-						<CheckCircleIcon className="size-7 text-emerald-500" />
+				{/* Cost breakdown */}
+				<div className="mb-4 overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800">
+					<div className="flex justify-between border-b border-zinc-100 px-4 py-2.5 text-xs dark:border-zinc-800">
+						<span className="text-zinc-500 dark:text-zinc-400">Bill Amount ({enrollment.lockedBillRate}%)</span>
+						<span className="font-medium text-zinc-900 dark:text-white">{formatCurrency(costs.billAmount)}</span>
 					</div>
-					<p className="text-sm text-zinc-600 dark:text-zinc-400">
-						Approve and pay <strong className="text-zinc-900 dark:text-white">{formatCurrency(costs.totalCost)}</strong>{" "}
-						to the creator?
-					</p>
-				</div>
-
-				<div className="mb-4 overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-700">
-					<div className="divide-y divide-zinc-100 text-xs dark:divide-zinc-800">
-						<div className="flex justify-between px-4 py-2.5">
-							<span className="text-zinc-500 dark:text-zinc-400">Bill Amount ({enrollment.lockedBillRate}%)</span>
-							<span className="font-medium text-zinc-900 dark:text-white">{formatCurrency(costs.billAmount)}</span>
-						</div>
-						<div className="flex justify-between px-4 py-2.5">
-							<span className="text-zinc-500 dark:text-zinc-400">GST (18%)</span>
-							<span className="font-medium text-zinc-900 dark:text-white">{formatCurrency(costs.gstAmount)}</span>
-						</div>
-						<div className="flex justify-between px-4 py-2.5">
-							<span className="text-zinc-500 dark:text-zinc-400">Platform Fee</span>
-							<span className="font-medium text-zinc-900 dark:text-white">{formatCurrency(costs.platformFee)}</span>
-						</div>
-						<div className="flex justify-between bg-emerald-50 px-4 py-3 dark:bg-emerald-950/20">
-							<span className="font-semibold text-zinc-900 dark:text-white">Total</span>
-							<span className="font-semibold text-emerald-600 dark:text-emerald-400">
-								{formatCurrency(costs.totalCost)}
-							</span>
-						</div>
+					<div className="flex justify-between border-b border-zinc-100 px-4 py-2.5 text-xs dark:border-zinc-800">
+						<span className="text-zinc-500 dark:text-zinc-400">GST (18%)</span>
+						<span className="font-medium text-zinc-900 dark:text-white">{formatCurrency(costs.gstAmount)}</span>
+					</div>
+					<div className="flex justify-between border-b border-zinc-100 px-4 py-2.5 text-xs dark:border-zinc-800">
+						<span className="text-zinc-500 dark:text-zinc-400">Platform Fee</span>
+						<span className="font-medium text-zinc-900 dark:text-white">{formatCurrency(costs.platformFee)}</span>
+					</div>
+					<div className="flex justify-between bg-emerald-50 px-4 py-3 dark:bg-emerald-950/20">
+						<span className="text-sm font-semibold text-zinc-900 dark:text-white">Total</span>
+						<span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+							{formatCurrency(costs.totalCost)}
+						</span>
 					</div>
 				</div>
 
@@ -474,7 +426,17 @@ function ApproveDialog({
 					Cancel
 				</Button>
 				<Button color="emerald" onClick={handleSubmit} disabled={approveEnrollment.isPending}>
-					{approveEnrollment.isPending ? "Processing..." : "Approve & Pay"}
+					{approveEnrollment.isPending ? (
+						<>
+							<ArrowPathIcon className="size-4 animate-spin" />
+							Processing...
+						</>
+					) : (
+						<>
+							<CheckCircleIcon className="size-4" />
+							Approve & Pay
+						</>
+					)}
 				</Button>
 			</DialogActions>
 		</Dialog>
@@ -508,26 +470,25 @@ function RejectDialog({
 				enrollmentId: enrollment.id,
 				reason,
 			});
-			toast.success("Enrollment rejected");
+			showToast.success("Enrollment rejected");
 			onSuccess();
 			onClose();
 			setReason("");
 		} catch (err) {
-			toast.error(getAPIErrorMessage(err, "Failed to reject enrollment"));
+			showToast.error(err, "Failed to reject enrollment");
 		}
 	};
 
 	return (
 		<Dialog open={open} onClose={onClose} size="sm">
-			<DialogTitle>Reject Enrollment</DialogTitle>
-			<DialogDescription>This action cannot be undone. The creator will be notified.</DialogDescription>
+			<DialogHeader icon={XCircleIcon} iconColor="red" title="Reject Enrollment" onClose={onClose} />
 
 			<DialogBody>
-				<div className="mb-4 flex items-start gap-2 rounded-xl bg-red-50 p-3 dark:bg-red-950/30">
+				<div className="mb-4 flex items-start gap-2.5 rounded-xl bg-red-50 p-3 dark:bg-red-950/30">
 					<ExclamationTriangleIcon className="mt-0.5 size-4 shrink-0 text-red-500" />
-					<span className="text-sm text-red-800 dark:text-red-300">
-						Permanently rejecting this enrollment cannot be undone. The creator will be notified immediately.
-					</span>
+					<p className="text-sm text-red-700 dark:text-red-300">
+						This action is permanent and cannot be undone. The creator will be notified immediately.
+					</p>
 				</div>
 				<div>
 					<label htmlFor="reject-reason" className="block text-sm font-medium text-zinc-900 dark:text-white">
@@ -549,7 +510,17 @@ function RejectDialog({
 					Cancel
 				</Button>
 				<Button color="red" onClick={handleSubmit} disabled={rejectEnrollment.isPending || !reason.trim()}>
-					{rejectEnrollment.isPending ? "Rejecting..." : "Confirm Rejection"}
+					{rejectEnrollment.isPending ? (
+						<>
+							<ArrowPathIcon className="size-4 animate-spin" />
+							Rejecting...
+						</>
+					) : (
+						<>
+							<XCircleIcon className="size-4" />
+							Confirm Rejection
+						</>
+					)}
 				</Button>
 			</DialogActions>
 		</Dialog>
@@ -583,21 +554,24 @@ function RequestChangesDialog({
 				enrollmentId: enrollment.id,
 				reason: comment.trim(),
 			});
-			toast.success("Changes requested from creator");
+			showToast.success("Changes requested from creator");
 			onSuccess();
 			onClose();
 			setComment("");
 		} catch (err) {
-			toast.error(getAPIErrorMessage(err, "Failed to request changes"));
+			showToast.error(err, "Failed to request changes");
 		}
 	};
 
 	return (
 		<Dialog open={open} onClose={onClose} size="sm">
-			<DialogTitle>Request Changes</DialogTitle>
-			<DialogDescription>
-				Describe what changes the creator needs to make. They will be notified and can resubmit.
-			</DialogDescription>
+			<DialogHeader
+				icon={PencilSquareIcon}
+				iconColor="amber"
+				title="Request Changes"
+				description="The creator will be notified and can resubmit."
+				onClose={onClose}
+			/>
 
 			<DialogBody>
 				<div>
@@ -619,8 +593,18 @@ function RequestChangesDialog({
 				<Button plain onClick={onClose} disabled={requestChanges.isPending}>
 					Cancel
 				</Button>
-				<Button color="dark/zinc" onClick={handleSubmit} disabled={requestChanges.isPending || !comment.trim()}>
-					{requestChanges.isPending ? "Sending..." : "Send Request"}
+				<Button color="amber" onClick={handleSubmit} disabled={requestChanges.isPending || !comment.trim()}>
+					{requestChanges.isPending ? (
+						<>
+							<ArrowPathIcon className="size-4 animate-spin" />
+							Sending...
+						</>
+					) : (
+						<>
+							<PencilSquareIcon className="size-4" />
+							Send Request
+						</>
+					)}
 				</Button>
 			</DialogActions>
 		</Dialog>
@@ -633,15 +617,14 @@ function RequestChangesDialog({
 
 export function EnrollmentShow() {
 	const { id: enrollmentId } = useParams({ strict: false }) as { id: string };
-	const organization = useCurrentOrganization();
-	const organizationId = organization?.id;
-	const orgSlug = useOrgSlug();
+	const { organizationId, orgSlug } = useOrgContext();
 
 	const canApproveEnrollment = useCan("enrollment", "approve");
 	const canRejectEnrollment = useCan("enrollment", "reject");
 	const canRequestChanges = useCan("enrollment", "request_changes");
 
 	const { data: enrollment, loading, error, refetch } = useEnrollment(organizationId, undefined, enrollmentId);
+	usePageTitle(enrollment?.displayId ?? null);
 
 	const [activeDialog, setActiveDialog] = useState<"approve" | "reject" | "changes" | null>(null);
 
@@ -655,7 +638,8 @@ export function EnrollmentShow() {
 	}, [enrollment]);
 
 	if (loading) return <LoadingSkeleton />;
-	if (error || !enrollment) return <ErrorState onRetry={refetch} />;
+	if (error || !enrollment)
+		return <ErrorState message="Failed to load enrollment details. Please try again." onRetry={refetch} />;
 
 	const statusConfig = getStatusConfig(enrollment.status);
 	const StatusIcon = statusConfig.icon;
@@ -808,7 +792,7 @@ export function EnrollmentShow() {
 									icon={<CalendarIcon className="size-5" />}
 									label="Purchase Date"
 									sublabel="When the order was placed"
-									value={enrollment.purchaseDate ? formatDate(enrollment.purchaseDate) : "—"}
+									value={enrollment.purchaseDate ? formatDateTime(enrollment.purchaseDate) : "—"}
 								/>
 								<InfoRow
 									icon={<CalendarIcon className="size-5" />}
@@ -816,7 +800,7 @@ export function EnrollmentShow() {
 									iconColorClass="text-sky-500"
 									label="Enrolled"
 									sublabel="When the creator enrolled"
-									value={formatDate(enrollment.createdAt)}
+									value={formatDateTime(enrollment.createdAt)}
 								/>
 								{enrollment.submittedAt && (
 									<InfoRow
@@ -825,7 +809,7 @@ export function EnrollmentShow() {
 										iconColorClass="text-emerald-500"
 										label="Submitted"
 										sublabel="Proof submitted"
-										value={formatDate(enrollment.submittedAt)}
+										value={formatDateTime(enrollment.submittedAt)}
 									/>
 								)}
 								{enrollment.approvedAt && (
@@ -835,7 +819,7 @@ export function EnrollmentShow() {
 										iconColorClass="text-emerald-500"
 										label="Approved"
 										sublabel="When approved"
-										value={formatDate(enrollment.approvedAt)}
+										value={formatDateTime(enrollment.approvedAt)}
 									/>
 								)}
 								<InfoRow
@@ -844,7 +828,7 @@ export function EnrollmentShow() {
 									iconColorClass="text-amber-500"
 									label="Expires"
 									sublabel="Submission deadline"
-									value={enrollment.expiresAt ? formatDate(enrollment.expiresAt) : "No expiry"}
+									value={enrollment.expiresAt ? formatDateTime(enrollment.expiresAt) : "No expiry"}
 									isLast
 								/>
 							</div>
@@ -951,7 +935,7 @@ export function EnrollmentShow() {
 											<div className="flex items-center justify-between rounded-lg bg-zinc-50 px-3 py-2.5 dark:bg-zinc-800/50">
 												<span className="text-xs text-zinc-500 dark:text-zinc-400">Extracted Date</span>
 												<span className="text-sm font-medium text-zinc-900 dark:text-white">
-													{formatDate(enrollment.ocrData.extractedPurchaseDate)}
+													{formatDateTime(enrollment.ocrData.extractedPurchaseDate)}
 												</span>
 											</div>
 										)}
@@ -1011,7 +995,7 @@ export function EnrollmentShow() {
 									{(() => {
 										const groupedByPlatform: Record<string, typeof enrollment.tasks> = {};
 										for (const task of enrollment.tasks) {
-											const platform = task.platformName || extractPlatformFromText(task.name || "") || "General";
+											const platform = task.platformName || extractPlatformFromText(task.taskName || "") || "General";
 											if (!groupedByPlatform[platform]) groupedByPlatform[platform] = [];
 											groupedByPlatform[platform].push(task);
 										}
@@ -1042,7 +1026,8 @@ export function EnrollmentShow() {
 															<div className="space-y-2">
 																{tasks.map((task, index) => {
 																	const taskPlatform = task.platformName || pName;
-																	const PlatformTaskIcon = taskPlatform && taskPlatform !== "General" ? getPlatformIcon(taskPlatform) : null;
+																	const PlatformTaskIcon =
+																		taskPlatform && taskPlatform !== "General" ? getPlatformIcon(taskPlatform) : null;
 																	const FallbackIcon = getDeliverableIcon(task.taskName);
 																	const isSubmitted = !!task.submittedAt;
 
@@ -1068,7 +1053,9 @@ export function EnrollmentShow() {
 																					<PlatformTaskIcon
 																						className={clsx(
 																							"size-5",
-																							isSubmitted ? getPlatformColor(taskPlatform) : "text-zinc-500 dark:text-zinc-400"
+																							isSubmitted
+																								? getPlatformColor(taskPlatform)
+																								: "text-zinc-500 dark:text-zinc-400"
 																						)}
 																					/>
 																				) : (
@@ -1143,7 +1130,7 @@ export function EnrollmentShow() {
 																						)}
 																						{task.submittedAt && (
 																							<span className="inline-flex items-center text-xs text-zinc-400 dark:text-zinc-500">
-																								{formatDate(task.submittedAt)}
+																								{formatDateTime(task.submittedAt)}
 																							</span>
 																						)}
 																					</div>
@@ -1269,7 +1256,7 @@ export function EnrollmentShow() {
 								<p className="text-sm text-red-600 dark:text-red-300">{enrollment.rejection.reason}</p>
 								{enrollment.rejection.lastRejectedAt && (
 									<p className="mt-2 text-xs text-red-400 dark:text-red-500">
-										{formatDate(enrollment.rejection.lastRejectedAt)}
+										{formatDateTime(enrollment.rejection.lastRejectedAt)}
 									</p>
 								)}
 							</div>

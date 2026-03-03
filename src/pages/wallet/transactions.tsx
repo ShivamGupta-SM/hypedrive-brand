@@ -2,12 +2,11 @@ import { ArrowPathIcon } from "@heroicons/react/16/solid";
 import { Button } from "@/components/button";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Skeleton } from "@/components/skeleton";
-import { useCurrentOrganization, useInfiniteWalletTransactions } from "@/hooks";
+import { useInfiniteWalletTransactions, useOrgContext } from "@/hooks";
 import { TransactionRow } from "./components";
 
 export function WalletTransactions() {
-	const organization = useCurrentOrganization();
-	const organizationId = organization?.id;
+	const { organizationId } = useOrgContext();
 
 	const {
 		data: transactions,

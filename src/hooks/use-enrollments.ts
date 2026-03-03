@@ -20,6 +20,7 @@ export function useEnrollments(
 			return client.brand.listOrganizationEnrollments(organizationId as string, params || {});
 		},
 		enabled: !!organizationId,
+		staleTime: 30_000,
 	});
 
 	return {
@@ -52,6 +53,7 @@ export function useInfiniteEnrollments(
 			return allPages.reduce((acc, page) => acc + (page.data?.length ?? 0), 0);
 		},
 		enabled: !!organizationId,
+		staleTime: 30_000,
 	});
 
 	const data = query.data?.pages.flatMap((page) => page.data) ?? [];

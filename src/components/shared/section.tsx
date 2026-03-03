@@ -237,7 +237,14 @@ export function DetailItem({ label, value, children, className, span = 1, copyab
 						className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-700 dark:hover:text-zinc-300"
 						title="Copy"
 					>
-						<svg className="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+						<svg
+							className="size-3.5"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+							strokeWidth={2}
+							aria-hidden="true"
+						>
 							<path
 								strokeLinecap="round"
 								strokeLinejoin="round"

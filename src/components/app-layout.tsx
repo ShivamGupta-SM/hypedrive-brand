@@ -56,15 +56,19 @@ export function AppLayout({
 	const pathname = location.pathname;
 	const orgSlug = useOrgSlug();
 	const serverCurrentOrg = serverOrganizations.find((o) => o.slug === orgSlug) ?? serverOrganizations[0] ?? null;
-	const user = useAuthStore((state) => state.user);
 
-	// Sync server auth user into Zustand store on mount/refresh
+	// User from router context (SSR) — Zustand overrides after login or profile edit
+	const storeUser = useAuthStore((state) => state.user);
+	const user = storeUser ?? serverAuth.user ?? null;
+
+	// Sync server user into Zustand on initial mount so other consumers
+	// (settings, team page) can read from the store
 	useEffect(() => {
-		if (serverAuth.user && !user) {
+		if (serverAuth.user && !storeUser) {
 			useAuthStore.getState().setUser(serverAuth.user);
 			useAuthStore.getState().setAuthenticated(true);
 		}
-	}, [serverAuth.user, user]);
+	}, [serverAuth.user, storeUser]);
 
 	const [showSettings, setShowSettings] = useState(false);
 	const [settingsTab, setSettingsTab] = useState<"org" | "account">("org");
@@ -91,11 +95,12 @@ export function AppLayout({
 		return () => window.removeEventListener("keydown", handleKeyDown);
 	}, []);
 
-	const isActive = (path: string) => pathname.includes(path);
+	const isActive = (path: string) => pathname === path || pathname.startsWith(`${path}/`);
 
 	return (
 		<>
 			<SidebarLayout
+				logoHref={`/${orgSlug}`}
 				contentHeader={<ContentHeader />}
 				mobileOrgSwitcher={
 					<MobileOrgSwitcher
@@ -128,6 +133,36 @@ export function AppLayout({
 						</NavbarSection>
 					</Navbar>
 				}
+				mobileNavbar={
+					<>
+						<button
+							type="button"
+							onClick={() => setShowSearch(true)}
+							aria-label="Search"
+							className="flex size-8 items-center justify-center rounded-lg text-zinc-500 hover:bg-zinc-950/5 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-zinc-200"
+						>
+							<MagnifyingGlassIcon className="size-5" />
+						</button>
+						<NotificationPopoverNavbar />
+						<Dropdown>
+							<DropdownButton
+								as="button"
+								aria-label="Account menu"
+								className="flex size-8 cursor-default items-center justify-center rounded-full hover:bg-zinc-950/5 dark:hover:bg-white/5"
+							>
+								{user?.image ? (
+									<Avatar src={user.image} className="size-6 outline-0!" />
+								) : (
+									<Avatar
+										initials={user?.name?.charAt(0).toUpperCase() || "U"}
+										className="size-6 bg-zinc-900 text-[10px] text-white outline-0! dark:bg-white dark:text-zinc-900"
+									/>
+								)}
+							</DropdownButton>
+							<AccountDropdownMenu anchor="bottom end" onOpenAccountSettings={openAccountSettings} />
+						</Dropdown>
+					</>
+				}
 				sidebar={
 					<Sidebar>
 						<SidebarHeader>
@@ -145,12 +180,12 @@ export function AppLayout({
 							<button
 								type="button"
 								onClick={() => setShowSearch(true)}
-								className="mb-1 flex w-full items-center gap-2 rounded-lg bg-zinc-100 px-2.5 py-1.5 text-left text-sm text-zinc-500 transition-colors hover:bg-zinc-200/80 hover:text-zinc-700 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700/60 dark:hover:text-zinc-200"
+								className="mb-1 flex w-full items-center gap-2.5 rounded-lg border border-zinc-200 bg-white px-2.5 py-2 text-left text-sm text-zinc-400 shadow-sm transition-all hover:border-zinc-300 hover:text-zinc-600 dark:border-zinc-700/80 dark:bg-zinc-800/50 dark:text-zinc-500 dark:hover:border-zinc-600 dark:hover:text-zinc-300"
 							>
 								<MagnifyingGlassIcon className="size-4 shrink-0" />
 								<span className="flex-1">Search...</span>
-								<kbd className="hidden rounded border border-zinc-200 bg-white px-1.5 py-0.5 font-mono text-[10px] text-zinc-400 lg:block dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-500">
-									⌘K
+								<kbd className="hidden rounded border border-zinc-200/80 bg-zinc-50 px-1.5 py-0.5 font-mono text-[10px] text-zinc-400 lg:block dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-500">
+									{typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.userAgent) ? "⌘K" : "Ctrl K"}
 								</kbd>
 							</button>
 

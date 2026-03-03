@@ -1,6 +1,5 @@
 import {
 	ArrowPathIcon,
-	CheckIcon,
 	ChevronLeftIcon,
 	ChevronRightIcon,
 	CubeIcon,
@@ -13,18 +12,19 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "@tanstack/react-router";
 import clsx from "clsx";
-import { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "@/components/button";
-import { Dialog, DialogBody, DialogTitle } from "@/components/dialog";
+import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/dialog";
 import { Description, ErrorMessage, Field, FieldGroup, Label } from "@/components/fieldset";
 import { FileDropzone } from "@/components/file-dropzone";
 import { Input, InputGroup } from "@/components/input";
 import { CurrencyInput } from "@/components/number-input";
+import { WizardStepper } from "@/components/shared/wizard-stepper";
 import { Textarea } from "@/components/textarea";
-import { getAPIErrorMessage, useCreateListing, useFileUpload, useOrgSlug } from "@/hooks";
+import { useCreateListing, useFileUpload, useOrgSlug } from "@/hooks";
+import { showToast } from "@/lib/toast";
 
 // =============================================================================
 // SCHEMA
@@ -37,7 +37,7 @@ const listingSchema = z.object({
 		.min(1, "SKU is required")
 		.max(40, "SKU too long")
 		.regex(/^[A-Z0-9_-]+$/, "Only uppercase letters, numbers, hyphens, underscores"),
-	price: z.number({ required_error: "Price is required" }).positive("Must be greater than 0"),
+	price: z.number({ error: "Price is required" }).positive("Must be greater than 0"),
 	description: z.string().max(500, "Max 500 characters").optional(),
 	link: z.string().min(1, "Link is required").url("Must be a valid URL"),
 });
@@ -49,68 +49,6 @@ const STEPS = ["Details", "Media & Link", "Review"] as const;
 // =============================================================================
 // INLINE HELPERS
 // =============================================================================
-
-function WizardStepper({
-	steps,
-	currentStep,
-	completedSteps,
-	onStepClick,
-}: {
-	steps: readonly string[];
-	currentStep: number;
-	completedSteps: boolean[];
-	onStepClick: (step: number) => void;
-}) {
-	return (
-		<div className="mb-6 flex items-start">
-			{steps.map((label, i) => {
-				const canClick = i < currentStep || completedSteps[i];
-				return (
-					<Fragment key={label}>
-						{i > 0 && (
-							<div
-								className={clsx(
-									"mx-1 mt-3 h-px flex-1 transition-colors sm:mx-0 sm:mt-3.5",
-									completedSteps[i - 1] ? "bg-emerald-500" : "bg-zinc-200 dark:bg-zinc-700"
-								)}
-							/>
-						)}
-						<button
-							type="button"
-							onClick={() => canClick && onStepClick(i)}
-							className={clsx("flex flex-col items-center gap-1", canClick ? "cursor-pointer" : "cursor-default")}
-						>
-							<div
-								className={clsx(
-									"flex size-6 items-center justify-center rounded-full text-[11px] font-semibold transition-all sm:size-7 sm:text-xs",
-									i === currentStep
-										? "bg-zinc-900 text-white ring-4 ring-zinc-900/10 dark:bg-white dark:text-zinc-900 dark:ring-white/10"
-										: completedSteps[i]
-											? "bg-emerald-500 text-white"
-											: "bg-zinc-100 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500"
-								)}
-							>
-								{completedSteps[i] && i !== currentStep ? <CheckIcon className="size-3" /> : i + 1}
-							</div>
-							<span
-								className={clsx(
-									"max-w-14 truncate text-[10px] sm:max-w-20 sm:text-[11px]",
-									i === currentStep
-										? "font-medium text-zinc-900 dark:text-white"
-										: completedSteps[i]
-											? "font-medium text-emerald-600 dark:text-emerald-400"
-											: "text-zinc-400 dark:text-zinc-500"
-								)}
-							>
-								{label}
-							</span>
-						</button>
-					</Fragment>
-				);
-			})}
-		</div>
-	);
-}
 
 function ReviewRow({ label, value }: { label: string; value: React.ReactNode }) {
 	return (
@@ -254,7 +192,7 @@ export function CreateListingModal({
 						const { fileUrl } = await fileUpload.mutateAsync({ file, folder: "uploads" });
 						setImages((prev) => [...prev, fileUrl]);
 					} catch {
-						toast.error(`Failed to upload ${file.name}`);
+						showToast.error(`Failed to upload ${file.name}`);
 					} finally {
 						setUploadingCount((n) => n - 1);
 					}
@@ -306,12 +244,12 @@ export function CreateListingModal({
 							? images.map((url, i) => ({ imageUrl: url, isPrimary: i === 0, sortOrder: i }))
 							: undefined,
 				});
-				toast.success("Listing created");
+				showToast.success("Listing created");
 				onSuccess();
 				handleClose();
 				navigate({ to: "/$orgSlug/listings/$id", params: { orgSlug, id: listing.id } });
 			} catch (err) {
-				toast.error(getAPIErrorMessage(err, "Failed to create listing"));
+				showToast.error(err, "Failed to create listing");
 			}
 		},
 		[organizationId, createListing, images, onSuccess, handleClose, navigate, orgSlug]
@@ -325,26 +263,21 @@ export function CreateListingModal({
 					if (e.key === "Enter" && e.target instanceof HTMLInputElement) e.preventDefault();
 				}}
 			>
-				{/* Header */}
-				<div className="flex items-center justify-between">
-					<div className="flex items-center gap-3">
-						<div className="flex size-9 items-center justify-center rounded-lg bg-emerald-500/10 dark:bg-emerald-500/15">
-							<CubeIcon className="size-5 text-emerald-600 dark:text-emerald-400" />
-						</div>
-						<div>
-							<DialogTitle>Add Listing</DialogTitle>
-							<p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
-								Step {step + 1} of {STEPS.length}
-							</p>
-						</div>
-					</div>
+				<DialogHeader
+					icon={CubeIcon}
+					iconColor="emerald"
+					title="Add Listing"
+					description={`Step ${step + 1} of ${STEPS.length} · ${STEPS[step]}`}
+					onClose={handleClose}
+				/>
+
+				{/* Stepper */}
+				<div className="mt-4" ref={stepTopRef}>
+					<WizardStepper steps={STEPS} currentStep={step} completedSteps={completedSteps} onStepClick={goToStep} />
 				</div>
 
 				{/* Body */}
 				<DialogBody>
-					<div ref={stepTopRef} />
-					<WizardStepper steps={STEPS} currentStep={step} completedSteps={completedSteps} onStepClick={goToStep} />
-
 					{/* Step 0: Details */}
 					{step === 0 && (
 						<FieldGroup>
@@ -472,11 +405,7 @@ export function CreateListingModal({
 													)}
 													title={idx === 0 ? "Primary image" : "Click to set as primary"}
 												>
-													<img
-														src={url}
-														alt={`Upload ${idx + 1}`}
-														className="size-full object-contain"
-													/>
+													<img src={url} alt={`Upload ${idx + 1}`} className="size-full object-contain" />
 												</button>
 												{idx === 0 && (
 													<span className="absolute -top-1.5 left-1/2 -translate-x-1/2 rounded-full bg-emerald-500 px-1.5 py-px text-[10px] font-semibold text-white">
@@ -566,21 +495,27 @@ export function CreateListingModal({
 					)}
 				</DialogBody>
 
-				{/* Actions */}
-				<div className="mt-6 flex gap-2">
-					{step > 0 && (
-						<Button type="button" onClick={() => goToStep(step - 1)} color="zinc" className="w-full">
-							<ChevronLeftIcon />
-							Back
+				<DialogActions>
+					<div className="flex flex-1 items-center">
+						{step > 0 && (
+							<Button type="button" onClick={() => goToStep(step - 1)} outline>
+								<ChevronLeftIcon />
+								Back
+							</Button>
+						)}
+					</div>
+					{step === 0 && (
+						<Button plain onClick={handleClose}>
+							Cancel
 						</Button>
 					)}
 					{step < 2 ? (
-						<Button type="button" onClick={goNext} color="emerald" className="w-full">
+						<Button type="button" onClick={goNext} color="emerald">
 							{step === 1 ? "Review" : "Next"}
 							<ChevronRightIcon />
 						</Button>
 					) : (
-						<Button type="submit" color="emerald" className="w-full" disabled={createListing.isPending || uploadingCount > 0}>
+						<Button type="submit" color="emerald" disabled={createListing.isPending || uploadingCount > 0}>
 							{createListing.isPending ? (
 								<>
 									<ArrowPathIcon className="size-4 animate-spin" />
@@ -594,7 +529,7 @@ export function CreateListingModal({
 							)}
 						</Button>
 					)}
-				</div>
+				</DialogActions>
 			</form>
 		</Dialog>
 	);

@@ -442,6 +442,52 @@ export function getPlatformColor(platformName: string): string {
 }
 
 /**
+ * Get platform brand gradient classes for bg-gradient-to-br
+ * @param platformName - The platform name (case-insensitive)
+ * @returns Tailwind gradient from/to classes
+ */
+export function getPlatformGradient(platformName: string): string {
+	const gradients: Record<string, string> = {
+		instagram: "from-pink-500 to-purple-600",
+		youtube: "from-red-500 to-red-700",
+		twitter: "from-zinc-700 to-zinc-900",
+		x: "from-zinc-700 to-zinc-900",
+		facebook: "from-blue-600 to-blue-400",
+		linkedin: "from-blue-700 to-blue-500",
+		tiktok: "from-zinc-800 to-zinc-950",
+		pinterest: "from-red-500 to-red-700",
+		snapchat: "from-yellow-300 to-yellow-500",
+		whatsapp: "from-green-400 to-green-600",
+		telegram: "from-sky-400 to-sky-600",
+		threads: "from-zinc-700 to-zinc-900",
+		google: "from-blue-500 to-blue-600",
+		amazon: "from-yellow-400 to-orange-500",
+		flipkart: "from-yellow-400 to-blue-600",
+		myntra: "from-pink-400 to-pink-600",
+		meesho: "from-pink-400 to-pink-600",
+		nykaa: "from-pink-500 to-pink-700",
+		ajio: "from-zinc-700 to-zinc-900",
+		bigbasket: "from-green-500 to-green-700",
+		blinkit: "from-yellow-300 to-yellow-500",
+		zepto: "from-purple-500 to-purple-700",
+		dunzo: "from-green-400 to-green-600",
+		jiomart: "from-blue-500 to-blue-700",
+		swiggy: "from-orange-400 to-orange-600",
+		zomato: "from-red-400 to-red-600",
+		paytm: "from-blue-500 to-blue-700",
+		phonepe: "from-purple-500 to-purple-700",
+		shopify: "from-green-500 to-green-700",
+		ebay: "from-blue-500 to-blue-700",
+		aliexpress: "from-orange-500 to-orange-700",
+		walmart: "from-blue-500 to-blue-700",
+		target: "from-red-500 to-red-700",
+		etsy: "from-orange-400 to-orange-600",
+	};
+	const normalizedName = platformName.toLowerCase().replace(/\s+/g, "");
+	return gradients[normalizedName] || "from-zinc-400 to-zinc-600";
+}
+
+/**
  * Extract a platform name from arbitrary text (e.g. task name "Amazon Product Review" → "amazon")
  * Checks each word against the platform icon map.
  * @returns The matched platform key or null

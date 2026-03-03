@@ -1,12 +1,10 @@
 import {
-	ArrowPathIcon,
 	ArrowTrendingUpIcon,
 	BanknotesIcon,
 	CheckCircleIcon,
 	ChevronRightIcon,
 	ClockIcon,
 	ExclamationCircleIcon,
-	ExclamationTriangleIcon,
 	MegaphoneIcon,
 	RocketLaunchIcon,
 	ShoppingBagIcon,
@@ -22,36 +20,18 @@ import { EnrollmentCardInline } from "@/components/enrollment-card";
 import { Heading } from "@/components/heading";
 import { Link } from "@/components/link";
 import { Card } from "@/components/shared/card";
+import { ErrorState } from "@/components/shared/error-state";
 import { IconButton } from "@/components/shared/icon-button";
 import { Skeleton } from "@/components/skeleton";
 import {
-	useCurrentOrganization,
 	useDashboard,
 	useOrganizationActivity,
+	useOrgContext,
 	useSetupProgress,
 	useSetupProgressStream,
 } from "@/hooks";
 import { getAssetUrl } from "@/hooks/api-client";
-import { useOrgSlug } from "@/hooks/use-org-slug";
-import { formatRelativeTime } from "@/lib/design-tokens";
-
-// =============================================================================
-// HELPERS
-// =============================================================================
-
-/** Format a Decimal string (from API) as ₹ amount with Indian grouping */
-function fmtINR(decimal: string): string {
-	const num = Number.parseFloat(decimal.replace(/,/g, ""));
-	if (Number.isNaN(num)) return "\u20B9 0";
-	return new Intl.NumberFormat("en-IN", {
-		style: "currency",
-		currency: "INR",
-		minimumFractionDigits: 2,
-		maximumFractionDigits: 2,
-	})
-		.format(num)
-		.replace("₹", "₹\u2009");
-}
+import { formatCurrency, formatRelativeTime } from "@/lib/design-tokens";
 
 // =============================================================================
 // GREETING
@@ -62,28 +42,6 @@ function getGreeting(): string {
 	if (hour < 12) return "Good morning";
 	if (hour < 17) return "Good afternoon";
 	return "Good evening";
-}
-
-// =============================================================================
-// ERROR STATE
-// =============================================================================
-
-function ErrorState({ onRetry }: { onRetry: () => void }) {
-	return (
-		<div className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
-			<div className="flex size-14 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800">
-				<ExclamationTriangleIcon className="size-7 text-zinc-400 dark:text-zinc-500" />
-			</div>
-			<h2 className="mt-5 text-lg font-semibold text-zinc-900 dark:text-white">Something went wrong</h2>
-			<p className="mx-auto mt-1.5 max-w-xs text-sm text-zinc-500 dark:text-zinc-400">
-				We couldn't load your dashboard. Please check your connection and try again.
-			</p>
-			<Button className="mt-6" onClick={onRetry} color="dark/zinc">
-				<ArrowPathIcon className="size-4" />
-				Try Again
-			</Button>
-		</div>
-	);
 }
 
 // =============================================================================
@@ -232,7 +190,7 @@ function WalletHero({
 					<p className="text-xs font-medium text-zinc-400">Available Balance</p>
 					<p className="mt-1 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
 						{stats.walletBalanceStale && <span className="mr-1 text-amber-400/80">~</span>}
-						{fmtINR(stats.availableBalanceDecimal)}
+						{formatCurrency(stats.availableBalanceDecimal)}
 					</p>
 					{stats.walletBalanceStale && <p className="mt-0.5 text-[10px] text-amber-400/70">Balance may be delayed</p>}
 				</div>
@@ -248,7 +206,7 @@ function WalletHero({
 				<div className="min-w-0">
 					<p className="text-[11px] text-zinc-500">Wallet Balance</p>
 					<p className="mt-0.5 truncate text-sm font-medium tabular-nums text-zinc-300">
-						{fmtINR(stats.walletBalanceDecimal)}
+						{formatCurrency(stats.walletBalanceDecimal)}
 					</p>
 				</div>
 				<div className="min-w-0">
@@ -256,7 +214,7 @@ function WalletHero({
 						{stats.paymentMode === "post_submission" ? "Commitments" : "On Hold"}
 					</p>
 					<p className="mt-0.5 truncate text-sm font-medium tabular-nums text-zinc-300">
-						{fmtINR(
+						{formatCurrency(
 							stats.paymentMode === "post_submission" ? stats.pendingCommitmentsDecimal || "0" : stats.heldAmountDecimal
 						)}
 					</p>
@@ -993,9 +951,7 @@ function DashboardSkeleton() {
 // =============================================================================
 
 export function Dashboard() {
-	const organization = useCurrentOrganization();
-	const organizationId = organization?.id;
-	const orgSlug = useOrgSlug();
+	const { organization, organizationId, orgSlug } = useOrgContext();
 
 	const { data: dashboardData, loading, error, refetch } = useDashboard(organizationId);
 
@@ -1013,7 +969,13 @@ export function Dashboard() {
 	}, []);
 
 	if (loading) return <DashboardSkeleton />;
-	if (error || !dashboardData || !stats) return <ErrorState onRetry={refetch} />;
+	if (error || !dashboardData || !stats)
+		return (
+			<ErrorState
+				message="We couldn't load your dashboard. Please check your connection and try again."
+				onRetry={refetch}
+			/>
+		);
 
 	return (
 		<div className="min-w-0 space-y-4 sm:space-y-5">

@@ -302,6 +302,7 @@ export function VirtualTable<T>({
 					{virtualItems.map((virtualItem) => {
 						const item = items[virtualItem.index];
 						return (
+							// biome-ignore lint/a11y/noStaticElementInteractions: role="button" is conditionally set when onRowClick exists
 							<div
 								key={virtualItem.key}
 								role={onRowClick ? "button" : undefined}

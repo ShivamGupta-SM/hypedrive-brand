@@ -10,7 +10,7 @@ import { Badge } from "@/components/badge";
 import { getPlatformColor, getPlatformIcon } from "@/components/icons/platform-icons";
 import { Link } from "@/components/link";
 import type { brand, db } from "@/lib/brand-client";
-import { formatCurrency } from "@/lib/design-tokens";
+import { formatCurrency, formatDateCompact } from "@/lib/design-tokens";
 
 // =============================================================================
 // TYPES
@@ -18,6 +18,15 @@ import { formatCurrency } from "@/lib/design-tokens";
 
 type Enrollment = brand.EnrollmentWithRelations;
 type EnrollmentStatus = db.EnrollmentStatus;
+
+// =============================================================================
+// AVATAR HELPER
+// =============================================================================
+
+/** Generate a DiceBear Micah avatar URL with diverse skin tones and balanced features */
+function getAvatarUrl(seed: string) {
+	return `https://api.dicebear.com/9.x/micah/svg?seed=${encodeURIComponent(seed)}&baseColor=f9c9b6,e8b298,c89070,a67457,77311d,ac6651&facialHairProbability=20&earringsProbability=30`;
+}
 
 // =============================================================================
 // STATUS CONFIG (shared across all variants)
@@ -50,11 +59,6 @@ export function getEnrollmentStatusConfig(status: EnrollmentStatus): {
 // =============================================================================
 // SHARED CONSTANTS
 // =============================================================================
-
-function formatDateShort(dateStr: string | undefined) {
-	if (!dateStr) return "—";
-	return new Date(dateStr).toLocaleDateString("en-IN", { month: "short", day: "numeric" });
-}
 
 // =============================================================================
 // OVERDUE DETECTION
@@ -137,7 +141,7 @@ function EnrollmentCardFull({
 					<div className="flex items-start gap-3">
 						<div className="relative shrink-0">
 							<img
-								src={`https://api.dicebear.com/9.x/notionists/svg?seed=${encodeURIComponent(avatarSeed)}`}
+								src={getAvatarUrl(avatarSeed)}
 								alt={creatorName}
 								className="size-11 rounded-lg bg-zinc-100 sm:size-12 dark:bg-zinc-800"
 							/>
@@ -170,7 +174,7 @@ function EnrollmentCardFull({
 									<span className="font-mono">{enrollment.displayId}</span>
 									{showOverdueAlert && <OverdueAlert />}
 									<span className="text-zinc-300 dark:text-zinc-600">·</span>
-									<span>{formatDateShort(enrollment.createdAt)}</span>
+									<span>{formatDateCompact(enrollment.createdAt)}</span>
 									{enrollment.creator?.city && (
 										<>
 											<span className="text-zinc-300 dark:text-zinc-600">·</span>
@@ -201,7 +205,7 @@ function EnrollmentCardFull({
 					<div className="flex flex-col items-center justify-center py-2">
 						<span className="text-[10px] text-zinc-400 dark:text-zinc-500">Submitted</span>
 						<span className="text-xs font-semibold tabular-nums text-zinc-700 sm:text-sm dark:text-zinc-300">
-							{formatDateShort(enrollment.createdAt)}
+							{formatDateCompact(enrollment.createdAt)}
 						</span>
 					</div>
 				</div>
@@ -238,7 +242,7 @@ function EnrollmentCardCompact({ enrollment, onClick }: CompactVariantProps) {
 		>
 			{/* Creator avatar */}
 			<img
-				src={`https://api.dicebear.com/9.x/notionists/svg?seed=${encodeURIComponent(avatarSeed)}`}
+				src={getAvatarUrl(avatarSeed)}
 				alt={creatorName}
 				className="size-8 shrink-0 rounded-lg bg-zinc-100 dark:bg-zinc-800"
 			/>
@@ -255,7 +259,7 @@ function EnrollmentCardCompact({ enrollment, onClick }: CompactVariantProps) {
 				<p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
 					<span className="font-mono">{enrollment.displayId}</span>
 					<span className="mx-1 text-zinc-300 dark:text-zinc-600">·</span>
-					{formatDateShort(enrollment.createdAt)}
+					{formatDateCompact(enrollment.createdAt)}
 					{platformName && (
 						<>
 							<span className="mx-1 text-zinc-300 dark:text-zinc-600">·</span>
@@ -302,7 +306,7 @@ function EnrollmentCardInline({ enrollment, orgSlug, formatRelativeTime }: Inlin
 			className="group flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/40"
 		>
 			<img
-				src={`https://api.dicebear.com/9.x/notionists/svg?seed=${encodeURIComponent(enrollment.creator.id)}`}
+				src={`https://api.dicebear.com/9.x/micah/svg?seed=${encodeURIComponent(enrollment.creator.id)}`}
 				alt={enrollment.creator.name}
 				className="size-9 shrink-0 rounded-lg bg-zinc-100 dark:bg-zinc-800"
 			/>

@@ -4,7 +4,8 @@ import type { brand, internal, StreamIn } from "@/lib/brand-client";
 import { useOrganizationStore } from "@/store/organization-store";
 import { getAuthenticatedClient, queryKeys } from "./api-client";
 
-// Re-export for convenience
+// Re-export for components ABOVE the $orgSlug route tree (NotificationPopover,
+// SearchDialog, approval pages). Pages inside $orgSlug should use useOrgContext().
 export { useCurrentOrganization, useOrganizationId } from "@/store/organization-store";
 
 // =============================================================================
@@ -390,11 +391,14 @@ export function useUnifiedSearch(
 			return client.brand.unifiedSearch(organizationId as string, params);
 		},
 		enabled: !!organizationId && params.q.length >= 2,
+		placeholderData: (prev) => prev,
+		staleTime: 60_000,
 	});
 
 	return {
 		data: query.data ?? null,
 		loading: query.isLoading,
+		isFetching: query.isFetching,
 		error: query.error,
 		refetch: query.refetch,
 	};
@@ -403,25 +407,6 @@ export function useUnifiedSearch(
 // =============================================================================
 // NOTIFICATION PREFERENCES
 // =============================================================================
-
-export function useNotificationPreferences(organizationId: string | undefined) {
-	const query = useQuery({
-		queryKey: queryKeys.notificationPreferences(organizationId || ""),
-		queryFn: async () => {
-			const client = getAuthenticatedClient();
-			await client.brand.getPreferences(organizationId as string);
-			return null;
-		},
-		enabled: !!organizationId,
-	});
-
-	return {
-		data: query.data ?? null,
-		loading: query.isLoading,
-		error: query.error,
-		refetch: query.refetch,
-	};
-}
 
 export function useUpdateNotificationPreferences(organizationId: string | undefined) {
 	const queryClient = useQueryClient();
@@ -456,8 +441,7 @@ export function useNotifications(
 		queryKey: queryKeys.notifications(organizationId || "", params),
 		queryFn: async () => {
 			const client = getAuthenticatedClient();
-			await client.brand.listNotifications(organizationId as string, params || {});
-			return null;
+			return client.brand.listNotifications(organizationId as string, params || {});
 		},
 		enabled: !!organizationId,
 	});
@@ -470,8 +454,7 @@ export function useUnreadCount(organizationId: string | undefined) {
 		queryKey: queryKeys.unreadCount(organizationId || ""),
 		queryFn: async () => {
 			const client = getAuthenticatedClient();
-			await client.brand.getUnreadCount(organizationId as string);
-			return null;
+			return client.brand.getUnreadCount(organizationId as string);
 		},
 		enabled: !!organizationId,
 		refetchInterval: 30000, // Poll every 30s for unread count
@@ -601,11 +584,10 @@ export function useRemovePushToken(organizationId: string | undefined) {
 
 export function useListPushTokens(organizationId: string | undefined) {
 	const query = useQuery({
-		queryKey: ["pushTokens", organizationId] as const,
+		queryKey: queryKeys.pushTokens(organizationId || ""),
 		queryFn: async () => {
 			const client = getAuthenticatedClient();
-			await client.brand.listTokens(organizationId as string);
-			return null;
+			return client.brand.listTokens(organizationId as string);
 		},
 		enabled: !!organizationId,
 	});

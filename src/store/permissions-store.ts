@@ -80,8 +80,8 @@ export function usePermissionContext(): PermissionContext | null {
  */
 export function useCan<R extends OrgResource>(resource: R, action: OrgAction<R>): boolean {
 	const role = useOrgRole();
-	// When role hasn't loaded yet, default to true (server enforces)
-	if (role === undefined) return true;
+	// Deny until role loads (server enforces regardless)
+	if (role === undefined) return false;
 	return canPerformOrgAction(role, resource, action);
 }
 

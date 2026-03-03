@@ -3,14 +3,12 @@ import { Heading } from "@/components/heading";
 import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
 import { TabNav, type TabNavItem } from "@/components/shared/tab-nav";
 import { Text } from "@/components/text";
-import { useInvitations, useMembers } from "@/hooks";
+import { useInvitations, useMembers, useOrgContext } from "@/hooks";
 import { useOrgPath } from "@/hooks/use-org-slug";
-import { useCurrentOrganization } from "@/store/organization-store";
 import { TeamSkeleton } from "./components";
 
 export function TeamLayout() {
-	const organization = useCurrentOrganization();
-	const organizationId = organization?.id;
+	const { organizationId } = useOrgContext();
 	const orgPath = useOrgPath();
 
 	// Both hooks used for stats row counts
@@ -44,7 +42,7 @@ export function TeamLayout() {
 			{/* Stats */}
 			<FinancialStatsGridBordered
 				stats={[
-					{ name: "Members", value: totalMembers },
+					{ name: "Total", value: totalMembers },
 					{ name: "Admins", value: adminCount },
 					{ name: "Members", value: memberCount },
 					{

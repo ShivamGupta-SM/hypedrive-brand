@@ -10,7 +10,7 @@ import { Input } from "@/components/input";
 import { Logo } from "@/components/logo";
 import { Strong, TextLink } from "@/components/text";
 import { useConfetti, useSendVerificationEmail } from "@/hooks";
-import { useRegister, useSocialLogin } from "@/store/auth-store";
+import { useRegister, useSocialLogin } from "@/hooks/use-auth";
 import { FormError } from "./components";
 import { AuthShell } from "./login";
 
@@ -148,18 +148,21 @@ function VerifyEmailScreen({
 // ─── Register ─────────────────────────────────────────────────────────────────
 
 export function Register() {
-	const { mutate: registerUser, isPending } = useRegister();
-	const { mutate: socialLogin, isPending: isSocialPending } = useSocialLogin();
+	const registerMutation = useRegister();
+	const socialLogin = useSocialLogin();
 	const sendVerification = useSendVerificationEmail();
 	const [showPassword, setShowPassword] = useState(false);
 	const [serverError, setServerError] = useState<string | null>(null);
 	const [registeredEmail, setRegisteredEmail] = useState<string | null>(null);
 
+	const isPending = registerMutation.isPending;
+	const isSocialPending = socialLogin.isPending;
+
 	const handleSocialLogin = useCallback(
 		(provider: "google" | "apple") => {
-			socialLogin(provider, {
-				onSuccess: (redirectUrl) => {
-					if (redirectUrl) window.location.href = redirectUrl;
+			socialLogin.mutate(provider, {
+				onSuccess: (data) => {
+					if ("redirectUrl" in data && data.redirectUrl) window.location.href = data.redirectUrl;
 				},
 				onError: (err) => setServerError(err.message || "Social login failed."),
 			});
@@ -186,9 +189,9 @@ export function Register() {
 		sendVerification.mutate({ email: registeredEmail, callbackURL: `${origin}/verify-email` });
 	}, [registeredEmail, sendVerification]);
 
-	const onSubmit = async (data: RegisterFormData) => {
+	const onSubmit = (data: RegisterFormData) => {
 		setServerError(null);
-		registerUser(
+		registerMutation.mutate(
 			{ email: data.email, password: data.password, name: data.name },
 			{
 				onSuccess: () => {
@@ -197,8 +200,7 @@ export function Register() {
 					setRegisteredEmail(data.email);
 				},
 				onError: (err) => {
-					const error = err as Error;
-					setServerError(error.message || "Registration failed. Please try again.");
+					setServerError(err.message || "Registration failed. Please try again.");
 				},
 			}
 		);

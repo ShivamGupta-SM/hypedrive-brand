@@ -12,9 +12,14 @@
 
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { useEffect } from "react";
-
-import { ORG_ROLE_PERMISSIONS, registerCustomRolePermissions } from "@/lib/permissions/access-control-client";
+import { queryKeys } from "@/hooks/api-client";
+import {
+	clearCustomRolePermissions,
+	ORG_ROLE_PERMISSIONS,
+	registerCustomRolePermissions,
+} from "@/lib/permissions/access-control-client";
 import { getActiveMemberFromServer, getOrgRolesFromServer } from "@/lib/server-auth";
+import { useAuthStore } from "@/store/auth-store";
 import { useOrganizationStore } from "@/store/organization-store";
 import { usePermissionsStore } from "@/store/permissions-store";
 
@@ -44,26 +49,37 @@ export const Route = createFileRoute("/_app/$orgSlug")({
 			throw redirect({ to: "/rejected" });
 		}
 
-		// Fetch active member role server-side for RBAC, cached per org for 5 min
-		const { member } = await context.queryClient.ensureQueryData({
-			queryKey: ["server", "activeMember", org.id],
-			queryFn: () => getActiveMemberFromServer({ data: { organizationId: org.id } }),
-			staleTime: 5 * 60 * 1000,
-		});
-
-		// If member has a custom role (not in the hardcoded matrix), fetch its permissions
+		// Fetch active member role server-side for RBAC, cached per org for 5 min.
+		// Wrapped in try-catch so a transient fetch error during client hydration
+		// doesn't bubble up to the root error boundary and flash "Something went wrong".
+		let member: { role: string } | null = null;
 		let customPermissions: Record<string, string[]> | null = null;
-		if (member?.role && !(member.role in ORG_ROLE_PERMISSIONS)) {
-			const { roles } = await context.queryClient.ensureQueryData({
-				queryKey: ["server", "orgRoles", org.id],
-				queryFn: () => getOrgRolesFromServer({ data: { organizationId: org.id } }),
-				staleTime: 10 * 60 * 1000,
-			});
-			const match = roles.find((r) => r.role === member.role);
-			customPermissions = match?.permission ?? null;
 
-			// Register immediately for SSR-time rendering
-			registerCustomRolePermissions(customPermissions);
+		try {
+			const result = await context.queryClient.ensureQueryData({
+				queryKey: queryKeys.activeMember(org.id),
+				queryFn: () => getActiveMemberFromServer({ data: { organizationId: org.id } }),
+				staleTime: 5 * 60 * 1000,
+			});
+			member = result.member;
+
+			// If member has a custom role (not in the hardcoded matrix), fetch its permissions
+			if (member?.role && !(member.role in ORG_ROLE_PERMISSIONS)) {
+				const { roles } = await context.queryClient.ensureQueryData({
+					queryKey: queryKeys.organizationRoles(org.id),
+					queryFn: () => getOrgRolesFromServer({ data: { organizationId: org.id } }),
+					staleTime: 10 * 60 * 1000,
+				});
+				const memberRole = member?.role;
+				const match = roles.find((r) => r.role === memberRole);
+				customPermissions = match?.permission ?? null;
+
+				// Register immediately for SSR-time rendering
+				registerCustomRolePermissions(customPermissions);
+			}
+		} catch {
+			// Transient error — clear any stale custom role permissions from previous org
+			clearCustomRolePermissions();
 		}
 
 		return {
@@ -77,7 +93,8 @@ export const Route = createFileRoute("/_app/$orgSlug")({
 });
 
 function OrgLayoutWrapper() {
-	const { organization, organizations, activeMember, customPermissions, auth } = Route.useRouteContext();
+	const { organization, organizations, activeMember, customPermissions } = Route.useRouteContext();
+	const userId = useAuthStore((s) => s.user?.id);
 
 	// Sync server-resolved data to client stores for reactive UI (dropdowns, permissions, etc.)
 	useEffect(() => {
@@ -91,16 +108,16 @@ function OrgLayoutWrapper() {
 
 	// Sync permissions to store — clear if member fetch failed
 	useEffect(() => {
-		if (activeMember?.role && organization && auth?.user) {
+		if (activeMember?.role && organization && userId) {
 			usePermissionsStore.getState().setPermissions({
-				userId: auth.user.id,
+				userId,
 				organizationRole: activeMember.role,
 				customPermissions,
 			});
 		} else {
 			usePermissionsStore.getState().clearPermissions();
 		}
-	}, [activeMember, organization, auth?.user, customPermissions]);
+	}, [activeMember, organization, userId, customPermissions]);
 
 	return <Outlet />;
 }

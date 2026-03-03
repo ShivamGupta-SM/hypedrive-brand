@@ -1,24 +1,23 @@
 import {
 	ArrowPathIcon,
 	CheckCircleIcon,
+	DocumentArrowDownIcon,
 	DocumentTextIcon,
-	ExclamationTriangleIcon,
 	MagnifyingGlassIcon,
 	XMarkIcon,
 } from "@heroicons/react/16/solid";
 import { useCallback, useMemo, useState } from "react";
-import { FaFilePdf } from "react-icons/fa";
 import { Badge } from "@/components/badge";
 import { Button } from "@/components/button";
-import { Dialog, DialogActions, DialogBody } from "@/components/dialog";
+import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/dialog";
 import { Heading } from "@/components/heading";
 import { Input, InputGroup } from "@/components/input";
-import { Logo } from "@/components/logo";
 import { EmptyState } from "@/components/shared/empty-state";
+import { ErrorState } from "@/components/shared/error-state";
 import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
 import { Skeleton } from "@/components/skeleton";
 import { Text } from "@/components/text";
-import { useCurrentOrganization, useGenerateInvoicePDF, useInfiniteInvoices, useInvoice } from "@/hooks";
+import { useGenerateInvoicePDF, useInfiniteInvoices, useInvoice, useOrgContext } from "@/hooks";
 import type { brand } from "@/lib/brand-client";
 import { formatCurrency, formatDate } from "@/lib/design-tokens";
 import { showToast } from "@/lib/toast";
@@ -86,26 +85,6 @@ function InvoicesSkeleton() {
 }
 
 // =============================================================================
-// ERROR STATE
-// =============================================================================
-
-function ErrorState({ onRetry }: { onRetry: () => void }) {
-	return (
-		<div className="flex flex-col items-center justify-center py-16 text-center">
-			<div className="flex size-16 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-950/30">
-				<ExclamationTriangleIcon className="size-8 text-red-400" />
-			</div>
-			<p className="mt-4 text-lg font-semibold text-zinc-900 dark:text-white">Something went wrong</p>
-			<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Failed to load invoices. Please try again.</p>
-			<Button className="mt-6" onClick={onRetry} color="dark/zinc">
-				<ArrowPathIcon className="size-4" />
-				Try Again
-			</Button>
-		</div>
-	);
-}
-
-// =============================================================================
 // INVOICE ROW
 // =============================================================================
 
@@ -149,7 +128,7 @@ function InvoiceRow({ invoice, onView }: { invoice: Invoice; onView: () => void 
 // =============================================================================
 
 function InvoiceDetailModal({ invoice, onClose }: { invoice: Invoice | null; onClose: () => void }) {
-	const organization = useCurrentOrganization();
+	const { organization } = useOrgContext();
 	const canDownload = useCan("invoice", "download");
 	const generatePDF = useGenerateInvoicePDF(organization?.id);
 	// Fetch fresh invoice detail when modal opens
@@ -179,27 +158,14 @@ function InvoiceDetailModal({ invoice, onClose }: { invoice: Invoice | null; onC
 
 	return (
 		<Dialog open={!!displayInvoice} onClose={onClose} size="md">
-			{/* Header */}
-			<div className="flex items-center justify-between border-b border-zinc-200 pb-4 dark:border-zinc-700">
-				<Logo className="h-5 w-auto text-zinc-950 dark:text-white" />
-				<button
-					type="button"
-					onClick={onClose}
-					className="rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
-				>
-					<XMarkIcon className="size-5" />
-				</button>
-			</div>
+			<DialogHeader
+				icon={DocumentTextIcon}
+				iconColor="zinc"
+				title={`Invoice ${displayInvoice.invoiceNumber}`}
+				onClose={onClose}
+			/>
 
 			<DialogBody className="space-y-5">
-				{/* Tax Invoice Title */}
-				<div className="text-center">
-					<p className="text-xs font-medium uppercase tracking-widest text-zinc-400">Tax Invoice</p>
-					<p className="mt-1 font-mono text-sm font-semibold text-zinc-900 dark:text-white">
-						{displayInvoice.invoiceNumber}
-					</p>
-				</div>
-
 				{/* From / To */}
 				<div className="grid grid-cols-2 gap-4">
 					<div>
@@ -285,12 +251,21 @@ function InvoiceDetailModal({ invoice, onClose }: { invoice: Invoice | null; onC
 			</DialogBody>
 
 			{canDownload && (
-			<DialogActions className="border-t border-zinc-200 pt-4 dark:border-zinc-700">
-				<Button color="red" onClick={handleDownloadPDF} disabled={generatePDF.isPending} className="w-full">
-					<FaFilePdf data-slot="icon" className="size-4" />
-					{generatePDF.isPending ? "Generating..." : "Download PDF"}
-				</Button>
-			</DialogActions>
+				<DialogActions>
+					<Button color="emerald" onClick={handleDownloadPDF} disabled={generatePDF.isPending}>
+						{generatePDF.isPending ? (
+							<>
+								<ArrowPathIcon className="size-4 animate-spin" />
+								Generating...
+							</>
+						) : (
+							<>
+								<DocumentArrowDownIcon data-slot="icon" className="size-4" />
+								Download PDF
+							</>
+						)}
+					</Button>
+				</DialogActions>
 			)}
 
 			{/* Footer */}
@@ -307,8 +282,7 @@ function InvoiceDetailModal({ invoice, onClose }: { invoice: Invoice | null; onC
 // =============================================================================
 
 export function InvoicesList() {
-	const organization = useCurrentOrganization();
-	const organizationId = organization?.id;
+	const { organizationId } = useOrgContext();
 
 	const [search, setSearch] = useState("");
 	const [periodFilter, setPeriodFilter] = useState<PeriodFilter>("all");
@@ -364,8 +338,12 @@ export function InvoicesList() {
 	const stats = useMemo(
 		() => ({
 			count: filteredInvoices.length,
-			totalAmount: filteredInvoices.reduce((acc, inv: Invoice) => acc + parseFloat(inv.totalAmountDecimal || "0"), 0).toFixed(2),
-			totalGst: filteredInvoices.reduce((acc, inv: Invoice) => acc + parseFloat(inv.gstAmountDecimal || "0"), 0).toFixed(2),
+			totalAmount: filteredInvoices
+				.reduce((acc, inv: Invoice) => acc + parseFloat(inv.totalAmountDecimal || "0"), 0)
+				.toFixed(2),
+			totalGst: filteredInvoices
+				.reduce((acc, inv: Invoice) => acc + parseFloat(inv.gstAmountDecimal || "0"), 0)
+				.toFixed(2),
 			totalEnrollments: filteredInvoices.length,
 		}),
 		[filteredInvoices]
@@ -384,7 +362,7 @@ export function InvoicesList() {
 	}
 
 	if (error) {
-		return <ErrorState onRetry={refetch} />;
+		return <ErrorState message="Failed to load invoices. Please try again." onRetry={refetch} />;
 	}
 
 	return (

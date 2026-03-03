@@ -39,8 +39,9 @@ export function Avatar({
 					className="size-full fill-current p-[5%] text-[48px] font-medium uppercase select-none"
 					viewBox="0 0 100 100"
 					aria-hidden={alt ? undefined : "true"}
+					role={alt ? "img" : undefined}
 				>
-					{alt && <title>{alt}</title>}
+					<title>{alt || "Avatar"}</title>
 					<text x="50%" y="50%" alignmentBaseline="middle" dominantBaseline="middle" textAnchor="middle" dy=".125em">
 						{initials}
 					</text>

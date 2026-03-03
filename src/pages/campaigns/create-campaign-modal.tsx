@@ -25,24 +25,23 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "@tanstack/react-router";
 import clsx from "clsx";
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 import { Badge } from "@/components/badge";
 import { Button } from "@/components/button";
 import { DatePicker } from "@/components/date-picker";
-import { Dialog, DialogBody, DialogTitle } from "@/components/dialog";
+import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/dialog";
 import { Description, ErrorMessage, Field, FieldGroup, Label } from "@/components/fieldset";
+import { getPlatformColor, getPlatformIcon } from "@/components/icons/platform-icons";
 import { Input, InputGroup } from "@/components/input";
 import { NumberInput } from "@/components/number-input";
 import { Select } from "@/components/select";
+import { FilterChip } from "@/components/shared/filter-chip";
+import { WizardStepper } from "@/components/shared/wizard-stepper";
 import { Switch } from "@/components/switch";
 import { Textarea } from "@/components/textarea";
-import { getPlatformColor, getPlatformIcon } from "@/components/icons/platform-icons";
-import { FilterChip } from "@/components/shared/filter-chip";
 import {
-	getAPIErrorMessage,
 	getAssetUrl,
 	useCreateAndSubmitCampaign,
 	useCreateCampaign,
@@ -53,6 +52,7 @@ import {
 } from "@/hooks";
 import type { db } from "@/lib/brand-client";
 import { formatCurrency } from "@/lib/design-tokens";
+import { showToast } from "@/lib/toast";
 
 // =============================================================================
 // SCHEMA
@@ -63,11 +63,11 @@ const campaignSchema = z
 		listingId: z.string().min(1, "Select a listing"),
 		title: z.string().min(1, "Title is required").max(120, "Title too long"),
 		description: z.string().max(1000).optional(),
-		campaignType: z.string().default("cashback"),
-		isPublic: z.boolean().default(true),
-		startDate: z.date({ required_error: "Start date is required" }),
-		endDate: z.date({ required_error: "End date is required" }),
-		maxEnrollments: z.number({ required_error: "Required" }).int().min(1, "At least 1"),
+		campaignType: z.string(),
+		isPublic: z.boolean(),
+		startDate: z.date({ error: "Start date is required" }),
+		endDate: z.date({ error: "End date is required" }),
+		maxEnrollments: z.number({ error: "Required" }).int().min(1, "At least 1"),
 		termsAndConditions: z.string().max(5000).optional(),
 	})
 	.refine((d) => d.endDate > d.startDate, {
@@ -83,6 +83,7 @@ interface TaskEntry {
 	taskTemplateId: string;
 	taskTemplateName: string;
 	platformName?: string;
+	category?: db.TaskCategory;
 	instructions: string;
 	requirements: db.TaskRequirements;
 }
@@ -107,68 +108,6 @@ function nextTaskId() {
 // =============================================================================
 // INLINE HELPERS
 // =============================================================================
-
-function WizardStepper({
-	steps,
-	currentStep,
-	completedSteps,
-	onStepClick,
-}: {
-	steps: readonly string[];
-	currentStep: number;
-	completedSteps: boolean[];
-	onStepClick: (step: number) => void;
-}) {
-	return (
-		<div className="mb-6 flex items-start">
-			{steps.map((label, i) => {
-				const canClick = i < currentStep || completedSteps[i];
-				return (
-					<Fragment key={label}>
-						{i > 0 && (
-							<div
-								className={clsx(
-									"mx-1 mt-3 h-px flex-1 transition-colors sm:mx-0 sm:mt-3.5",
-									completedSteps[i - 1] ? "bg-emerald-500" : "bg-zinc-200 dark:bg-zinc-700"
-								)}
-							/>
-						)}
-						<button
-							type="button"
-							onClick={() => canClick && onStepClick(i)}
-							className={clsx("flex flex-col items-center gap-1", canClick ? "cursor-pointer" : "cursor-default")}
-						>
-							<div
-								className={clsx(
-									"flex size-6 items-center justify-center rounded-full text-[11px] font-semibold transition-all sm:size-7 sm:text-xs",
-									i === currentStep
-										? "bg-zinc-900 text-white ring-4 ring-zinc-900/10 dark:bg-white dark:text-zinc-900 dark:ring-white/10"
-										: completedSteps[i]
-											? "bg-emerald-500 text-white"
-											: "bg-zinc-100 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500"
-								)}
-							>
-								{completedSteps[i] && i !== currentStep ? <CheckIcon className="size-3" /> : i + 1}
-							</div>
-							<span
-								className={clsx(
-									"max-w-14 truncate text-[10px] sm:max-w-20 sm:text-[11px]",
-									i === currentStep
-										? "font-medium text-zinc-900 dark:text-white"
-										: completedSteps[i]
-											? "font-medium text-emerald-600 dark:text-emerald-400"
-											: "text-zinc-400 dark:text-zinc-500"
-								)}
-							>
-								{label}
-							</span>
-						</button>
-					</Fragment>
-				);
-			})}
-		</div>
-	);
-}
 
 function InfoCallout({ children }: { children: React.ReactNode }) {
 	return (
@@ -247,16 +186,32 @@ function TaskRequirementsDialog({
 
 	const updateReq = (patch: Partial<db.TaskRequirements>) => setReq((prev) => ({ ...prev, ...patch }));
 
+	const cat = task.category;
+	const showSocial = !cat || cat === "social" || cat === "video";
+	const showContent = !cat || cat === "review" || cat === "feedback";
+	const showMedia = !cat || cat === "review" || cat === "feedback" || cat === "photo";
+	const showDuration = !cat || cat === "social" || cat === "video";
+
 	return (
 		<Dialog open onClose={onClose} size="lg">
-			<DialogTitle>Edit Task — {task.taskTemplateName}</DialogTitle>
+			<DialogHeader
+				icon={PencilSquareIcon}
+				iconColor="amber"
+				title={`Edit Task — ${task.taskTemplateName}`}
+				onClose={onClose}
+			/>
 			<DialogBody>
 				<div className="space-y-4">
 					{/* Instructions */}
 					<Field>
 						<div className="flex items-center justify-between">
 							<Label>Instructions</Label>
-							<span className={clsx("text-xs tabular-nums", instructions.length > 900 ? "text-amber-500" : "text-zinc-400 dark:text-zinc-500")}>
+							<span
+								className={clsx(
+									"text-xs tabular-nums",
+									instructions.length > 900 ? "text-amber-500" : "text-zinc-400 dark:text-zinc-500"
+								)}
+							>
 								{instructions.length}/1000
 							</span>
 						</div>
@@ -291,210 +246,232 @@ function TaskRequirementsDialog({
 						{showReqs && (
 							<div className="mt-3 space-y-4">
 								{/* Social Media */}
-								<div className="space-y-2">
-									<p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Social Media</p>
-									<Field>
-										<Label>Required Hashtags</Label>
-										<div className="flex gap-2">
-											<Input
-												type="text"
-												value={hashtagInput}
-												onChange={(e) => setHashtagInput(e.target.value)}
-												onKeyDown={(e) => {
-													if (e.key === "Enter") {
-														e.preventDefault();
+								{showSocial && (
+									<div className="space-y-2">
+										<p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+											Social Media
+										</p>
+										<Field>
+											<Label>Required Hashtags</Label>
+											<div className="flex gap-2">
+												<Input
+													type="text"
+													value={hashtagInput}
+													onChange={(e) => setHashtagInput(e.target.value)}
+													onKeyDown={(e) => {
+														if (e.key === "Enter") {
+															e.preventDefault();
+															const tag = hashtagInput.trim().replace(/^#/, "");
+															if (tag && !req.requiredHashtags?.includes(tag)) {
+																updateReq({ requiredHashtags: [...(req.requiredHashtags || []), tag] });
+																setHashtagInput("");
+															}
+														}
+													}}
+													placeholder="#hashtag"
+												/>
+												<Button
+													type="button"
+													outline
+													onClick={() => {
 														const tag = hashtagInput.trim().replace(/^#/, "");
 														if (tag && !req.requiredHashtags?.includes(tag)) {
 															updateReq({ requiredHashtags: [...(req.requiredHashtags || []), tag] });
 															setHashtagInput("");
 														}
-													}
-												}}
-												placeholder="#hashtag"
-											/>
-											<Button
-												type="button"
-												outline
-												onClick={() => {
-													const tag = hashtagInput.trim().replace(/^#/, "");
-													if (tag && !req.requiredHashtags?.includes(tag)) {
-														updateReq({ requiredHashtags: [...(req.requiredHashtags || []), tag] });
-														setHashtagInput("");
-													}
-												}}
-											>
-												<PlusIcon className="size-4" />
-											</Button>
-										</div>
-										{(req.requiredHashtags?.length ?? 0) > 0 && (
-											<div className="mt-1.5 flex flex-wrap gap-1.5">
-												{req.requiredHashtags?.map((tag) => (
-													<FilterChip
-														key={tag}
-														label={`#${tag}`}
-														onRemove={() => updateReq({ requiredHashtags: req.requiredHashtags?.filter((t) => t !== tag) || [] })}
-													/>
-												))}
+													}}
+												>
+													<PlusIcon className="size-4" />
+												</Button>
 											</div>
-										)}
-									</Field>
-									<Field>
-										<Label>Required Mentions</Label>
-										<div className="flex gap-2">
-											<Input
-												type="text"
-												value={mentionInput}
-												onChange={(e) => setMentionInput(e.target.value)}
-												onKeyDown={(e) => {
-													if (e.key === "Enter") {
-														e.preventDefault();
+											{(req.requiredHashtags?.length ?? 0) > 0 && (
+												<div className="mt-1.5 flex flex-wrap gap-1.5">
+													{req.requiredHashtags?.map((tag) => (
+														<FilterChip
+															key={tag}
+															label={`#${tag}`}
+															onRemove={() =>
+																updateReq({ requiredHashtags: req.requiredHashtags?.filter((t) => t !== tag) || [] })
+															}
+														/>
+													))}
+												</div>
+											)}
+										</Field>
+										<Field>
+											<Label>Required Mentions</Label>
+											<div className="flex gap-2">
+												<Input
+													type="text"
+													value={mentionInput}
+													onChange={(e) => setMentionInput(e.target.value)}
+													onKeyDown={(e) => {
+														if (e.key === "Enter") {
+															e.preventDefault();
+															const mention = mentionInput.trim().replace(/^@/, "");
+															if (mention && !req.requiredMentions?.includes(mention)) {
+																updateReq({ requiredMentions: [...(req.requiredMentions || []), mention] });
+																setMentionInput("");
+															}
+														}
+													}}
+													placeholder="@username"
+												/>
+												<Button
+													type="button"
+													outline
+													onClick={() => {
 														const mention = mentionInput.trim().replace(/^@/, "");
 														if (mention && !req.requiredMentions?.includes(mention)) {
 															updateReq({ requiredMentions: [...(req.requiredMentions || []), mention] });
 															setMentionInput("");
 														}
-													}
-												}}
-												placeholder="@username"
-											/>
-											<Button
-												type="button"
-												outline
-												onClick={() => {
-													const mention = mentionInput.trim().replace(/^@/, "");
-													if (mention && !req.requiredMentions?.includes(mention)) {
-														updateReq({ requiredMentions: [...(req.requiredMentions || []), mention] });
-														setMentionInput("");
-													}
-												}}
-											>
-												<PlusIcon className="size-4" />
-											</Button>
-										</div>
-										{(req.requiredMentions?.length ?? 0) > 0 && (
-											<div className="mt-1.5 flex flex-wrap gap-1.5">
-												{req.requiredMentions?.map((m) => (
-													<FilterChip
-														key={m}
-														label={`@${m}`}
-														onRemove={() => updateReq({ requiredMentions: req.requiredMentions?.filter((t) => t !== m) || [] })}
-													/>
-												))}
+													}}
+												>
+													<PlusIcon className="size-4" />
+												</Button>
 											</div>
-										)}
-									</Field>
-								</div>
+											{(req.requiredMentions?.length ?? 0) > 0 && (
+												<div className="mt-1.5 flex flex-wrap gap-1.5">
+													{req.requiredMentions?.map((m) => (
+														<FilterChip
+															key={m}
+															label={`@${m}`}
+															onRemove={() =>
+																updateReq({ requiredMentions: req.requiredMentions?.filter((t) => t !== m) || [] })
+															}
+														/>
+													))}
+												</div>
+											)}
+										</Field>
+									</div>
+								)}
 
 								{/* Content */}
-								<div className="space-y-2">
-									<p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Content</p>
-									<div className="grid grid-cols-2 gap-3">
-										<Field>
-											<Label>Min Word Count</Label>
-											<NumberInput
-												value={req.minWordCount ?? undefined}
-												onValueChange={(v) => updateReq({ minWordCount: v.floatValue })}
-												allowNegative={false}
-												decimalScale={0}
-												placeholder="0"
-											/>
-										</Field>
-										<Field>
-											<Label>Min Rating</Label>
-											<Select
-												value={req.minRating?.toString() ?? ""}
-												onChange={(e) => updateReq({ minRating: e.target.value ? Number(e.target.value) : undefined })}
-											>
-												<option value="">None</option>
-												<option value="1">1 Star</option>
-												<option value="2">2 Stars</option>
-												<option value="3">3 Stars</option>
-												<option value="4">4 Stars</option>
-												<option value="5">5 Stars</option>
-											</Select>
-										</Field>
+								{showContent && (
+									<div className="space-y-2">
+										<p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+											Content
+										</p>
+										<div className="grid grid-cols-2 gap-3">
+											<Field>
+												<Label>Min Word Count</Label>
+												<NumberInput
+													value={req.minWordCount ?? undefined}
+													onValueChange={(v) => updateReq({ minWordCount: v.floatValue })}
+													allowNegative={false}
+													decimalScale={0}
+													placeholder="0"
+												/>
+											</Field>
+											<Field>
+												<Label>Min Rating</Label>
+												<Select
+													value={req.minRating?.toString() ?? ""}
+													onChange={(e) =>
+														updateReq({ minRating: e.target.value ? Number(e.target.value) : undefined })
+													}
+												>
+													<option value="">None</option>
+													<option value="1">1 Star</option>
+													<option value="2">2 Stars</option>
+													<option value="3">3 Stars</option>
+													<option value="4">4 Stars</option>
+													<option value="5">5 Stars</option>
+												</Select>
+											</Field>
+										</div>
 									</div>
-								</div>
+								)}
 
 								{/* Media */}
-								<div className="space-y-2">
-									<p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Media</p>
-									<div className="space-y-3">
-										<div className="flex items-center justify-between">
-											<div>
-												<p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Require Photos</p>
-												<p className="text-xs text-zinc-500 dark:text-zinc-400">Creator must include photos</p>
-											</div>
-											<Switch
-												color="emerald"
-												checked={req.requirePhotosInReview ?? false}
-												onChange={(v) => updateReq({ requirePhotosInReview: v })}
-											/>
-										</div>
-										{req.requirePhotosInReview && (
-											<Field>
-												<Label>Min Photos</Label>
-												<NumberInput
-													value={req.minPhotos ?? undefined}
-													onValueChange={(v) => updateReq({ minPhotos: v.floatValue })}
-													allowNegative={false}
-													decimalScale={0}
-													placeholder="1"
+								{showMedia && (
+									<div className="space-y-2">
+										<p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+											Media
+										</p>
+										<div className="space-y-3">
+											<div className="flex items-center justify-between">
+												<div>
+													<p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Require Photos</p>
+													<p className="text-xs text-zinc-500 dark:text-zinc-400">Creator must include photos</p>
+												</div>
+												<Switch
+													color="emerald"
+													checked={req.requirePhotosInReview ?? false}
+													onChange={(v) => updateReq({ requirePhotosInReview: v })}
 												/>
-											</Field>
-										)}
-										<div className="flex items-center justify-between">
-											<div>
-												<p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Require Videos</p>
-												<p className="text-xs text-zinc-500 dark:text-zinc-400">Creator must include videos</p>
 											</div>
-											<Switch
-												color="emerald"
-												checked={req.requireVideosInReview ?? false}
-												onChange={(v) => updateReq({ requireVideosInReview: v })}
-											/>
-										</div>
-										{req.requireVideosInReview && (
-											<Field>
-												<Label>Min Videos</Label>
-												<NumberInput
-													value={req.minVideos ?? undefined}
-													onValueChange={(v) => updateReq({ minVideos: v.floatValue })}
-													allowNegative={false}
-													decimalScale={0}
-													placeholder="1"
+											{req.requirePhotosInReview && (
+												<Field>
+													<Label>Min Photos</Label>
+													<NumberInput
+														value={req.minPhotos ?? undefined}
+														onValueChange={(v) => updateReq({ minPhotos: v.floatValue })}
+														allowNegative={false}
+														decimalScale={0}
+														placeholder="1"
+													/>
+												</Field>
+											)}
+											<div className="flex items-center justify-between">
+												<div>
+													<p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Require Videos</p>
+													<p className="text-xs text-zinc-500 dark:text-zinc-400">Creator must include videos</p>
+												</div>
+												<Switch
+													color="emerald"
+													checked={req.requireVideosInReview ?? false}
+													onChange={(v) => updateReq({ requireVideosInReview: v })}
 												/>
-											</Field>
-										)}
+											</div>
+											{req.requireVideosInReview && (
+												<Field>
+													<Label>Min Videos</Label>
+													<NumberInput
+														value={req.minVideos ?? undefined}
+														onValueChange={(v) => updateReq({ minVideos: v.floatValue })}
+														allowNegative={false}
+														decimalScale={0}
+														placeholder="1"
+													/>
+												</Field>
+											)}
+										</div>
 									</div>
-								</div>
+								)}
 
 								{/* Duration */}
-								<div className="space-y-2">
-									<p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Duration (seconds)</p>
-									<div className="grid grid-cols-2 gap-3">
-										<Field>
-											<Label>Min Duration</Label>
-											<NumberInput
-												value={req.minDuration ?? undefined}
-												onValueChange={(v) => updateReq({ minDuration: v.floatValue })}
-												allowNegative={false}
-												decimalScale={0}
-												placeholder="0"
-											/>
-										</Field>
-										<Field>
-											<Label>Max Duration</Label>
-											<NumberInput
-												value={req.maxDuration ?? undefined}
-												onValueChange={(v) => updateReq({ maxDuration: v.floatValue })}
-												allowNegative={false}
-												decimalScale={0}
-												placeholder="0"
-											/>
-										</Field>
+								{showDuration && (
+									<div className="space-y-2">
+										<p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+											Duration (seconds)
+										</p>
+										<div className="grid grid-cols-2 gap-3">
+											<Field>
+												<Label>Min Duration</Label>
+												<NumberInput
+													value={req.minDuration ?? undefined}
+													onValueChange={(v) => updateReq({ minDuration: v.floatValue })}
+													allowNegative={false}
+													decimalScale={0}
+													placeholder="0"
+												/>
+											</Field>
+											<Field>
+												<Label>Max Duration</Label>
+												<NumberInput
+													value={req.maxDuration ?? undefined}
+													onValueChange={(v) => updateReq({ maxDuration: v.floatValue })}
+													allowNegative={false}
+													decimalScale={0}
+													placeholder="0"
+												/>
+											</Field>
+										</div>
 									</div>
-								</div>
+								)}
 
 								{/* Seller Instructions */}
 								<Field>
@@ -686,12 +663,12 @@ export function CreateCampaignModal({
 					isPublic: data.isPublic,
 					termsAndConditions: data.termsAndConditions?.trim() || undefined,
 				});
-				toast.success("Campaign draft created");
+				showToast.success("Campaign draft created");
 				onSuccess();
 				handleClose();
 				navigate({ to: "/$orgSlug/campaigns/$id", params: { orgSlug, id: campaign.id } });
 			} catch (err) {
-				toast.error(getAPIErrorMessage(err, "Failed to create campaign"));
+				showToast.error(err, "Failed to create campaign");
 			}
 		},
 		[organizationId, createCampaign, onSuccess, navigate, orgSlug, handleClose]
@@ -701,7 +678,7 @@ export function CreateCampaignModal({
 		async (data: CampaignFormValues) => {
 			if (!organizationId) return;
 			if (tasks.length === 0) {
-				toast.error("Add at least one task to submit for approval");
+				showToast.error("Add at least one task to submit for approval");
 				return;
 			}
 
@@ -742,12 +719,12 @@ export function CreateCampaignModal({
 					termsAndConditions: data.termsAndConditions?.trim() || undefined,
 					tasks: apiTasks,
 				});
-				toast.success("Campaign submitted for approval");
+				showToast.success("Campaign submitted for approval");
 				onSuccess();
 				handleClose();
 				navigate({ to: "/$orgSlug/campaigns/$id", params: { orgSlug, id: campaign.id } });
 			} catch (err) {
-				toast.error(getAPIErrorMessage(err, "Failed to submit campaign"));
+				showToast.error(err, "Failed to submit campaign");
 			}
 		},
 		[organizationId, tasks, createAndSubmit, onSuccess, navigate, orgSlug, handleClose]
@@ -769,33 +746,21 @@ export function CreateCampaignModal({
 					if (e.key === "Enter" && e.target instanceof HTMLInputElement) e.preventDefault();
 				}}
 			>
-				{/* Header */}
-				<div className="flex items-center justify-between">
-					<div className="flex items-center gap-3">
-						<div className="flex size-9 items-center justify-center rounded-lg bg-emerald-500/10 dark:bg-emerald-500/15">
-							<MegaphoneIcon className="size-5 text-emerald-600 dark:text-emerald-400" />
-						</div>
-						<div>
-							<DialogTitle>Create Campaign</DialogTitle>
-							<p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
-								Step {step + 1} of {STEPS.length}
-							</p>
-						</div>
-					</div>
-					<button
-						type="button"
-						onClick={handleClose}
-						className="rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
-					>
-						<XMarkIcon className="size-5" />
-					</button>
+				<DialogHeader
+					icon={MegaphoneIcon}
+					iconColor="emerald"
+					title="Create Campaign"
+					description={`Step ${step + 1} of ${STEPS.length} · ${STEPS[step]}`}
+					onClose={handleClose}
+				/>
+
+				{/* Stepper */}
+				<div className="mt-4" ref={stepTopRef}>
+					<WizardStepper steps={STEPS} currentStep={step} completedSteps={completedSteps} onStepClick={goToStep} />
 				</div>
 
 				{/* Body */}
 				<DialogBody>
-					<div ref={stepTopRef} />
-					<WizardStepper steps={STEPS} currentStep={step} completedSteps={completedSteps} onStepClick={goToStep} />
-
 					{/* Step 0: Select Listing */}
 					{step === 0 && (
 						<div className="space-y-4">
@@ -850,9 +815,7 @@ export function CreateCampaignModal({
 												)}
 												<div className="min-w-0 flex-1">
 													<p className="truncate text-sm font-medium text-zinc-900 dark:text-white">{listing.name}</p>
-													<p className="text-xs text-zinc-500">
-														{formatCurrency(listing.priceDecimal)}
-													</p>
+													<p className="text-xs text-zinc-500">{formatCurrency(listing.priceDecimal)}</p>
 												</div>
 												{selected && <CheckCircleIcon className="size-5 shrink-0 text-emerald-500" />}
 											</button>
@@ -951,7 +914,12 @@ export function CreateCampaignModal({
 												<Icon className="size-4 shrink-0 sm:size-5" />
 												<div>
 													<p className="text-xs font-medium sm:text-sm">{opt.label}</p>
-													<p className={clsx("hidden text-xs sm:block", active ? "opacity-60" : "text-zinc-400 dark:text-zinc-500")}>
+													<p
+														className={clsx(
+															"hidden text-xs sm:block",
+															active ? "opacity-60" : "text-zinc-400 dark:text-zinc-500"
+														)}
+													>
 														{opt.desc}
 													</p>
 												</div>
@@ -1080,10 +1048,10 @@ export function CreateCampaignModal({
 									<div className="flex items-center gap-2">
 										<RocketLaunchIcon className="size-4 text-zinc-400" />
 										<p className="text-sm font-medium text-zinc-900 dark:text-white">Tasks</p>
-										{tasks.length > 0 && (
-											<Badge color="emerald">{tasks.length}</Badge>
-										)}
-										<Badge color="zinc" className="ml-auto">Optional</Badge>
+										{tasks.length > 0 && <Badge color="emerald">{tasks.length}</Badge>}
+										<Badge color="zinc" className="ml-auto">
+											Optional
+										</Badge>
 									</div>
 									<p className="mt-1.5 text-xs text-zinc-500 dark:text-zinc-400">
 										Add tasks to submit for approval immediately, or skip to save as draft.
@@ -1162,7 +1130,9 @@ export function CreateCampaignModal({
 												>
 													<option value="">All platforms</option>
 													{platforms.map((p) => (
-														<option key={p.id} value={p.id}>{p.name}</option>
+														<option key={p.id} value={p.id}>
+															{p.name}
+														</option>
 													))}
 												</Select>
 											)}
@@ -1175,7 +1145,9 @@ export function CreateCampaignModal({
 												</div>
 											) : taskTemplates.length === 0 ? (
 												<Select disabled>
-													<option>{selectedPlatformId ? "No tasks for this platform" : "Select a platform first"}</option>
+													<option>
+														{selectedPlatformId ? "No tasks for this platform" : "Select a platform first"}
+													</option>
 												</Select>
 											) : (
 												<Select
@@ -1189,18 +1161,22 @@ export function CreateCampaignModal({
 															taskTemplateId: tpl.id,
 															taskTemplateName: tpl.name,
 															platformName: platform?.name || tpl.platformName,
+															category: tpl.category,
 															instructions: "",
 															requirements: tpl.defaultRequirements ?? {},
 														};
 														setTasks((prev) => [...prev, entry]);
 													}}
 												>
-													<option value="" disabled>Select task type…</option>
+													<option value="" disabled>
+														Select task type…
+													</option>
 													{taskTemplates.map((tpl) => {
 														const alreadyAdded = tasks.some((t) => t.taskTemplateId === tpl.id);
 														return (
 															<option key={tpl.id} value={tpl.id} disabled={alreadyAdded}>
-																{tpl.name}{alreadyAdded ? " (added)" : ""}
+																{tpl.name}
+																{alreadyAdded ? " (added)" : ""}
 															</option>
 														);
 													})}
@@ -1216,9 +1192,7 @@ export function CreateCampaignModal({
 								<TaskRequirementsDialog
 									task={editingTask}
 									onSave={(updated) => {
-										setTasks((prev) =>
-											prev.map((t, i) => (i === editingTaskIdx ? { ...t, ...updated } : t))
-										);
+										setTasks((prev) => prev.map((t, i) => (i === editingTaskIdx ? { ...t, ...updated } : t)));
 										setEditingTaskIdx(null);
 									}}
 									onClose={() => setEditingTaskIdx(null)}
@@ -1258,9 +1232,7 @@ export function CreateCampaignModal({
 											{selectedListing?.name || "Unknown listing"}
 										</p>
 										<p className="text-xs text-zinc-500">
-											{selectedListing
-												? formatCurrency(selectedListing.priceDecimal)
-												: ""}
+											{selectedListing ? formatCurrency(selectedListing.priceDecimal) : ""}
 										</p>
 									</div>
 								</div>
@@ -1323,7 +1295,9 @@ export function CreateCampaignModal({
 											value={
 												<div className="flex flex-wrap justify-end gap-1">
 													{tasks.map((t) => (
-														<Badge key={t.id} color="zinc">{t.taskTemplateName}</Badge>
+														<Badge key={t.id} color="zinc">
+															{t.taskTemplateName}
+														</Badge>
 													))}
 												</div>
 											}
@@ -1335,31 +1309,37 @@ export function CreateCampaignModal({
 					)}
 				</DialogBody>
 
-				{/* Actions */}
-				<div className="mt-6 flex gap-2">
-					{step > 0 && (
-						<Button type="button" onClick={() => goToStep(step - 1)} color="zinc" className="w-full">
-							<ChevronLeftIcon />
-							Back
+				<DialogActions>
+					<div className="flex flex-1 items-center">
+						{step > 0 && (
+							<Button type="button" onClick={() => goToStep(step - 1)} outline>
+								<ChevronLeftIcon />
+								Back
+							</Button>
+						)}
+					</div>
+					{step === 0 && (
+						<Button plain onClick={handleClose}>
+							Cancel
 						</Button>
 					)}
 					{step < 3 ? (
-						<Button type="button" onClick={goNext} color="emerald" className="w-full">
+						<Button type="button" onClick={goNext} color="emerald">
 							{step === 2 ? "Review" : "Continue"}
 							<ChevronRightIcon />
 						</Button>
 					) : tasks.length > 0 ? (
-						<Button type="button" color="emerald" onClick={handleSubmit(onSubmitAndPublish)} disabled={isPending} className="w-full">
+						<Button type="button" color="emerald" onClick={handleSubmit(onSubmitAndPublish)} disabled={isPending}>
 							{createAndSubmit.isPending ? <ArrowPathIcon className="size-4 animate-spin" /> : <RocketLaunchIcon />}
 							Submit for Approval
 						</Button>
 					) : (
-						<Button type="submit" color="emerald" disabled={isPending} className="w-full">
+						<Button type="submit" color="emerald" disabled={isPending}>
 							{createCampaign.isPending ? <ArrowPathIcon className="size-4 animate-spin" /> : <PlusIcon />}
 							Save as Draft
 						</Button>
 					)}
-				</div>
+				</DialogActions>
 			</form>
 		</Dialog>
 	);

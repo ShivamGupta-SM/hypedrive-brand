@@ -21,6 +21,7 @@ export function useCampaigns(
 			return client.brand.listCampaigns(organizationId as string, params || {});
 		},
 		enabled: !!organizationId,
+		staleTime: 30_000,
 	});
 
 	return {
@@ -53,6 +54,7 @@ export function useInfiniteCampaigns(
 			return allPages.reduce((acc, page) => acc + (page.data?.length ?? 0), 0);
 		},
 		enabled: !!organizationId,
+		staleTime: 30_000,
 	});
 
 	const data = query.data?.pages.flatMap((page) => page.data ?? []) ?? [];
@@ -152,7 +154,16 @@ export function useUpdateCampaign(organizationId: string | undefined) {
 	});
 }
 
-export function usePauseCampaign() {
+// =============================================================================
+// CAMPAIGN STATE MUTATIONS — Factory pattern to avoid 6 nearly identical hooks
+// =============================================================================
+
+type CampaignAction = "pause" | "resume" | "end" | "cancel" | "archive" | "submit";
+
+/** Actions that also invalidate the individual campaign detail cache */
+const INVALIDATES_DETAIL: CampaignAction[] = ["pause", "resume", "end", "submit"];
+
+function useCampaignStateAction(action: CampaignAction) {
 	const queryClient = useQueryClient();
 
 	return useMutation({
@@ -166,70 +177,37 @@ export function usePauseCampaign() {
 			reason?: string;
 		}) => {
 			const client = getAuthenticatedClient();
-			return client.brand.updateCampaignState(organizationId, campaignId, {
-				action: "pause",
-				reason,
-			});
+			return client.brand.updateCampaignState(organizationId, campaignId, { action, reason });
 		},
 		onSuccess: (_, v) => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.campaigns(v.organizationId) });
 			queryClient.invalidateQueries({ queryKey: queryKeys.infiniteCampaigns(v.organizationId) });
-			queryClient.invalidateQueries({
-				queryKey: queryKeys.campaign(v.organizationId, v.campaignId),
-			});
+			if (INVALIDATES_DETAIL.includes(action)) {
+				queryClient.invalidateQueries({
+					queryKey: queryKeys.campaign(v.organizationId, v.campaignId),
+				});
+			}
 		},
 	});
 }
 
+export function usePauseCampaign() {
+	return useCampaignStateAction("pause");
+}
 export function useResumeCampaign() {
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: async ({ organizationId, campaignId }: { organizationId: string; campaignId: string }) => {
-			const client = getAuthenticatedClient();
-			return client.brand.updateCampaignState(organizationId, campaignId, { action: "resume" });
-		},
-		onSuccess: (_, v) => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.campaigns(v.organizationId) });
-			queryClient.invalidateQueries({ queryKey: queryKeys.infiniteCampaigns(v.organizationId) });
-			queryClient.invalidateQueries({
-				queryKey: queryKeys.campaign(v.organizationId, v.campaignId),
-			});
-		},
-	});
+	return useCampaignStateAction("resume");
 }
-
 export function useEndCampaign() {
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: async ({ organizationId, campaignId }: { organizationId: string; campaignId: string }) => {
-			const client = getAuthenticatedClient();
-			return client.brand.updateCampaignState(organizationId, campaignId, { action: "end" });
-		},
-		onSuccess: (_, v) => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.campaigns(v.organizationId) });
-			queryClient.invalidateQueries({ queryKey: queryKeys.infiniteCampaigns(v.organizationId) });
-			queryClient.invalidateQueries({
-				queryKey: queryKeys.campaign(v.organizationId, v.campaignId),
-			});
-		},
-	});
+	return useCampaignStateAction("end");
 }
-
 export function useCancelCampaign() {
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: async ({ organizationId, campaignId }: { organizationId: string; campaignId: string }) => {
-			const client = getAuthenticatedClient();
-			return client.brand.updateCampaignState(organizationId, campaignId, { action: "cancel" });
-		},
-		onSuccess: (_, v) => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.campaigns(v.organizationId) });
-			queryClient.invalidateQueries({ queryKey: queryKeys.infiniteCampaigns(v.organizationId) });
-		},
-	});
+	return useCampaignStateAction("cancel");
+}
+export function useArchiveCampaign() {
+	return useCampaignStateAction("archive");
+}
+export function useSubmitCampaign() {
+	return useCampaignStateAction("submit");
 }
 
 export function useDuplicateCampaign() {
@@ -251,39 +229,6 @@ export function useDuplicateCampaign() {
 		onSuccess: (_, v) => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.campaigns(v.organizationId) });
 			queryClient.invalidateQueries({ queryKey: queryKeys.infiniteCampaigns(v.organizationId) });
-		},
-	});
-}
-
-export function useArchiveCampaign() {
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: async ({ organizationId, campaignId }: { organizationId: string; campaignId: string }) => {
-			const client = getAuthenticatedClient();
-			return client.brand.updateCampaignState(organizationId, campaignId, { action: "archive" });
-		},
-		onSuccess: (_, v) => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.campaigns(v.organizationId) });
-			queryClient.invalidateQueries({ queryKey: queryKeys.infiniteCampaigns(v.organizationId) });
-		},
-	});
-}
-
-export function useSubmitCampaign() {
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: async ({ organizationId, campaignId }: { organizationId: string; campaignId: string }) => {
-			const client = getAuthenticatedClient();
-			return client.brand.updateCampaignState(organizationId, campaignId, { action: "submit" });
-		},
-		onSuccess: (_, v) => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.campaigns(v.organizationId) });
-			queryClient.invalidateQueries({ queryKey: queryKeys.infiniteCampaigns(v.organizationId) });
-			queryClient.invalidateQueries({
-				queryKey: queryKeys.campaign(v.organizationId, v.campaignId),
-			});
 		},
 	});
 }

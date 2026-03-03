@@ -6,6 +6,7 @@ import {
 	Cog6ToothIcon,
 	CubeIcon,
 	DocumentTextIcon,
+	ExclamationCircleIcon,
 	HomeIcon,
 	MagnifyingGlassIcon,
 	RocketLaunchIcon,
@@ -14,8 +15,11 @@ import {
 } from "@heroicons/react/16/solid";
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Badge } from "@/components/badge";
+import { Skeleton, SkeletonProvider } from "@/components/skeleton";
 import { useCurrentOrganization, useUnifiedSearch } from "@/hooks";
 import type { brand } from "@/lib/brand-client";
+import { formatRelativeTime, formatStatus, getStatusColor } from "@/lib/design-tokens";
 import { HighlightText } from "@/lib/highlight-text";
 
 // =============================================================================
@@ -88,30 +92,6 @@ function getResultIconBg(type: string) {
 		default:
 			return "bg-zinc-100 dark:bg-zinc-800";
 	}
-}
-
-function getStatusBadgeClasses(status: string): string {
-	const s = status.toLowerCase();
-	if (s === "active") return "bg-lime-100 text-lime-700 dark:bg-lime-950/40 dark:text-lime-400";
-	if (s === "draft") return "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400";
-	if (s.includes("pending") || s.includes("awaiting"))
-		return "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400";
-	if (s === "approved" || s === "completed")
-		return "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400";
-	if (s.includes("reject") || s === "cancelled" || s === "expired")
-		return "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400";
-	if (s === "paused") return "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400";
-	return "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400";
-}
-
-function formatRelativeTime(dateString: string): string {
-	const date = new Date(dateString);
-	const diffDays = Math.floor((Date.now() - date.getTime()) / 86400000);
-	if (diffDays === 0) return "Today";
-	if (diffDays === 1) return "Yesterday";
-	if (diffDays < 7) return `${diffDays}d ago`;
-	if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
-	return date.toLocaleDateString("en-IN", { month: "short", day: "numeric" });
 }
 
 function groupByType(results: brand.BrandSearchResult[]) {
@@ -187,6 +167,23 @@ function useRecentSearches() {
 }
 
 // =============================================================================
+// SKELETON
+// =============================================================================
+
+function SearchResultSkeleton() {
+	return (
+		<div className="flex items-center gap-3 px-2.5 py-2.5">
+			<Skeleton width={40} height={40} borderRadius={8} />
+			<div className="flex-1 space-y-1.5">
+				<Skeleton width="55%" height={14} />
+				<Skeleton width="35%" height={11} />
+			</div>
+			<Skeleton width={40} height={11} />
+		</div>
+	);
+}
+
+// =============================================================================
 // SEARCH RESULT ROW
 // =============================================================================
 
@@ -224,19 +221,19 @@ function SearchResultRow({
 		<button
 			type="button"
 			onClick={onSelect}
-			className={`group flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left transition-colors ${
-				isFocused ? "bg-zinc-100 dark:bg-zinc-800" : "hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+			className={`group flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left transition-all ${
+				isFocused ? "bg-zinc-950/[0.04] dark:bg-white/[0.06]" : "hover:bg-zinc-950/[0.03] dark:hover:bg-white/[0.04]"
 			}`}
 		>
 			{thumbnail ? (
 				<img
 					src={thumbnail}
 					alt=""
-					className="size-9 shrink-0 rounded-lg bg-zinc-100 object-contain dark:bg-zinc-800"
+					className="size-10 shrink-0 rounded-lg bg-zinc-100 object-contain dark:bg-zinc-800"
 				/>
 			) : (
 				<div
-					className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${getResultIconBg(result.resultType)}`}
+					className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${getResultIconBg(result.resultType)}`}
 				>
 					{getResultIcon(result.resultType)}
 				</div>
@@ -247,19 +244,30 @@ function SearchResultRow({
 					<span className="truncate text-sm font-medium text-zinc-900 dark:text-white">
 						<HighlightText text={result.title} query={query} />
 					</span>
-					<span
-						className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium ${getStatusBadgeClasses(result.status)}`}
-					>
-						{result.status.replace(/_/g, " ")}
-					</span>
+					<Badge color={getStatusColor(result.status)} className="shrink-0 text-[10px]/4">
+						{formatStatus(result.status)}
+					</Badge>
 				</div>
-				{meta.length > 0 && <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">{meta.join(" · ")}</p>}
-				{result.displayId && <p className="text-[10px] text-zinc-400 dark:text-zinc-500">{result.displayId}</p>}
+				{meta.length > 0 && (
+					<p className="mt-0.5 truncate text-xs text-zinc-500 dark:text-zinc-400">
+						{meta.map((m, i) => (
+							<span key={i}>
+								{i > 0 && " · "}
+								<HighlightText text={m} query={query} />
+							</span>
+						))}
+					</p>
+				)}
+				{result.displayId && (
+					<p className="mt-0.5 text-[10px] text-zinc-400 dark:text-zinc-500">
+						<HighlightText text={result.displayId} query={query} />
+					</p>
+				)}
 			</div>
 
-			<div className="shrink-0 text-right">
-				<p className="text-xs text-zinc-400">{formatRelativeTime(result.createdAt)}</p>
-				<ArrowRightIcon className="ml-auto mt-0.5 size-3 text-zinc-300 opacity-0 transition-opacity group-hover:opacity-100 dark:text-zinc-600" />
+			<div className="flex shrink-0 flex-col items-end gap-1">
+				<p className="text-[11px] text-zinc-400 dark:text-zinc-500">{formatRelativeTime(result.createdAt)}</p>
+				<ArrowRightIcon className="size-3 text-zinc-300 opacity-0 transition-opacity group-hover:opacity-100 dark:text-zinc-600" />
 			</div>
 		</button>
 	);
@@ -282,13 +290,19 @@ export function SearchDialog({ isOpen, onClose, orgSlug }: { isOpen: boolean; on
 
 	const hasQuery = debouncedQuery.trim().length >= 2;
 
-	const { data: searchResults, loading } = useUnifiedSearch(hasQuery ? organization?.id : undefined, {
+	const {
+		data: searchResults,
+		loading,
+		isFetching,
+		error: searchError,
+	} = useUnifiedSearch(hasQuery ? organization?.id : undefined, {
 		q: debouncedQuery,
 		limit: 50,
 	});
 
 	const allResults = searchResults?.data ?? [];
 	const facets = searchResults?.facets;
+	const hasMore = searchResults?.hasMore ?? false;
 
 	const filteredResults = useMemo(() => {
 		if (filter === "all") return allResults;
@@ -460,10 +474,10 @@ export function SearchDialog({ isOpen, onClose, orgSlug }: { isOpen: boolean; on
 			<div className="fixed inset-x-4 top-[8%] z-50 mx-auto sm:inset-x-auto sm:left-1/2 sm:w-full sm:max-w-xl sm:-translate-x-1/2 md:max-w-2xl">
 				<Headless.DialogPanel
 					transition
-					className="overflow-hidden rounded-xl bg-white shadow-2xl ring-1 ring-zinc-200 transition duration-200 ease-out data-closed:scale-95 data-closed:opacity-0 dark:bg-zinc-900 dark:ring-zinc-800"
+					className="overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-zinc-950/5 transition duration-200 ease-out data-closed:scale-95 data-closed:opacity-0 dark:bg-zinc-900 dark:ring-white/10"
 				>
 					{/* Search Input */}
-					<div className="flex items-center gap-3 border-b border-zinc-200 px-4 dark:border-zinc-700">
+					<div className="flex items-center gap-3 border-b border-zinc-200 px-5 dark:border-zinc-800">
 						<MagnifyingGlassIcon className="size-5 shrink-0 text-zinc-400" />
 						<input
 							ref={inputRef}
@@ -473,8 +487,8 @@ export function SearchDialog({ isOpen, onClose, orgSlug }: { isOpen: boolean; on
 								setQuery(e.target.value);
 								setFocusedIndex(-1);
 							}}
-							placeholder="Search campaigns, enrollments, listings, invoices..."
-							className="h-12 w-full bg-transparent text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none dark:text-white"
+							placeholder="Search campaigns, enrollments, listings..."
+							className="h-13 w-full bg-transparent text-base text-zinc-900 placeholder:text-zinc-400 focus:outline-none dark:text-white sm:text-sm"
 						/>
 						{query && (
 							<button
@@ -484,47 +498,63 @@ export function SearchDialog({ isOpen, onClose, orgSlug }: { isOpen: boolean; on
 									setFocusedIndex(-1);
 									inputRef.current?.focus();
 								}}
-								className="shrink-0 p-1 text-zinc-400 transition-colors hover:text-zinc-600 dark:hover:text-zinc-300"
+								className="flex size-6 shrink-0 items-center justify-center rounded-md bg-zinc-100 text-zinc-400 transition-colors hover:bg-zinc-200 hover:text-zinc-600 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:hover:text-zinc-300"
 							>
-								<XMarkIcon className="size-4" />
+								<XMarkIcon className="size-3.5" />
 							</button>
 						)}
+						<kbd className="hidden shrink-0 rounded border border-zinc-200 bg-zinc-50 px-1.5 py-0.5 font-mono text-[10px] text-zinc-400 sm:block dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-500">
+							Esc
+						</kbd>
 					</div>
+
+					{/* Refetch progress bar */}
+					{hasQuery && isFetching && !loading && (
+						<div className="h-0.5 bg-zinc-200/60 dark:bg-zinc-700/60">
+							<div className="h-full w-1/3 animate-pulse rounded-full bg-zinc-400/50 dark:bg-zinc-500/50" />
+						</div>
+					)}
 
 					{/* Filter Tabs */}
 					{hasQuery && facets && (
-						<div className="flex gap-1.5 overflow-x-auto border-b border-zinc-200 px-4 py-2 dark:border-zinc-700">
+						<div className="flex gap-1 overflow-x-auto border-b border-zinc-200 px-5 py-2 dark:border-zinc-800">
 							{tabs.map((tab) => (
 								<button
 									key={tab.key}
 									type="button"
 									onClick={() => setFilter(tab.key)}
-									className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
+									className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors ${
 										filter === tab.key
 											? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
-											: "text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
+											: "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
 									}`}
 								>
 									{tab.label}
-									{tab.count > 0 && <span className="ml-1 opacity-60">{tab.count}</span>}
+									{tab.count > 0 && (
+										<span className={`ml-1 ${filter === tab.key ? "opacity-60" : "text-zinc-400 dark:text-zinc-500"}`}>
+											{tab.count}
+										</span>
+									)}
 								</button>
 							))}
 						</div>
 					)}
 
 					{/* Results list */}
-					<div ref={listRef} className="max-h-[420px] overflow-y-auto p-2">
-						{/* Empty state */}
+					<div ref={listRef} className="max-h-[420px] overflow-y-auto px-2 py-2">
+						{/* Empty state — recent searches + quick actions */}
 						{!hasQuery && (
 							<>
 								{recentSearches.length > 0 && (
 									<>
-										<div className="flex items-center justify-between px-2 py-1.5">
-											<span className="text-xs font-medium text-zinc-400">Recent</span>
+										<div className="flex items-center justify-between px-2.5 py-1.5">
+											<span className="text-[11px] font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+												Recent
+											</span>
 											<button
 												type="button"
 												onClick={clearRecentSearches}
-												className="text-xs text-zinc-400 transition-colors hover:text-zinc-600 dark:hover:text-zinc-300"
+												className="text-[11px] text-zinc-400 transition-colors hover:text-zinc-600 dark:hover:text-zinc-300"
 											>
 												Clear
 											</button>
@@ -532,10 +562,10 @@ export function SearchDialog({ isOpen, onClose, orgSlug }: { isOpen: boolean; on
 										{recentSearches.map((search, i) => (
 											<div
 												key={search.query}
-												className={`flex items-center gap-3 rounded-lg px-2 py-2 transition-colors ${
+												className={`flex items-center gap-3 rounded-xl px-2.5 py-2 transition-all ${
 													focusedIndex === getRecentFlatIndex(i)
-														? "bg-zinc-100 dark:bg-zinc-800"
-														: "hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+														? "bg-zinc-950/[0.04] dark:bg-white/[0.06]"
+														: "hover:bg-zinc-950/[0.03] dark:hover:bg-white/[0.04]"
 												}`}
 											>
 												<button
@@ -543,23 +573,25 @@ export function SearchDialog({ isOpen, onClose, orgSlug }: { isOpen: boolean; on
 													onClick={() => setQuery(search.query)}
 													className="flex flex-1 items-center gap-3 text-left"
 												>
-													<ClockIcon className="size-4 shrink-0 text-zinc-400" />
+													<ClockIcon className="size-4 shrink-0 text-zinc-300 dark:text-zinc-600" />
 													<span className="flex-1 text-sm text-zinc-700 dark:text-zinc-300">{search.query}</span>
 												</button>
 												<button
 													type="button"
 													onClick={() => removeRecentSearch(search.query)}
-													className="text-zinc-400 transition-colors hover:text-zinc-600"
+													className="rounded-md p-0.5 text-zinc-300 transition-colors hover:text-zinc-500 dark:text-zinc-600 dark:hover:text-zinc-400"
 												>
 													<XMarkIcon className="size-3.5" />
 												</button>
 											</div>
 										))}
-										<div className="my-1.5 h-px bg-zinc-100 dark:bg-zinc-800" />
+										<div className="my-2 h-px bg-zinc-100 dark:bg-zinc-800" />
 									</>
 								)}
-								<div className="px-2 py-1.5">
-									<span className="text-xs font-medium text-zinc-400">Quick Actions</span>
+								<div className="px-2.5 py-1.5">
+									<span className="text-[11px] font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+										Quick Actions
+									</span>
 								</div>
 								{filteredActions.map((action, i) => (
 									<button
@@ -569,35 +601,45 @@ export function SearchDialog({ isOpen, onClose, orgSlug }: { isOpen: boolean; on
 											navigate({ to: action.path });
 											onClose();
 										}}
-										className={`group flex w-full items-center gap-3 rounded-lg px-2 py-2 transition-colors ${
+										className={`group flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 transition-all ${
 											focusedIndex === getActionFlatIndex(i)
-												? "bg-zinc-100 dark:bg-zinc-800"
-												: "hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+												? "bg-zinc-950/[0.04] dark:bg-white/[0.06]"
+												: "hover:bg-zinc-950/[0.03] dark:hover:bg-white/[0.04]"
 										}`}
 									>
-										<div className="flex size-8 items-center justify-center rounded-lg bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+										<div className="flex size-9 items-center justify-center rounded-lg bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
 											{action.icon}
 										</div>
 										<div className="flex-1 text-left">
 											<p className="text-sm font-medium text-zinc-900 dark:text-white">{action.label}</p>
 											<p className="text-xs text-zinc-500 dark:text-zinc-400">{action.description}</p>
 										</div>
-										<ArrowRightIcon className="size-4 text-zinc-300 opacity-0 transition-opacity group-hover:opacity-100 dark:text-zinc-600" />
+										<ArrowRightIcon className="size-3.5 text-zinc-300 opacity-0 transition-opacity group-hover:opacity-100 dark:text-zinc-600" />
 									</button>
 								))}
 							</>
 						)}
 
-						{/* Loading */}
+						{/* Loading — skeleton shimmer */}
 						{hasQuery && loading && (
-							<div className="flex items-center justify-center py-8">
-								<div className="size-4 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-600 dark:border-zinc-700 dark:border-t-zinc-300" />
-								<span className="ml-2 text-xs text-zinc-500">Searching...</span>
+							<SkeletonProvider>
+								{Array.from({ length: 5 }).map((_, i) => (
+									<SearchResultSkeleton key={i} />
+								))}
+							</SkeletonProvider>
+						)}
+
+						{/* Error state */}
+						{hasQuery && !loading && searchError && (
+							<div className="py-8 text-center">
+								<ExclamationCircleIcon className="mx-auto size-6 text-red-400 dark:text-red-500" />
+								<p className="mt-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">Search unavailable</p>
+								<p className="mt-1 text-xs text-zinc-400">Something went wrong. Try again in a moment.</p>
 							</div>
 						)}
 
 						{/* No results */}
-						{hasQuery && !loading && filteredResults.length === 0 && (
+						{hasQuery && !loading && !searchError && filteredResults.length === 0 && (
 							<div className="py-8 text-center">
 								<MagnifyingGlassIcon className="mx-auto size-6 text-zinc-300 dark:text-zinc-600" />
 								<p className="mt-2 text-sm text-zinc-500">
@@ -612,8 +654,10 @@ export function SearchDialog({ isOpen, onClose, orgSlug }: { isOpen: boolean; on
 							<>
 								{(filter === "all" || filter === "campaigns") && grouped.campaigns.length > 0 && (
 									<>
-										<div className="px-2 py-1.5">
-											<span className="text-xs font-medium text-zinc-400">Campaigns</span>
+										<div className="px-2.5 py-1.5">
+											<span className="text-[11px] font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+												Campaigns
+											</span>
 										</div>
 										{grouped.campaigns.map((result) => (
 											<SearchResultRow
@@ -628,8 +672,10 @@ export function SearchDialog({ isOpen, onClose, orgSlug }: { isOpen: boolean; on
 								)}
 								{(filter === "all" || filter === "enrollments") && grouped.enrollments.length > 0 && (
 									<>
-										<div className="px-2 py-1.5">
-											<span className="text-xs font-medium text-zinc-400">Enrollments</span>
+										<div className="px-2.5 py-1.5">
+											<span className="text-[11px] font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+												Enrollments
+											</span>
 										</div>
 										{grouped.enrollments.map((result) => (
 											<SearchResultRow
@@ -644,8 +690,10 @@ export function SearchDialog({ isOpen, onClose, orgSlug }: { isOpen: boolean; on
 								)}
 								{(filter === "all" || filter === "listings") && grouped.listings.length > 0 && (
 									<>
-										<div className="px-2 py-1.5">
-											<span className="text-xs font-medium text-zinc-400">Listings</span>
+										<div className="px-2.5 py-1.5">
+											<span className="text-[11px] font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+												Listings
+											</span>
 										</div>
 										{grouped.listings.map((result) => (
 											<SearchResultRow
@@ -660,8 +708,10 @@ export function SearchDialog({ isOpen, onClose, orgSlug }: { isOpen: boolean; on
 								)}
 								{(filter === "all" || filter === "invoices") && grouped.invoices.length > 0 && (
 									<>
-										<div className="px-2 py-1.5">
-											<span className="text-xs font-medium text-zinc-400">Invoices</span>
+										<div className="px-2.5 py-1.5">
+											<span className="text-[11px] font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+												Invoices
+											</span>
 										</div>
 										{grouped.invoices.map((result) => (
 											<SearchResultRow
@@ -674,24 +724,39 @@ export function SearchDialog({ isOpen, onClose, orgSlug }: { isOpen: boolean; on
 										))}
 									</>
 								)}
+
+								{/* Has more results notice */}
+								{hasMore && (
+									<div className="mt-1 border-t border-zinc-100 px-2 py-2 dark:border-zinc-800">
+										<p className="text-center text-xs text-zinc-400">
+											Showing top results — refine your query to narrow down
+										</p>
+									</div>
+								)}
 							</>
 						)}
 					</div>
 
 					{/* Footer */}
-					<div className="flex items-center justify-between border-t border-zinc-200 px-4 py-2 text-[10px] text-zinc-400 dark:border-zinc-700">
+					<div className="flex items-center justify-between border-t border-zinc-200 px-5 py-2.5 text-[11px] text-zinc-400 dark:border-zinc-800 dark:text-zinc-500">
 						<div className="flex items-center gap-3">
-							<span className="flex items-center gap-1">
-								<kbd className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">↑↓</kbd>
+							<span className="flex items-center gap-1.5">
+								<kbd className="rounded border border-zinc-200 bg-zinc-50 px-1.5 py-0.5 font-mono text-[10px] text-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400">
+									↑↓
+								</kbd>
 								navigate
 							</span>
-							<span className="flex items-center gap-1">
-								<kbd className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">↵</kbd>
+							<span className="flex items-center gap-1.5">
+								<kbd className="rounded border border-zinc-200 bg-zinc-50 px-1.5 py-0.5 font-mono text-[10px] text-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400">
+									↵
+								</kbd>
 								select
 							</span>
 						</div>
-						<span className="flex items-center gap-1">
-							<kbd className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">Esc</kbd>
+						<span className="flex items-center gap-1.5">
+							<kbd className="rounded border border-zinc-200 bg-zinc-50 px-1.5 py-0.5 font-mono text-[10px] text-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400">
+								Esc
+							</kbd>
 							close
 						</span>
 					</div>

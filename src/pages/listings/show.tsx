@@ -1,21 +1,22 @@
-import * as Headless from "@headlessui/react";
 import { Button } from "@/components/button";
+import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/dialog";
 import { Heading } from "@/components/heading";
 import { CopyButton } from "@/components/shared";
 import { Card } from "@/components/shared/card";
 import { EmptyState } from "@/components/shared/empty-state";
+import { ErrorState } from "@/components/shared/error-state";
 import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
 import { Skeleton } from "@/components/skeleton";
 import { Text } from "@/components/text";
 import {
 	getAPIErrorMessage,
 	getAssetUrl,
-	useCurrentOrganization,
 	useDeleteListing,
 	useListing,
+	useOrgContext,
 	useUpdateListing,
 } from "@/hooks";
-import { useOrgSlug } from "@/hooks/use-org-slug";
+import { usePageTitle } from "@/hooks/use-breadcrumb";
 import type { brand } from "@/lib/brand-client";
 
 type Listing = brand.ListingWithStats;
@@ -47,26 +48,6 @@ import { showToast } from "@/lib/toast";
 import { useCan } from "@/store/permissions-store";
 
 const routeApi = getRouteApi("/_app/$orgSlug/listings_/$id");
-
-// =============================================================================
-// ERROR STATE
-// =============================================================================
-
-function ErrorState({ onRetry }: { onRetry: () => void }) {
-	return (
-		<div className="flex flex-col items-center justify-center py-16 text-center">
-			<div className="flex size-16 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-950/30">
-				<ExclamationTriangleIcon className="size-8 text-red-400" />
-			</div>
-			<p className="mt-4 text-lg font-semibold text-zinc-900 dark:text-white">Something went wrong</p>
-			<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Failed to load listing details. Please try again.</p>
-			<Button className="mt-6" onClick={onRetry} color="dark/zinc">
-				<ArrowPathIcon className="size-4" />
-				Try Again
-			</Button>
-		</div>
-	);
-}
 
 // =============================================================================
 // LOADING SKELETON
@@ -314,337 +295,299 @@ function EditListingModal({
 	}, [onClose]);
 
 	return (
-		<Headless.Dialog open={isOpen} onClose={resetAndClose} className="relative z-50">
-			<Headless.DialogBackdrop
-				transition
-				className="fixed inset-0 bg-black/40 backdrop-blur-sm transition duration-200 ease-out data-closed:opacity-0"
+		<Dialog open={isOpen} onClose={resetAndClose} size="lg">
+			<DialogHeader
+				icon={PencilIcon}
+				iconColor="amber"
+				title="Edit Listing"
+				description={`Step ${step} of 2 · ${EDIT_LISTING_STEPS[step - 1].description}`}
+				onClose={resetAndClose}
 			/>
 
-			<div className="fixed inset-0 overflow-y-auto">
-				<div className="flex min-h-full items-end justify-center sm:items-center sm:p-4">
-					<Headless.DialogPanel
-						transition
-						className="w-full max-w-lg rounded-t-2xl bg-white transition duration-300 ease-out data-closed:translate-y-full sm:rounded-2xl sm:data-closed:translate-y-8 sm:data-closed:scale-95 dark:bg-zinc-900"
-					>
-						{/* Handle - mobile only */}
-						<div className="flex justify-center py-3 sm:hidden">
-							<div className="h-1 w-10 rounded-full bg-zinc-300 dark:bg-zinc-700" />
-						</div>
-
-						{/* Header */}
-						<div className="flex items-center justify-between border-b border-zinc-200 px-5 pb-4 pt-2 sm:pt-5 dark:border-zinc-800">
-							<div>
-								<Headless.DialogTitle className="text-lg font-semibold text-zinc-900 dark:text-white">
-									Edit Listing
-								</Headless.DialogTitle>
-								<p className="mt-0.5 text-sm text-zinc-500">
-									Step {step} of 2 · {EDIT_LISTING_STEPS[step - 1].description}
-								</p>
-							</div>
-							<button
-								type="button"
-								onClick={resetAndClose}
-								className="rounded-full p-2 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-							>
-								<XMarkIcon className="size-5" />
-							</button>
-						</div>
-
-						{/* Progress Steps */}
-						<div className="border-b border-zinc-200 px-5 py-3 dark:border-zinc-800">
-							<div className="flex items-center justify-center gap-4">
-								{EDIT_LISTING_STEPS.map((s, idx) => (
-									<div key={s.id} className="flex items-center">
-										<div
-											className={clsx(
-												"flex size-8 items-center justify-center rounded-full text-sm font-medium transition-colors",
-												step > s.id
-													? "bg-emerald-500 text-white"
-													: step === s.id
-														? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
-														: "bg-zinc-100 text-zinc-400 dark:bg-zinc-800"
-											)}
-										>
-											{step > s.id ? <CheckCircleIcon className="size-5" /> : s.id}
-										</div>
-										{idx < EDIT_LISTING_STEPS.length - 1 && (
-											<div
-												className={clsx(
-													"mx-3 h-0.5 w-12 rounded-full transition-colors sm:w-20",
-													step > s.id ? "bg-emerald-500" : "bg-zinc-200 dark:bg-zinc-700"
-												)}
-											/>
-										)}
-									</div>
-								))}
-							</div>
-						</div>
-
-						{/* Content */}
-						<div className="max-h-[60vh] overflow-y-auto p-5">
-							{/* Step 1: Listing Details */}
-							{step === 1 && (
-								<div className="space-y-4">
-									{/* Name */}
-									<div>
-										<label
-											htmlFor="edit-listing-name"
-											className="mb-1.5 block text-sm font-medium text-zinc-900 dark:text-white"
-										>
-											Listing Name <span className="text-red-500">*</span>
-										</label>
-										<input
-											id="edit-listing-name"
-											type="text"
-											value={formData.name}
-											onChange={(e) => updateField("name", e.target.value)}
-											placeholder="e.g., Premium Wireless Headphones"
-											className={clsx(
-												"w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none dark:bg-zinc-800 dark:text-white",
-												errors.name
-													? "border-red-300 focus:border-red-500"
-													: "border-zinc-200 focus:border-zinc-400 dark:border-zinc-700"
-											)}
-										/>
-										{errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
-									</div>
-
-									{/* Identifier */}
-									<div>
-										<label
-											htmlFor="edit-listing-identifier"
-											className="mb-1.5 block text-sm font-medium text-zinc-900 dark:text-white"
-										>
-											SKU <span className="text-red-500">*</span>
-										</label>
-										<div className="relative">
-											<TagIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
-											<input
-												id="edit-listing-identifier"
-												type="text"
-												value={formData.identifier}
-												onChange={(e) => updateField("identifier", e.target.value.toUpperCase())}
-												placeholder="e.g., WH-001"
-												className={clsx(
-													"w-full rounded-xl border bg-white py-2.5 pl-9 pr-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none dark:bg-zinc-800 dark:text-white",
-													errors.identifier
-														? "border-red-300 focus:border-red-500"
-														: "border-zinc-200 focus:border-zinc-400 dark:border-zinc-700"
-												)}
-											/>
-										</div>
-										{errors.identifier && <p className="mt-1 text-sm text-red-500">{errors.identifier}</p>}
-									</div>
-
-									{/* Price */}
-									<div>
-										<label
-											htmlFor="edit-listing-price"
-											className="mb-1.5 block text-sm font-medium text-zinc-900 dark:text-white"
-										>
-											Price (₹) <span className="text-red-500">*</span>
-										</label>
-										<div className="relative">
-											<CurrencyRupeeIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
-											<input
-												id="edit-listing-price"
-												type="number"
-												step="0.01"
-												min="0"
-												value={formData.price}
-												onChange={(e) => updateField("price", e.target.value)}
-												placeholder="0.00"
-												className={clsx(
-													"w-full rounded-xl border bg-white py-2.5 pl-9 pr-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none dark:bg-zinc-800 dark:text-white",
-													errors.price
-														? "border-red-300 focus:border-red-500"
-														: "border-zinc-200 focus:border-zinc-400 dark:border-zinc-700"
-												)}
-											/>
-										</div>
-										{errors.price && <p className="mt-1 text-sm text-red-500">{errors.price}</p>}
-									</div>
-
-									{/* Description */}
-									<div>
-										<label
-											htmlFor="edit-listing-description"
-											className="mb-1.5 block text-sm font-medium text-zinc-900 dark:text-white"
-										>
-											Description
-										</label>
-										<textarea
-											id="edit-listing-description"
-											value={formData.description}
-											onChange={(e) => updateField("description", e.target.value)}
-											rows={3}
-											placeholder="Brief listing description..."
-											className="w-full resize-none rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
-										/>
-									</div>
-								</div>
+			{/* Progress Steps */}
+			<div className="mt-5 flex items-center justify-center gap-4">
+				{EDIT_LISTING_STEPS.map((s, idx) => (
+					<div key={s.id} className="flex items-center">
+						<div
+							className={clsx(
+								"flex size-8 items-center justify-center rounded-full text-sm font-medium transition-colors",
+								step > s.id
+									? "bg-emerald-500 text-white"
+									: step === s.id
+										? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
+										: "bg-zinc-100 text-zinc-400 dark:bg-zinc-800"
 							)}
-
-							{/* Step 2: Media & Links */}
-							{step === 2 && (
-								<div className="space-y-4">
-									{/* Listing Link */}
-									<div>
-										<label
-											htmlFor="edit-listing-link"
-											className="mb-1.5 block text-sm font-medium text-zinc-900 dark:text-white"
-										>
-											Listing Link <span className="text-red-500">*</span>
-										</label>
-										<div className="relative">
-											<LinkIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
-											<input
-												id="edit-listing-link"
-												type="url"
-												value={formData.link}
-												onChange={(e) => updateField("link", e.target.value)}
-												placeholder="https://example.com/listing"
-												className={clsx(
-													"w-full rounded-xl border bg-white py-2.5 pl-9 pr-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none dark:bg-zinc-800 dark:text-white",
-													errors.link
-														? "border-red-300 focus:border-red-500"
-														: "border-zinc-200 focus:border-zinc-400 dark:border-zinc-700"
-												)}
-											/>
-										</div>
-										{errors.link && <p className="mt-1 text-sm text-red-500">{errors.link}</p>}
-									</div>
-
-									{/* Image URLs */}
-									<div>
-										<span className="mb-1.5 block text-sm font-medium text-zinc-900 dark:text-white">
-											Listing Images
-										</span>
-										<p className="mb-3 text-xs text-zinc-500">
-											Add image URLs for your listing. The first image will be the primary image.
-										</p>
-
-										{/* Add image input */}
-										<div className="flex gap-2">
-											<div className="relative flex-1">
-												<PhotoIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
-												<input
-													type="url"
-													value={imageUrl}
-													onChange={(e) => setImageUrl(e.target.value)}
-													onKeyDown={(e) => {
-														if (e.key === "Enter") {
-															e.preventDefault();
-															addImage();
-														}
-													}}
-													placeholder="https://example.com/image.jpg"
-													className="w-full rounded-xl border border-zinc-200 bg-white py-2.5 pl-9 pr-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
-												/>
-											</div>
-											<Button type="button" onClick={addImage} outline>
-												<PlusIcon className="size-4" />
-											</Button>
-										</div>
-
-										{/* Image list */}
-										{formData.listingImages.length > 0 && (
-											<div className="mt-3 space-y-2">
-												{formData.listingImages.map((imgUrl, idx) => (
-													<div
-														key={imgUrl}
-														className="flex items-center gap-3 rounded-xl bg-zinc-50 p-2 dark:bg-zinc-800/50"
-													>
-														<img
-															src={getAssetUrl(imgUrl)}
-															alt={`Listing ${idx + 1}`}
-															className="size-12 rounded-lg object-contain bg-zinc-100 dark:bg-zinc-800"
-															onError={(e) => {
-																(e.target as HTMLImageElement).src =
-																	"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'%3E%3Cpath fill='%23a1a1aa' d='M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'/%3E%3C/svg%3E";
-															}}
-														/>
-														<div className="min-w-0 flex-1">
-															<p className="truncate text-sm text-zinc-900 dark:text-white">
-																{imgUrl.split("/").pop()}
-															</p>
-															<button
-																type="button"
-																onClick={() => setPrimaryImage(idx)}
-																className={clsx(
-																	"text-xs font-medium",
-																	idx === 0
-																		? "text-emerald-600 dark:text-emerald-400"
-																		: "text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
-																)}
-															>
-																{idx === 0 ? "✓ Primary" : "Set as primary"}
-															</button>
-														</div>
-														<button
-															type="button"
-															onClick={() => removeImage(idx)}
-															className="rounded-lg p-1 text-zinc-400 hover:bg-zinc-200 hover:text-zinc-600 dark:hover:bg-zinc-700 dark:hover:text-zinc-300"
-														>
-															<XMarkIcon className="size-4" />
-														</button>
-													</div>
-												))}
-											</div>
-										)}
-
-										{formData.listingImages.length === 0 && (
-											<div className="mt-3 rounded-xl border-2 border-dashed border-zinc-200 p-6 text-center dark:border-zinc-700">
-												<PhotoIcon className="mx-auto size-8 text-zinc-400" />
-												<p className="mt-2 text-sm text-zinc-500">No images added yet</p>
-												<p className="text-xs text-zinc-400">Add image URLs above to showcase your listing</p>
-											</div>
-										)}
-									</div>
-								</div>
-							)}
+						>
+							{step > s.id ? <CheckCircleIcon className="size-5" /> : s.id}
 						</div>
-
-						{/* Footer */}
-						<div className="flex items-center justify-between border-t border-zinc-200 px-5 py-4 dark:border-zinc-800">
-							<div>
-								{step > 1 && (
-									<Button type="button" onClick={handleBack} outline>
-										<ChevronLeftIcon className="size-4" />
-										Back
-									</Button>
+						{idx < EDIT_LISTING_STEPS.length - 1 && (
+							<div
+								className={clsx(
+									"mx-3 h-0.5 w-12 rounded-full transition-colors sm:w-20",
+									step > s.id ? "bg-emerald-500" : "bg-zinc-200 dark:bg-zinc-700"
 								)}
-							</div>
-							<div className="flex gap-2">
-								<Button type="button" onClick={resetAndClose} outline>
-									Cancel
-								</Button>
-								{step < 2 ? (
-									<Button type="button" onClick={handleNext} color="emerald">
-										Next
-										<ChevronRightIcon className="size-4" />
-									</Button>
-								) : (
-									<Button type="button" onClick={handleSubmit} color="emerald" disabled={updateListing.isPending}>
-										{updateListing.isPending ? (
-											<>
-												<ArrowPathIcon className="size-4 animate-spin" />
-												Saving...
-											</>
-										) : (
-											<>
-												<CheckCircleIcon className="size-4" />
-												Save Changes
-											</>
-										)}
-									</Button>
-								)}
-							</div>
-						</div>
-					</Headless.DialogPanel>
-				</div>
+							/>
+						)}
+					</div>
+				))}
 			</div>
-		</Headless.Dialog>
+
+			<DialogBody>
+				<div className="max-h-[60vh] overflow-y-auto">
+					{/* Step 1: Listing Details */}
+					{step === 1 && (
+						<div className="space-y-4">
+							{/* Name */}
+							<div>
+								<label
+									htmlFor="edit-listing-name"
+									className="mb-1.5 block text-sm font-medium text-zinc-900 dark:text-white"
+								>
+									Listing Name <span className="text-red-500">*</span>
+								</label>
+								<input
+									id="edit-listing-name"
+									type="text"
+									value={formData.name}
+									onChange={(e) => updateField("name", e.target.value)}
+									placeholder="e.g., Premium Wireless Headphones"
+									className={clsx(
+										"w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none dark:bg-zinc-800 dark:text-white",
+										errors.name
+											? "border-red-300 focus:border-red-500"
+											: "border-zinc-200 focus:border-zinc-400 dark:border-zinc-700"
+									)}
+								/>
+								{errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
+							</div>
+
+							{/* Identifier */}
+							<div>
+								<label
+									htmlFor="edit-listing-identifier"
+									className="mb-1.5 block text-sm font-medium text-zinc-900 dark:text-white"
+								>
+									SKU <span className="text-red-500">*</span>
+								</label>
+								<div className="relative">
+									<TagIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
+									<input
+										id="edit-listing-identifier"
+										type="text"
+										value={formData.identifier}
+										onChange={(e) => updateField("identifier", e.target.value.toUpperCase())}
+										placeholder="e.g., WH-001"
+										className={clsx(
+											"w-full rounded-xl border bg-white py-2.5 pl-9 pr-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none dark:bg-zinc-800 dark:text-white",
+											errors.identifier
+												? "border-red-300 focus:border-red-500"
+												: "border-zinc-200 focus:border-zinc-400 dark:border-zinc-700"
+										)}
+									/>
+								</div>
+								{errors.identifier && <p className="mt-1 text-sm text-red-500">{errors.identifier}</p>}
+							</div>
+
+							{/* Price */}
+							<div>
+								<label
+									htmlFor="edit-listing-price"
+									className="mb-1.5 block text-sm font-medium text-zinc-900 dark:text-white"
+								>
+									Price (₹) <span className="text-red-500">*</span>
+								</label>
+								<div className="relative">
+									<CurrencyRupeeIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
+									<input
+										id="edit-listing-price"
+										type="number"
+										step="0.01"
+										min="0"
+										value={formData.price}
+										onChange={(e) => updateField("price", e.target.value)}
+										placeholder="0.00"
+										className={clsx(
+											"w-full rounded-xl border bg-white py-2.5 pl-9 pr-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none dark:bg-zinc-800 dark:text-white",
+											errors.price
+												? "border-red-300 focus:border-red-500"
+												: "border-zinc-200 focus:border-zinc-400 dark:border-zinc-700"
+										)}
+									/>
+								</div>
+								{errors.price && <p className="mt-1 text-sm text-red-500">{errors.price}</p>}
+							</div>
+
+							{/* Description */}
+							<div>
+								<label
+									htmlFor="edit-listing-description"
+									className="mb-1.5 block text-sm font-medium text-zinc-900 dark:text-white"
+								>
+									Description
+								</label>
+								<textarea
+									id="edit-listing-description"
+									value={formData.description}
+									onChange={(e) => updateField("description", e.target.value)}
+									rows={3}
+									placeholder="Brief listing description..."
+									className="w-full resize-none rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
+								/>
+							</div>
+						</div>
+					)}
+
+					{/* Step 2: Media & Links */}
+					{step === 2 && (
+						<div className="space-y-4">
+							{/* Listing Link */}
+							<div>
+								<label
+									htmlFor="edit-listing-link"
+									className="mb-1.5 block text-sm font-medium text-zinc-900 dark:text-white"
+								>
+									Listing Link <span className="text-red-500">*</span>
+								</label>
+								<div className="relative">
+									<LinkIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
+									<input
+										id="edit-listing-link"
+										type="url"
+										value={formData.link}
+										onChange={(e) => updateField("link", e.target.value)}
+										placeholder="https://example.com/listing"
+										className={clsx(
+											"w-full rounded-xl border bg-white py-2.5 pl-9 pr-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none dark:bg-zinc-800 dark:text-white",
+											errors.link
+												? "border-red-300 focus:border-red-500"
+												: "border-zinc-200 focus:border-zinc-400 dark:border-zinc-700"
+										)}
+									/>
+								</div>
+								{errors.link && <p className="mt-1 text-sm text-red-500">{errors.link}</p>}
+							</div>
+
+							{/* Image URLs */}
+							<div>
+								<span className="mb-1.5 block text-sm font-medium text-zinc-900 dark:text-white">Listing Images</span>
+								<p className="mb-3 text-xs text-zinc-500">
+									Add image URLs for your listing. The first image will be the primary image.
+								</p>
+
+								{/* Add image input */}
+								<div className="flex gap-2">
+									<div className="relative flex-1">
+										<PhotoIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
+										<input
+											type="url"
+											value={imageUrl}
+											onChange={(e) => setImageUrl(e.target.value)}
+											onKeyDown={(e) => {
+												if (e.key === "Enter") {
+													e.preventDefault();
+													addImage();
+												}
+											}}
+											placeholder="https://example.com/image.jpg"
+											className="w-full rounded-xl border border-zinc-200 bg-white py-2.5 pl-9 pr-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
+										/>
+									</div>
+									<Button type="button" onClick={addImage} outline>
+										<PlusIcon className="size-4" />
+									</Button>
+								</div>
+
+								{/* Image list */}
+								{formData.listingImages.length > 0 && (
+									<div className="mt-3 space-y-2">
+										{formData.listingImages.map((imgUrl, idx) => (
+											<div
+												key={imgUrl}
+												className="flex items-center gap-3 rounded-xl bg-zinc-50 p-2 dark:bg-zinc-800/50"
+											>
+												<img
+													src={getAssetUrl(imgUrl)}
+													alt={`Listing ${idx + 1}`}
+													className="size-12 rounded-lg object-contain bg-zinc-100 dark:bg-zinc-800"
+													onError={(e) => {
+														(e.target as HTMLImageElement).src =
+															"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'%3E%3Cpath fill='%23a1a1aa' d='M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'/%3E%3C/svg%3E";
+													}}
+												/>
+												<div className="min-w-0 flex-1">
+													<p className="truncate text-sm text-zinc-900 dark:text-white">{imgUrl.split("/").pop()}</p>
+													<button
+														type="button"
+														onClick={() => setPrimaryImage(idx)}
+														className={clsx(
+															"text-xs font-medium",
+															idx === 0
+																? "text-emerald-600 dark:text-emerald-400"
+																: "text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+														)}
+													>
+														{idx === 0 ? "✓ Primary" : "Set as primary"}
+													</button>
+												</div>
+												<button
+													type="button"
+													onClick={() => removeImage(idx)}
+													className="rounded-lg p-1 text-zinc-400 hover:bg-zinc-200 hover:text-zinc-600 dark:hover:bg-zinc-700 dark:hover:text-zinc-300"
+												>
+													<XMarkIcon className="size-4" />
+												</button>
+											</div>
+										))}
+									</div>
+								)}
+
+								{formData.listingImages.length === 0 && (
+									<div className="mt-3 rounded-xl border-2 border-dashed border-zinc-200 p-6 text-center dark:border-zinc-700">
+										<PhotoIcon className="mx-auto size-8 text-zinc-400" />
+										<p className="mt-2 text-sm text-zinc-500">No images added yet</p>
+										<p className="text-xs text-zinc-400">Add image URLs above to showcase your listing</p>
+									</div>
+								)}
+							</div>
+						</div>
+					)}
+				</div>
+			</DialogBody>
+
+			<DialogActions>
+				<div className="flex flex-1 items-center">
+					{step > 1 && (
+						<Button type="button" onClick={handleBack} outline>
+							<ChevronLeftIcon className="size-4" />
+							Back
+						</Button>
+					)}
+				</div>
+				<Button plain onClick={resetAndClose}>
+					Cancel
+				</Button>
+				{step < 2 ? (
+					<Button type="button" onClick={handleNext} color="emerald">
+						Next
+						<ChevronRightIcon className="size-4" />
+					</Button>
+				) : (
+					<Button type="button" onClick={handleSubmit} color="emerald" disabled={updateListing.isPending}>
+						{updateListing.isPending ? (
+							<>
+								<ArrowPathIcon className="size-4 animate-spin" />
+								Saving...
+							</>
+						) : (
+							<>
+								<CheckCircleIcon className="size-4" />
+								Save Changes
+							</>
+						)}
+					</Button>
+				)}
+			</DialogActions>
+		</Dialog>
 	);
 }
 
@@ -654,9 +597,7 @@ function EditListingModal({
 
 export function ListingShow() {
 	const { id: listingId } = routeApi.useParams();
-	const organization = useCurrentOrganization();
-	const organizationId = organization?.id;
-	const orgSlug = useOrgSlug();
+	const { organizationId, orgSlug } = useOrgContext();
 
 	// Permission checks
 	const canUpdateListing = useCan("listing", "update");
@@ -677,6 +618,7 @@ export function ListingShow() {
 		error: listingError,
 		refetch: refetchListing,
 	} = useListing(organizationId, listingId);
+	usePageTitle(listing?.name ?? null);
 
 	const loading = listingLoading;
 
@@ -701,7 +643,7 @@ export function ListingShow() {
 	}
 
 	if (listingError || !listing) {
-		return <ErrorState onRetry={handleRefetch} />;
+		return <ErrorState message="Failed to load listing details. Please try again." onRetry={handleRefetch} />;
 	}
 
 	return (
@@ -728,7 +670,7 @@ export function ListingShow() {
 
 						<div className="flex items-center gap-1">
 							<p className="text-sm text-zinc-500 dark:text-zinc-400">SKU: {listing.identifier}</p>
-							<CopyButton value={listing.identifier} label="SKU" />
+							<CopyButton value={listing.identifier ?? ""} label="SKU" />
 						</div>
 
 						<p className="text-2xl font-bold text-zinc-900 dark:text-white">{formatCurrency(listing.priceDecimal)}</p>
@@ -807,7 +749,7 @@ export function ListingShow() {
 								</div>
 								<div className="flex items-center gap-1">
 									<span className="font-mono text-sm text-zinc-900 dark:text-white">{listing.identifier}</span>
-									<CopyButton value={listing.identifier} label="SKU" />
+									<CopyButton value={listing.identifier ?? ""} label="SKU" />
 								</div>
 							</div>
 
@@ -867,48 +809,42 @@ export function ListingShow() {
 			)}
 
 			{/* Delete Confirmation Dialog */}
-			<Headless.Dialog open={showDeleteConfirm} onClose={() => setShowDeleteConfirm(false)} className="relative z-50">
-				<Headless.DialogBackdrop
-					transition
-					className="fixed inset-0 bg-black/40 backdrop-blur-sm transition duration-200 ease-out data-closed:opacity-0"
+			<Dialog open={showDeleteConfirm} onClose={() => setShowDeleteConfirm(false)}>
+				<DialogHeader
+					icon={TrashIcon}
+					iconColor="red"
+					title="Delete Listing"
+					description={`Are you sure you want to delete "${listing.name}"? This action cannot be undone.`}
+					onClose={() => setShowDeleteConfirm(false)}
 				/>
-				<div className="fixed inset-0 flex items-center justify-center p-4">
-					<Headless.DialogPanel
-						transition
-						className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl transition duration-200 ease-out data-closed:scale-95 data-closed:opacity-0 dark:bg-zinc-900"
-					>
-						<div className="flex size-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-950/30">
-							<TrashIcon className="size-6 text-red-600 dark:text-red-400" />
-						</div>
-						<Headless.DialogTitle className="mt-4 text-lg font-semibold text-zinc-900 dark:text-white">
-							Delete Listing
-						</Headless.DialogTitle>
-						<p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-							Are you sure you want to delete{" "}
-							<strong className="text-zinc-700 dark:text-zinc-300">{listing.name}</strong>? This action cannot be
-							undone.
+				<DialogBody>
+					<div className="flex items-start gap-2.5 rounded-xl bg-red-50 p-3 dark:bg-red-950/20">
+						<ExclamationTriangleIcon className="mt-0.5 size-4 shrink-0 text-red-500" />
+						<p className="text-sm text-red-700 dark:text-red-300">
+							This will permanently remove <strong>{listing.name}</strong> and all associated data. This action is
+							irreversible.
 						</p>
-						<div className="mt-6 flex gap-3">
-							<Button outline onClick={() => setShowDeleteConfirm(false)} className="flex-1">
-								Cancel
-							</Button>
-							<Button color="red" onClick={handleDelete} disabled={deleteListing.isPending} className="flex-1">
-								{deleteListing.isPending ? (
-									<>
-										<ArrowPathIcon className="size-4 animate-spin" />
-										Deleting...
-									</>
-								) : (
-									<>
-										<TrashIcon className="size-4" />
-										Delete
-									</>
-								)}
-							</Button>
-						</div>
-					</Headless.DialogPanel>
-				</div>
-			</Headless.Dialog>
+					</div>
+				</DialogBody>
+				<DialogActions>
+					<Button plain onClick={() => setShowDeleteConfirm(false)}>
+						Cancel
+					</Button>
+					<Button color="red" onClick={handleDelete} disabled={deleteListing.isPending}>
+						{deleteListing.isPending ? (
+							<>
+								<ArrowPathIcon className="size-4 animate-spin" />
+								Deleting...
+							</>
+						) : (
+							<>
+								<TrashIcon className="size-4" />
+								Delete
+							</>
+						)}
+					</Button>
+				</DialogActions>
+			</Dialog>
 		</div>
 	);
 }

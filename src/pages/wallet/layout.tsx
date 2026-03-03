@@ -3,13 +3,14 @@ import { Outlet } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/button";
 import { Heading } from "@/components/heading";
+import { ErrorState } from "@/components/shared/error-state";
 import { IconButton } from "@/components/shared/icon-button";
 import { TabNav, type TabNavItem } from "@/components/shared/tab-nav";
 import { Text } from "@/components/text";
 import {
-	useCurrentOrganization,
 	useDeposits,
 	useInfiniteWalletTransactions,
+	useOrgContext,
 	useVirtualAccount,
 	useWallet,
 	useWalletHolds,
@@ -18,11 +19,10 @@ import {
 import { useOrgPath } from "@/hooks/use-org-slug";
 import { formatCurrency } from "@/lib/design-tokens";
 import { useCan } from "@/store/permissions-store";
-import { DepositAccountDialog, ErrorState, LoadingSkeleton, WithdrawDialog } from "./components";
+import { DepositAccountDialog, LoadingSkeleton, WithdrawDialog } from "./components";
 
 export function WalletLayout() {
-	const organization = useCurrentOrganization();
-	const organizationId = organization?.id;
+	const { organizationId } = useOrgContext();
 	const orgPath = useOrgPath();
 
 	const {
@@ -63,6 +63,7 @@ export function WalletLayout() {
 	if (walletError)
 		return (
 			<ErrorState
+				message="Failed to load wallet. Please try again."
 				onRetry={() => {
 					refetchWallet();
 					refetchHolds();
@@ -92,37 +93,37 @@ export function WalletLayout() {
 					<Text className="mt-1">Manage your campaign funds and transactions</Text>
 				</div>
 				{(canDeposit || canWithdraw) && (
-				<div className="flex items-center gap-2">
-					{/* Mobile: icon-only circle buttons */}
-					<div className="flex items-center gap-2 sm:hidden">
-						{canDeposit && (
-							<IconButton color="emerald" onClick={() => setShowDeposit(true)}>
-								<ArrowDownLeftIcon className="size-5" />
-							</IconButton>
-						)}
-						{canWithdraw && (
-							<IconButton color="zinc" onClick={() => setShowWithdraw(true)}>
-								<ArrowUpRightIcon className="size-5" />
-							</IconButton>
-						)}
+					<div className="flex items-center gap-2">
+						{/* Mobile: icon-only circle buttons */}
+						<div className="flex items-center gap-2 sm:hidden">
+							{canDeposit && (
+								<IconButton color="emerald" onClick={() => setShowDeposit(true)}>
+									<ArrowDownLeftIcon className="size-5" />
+								</IconButton>
+							)}
+							{canWithdraw && (
+								<IconButton color="zinc" onClick={() => setShowWithdraw(true)}>
+									<ArrowUpRightIcon className="size-5" />
+								</IconButton>
+							)}
+						</div>
+						{/* Desktop: text buttons */}
+						<div className="hidden items-center gap-2 sm:flex">
+							{canDeposit && (
+								<Button outline onClick={() => setShowDeposit(true)}>
+									<ArrowDownLeftIcon className="size-4 text-emerald-500" />
+									Add Funds
+								</Button>
+							)}
+							{canWithdraw && (
+								<Button color="dark/zinc" onClick={() => setShowWithdraw(true)}>
+									<ArrowUpRightIcon className="size-4" />
+									Withdraw
+								</Button>
+							)}
+						</div>
 					</div>
-					{/* Desktop: text buttons */}
-					<div className="hidden items-center gap-2 sm:flex">
-						{canDeposit && (
-							<Button outline onClick={() => setShowDeposit(true)}>
-								<ArrowDownLeftIcon className="size-4 text-emerald-500" />
-								Add Funds
-							</Button>
-						)}
-						{canWithdraw && (
-							<Button color="dark/zinc" onClick={() => setShowWithdraw(true)}>
-								<ArrowUpRightIcon className="size-4" />
-								Withdraw
-							</Button>
-						)}
-					</div>
-				</div>
-			)}
+				)}
 			</div>
 
 			{/* Balance Card */}
@@ -203,7 +204,9 @@ export function WalletLayout() {
 							<div className="mt-1.5 h-1 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
 								<div
 									className="h-full rounded-full bg-sky-500 transition-all dark:bg-sky-400"
-									style={{ width: `${Math.round((parseFloat(stats.creditUtilized) / parseFloat(stats.creditLimit)) * 100)}%` }}
+									style={{
+										width: `${Math.round((parseFloat(stats.creditUtilized) / parseFloat(stats.creditLimit)) * 100)}%`,
+									}}
 								/>
 							</div>
 						</div>

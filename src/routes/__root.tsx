@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { SkeletonTheme } from "react-loading-skeleton";
 import { Toaster } from "sonner";
 import type { types } from "@/lib/brand-client";
-import { getSessionFromCookie } from "@/lib/server-auth";
+import { getServerAuthWithOrgs } from "@/lib/server-auth";
 import { AbilityProvider } from "@/providers/ability-provider";
 import type { Organization } from "@/store/organization-store";
 
@@ -29,13 +29,21 @@ export interface RouterContext {
 
 export const Route = createRootRouteWithContext<RouterContext>()({
 	beforeLoad: async ({ context }) => {
-		// Validate session from cookie, cache for 5 minutes to avoid re-validating on every navigation
-		const auth = await context.queryClient.ensureQueryData({
-			queryKey: ["auth", "session"],
-			queryFn: () => getSessionFromCookie(),
+		// Single server round-trip: auth session + organizations fetched in parallel.
+		// Cached 5 min so client-side navigations are instant.
+		const result = await context.queryClient.ensureQueryData({
+			queryKey: ["auth", "session-with-orgs"],
+			queryFn: () => getServerAuthWithOrgs(),
 			staleTime: 5 * 60 * 1000,
 		});
-		return { auth };
+		return {
+			auth: {
+				isAuthenticated: result.isAuthenticated,
+				user: result.user,
+				token: result.token,
+			},
+			organizations: result.organizations,
+		};
 	},
 	head: () => ({
 		meta: [

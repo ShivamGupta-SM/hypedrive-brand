@@ -6,21 +6,15 @@
 
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
-import { getOrganizationsFromServer } from "@/lib/server-auth";
-
 export const Route = createFileRoute("/_onboarding")({
-	beforeLoad: async ({ context }) => {
+	beforeLoad: ({ context }) => {
 		// Not authenticated — redirect to login
 		if (!context.auth.isAuthenticated) {
 			throw redirect({ to: "/login" });
 		}
 
-		// Fetch orgs server-side, cached for 5 min
-		const { organizations } = await context.queryClient.ensureQueryData({
-			queryKey: ["server", "organizations"],
-			queryFn: () => getOrganizationsFromServer(),
-			staleTime: 5 * 60 * 1000,
-		});
+		// Organizations already in context from root beforeLoad
+		const organizations = context.organizations ?? [];
 
 		if (organizations.length > 0) {
 			const org = organizations[0];

@@ -1,4 +1,3 @@
-import * as Headless from "@headlessui/react";
 import {
 	ArchiveBoxIcon,
 	ArrowPathIcon,
@@ -19,36 +18,36 @@ import {
 	PaperAirplaneIcon,
 	PauseCircleIcon,
 	PencilIcon,
+	PencilSquareIcon,
 	PlayCircleIcon,
 	PlusIcon,
 	SparklesIcon,
 	StopCircleIcon,
+	TableCellsIcon,
 	TrashIcon,
 	UserGroupIcon,
 	XCircleIcon,
-	XMarkIcon,
 } from "@heroicons/react/16/solid";
 import { getRouteApi } from "@tanstack/react-router";
 import clsx from "clsx";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FiTable } from "react-icons/fi";
 import { Badge } from "@/components/badge";
 import { Button } from "@/components/button";
-import { Dialog, DialogActions, DialogBody, DialogDescription, DialogTitle } from "@/components/dialog";
+import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/dialog";
 import { EnrollmentCardCompact } from "@/components/enrollment-card";
 import { Description, Field, Label } from "@/components/fieldset";
 import { Heading } from "@/components/heading";
-import { extractPlatformFromText, getPlatformColor, getPlatformIcon } from "@/components/icons/platform-icons";
+import { extractPlatformFromText, getPlatformGradient, getPlatformIcon } from "@/components/icons/platform-icons";
 import { Input } from "@/components/input";
 import { Link } from "@/components/link";
 import { NumberInput } from "@/components/number-input";
 import { Select } from "@/components/select";
 import { EmptyState } from "@/components/shared/empty-state";
+import { ErrorState } from "@/components/shared/error-state";
 import { FilterChip } from "@/components/shared/filter-chip";
 import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
 import { Skeleton } from "@/components/skeleton";
 import { Switch } from "@/components/switch";
-import { Text } from "@/components/text";
 import { Textarea } from "@/components/textarea";
 import {
 	getAPIErrorMessage,
@@ -60,9 +59,9 @@ import {
 	useCampaignStats,
 	useCampaignTasks,
 	useConfetti,
-	useCurrentOrganization,
 	useEndCampaign,
 	useExportEnrollments,
+	useOrgContext,
 	usePauseCampaign,
 	usePlatforms,
 	useRejectEnrollment,
@@ -73,7 +72,7 @@ import {
 	useUpdateCampaign,
 	useUpdateCampaignTask,
 } from "@/hooks";
-import { useOrgPath, useOrgSlug } from "@/hooks/use-org-slug";
+import { usePageTitle } from "@/hooks/use-breadcrumb";
 import type { brand, db } from "@/lib/brand-client";
 import { formatCurrency } from "@/lib/design-tokens";
 import { showToast } from "@/lib/toast";
@@ -125,28 +124,6 @@ const CAMPAIGN_TYPE_CONFIG: Record<
 	barter: { label: "Barter", color: "amber", icon: ArrowsRightLeftIcon },
 	hybrid: { label: "Hybrid", color: "sky", icon: SparklesIcon },
 };
-
-// =============================================================================
-// ERROR STATE
-// =============================================================================
-
-function ErrorState({ onRetry }: { onRetry: () => void }) {
-	return (
-		<div className="flex flex-col items-center justify-center py-16 text-center">
-			<div className="flex size-16 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-950/30">
-				<ExclamationTriangleIcon className="size-8 text-red-400" />
-			</div>
-			<p className="mt-4 text-lg font-semibold text-zinc-900 dark:text-white">Something went wrong</p>
-			<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-				Failed to load campaign details. Please try again.
-			</p>
-			<Button className="mt-6" onClick={onRetry} color="dark/zinc">
-				<ArrowPathIcon className="size-4" />
-				Try Again
-			</Button>
-		</div>
-	);
-}
 
 // =============================================================================
 // LOADING SKELETON
@@ -393,293 +370,280 @@ function EditCampaignModal({
 	if (!campaign) return null;
 
 	return (
-		<Headless.Dialog open={isOpen} onClose={resetAndClose} className="relative z-50">
-			<Headless.DialogBackdrop
-				transition
-				className="fixed inset-0 bg-black/40 backdrop-blur-sm transition duration-200 ease-out data-closed:opacity-0"
+		<Dialog open={isOpen} onClose={resetAndClose} size="lg">
+			<DialogHeader
+				icon={PencilIcon}
+				iconColor="amber"
+				title="Edit Campaign"
+				description={`Step ${step} of 2 · ${EDIT_STEPS[step - 1].description}`}
+				onClose={resetAndClose}
 			/>
 
-			<div className="fixed inset-0 overflow-y-auto">
-				<div className="flex min-h-full items-end justify-center sm:items-center sm:p-4">
-					<Headless.DialogPanel
-						transition
-						className="w-full max-w-lg rounded-t-2xl bg-white transition duration-300 ease-out data-closed:translate-y-full sm:rounded-2xl sm:data-closed:translate-y-8 sm:data-closed:scale-95 dark:bg-zinc-900"
-					>
-						{/* Handle - mobile only */}
-						<div className="flex justify-center py-3 sm:hidden">
-							<div className="h-1 w-10 rounded-full bg-zinc-300 dark:bg-zinc-700" />
-						</div>
-
-						{/* Header */}
-						<div className="flex items-center justify-between border-b border-zinc-200 px-5 pb-4 pt-2 sm:pt-5 dark:border-zinc-800">
-							<div>
-								<Headless.DialogTitle className="text-lg font-semibold text-zinc-900 dark:text-white">
-									Edit Campaign
-								</Headless.DialogTitle>
-								<p className="mt-0.5 text-sm text-zinc-500">
-									Step {step} of 2 · {EDIT_STEPS[step - 1].description}
-								</p>
-							</div>
-							<button
-								type="button"
-								onClick={resetAndClose}
-								className="rounded-full p-2 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-							>
-								<XMarkIcon className="size-5" />
-							</button>
-						</div>
-
-						{/* Progress Steps */}
-						<div className="border-b border-zinc-200 px-5 py-3 dark:border-zinc-800">
-							<div className="flex items-center justify-center gap-4">
-								{EDIT_STEPS.map((s, idx) => (
-									<div key={s.id} className="flex items-center">
-										<div
-											className={clsx(
-												"flex size-8 items-center justify-center rounded-full text-sm font-medium transition-colors",
-												step > s.id
-													? "bg-emerald-500 text-white"
-													: step === s.id
-														? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
-														: "bg-zinc-100 text-zinc-400 dark:bg-zinc-800"
-											)}
-										>
-											{step > s.id ? <CheckCircleIcon className="size-5" /> : s.id}
-										</div>
-										{idx < EDIT_STEPS.length - 1 && (
-											<div
-												className={clsx(
-													"mx-2 h-0.5 w-16 rounded-full transition-colors",
-													step > s.id ? "bg-emerald-500" : "bg-zinc-200 dark:bg-zinc-700"
-												)}
-											/>
-										)}
-									</div>
-								))}
-							</div>
-						</div>
-
-						{/* Content */}
-						<div className="max-h-[60vh] overflow-y-auto p-5">
-							{/* Step 1: Campaign Details */}
-							{step === 1 && (
-								<div className="space-y-4">
-									<div>
-										<label className="mb-2 block text-sm font-medium text-zinc-900 dark:text-white">
-											Campaign Title <span className="text-red-500">*</span>
-										</label>
-										<input
-											type="text"
-											value={formData.title}
-											onChange={(e) => updateField("title", e.target.value)}
-											placeholder="e.g., Summer Sale Campaign"
-											className={clsx(
-												"w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none dark:bg-zinc-800 dark:text-white",
-												errors.title
-													? "border-red-300 focus:border-red-500"
-													: "border-zinc-200 focus:border-zinc-400 dark:border-zinc-700"
-											)}
-										/>
-										{errors.title && <p className="mt-1 text-sm text-red-500">{errors.title}</p>}
-									</div>
-
-									<div>
-										<label className="mb-2 block text-sm font-medium text-zinc-900 dark:text-white">Description</label>
-										<textarea
-											value={formData.description}
-											onChange={(e) => updateField("description", e.target.value)}
-											placeholder="Describe your campaign..."
-											rows={3}
-											className="w-full resize-none rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
-										/>
-									</div>
-
-									<div className="grid grid-cols-2 gap-3">
-										<div>
-											<label className="mb-2 block text-sm font-medium text-zinc-900 dark:text-white">
-												Start Date <span className="text-red-500">*</span>
-											</label>
-											<input
-												type="date"
-												value={formData.startDate}
-												onChange={(e) => updateField("startDate", e.target.value)}
-												className={clsx(
-													"w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-zinc-900 focus:outline-none dark:bg-zinc-800 dark:text-white",
-													errors.startDate
-														? "border-red-300 focus:border-red-500"
-														: "border-zinc-200 focus:border-zinc-400 dark:border-zinc-700"
-												)}
-											/>
-											{errors.startDate && <p className="mt-1 text-sm text-red-500">{errors.startDate}</p>}
-										</div>
-										<div>
-											<label className="mb-2 block text-sm font-medium text-zinc-900 dark:text-white">
-												End Date <span className="text-red-500">*</span>
-											</label>
-											<input
-												type="date"
-												value={formData.endDate}
-												onChange={(e) => updateField("endDate", e.target.value)}
-												min={formData.startDate}
-												className={clsx(
-													"w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-zinc-900 focus:outline-none dark:bg-zinc-800 dark:text-white",
-													errors.endDate
-														? "border-red-300 focus:border-red-500"
-														: "border-zinc-200 focus:border-zinc-400 dark:border-zinc-700"
-												)}
-											/>
-											{errors.endDate && <p className="mt-1 text-sm text-red-500">{errors.endDate}</p>}
-										</div>
-									</div>
-								</div>
+			{/* Progress Steps */}
+			<div className="mt-5 flex items-center justify-center gap-4">
+				{EDIT_STEPS.map((s, idx) => (
+					<div key={s.id} className="flex items-center">
+						<div
+							className={clsx(
+								"flex size-8 items-center justify-center rounded-full text-sm font-medium transition-colors",
+								step > s.id
+									? "bg-emerald-500 text-white"
+									: step === s.id
+										? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
+										: "bg-zinc-100 text-zinc-400 dark:bg-zinc-800"
 							)}
-
-							{/* Step 2: Settings */}
-							{step === 2 && (
-								<div className="space-y-4">
-									<div>
-										<label className="mb-2 block text-sm font-medium text-zinc-900 dark:text-white">
-											Campaign Type
-										</label>
-										<div className="grid grid-cols-3 gap-2">
-											{(["cashback", "barter", "hybrid"] as const).map((type) => {
-												const config = CAMPAIGN_TYPE_CONFIG[type];
-												const Icon = config.icon;
-												return (
-													<button
-														key={type}
-														type="button"
-														onClick={() => updateField("campaignType", type as db.CampaignType)}
-														className={clsx(
-															"flex flex-col items-center gap-1.5 rounded-xl p-3 transition-colors",
-															formData.campaignType === type
-																? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
-																: "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
-														)}
-													>
-														<Icon className="size-5" />
-														<span className="text-xs font-medium">{config.label}</span>
-													</button>
-												);
-											})}
-										</div>
-									</div>
-
-									<div>
-										<label className="mb-2 block text-sm font-medium text-zinc-900 dark:text-white">
-											Max Enrollments
-										</label>
-										<input
-											type="number"
-											value={formData.maxEnrollments}
-											onChange={(e) => updateField("maxEnrollments", parseInt(e.target.value) || 0)}
-											min={1}
-											className={clsx(
-												"w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-zinc-900 focus:outline-none dark:bg-zinc-800 dark:text-white",
-												errors.maxEnrollments
-													? "border-red-300 focus:border-red-500"
-													: "border-zinc-200 focus:border-zinc-400 dark:border-zinc-700"
-											)}
-										/>
-										{errors.maxEnrollments && <p className="mt-1 text-sm text-red-500">{errors.maxEnrollments}</p>}
-										{/* Note: Current enrollment count is from stats, not campaign object */}
-									</div>
-
-									<div>
-										<label className="mb-2 block text-sm font-medium text-zinc-900 dark:text-white">Visibility</label>
-										<div className="grid grid-cols-2 gap-2">
-											<button
-												type="button"
-												onClick={() => updateField("isPublic", true)}
-												className={clsx(
-													"flex items-center gap-2 rounded-xl p-3 transition-colors",
-													formData.isPublic
-														? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
-														: "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
-												)}
-											>
-												<GlobeAltIcon className="size-5" />
-												<div className="text-left">
-													<p className="text-sm font-medium">Public</p>
-													<p
-														className={clsx(
-															"text-xs",
-															formData.isPublic ? "text-zinc-400 dark:text-zinc-600" : "text-zinc-500"
-														)}
-													>
-														Anyone can join
-													</p>
-												</div>
-											</button>
-											<button
-												type="button"
-												onClick={() => updateField("isPublic", false)}
-												className={clsx(
-													"flex items-center gap-2 rounded-xl p-3 transition-colors",
-													!formData.isPublic
-														? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
-														: "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
-												)}
-											>
-												<LockClosedIcon className="size-5" />
-												<div className="text-left">
-													<p className="text-sm font-medium">Private</p>
-													<p
-														className={clsx(
-															"text-xs",
-															!formData.isPublic ? "text-zinc-400 dark:text-zinc-600" : "text-zinc-500"
-														)}
-													>
-														Invite only
-													</p>
-												</div>
-											</button>
-										</div>
-									</div>
-								</div>
-							)}
+						>
+							{step > s.id ? <CheckCircleIcon className="size-5" /> : s.id}
 						</div>
-
-						{/* Footer */}
-						<div className="flex items-center justify-between border-t border-zinc-200 px-5 py-4 dark:border-zinc-800">
-							<div>
-								{step > 1 && (
-									<Button outline onClick={handleBack}>
-										<ChevronLeftIcon className="size-4" />
-										Back
-									</Button>
+						{idx < EDIT_STEPS.length - 1 && (
+							<div
+								className={clsx(
+									"mx-2 h-0.5 w-16 rounded-full transition-colors",
+									step > s.id ? "bg-emerald-500" : "bg-zinc-200 dark:bg-zinc-700"
 								)}
-							</div>
-							<div className="flex gap-2">
-								<Button outline onClick={resetAndClose}>
-									Cancel
-								</Button>
-								{step < 2 ? (
-									<Button color="emerald" onClick={handleNext}>
-										Next
-										<ChevronRightIcon className="size-4" />
-									</Button>
-								) : (
-									<Button color="emerald" onClick={handleSubmit} disabled={updateCampaign.isPending}>
-										{updateCampaign.isPending ? (
-											<>
-												<ArrowPathIcon className="size-4 animate-spin" />
-												Saving...
-											</>
-										) : (
-											<>
-												<CheckCircleIcon className="size-4" />
-												Save Changes
-											</>
-										)}
-									</Button>
-								)}
-							</div>
-						</div>
-					</Headless.DialogPanel>
-				</div>
+							/>
+						)}
+					</div>
+				))}
 			</div>
-		</Headless.Dialog>
+
+			<DialogBody>
+				<div className="max-h-[60vh] overflow-y-auto">
+					{/* Step 1: Campaign Details */}
+					{step === 1 && (
+						<div className="space-y-4">
+							<div>
+								<label
+									htmlFor="edit-campaign-title"
+									className="mb-2 block text-sm font-medium text-zinc-900 dark:text-white"
+								>
+									Campaign Title <span className="text-red-500">*</span>
+								</label>
+								<input
+									id="edit-campaign-title"
+									type="text"
+									value={formData.title}
+									onChange={(e) => updateField("title", e.target.value)}
+									placeholder="e.g., Summer Sale Campaign"
+									className={clsx(
+										"w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none dark:bg-zinc-800 dark:text-white",
+										errors.title
+											? "border-red-300 focus:border-red-500"
+											: "border-zinc-200 focus:border-zinc-400 dark:border-zinc-700"
+									)}
+								/>
+								{errors.title && <p className="mt-1 text-sm text-red-500">{errors.title}</p>}
+							</div>
+
+							<div>
+								<label
+									htmlFor="edit-campaign-description"
+									className="mb-2 block text-sm font-medium text-zinc-900 dark:text-white"
+								>
+									Description
+								</label>
+								<textarea
+									id="edit-campaign-description"
+									value={formData.description}
+									onChange={(e) => updateField("description", e.target.value)}
+									placeholder="Describe your campaign..."
+									rows={3}
+									className="w-full resize-none rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
+								/>
+							</div>
+
+							<div className="grid grid-cols-2 gap-3">
+								<div>
+									<label
+										htmlFor="edit-campaign-start-date"
+										className="mb-2 block text-sm font-medium text-zinc-900 dark:text-white"
+									>
+										Start Date <span className="text-red-500">*</span>
+									</label>
+									<input
+										id="edit-campaign-start-date"
+										type="date"
+										value={formData.startDate}
+										onChange={(e) => updateField("startDate", e.target.value)}
+										className={clsx(
+											"w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-zinc-900 focus:outline-none dark:bg-zinc-800 dark:text-white",
+											errors.startDate
+												? "border-red-300 focus:border-red-500"
+												: "border-zinc-200 focus:border-zinc-400 dark:border-zinc-700"
+										)}
+									/>
+									{errors.startDate && <p className="mt-1 text-sm text-red-500">{errors.startDate}</p>}
+								</div>
+								<div>
+									<label
+										htmlFor="edit-campaign-end-date"
+										className="mb-2 block text-sm font-medium text-zinc-900 dark:text-white"
+									>
+										End Date <span className="text-red-500">*</span>
+									</label>
+									<input
+										id="edit-campaign-end-date"
+										type="date"
+										value={formData.endDate}
+										onChange={(e) => updateField("endDate", e.target.value)}
+										min={formData.startDate}
+										className={clsx(
+											"w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-zinc-900 focus:outline-none dark:bg-zinc-800 dark:text-white",
+											errors.endDate
+												? "border-red-300 focus:border-red-500"
+												: "border-zinc-200 focus:border-zinc-400 dark:border-zinc-700"
+										)}
+									/>
+									{errors.endDate && <p className="mt-1 text-sm text-red-500">{errors.endDate}</p>}
+								</div>
+							</div>
+						</div>
+					)}
+
+					{/* Step 2: Settings */}
+					{step === 2 && (
+						<div className="space-y-4">
+							<div>
+								<span className="mb-2 block text-sm font-medium text-zinc-900 dark:text-white">Campaign Type</span>
+								<div className="grid grid-cols-3 gap-2">
+									{(["cashback", "barter", "hybrid"] as const).map((type) => {
+										const config = CAMPAIGN_TYPE_CONFIG[type];
+										const Icon = config.icon;
+										return (
+											<button
+												key={type}
+												type="button"
+												onClick={() => updateField("campaignType", type as db.CampaignType)}
+												className={clsx(
+													"flex flex-col items-center gap-1.5 rounded-xl p-3 transition-colors",
+													formData.campaignType === type
+														? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
+														: "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+												)}
+											>
+												<Icon className="size-5" />
+												<span className="text-xs font-medium">{config.label}</span>
+											</button>
+										);
+									})}
+								</div>
+							</div>
+
+							<div>
+								<label
+									htmlFor="edit-campaign-max-enrollments"
+									className="mb-2 block text-sm font-medium text-zinc-900 dark:text-white"
+								>
+									Max Enrollments
+								</label>
+								<input
+									id="edit-campaign-max-enrollments"
+									type="number"
+									value={formData.maxEnrollments}
+									onChange={(e) => updateField("maxEnrollments", parseInt(e.target.value, 10) || 0)}
+									min={1}
+									className={clsx(
+										"w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-zinc-900 focus:outline-none dark:bg-zinc-800 dark:text-white",
+										errors.maxEnrollments
+											? "border-red-300 focus:border-red-500"
+											: "border-zinc-200 focus:border-zinc-400 dark:border-zinc-700"
+									)}
+								/>
+								{errors.maxEnrollments && <p className="mt-1 text-sm text-red-500">{errors.maxEnrollments}</p>}
+								{/* Note: Current enrollment count is from stats, not campaign object */}
+							</div>
+
+							<div>
+								<span className="mb-2 block text-sm font-medium text-zinc-900 dark:text-white">Visibility</span>
+								<div className="grid grid-cols-2 gap-2">
+									<button
+										type="button"
+										onClick={() => updateField("isPublic", true)}
+										className={clsx(
+											"flex items-center gap-2 rounded-xl p-3 transition-colors",
+											formData.isPublic
+												? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
+												: "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+										)}
+									>
+										<GlobeAltIcon className="size-5" />
+										<div className="text-left">
+											<p className="text-sm font-medium">Public</p>
+											<p
+												className={clsx(
+													"text-xs",
+													formData.isPublic ? "text-zinc-400 dark:text-zinc-600" : "text-zinc-500"
+												)}
+											>
+												Anyone can join
+											</p>
+										</div>
+									</button>
+									<button
+										type="button"
+										onClick={() => updateField("isPublic", false)}
+										className={clsx(
+											"flex items-center gap-2 rounded-xl p-3 transition-colors",
+											!formData.isPublic
+												? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
+												: "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+										)}
+									>
+										<LockClosedIcon className="size-5" />
+										<div className="text-left">
+											<p className="text-sm font-medium">Private</p>
+											<p
+												className={clsx(
+													"text-xs",
+													!formData.isPublic ? "text-zinc-400 dark:text-zinc-600" : "text-zinc-500"
+												)}
+											>
+												Invite only
+											</p>
+										</div>
+									</button>
+								</div>
+							</div>
+						</div>
+					)}
+				</div>
+			</DialogBody>
+
+			{/* Footer */}
+			<DialogActions>
+				<div className="flex flex-1 items-center">
+					{step > 1 && (
+						<Button outline onClick={handleBack}>
+							<ChevronLeftIcon className="size-4" />
+							Back
+						</Button>
+					)}
+				</div>
+				<Button plain onClick={resetAndClose}>
+					Cancel
+				</Button>
+				{step < 2 ? (
+					<Button color="emerald" onClick={handleNext}>
+						Next
+						<ChevronRightIcon className="size-4" />
+					</Button>
+				) : (
+					<Button color="emerald" onClick={handleSubmit} disabled={updateCampaign.isPending}>
+						{updateCampaign.isPending ? (
+							<>
+								<ArrowPathIcon className="size-4 animate-spin" />
+								Saving...
+							</>
+						) : (
+							<>
+								<CheckCircleIcon className="size-4" />
+								Save Changes
+							</>
+						)}
+					</Button>
+				)}
+			</DialogActions>
+		</Dialog>
 	);
 }
 
@@ -742,37 +706,41 @@ function EnrollmentReviewDialog({
 
 	return (
 		<Dialog open={open} onClose={onClose} size="md">
-			<DialogTitle>Review Enrollment</DialogTitle>
-			<DialogDescription>Review this enrollment request.</DialogDescription>
+			<DialogHeader
+				icon={ClipboardDocumentListIcon}
+				iconColor="sky"
+				title="Review Enrollment"
+				description={enrollment.displayId}
+				onClose={onClose}
+			/>
 
 			<DialogBody>
 				{error && (
-					<div className="mb-4 rounded-lg bg-red-50 p-3 dark:bg-red-950/30">
-						<p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+					<div className="mb-4 flex items-start gap-2.5 rounded-xl bg-red-50 p-3 dark:bg-red-950/30">
+						<ExclamationTriangleIcon className="mt-0.5 size-4 shrink-0 text-red-500" />
+						<p className="text-sm text-red-700 dark:text-red-300">{error}</p>
 					</div>
 				)}
 
 				<div className="space-y-4">
 					{/* Enrollment Details */}
-					<div className="rounded-lg bg-zinc-50 p-4 dark:bg-zinc-800/50">
-						<div className="grid grid-cols-2 gap-4">
-							<div>
-								<p className="text-xs font-medium uppercase text-zinc-500 dark:text-zinc-400">Enrollment</p>
-								<p className="mt-1 font-mono text-sm font-medium text-zinc-900 dark:text-white">{enrollment.displayId}</p>
-							</div>
-							<div>
-								<p className="text-xs font-medium uppercase text-zinc-500 dark:text-zinc-400">Order Value</p>
-								<p className="mt-1 font-medium text-zinc-900 dark:text-white">
+					<div className="overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800">
+						<div className="grid grid-cols-2">
+							<div className="px-4 py-3">
+								<p className="text-[11px] font-medium text-zinc-400 dark:text-zinc-500">Order Value</p>
+								<p className="mt-0.5 text-sm font-semibold text-zinc-900 dark:text-white">
 									{formatCurrency(enrollment.orderValueDecimal)}
 								</p>
 							</div>
-							<div>
-								<p className="text-xs font-medium uppercase text-zinc-500 dark:text-zinc-400">Bill Rate</p>
-								<p className="mt-1 font-medium text-emerald-600 dark:text-emerald-400">{enrollment.lockedBillRate}%</p>
+							<div className="border-l border-zinc-100 px-4 py-3 dark:border-zinc-800">
+								<p className="text-[11px] font-medium text-zinc-400 dark:text-zinc-500">Bill Rate</p>
+								<p className="mt-0.5 text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+									{enrollment.lockedBillRate}%
+								</p>
 							</div>
-							<div>
-								<p className="text-xs font-medium uppercase text-zinc-500 dark:text-zinc-400">Created</p>
-								<p className="mt-1 font-medium text-zinc-900 dark:text-white">
+							<div className="border-t border-zinc-100 px-4 py-3 dark:border-zinc-800">
+								<p className="text-[11px] font-medium text-zinc-400 dark:text-zinc-500">Created</p>
+								<p className="mt-0.5 text-sm font-medium text-zinc-900 dark:text-white">
 									{enrollment.createdAt
 										? new Date(enrollment.createdAt).toLocaleDateString("en-IN", {
 												month: "short",
@@ -781,6 +749,12 @@ function EnrollmentReviewDialog({
 											})
 										: "—"}
 								</p>
+							</div>
+							<div className="border-t border-l border-zinc-100 px-4 py-3 dark:border-zinc-800">
+								<p className="text-[11px] font-medium text-zinc-400 dark:text-zinc-500">Status</p>
+								<Badge color="amber" className="mt-0.5">
+									{enrollment.status}
+								</Badge>
 							</div>
 						</div>
 					</div>
@@ -807,10 +781,30 @@ function EnrollmentReviewDialog({
 					Cancel
 				</Button>
 				<Button color="red" onClick={handleReject} disabled={isPending || !rejectReason.trim()}>
-					{rejectEnrollment.isPending ? "Rejecting..." : "Reject"}
+					{rejectEnrollment.isPending ? (
+						<>
+							<ArrowPathIcon className="size-4 animate-spin" />
+							Rejecting...
+						</>
+					) : (
+						<>
+							<XCircleIcon className="size-4" />
+							Reject
+						</>
+					)}
 				</Button>
 				<Button color="emerald" onClick={handleApprove} disabled={isPending}>
-					{approveEnrollment.isPending ? "Approving..." : "Approve"}
+					{approveEnrollment.isPending ? (
+						<>
+							<ArrowPathIcon className="size-4 animate-spin" />
+							Approving...
+						</>
+					) : (
+						<>
+							<CheckCircleIcon className="size-4" />
+							Approve
+						</>
+					)}
 				</Button>
 			</DialogActions>
 		</Dialog>
@@ -823,10 +817,7 @@ function EnrollmentReviewDialog({
 
 export function CampaignShow() {
 	const { id: campaignId } = routeApi.useParams();
-	const organization = useCurrentOrganization();
-	const organizationId = organization?.id;
-	const orgSlug = useOrgSlug();
-	const orgPath = useOrgPath();
+	const { organizationId, orgSlug } = useOrgContext();
 
 	// Permission checks
 	const canUpdateCampaign = useCan("campaign", "update");
@@ -846,6 +837,9 @@ export function CampaignShow() {
 	} = useCampaignEnrollments(organizationId, campaignId, { take: 10 });
 	const { data: tasks, loading: tasksLoading } = useCampaignTasks(organizationId, campaignId);
 
+	// Set breadcrumb page title
+	usePageTitle(campaign?.title);
+
 	const submitCampaign = useSubmitCampaign();
 	const pauseCampaign = usePauseCampaign();
 	const resumeCampaign = useResumeCampaign();
@@ -857,9 +851,7 @@ export function CampaignShow() {
 	const exportEnrollments = useExportEnrollments(organizationId);
 	const { data: platforms } = usePlatforms();
 	const [addTaskPlatformId, setAddTaskPlatformId] = useState("");
-	const { data: taskTemplates } = useTaskTemplates(
-		addTaskPlatformId ? { platformId: addTaskPlatformId } : undefined
-	);
+	const { data: taskTemplates } = useTaskTemplates(addTaskPlatformId ? { platformId: addTaskPlatformId } : undefined);
 
 	const [selectedEnrollment, setSelectedEnrollment] = useState<CampaignEnrollment | null>(null);
 	const [showReviewDialog, setShowReviewDialog] = useState(false);
@@ -869,6 +861,7 @@ export function CampaignShow() {
 	const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
 	const [editingTaskInstructions, setEditingTaskInstructions] = useState("");
 	const [editingTaskRequirements, setEditingTaskRequirements] = useState<db.TaskRequirements>({});
+	const [editingTaskCategory, setEditingTaskCategory] = useState<string | undefined>();
 	const [hashtagInput, setHashtagInput] = useState("");
 	const [mentionInput, setMentionInput] = useState("");
 	const [showEndConfirm, setShowEndConfirm] = useState(false);
@@ -889,7 +882,6 @@ export function CampaignShow() {
 			await submitCampaign.mutateAsync({ organizationId, campaignId });
 			showToast.success("Campaign submitted for approval");
 			fireConfetti("side-cannons");
-			refetchCampaign();
 		} catch (err) {
 			showToast.error(err, "Failed to submit campaign");
 		}
@@ -900,7 +892,6 @@ export function CampaignShow() {
 		try {
 			await pauseCampaign.mutateAsync({ organizationId, campaignId });
 			showToast.success("Campaign paused");
-			refetchCampaign();
 		} catch (err) {
 			showToast.error(err, "Failed to pause campaign");
 		}
@@ -911,7 +902,6 @@ export function CampaignShow() {
 		try {
 			await resumeCampaign.mutateAsync({ organizationId, campaignId });
 			showToast.success("Campaign resumed");
-			refetchCampaign();
 		} catch (err) {
 			showToast.error(err, "Failed to resume campaign");
 		}
@@ -923,7 +913,6 @@ export function CampaignShow() {
 			await endCampaign.mutateAsync({ organizationId, campaignId });
 			showToast.success("Campaign ended");
 			setShowEndConfirm(false);
-			refetchCampaign();
 		} catch (err) {
 			showToast.error(err, "Failed to end campaign");
 		}
@@ -934,7 +923,6 @@ export function CampaignShow() {
 		try {
 			await archiveCampaign.mutateAsync({ organizationId, campaignId });
 			showToast.success("Campaign archived");
-			refetchCampaign();
 		} catch (err) {
 			showToast.error(err, "Failed to archive campaign");
 		}
@@ -1005,7 +993,7 @@ export function CampaignShow() {
 	}
 
 	if (campaignError || !campaign) {
-		return <ErrorState onRetry={handleRefetch} />;
+		return <ErrorState message="Failed to load campaign details. Please try again." onRetry={handleRefetch} />;
 	}
 
 	const statusConfig = getStatusConfig(campaign.status);
@@ -1031,12 +1019,6 @@ export function CampaignShow() {
 
 	return (
 		<div className="space-y-4 sm:space-y-5">
-			{/* Back button */}
-			<Button href={orgPath("/campaigns")} color="zinc">
-				<ChevronLeftIcon className="size-4" />
-				Campaigns
-			</Button>
-
 			{/* Header Card */}
 			<header className="overflow-hidden rounded-xl bg-white ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
 				<div className="p-4 sm:p-5">
@@ -1243,23 +1225,21 @@ export function CampaignShow() {
 							type="button"
 							onClick={() => setActiveTab(tab.key)}
 							className={clsx(
-								"inline-flex shrink-0 items-center gap-1.5 sm:gap-2 whitespace-nowrap rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium ring-1 transition-all duration-200",
+								"inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-200 active:scale-95",
 								isActive
-									? "bg-zinc-900 text-white ring-zinc-900 dark:bg-white dark:text-zinc-900 dark:ring-white"
-									: "bg-white text-zinc-600 ring-zinc-200 hover:bg-zinc-50 active:bg-zinc-100 dark:bg-zinc-800 dark:text-zinc-400 dark:ring-zinc-700 dark:hover:bg-zinc-700"
+									? "bg-zinc-900 text-white shadow-sm dark:bg-white dark:text-zinc-900"
+									: "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
 							)}
 						>
-							<Icon
-								className={clsx("size-3.5 sm:size-4", isActive ? "text-white dark:text-zinc-900" : "text-zinc-400")}
-							/>
+							<Icon className={clsx("size-3.5", isActive ? "text-white dark:text-zinc-900" : "text-zinc-400")} />
 							{tab.label}
 							{tab.count !== undefined && tab.count > 0 && (
 								<span
 									className={clsx(
-										"inline-flex h-4 sm:h-4.5 min-w-4 sm:min-w-4.5 items-center justify-center rounded-full px-1 text-[9px] sm:text-[10px] font-semibold",
+										"inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-semibold",
 										isActive
 											? "bg-white/20 text-white dark:bg-zinc-900/20 dark:text-zinc-900"
-											: "bg-zinc-100 text-zinc-500 dark:bg-zinc-700 dark:text-zinc-400"
+											: "bg-zinc-200 text-zinc-500 dark:bg-zinc-700 dark:text-zinc-400"
 									)}
 								>
 									{tab.count}
@@ -1274,178 +1254,173 @@ export function CampaignShow() {
 			{/* OVERVIEW TAB */}
 			{/* ============================================================= */}
 			{activeTab === "overview" && (
-				<div className="space-y-4 sm:space-y-6">
-					{/* Key Metrics */}
-					<FinancialStatsGridBordered
-						stats={[
+				<div className="space-y-4 sm:space-y-5">
+					{/* Stats Row — 4 stats */}
+					<div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+						{[
 							{
-								name: "Total Enrollments",
-								value: stats?.totalEnrollments ?? 0,
-								change: campaign.maxEnrollments ? `of ${campaign.maxEnrollments} max` : "no limit",
-								changeType: "neutral",
+								label: "Order Value",
+								value: formatCurrency(stats?.totalOrderValueDecimal ?? "0"),
+								accent: "text-emerald-600 dark:text-emerald-400",
 							},
 							{
-								name: "Approved",
-								value: stats?.approvedEnrollments ?? 0,
-								change: "enrollments",
-								changeType: "positive",
+								label: "Enrollments",
+								value: `${stats?.totalEnrollments ?? 0}${campaign.maxEnrollments ? ` / ${campaign.maxEnrollments}` : ""}`,
+								accent: "text-zinc-900 dark:text-white",
 							},
 							{
-								name: "Pending Review",
-								value: stats?.pendingEnrollments ?? 0,
-								change: (stats?.pendingEnrollments ?? 0) > 0 ? "action needed" : undefined,
-								changeType: (stats?.pendingEnrollments ?? 0) > 0 ? "negative" : undefined,
+								label: "Approved",
+								value: String(stats?.approvedEnrollments ?? 0),
+								accent: "text-emerald-600 dark:text-emerald-400",
 							},
-							{ name: "Total Order Value", value: formatCurrency(stats?.totalOrderValueDecimal ?? "0") },
-						]}
-						columns={4}
-					/>
+							{
+								label: "Pending",
+								value: String(stats?.pendingEnrollments ?? 0),
+								accent:
+									(stats?.pendingEnrollments ?? 0) > 0
+										? "text-amber-600 dark:text-amber-400"
+										: "text-zinc-900 dark:text-white",
+							},
+						].map((stat) => (
+							<div
+								key={stat.label}
+								className="rounded-xl bg-white p-3 sm:p-4 shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800"
+							>
+								<p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">{stat.label}</p>
+								<p className={`mt-1 text-lg font-semibold tabular-nums sm:text-xl ${stat.accent}`}>{stat.value}</p>
+							</div>
+						))}
+					</div>
 
-					{/* Progress Cards */}
-					<div className="grid gap-3 sm:gap-4 sm:grid-cols-2">
-						{/* Enrollment Progress */}
-						<div className="rounded-xl bg-white p-3.5 sm:p-4 shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-							<div className="flex items-center justify-between">
-								<span className="flex items-center gap-1.5 text-zinc-500 dark:text-zinc-400">
-									<UserGroupIcon className="size-4" />
-									<span className="text-xs sm:text-sm">Enrollment Progress</span>
-								</span>
-								<span className="text-xs sm:text-sm font-medium text-zinc-900 dark:text-white">
-									{stats?.totalEnrollments ?? 0}
-									{campaign.maxEnrollments ? ` / ${campaign.maxEnrollments}` : ""}
-								</span>
+					{/* Progress Section — Enrollment bar + Timeline bar in one card */}
+					<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
+						<div className="grid divide-y sm:grid-cols-2 sm:divide-x sm:divide-y-0 divide-zinc-200 dark:divide-zinc-700">
+							{/* Enrollment progress */}
+							<div className="p-3.5 sm:p-4">
+								<div className="mb-2 flex items-center justify-between">
+									<span className="flex items-center gap-1.5 text-xs font-medium text-zinc-700 dark:text-zinc-300">
+										<UserGroupIcon className="size-3.5 text-zinc-400" />
+										Enrollment Slots
+									</span>
+									<span className="text-xs font-semibold tabular-nums text-zinc-900 dark:text-white">
+										{campaign.maxEnrollments
+											? `${Math.min(Math.round(((stats?.totalEnrollments ?? 0) / campaign.maxEnrollments) * 100), 100)}%`
+											: `${stats?.totalEnrollments ?? 0} total`}
+									</span>
+								</div>
+								<div className="h-2 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+									<div className="flex h-full">
+										<div
+											className="h-full bg-emerald-500 transition-all"
+											style={{
+												width: campaign.maxEnrollments
+													? `${Math.min(((stats?.approvedEnrollments ?? 0) / campaign.maxEnrollments) * 100, 100)}%`
+													: "0%",
+											}}
+										/>
+										<div
+											className="h-full bg-amber-400 transition-all"
+											style={{
+												width: campaign.maxEnrollments
+													? `${Math.min(((stats?.pendingEnrollments ?? 0) / campaign.maxEnrollments) * 100, 100)}%`
+													: "0%",
+											}}
+										/>
+									</div>
+								</div>
+								<div className="mt-2 flex items-center gap-3">
+									{[
+										{ label: "Approved", count: enrollmentDistribution.approved, color: "bg-emerald-500" },
+										{ label: "Pending", count: enrollmentDistribution.pending, color: "bg-amber-400" },
+										{ label: "Rejected", count: enrollmentDistribution.rejected, color: "bg-red-500" },
+									].map((item) => (
+										<div key={item.label} className="flex items-center gap-1">
+											<span className={`size-1.5 rounded-full ${item.color}`} />
+											<span className="text-[10px] text-zinc-500 dark:text-zinc-400">
+												{item.label} {item.count}
+											</span>
+										</div>
+									))}
+								</div>
 							</div>
-							<div className="mt-3 h-2 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
-								<div
-									className={clsx(
-										"h-full rounded-full transition-all",
-										campaign.maxEnrollments
-											? ((stats?.totalEnrollments ?? 0) / campaign.maxEnrollments) * 100 >= 90
-												? "bg-red-500"
-												: ((stats?.totalEnrollments ?? 0) / campaign.maxEnrollments) * 100 >= 70
-													? "bg-amber-500"
-													: "bg-emerald-500"
-											: "bg-emerald-500"
-									)}
-									style={{
-										width: campaign.maxEnrollments
-											? `${Math.min(((stats?.totalEnrollments ?? 0) / campaign.maxEnrollments) * 100, 100)}%`
-											: "0%",
-									}}
-								/>
+							{/* Timeline progress */}
+							<div className="p-3.5 sm:p-4">
+								<div className="mb-2 flex items-center justify-between">
+									<span className="flex items-center gap-1.5 text-xs font-medium text-zinc-700 dark:text-zinc-300">
+										<CalendarIcon className="size-3.5 text-zinc-400" />
+										Timeline
+									</span>
+									<span className="text-xs font-semibold tabular-nums text-zinc-900 dark:text-white">
+										{daysRemaining !== null && daysRemaining > 0
+											? `${daysRemaining}d left`
+											: timeProgress !== null && timeProgress >= 100
+												? "Ended"
+												: "Not started"}
+									</span>
+								</div>
+								<div className="h-2 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+									<div
+										className="h-full rounded-full bg-sky-500 transition-all"
+										style={{ width: `${timeProgress ?? 0}%` }}
+									/>
+								</div>
+								<div className="mt-2 flex items-center justify-between">
+									<span className="text-[10px] text-zinc-400 dark:text-zinc-500">{formatDate(campaign.startDate)}</span>
+									<span className="text-[10px] text-zinc-400 dark:text-zinc-500">{formatDate(campaign.endDate)}</span>
+								</div>
 							</div>
-							<p className="mt-1.5 text-[10px] sm:text-xs text-zinc-400">
-								{campaign.maxEnrollments
-									? `${Math.min(Math.round(((stats?.totalEnrollments ?? 0) / campaign.maxEnrollments) * 100), 100)}% capacity used`
-									: "No limit set"}
-							</p>
-						</div>
-
-						{/* Duration Progress */}
-						<div className="rounded-xl bg-white p-3.5 sm:p-4 shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-							<div className="flex items-center justify-between">
-								<span className="flex items-center gap-1.5 text-zinc-500 dark:text-zinc-400">
-									<ClockIcon className="size-4" />
-									<span className="text-xs sm:text-sm">Campaign Duration</span>
-								</span>
-								<span className="text-xs sm:text-sm font-medium text-zinc-900 dark:text-white">
-									{daysRemaining !== null && daysRemaining > 0 ? `${daysRemaining}d left` : "\u2014"}
-								</span>
-							</div>
-							<div className="mt-3 h-2 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
-								<div
-									className="h-full rounded-full bg-sky-500 transition-all"
-									style={{ width: `${timeProgress ?? 0}%` }}
-								/>
-							</div>
-							<p className="mt-1.5 text-[10px] sm:text-xs text-zinc-400">
-								{timeProgress !== null ? `${timeProgress}% time elapsed` : "Not started"}
-							</p>
 						</div>
 					</div>
 
-					{/* Main Content Grid */}
-					<div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
-						{/* Left Column */}
-						<div className="space-y-4 sm:space-y-6 lg:col-span-2">
-							{/* Enrollment Distribution */}
-							<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-								<div className="flex items-center gap-2 border-b border-zinc-200 px-3.5 sm:px-4 py-2.5 sm:py-3 dark:border-zinc-700">
-									<UserGroupIcon className="size-4 text-emerald-500" />
-									<h3 className="text-xs sm:text-sm font-semibold text-zinc-900 dark:text-white">
-										Enrollment Distribution
-									</h3>
-								</div>
-								<div className="p-3.5 sm:p-5">
-									<div className="h-2 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700">
-										<div className="flex h-full">
-											<div
-												className="h-full bg-emerald-500 transition-all"
-												style={{ width: `${(enrollmentDistribution.approved / enrollmentDistribution.total) * 100}%` }}
-											/>
-											<div
-												className="h-full bg-amber-500 transition-all"
-												style={{ width: `${(enrollmentDistribution.pending / enrollmentDistribution.total) * 100}%` }}
-											/>
-											<div
-												className="h-full bg-red-500 transition-all"
-												style={{ width: `${(enrollmentDistribution.rejected / enrollmentDistribution.total) * 100}%` }}
-											/>
-										</div>
-									</div>
-									<div className="mt-3 sm:mt-4 flex items-center gap-4 sm:gap-6">
-										{[
-											{ label: "Approved", count: enrollmentDistribution.approved, color: "bg-emerald-500" },
-											{ label: "Pending", count: enrollmentDistribution.pending, color: "bg-amber-500" },
-											{ label: "Rejected", count: enrollmentDistribution.rejected, color: "bg-red-500" },
-										].map((item) => (
-											<div key={item.label} className="flex items-center gap-2">
-												<span className={`size-2 rounded-full ${item.color}`} />
-												<span className="text-xs text-zinc-500 dark:text-zinc-400">{item.label}</span>
-												<span className="text-xs font-bold tabular-nums text-zinc-900 dark:text-white">
-													{item.count}
-												</span>
+					{/* Two-column layout: Main + Sidebar */}
+					<div className="grid gap-4 sm:gap-5 lg:grid-cols-5">
+						{/* Left — Main Content */}
+						<div className="space-y-4 sm:space-y-5 lg:col-span-3">
+							{/* Task Summary — compact clickable banner */}
+							{tasks.length > 0 && (
+								<button
+									type="button"
+									onClick={() => setActiveTab("tasks")}
+									className="flex w-full items-center gap-3 rounded-xl bg-white p-3 sm:p-4 shadow-sm ring-1 ring-zinc-200 transition-colors hover:bg-zinc-50 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:bg-zinc-800/80"
+								>
+									<div className="flex -space-x-1.5">
+										{tasks.slice(0, 4).map((task) => {
+											const taskPlatform =
+												task.taskTemplate?.platformName || extractPlatformFromText(task.taskTemplate?.name || "");
+											const TaskIcon = taskPlatform ? getPlatformIcon(taskPlatform) : null;
+											return (
+												<div
+													key={task.id}
+													className={`flex size-7 items-center justify-center rounded-full bg-gradient-to-br ring-2 ring-white dark:ring-zinc-900 ${getPlatformGradient(taskPlatform || "")}`}
+												>
+													{TaskIcon ? (
+														<TaskIcon className="size-3.5 text-white" />
+													) : (
+														<ClipboardDocumentListIcon className="size-3.5 text-white" />
+													)}
+												</div>
+											);
+										})}
+										{tasks.length > 4 && (
+											<div className="flex size-7 items-center justify-center rounded-full bg-zinc-200 text-[10px] font-bold text-zinc-600 ring-2 ring-white dark:bg-zinc-700 dark:text-zinc-300 dark:ring-zinc-900">
+												+{tasks.length - 4}
 											</div>
-										))}
+										)}
 									</div>
-								</div>
-							</div>
-
-							{/* Financial Configuration */}
-							<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-								<div className="flex items-center gap-2 border-b border-zinc-200 px-3.5 sm:px-4 py-2.5 sm:py-3 dark:border-zinc-700">
-									<CurrencyRupeeIcon className="size-4 text-zinc-400" />
-									<h3 className="text-xs sm:text-sm font-semibold text-zinc-900 dark:text-white">
-										Financial Configuration
-									</h3>
-								</div>
-								<div className="grid grid-cols-3 divide-x divide-zinc-100 dark:divide-zinc-800">
-									<div className="p-3 sm:p-4 text-center">
-										<p className="text-[10px] sm:text-xs font-medium text-zinc-500 dark:text-zinc-400">Bill Rate</p>
-										<p className="mt-1 text-lg sm:text-2xl font-bold tabular-nums text-zinc-900 dark:text-white">
-											{campaign.billRateDecimal != null ? `${campaign.billRateDecimal}%` : "—"}
+									<div className="min-w-0 flex-1 text-left">
+										<p className="text-sm font-medium text-zinc-900 dark:text-white">
+											{tasks.length} task{tasks.length !== 1 ? "s" : ""} configured
 										</p>
-										<p className="mt-0.5 text-[9px] sm:text-[10px] text-zinc-400 dark:text-zinc-500">Brand Pays</p>
-									</div>
-									<div className="p-3 sm:p-4 text-center">
-										<p className="text-[10px] sm:text-xs font-medium text-zinc-500 dark:text-zinc-400">Platform Fee</p>
-										<p className="mt-1 text-lg sm:text-2xl font-bold tabular-nums text-zinc-900 dark:text-white">
-											{campaign.platformFeeDecimal ? formatCurrency(campaign.platformFeeDecimal) : "—"}
+										<p className="text-xs text-zinc-500 dark:text-zinc-400">
+											{tasks.filter((t) => t.isRequired).length} required
 										</p>
-										<p className="mt-0.5 text-[9px] sm:text-[10px] text-zinc-400 dark:text-zinc-500">Per Enrollment</p>
 									</div>
-									<div className="p-3 sm:p-4 text-center">
-										<p className="text-[10px] sm:text-xs font-medium text-zinc-500 dark:text-zinc-400">Max Slots</p>
-										<p className="mt-1 text-lg sm:text-2xl font-bold tabular-nums text-zinc-900 dark:text-white">
-											{campaign.maxEnrollments || "∞"}
-										</p>
-										<p className="mt-0.5 text-[9px] sm:text-[10px] text-zinc-400 dark:text-zinc-500">Enrollments</p>
-									</div>
-								</div>
-							</div>
+									<ChevronRightIcon className="size-4 text-zinc-400" />
+								</button>
+							)}
 
 							{/* Recent Enrollments */}
-							{enrollments.length > 0 && (
+							{enrollments.length > 0 ? (
 								<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
 									<div className="flex items-center justify-between border-b border-zinc-200 px-3.5 sm:px-4 py-2.5 sm:py-3 dark:border-zinc-700">
 										<div className="flex items-center gap-2">
@@ -1463,7 +1438,7 @@ export function CampaignShow() {
 										</button>
 									</div>
 									<div className="divide-y divide-zinc-100 dark:divide-zinc-800">
-										{enrollments.slice(0, 3).map((enrollment) => (
+										{enrollments.slice(0, 5).map((enrollment) => (
 											<EnrollmentCardCompact
 												key={enrollment.id}
 												enrollment={enrollment}
@@ -1472,58 +1447,59 @@ export function CampaignShow() {
 										))}
 									</div>
 								</div>
+							) : (
+								<div className="overflow-hidden rounded-xl bg-white p-6 shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
+									<EmptyState
+										preset="enrollments"
+										title="No enrollments yet"
+										description="Enrollments will appear here when shoppers join this campaign"
+									/>
+								</div>
 							)}
 						</div>
 
-						{/* Right Column */}
-						<div className="space-y-4 sm:space-y-6">
-							{/* Campaign Details */}
+						{/* Right — Sidebar */}
+						<div className="space-y-4 sm:space-y-5 lg:col-span-2">
+							{/* Campaign Configuration */}
 							<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
 								<div className="flex items-center gap-2 border-b border-zinc-200 px-3.5 sm:px-4 py-2.5 sm:py-3 dark:border-zinc-700">
 									<CubeIcon className="size-4 text-violet-500" />
-									<h3 className="text-xs sm:text-sm font-semibold text-zinc-900 dark:text-white">Campaign Details</h3>
+									<h3 className="text-xs sm:text-sm font-semibold text-zinc-900 dark:text-white">Configuration</h3>
 								</div>
-								<div className="divide-y divide-zinc-200 dark:divide-zinc-700">
-									<div className="flex items-center justify-between px-3.5 sm:px-4 py-2.5 sm:py-3">
-										<div className="flex items-center gap-2">
-											<CalendarIcon className="size-3.5 sm:size-4 shrink-0 text-zinc-400" />
-											<span className="text-xs sm:text-[13px] text-zinc-600 dark:text-zinc-400">Duration</span>
-										</div>
-										<span className="text-xs sm:text-[13px] font-medium text-zinc-900 dark:text-white text-right">
-											{formatDate(campaign.startDate)} &ndash; {formatDate(campaign.endDate)}
-										</span>
-									</div>
-									<div className="flex items-center justify-between px-3.5 sm:px-4 py-2.5 sm:py-3">
-										<div className="flex items-center gap-2">
-											<CurrencyRupeeIcon className="size-3.5 sm:size-4 shrink-0 text-zinc-400" />
-											<span className="text-xs sm:text-[13px] text-zinc-600 dark:text-zinc-400">Bill Rate</span>
-										</div>
-										<span className="text-xs sm:text-[13px] font-semibold text-emerald-600 dark:text-emerald-400">
-											{campaign.billRateDecimal != null ? `${campaign.billRateDecimal}%` : "N/A"}
-										</span>
-									</div>
-									<div className="flex items-center justify-between px-3.5 sm:px-4 py-2.5 sm:py-3">
-										<div className="flex items-center gap-2">
-											<ChartBarIcon className="size-3.5 sm:size-4 shrink-0 text-zinc-400" />
-											<span className="text-xs sm:text-[13px] text-zinc-600 dark:text-zinc-400">Platform Fee</span>
-										</div>
-										<span className="text-xs sm:text-[13px] font-medium text-zinc-900 dark:text-white">
-											{campaign.platformFeeDecimal ? formatCurrency(campaign.platformFeeDecimal) : "N/A"}
-										</span>
-									</div>
-									<div className="flex items-center justify-between px-3.5 sm:px-4 py-2.5 sm:py-3">
-										<div className="flex items-center gap-2">
-											{campaign.isPublic ? (
-												<GlobeAltIcon className="size-3.5 sm:size-4 shrink-0 text-zinc-400" />
-											) : (
-												<LockClosedIcon className="size-3.5 sm:size-4 shrink-0 text-zinc-400" />
-											)}
-											<span className="text-xs sm:text-[13px] text-zinc-600 dark:text-zinc-400">Visibility</span>
-										</div>
-										<span className="text-xs sm:text-[13px] font-medium text-zinc-900 dark:text-white">
-											{campaign.isPublic ? "Public" : "Private"}
-										</span>
-									</div>
+								<div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+									{[
+										{
+											label: "Bill Rate",
+											value: campaign.billRateDecimal != null ? `${campaign.billRateDecimal}%` : "—",
+											valueClass: "text-emerald-600 font-semibold dark:text-emerald-400",
+										},
+										{
+											label: "Platform Fee",
+											value: campaign.platformFeeDecimal ? formatCurrency(campaign.platformFeeDecimal) : "—",
+										},
+										{
+											label: "Max Slots",
+											value: campaign.maxEnrollments ? String(campaign.maxEnrollments) : "Unlimited",
+										},
+										{
+											label: "Visibility",
+											value: campaign.isPublic ? "Public" : "Private",
+											icon: campaign.isPublic ? GlobeAltIcon : LockClosedIcon,
+										},
+									].map((row) => {
+										const RowIcon = row.icon;
+										return (
+											<div key={row.label} className="flex items-center justify-between px-3.5 sm:px-4 py-2.5">
+												<span className="text-xs text-zinc-500 dark:text-zinc-400">{row.label}</span>
+												<span
+													className={`inline-flex items-center gap-1 text-xs font-medium ${row.valueClass || "text-zinc-900 dark:text-white"}`}
+												>
+													{RowIcon && <RowIcon className="size-3 text-zinc-400" />}
+													{row.value}
+												</span>
+											</div>
+										);
+									})}
 								</div>
 							</div>
 
@@ -1554,40 +1530,6 @@ export function CampaignShow() {
 									</div>
 								</div>
 							)}
-
-							{/* Reference IDs */}
-							<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-								<div className="flex items-center gap-2 border-b border-zinc-200 px-3.5 sm:px-4 py-2.5 sm:py-3 dark:border-zinc-700">
-									<CubeIcon className="size-4 text-zinc-400" />
-									<h3 className="text-xs sm:text-sm font-semibold text-zinc-900 dark:text-white">Reference IDs</h3>
-								</div>
-								<div className="divide-y divide-zinc-100 dark:divide-zinc-800/50">
-									<div className="flex items-center justify-between gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5">
-										<span className="text-[10px] sm:text-xs text-zinc-500">Campaign</span>
-										<code className="truncate rounded bg-zinc-100 px-1.5 py-0.5 text-[9px] sm:text-[10px] text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
-											{campaign.id.length > 16 ? `${campaign.id.slice(0, 8)}...${campaign.id.slice(-4)}` : campaign.id}
-										</code>
-									</div>
-									{campaign.listing?.id && (
-										<div className="flex items-center justify-between gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5">
-											<span className="text-[10px] sm:text-xs text-zinc-500">Listing</span>
-											<code className="truncate rounded bg-zinc-100 px-1.5 py-0.5 text-[9px] sm:text-[10px] text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
-												{campaign.listing.id.length > 16
-													? `${campaign.listing.id.slice(0, 8)}...${campaign.listing.id.slice(-4)}`
-													: campaign.listing.id}
-											</code>
-										</div>
-									)}
-									<div className="flex items-center justify-between gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5">
-										<span className="text-[10px] sm:text-xs text-zinc-500">Organization</span>
-										<code className="truncate rounded bg-zinc-100 px-1.5 py-0.5 text-[9px] sm:text-[10px] text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
-											{campaign.organizationId.length > 16
-												? `${campaign.organizationId.slice(0, 8)}...${campaign.organizationId.slice(-4)}`
-												: campaign.organizationId}
-										</code>
-									</div>
-								</div>
-							</div>
 						</div>
 					</div>
 				</div>
@@ -1598,18 +1540,17 @@ export function CampaignShow() {
 			{/* ============================================================= */}
 			{activeTab === "enrollments" && (
 				<div className="space-y-3 sm:space-y-4">
-					{/* Enrollment Table */}
+					{/* Enrollment Card */}
 					<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-						{/* Header */}
+						{/* Header with actions */}
 						<div className="flex items-center justify-between border-b border-zinc-200 px-3.5 sm:px-4 py-2.5 sm:py-3 dark:border-zinc-700">
 							<div className="flex items-center gap-2">
 								<UserGroupIcon className="size-4 text-zinc-400" />
 								<h3 className="text-xs sm:text-sm font-semibold text-zinc-900 dark:text-white">Enrollments</h3>
-								<Badge color="zinc">{enrollments.length}</Badge>
 							</div>
 							<div className="flex items-center gap-2">
 								<Button
-									color="emerald"
+									outline
 									onClick={async () => {
 										try {
 											const result = await exportEnrollments.mutateAsync({ campaignId });
@@ -1627,7 +1568,7 @@ export function CampaignShow() {
 									}}
 									disabled={exportEnrollments.isPending}
 								>
-									<FiTable data-slot="icon" className="size-4" />
+									<TableCellsIcon data-slot="icon" className="size-4" />
 									<span className="hidden sm:inline">
 										{exportEnrollments.isPending ? "Exporting..." : "Export CSV"}
 									</span>
@@ -1641,15 +1582,40 @@ export function CampaignShow() {
 							</div>
 						</div>
 
-						{/* Filter Tabs */}
+						{/* Filter Tabs with counts */}
 						<div className="flex gap-1 overflow-x-auto scrollbar-none border-b border-zinc-200 px-3.5 sm:px-4 py-1.5 sm:py-2 dark:border-zinc-700">
 							{(
 								[
-									{ value: "all" as const, label: "All", icon: UserGroupIcon },
-									{ value: "awaiting_review" as const, label: "Pending", icon: ClockIcon },
-									{ value: "approved" as const, label: "Approved", icon: CheckCircleIcon },
-									{ value: "awaiting_submission" as const, label: "In Progress", icon: ArrowPathIcon },
-									{ value: "permanently_rejected" as const, label: "Rejected", icon: XCircleIcon },
+									{
+										value: "all" as const,
+										label: "All",
+										icon: UserGroupIcon,
+										count: enrollments.length,
+									},
+									{
+										value: "awaiting_review" as const,
+										label: "Pending",
+										icon: ClockIcon,
+										count: enrollments.filter((e) => e.status === "awaiting_review").length,
+									},
+									{
+										value: "approved" as const,
+										label: "Approved",
+										icon: CheckCircleIcon,
+										count: enrollments.filter((e) => e.status === "approved").length,
+									},
+									{
+										value: "awaiting_submission" as const,
+										label: "In Progress",
+										icon: ArrowPathIcon,
+										count: enrollments.filter((e) => e.status === "awaiting_submission").length,
+									},
+									{
+										value: "permanently_rejected" as const,
+										label: "Rejected",
+										icon: XCircleIcon,
+										count: enrollments.filter((e) => e.status === "permanently_rejected").length,
+									},
 								] as const
 							).map((tab) => {
 								const TabIcon = tab.icon;
@@ -1668,12 +1634,24 @@ export function CampaignShow() {
 									>
 										<TabIcon className="size-3.5" />
 										{tab.label}
+										{tab.count > 0 && (
+											<span
+												className={clsx(
+													"ml-0.5 inline-flex h-[16px] min-w-[16px] items-center justify-center rounded-full px-1 text-[10px] font-semibold",
+													isActive
+														? "bg-white/20 text-white dark:bg-zinc-900/20 dark:text-zinc-900"
+														: "bg-zinc-200/70 text-zinc-500 dark:bg-zinc-700 dark:text-zinc-400"
+												)}
+											>
+												{tab.count}
+											</span>
+										)}
 									</button>
 								);
 							})}
 						</div>
 
-						{/* Table */}
+						{/* Enrollment List */}
 						<div className="overflow-x-auto">
 							{enrollmentsLoading ? (
 								<div className="space-y-3 p-5">
@@ -1722,18 +1700,6 @@ export function CampaignShow() {
 			{/* ============================================================= */}
 			{activeTab === "tasks" && (
 				<div className="space-y-3 sm:space-y-4">
-					<div className="flex items-center justify-between">
-						<Text className="text-xs sm:text-sm">
-							{tasks.length} task{tasks.length !== 1 ? "s" : ""} configured
-						</Text>
-						{canUpdateCampaign && ["draft", "rejected", "paused"].includes(campaign.status) && (
-							<Button outline onClick={() => setShowAddTaskPicker(true)} disabled={addTask.isPending}>
-								<PlusIcon className="size-4" />
-								Add Task
-							</Button>
-						)}
-					</div>
-
 					{tasksLoading ? (
 						<div className="space-y-3">
 							{[1, 2].map((i) => (
@@ -1746,28 +1712,49 @@ export function CampaignShow() {
 								title="No tasks configured"
 								description="Add tasks that shoppers must complete for this campaign"
 							/>
+							{canUpdateCampaign && ["draft", "rejected", "paused"].includes(campaign.status) && (
+								<div className="mt-4 flex justify-center">
+									<Button outline onClick={() => setShowAddTaskPicker(true)} disabled={addTask.isPending}>
+										<PlusIcon className="size-4" />
+										Add Task
+									</Button>
+								</div>
+							)}
 						</div>
 					) : (
 						<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-							<div className="divide-y divide-zinc-200 dark:divide-zinc-700">
+							{/* Header */}
+							<div className="flex items-center justify-between border-b border-zinc-200 px-3.5 sm:px-4 py-2.5 sm:py-3 dark:border-zinc-700">
+								<div className="flex items-center gap-2">
+									<ClipboardDocumentListIcon className="size-4 text-violet-500" />
+									<h3 className="text-xs sm:text-sm font-semibold text-zinc-900 dark:text-white">Campaign Tasks</h3>
+								</div>
+								{canUpdateCampaign && ["draft", "rejected", "paused"].includes(campaign.status) && (
+									<Button outline onClick={() => setShowAddTaskPicker(true)} disabled={addTask.isPending}>
+										<PlusIcon className="size-4" />
+										Add Task
+									</Button>
+								)}
+							</div>
+							<div className="divide-y divide-zinc-100 dark:divide-zinc-800">
 								{tasks.map((task, idx) => {
 									const taskPlatform =
 										task.taskTemplate?.platformName || extractPlatformFromText(task.taskTemplate?.name || "");
 									const TaskIcon = taskPlatform ? getPlatformIcon(taskPlatform) : null;
 									return (
-										<div key={task.id} className="group flex items-start gap-3 px-4 py-3">
-											{/* Numbered icon */}
+										<div key={task.id} className="group flex items-start gap-3 px-3.5 sm:px-4 py-3.5">
+											{/* Gradient platform icon */}
 											<div className="relative shrink-0">
 												<div
-													className={`flex size-7 items-center justify-center rounded-lg ${TaskIcon ? "bg-zinc-100 dark:bg-zinc-800" : "bg-violet-100 dark:bg-violet-900/40"}`}
+													className={`flex size-9 items-center justify-center rounded-full bg-gradient-to-br ${getPlatformGradient(taskPlatform || "")}`}
 												>
 													{TaskIcon ? (
-														<TaskIcon className={`size-4 ${getPlatformColor(taskPlatform || "")}`} />
+														<TaskIcon className="size-4.5 text-white" />
 													) : (
-														<ClipboardDocumentListIcon className="size-4 text-violet-600 dark:text-violet-400" />
+														<ClipboardDocumentListIcon className="size-4.5 text-white" />
 													)}
 												</div>
-												<span className="absolute -top-1 -left-1 flex size-4 items-center justify-center rounded-full bg-zinc-900 text-[9px] font-bold text-white ring-2 ring-white dark:bg-white dark:text-zinc-900 dark:ring-zinc-900">
+												<span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-zinc-900 text-[9px] font-bold text-white ring-2 ring-white dark:bg-white dark:text-zinc-900 dark:ring-zinc-900">
 													{idx + 1}
 												</span>
 											</div>
@@ -1794,59 +1781,55 @@ export function CampaignShow() {
 														{task.instructions}
 													</p>
 												)}
-												{/* Platform / category chip + requirements badges */}
-												<div className="mt-2 flex flex-wrap items-center gap-1.5">
-													{(() => {
-														const taskPlatformName =
-															task.taskTemplate?.platformName || extractPlatformFromText(task.taskTemplate?.name || "");
-														const TaskPlatformIcon = taskPlatformName ? getPlatformIcon(taskPlatformName) : null;
-														return (
-															<span className="inline-flex items-center gap-1 rounded-md border border-zinc-200 bg-zinc-50 px-1.5 py-0.5 text-[10px] font-medium text-zinc-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400">
-																{TaskPlatformIcon && (
-																	<TaskPlatformIcon className={`size-3 ${getPlatformColor(taskPlatformName || "")}`} />
-																)}
-																{taskPlatformName || task.taskTemplate?.category || "Task"}
-															</span>
-														);
-													})()}
-													{task.requirements?.requiredHashtags?.map((t) => (
-														<Badge key={t} color="sky" className="text-[10px]">
-															#{t}
-														</Badge>
-													))}
-													{task.requirements?.requiredMentions?.map((m) => (
-														<Badge key={m} color="violet" className="text-[10px]">
-															@{m}
-														</Badge>
-													))}
-													{task.requirements?.requirePhotosInReview && (
-														<Badge color="amber" className="text-[10px]">
-															Photos{task.requirements.minPhotos ? ` (${task.requirements.minPhotos}+)` : ""}
-														</Badge>
-													)}
-													{task.requirements?.requireVideosInReview && (
-														<Badge color="rose" className="text-[10px]">
-															Videos{task.requirements.minVideos ? ` (${task.requirements.minVideos}+)` : ""}
-														</Badge>
-													)}
-													{task.requirements?.minWordCount ? (
-														<Badge color="zinc" className="text-[10px]">
-															{task.requirements.minWordCount}+ words
-														</Badge>
-													) : null}
-													{task.requirements?.minRating ? (
-														<Badge color="emerald" className="text-[10px]">
-															{task.requirements.minRating}+ stars
-														</Badge>
-													) : null}
-													{task.requirements?.minDuration || task.requirements?.maxDuration ? (
-														<Badge color="zinc" className="text-[10px]">
-															{task.requirements.minDuration ? `${task.requirements.minDuration}s` : ""}
-															{task.requirements.minDuration && task.requirements.maxDuration ? "–" : ""}
-															{task.requirements.maxDuration ? `${task.requirements.maxDuration}s` : ""}
-														</Badge>
-													) : null}
-												</div>
+												{/* Requirements badges */}
+												{(task.requirements?.requiredHashtags?.length ||
+													task.requirements?.requiredMentions?.length ||
+													task.requirements?.requirePhotosInReview ||
+													task.requirements?.requireVideosInReview ||
+													task.requirements?.minWordCount ||
+													task.requirements?.minRating ||
+													task.requirements?.minDuration ||
+													task.requirements?.maxDuration) && (
+													<div className="mt-2 flex flex-wrap items-center gap-1.5">
+														{task.requirements?.requiredHashtags?.map((t) => (
+															<Badge key={t} color="sky" className="text-[10px]">
+																#{t}
+															</Badge>
+														))}
+														{task.requirements?.requiredMentions?.map((m) => (
+															<Badge key={m} color="violet" className="text-[10px]">
+																@{m}
+															</Badge>
+														))}
+														{task.requirements?.requirePhotosInReview && (
+															<Badge color="amber" className="text-[10px]">
+																Photos{task.requirements.minPhotos ? ` (${task.requirements.minPhotos}+)` : ""}
+															</Badge>
+														)}
+														{task.requirements?.requireVideosInReview && (
+															<Badge color="rose" className="text-[10px]">
+																Videos{task.requirements.minVideos ? ` (${task.requirements.minVideos}+)` : ""}
+															</Badge>
+														)}
+														{task.requirements?.minWordCount ? (
+															<Badge color="zinc" className="text-[10px]">
+																{task.requirements.minWordCount}+ words
+															</Badge>
+														) : null}
+														{task.requirements?.minRating ? (
+															<Badge color="emerald" className="text-[10px]">
+																{task.requirements.minRating}+ stars
+															</Badge>
+														) : null}
+														{task.requirements?.minDuration || task.requirements?.maxDuration ? (
+															<Badge color="zinc" className="text-[10px]">
+																{task.requirements.minDuration ? `${task.requirements.minDuration}s` : ""}
+																{task.requirements.minDuration && task.requirements.maxDuration ? "–" : ""}
+																{task.requirements.maxDuration ? `${task.requirements.maxDuration}s` : ""}
+															</Badge>
+														) : null}
+													</div>
+												)}
 											</div>
 											{/* Actions */}
 											{canUpdateCampaign && ["draft", "rejected", "paused"].includes(campaign.status) && (
@@ -1857,6 +1840,7 @@ export function CampaignShow() {
 															setEditingTaskId(task.id);
 															setEditingTaskInstructions(task.instructions || "");
 															setEditingTaskRequirements(task.requirements || {});
+															setEditingTaskCategory(task.taskTemplate?.category);
 															setHashtagInput("");
 															setMentionInput("");
 														}}
@@ -1909,15 +1893,19 @@ export function CampaignShow() {
 				organizationId={organizationId}
 				campaign={campaign}
 				onSuccess={() => {
-					refetchCampaign();
 					refetchStats();
 				}}
 			/>
 
 			{/* Edit Task Dialog */}
 			<Dialog open={!!editingTaskId} onClose={() => setEditingTaskId(null)} size="lg">
-				<DialogTitle>Edit Task</DialogTitle>
-				<DialogDescription>Update task instructions and requirements</DialogDescription>
+				<DialogHeader
+					icon={PencilSquareIcon}
+					iconColor="amber"
+					title="Edit Task"
+					description="Update task instructions and requirements"
+					onClose={() => setEditingTaskId(null)}
+				/>
 				<DialogBody>
 					<div className="space-y-4">
 						{/* Instructions */}
@@ -1933,20 +1921,37 @@ export function CampaignShow() {
 						</Field>
 
 						{/* Social Media */}
-						<div className="space-y-2">
-							<p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-								Social Media
-							</p>
-							<Field>
-								<Label>Required Hashtags</Label>
-								<div className="flex gap-2">
-									<Input
-										type="text"
-										value={hashtagInput}
-										onChange={(e) => setHashtagInput(e.target.value)}
-										onKeyDown={(e) => {
-											if (e.key === "Enter") {
-												e.preventDefault();
+						{(!editingTaskCategory || editingTaskCategory === "social" || editingTaskCategory === "video") && (
+							<div className="space-y-2">
+								<p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+									Social Media
+								</p>
+								<Field>
+									<Label>Required Hashtags</Label>
+									<div className="flex gap-2">
+										<Input
+											type="text"
+											value={hashtagInput}
+											onChange={(e) => setHashtagInput(e.target.value)}
+											onKeyDown={(e) => {
+												if (e.key === "Enter") {
+													e.preventDefault();
+													const tag = hashtagInput.trim().replace(/^#/, "");
+													if (tag && !editingTaskRequirements.requiredHashtags?.includes(tag)) {
+														setEditingTaskRequirements((prev) => ({
+															...prev,
+															requiredHashtags: [...(prev.requiredHashtags || []), tag],
+														}));
+														setHashtagInput("");
+													}
+												}
+											}}
+											placeholder="#hashtag"
+										/>
+										<Button
+											type="button"
+											outline
+											onClick={() => {
 												const tag = hashtagInput.trim().replace(/^#/, "");
 												if (tag && !editingTaskRequirements.requiredHashtags?.includes(tag)) {
 													setEditingTaskRequirements((prev) => ({
@@ -1955,54 +1960,54 @@ export function CampaignShow() {
 													}));
 													setHashtagInput("");
 												}
-											}
-										}}
-										placeholder="#hashtag"
-									/>
-									<Button
-										type="button"
-										outline
-										onClick={() => {
-											const tag = hashtagInput.trim().replace(/^#/, "");
-											if (tag && !editingTaskRequirements.requiredHashtags?.includes(tag)) {
-												setEditingTaskRequirements((prev) => ({
-													...prev,
-													requiredHashtags: [...(prev.requiredHashtags || []), tag],
-												}));
-												setHashtagInput("");
-											}
-										}}
-									>
-										<PlusIcon className="size-4" />
-									</Button>
-								</div>
-								{(editingTaskRequirements.requiredHashtags?.length ?? 0) > 0 && (
-									<div className="mt-1.5 flex flex-wrap gap-1.5">
-										{editingTaskRequirements.requiredHashtags?.map((tag) => (
-											<FilterChip
-												key={tag}
-												label={`#${tag}`}
-												onRemove={() =>
-													setEditingTaskRequirements((prev) => ({
-														...prev,
-														requiredHashtags: prev.requiredHashtags?.filter((t) => t !== tag) || [],
-													}))
-												}
-											/>
-										))}
+											}}
+										>
+											<PlusIcon className="size-4" />
+										</Button>
 									</div>
-								)}
-							</Field>
-							<Field>
-								<Label>Required Mentions</Label>
-								<div className="flex gap-2">
-									<Input
-										type="text"
-										value={mentionInput}
-										onChange={(e) => setMentionInput(e.target.value)}
-										onKeyDown={(e) => {
-											if (e.key === "Enter") {
-												e.preventDefault();
+									{(editingTaskRequirements.requiredHashtags?.length ?? 0) > 0 && (
+										<div className="mt-1.5 flex flex-wrap gap-1.5">
+											{editingTaskRequirements.requiredHashtags?.map((tag) => (
+												<FilterChip
+													key={tag}
+													label={`#${tag}`}
+													onRemove={() =>
+														setEditingTaskRequirements((prev) => ({
+															...prev,
+															requiredHashtags: prev.requiredHashtags?.filter((t) => t !== tag) || [],
+														}))
+													}
+												/>
+											))}
+										</div>
+									)}
+								</Field>
+								<Field>
+									<Label>Required Mentions</Label>
+									<div className="flex gap-2">
+										<Input
+											type="text"
+											value={mentionInput}
+											onChange={(e) => setMentionInput(e.target.value)}
+											onKeyDown={(e) => {
+												if (e.key === "Enter") {
+													e.preventDefault();
+													const mention = mentionInput.trim().replace(/^@/, "");
+													if (mention && !editingTaskRequirements.requiredMentions?.includes(mention)) {
+														setEditingTaskRequirements((prev) => ({
+															...prev,
+															requiredMentions: [...(prev.requiredMentions || []), mention],
+														}));
+														setMentionInput("");
+													}
+												}
+											}}
+											placeholder="@username"
+										/>
+										<Button
+											type="button"
+											outline
+											onClick={() => {
 												const mention = mentionInput.trim().replace(/^@/, "");
 												if (mention && !editingTaskRequirements.requiredMentions?.includes(mention)) {
 													setEditingTaskRequirements((prev) => ({
@@ -2011,171 +2016,169 @@ export function CampaignShow() {
 													}));
 													setMentionInput("");
 												}
-											}
-										}}
-										placeholder="@username"
-									/>
-									<Button
-										type="button"
-										outline
-										onClick={() => {
-											const mention = mentionInput.trim().replace(/^@/, "");
-											if (mention && !editingTaskRequirements.requiredMentions?.includes(mention)) {
-												setEditingTaskRequirements((prev) => ({
-													...prev,
-													requiredMentions: [...(prev.requiredMentions || []), mention],
-												}));
-												setMentionInput("");
-											}
-										}}
-									>
-										<PlusIcon className="size-4" />
-									</Button>
-								</div>
-								{(editingTaskRequirements.requiredMentions?.length ?? 0) > 0 && (
-									<div className="mt-1.5 flex flex-wrap gap-1.5">
-										{editingTaskRequirements.requiredMentions?.map((m) => (
-											<FilterChip
-												key={m}
-												label={`@${m}`}
-												onRemove={() =>
-													setEditingTaskRequirements((prev) => ({
-														...prev,
-														requiredMentions: prev.requiredMentions?.filter((t) => t !== m) || [],
-													}))
-												}
-											/>
-										))}
+											}}
+										>
+											<PlusIcon className="size-4" />
+										</Button>
 									</div>
-								)}
-							</Field>
-						</div>
+									{(editingTaskRequirements.requiredMentions?.length ?? 0) > 0 && (
+										<div className="mt-1.5 flex flex-wrap gap-1.5">
+											{editingTaskRequirements.requiredMentions?.map((m) => (
+												<FilterChip
+													key={m}
+													label={`@${m}`}
+													onRemove={() =>
+														setEditingTaskRequirements((prev) => ({
+															...prev,
+															requiredMentions: prev.requiredMentions?.filter((t) => t !== m) || [],
+														}))
+													}
+												/>
+											))}
+										</div>
+									)}
+								</Field>
+							</div>
+						)}
 
 						{/* Content Requirements */}
-						<div className="space-y-2">
-							<p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-								Content
-							</p>
-							<div className="grid grid-cols-2 gap-3">
-								<Field>
-									<Label>Min Word Count</Label>
-									<NumberInput
-										value={editingTaskRequirements.minWordCount ?? undefined}
-										onValueChange={(v) =>
-											setEditingTaskRequirements((prev) => ({ ...prev, minWordCount: v.floatValue }))
-										}
-										allowNegative={false}
-										decimalScale={0}
-										placeholder="0"
-									/>
-								</Field>
-								<Field>
-									<Label>Min Rating</Label>
-									<Select
-										value={editingTaskRequirements.minRating?.toString() ?? ""}
-										onChange={(e) =>
-											setEditingTaskRequirements((prev) => ({
-												...prev,
-												minRating: e.target.value ? Number(e.target.value) : undefined,
-											}))
-										}
-									>
-										<option value="">None</option>
-										<option value="1">1 Star</option>
-										<option value="2">2 Stars</option>
-										<option value="3">3 Stars</option>
-										<option value="4">4 Stars</option>
-										<option value="5">5 Stars</option>
-									</Select>
-								</Field>
+						{(!editingTaskCategory || editingTaskCategory === "review" || editingTaskCategory === "feedback") && (
+							<div className="space-y-2">
+								<p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+									Content
+								</p>
+								<div className="grid grid-cols-2 gap-3">
+									<Field>
+										<Label>Min Word Count</Label>
+										<NumberInput
+											value={editingTaskRequirements.minWordCount ?? undefined}
+											onValueChange={(v) =>
+												setEditingTaskRequirements((prev) => ({ ...prev, minWordCount: v.floatValue }))
+											}
+											allowNegative={false}
+											decimalScale={0}
+											placeholder="0"
+										/>
+									</Field>
+									<Field>
+										<Label>Min Rating</Label>
+										<Select
+											value={editingTaskRequirements.minRating?.toString() ?? ""}
+											onChange={(e) =>
+												setEditingTaskRequirements((prev) => ({
+													...prev,
+													minRating: e.target.value ? Number(e.target.value) : undefined,
+												}))
+											}
+										>
+											<option value="">None</option>
+											<option value="1">1 Star</option>
+											<option value="2">2 Stars</option>
+											<option value="3">3 Stars</option>
+											<option value="4">4 Stars</option>
+											<option value="5">5 Stars</option>
+										</Select>
+									</Field>
+								</div>
 							</div>
-						</div>
+						)}
 
 						{/* Media Requirements */}
-						<div className="space-y-3">
-							<p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-								Media
-							</p>
-							<div className="flex items-center justify-between">
-								<div>
-									<p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Require Photos</p>
-									<p className="text-xs text-zinc-500 dark:text-zinc-400">Creator must include photos in review</p>
-								</div>
-								<Switch
-									color="emerald"
-									checked={editingTaskRequirements.requirePhotosInReview ?? false}
-									onChange={(v) => setEditingTaskRequirements((prev) => ({ ...prev, requirePhotosInReview: v }))}
-								/>
-							</div>
-							{editingTaskRequirements.requirePhotosInReview && (
-								<Field>
-									<Label>Min Photos</Label>
-									<NumberInput
-										value={editingTaskRequirements.minPhotos ?? undefined}
-										onValueChange={(v) => setEditingTaskRequirements((prev) => ({ ...prev, minPhotos: v.floatValue }))}
-										allowNegative={false}
-										decimalScale={0}
-										placeholder="1"
+						{(!editingTaskCategory ||
+							editingTaskCategory === "review" ||
+							editingTaskCategory === "feedback" ||
+							editingTaskCategory === "photo") && (
+							<div className="space-y-3">
+								<p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+									Media
+								</p>
+								<div className="flex items-center justify-between">
+									<div>
+										<p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Require Photos</p>
+										<p className="text-xs text-zinc-500 dark:text-zinc-400">Creator must include photos in review</p>
+									</div>
+									<Switch
+										color="emerald"
+										checked={editingTaskRequirements.requirePhotosInReview ?? false}
+										onChange={(v) => setEditingTaskRequirements((prev) => ({ ...prev, requirePhotosInReview: v }))}
 									/>
-								</Field>
-							)}
-							<div className="flex items-center justify-between">
-								<div>
-									<p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Require Videos</p>
-									<p className="text-xs text-zinc-500 dark:text-zinc-400">Creator must include videos in review</p>
 								</div>
-								<Switch
-									color="emerald"
-									checked={editingTaskRequirements.requireVideosInReview ?? false}
-									onChange={(v) => setEditingTaskRequirements((prev) => ({ ...prev, requireVideosInReview: v }))}
-								/>
-							</div>
-							{editingTaskRequirements.requireVideosInReview && (
-								<Field>
-									<Label>Min Videos</Label>
-									<NumberInput
-										value={editingTaskRequirements.minVideos ?? undefined}
-										onValueChange={(v) => setEditingTaskRequirements((prev) => ({ ...prev, minVideos: v.floatValue }))}
-										allowNegative={false}
-										decimalScale={0}
-										placeholder="1"
+								{editingTaskRequirements.requirePhotosInReview && (
+									<Field>
+										<Label>Min Photos</Label>
+										<NumberInput
+											value={editingTaskRequirements.minPhotos ?? undefined}
+											onValueChange={(v) =>
+												setEditingTaskRequirements((prev) => ({ ...prev, minPhotos: v.floatValue }))
+											}
+											allowNegative={false}
+											decimalScale={0}
+											placeholder="1"
+										/>
+									</Field>
+								)}
+								<div className="flex items-center justify-between">
+									<div>
+										<p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Require Videos</p>
+										<p className="text-xs text-zinc-500 dark:text-zinc-400">Creator must include videos in review</p>
+									</div>
+									<Switch
+										color="emerald"
+										checked={editingTaskRequirements.requireVideosInReview ?? false}
+										onChange={(v) => setEditingTaskRequirements((prev) => ({ ...prev, requireVideosInReview: v }))}
 									/>
-								</Field>
-							)}
-						</div>
+								</div>
+								{editingTaskRequirements.requireVideosInReview && (
+									<Field>
+										<Label>Min Videos</Label>
+										<NumberInput
+											value={editingTaskRequirements.minVideos ?? undefined}
+											onValueChange={(v) =>
+												setEditingTaskRequirements((prev) => ({ ...prev, minVideos: v.floatValue }))
+											}
+											allowNegative={false}
+											decimalScale={0}
+											placeholder="1"
+										/>
+									</Field>
+								)}
+							</div>
+						)}
 
 						{/* Duration */}
-						<div className="space-y-2">
-							<p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-								Duration (seconds)
-							</p>
-							<div className="grid grid-cols-2 gap-3">
-								<Field>
-									<Label>Min Duration</Label>
-									<NumberInput
-										value={editingTaskRequirements.minDuration ?? undefined}
-										onValueChange={(v) =>
-											setEditingTaskRequirements((prev) => ({ ...prev, minDuration: v.floatValue }))
-										}
-										allowNegative={false}
-										decimalScale={0}
-										placeholder="0"
-									/>
-								</Field>
-								<Field>
-									<Label>Max Duration</Label>
-									<NumberInput
-										value={editingTaskRequirements.maxDuration ?? undefined}
-										onValueChange={(v) =>
-											setEditingTaskRequirements((prev) => ({ ...prev, maxDuration: v.floatValue }))
-										}
-										allowNegative={false}
-										decimalScale={0}
-										placeholder="0"
-									/>
-								</Field>
+						{(!editingTaskCategory || editingTaskCategory === "social" || editingTaskCategory === "video") && (
+							<div className="space-y-2">
+								<p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+									Duration (seconds)
+								</p>
+								<div className="grid grid-cols-2 gap-3">
+									<Field>
+										<Label>Min Duration</Label>
+										<NumberInput
+											value={editingTaskRequirements.minDuration ?? undefined}
+											onValueChange={(v) =>
+												setEditingTaskRequirements((prev) => ({ ...prev, minDuration: v.floatValue }))
+											}
+											allowNegative={false}
+											decimalScale={0}
+											placeholder="0"
+										/>
+									</Field>
+									<Field>
+										<Label>Max Duration</Label>
+										<NumberInput
+											value={editingTaskRequirements.maxDuration ?? undefined}
+											onValueChange={(v) =>
+												setEditingTaskRequirements((prev) => ({ ...prev, maxDuration: v.floatValue }))
+											}
+											allowNegative={false}
+											decimalScale={0}
+											placeholder="0"
+										/>
+									</Field>
+								</div>
 							</div>
-						</div>
+						)}
 
 						{/* Seller Instructions */}
 						<Field>
@@ -2237,22 +2240,54 @@ export function CampaignShow() {
 							);
 						}}
 					>
-						{updateTask.isPending ? "Saving..." : "Save Changes"}
+						{updateTask.isPending ? (
+							<>
+								<ArrowPathIcon className="size-4 animate-spin" />
+								Saving...
+							</>
+						) : (
+							"Save Changes"
+						)}
 					</Button>
 				</DialogActions>
 			</Dialog>
 
 			{/* Add Task Template Picker */}
-			<Dialog open={showAddTaskPicker} onClose={() => { setShowAddTaskPicker(false); setAddTaskTemplateId(""); setAddTaskPlatformId(""); }} size="sm">
-				<DialogTitle>Add Task</DialogTitle>
-				<DialogDescription>Select a platform and task type to add</DialogDescription>
+			<Dialog
+				open={showAddTaskPicker}
+				onClose={() => {
+					setShowAddTaskPicker(false);
+					setAddTaskTemplateId("");
+					setAddTaskPlatformId("");
+				}}
+				size="sm"
+			>
+				<DialogHeader
+					icon={PlusIcon}
+					iconColor="emerald"
+					title="Add Task"
+					description="Select a platform and task type to add"
+					onClose={() => {
+						setShowAddTaskPicker(false);
+						setAddTaskTemplateId("");
+						setAddTaskPlatformId("");
+					}}
+				/>
 				<DialogBody className="space-y-4">
 					<Field>
 						<Label>Platform</Label>
-						<Select value={addTaskPlatformId} onChange={(e) => { setAddTaskPlatformId(e.target.value); setAddTaskTemplateId(""); }}>
+						<Select
+							value={addTaskPlatformId}
+							onChange={(e) => {
+								setAddTaskPlatformId(e.target.value);
+								setAddTaskTemplateId("");
+							}}
+						>
 							<option value="">All platforms</option>
 							{platforms.map((p) => (
-								<option key={p.id} value={p.id}>{p.name}</option>
+								<option key={p.id} value={p.id}>
+									{p.name}
+								</option>
 							))}
 						</Select>
 					</Field>
@@ -2264,12 +2299,15 @@ export function CampaignShow() {
 							</Select>
 						) : (
 							<Select value={addTaskTemplateId} onChange={(e) => setAddTaskTemplateId(e.target.value)}>
-								<option value="" disabled>Select task type…</option>
+								<option value="" disabled>
+									Select task type…
+								</option>
 								{taskTemplates.map((tpl) => {
 									const alreadyAdded = tasks.some((t) => t.taskTemplate?.id === tpl.id);
 									return (
 										<option key={tpl.id} value={tpl.id} disabled={alreadyAdded}>
-											{tpl.name}{alreadyAdded ? " (already added)" : ""}
+											{tpl.name}
+											{alreadyAdded ? " (already added)" : ""}
 										</option>
 									);
 								})}
@@ -2278,7 +2316,14 @@ export function CampaignShow() {
 					</Field>
 				</DialogBody>
 				<DialogActions>
-					<Button plain onClick={() => { setShowAddTaskPicker(false); setAddTaskTemplateId(""); setAddTaskPlatformId(""); }}>
+					<Button
+						plain
+						onClick={() => {
+							setShowAddTaskPicker(false);
+							setAddTaskTemplateId("");
+							setAddTaskPlatformId("");
+						}}
+					>
 						Cancel
 					</Button>
 					<Button
@@ -2316,18 +2361,37 @@ export function CampaignShow() {
 
 			{/* End Campaign Confirmation */}
 			<Dialog open={showEndConfirm} onClose={() => setShowEndConfirm(false)} size="sm">
-				<DialogTitle>End Campaign</DialogTitle>
-				<DialogDescription>
-					Are you sure you want to end <strong>{campaign.title}</strong>? This action cannot be undone and no new
-					enrollments will be accepted.
-				</DialogDescription>
-				<DialogBody className="sr-only" />
+				<DialogHeader
+					icon={StopCircleIcon}
+					iconColor="red"
+					title="End Campaign"
+					onClose={() => setShowEndConfirm(false)}
+				/>
+				<DialogBody>
+					<div className="flex items-start gap-2.5 rounded-xl bg-red-50 p-3 dark:bg-red-950/30">
+						<ExclamationTriangleIcon className="mt-0.5 size-4 shrink-0 text-red-500" />
+						<p className="text-sm text-red-700 dark:text-red-300">
+							Are you sure you want to end <strong>{campaign.title}</strong>? This action cannot be undone and no new
+							enrollments will be accepted.
+						</p>
+					</div>
+				</DialogBody>
 				<DialogActions>
 					<Button plain onClick={() => setShowEndConfirm(false)}>
 						Cancel
 					</Button>
 					<Button color="red" onClick={handleEnd} disabled={endCampaign.isPending}>
-						{endCampaign.isPending ? "Ending..." : "End Campaign"}
+						{endCampaign.isPending ? (
+							<>
+								<ArrowPathIcon className="size-4 animate-spin" />
+								Ending...
+							</>
+						) : (
+							<>
+								<StopCircleIcon className="size-4" />
+								End Campaign
+							</>
+						)}
 					</Button>
 				</DialogActions>
 			</Dialog>

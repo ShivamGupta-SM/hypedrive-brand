@@ -107,9 +107,12 @@ const dayPickerClassNames = {
 		"[&>button]:bg-zinc-900 [&>button]:text-white [&>button]:hover:bg-zinc-800 dark:[&>button]:bg-white dark:[&>button]:text-zinc-900 dark:[&>button]:hover:bg-zinc-100",
 	today: "[&>button]:font-bold [&>button]:ring-1 [&>button]:ring-zinc-300 dark:[&>button]:ring-zinc-600",
 	outside: "[&>button]:text-zinc-300 dark:[&>button]:text-zinc-600",
-	disabled: "[&>button]:text-zinc-300 dark:[&>button]:text-zinc-600 [&>button]:cursor-not-allowed [&>button]:hover:bg-transparent dark:[&>button]:hover:bg-transparent",
-	range_start: "[&>button]:bg-zinc-900 [&>button]:text-white [&>button]:rounded-lg dark:[&>button]:bg-white dark:[&>button]:text-zinc-900",
-	range_end: "[&>button]:bg-zinc-900 [&>button]:text-white [&>button]:rounded-lg dark:[&>button]:bg-white dark:[&>button]:text-zinc-900",
+	disabled:
+		"[&>button]:text-zinc-300 dark:[&>button]:text-zinc-600 [&>button]:cursor-not-allowed [&>button]:hover:bg-transparent dark:[&>button]:hover:bg-transparent",
+	range_start:
+		"[&>button]:bg-zinc-900 [&>button]:text-white [&>button]:rounded-lg dark:[&>button]:bg-white dark:[&>button]:text-zinc-900",
+	range_end:
+		"[&>button]:bg-zinc-900 [&>button]:text-white [&>button]:rounded-lg dark:[&>button]:bg-white dark:[&>button]:text-zinc-900",
 	range_middle:
 		"[&>button]:bg-zinc-100 [&>button]:text-zinc-900 [&>button]:rounded-none dark:[&>button]:bg-zinc-700 dark:[&>button]:text-zinc-100",
 };

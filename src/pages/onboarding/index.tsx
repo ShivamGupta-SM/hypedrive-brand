@@ -23,7 +23,7 @@ import {
 	useSetupProgressStream,
 	useVerifyGSTPreview,
 } from "@/hooks";
-import { useLogout } from "@/store/auth-store";
+import { useLogout } from "@/hooks/use-auth";
 
 // =============================================================================
 // STEP INDICATOR
@@ -150,8 +150,7 @@ function OrganizationStep({
 		if (logoUrl && data.logo !== logoUrl) {
 			onChange({ ...data, logo: logoUrl });
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [logoPreview?.logoUrl]);
+	}, [logoPreview?.logoUrl, data, onChange]);
 
 	const handleNameChange = (name: string) => {
 		onChange({ ...data, name });
@@ -736,7 +735,7 @@ function useStepStatuses(updates: { completedStep?: string; failedStep?: string;
 // =============================================================================
 
 export function Onboarding() {
-	const { mutate: logout } = useLogout();
+	const logout = useLogout();
 	const [step, setStep] = useState(0);
 	const [formData, setFormData] = useState<OrganizationFormData>({
 		name: "",
@@ -822,7 +821,7 @@ export function Onboarding() {
 						<div className="mt-8 flex justify-center">
 							<button
 								type="button"
-								onClick={() => logout()}
+								onClick={() => logout.mutate()}
 								className="inline-flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
 							>
 								<ArrowRightStartOnRectangleIcon className="size-4" />

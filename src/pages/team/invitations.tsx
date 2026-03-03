@@ -2,14 +2,13 @@ import { EnvelopeIcon } from "@heroicons/react/16/solid";
 import { useCallback, useState } from "react";
 import { Button } from "@/components/button";
 import { EmptyState } from "@/components/shared/empty-state";
-import { getAPIErrorMessage, useCancelInvitation, useCurrentOrganization, useInvitations } from "@/hooks";
+import { getAPIErrorMessage, useCancelInvitation, useInvitations, useOrgContext } from "@/hooks";
 import { useCan } from "@/store/permissions-store";
 import type { Invitation } from "./components";
 import { InvitationRow, InviteMemberModal } from "./components";
 
 export function TeamInvitations() {
-	const organization = useCurrentOrganization();
-	const organizationId = organization?.id;
+	const { organizationId } = useOrgContext();
 
 	const canInviteMembers = useCan("member", "create");
 	const canManageMembers = useCan("member", "update");

@@ -20,6 +20,7 @@ export * from "./use-dashboard";
 export * from "./use-enrollments";
 export * from "./use-invoices";
 export * from "./use-listings";
+export * from "./use-org-context";
 export * from "./use-org-slug";
 export * from "./use-organization";
 export * from "./use-storage";

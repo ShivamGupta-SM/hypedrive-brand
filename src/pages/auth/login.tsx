@@ -17,8 +17,9 @@ import {
 	useTwoFactorVerifyBackupCode,
 	useTwoFactorVerifyTotp,
 } from "@/hooks";
+import { useLogin, useSocialLogin } from "@/hooks/use-auth";
 import { setServerAuthCookie } from "@/lib/server-auth";
-import { useAuthStore, useLogin, useSocialLogin } from "@/store/auth-store";
+import { useAuthStore } from "@/store/auth-store";
 import { FormError } from "./components";
 
 const loginSchema = z.object({
@@ -91,8 +92,8 @@ function OAuthButton({
 // ─── Login ────────────────────────────────────────────────────────────────────
 
 export function Login() {
-	const { mutate: login, isPending } = useLogin();
-	const { mutate: socialLogin, isPending: isSocialPending } = useSocialLogin();
+	const login = useLogin();
+	const socialLogin = useSocialLogin();
 	const navigate = useNavigate();
 	const [showPassword, setShowPassword] = useState(false);
 	const [serverError, setServerError] = useState<string | null>(null);
@@ -102,6 +103,9 @@ export function Login() {
 	const [twoFactorCode, setTwoFactorCode] = useState("");
 	const [twoFactorError, setTwoFactorError] = useState<string | null>(null);
 
+	const isPending = login.isPending;
+	const isSocialPending = socialLogin.isPending;
+
 	const verifyTotp = useTwoFactorVerifyTotp();
 	const verifyBackupCode = useTwoFactorVerifyBackupCode();
 	const passkeyAuthOptions = usePasskeyAuthenticateOptions();
@@ -109,9 +113,9 @@ export function Login() {
 
 	const handleSocialLogin = useCallback(
 		(provider: "google" | "apple") => {
-			socialLogin(provider, {
-				onSuccess: (redirectUrl) => {
-					if (redirectUrl) window.location.href = redirectUrl;
+			socialLogin.mutate(provider, {
+				onSuccess: (data) => {
+					if ("redirectUrl" in data && data.redirectUrl) window.location.href = data.redirectUrl;
 				},
 				onError: (err) => setServerError(err.message || "Social login failed."),
 			});
@@ -134,22 +138,24 @@ export function Login() {
 
 	const onSubmit = async (data: LoginFormData) => {
 		setServerError(null);
-		const result = await login(
-			{ email: data.email, password: data.password, rememberMe: data.rememberMe },
-			{
-				onSuccess: () => navigate({ to: "/" }),
-				onError: (err) => {
-					const error = err as { message: string; code?: string };
-					if (error.code === "TWO_FACTOR_REQUIRED") return;
-					setServerError(error.message || "Invalid email or password.");
-				},
+		try {
+			const result = await login.mutateAsync({
+				email: data.email,
+				password: data.password,
+				rememberMe: data.rememberMe,
+			});
+			if ("twoFactorRedirect" in result && result.twoFactorRedirect && "twoFactorToken" in result) {
+				setTwoFactorToken(result.twoFactorToken as string);
+				setTwoFactorMode("totp");
+				setTwoFactorCode("");
+				setTwoFactorError(null);
+			} else {
+				navigate({ to: "/" });
 			}
-		);
-		if (result && "twoFactorRedirect" in result && result.twoFactorRedirect && "twoFactorToken" in result) {
-			setTwoFactorToken(result.twoFactorToken as string);
-			setTwoFactorMode("totp");
-			setTwoFactorCode("");
-			setTwoFactorError(null);
+		} catch (err) {
+			const error = err as { message: string; code?: string };
+			if (error.code === "TWO_FACTOR_REQUIRED") return;
+			setServerError(error.message || "Invalid email or password.");
 		}
 	};
 
@@ -184,8 +190,19 @@ export function Login() {
 				await setServerAuthCookie({ data: { token: result.token } });
 				useAuthStore.getState().setAuthenticated(true);
 				navigate({ to: "/" });
+			} else if (result.success) {
+				// Authenticated but no token returned — try navigating anyway
+				// (the server may have set the session cookie directly)
+				useAuthStore.getState().setAuthenticated(true);
+				navigate({ to: "/" });
+			} else {
+				setServerError("Passkey authentication failed. Please try again.");
 			}
 		} catch (err) {
+			if (err instanceof DOMException && err.name === "NotAllowedError") {
+				// User cancelled the passkey prompt — don't show error
+				return;
+			}
 			if (err instanceof Error && err.message !== "Authentication cancelled") {
 				setServerError(err.message || "Passkey authentication failed");
 			}

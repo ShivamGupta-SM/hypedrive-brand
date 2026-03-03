@@ -213,7 +213,7 @@ export function ImageDropzone({
 }: ImageDropzoneProps) {
 	return (
 		<FileDropzone
-			accept={acceptedTypes.reduce((acc, type) => ({ ...acc, [type]: [] }), {})}
+			accept={Object.fromEntries(acceptedTypes.map((type) => [type, []]))}
 			showPreviews
 			label={label}
 			{...props}

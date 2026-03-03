@@ -10,8 +10,8 @@ import { Input } from "@/components/input";
 import { Logo } from "@/components/logo";
 import { Strong, TextLink } from "@/components/text";
 import { useConfetti } from "@/hooks";
+import { useUpdatePassword } from "@/hooks/use-auth";
 import { Route } from "@/routes/_auth/reset-password";
-import { useUpdatePassword } from "@/store/auth-store";
 import { FormError } from "./components";
 import { AuthShell } from "./login";
 
@@ -137,7 +137,8 @@ function SuccessState() {
 
 export function ResetPassword() {
 	const { token } = Route.useSearch();
-	const { mutate: resetPassword, isPending } = useUpdatePassword();
+	const resetPassword = useUpdatePassword();
+	const isPending = resetPassword.isPending;
 	const [success, setSuccess] = useState(false);
 	const [serverError, setServerError] = useState<string | null>(null);
 	const [showPassword, setShowPassword] = useState(false);
@@ -160,7 +161,7 @@ export function ResetPassword() {
 
 	const onSubmit = (data: ResetPasswordFormData) => {
 		setServerError(null);
-		resetPassword(
+		resetPassword.mutate(
 			{ token, newPassword: data.password },
 			{
 				onSuccess: () => setSuccess(true),

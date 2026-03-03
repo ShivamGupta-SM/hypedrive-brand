@@ -23,6 +23,7 @@ import { startRegistration } from "@simplewebauthn/browser";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/button";
+import { AvatarUpload } from "@/components/file-dropzone";
 import { Heading } from "@/components/heading";
 import { GoogleIcon } from "@/components/icons/platform-icons";
 import { Input } from "@/components/input";
@@ -72,14 +73,25 @@ import {
 	useUserInfo,
 	useUserInvitations,
 } from "@/hooks";
-import { useAuthStore, useLogout } from "@/store/auth-store";
-import { useCurrentOrganization } from "@/store/organization-store";
+import { useLogout } from "@/hooks/use-auth";
+import { useOrgContext } from "@/hooks/use-org-context";
+import { useAuthStore } from "@/store/auth-store";
 
 // =============================================================================
 // USER PROFILE HEADER CARD
 // =============================================================================
 
-function UserProfileCard({ name, email, onEditProfile }: { name: string; email: string; onEditProfile: () => void }) {
+function UserProfileCard({
+	name,
+	email,
+	image,
+	onEditProfile,
+}: {
+	name: string;
+	email: string;
+	image?: string | null;
+	onEditProfile: () => void;
+}) {
 	const initials =
 		name
 			.split(" ")
@@ -92,9 +104,13 @@ function UserProfileCard({ name, email, onEditProfile }: { name: string; email: 
 		<div className="overflow-hidden rounded-2xl bg-zinc-900 ring-1 ring-white/5 dark:bg-zinc-800">
 			<div className="flex items-center justify-between px-5 py-4">
 				<div className="flex items-center gap-4">
-					<div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-zinc-700 text-lg font-bold text-white ring-1 ring-white/10 dark:bg-zinc-600">
-						{initials}
-					</div>
+					{image ? (
+						<img src={image} alt={name} className="size-14 shrink-0 rounded-2xl object-cover ring-1 ring-white/10" />
+					) : (
+						<div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-zinc-700 text-lg font-bold text-white ring-1 ring-white/10 dark:bg-zinc-600">
+							{initials}
+						</div>
+					)}
 					<div className="min-w-0">
 						<h2 className="truncate text-base font-semibold text-white">{name}</h2>
 						<p className="mt-0.5 truncate text-sm text-zinc-400">{email}</p>
@@ -566,14 +582,26 @@ function ActiveSessionsPanel() {
 // EDIT USER PROFILE PANEL
 // =============================================================================
 
-function EditUserProfilePanel({ initialName }: { initialName: string }) {
+function EditUserProfilePanel({ initialName, initialImage }: { initialName: string; initialImage?: string | null }) {
 	const panelNav = usePanelNav();
 	const [name, setName] = useState(initialName);
+	const [avatarFile, setAvatarFile] = useState<File | null>(null);
+	const [avatarPreview, setAvatarPreview] = useState<string | null>(initialImage || null);
 	const [error, setError] = useState<string | null>(null);
 	const [success, setSuccess] = useState(false);
 	const [isPending, setIsPending] = useState(false);
 
 	const handleClose = () => panelNav?.popPanel();
+
+	const handleAvatarChange = (file: File | null) => {
+		setAvatarFile(file);
+		if (file) {
+			const url = URL.createObjectURL(file);
+			setAvatarPreview(url);
+		} else {
+			setAvatarPreview(initialImage || null);
+		}
+	};
 
 	const doSubmit = async () => {
 		setError(null);
@@ -587,10 +615,37 @@ function EditUserProfilePanel({ initialName }: { initialName: string }) {
 		try {
 			const { getAuthenticatedClient } = await import("@/hooks/api-client");
 			const client = getAuthenticatedClient();
-			await client.auth.updateUser({ name: name.trim() });
+
+			let imageUrl: string | undefined;
+
+			// Upload avatar if changed
+			if (avatarFile) {
+				// Upload flow — request signed URL then upload to S3
+				const { uploadUrl, fileUrl } = await client.storage.requestUploadUrl({
+					filename: avatarFile.name,
+					contentType: avatarFile.type,
+					folder: "profile-pictures",
+				});
+				await fetch(uploadUrl, {
+					method: "PUT",
+					body: avatarFile,
+					headers: { "Content-Type": avatarFile.type },
+				});
+				imageUrl = fileUrl;
+			}
+
+			await client.auth.updateUser({
+				name: name.trim(),
+				...(imageUrl ? { image: imageUrl } : {}),
+			});
+
 			const currentUser = useAuthStore.getState().user;
 			if (currentUser) {
-				useAuthStore.getState().setUser({ ...currentUser, name: name.trim() });
+				useAuthStore.getState().setUser({
+					...currentUser,
+					name: name.trim(),
+					...(imageUrl ? { image: imageUrl } : {}),
+				});
 			}
 			setSuccess(true);
 			setTimeout(() => handleClose(), 1500);
@@ -605,6 +660,19 @@ function EditUserProfilePanel({ initialName }: { initialName: string }) {
 		setName(initialName);
 	}, [initialName]);
 
+	useEffect(() => {
+		setAvatarPreview(initialImage || null);
+	}, [initialImage]);
+
+	// Cleanup object URL on unmount
+	useEffect(() => {
+		return () => {
+			if (avatarPreview?.startsWith("blob:")) {
+				URL.revokeObjectURL(avatarPreview);
+			}
+		};
+	}, [avatarPreview]);
+
 	return (
 		<div className="space-y-5">
 			<div className="flex items-start gap-4">
@@ -613,7 +681,7 @@ function EditUserProfilePanel({ initialName }: { initialName: string }) {
 				</div>
 				<div className="min-w-0 flex-1">
 					<p className="font-semibold text-zinc-900 dark:text-white">Edit Profile</p>
-					<p className="mt-0.5 text-sm text-zinc-500">Update your personal profile information.</p>
+					<p className="mt-0.5 text-sm text-zinc-500">Update your name and profile picture.</p>
 				</div>
 			</div>
 
@@ -633,6 +701,19 @@ function EditUserProfilePanel({ initialName }: { initialName: string }) {
 							<p className="text-sm text-red-600 dark:text-red-400">{error}</p>
 						</div>
 					)}
+
+					{/* Avatar upload */}
+					<div className="flex flex-col items-center gap-2">
+						<p className="text-sm font-medium text-zinc-900 dark:text-white">Profile Picture</p>
+						<AvatarUpload
+							src={avatarPreview || undefined}
+							onFileChange={handleAvatarChange}
+							size={80}
+							disabled={isPending}
+						/>
+						<p className="text-xs text-zinc-400">Click or drag to upload</p>
+					</div>
+
 					<div>
 						<label htmlFor="user-name" className="text-sm font-medium text-zinc-900 dark:text-white">
 							Full Name
@@ -1332,7 +1413,7 @@ function DeleteAccountPanel() {
 	const [confirmText, setConfirmText] = useState("");
 	const [error, setError] = useState<string | null>(null);
 	const deleteUser = useDeleteUser();
-	const { mutate: logoutFn } = useLogout();
+	const logout = useLogout();
 	const navigate = useNavigate();
 
 	const handleDelete = async () => {
@@ -1343,7 +1424,7 @@ function DeleteAccountPanel() {
 		}
 		try {
 			await deleteUser.mutateAsync({ password });
-			const result = await logoutFn();
+			const result = await logout.mutateAsync();
 			if (result.redirectTo) {
 				navigate({ to: result.redirectTo as "/" | "/login" });
 			}
@@ -1664,17 +1745,21 @@ export type AccountSettingsSection = "profile" | "security" | "passkeys" | "pref
 
 export function AccountSettings({ section = "all" }: { section?: AccountSettingsSection } = {}) {
 	const user = useAuthStore((state) => state.user);
-	const { mutate: logout } = useLogout();
+	const logout = useLogout();
 	const navigate = useNavigate();
 	const { data: sessions } = useDeviceSessions();
 	const panelNav = usePanelNav();
 
 	// Notification preferences — local optimistic state for toggles
-	const organization = useCurrentOrganization();
-	const organizationId = organization?.id;
+	const { organization, organizationId } = useOrgContext();
 	const updateNotifPrefs = useUpdateNotificationPreferences(organizationId);
 	const [emailNotifications, setEmailNotifications] = useState(true);
-	const [pushNotifications, setPushNotifications] = useState(false);
+	const [pushNotifications, setPushNotifications] = useState(() => {
+		if (typeof window !== "undefined" && "Notification" in window) {
+			return Notification.permission === "granted";
+		}
+		return false;
+	});
 
 	// Push notification tokens (API returns void — token list not available yet)
 	const removePushToken = useRemovePushToken(organizationId);
@@ -1688,18 +1773,34 @@ export function AccountSettings({ section = "all" }: { section?: AccountSettings
 	const { data: linkedAccounts } = useLinkedAccounts();
 	const hasPasswordAccount = linkedAccounts.some((a) => a.providerId === "credential");
 
-	const handleNotificationChange = (channel: "email" | "push", value: boolean) => {
+	const handleNotificationChange = async (channel: "email" | "push", value: boolean) => {
 		if (channel === "email") {
 			setEmailNotifications(value);
 			updateNotifPrefs.mutate({ emailEnabled: value });
 		} else {
-			setPushNotifications(value);
-			updateNotifPrefs.mutate({ pushEnabled: value });
+			if (value) {
+				// Request browser notification permission
+				if (!("Notification" in window)) {
+					return; // Browser doesn't support notifications
+				}
+
+				const permission = await Notification.requestPermission();
+				if (permission === "granted") {
+					setPushNotifications(true);
+					updateNotifPrefs.mutate({ pushEnabled: true });
+				} else {
+					// Permission denied or dismissed — keep toggle off
+					setPushNotifications(false);
+				}
+			} else {
+				setPushNotifications(false);
+				updateNotifPrefs.mutate({ pushEnabled: false });
+			}
 		}
 	};
 
 	const handleLogout = async () => {
-		const result = await logout();
+		const result = await logout.mutateAsync();
 		if (result.success && result.redirectTo) {
 			navigate({ to: result.redirectTo as "/" | "/login" });
 		}
@@ -1728,7 +1829,11 @@ export function AccountSettings({ section = "all" }: { section?: AccountSettings
 
 	// Panel openers
 	const openEditProfile = () =>
-		panelNav?.pushPanel("edit-profile", "Edit Profile", <EditUserProfilePanel initialName={user?.name || ""} />);
+		panelNav?.pushPanel(
+			"edit-profile",
+			"Edit Profile",
+			<EditUserProfilePanel initialName={user?.name || ""} initialImage={user?.image} />
+		);
 
 	const openChangeEmail = () =>
 		panelNav?.pushPanel("change-email", "Change Email", <ChangeEmailPanel currentEmail={user?.email || ""} />);
@@ -1753,7 +1858,12 @@ export function AccountSettings({ section = "all" }: { section?: AccountSettings
 	// --- Section: Profile ---
 	const profileSection = (
 		<>
-			<UserProfileCard name={user?.name || "User"} email={user?.email || "—"} onEditProfile={openEditProfile} />
+			<UserProfileCard
+				name={user?.name || "User"}
+				email={user?.email || "—"}
+				image={user?.image}
+				onEditProfile={openEditProfile}
+			/>
 			<div>
 				<MenuSectionHeader>Account</MenuSectionHeader>
 				<MenuSection>

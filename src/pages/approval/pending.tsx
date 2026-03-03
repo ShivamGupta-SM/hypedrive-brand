@@ -3,12 +3,12 @@ import { useNavigate, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "@/components/button";
 import { Logo } from "@/components/logo";
-import { useLogout } from "@/store/auth-store";
+import { useLogout } from "@/hooks/use-auth";
 import { useCurrentOrganization } from "@/store/organization-store";
 
 export function PendingApproval() {
 	const organization = useCurrentOrganization();
-	const { mutate: logout } = useLogout();
+	const logout = useLogout();
 	const navigate = useNavigate();
 	const router = useRouter();
 	const [loading, setLoading] = useState(false);
@@ -24,7 +24,7 @@ export function PendingApproval() {
 	};
 
 	const handleSignOut = async () => {
-		const result = await logout();
+		const result = await logout.mutateAsync();
 		if (result.success && result.redirectTo) {
 			navigate({ to: result.redirectTo as "/" | "/login" });
 		}

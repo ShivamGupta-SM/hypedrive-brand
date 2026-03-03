@@ -14,7 +14,7 @@ import { Field, Label } from "@/components/fieldset";
 import { Input } from "@/components/input";
 import { Logo } from "@/components/logo";
 import { Strong, TextLink } from "@/components/text";
-import { useForgotPassword } from "@/store/auth-store";
+import { useForgotPassword } from "@/hooks/use-auth";
 import { FormError } from "./components";
 import { AuthShell } from "./login";
 
@@ -77,7 +77,8 @@ function SuccessState({ email, onTryAgain }: { email: string; onTryAgain: () => 
 }
 
 export function ForgotPassword() {
-	const { mutate: forgotPassword, isPending } = useForgotPassword();
+	const forgotPassword = useForgotPassword();
+	const isPending = forgotPassword.isPending;
 	const [submitted, setSubmitted] = useState(false);
 	const [submittedEmail, setSubmittedEmail] = useState("");
 	const [serverError, setServerError] = useState<string | null>(null);
@@ -93,7 +94,7 @@ export function ForgotPassword() {
 
 	const onSubmit = (data: ForgotPasswordFormData) => {
 		setServerError(null);
-		forgotPassword(
+		forgotPassword.mutate(
 			{ email: data.email },
 			{
 				onSuccess: () => {
@@ -101,8 +102,7 @@ export function ForgotPassword() {
 					setSubmitted(true);
 				},
 				onError: (err) => {
-					const error = err as Error;
-					setServerError(error.message || "Failed to send reset email. Please try again.");
+					setServerError(err.message || "Failed to send reset email. Please try again.");
 				},
 			}
 		);

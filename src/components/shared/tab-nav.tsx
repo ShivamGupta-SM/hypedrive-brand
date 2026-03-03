@@ -34,7 +34,7 @@ export function TabNav({ tabs, className }: TabNavProps) {
 							key={tab.to}
 							to={tab.to}
 							className={clsx(
-								"inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1.5 text-sm font-medium transition-all duration-200 active:scale-95",
+								"inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-200 active:scale-95",
 								isActive
 									? "bg-zinc-900 text-white shadow-sm dark:bg-white dark:text-zinc-900"
 									: "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
