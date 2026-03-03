@@ -1,12 +1,9 @@
 /**
  * Server-only auth helpers — cookie management and client factory.
  *
- * The .server.ts suffix ensures TanStack Start's import-protection blocks
- * any direct import from client code. Only import from other .server.ts files
- * or from within createServerFn handlers.
- *
- * NOTE: The shared authMiddleware lives in src/server/middleware.ts (non-.server.ts)
- * so feature server.ts files can import it without triggering import-protection.
+ * These functions use @tanstack/react-start/server APIs and are only called
+ * inside createServerFn handlers or middleware .server() handlers, which are
+ * tree-shaken from client bundles by TanStack Start.
  */
 
 import { deleteCookie, getCookie, setCookie } from "@tanstack/react-start/server";

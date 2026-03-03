@@ -2,11 +2,11 @@
  * Auth Query Server Functions — read-only server functions for auth data.
  *
  * Most functions use authMiddleware for automatic cookie→client resolution.
- * Special cases (getServerAuthWithOrgs, cookie management, stream token)
- * use dynamic imports because they need non-standard auth handling.
+ * Special cases (getServerAuthWithOrgs, cookie management) handle auth manually.
  */
 
 import { createServerFn } from "@tanstack/react-start";
+import { clearAuthCookies, getServerClient, readAuthCookie, setAuthCookies } from "@/server/auth-helpers.server";
 import { authMiddleware } from "@/server/middleware";
 
 // =============================================================================
@@ -20,8 +20,6 @@ import { authMiddleware } from "@/server/middleware";
  * NOTE: Cannot use authMiddleware — must return gracefully when not authenticated.
  */
 export const getServerAuthWithOrgs = createServerFn({ method: "GET" }).handler(async () => {
-	const { readAuthCookie, getServerClient, clearAuthCookies } = await import("@/server/auth-helpers.server");
-
 	const token = readAuthCookie();
 	if (!token) {
 		return { isAuthenticated: false as const, user: null, token: null, organizations: [] };
@@ -90,13 +88,11 @@ export const getStreamTokenServer = createServerFn({ method: "GET" })
 export const setServerAuthCookie = createServerFn({ method: "POST" })
 	.inputValidator((input: { token: string; rememberMe?: boolean }) => input)
 	.handler(async ({ data }) => {
-		const { setAuthCookies } = await import("@/server/auth-helpers.server");
 		setAuthCookies(data.token, data.rememberMe);
 	});
 
 /** Clear auth cookies on logout or auth errors. */
 export const clearServerAuthCookie = createServerFn({ method: "POST" }).handler(async () => {
-	const { clearAuthCookies } = await import("@/server/auth-helpers.server");
 	clearAuthCookies();
 });
 

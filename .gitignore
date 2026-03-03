@@ -41,3 +41,7 @@ _.sln
 # pnpm lock (using package-lock.json)
 pnpm-lock.yaml
 .claude/worktrees/
+
+# Nitro build artifacts
+.nitro/
+.output/

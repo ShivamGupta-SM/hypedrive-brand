@@ -1,15 +1,14 @@
 /**
  * Server Function Middleware — reusable middleware for createServerFn chains.
  *
- * This file deliberately does NOT have a .server.ts suffix so it can be
- * imported by feature server.ts files (which are themselves imported by hooks).
- * The actual server-only logic (cookie reading) is dynamically imported at
- * runtime inside the .server() handler, which only executes on the server.
+ * Imported by feature server.ts files and auth-queries.ts. The .server()
+ * handler is tree-shaken from client bundles by TanStack Start.
  */
 
 import { createMiddleware } from "@tanstack/react-start";
 import Client from "@/lib/brand-client";
 import { API_URL } from "@/lib/config";
+import { readAuthCookie } from "@/server/auth-helpers.server";
 
 /**
  * Auth middleware for server functions.
@@ -26,7 +25,6 @@ import { API_URL } from "@/lib/config";
  * ```
  */
 export const authMiddleware = createMiddleware({ type: "function" }).server(async ({ next }) => {
-	const { readAuthCookie } = await import("@/server/auth-helpers.server");
 	const token = readAuthCookie();
 	if (!token) {
 		throw Object.assign(new Error("UNAUTHORIZED"), { status: 401 });

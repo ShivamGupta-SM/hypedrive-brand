@@ -3,14 +3,12 @@
  *
  * All auth operations execute on the server and manage the auth cookie
  * atomically. No token is exposed to client code for these operations.
- *
- * Server-only helpers are dynamically imported inside handlers
- * to avoid triggering TanStack Start's import-protection.
  */
 
 import { createServerFn } from "@tanstack/react-start";
 import Client from "@/lib/brand-client";
 import { API_URL } from "@/lib/config";
+import { clearAuthCookies, readAuthCookie, setAuthCookies } from "@/server/auth-helpers.server";
 
 // =============================================================================
 // LOGIN
@@ -27,7 +25,6 @@ export const loginAction = createServerFn({ method: "POST" })
 			});
 
 			if (response.token && response.user) {
-				const { setAuthCookies } = await import("@/server/auth-helpers.server");
 				setAuthCookies(response.token, data.rememberMe);
 				return {
 					success: true as const,
@@ -81,7 +78,6 @@ export const registerAction = createServerFn({ method: "POST" })
 			});
 
 			if (response.token && response.user) {
-				const { setAuthCookies } = await import("@/server/auth-helpers.server");
 				setAuthCookies(response.token);
 				return {
 					success: true as const,
@@ -118,8 +114,6 @@ export const registerAction = createServerFn({ method: "POST" })
 // =============================================================================
 
 export const logoutAction = createServerFn({ method: "POST" }).handler(async () => {
-	const { readAuthCookie, clearAuthCookies } = await import("@/server/auth-helpers.server");
-
 	const token = readAuthCookie();
 	if (token) {
 		try {
@@ -210,7 +204,6 @@ export const socialLoginAction = createServerFn({ method: "POST" })
 
 			// Direct token response (e.g., from ID token)
 			if (response.token && response.user) {
-				const { setAuthCookies } = await import("@/server/auth-helpers.server");
 				setAuthCookies(response.token);
 				return { success: true as const, redirectUrl: "/" };
 			}
