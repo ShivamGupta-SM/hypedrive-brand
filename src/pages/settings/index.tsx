@@ -34,24 +34,23 @@ import { useCan } from "@/components/shared/can";
 import { MenuRow, MenuSection, MenuSectionHeader, MenuSeparator } from "@/components/shared/menu-list";
 import { Text } from "@/components/text";
 import { Textarea } from "@/components/textarea";
+import { usePasskeyReauthOptions } from "@/features/auth/hooks-passkeys";
+import { useDashboard } from "@/features/organization/hooks";
 import {
-	getAPIErrorMessage,
-	getAssetUrl,
 	useAddBankAccount,
 	useBankAccount,
 	useChangeOrgPhone,
-	useDashboard,
 	useDeleteBankAccount,
-	useFileUpload,
 	useGSTDetails,
 	useOrganizationSettings,
-	useOrgContext,
-	usePasskeyReauthOptions,
 	useUpdateOrganizationSettings,
 	useVerifyBankAccount,
 	useVerifyGST,
 	useVerifyGSTPreview,
-} from "@/hooks";
+} from "@/features/organization/hooks-settings";
+import { useFileUpload } from "@/features/storage/hooks";
+import { getAPIErrorMessage, getAssetUrl } from "@/hooks/api-client";
+import { useOrgContext } from "@/hooks/use-org-context";
 import {
 	getAllCountries,
 	getCitiesForState,

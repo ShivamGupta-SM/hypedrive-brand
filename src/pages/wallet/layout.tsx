@@ -17,12 +17,12 @@ import { TabNav, type TabNavItem } from "@/components/shared/tab-nav";
 import {
 	useDeposits,
 	useInfiniteWalletTransactions,
-	useOrgContext,
 	useVirtualAccount,
 	useWallet,
 	useWalletHolds,
 	useWithdrawals,
-} from "@/hooks";
+} from "@/features/wallet/hooks";
+import { useOrgContext } from "@/hooks/use-org-context";
 import { useOrgPath } from "@/hooks/use-org-slug";
 import { formatCurrency } from "@/lib/design-tokens";
 import { DepositAccountDialog, LoadingSkeleton, WithdrawDialog } from "./components";

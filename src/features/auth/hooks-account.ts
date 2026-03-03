@@ -3,15 +3,22 @@
  */
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { getAuthenticatedClient, queryKeys } from "@/hooks/api-client";
+import { queryKeys } from "@/hooks/api-client";
+import {
+	changeEmailServer,
+	changePasswordServer,
+	deleteUserServer,
+	sendVerificationEmailServer,
+	setPasswordServer,
+	verifyEmailServer,
+} from "./server";
 
 // -- Password -----------------------------------------------------------------
 
 export function useChangePassword() {
 	return useMutation({
 		mutationFn: async (params: { currentPassword: string; newPassword: string; revokeOtherSessions?: boolean }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.changePassword(params);
+			return changePasswordServer({ data: { ...params } });
 		},
 	});
 }
@@ -20,8 +27,7 @@ export function useSetPassword() {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: async (params: { newPassword: string }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.setPassword(params);
+			return setPasswordServer({ data: { ...params } });
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.userInfo() });
@@ -34,8 +40,7 @@ export function useSetPassword() {
 export function useChangeEmail() {
 	return useMutation({
 		mutationFn: async (params: { newEmail: string; callbackURL?: string }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.changeEmail(params);
+			return changeEmailServer({ data: { ...params } });
 		},
 	});
 }
@@ -44,8 +49,7 @@ export function useVerifyEmail() {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: async (params: { token: string; callbackURL?: string }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.verifyEmail(params);
+			return verifyEmailServer({ data: { ...params } });
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.userInfo() });
@@ -57,8 +61,7 @@ export function useSendVerificationEmail() {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: async (params: { email: string; callbackURL?: string }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.sendVerificationEmail(params);
+			return sendVerificationEmailServer({ data: { ...params } });
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.userInfo() });
@@ -71,8 +74,7 @@ export function useSendVerificationEmail() {
 export function useDeleteUser() {
 	return useMutation({
 		mutationFn: async (params: { password?: string; callbackURL?: string }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.deleteUser(params);
+			return deleteUserServer({ data: { ...params } });
 		},
 	});
 }

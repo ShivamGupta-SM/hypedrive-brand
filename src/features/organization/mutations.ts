@@ -3,7 +3,8 @@
  */
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { getAuthenticatedClient, queryKeys } from "@/hooks/api-client";
+import { queryKeys } from "@/hooks/api-client";
+import { checkSlugServer, createOrganizationServer, leaveOrganizationServer, updateOrganizationServer } from "./server";
 
 export function useCreateOrganization() {
 	const queryClient = useQueryClient();
@@ -28,8 +29,7 @@ export function useCreateOrganization() {
 			country?: string;
 			postalCode?: string;
 		}) => {
-			const client = getAuthenticatedClient();
-			return client.auth.createOrganization(params);
+			return createOrganizationServer({ data: params });
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.organizationProfile() });
@@ -43,8 +43,7 @@ export function useUpdateOrganization() {
 
 	return useMutation({
 		mutationFn: async ({ organizationId, ...params }: { organizationId: string; name?: string; logo?: string }) => {
-			const client = getAuthenticatedClient();
-			return client.brand.updateOrganization(organizationId, params);
+			return updateOrganizationServer({ data: { organizationId, ...params } });
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.organizationProfile() });
@@ -58,8 +57,7 @@ export function useLeaveOrganization() {
 
 	return useMutation({
 		mutationFn: async (organizationId: string) => {
-			const client = getAuthenticatedClient();
-			return client.auth.leaveOrganization(organizationId);
+			return leaveOrganizationServer({ data: { organizationId } });
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.organizationProfile() });
@@ -71,8 +69,7 @@ export function useLeaveOrganization() {
 export function useCheckSlug() {
 	return useMutation({
 		mutationFn: async (slug: string) => {
-			const client = getAuthenticatedClient();
-			return client.auth.checkSlug({ slug });
+			return checkSlugServer({ data: { slug } });
 		},
 	});
 }

@@ -14,16 +14,12 @@ import { Input } from "@/components/input";
 import { Logo } from "@/components/logo";
 import { Textarea } from "@/components/textarea";
 import { useLogout } from "@/features/auth/hooks";
-import {
-	getAPIErrorMessage,
-	useCheckSlug,
-	useConfetti,
-	useCreateOrganization,
-	useEnrichPreview,
-	usePreviewLogoByDomain,
-	useSetupProgressStream,
-	useVerifyGSTPreview,
-} from "@/hooks";
+import { useSetupProgressStream } from "@/features/organization/hooks";
+import { useEnrichPreview, useVerifyGSTPreview } from "@/features/organization/hooks-settings";
+import { useCheckSlug, useCreateOrganization } from "@/features/organization/mutations";
+import { usePreviewLogoByDomain } from "@/features/storage/hooks";
+import { getAPIErrorMessage } from "@/hooks/api-client";
+import { useConfetti } from "@/hooks/use-confetti";
 
 // =============================================================================
 // STEP INDICATOR

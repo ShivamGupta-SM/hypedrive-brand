@@ -3,8 +3,9 @@
  */
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getAuthenticatedClient, queryKeys } from "@/hooks/api-client";
+import { queryKeys } from "@/hooks/api-client";
 import { organizationRolesQueryOptions } from "../team/queries";
+import { createOrganizationRoleServer, deleteOrganizationRoleServer, updateOrganizationRoleServer } from "./server";
 
 export function useOrganizationRoles(organizationId: string | undefined) {
 	const query = useQuery({
@@ -25,8 +26,7 @@ export function useCreateOrganizationRole(organizationId: string | undefined) {
 
 	return useMutation({
 		mutationFn: async (params: { role: string; description?: string; permission?: Record<string, string[]> }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.createOrganizationRole(organizationId as string, params);
+			return createOrganizationRoleServer({ data: { organizationId: organizationId as string, ...params } });
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.organizationRoles(organizationId || "") });
@@ -47,8 +47,9 @@ export function useUpdateOrganizationRole(organizationId: string | undefined) {
 			description?: string;
 			permission?: Record<string, string[]>;
 		}) => {
-			const client = getAuthenticatedClient();
-			return client.auth.updateOrganizationRole(organizationId as string, roleId, params);
+			return updateOrganizationRoleServer({
+				data: { organizationId: organizationId as string, roleId, ...params },
+			});
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.organizationRoles(organizationId || "") });
@@ -61,8 +62,7 @@ export function useDeleteOrganizationRole(organizationId: string | undefined) {
 
 	return useMutation({
 		mutationFn: async (roleId: string) => {
-			const client = getAuthenticatedClient();
-			return client.auth.deleteOrganizationRole(organizationId as string, roleId);
+			return deleteOrganizationRoleServer({ data: { organizationId: organizationId as string, roleId } });
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.organizationRoles(organizationId || "") });

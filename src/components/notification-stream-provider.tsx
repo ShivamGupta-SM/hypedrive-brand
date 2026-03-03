@@ -7,14 +7,15 @@
  */
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
-import { getAuthenticatedClient } from "@/hooks/api-client";
-import type { notifications } from "@/lib/brand-client";
+import Client, { type notifications } from "@/lib/brand-client";
+import { API_URL } from "@/lib/config";
+import { getStreamTokenServer } from "@/server/auth-queries";
 
 // =============================================================================
 // TYPES
 // =============================================================================
 
-type Notification = {
+export type Notification = {
 	id: string;
 	type?: string;
 	title?: string;
@@ -78,10 +79,15 @@ export function NotificationStreamProvider({
 		if (!organizationId) return;
 
 		let cancelled = false;
+		let retryAttempt = 0;
+		let retryTimer: ReturnType<typeof setTimeout>;
 
 		async function connect() {
 			try {
-				const client = getAuthenticatedClient();
+				const { token } = await getStreamTokenServer();
+				if (cancelled) return;
+
+				const client = new Client(API_URL, { auth: { authorization: `Bearer ${token}` } });
 				const stream = await client.notifications.stream({});
 				if (cancelled) {
 					stream.close();
@@ -89,6 +95,7 @@ export function NotificationStreamProvider({
 				}
 				streamRef.current = stream;
 				setConnected(true);
+				retryAttempt = 0; // Reset on successful connection
 
 				for await (const event of stream) {
 					if (cancelled) break;
@@ -132,15 +139,33 @@ export function NotificationStreamProvider({
 						}
 					}
 				}
+
+				// Stream ended cleanly (server closed) — reconnect
+				if (!cancelled) {
+					scheduleReconnect();
+				}
 			} catch {
 				setConnected(false);
+				if (!cancelled) {
+					scheduleReconnect();
+				}
 			}
+		}
+
+		function scheduleReconnect() {
+			setConnected(false);
+			streamRef.current = null;
+			// Exponential backoff: 1s, 2s, 4s, 8s, 16s, max 30s
+			const delay = Math.min(1000 * 2 ** retryAttempt, 30_000);
+			retryAttempt++;
+			retryTimer = setTimeout(connect, delay);
 		}
 
 		connect();
 
 		return () => {
 			cancelled = true;
+			clearTimeout(retryTimer);
 			streamRef.current?.close();
 			streamRef.current = null;
 			setConnected(false);

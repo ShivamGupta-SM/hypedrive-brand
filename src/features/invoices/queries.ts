@@ -3,15 +3,16 @@
  */
 
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
-import { CACHE, DEFAULT_PAGE_SIZE, getAuthenticatedClient, queryKeys } from "@/hooks/api-client";
+import { CACHE, DEFAULT_PAGE_SIZE, queryKeys } from "@/hooks/api-client";
 import type { db } from "@/lib/brand-client";
+import { getInvoiceServer, listInvoicesServer } from "./server";
 
 // -- Invoice Detail -----------------------------------------------------------
 
 export const invoiceQueryOptions = (orgId: string, invoiceId: string) =>
 	queryOptions({
 		queryKey: queryKeys.invoice(orgId, invoiceId),
-		queryFn: () => getAuthenticatedClient().brand.getInvoice(orgId, invoiceId),
+		queryFn: () => getInvoiceServer({ data: { orgId, invoiceId } }),
 		staleTime: CACHE.detail,
 	});
 
@@ -30,7 +31,7 @@ export const invoicesQueryOptions = (
 ) =>
 	queryOptions({
 		queryKey: queryKeys.invoices(orgId, params),
-		queryFn: () => getAuthenticatedClient().brand.listInvoices(orgId, params || {}),
+		queryFn: () => listInvoicesServer({ data: { orgId, params: params || {} } }),
 		staleTime: CACHE.list,
 	});
 
@@ -40,7 +41,7 @@ export const infiniteInvoicesQueryOptions = (orgId: string, params?: { status?: 
 	infiniteQueryOptions({
 		queryKey: queryKeys.infiniteInvoices(orgId, params),
 		queryFn: ({ pageParam = 0 }) =>
-			getAuthenticatedClient().brand.listInvoices(orgId, { ...params, skip: pageParam, take: DEFAULT_PAGE_SIZE }),
+			listInvoicesServer({ data: { orgId, params: { ...params, skip: pageParam, take: DEFAULT_PAGE_SIZE } } }),
 		initialPageParam: 0,
 		getNextPageParam: (lastPage, allPages) => {
 			if (!lastPage.hasMore) return undefined;

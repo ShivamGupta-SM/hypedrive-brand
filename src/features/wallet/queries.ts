@@ -3,61 +3,71 @@
  */
 
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
-import { CACHE, DEFAULT_PAGE_SIZE, getAuthenticatedClient, queryKeys } from "@/hooks/api-client";
+import { CACHE, DEFAULT_PAGE_SIZE, queryKeys } from "@/hooks/api-client";
+import {
+	getVirtualAccountServer,
+	getWalletHoldsServer,
+	getWalletServer,
+	getWalletTransactionsServer,
+	getWithdrawalDetailServer,
+	getWithdrawalStatsServer,
+	listDepositsServer,
+	listWithdrawalsServer,
+} from "./server";
 
 export const walletQueryOptions = (orgId: string) =>
 	queryOptions({
 		queryKey: queryKeys.wallet(orgId),
-		queryFn: () => getAuthenticatedClient().brand.getOrganizationWallet(orgId),
+		queryFn: () => getWalletServer({ data: { orgId } }),
 		staleTime: CACHE.list,
 	});
 
 export const walletHoldsQueryOptions = (orgId: string) =>
 	queryOptions({
 		queryKey: queryKeys.walletHolds(orgId),
-		queryFn: () => getAuthenticatedClient().brand.getWalletHolds(orgId, {}),
+		queryFn: () => getWalletHoldsServer({ data: { orgId } }),
 		staleTime: CACHE.list,
 	});
 
 export const withdrawalsQueryOptions = (orgId: string, params?: Record<string, unknown>) =>
 	queryOptions({
 		queryKey: queryKeys.withdrawals(orgId, params),
-		queryFn: () => getAuthenticatedClient().brand.listWithdrawalRequests(orgId, params || {}),
+		queryFn: () => listWithdrawalsServer({ data: { orgId, params: params || {} } }),
 		staleTime: CACHE.list,
 	});
 
 export const withdrawalStatsQueryOptions = (orgId: string) =>
 	queryOptions({
 		queryKey: queryKeys.withdrawalStats(orgId),
-		queryFn: () => getAuthenticatedClient().brand.getOrganizationWithdrawalStats(orgId),
+		queryFn: () => getWithdrawalStatsServer({ data: { orgId } }),
 		staleTime: CACHE.list,
 	});
 
 export const depositsQueryOptions = (orgId: string, params?: Record<string, unknown>) =>
 	queryOptions({
 		queryKey: queryKeys.deposits(orgId, params),
-		queryFn: () => getAuthenticatedClient().brand.listDeposits(orgId, params || {}),
+		queryFn: () => listDepositsServer({ data: { orgId, params: params || {} } }),
 		staleTime: CACHE.list,
 	});
 
 export const walletTransactionsQueryOptions = (orgId: string, params?: Record<string, unknown>) =>
 	queryOptions({
 		queryKey: queryKeys.walletTransactions(orgId, params),
-		queryFn: () => getAuthenticatedClient().brand.getOrganizationWalletTransactions(orgId, params || {}),
+		queryFn: () => getWalletTransactionsServer({ data: { orgId, params: params || {} } }),
 		staleTime: CACHE.list,
 	});
 
 export const virtualAccountQueryOptions = (orgId: string) =>
 	queryOptions({
 		queryKey: queryKeys.virtualAccount(orgId),
-		queryFn: () => getAuthenticatedClient().brand.getVirtualAccount(orgId),
+		queryFn: () => getVirtualAccountServer({ data: { orgId } }),
 		staleTime: CACHE.list,
 	});
 
 export const withdrawalDetailQueryOptions = (orgId: string, withdrawalId: string) =>
 	queryOptions({
 		queryKey: queryKeys.withdrawal(orgId, withdrawalId),
-		queryFn: () => getAuthenticatedClient().brand.getWithdrawalRequest(orgId, withdrawalId),
+		queryFn: () => getWithdrawalDetailServer({ data: { orgId, withdrawalId } }),
 		staleTime: CACHE.list,
 	});
 
@@ -71,10 +81,8 @@ export const infiniteWalletTransactionsQueryOptions = (
 	infiniteQueryOptions({
 		queryKey: queryKeys.infiniteWalletTransactions(orgId, params),
 		queryFn: ({ pageParam = 0 }) =>
-			getAuthenticatedClient().brand.getOrganizationWalletTransactions(orgId, {
-				...params,
-				skip: pageParam,
-				take: DEFAULT_PAGE_SIZE,
+			getWalletTransactionsServer({
+				data: { orgId, params: { ...params, skip: pageParam, take: DEFAULT_PAGE_SIZE } },
 			}),
 		initialPageParam: 0,
 		getNextPageParam: (lastPage, allPages) => {

@@ -10,8 +10,9 @@ import { Input } from "@/components/input";
 import { Logo } from "@/components/logo";
 import { Strong, TextLink } from "@/components/text";
 import { useRegister, useSocialLogin } from "@/features/auth/hooks";
-import { useConfetti, useSendVerificationEmail } from "@/hooks";
+import { useSendVerificationEmail } from "@/features/auth/hooks-account";
 import { useAutofillSync } from "@/hooks/use-autofill-sync";
+import { useConfetti } from "@/hooks/use-confetti";
 import { FormError } from "./components";
 import { AuthShell } from "./login";
 

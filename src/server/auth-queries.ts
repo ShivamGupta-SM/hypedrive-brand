@@ -1,12 +1,13 @@
 /**
  * Auth Query Server Functions — read-only server functions for auth data.
  *
- * createServerFn exports become RPC stubs in client bundles.
- * Server-only helpers are dynamically imported inside handlers
- * to avoid triggering import-protection.
+ * Most functions use authMiddleware for automatic cookie→client resolution.
+ * Special cases (getServerAuthWithOrgs, cookie management, stream token)
+ * use dynamic imports because they need non-standard auth handling.
  */
 
 import { createServerFn } from "@tanstack/react-start";
+import { authMiddleware } from "@/server/middleware";
 
 // =============================================================================
 // SESSION + ORGANIZATIONS (combined fetch for root beforeLoad)
@@ -15,6 +16,8 @@ import { createServerFn } from "@tanstack/react-start";
 /**
  * Combined auth + organizations fetch in a single server round-trip.
  * Calls getSession() and listOrganizations() in parallel on the server.
+ *
+ * NOTE: Cannot use authMiddleware — must return gracefully when not authenticated.
  */
 export const getServerAuthWithOrgs = createServerFn({ method: "GET" }).handler(async () => {
 	const { readAuthCookie, getServerClient, clearAuthCookies } = await import("@/server/auth-helpers.server");
@@ -48,7 +51,7 @@ export const getServerAuthWithOrgs = createServerFn({ method: "GET" }).handler(a
 		return {
 			isAuthenticated: true as const,
 			user: session.user,
-			token,
+			token: null,
 			organizations,
 		};
 	} catch {
@@ -58,12 +61,31 @@ export const getServerAuthWithOrgs = createServerFn({ method: "GET" }).handler(a
 });
 
 // =============================================================================
+// STREAM TOKEN (for WebSocket connections that need client-side auth)
+// =============================================================================
+
+/**
+ * Returns the auth token from the httpOnly cookie so the client can use it
+ * for WebSocket stream connections (notifications, setup progress).
+ * The token is only held in JS memory briefly for the WS handshake.
+ *
+ * Uses authMiddleware to read the cookie and extract the raw token from context.
+ */
+export const getStreamTokenServer = createServerFn({ method: "GET" })
+	.middleware([authMiddleware])
+	.handler(async ({ context }) => {
+		return { token: context.token };
+	});
+
+// =============================================================================
 // COOKIE MANAGEMENT
 // =============================================================================
 
 /**
  * Set auth cookies after login/register.
  * Pass rememberMe: true for extended session (30 days), false for 1 day.
+ *
+ * NOTE: Cannot use authMiddleware — called before auth cookie exists.
  */
 export const setServerAuthCookie = createServerFn({ method: "POST" })
 	.inputValidator((input: { token: string; rememberMe?: boolean }) => input)
@@ -72,38 +94,10 @@ export const setServerAuthCookie = createServerFn({ method: "POST" })
 		setAuthCookies(data.token, data.rememberMe);
 	});
 
-/** Clear both auth cookies on logout or auth errors. */
+/** Clear auth cookies on logout or auth errors. */
 export const clearServerAuthCookie = createServerFn({ method: "POST" }).handler(async () => {
 	const { clearAuthCookies } = await import("@/server/auth-helpers.server");
 	clearAuthCookies();
-});
-
-// =============================================================================
-// ORGANIZATIONS
-// =============================================================================
-
-/** Fetch organizations server-side. */
-export const getOrganizationsFromServer = createServerFn({ method: "GET" }).handler(async () => {
-	const { readAuthCookie, getServerClient } = await import("@/server/auth-helpers.server");
-
-	const token = readAuthCookie();
-	if (!token) throw new Error("UNAUTHORIZED");
-
-	try {
-		const client = getServerClient(token);
-		const result = await client.auth.listOrganizations();
-		const organizations = (result.organizations ?? []).map((org) => ({
-			id: org.id,
-			name: org.name,
-			slug: org.slug,
-			logo: org.logo,
-			createdAt: org.createdAt,
-			approvalStatus: org.status,
-		}));
-		return { organizations };
-	} catch {
-		return { organizations: [] };
-	}
 });
 
 // =============================================================================
@@ -112,16 +106,11 @@ export const getOrganizationsFromServer = createServerFn({ method: "GET" }).hand
 
 /** Fetch organization roles server-side (for custom role permission resolution). */
 export const getOrgRolesFromServer = createServerFn({ method: "GET" })
+	.middleware([authMiddleware])
 	.inputValidator((input: { organizationId: string }) => input)
-	.handler(async ({ data }) => {
-		const { readAuthCookie, getServerClient } = await import("@/server/auth-helpers.server");
-
-		const token = readAuthCookie();
-		if (!token) throw new Error("UNAUTHORIZED");
-
+	.handler(async ({ context, data }) => {
 		try {
-			const client = getServerClient(token);
-			const result = await client.auth.listOrganizationRoles(data.organizationId);
+			const result = await context.client.auth.listOrganizationRoles(data.organizationId);
 			return { roles: result.roles ?? [] };
 		} catch {
 			return { roles: [] };
@@ -130,16 +119,11 @@ export const getOrgRolesFromServer = createServerFn({ method: "GET" })
 
 /** Fetch current user's member record for an organization (RBAC). */
 export const getActiveMemberFromServer = createServerFn({ method: "GET" })
+	.middleware([authMiddleware])
 	.inputValidator((input: { organizationId: string }) => input)
-	.handler(async ({ data }) => {
-		const { readAuthCookie, getServerClient } = await import("@/server/auth-helpers.server");
-
-		const token = readAuthCookie();
-		if (!token) throw new Error("UNAUTHORIZED");
-
+	.handler(async ({ context, data }) => {
 		try {
-			const client = getServerClient(token);
-			const result = await client.auth.getActiveMember(data.organizationId);
+			const result = await context.client.auth.getActiveMember(data.organizationId);
 			return { member: result.member ?? null };
 		} catch (error) {
 			console.error(

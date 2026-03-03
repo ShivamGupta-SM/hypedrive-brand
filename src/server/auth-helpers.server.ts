@@ -1,24 +1,19 @@
 /**
- * Server-only auth helpers — cookie management, middleware, and client factory.
+ * Server-only auth helpers — cookie management and client factory.
  *
  * The .server.ts suffix ensures TanStack Start's import-protection blocks
  * any direct import from client code. Only import from other .server.ts files
  * or from within createServerFn handlers.
+ *
+ * NOTE: The shared authMiddleware lives in src/server/middleware.ts (non-.server.ts)
+ * so feature server.ts files can import it without triggering import-protection.
  */
 
-import { createMiddleware } from "@tanstack/react-start";
 import { deleteCookie, getCookie, setCookie } from "@tanstack/react-start/server";
 import Client from "@/lib/brand-client";
-import {
-	API_URL,
-	AUTH_COOKIE_MAX_AGE,
-	AUTH_COOKIE_NAME,
-	AUTH_COOKIE_PUBLIC_NAME,
-	AUTH_COOKIE_SESSION_MAX_AGE,
-} from "@/lib/config";
+import { API_URL, AUTH_COOKIE_MAX_AGE, AUTH_COOKIE_NAME, AUTH_COOKIE_SESSION_MAX_AGE } from "@/lib/config";
 
 const AUTH_COOKIE = AUTH_COOKIE_NAME;
-const AUTH_COOKIE_PUBLIC = AUTH_COOKIE_PUBLIC_NAME;
 const IS_PROD = process.env.NODE_ENV === "production";
 
 // =============================================================================
@@ -27,14 +22,11 @@ const IS_PROD = process.env.NODE_ENV === "production";
 
 export function setAuthCookies(token: string, rememberMe = false) {
 	const maxAge = rememberMe ? AUTH_COOKIE_MAX_AGE : AUTH_COOKIE_SESSION_MAX_AGE;
-	const base = { path: "/", sameSite: "lax" as const, secure: IS_PROD, maxAge };
-	setCookie(AUTH_COOKIE, token, { ...base, httpOnly: true });
-	setCookie(AUTH_COOKIE_PUBLIC, token, base);
+	setCookie(AUTH_COOKIE, token, { path: "/", sameSite: "lax", secure: IS_PROD, maxAge, httpOnly: true });
 }
 
 export function clearAuthCookies() {
 	deleteCookie(AUTH_COOKIE, { path: "/" });
-	deleteCookie(AUTH_COOKIE_PUBLIC, { path: "/" });
 }
 
 export function readAuthCookie(): string | null {
@@ -52,15 +44,3 @@ export function getServerClient(token: string): Client {
 		},
 	});
 }
-
-// =============================================================================
-// AUTH MIDDLEWARE
-// =============================================================================
-
-export const authMiddleware = createMiddleware({ type: "function" }).server(async ({ next }) => {
-	const token = readAuthCookie();
-	if (!token) {
-		throw new Error("UNAUTHORIZED");
-	}
-	return next({ context: { token, client: getServerClient(token) } });
-});

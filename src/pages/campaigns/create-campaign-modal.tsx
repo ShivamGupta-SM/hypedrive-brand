@@ -42,15 +42,11 @@ import { WizardStepper } from "@/components/shared/wizard-stepper";
 import { Skeleton } from "@/components/skeleton";
 import { Switch } from "@/components/switch";
 import { Textarea } from "@/components/textarea";
-import {
-	getAssetUrl,
-	useCreateAndSubmitCampaign,
-	useCreateCampaign,
-	useListings,
-	useOrgSlug,
-	usePlatforms,
-	useTaskTemplates,
-} from "@/hooks";
+import { usePlatforms, useTaskTemplates } from "@/features/campaigns/hooks";
+import { useCreateAndSubmitCampaign, useCreateCampaign } from "@/features/campaigns/mutations";
+import { useListings } from "@/features/listings/hooks";
+import { getAssetUrl } from "@/hooks/api-client";
+import { useOrgSlug } from "@/hooks/use-org-slug";
 import type { db } from "@/lib/brand-client";
 import { formatCurrency } from "@/lib/design-tokens";
 import { showToast } from "@/lib/toast";

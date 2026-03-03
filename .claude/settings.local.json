@@ -21,7 +21,8 @@
       "Bash(npx biome check src/components/search-dialog.tsx src/hooks/use-organization.ts --write)",
       "Bash(npx biome check src/components/search-dialog.tsx --write)",
       "WebFetch(domain:3dicons.com)",
-      "Bash(pnpm build)"
+      "Bash(pnpm build)",
+      "Bash(ls -la /c/Projects/hypedrive-brand/src/lib/server-auth*)"
     ]
   }
 }

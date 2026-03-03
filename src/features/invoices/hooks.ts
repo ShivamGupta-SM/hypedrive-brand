@@ -3,9 +3,9 @@
  */
 
 import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
-import { getAuthenticatedClient } from "@/hooks/api-client";
 import type { db } from "@/lib/brand-client";
 import { infiniteInvoicesQueryOptions, invoiceQueryOptions, invoicesQueryOptions } from "./queries";
+import { generateInvoicePDFServer } from "./server";
 
 export function useInvoices(
 	organizationId: string | undefined,
@@ -71,8 +71,7 @@ export function useInvoice(organizationId: string | undefined, invoiceId: string
 export function useGenerateInvoicePDF(organizationId: string | undefined) {
 	return useMutation({
 		mutationFn: async (invoiceId: string) => {
-			const client = getAuthenticatedClient();
-			return client.brand.generateInvoicePDF(organizationId as string, invoiceId);
+			return generateInvoicePDFServer({ data: { orgId: organizationId as string, invoiceId } });
 		},
 	});
 }

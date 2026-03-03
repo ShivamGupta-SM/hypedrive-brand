@@ -4,14 +4,15 @@
  */
 
 import { queryOptions } from "@tanstack/react-query";
-import { CACHE, getAuthenticatedClient, queryKeys } from "@/hooks/api-client";
+import { CACHE, queryKeys } from "@/hooks/api-client";
+import { listFilesServer, logoPreviewServer } from "./server";
 
 // -- File List ----------------------------------------------------------------
 
 export const listFilesQueryOptions = () =>
 	queryOptions({
 		queryKey: queryKeys.files(),
-		queryFn: () => getAuthenticatedClient().storage.listFiles(),
+		queryFn: () => listFilesServer(),
 		staleTime: CACHE.list,
 	});
 
@@ -20,6 +21,6 @@ export const listFilesQueryOptions = () =>
 export const logoPreviewQueryOptions = (domain: string) =>
 	queryOptions({
 		queryKey: queryKeys.logoPreview(domain),
-		queryFn: () => getAuthenticatedClient().storage.previewLogoByDomain({ domain }),
+		queryFn: () => logoPreviewServer({ data: { domain } }),
 		staleTime: CACHE.static,
 	});

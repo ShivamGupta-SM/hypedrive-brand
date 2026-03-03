@@ -25,11 +25,11 @@ import { Skeleton } from "@/components/skeleton";
 import {
 	useDashboard,
 	useOrganizationActivity,
-	useOrgContext,
 	useSetupProgress,
 	useSetupProgressStream,
-} from "@/hooks";
+} from "@/features/organization/hooks";
 import { getAssetUrl } from "@/hooks/api-client";
+import { useOrgContext } from "@/hooks/use-org-context";
 import { formatCurrency, formatRelativeTime } from "@/lib/design-tokens";
 
 // =============================================================================

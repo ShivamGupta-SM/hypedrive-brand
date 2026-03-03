@@ -51,29 +51,29 @@ import { Skeleton } from "@/components/skeleton";
 import { Switch } from "@/components/switch";
 import { Textarea } from "@/components/textarea";
 import {
-	getAPIErrorMessage,
-	useAddCampaignTask,
-	useApproveEnrollment,
-	useArchiveCampaign,
 	useCampaign,
-	useCampaignEnrollments,
 	useCampaignStats,
 	useCampaignTasks,
-	useConfetti,
-	useEndCampaign,
-	useExportEnrollments,
-	useOrgContext,
-	usePauseCampaign,
 	usePlatforms,
-	useRejectEnrollment,
+	useTaskTemplates,
+} from "@/features/campaigns/hooks";
+import {
+	useAddCampaignTask,
+	useArchiveCampaign,
+	useEndCampaign,
+	usePauseCampaign,
 	useRemoveCampaignTask,
 	useResumeCampaign,
 	useSubmitCampaign,
-	useTaskTemplates,
 	useUpdateCampaign,
 	useUpdateCampaignTask,
-} from "@/hooks";
+} from "@/features/campaigns/mutations";
+import { useCampaignEnrollments } from "@/features/enrollments/hooks";
+import { useApproveEnrollment, useExportEnrollments, useRejectEnrollment } from "@/features/enrollments/mutations";
+import { getAPIErrorMessage } from "@/hooks/api-client";
 import { usePageTitle } from "@/hooks/use-breadcrumb";
+import { useConfetti } from "@/hooks/use-confetti";
+import { useOrgContext } from "@/hooks/use-org-context";
 import type { brand, db } from "@/lib/brand-client";
 import { formatCurrency } from "@/lib/design-tokens";
 import { showToast } from "@/lib/toast";

@@ -3,18 +3,22 @@
  */
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { getAuthenticatedClient, queryKeys } from "@/hooks/api-client";
+import { queryKeys } from "@/hooks/api-client";
 import type { db } from "@/lib/brand-client";
+import {
+	batchEnrollmentsServer,
+	exportEnrollmentsServer,
+	exportOrgEnrollmentsServer,
+	reviewEnrollmentServer,
+} from "./server";
 
 export function useApproveEnrollment(organizationId: string | undefined) {
 	const queryClient = useQueryClient();
 
 	return useMutation({
 		mutationFn: async ({ enrollmentId, remarks }: { enrollmentId: string; remarks?: string }) => {
-			const client = getAuthenticatedClient();
-			return client.brand.updateEnrollmentReview(organizationId as string, enrollmentId, {
-				action: "approve",
-				remarks,
+			return reviewEnrollmentServer({
+				data: { orgId: organizationId as string, enrollmentId, action: "approve", remarks },
 			});
 		},
 		onSuccess: () => {
@@ -30,10 +34,8 @@ export function useRejectEnrollment(organizationId: string | undefined) {
 
 	return useMutation({
 		mutationFn: async ({ enrollmentId, reason }: { enrollmentId: string; reason: string }) => {
-			const client = getAuthenticatedClient();
-			return client.brand.updateEnrollmentReview(organizationId as string, enrollmentId, {
-				action: "reject",
-				reason,
+			return reviewEnrollmentServer({
+				data: { orgId: organizationId as string, enrollmentId, action: "reject", reason },
 			});
 		},
 		onSuccess: () => {
@@ -57,11 +59,14 @@ export function useRequestChangesEnrollment(organizationId: string | undefined) 
 			reason: string;
 			taskFeedback?: { submissionId: string; feedback: string }[];
 		}) => {
-			const client = getAuthenticatedClient();
-			return client.brand.updateEnrollmentReview(organizationId as string, enrollmentId, {
-				action: "request_changes",
-				reason,
-				taskFeedback,
+			return reviewEnrollmentServer({
+				data: {
+					orgId: organizationId as string,
+					enrollmentId,
+					action: "request_changes",
+					reason,
+					taskFeedback,
+				},
 			});
 		},
 		onSuccess: () => {
@@ -87,12 +92,8 @@ export function useBatchEnrollments(organizationId: string | undefined) {
 			reason?: string;
 			remarks?: string;
 		}) => {
-			const client = getAuthenticatedClient();
-			return client.brand.batchEnrollments(organizationId as string, {
-				action,
-				ids,
-				reason,
-				remarks,
+			return batchEnrollmentsServer({
+				data: { orgId: organizationId as string, action, ids, reason, remarks },
 			});
 		},
 		onSuccess: () => {
@@ -128,8 +129,7 @@ export function useBulkRejectEnrollments(organizationId: string | undefined) {
 export function useExportEnrollments(organizationId: string | undefined) {
 	return useMutation({
 		mutationFn: async ({ campaignId, status }: { campaignId: string; status?: db.EnrollmentStatus }) => {
-			const client = getAuthenticatedClient();
-			return client.brand.exportEnrollments(organizationId as string, campaignId, { status });
+			return exportEnrollmentsServer({ data: { orgId: organizationId as string, campaignId, status } });
 		},
 	});
 }
@@ -142,8 +142,7 @@ export function useExportOrganizationEnrollments(organizationId: string | undefi
 			createdFrom?: string;
 			createdTo?: string;
 		}) => {
-			const client = getAuthenticatedClient();
-			return client.brand.exportOrganizationEnrollments(organizationId as string, params);
+			return exportOrgEnrollmentsServer({ data: { orgId: organizationId as string, ...params } });
 		},
 	});
 }

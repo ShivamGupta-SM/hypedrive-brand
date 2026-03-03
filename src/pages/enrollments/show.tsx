@@ -32,15 +32,15 @@ import { ErrorState } from "@/components/shared/error-state";
 import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
 import { Skeleton } from "@/components/skeleton";
 import { Textarea } from "@/components/textarea";
+import { useEnrollment } from "@/features/enrollments/hooks";
 import {
 	useApproveEnrollment,
-	useEnrollment,
-	useOrgContext,
 	useRejectEnrollment,
 	useRequestChangesEnrollment,
-} from "@/hooks";
+} from "@/features/enrollments/mutations";
 import { getAssetUrl } from "@/hooks/api-client";
 import { usePageTitle } from "@/hooks/use-breadcrumb";
+import { useOrgContext } from "@/hooks/use-org-context";
 import type { brand, db } from "@/lib/brand-client";
 import { formatCurrency, formatDateTime, formatRelativeTime, getInitials } from "@/lib/design-tokens";
 import { showToast } from "@/lib/toast";

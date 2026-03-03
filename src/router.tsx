@@ -2,6 +2,7 @@ import { dehydrate, hydrate, QueryClient } from "@tanstack/react-query";
 import { createRouter as createTanStackRouter } from "@tanstack/react-router";
 
 import { isAPIError } from "@/hooks/api-client";
+import { clearServerAuthCookie } from "@/server/auth-queries";
 import { routeTree } from "./routeTree.gen";
 
 // Shared queryClient reference - accessible outside React tree
@@ -16,13 +17,10 @@ export function getQueryClient(): QueryClient | null {
  * Called from QueryClient retry and can be called from anywhere.
  */
 export async function handleAuthError() {
-	// Clear the public cookie from JS (the httpOnly cookie will expire or be
-	// cleared on the next server round-trip when getServerAuthWithOrgs sees an
-	// invalid token). This avoids importing server-auth which triggers import-protection.
-	if (typeof document !== "undefined") {
-		// biome-ignore lint: intentional cookie clear on 401
-		document.cookie = "hd_auth_pub=; path=/; max-age=0";
-	}
+	// Clear the httpOnly auth cookie via a server round-trip
+	try {
+		await clearServerAuthCookie();
+	} catch {}
 	// clear() wipes the entire QueryClient cache including auth+orgs
 	_queryClient?.clear();
 }

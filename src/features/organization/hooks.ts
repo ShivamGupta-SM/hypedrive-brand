@@ -4,8 +4,9 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getAuthenticatedClient } from "@/hooks/api-client";
-import type { internal, StreamIn } from "@/lib/brand-client";
+import Client, { type internal, type StreamIn } from "@/lib/brand-client";
+import { API_URL } from "@/lib/config";
+import { getStreamTokenServer } from "@/server/auth-queries";
 import {
 	activeMemberQueryOptions,
 	dashboardQueryOptions,
@@ -103,7 +104,8 @@ export function useSetupProgressStream(organizationId: string | undefined) {
 		setIsComplete(false);
 
 		try {
-			const client = getAuthenticatedClient();
+			const { token } = await getStreamTokenServer();
+			const client = new Client(API_URL, { auth: { authorization: `Bearer ${token}` } });
 			const stream = await client.brand.streamSetupProgress(organizationId);
 			streamRef.current = stream;
 			setIsConnectedRef.current(true);

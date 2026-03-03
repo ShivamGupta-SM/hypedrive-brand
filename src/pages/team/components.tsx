@@ -28,16 +28,13 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
 import { Skeleton } from "@/components/skeleton";
 import {
-	getAPIErrorMessage,
-	useAddMember,
 	useCreateOrganizationRole,
 	useDeleteOrganizationRole,
-	useInviteMember,
 	useOrganizationRoles,
-	useRemoveMember,
-	useUpdateMemberRole,
 	useUpdateOrganizationRole,
-} from "@/hooks";
+} from "@/features/organization/hooks-roles";
+import { useAddMember, useInviteMember, useRemoveMember, useUpdateMemberRole } from "@/features/team/mutations";
+import { getAPIErrorMessage } from "@/hooks/api-client";
 import type { types } from "@/lib/brand-client";
 import type { OrgResource } from "@/lib/permissions/definitions";
 import { ACTION_LABELS, ORG_RESOURCE_LABELS, ORG_STATEMENT } from "@/lib/permissions/definitions";

@@ -1,6 +1,7 @@
 import { EmptyState } from "@/components/shared/empty-state";
 import { Skeleton } from "@/components/skeleton";
-import { useDeposits, useOrgContext } from "@/hooks";
+import { useDeposits } from "@/features/wallet/hooks";
+import { useOrgContext } from "@/hooks/use-org-context";
 import { DepositRow } from "./components";
 
 export function WalletDeposits() {

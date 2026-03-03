@@ -13,12 +13,8 @@ import { Input } from "@/components/input";
 import { Logo } from "@/components/logo";
 import { Strong, TextLink } from "@/components/text";
 import { useLogin, useSocialLogin } from "@/features/auth/hooks";
-import {
-	usePasskeyAuthenticate,
-	usePasskeyAuthenticateOptions,
-	useTwoFactorVerifyBackupCode,
-	useTwoFactorVerifyTotp,
-} from "@/hooks";
+import { useTwoFactorVerifyBackupCode, useTwoFactorVerifyTotp } from "@/features/auth/hooks-2fa";
+import { usePasskeyAuthenticate, usePasskeyAuthenticateOptions } from "@/features/auth/hooks-passkeys";
 import { useAutofillSync } from "@/hooks/use-autofill-sync";
 import { setServerAuthCookie } from "@/server/auth-queries";
 import { FormError } from "./components";

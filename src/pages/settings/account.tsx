@@ -39,42 +39,37 @@ import {
 	MenuToggleRow,
 } from "@/components/shared/menu-list";
 import { Text } from "@/components/text";
-import { useLogout } from "@/features/auth/hooks";
+import { useLogout, useUserInfo } from "@/features/auth/hooks";
 import {
-	getAPIErrorMessage,
-	useAcceptInvitation,
-	useChangeEmail,
-	useChangePassword,
-	useDeleteUser,
-	useDeviceSessions,
-	useDeviceSessionsList,
-	useLeaveOrganization,
-	useLinkedAccounts,
-	useLinkSocial,
-	usePasskeyDelete,
-	usePasskeyList,
-	usePasskeyRegister,
-	usePasskeyRegisterOptions,
-	usePasskeyUpdateName,
-	useRejectInvitation,
-	useRemovePushToken,
-	useRevokeAllSessions,
-	useRevokeDeviceSession,
-	useRevokeOtherSessions,
-	useRevokeSession,
-	useSetActiveSession,
-	useSetPassword,
 	useTwoFactorDisable,
 	useTwoFactorEnable,
 	useTwoFactorGenerateBackupCodes,
 	useTwoFactorGetTotpUri,
 	useTwoFactorVerifyTotp,
 	useTwoFactorViewBackupCodes,
-	useUnlinkAccount,
-	useUpdateNotificationPreferences,
-	useUserInfo,
-	useUserInvitations,
-} from "@/hooks";
+} from "@/features/auth/hooks-2fa";
+import { useChangeEmail, useChangePassword, useDeleteUser, useSetPassword } from "@/features/auth/hooks-account";
+import { useAcceptInvitation, useRejectInvitation, useUserInvitations } from "@/features/auth/hooks-invitations";
+import {
+	usePasskeyDelete,
+	usePasskeyList,
+	usePasskeyRegister,
+	usePasskeyRegisterOptions,
+	usePasskeyUpdateName,
+} from "@/features/auth/hooks-passkeys";
+import {
+	useDeviceSessions,
+	useDeviceSessionsList,
+	useRevokeAllSessions,
+	useRevokeDeviceSession,
+	useRevokeOtherSessions,
+	useRevokeSession,
+	useSetActiveSession,
+} from "@/features/auth/hooks-sessions";
+import { useLinkedAccounts, useLinkSocial, useUnlinkAccount } from "@/features/auth/hooks-social";
+import { useRemovePushToken, useUpdateNotificationPreferences } from "@/features/notifications/hooks";
+import { useLeaveOrganization } from "@/features/organization/mutations";
+import { getAPIErrorMessage } from "@/hooks/api-client";
 import { useOrgContext } from "@/hooks/use-org-context";
 
 // =============================================================================
@@ -615,18 +610,20 @@ function EditUserProfilePanel({ initialName, initialImage }: { initialName: stri
 
 		setIsPending(true);
 		try {
-			const { getAuthenticatedClient } = await import("@/hooks/api-client");
-			const client = getAuthenticatedClient();
+			const { requestUploadUrlServer } = await import("@/features/storage/server");
+			const { updateUserServer } = await import("@/features/auth/server");
 
 			let imageUrl: string | undefined;
 
 			// Upload avatar if changed
 			if (avatarFile) {
 				// Upload flow — request signed URL then upload to S3
-				const { uploadUrl, fileUrl } = await client.storage.requestUploadUrl({
-					filename: avatarFile.name,
-					contentType: avatarFile.type,
-					folder: "profile-pictures",
+				const { uploadUrl, fileUrl } = await requestUploadUrlServer({
+					data: {
+						filename: avatarFile.name,
+						contentType: avatarFile.type,
+						folder: "profile-pictures",
+					},
 				});
 				await fetch(uploadUrl, {
 					method: "PUT",
@@ -636,9 +633,11 @@ function EditUserProfilePanel({ initialName, initialImage }: { initialName: stri
 				imageUrl = fileUrl;
 			}
 
-			await client.auth.updateUser({
-				name: name.trim(),
-				...(imageUrl ? { image: imageUrl } : {}),
+			await updateUserServer({
+				data: {
+					name: name.trim(),
+					...(imageUrl ? { image: imageUrl } : {}),
+				},
 			});
 
 			// Optimistic update — patch the auth session cache so sidebar/avatar

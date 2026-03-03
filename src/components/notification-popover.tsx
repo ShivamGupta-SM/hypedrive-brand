@@ -9,28 +9,13 @@ import {
 	UserGroupIcon,
 } from "@heroicons/react/20/solid";
 import { useEffect, useRef, useState } from "react";
-import { useNotificationStream } from "@/components/notification-stream-provider";
+import { type Notification, useNotificationStream } from "@/components/notification-stream-provider";
 import {
 	useArchiveNotifications,
 	useDeleteNotifications,
 	useMarkAllNotificationsRead,
 	useMarkNotificationRead,
 } from "@/features/notifications/hooks";
-
-// =============================================================================
-// TYPES
-// =============================================================================
-
-type Notification = {
-	id: string;
-	type?: string;
-	title?: string;
-	body?: string | null;
-	actionUrl?: string | null;
-	imageUrl?: string | null;
-	isRead?: boolean;
-	createdAt?: string;
-};
 
 // =============================================================================
 // NOTIFICATION ICON BY TYPE

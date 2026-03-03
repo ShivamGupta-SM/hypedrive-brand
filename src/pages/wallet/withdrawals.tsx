@@ -11,7 +11,8 @@ import { Button } from "@/components/button";
 import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/dialog";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Skeleton } from "@/components/skeleton";
-import { useOrgContext, useWithdrawalDetail, useWithdrawalStats, useWithdrawals } from "@/hooks";
+import { useWithdrawalDetail, useWithdrawalStats, useWithdrawals } from "@/features/wallet/hooks";
+import { useOrgContext } from "@/hooks/use-org-context";
 import { formatCurrency, formatDateTime } from "@/lib/design-tokens";
 import { WithdrawalRow } from "./components";
 

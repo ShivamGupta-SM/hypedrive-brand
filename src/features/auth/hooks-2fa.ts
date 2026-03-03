@@ -3,14 +3,24 @@
  */
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { getAuthenticatedClient, queryKeys } from "@/hooks/api-client";
+import { queryKeys } from "@/hooks/api-client";
+import {
+	twoFactorDisableServer,
+	twoFactorEnableServer,
+	twoFactorGenerateBackupCodesServer,
+	twoFactorGetTotpUriServer,
+	twoFactorSendOtpServer,
+	twoFactorVerifyBackupCodeServer,
+	twoFactorVerifyOtpServer,
+	twoFactorVerifyTotpServer,
+	twoFactorViewBackupCodesServer,
+} from "./server";
 
 export function useTwoFactorEnable() {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: async (params: { password: string; issuer?: string }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.twoFactorEnable(params);
+			return twoFactorEnableServer({ data: { ...params } });
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.userInfo() });
@@ -22,8 +32,7 @@ export function useTwoFactorDisable() {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: async (params: { password: string }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.twoFactorDisable(params);
+			return twoFactorDisableServer({ data: { ...params } });
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.userInfo() });
@@ -34,8 +43,7 @@ export function useTwoFactorDisable() {
 export function useTwoFactorGetTotpUri() {
 	return useMutation({
 		mutationFn: async (params: { password: string }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.twoFactorGetTotpUri(params);
+			return twoFactorGetTotpUriServer({ data: { ...params } });
 		},
 	});
 }
@@ -43,8 +51,7 @@ export function useTwoFactorGetTotpUri() {
 export function useTwoFactorVerifyTotp() {
 	return useMutation({
 		mutationFn: async (params: { twoFactorToken: string; code: string; trustDevice?: boolean }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.twoFactorVerifyTotp(params);
+			return twoFactorVerifyTotpServer({ data: { ...params } });
 		},
 	});
 }
@@ -52,8 +59,7 @@ export function useTwoFactorVerifyTotp() {
 export function useTwoFactorGenerateBackupCodes() {
 	return useMutation({
 		mutationFn: async (params: { password: string }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.twoFactorGenerateBackupCodes(params);
+			return twoFactorGenerateBackupCodesServer({ data: { ...params } });
 		},
 	});
 }
@@ -61,8 +67,7 @@ export function useTwoFactorGenerateBackupCodes() {
 export function useTwoFactorSendOtp() {
 	return useMutation({
 		mutationFn: async (params: { twoFactorToken: string; trustDevice?: boolean }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.twoFactorSendOtp(params);
+			return twoFactorSendOtpServer({ data: { ...params } });
 		},
 	});
 }
@@ -70,8 +75,7 @@ export function useTwoFactorSendOtp() {
 export function useTwoFactorVerifyOtp() {
 	return useMutation({
 		mutationFn: async (params: { twoFactorToken: string; otp: string; trustDevice?: boolean }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.twoFactorVerifyOtp(params);
+			return twoFactorVerifyOtpServer({ data: { ...params } });
 		},
 	});
 }
@@ -79,8 +83,7 @@ export function useTwoFactorVerifyOtp() {
 export function useTwoFactorViewBackupCodes() {
 	return useMutation({
 		mutationFn: async (params: { password: string }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.twoFactorViewBackupCodes(params);
+			return twoFactorViewBackupCodesServer({ data: { ...params } });
 		},
 	});
 }
@@ -88,8 +91,7 @@ export function useTwoFactorViewBackupCodes() {
 export function useTwoFactorVerifyBackupCode() {
 	return useMutation({
 		mutationFn: async (params: { twoFactorToken: string; code: string; trustDevice?: boolean }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.twoFactorVerifyBackupCode(params);
+			return twoFactorVerifyBackupCodeServer({ data: { ...params } });
 		},
 	});
 }

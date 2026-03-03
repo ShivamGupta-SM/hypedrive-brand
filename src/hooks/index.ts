@@ -30,14 +30,11 @@ export * from "@/features/wallet/hooks";
 export * from "@/features/wallet/mutations";
 // API client utilities
 export {
-	apiClient,
 	CACHE,
 	DEFAULT_PAGE_SIZE,
 	getAPIErrorCode,
 	getAPIErrorMessage,
 	getAssetUrl,
-	getAuthenticatedClient,
-	getAuthTokenFromCookie,
 	isAPIError,
 	queryKeys,
 } from "./api-client";

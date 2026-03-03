@@ -33,12 +33,6 @@ export const IS_DEV: boolean = !IS_PRODUCTION;
 /** Name of the HttpOnly auth cookie — readable only by the server (SSR auth checks). */
 export const AUTH_COOKIE_NAME = "hd_auth";
 
-/**
- * Name of the public (non-HttpOnly) auth cookie — readable by JS for Bearer headers.
- * Mirrors AUTH_COOKIE_NAME but without httpOnly so client can attach the token.
- */
-export const AUTH_COOKIE_PUBLIC_NAME = "hd_auth_pub";
-
 /** Cookie max-age in seconds when "Keep me signed in" is checked (30 days). */
 export const AUTH_COOKIE_MAX_AGE = 60 * 60 * 24 * 30;
 

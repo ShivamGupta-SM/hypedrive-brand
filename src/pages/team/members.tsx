@@ -3,7 +3,8 @@ import { useState } from "react";
 import { Button } from "@/components/button";
 import { useCan } from "@/components/shared/can";
 import { EmptyState } from "@/components/shared/empty-state";
-import { useMembers, useOrgContext } from "@/hooks";
+import { useMembers } from "@/features/team/hooks";
+import { useOrgContext } from "@/hooks/use-org-context";
 import type { Member, MemberRole } from "./components";
 import { AddMemberDialog, ChangeRoleDialog, InviteMemberModal, MemberRow, RemoveMemberDialog } from "./components";
 

@@ -3,15 +3,21 @@
  */
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { getAuthenticatedClient, queryKeys } from "@/hooks/api-client";
+import { queryKeys } from "@/hooks/api-client";
+import {
+	addMemberServer,
+	cancelInvitationServer,
+	inviteMemberServer,
+	removeMemberServer,
+	updateMemberRoleServer,
+} from "./server";
 
 export function useInviteMember(organizationId: string | undefined) {
 	const queryClient = useQueryClient();
 
 	return useMutation({
 		mutationFn: async (params: { email: string; role: "owner" | "admin" | "member" }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.inviteMemberAuth(organizationId as string, params);
+			return inviteMemberServer({ data: { orgId: organizationId as string, ...params } });
 		},
 		onSuccess: () => {
 			if (organizationId) {
@@ -26,8 +32,7 @@ export function useCancelInvitation(organizationId: string | undefined) {
 
 	return useMutation({
 		mutationFn: async (invitationId: string) => {
-			const client = getAuthenticatedClient();
-			return client.auth.cancelInvitation(organizationId as string, invitationId);
+			return cancelInvitationServer({ data: { orgId: organizationId as string, invitationId } });
 		},
 		onSuccess: () => {
 			if (organizationId) {
@@ -42,9 +47,8 @@ export function useUpdateMemberRole(organizationId: string | undefined) {
 
 	return useMutation({
 		mutationFn: async (params: { memberId: string; role: "owner" | "admin" | "member" }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.updateMemberRole(organizationId as string, params.memberId, {
-				role: params.role,
+			return updateMemberRoleServer({
+				data: { orgId: organizationId as string, memberId: params.memberId, role: params.role },
 			});
 		},
 		onSuccess: () => {
@@ -60,8 +64,7 @@ export function useRemoveMember(organizationId: string | undefined) {
 
 	return useMutation({
 		mutationFn: async (memberIdOrEmail: string) => {
-			const client = getAuthenticatedClient();
-			return client.auth.removeMember(organizationId as string, memberIdOrEmail, {});
+			return removeMemberServer({ data: { orgId: organizationId as string, memberIdOrEmail } });
 		},
 		onSuccess: () => {
 			if (organizationId) {
@@ -76,8 +79,7 @@ export function useAddMember(organizationId: string | undefined) {
 
 	return useMutation({
 		mutationFn: async (params: { userId: string; role: "owner" | "admin" | "member" }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.addMember(organizationId as string, params);
+			return addMemberServer({ data: { orgId: organizationId as string, ...params } });
 		},
 		onSuccess: () => {
 			if (organizationId) {

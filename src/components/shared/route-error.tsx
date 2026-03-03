@@ -3,10 +3,14 @@
  * Used by all data-loading routes as errorComponent / pendingComponent.
  */
 
+import { isCancelledError } from "@tanstack/react-query";
 import { getAPIErrorMessage, isAPIError } from "@/hooks/api-client";
 import { ErrorState } from "./error-state";
 
 export function RouteErrorComponent({ error, reset }: { error: unknown; reset?: () => void }) {
+	// Cancelled queries during navigation — not a real error, re-throw to root
+	if (isCancelledError(error)) throw error;
+
 	// Auth errors — let the root handler deal with redirect
 	if (isAPIError(error) && (error.status === 401 || error.status === 403)) {
 		throw error;

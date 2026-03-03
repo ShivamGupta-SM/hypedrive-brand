@@ -3,9 +3,19 @@
  */
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getAuthenticatedClient, queryKeys } from "@/hooks/api-client";
+import { queryKeys } from "@/hooks/api-client";
 import type { brand } from "@/lib/brand-client";
 import { bankAccountQueryOptions, gstDetailsQueryOptions, organizationSettingsQueryOptions } from "./queries";
+import {
+	addBankAccountServer,
+	changeOrgPhoneServer,
+	deleteBankAccountServer,
+	enrichPreviewServer,
+	updateOrganizationSettingsServer,
+	verifyBankAccountServer,
+	verifyGSTPreviewServer,
+	verifyGSTServer,
+} from "./server";
 
 // -- Organization Settings ----------------------------------------------------
 
@@ -42,8 +52,7 @@ export function useUpdateOrganizationSettings(organizationId: string | undefined
 			country?: string;
 			postalCode?: string;
 		}) => {
-			const client = getAuthenticatedClient();
-			return client.brand.updateOrganization(organizationId as string, params);
+			return updateOrganizationSettingsServer({ data: { organizationId: organizationId as string, ...params } });
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.organization(organizationId || "") });
@@ -58,8 +67,7 @@ export function useChangeOrgPhone(organizationId: string | undefined) {
 
 	return useMutation({
 		mutationFn: async (params: { phoneNumber: string; passkeyResponse: unknown; challengeId: string }) => {
-			const client = getAuthenticatedClient();
-			return client.brand.changeOrgPhone(organizationId as string, params);
+			return changeOrgPhoneServer({ data: { organizationId: organizationId as string, ...params } });
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.organization(organizationId || "") });
@@ -86,8 +94,7 @@ export function useBankAccount(organizationId: string | undefined) {
 export function useVerifyBankAccount(organizationId: string | undefined) {
 	return useMutation({
 		mutationFn: async (params: brand.VerifyBankAccountDetailsRequest) => {
-			const client = getAuthenticatedClient();
-			return client.brand.verifyBankAccountDetails(organizationId as string, params);
+			return verifyBankAccountServer({ data: { organizationId: organizationId as string, ...params } });
 		},
 	});
 }
@@ -97,8 +104,7 @@ export function useAddBankAccount(organizationId: string | undefined) {
 
 	return useMutation({
 		mutationFn: async (params: brand.AddBankAccountRequest) => {
-			const client = getAuthenticatedClient();
-			return client.brand.addBankAccount(organizationId as string, params);
+			return addBankAccountServer({ data: { organizationId: organizationId as string, ...params } });
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.bankAccount(organizationId || "") });
@@ -111,8 +117,7 @@ export function useDeleteBankAccount() {
 
 	return useMutation({
 		mutationFn: async ({ organizationId }: { organizationId: string }) => {
-			const client = getAuthenticatedClient();
-			return client.brand.deleteBankAccount(organizationId);
+			return deleteBankAccountServer({ data: { organizationId } });
 		},
 		onSuccess: (_, variables) => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.bankAccount(variables.organizationId) });
@@ -139,8 +144,7 @@ export function useGSTDetails(organizationId: string | undefined) {
 export function useVerifyGSTPreview() {
 	return useMutation({
 		mutationFn: async (params: { gstNumber: string }) => {
-			const client = getAuthenticatedClient();
-			return client.brand.verifyGSTPreview(params);
+			return verifyGSTPreviewServer({ data: params });
 		},
 	});
 }
@@ -149,8 +153,7 @@ export function useVerifyGST() {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: async ({ organizationId, gstNumber }: { organizationId: string; gstNumber: string }) => {
-			const client = getAuthenticatedClient();
-			return client.brand.verifyGST(organizationId, { gstNumber });
+			return verifyGSTServer({ data: { organizationId, gstNumber } });
 		},
 		onSuccess: (_, variables) => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.gstDetails(variables.organizationId) });
@@ -163,8 +166,7 @@ export function useVerifyGST() {
 export function useEnrichPreview() {
 	return useMutation({
 		mutationFn: async (params: { domain: string; name?: string }) => {
-			const client = getAuthenticatedClient();
-			return client.enrichment.enrichPreview(params);
+			return enrichPreviewServer({ data: params });
 		},
 	});
 }

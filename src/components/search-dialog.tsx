@@ -17,7 +17,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Badge } from "@/components/badge";
 import { Skeleton, SkeletonProvider } from "@/components/skeleton";
-import { useUnifiedSearch } from "@/hooks";
+import { useUnifiedSearch } from "@/features/organization/hooks";
 import type { brand } from "@/lib/brand-client";
 import { formatRelativeTime, formatStatus, getStatusColor } from "@/lib/design-tokens";
 import { HighlightText } from "@/lib/highlight-text";

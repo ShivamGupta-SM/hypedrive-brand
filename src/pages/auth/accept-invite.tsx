@@ -8,7 +8,8 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/button";
 import { Logo } from "@/components/logo";
-import { getAPIErrorMessage, useAcceptInvitation, useGetInvitation, useRejectInvitation } from "@/hooks";
+import { useAcceptInvitation, useGetInvitation, useRejectInvitation } from "@/features/auth/hooks-invitations";
+import { getAPIErrorMessage } from "@/hooks/api-client";
 import { AuthShell } from "./login";
 
 type InviteState = "loading" | "preview" | "accepted" | "rejected" | "error";

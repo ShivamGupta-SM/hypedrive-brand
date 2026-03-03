@@ -3,15 +3,15 @@
  */
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getAuthenticatedClient, queryKeys } from "@/hooks/api-client";
+import { queryKeys } from "@/hooks/api-client";
 import type { storage } from "@/lib/brand-client";
 import { listFilesQueryOptions, logoPreviewQueryOptions } from "./queries";
+import { deleteFileServer, requestDownloadUrlServer, requestUploadUrlServer } from "./server";
 
 export function useRequestUploadUrl() {
 	return useMutation({
 		mutationFn: async (params: storage.UploadUrlRequest) => {
-			const client = getAuthenticatedClient();
-			return client.storage.requestUploadUrl(params);
+			return requestUploadUrlServer({ data: params });
 		},
 	});
 }
@@ -19,8 +19,7 @@ export function useRequestUploadUrl() {
 export function useRequestDownloadUrl() {
 	return useMutation({
 		mutationFn: async (params: storage.DownloadUrlRequest) => {
-			const client = getAuthenticatedClient();
-			return client.storage.requestDownloadUrl(params);
+			return requestDownloadUrlServer({ data: params });
 		},
 	});
 }
@@ -43,8 +42,7 @@ export function useDeleteFile() {
 
 	return useMutation({
 		mutationFn: async (key: string) => {
-			const client = getAuthenticatedClient();
-			return client.storage.deleteFile(key);
+			return deleteFileServer({ data: { key } });
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.files() });

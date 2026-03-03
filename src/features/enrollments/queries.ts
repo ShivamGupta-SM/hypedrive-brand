@@ -3,15 +3,16 @@
  */
 
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
-import { CACHE, DEFAULT_PAGE_SIZE, getAuthenticatedClient, queryKeys } from "@/hooks/api-client";
+import { CACHE, DEFAULT_PAGE_SIZE, queryKeys } from "@/hooks/api-client";
 import type { db } from "@/lib/brand-client";
+import { getEnrollmentServer, listEnrollmentsServer } from "./server";
 
 // -- Enrollment Detail --------------------------------------------------------
 
 export const enrollmentQueryOptions = (orgId: string, enrollmentId: string) =>
 	queryOptions({
 		queryKey: queryKeys.enrollment(orgId, enrollmentId),
-		queryFn: () => getAuthenticatedClient().brand.getEnrollment(orgId, enrollmentId),
+		queryFn: () => getEnrollmentServer({ data: { orgId, enrollmentId } }),
 		staleTime: CACHE.detail,
 	});
 
@@ -30,7 +31,7 @@ export const enrollmentsQueryOptions = (
 ) =>
 	queryOptions({
 		queryKey: queryKeys.enrollments(orgId, params),
-		queryFn: () => getAuthenticatedClient().brand.listOrganizationEnrollments(orgId, params || {}),
+		queryFn: () => listEnrollmentsServer({ data: { orgId, params: params || {} } }),
 		staleTime: CACHE.list,
 	});
 
@@ -43,11 +44,7 @@ export const campaignEnrollmentsQueryOptions = (
 ) =>
 	queryOptions({
 		queryKey: queryKeys.enrollments(orgId, { campaignId, ...params }),
-		queryFn: () =>
-			getAuthenticatedClient().brand.listOrganizationEnrollments(orgId, {
-				campaignId,
-				...params,
-			}),
+		queryFn: () => listEnrollmentsServer({ data: { orgId, params: { campaignId, ...params } } }),
 		staleTime: CACHE.list,
 	});
 
@@ -60,10 +57,8 @@ export const infiniteEnrollmentsQueryOptions = (
 	infiniteQueryOptions({
 		queryKey: queryKeys.infiniteEnrollments(orgId, params),
 		queryFn: ({ pageParam = 0 }) =>
-			getAuthenticatedClient().brand.listOrganizationEnrollments(orgId, {
-				...params,
-				skip: pageParam,
-				take: DEFAULT_PAGE_SIZE,
+			listEnrollmentsServer({
+				data: { orgId, params: { ...params, skip: pageParam, take: DEFAULT_PAGE_SIZE } },
 			}),
 		initialPageParam: 0,
 		getNextPageParam: (lastPage, allPages) => {

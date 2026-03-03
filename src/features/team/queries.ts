@@ -3,25 +3,26 @@
  */
 
 import { queryOptions } from "@tanstack/react-query";
-import { CACHE, getAuthenticatedClient, queryKeys } from "@/hooks/api-client";
+import { CACHE, queryKeys } from "@/hooks/api-client";
+import { listInvitationsServer, listMembersServer, listOrgRolesServer } from "./server";
 
 export const membersQueryOptions = (orgId: string) =>
 	queryOptions({
 		queryKey: queryKeys.members(orgId),
-		queryFn: () => getAuthenticatedClient().auth.listMembersAuth(orgId),
+		queryFn: () => listMembersServer({ data: { orgId } }),
 		staleTime: CACHE.auth,
 	});
 
 export const invitationsQueryOptions = (orgId: string) =>
 	queryOptions({
 		queryKey: queryKeys.invitations(orgId),
-		queryFn: () => getAuthenticatedClient().auth.listInvitations(orgId),
+		queryFn: () => listInvitationsServer({ data: { orgId } }),
 		staleTime: CACHE.invitations,
 	});
 
 export const organizationRolesQueryOptions = (orgId: string) =>
 	queryOptions({
 		queryKey: queryKeys.organizationRoles(orgId),
-		queryFn: () => getAuthenticatedClient().auth.listOrganizationRoles(orgId),
+		queryFn: () => listOrgRolesServer({ data: { orgId } }),
 		staleTime: CACHE.settings,
 	});

@@ -42,8 +42,7 @@
 		"satori": "^0.19.2",
 		"sonner": "^2.0.7",
 		"tailwindcss": "^4.1.15",
-		"zod": "^4.3.5",
-		"zustand": "^5.0.10"
+		"zod": "^4.3.5"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.2.4",

@@ -1,8 +1,8 @@
 import { ChevronRightIcon, HomeIcon } from "@heroicons/react/20/solid";
 import { Link, useLocation } from "@tanstack/react-router";
 import { NotificationBell } from "@/components/notification-popover";
-import { useOrgContext } from "@/hooks";
 import { useBreadcrumbStore } from "@/hooks/use-breadcrumb";
+import { useOrgContext } from "@/hooks/use-org-context";
 
 const ROUTE_LABELS: Record<string, string> = {
 	campaigns: "Campaigns",
@@ -24,7 +24,7 @@ const ROUTE_LABELS: Record<string, string> = {
 function useBreadcrumbs() {
 	const { pathname } = useLocation();
 	const { orgSlug } = useOrgContext();
-	const pageTitle = useBreadcrumbStore((s) => s.pageTitle);
+	const { pageTitle } = useBreadcrumbStore();
 
 	// Strip org slug prefix: /my-org/campaigns/123 → ["campaigns", "123"]
 	const prefix = `/${orgSlug}`;

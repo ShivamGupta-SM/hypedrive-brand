@@ -3,7 +3,10 @@ import { useCallback, useState } from "react";
 import { Button } from "@/components/button";
 import { useCan } from "@/components/shared/can";
 import { EmptyState } from "@/components/shared/empty-state";
-import { getAPIErrorMessage, useCancelInvitation, useInvitations, useOrgContext } from "@/hooks";
+import { useInvitations } from "@/features/team/hooks";
+import { useCancelInvitation } from "@/features/team/mutations";
+import { getAPIErrorMessage } from "@/hooks/api-client";
+import { useOrgContext } from "@/hooks/use-org-context";
 import type { Invitation } from "./components";
 import { InvitationRow, InviteMemberModal } from "./components";
 

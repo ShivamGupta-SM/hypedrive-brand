@@ -3,11 +3,22 @@
  */
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getAuthenticatedClient, getAuthTokenFromCookie, queryKeys } from "@/hooks/api-client";
+import { queryKeys } from "@/hooks/api-client";
 import { deviceSessionsListQueryOptions, deviceSessionsQueryOptions } from "./queries";
+import {
+	getCurrentSessionIdServer,
+	revokeDeviceSessionServer,
+	revokeOtherSessionsServer,
+	revokeSessionServer,
+	revokeSessionsServer,
+	setActiveSessionServer,
+} from "./server";
 
 export function useDeviceSessions() {
-	const currentToken = getAuthTokenFromCookie();
+	const fingerprintQuery = useQuery({
+		queryKey: ["auth", "currentSessionId"],
+		queryFn: () => getCurrentSessionIdServer(),
+	});
 
 	const query = useQuery({
 		...deviceSessionsQueryOptions(),
@@ -15,7 +26,7 @@ export function useDeviceSessions() {
 
 	return {
 		data: query.data?.sessions ?? [],
-		currentToken,
+		currentToken: fingerprintQuery.data?.sessionToken ?? null,
 		loading: query.isPending && !query.data,
 		error: query.error,
 		refetch: query.refetch,
@@ -27,8 +38,7 @@ export function useRevokeSession() {
 
 	return useMutation({
 		mutationFn: async (sessionToken: string) => {
-			const client = getAuthenticatedClient();
-			return client.auth.revokeSession({ token: sessionToken });
+			return revokeSessionServer({ data: { token: sessionToken } });
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.deviceSessions() });
@@ -41,8 +51,7 @@ export function useRevokeOtherSessions() {
 
 	return useMutation({
 		mutationFn: async () => {
-			const client = getAuthenticatedClient();
-			return client.auth.revokeOtherSessions();
+			return revokeOtherSessionsServer();
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.deviceSessions() });
@@ -55,8 +64,7 @@ export function useRevokeAllSessions() {
 
 	return useMutation({
 		mutationFn: async () => {
-			const client = getAuthenticatedClient();
-			return client.auth.revokeSessions();
+			return revokeSessionsServer();
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.deviceSessions() });
@@ -69,8 +77,7 @@ export function useSetActiveSession() {
 
 	return useMutation({
 		mutationFn: async (sessionToken: string) => {
-			const client = getAuthenticatedClient();
-			return client.auth.setActiveSession({ sessionToken });
+			return setActiveSessionServer({ data: { sessionToken } });
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.userInfo() });
@@ -97,8 +104,7 @@ export function useRevokeDeviceSession() {
 
 	return useMutation({
 		mutationFn: async (sessionToken: string) => {
-			const client = getAuthenticatedClient();
-			return client.auth.revokeDeviceSession({ sessionToken });
+			return revokeDeviceSessionServer({ data: { sessionToken } });
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.deviceSessions() });

@@ -3,8 +3,17 @@
  */
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getAuthenticatedClient, queryKeys } from "@/hooks/api-client";
+import { queryKeys } from "@/hooks/api-client";
 import { passkeyListQueryOptions } from "./queries";
+import {
+	passkeyAuthenticateOptionsServer,
+	passkeyAuthenticateServer,
+	passkeyDeleteServer,
+	passkeyReauthOptionsServer,
+	passkeyRegisterOptionsServer,
+	passkeyRegisterServer,
+	passkeyUpdateNameServer,
+} from "./server";
 
 export function usePasskeyList() {
 	const query = useQuery({
@@ -22,8 +31,7 @@ export function usePasskeyList() {
 export function usePasskeyRegisterOptions() {
 	return useMutation({
 		mutationFn: async (params: { name?: string; authenticatorAttachment?: "platform" | "cross-platform" }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.passkeyRegisterOptions(params);
+			return passkeyRegisterOptionsServer({ data: { ...params } });
 		},
 	});
 }
@@ -33,8 +41,7 @@ export function usePasskeyRegister() {
 
 	return useMutation({
 		mutationFn: async (params: { response: unknown; name?: string; challengeCookie: string }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.passkeyRegister(params);
+			return passkeyRegisterServer({ data: { ...params } });
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.passkeys() });
@@ -47,8 +54,7 @@ export function usePasskeyDelete() {
 
 	return useMutation({
 		mutationFn: async (id: string) => {
-			const client = getAuthenticatedClient();
-			return client.auth.passkeyDelete({ id });
+			return passkeyDeleteServer({ data: { id } });
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.passkeys() });
@@ -61,8 +67,7 @@ export function usePasskeyUpdateName() {
 
 	return useMutation({
 		mutationFn: async (params: { id: string; name: string }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.passkeyUpdateName(params);
+			return passkeyUpdateNameServer({ data: { ...params } });
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.passkeys() });
@@ -73,8 +78,7 @@ export function usePasskeyUpdateName() {
 export function usePasskeyReauthOptions() {
 	return useMutation({
 		mutationFn: async () => {
-			const client = getAuthenticatedClient();
-			return client.auth.passkeyReauthOptions();
+			return passkeyReauthOptionsServer();
 		},
 	});
 }
@@ -82,8 +86,7 @@ export function usePasskeyReauthOptions() {
 export function usePasskeyAuthenticateOptions() {
 	return useMutation({
 		mutationFn: async () => {
-			const client = getAuthenticatedClient();
-			return client.auth.passkeyAuthenticateOptions();
+			return passkeyAuthenticateOptionsServer();
 		},
 	});
 }
@@ -91,8 +94,7 @@ export function usePasskeyAuthenticateOptions() {
 export function usePasskeyAuthenticate() {
 	return useMutation({
 		mutationFn: async (params: { response: unknown; challengeCookie: string }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.passkeyAuthenticate(params);
+			return passkeyAuthenticateServer({ data: { ...params } });
 		},
 	});
 }

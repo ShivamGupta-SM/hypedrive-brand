@@ -19,7 +19,6 @@ export interface RouterContext {
 	auth: {
 		isAuthenticated: boolean;
 		user: types.UserResponse | null;
-		token: string | null;
 	};
 	// Organization data — set in _app and $orgSlug beforeLoad
 	organizations?: Organization[];
@@ -41,7 +40,6 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 			auth: {
 				isAuthenticated: result.isAuthenticated,
 				user: result.user,
-				token: result.token,
 			},
 			organizations: result.organizations,
 		};

@@ -4,8 +4,9 @@
  */
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getAuthenticatedClient, queryKeys } from "@/hooks/api-client";
+import { queryKeys } from "@/hooks/api-client";
 import { userInvitationsQueryOptions } from "./queries";
+import { acceptInvitationServer, getInvitationServer, rejectInvitationServer } from "./server";
 
 export function useUserInvitations() {
 	const query = useQuery({
@@ -23,8 +24,7 @@ export function useUserInvitations() {
 export function useGetInvitation() {
 	return useMutation({
 		mutationFn: async (invitationId: string) => {
-			const client = getAuthenticatedClient();
-			return client.auth.getInvitation({ invitationId });
+			return getInvitationServer({ data: { invitationId } });
 		},
 	});
 }
@@ -34,8 +34,7 @@ export function useAcceptInvitation() {
 
 	return useMutation({
 		mutationFn: async (params: { organizationId: string; invitationId: string }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.acceptInvitation(params.organizationId, params.invitationId);
+			return acceptInvitationServer({ data: { ...params } });
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.userInvitations() });
@@ -50,8 +49,7 @@ export function useRejectInvitation() {
 
 	return useMutation({
 		mutationFn: async (params: { organizationId: string; invitationId: string }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.rejectInvitation(params.organizationId, params.invitationId);
+			return rejectInvitationServer({ data: { ...params } });
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.userInvitations() });

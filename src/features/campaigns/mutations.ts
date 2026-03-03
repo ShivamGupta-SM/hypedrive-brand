@@ -3,16 +3,25 @@
  */
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { getAuthenticatedClient, queryKeys } from "@/hooks/api-client";
+import { queryKeys } from "@/hooks/api-client";
 import type { brand, db } from "@/lib/brand-client";
+import {
+	addCampaignTaskServer,
+	createAndSubmitCampaignServer,
+	createCampaignServer,
+	duplicateCampaignServer,
+	removeCampaignTaskServer,
+	updateCampaignServer,
+	updateCampaignStateServer,
+	updateCampaignTaskServer,
+} from "./server";
 
 export function useCreateCampaign(organizationId: string | undefined) {
 	const queryClient = useQueryClient();
 
 	return useMutation({
 		mutationFn: async (params: brand.CreateCampaignRequest) => {
-			const client = getAuthenticatedClient();
-			return client.brand.createCampaign(organizationId as string, params);
+			return createCampaignServer({ data: { orgId: organizationId as string, params } });
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.campaigns(organizationId || "") });
@@ -35,8 +44,9 @@ export function useUpdateCampaign(organizationId: string | undefined) {
 			maxEnrollments?: number;
 			isPublic?: boolean;
 		}) => {
-			const client = getAuthenticatedClient();
-			return client.brand.updateCampaign(organizationId as string, campaignId, params);
+			return updateCampaignServer({
+				data: { orgId: organizationId as string, campaignId, ...params },
+			});
 		},
 		onSuccess: (_, variables) => {
 			queryClient.invalidateQueries({
@@ -69,8 +79,7 @@ function useCampaignStateAction(action: CampaignAction) {
 			campaignId: string;
 			reason?: string;
 		}) => {
-			const client = getAuthenticatedClient();
-			return client.brand.updateCampaignState(organizationId, campaignId, { action, reason });
+			return updateCampaignStateServer({ data: { organizationId, campaignId, action, reason } });
 		},
 		onSuccess: (_, v) => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.campaigns(v.organizationId) });
@@ -116,8 +125,7 @@ export function useDuplicateCampaign() {
 			campaignId: string;
 			newTitle?: string;
 		}) => {
-			const client = getAuthenticatedClient();
-			return client.brand.duplicateCampaign(organizationId, campaignId, { newTitle });
+			return duplicateCampaignServer({ data: { organizationId, campaignId, newTitle } });
 		},
 		onSuccess: (_, v) => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.campaigns(v.organizationId) });
@@ -135,8 +143,7 @@ export function useCreateAndSubmitCampaign(organizationId: string | undefined) {
 
 	return useMutation({
 		mutationFn: async (params: brand.CreateAndSubmitRequest) => {
-			const client = getAuthenticatedClient();
-			return client.brand.createAndSubmitCampaign(organizationId as string, params);
+			return createAndSubmitCampaignServer({ data: { orgId: organizationId as string, params } });
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.campaigns(organizationId || "") });
@@ -160,8 +167,9 @@ export function useAddCampaignTask(organizationId: string | undefined, campaignI
 			instructions?: string;
 			requirements?: db.TaskRequirements;
 		}) => {
-			const client = getAuthenticatedClient();
-			return client.brand.addCampaignTask(organizationId as string, campaignId as string, params);
+			return addCampaignTaskServer({
+				data: { orgId: organizationId as string, campaignId: campaignId as string, ...params },
+			});
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({
@@ -188,8 +196,9 @@ export function useUpdateCampaignTask(organizationId: string | undefined, campai
 			instructions?: string;
 			requirements?: db.TaskRequirements;
 		}) => {
-			const client = getAuthenticatedClient();
-			return client.brand.updateCampaignTask(organizationId as string, campaignId as string, taskId, params);
+			return updateCampaignTaskServer({
+				data: { orgId: organizationId as string, campaignId: campaignId as string, taskId, ...params },
+			});
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({
@@ -207,8 +216,9 @@ export function useRemoveCampaignTask(organizationId: string | undefined, campai
 
 	return useMutation({
 		mutationFn: async (taskId: string) => {
-			const client = getAuthenticatedClient();
-			return client.brand.removeCampaignTask(organizationId as string, campaignId as string, taskId);
+			return removeCampaignTaskServer({
+				data: { orgId: organizationId as string, campaignId: campaignId as string, taskId },
+			});
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({

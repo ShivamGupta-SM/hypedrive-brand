@@ -23,14 +23,14 @@ import { ErrorState } from "@/components/shared/error-state";
 import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
 import { IconButton } from "@/components/shared/icon-button";
 import { Skeleton } from "@/components/skeleton";
+import { useInfiniteCampaigns } from "@/features/campaigns/hooks";
 import {
 	useCancelCampaign,
 	useDuplicateCampaign,
-	useInfiniteCampaigns,
-	useOrgContext,
 	usePauseCampaign,
 	useResumeCampaign,
-} from "@/hooks";
+} from "@/features/campaigns/mutations";
+import { useOrgContext } from "@/hooks/use-org-context";
 import type { brand, db } from "@/lib/brand-client";
 import { downloadCSV } from "@/lib/download";
 import { showToast } from "@/lib/toast";

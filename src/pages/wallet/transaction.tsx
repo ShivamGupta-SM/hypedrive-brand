@@ -15,8 +15,9 @@ import { CopyButton } from "@/components/shared";
 import { ErrorState } from "@/components/shared/error-state";
 import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
 import { Skeleton } from "@/components/skeleton";
-import { useOrgContext, useWalletTransactions } from "@/hooks";
+import { useWalletTransactions } from "@/features/wallet/hooks";
 import { usePageTitle } from "@/hooks/use-breadcrumb";
+import { useOrgContext } from "@/hooks/use-org-context";
 import { formatCurrency, formatDateTime } from "@/lib/design-tokens";
 
 const routeApi = getRouteApi("/_app/$orgSlug/wallet_/transactions_/$id");

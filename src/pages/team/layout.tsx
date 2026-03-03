@@ -3,7 +3,8 @@ import { Outlet } from "@tanstack/react-router";
 import { PageHeader } from "@/components/page-header";
 import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
 import { TabNav, type TabNavItem } from "@/components/shared/tab-nav";
-import { useInvitations, useMembers, useOrgContext } from "@/hooks";
+import { useInvitations, useMembers } from "@/features/team/hooks";
+import { useOrgContext } from "@/hooks/use-org-context";
 import { useOrgPath } from "@/hooks/use-org-slug";
 import { TeamSkeleton } from "./components";
 

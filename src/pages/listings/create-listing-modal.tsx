@@ -24,7 +24,10 @@ import { CurrencyInput } from "@/components/number-input";
 import { Select } from "@/components/select";
 import { WizardStepper } from "@/components/shared/wizard-stepper";
 import { Textarea } from "@/components/textarea";
-import { useCreateListing, useFileUpload, useOrgSlug, usePlatforms } from "@/hooks";
+import { usePlatforms } from "@/features/campaigns/hooks";
+import { useCreateListing } from "@/features/listings/mutations";
+import { useFileUpload } from "@/features/storage/hooks";
+import { useOrgSlug } from "@/hooks/use-org-slug";
 import { showToast } from "@/lib/toast";
 
 // =============================================================================

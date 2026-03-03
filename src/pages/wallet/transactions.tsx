@@ -2,7 +2,8 @@ import { ArrowPathIcon } from "@heroicons/react/16/solid";
 import { Button } from "@/components/button";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Skeleton } from "@/components/skeleton";
-import { useInfiniteWalletTransactions, useOrgContext } from "@/hooks";
+import { useInfiniteWalletTransactions } from "@/features/wallet/hooks";
+import { useOrgContext } from "@/hooks/use-org-context";
 import { TransactionRow } from "./components";
 
 export function WalletTransactions() {

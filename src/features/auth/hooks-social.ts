@@ -3,8 +3,9 @@
  */
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getAuthenticatedClient, queryKeys } from "@/hooks/api-client";
+import { queryKeys } from "@/hooks/api-client";
 import { linkedAccountsQueryOptions } from "./queries";
+import { linkSocialServer, unlinkAccountServer } from "./server";
 
 export function useLinkedAccounts() {
 	const query = useQuery({
@@ -29,8 +30,7 @@ export function useLinkSocial() {
 			errorCallbackURL?: string;
 			scopes?: string[];
 		}) => {
-			const client = getAuthenticatedClient();
-			return client.auth.linkSocial(params);
+			return linkSocialServer({ data: { ...params } });
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.linkedAccounts() });
@@ -43,8 +43,7 @@ export function useUnlinkAccount() {
 
 	return useMutation({
 		mutationFn: async (params: { providerId: string; accountId?: string }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.unlinkAccount(params);
+			return unlinkAccountServer({ data: { ...params } });
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.linkedAccounts() });

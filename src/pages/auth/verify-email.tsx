@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/button";
 import { Logo } from "@/components/logo";
 import { TextLink } from "@/components/text";
-import { useVerifyEmail } from "@/hooks";
+import { useVerifyEmail } from "@/features/auth/hooks-account";
 import { Route } from "@/routes/_auth/verify-email";
 import { AuthShell } from "./login";
 

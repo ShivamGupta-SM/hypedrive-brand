@@ -6,8 +6,10 @@
 
 import { createFileRoute, isRedirect, Outlet, redirect } from "@tanstack/react-router";
 
-import { queryKeys } from "@/hooks/api-client";
-import { getOrganizationsFromServer } from "@/server/auth-queries";
+import { CACHE } from "@/hooks/api-client";
+import { getServerAuthWithOrgs } from "@/server/auth-queries";
+
+const AUTH_QUERY_KEY = ["auth", "session-with-orgs"] as const;
 
 export const Route = createFileRoute("/_approval")({
 	beforeLoad: async ({ context }) => {
@@ -16,7 +18,8 @@ export const Route = createFileRoute("/_approval")({
 			throw redirect({ to: "/login" });
 		}
 
-		// Fetch orgs fresh — staleTime: 0 so Check Status always gets latest state
+		// Invalidate + refetch the root auth query so "Check Status" always gets
+		// fresh approval status, while keeping a single cache entry for org data.
 		let approvalOrganization: {
 			id: string;
 			name: string;
@@ -26,11 +29,13 @@ export const Route = createFileRoute("/_approval")({
 			approvalStatus?: string;
 		} | null = null;
 		try {
-			const { organizations } = await context.queryClient.fetchQuery({
-				queryKey: [...queryKeys.organizationProfile(), "approval"],
-				queryFn: () => getOrganizationsFromServer(),
-				staleTime: 0,
+			await context.queryClient.invalidateQueries({ queryKey: [...AUTH_QUERY_KEY] });
+			const result = await context.queryClient.fetchQuery({
+				queryKey: [...AUTH_QUERY_KEY],
+				queryFn: () => getServerAuthWithOrgs(),
+				staleTime: CACHE.auth,
 			});
+			const organizations = result.organizations ?? [];
 
 			// No organization — redirect to onboarding
 			if (organizations.length === 0) {

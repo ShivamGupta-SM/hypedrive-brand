@@ -3,27 +3,11 @@
  * Shared across all hook modules
  */
 
-import Client from "@/lib/brand-client";
 import { API_URL } from "@/lib/config";
 
 // =============================================================================
-// API CLIENT SETUP
+// ASSET URLS
 // =============================================================================
-
-export const apiClient = new Client(API_URL);
-
-/** Read auth token from the public (non-httpOnly) cookie, readable by JS for Bearer headers. */
-export function getAuthTokenFromCookie(): string | null {
-	if (typeof document === "undefined") return null;
-	const match = document.cookie.match(/(?:^|;\s*)hd_auth_pub=([^;]*)/);
-	return match ? decodeURIComponent(match[1]) : null;
-}
-
-export function getAuthenticatedClient(): Client {
-	const token = getAuthTokenFromCookie();
-	if (!token) return apiClient;
-	return apiClient.with({ auth: { authorization: `Bearer ${token}` } });
-}
 
 export function getAssetUrl(path: string | undefined | null): string {
 	if (!path) return "";
@@ -104,7 +88,6 @@ export const queryKeys = {
 	deviceSessions: () => ["deviceSessions"] as const,
 	passkeys: () => ["passkeys"] as const,
 	notifications: (orgId: string, params?: Record<string, unknown>) => ["notifications", orgId, params] as const,
-	unreadCount: (orgId: string) => ["notifications", orgId, "unreadCount"] as const,
 	files: () => ["files"] as const,
 	withdrawal: (orgId: string, withdrawalId: string) => ["wallet", orgId, "withdrawal", withdrawalId] as const,
 	organizationRoles: (orgId: string) => ["organizationRoles", orgId] as const,
