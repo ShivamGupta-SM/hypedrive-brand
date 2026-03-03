@@ -1,197 +1,12 @@
 /**
- * Card Component
- * Standardized card container with Header, Body, and Footer subcomponents
+ * StatCard & MiniStat Components
+ *
+ * Card/CardHeader/CardBody/CardFooter/CardDivider/CardGrid have been
+ * moved to page-header.tsx as ContentCard and its sub-components.
  */
 
 import clsx from "clsx";
-import { Heading, Subheading } from "@/components/heading";
 import { Text } from "@/components/text";
-
-// =============================================================================
-// CARD CONTAINER
-// =============================================================================
-
-export interface CardProps {
-	children: React.ReactNode;
-	className?: string;
-	padding?: "none" | "sm" | "md" | "lg";
-	variant?: "default" | "bordered" | "elevated" | "subtle" | "interactive" | "hero";
-	hover?: boolean;
-	onClick?: () => void;
-	as?: "div" | "article" | "section";
-}
-
-const paddingStyles = {
-	none: "",
-	sm: "p-3",
-	md: "p-4",
-	lg: "p-6",
-};
-
-const variantStyles = {
-	default: "bg-white ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800",
-	bordered: "border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900",
-	elevated: "bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800",
-	subtle: "bg-zinc-50 dark:bg-zinc-800/50",
-	interactive:
-		"bg-white ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800 hover:ring-zinc-300 dark:hover:ring-zinc-700 transition-all cursor-pointer",
-	hero: "bg-emerald-600 dark:bg-emerald-700",
-};
-
-export function Card({
-	children,
-	className,
-	padding = "md",
-	variant = "default",
-	hover = false,
-	onClick,
-	as: Component = "div",
-}: CardProps) {
-	return (
-		<Component
-			className={clsx(
-				"min-w-0 overflow-hidden",
-				variant === "hero" ? "rounded-2xl" : "rounded-xl",
-				variantStyles[variant],
-				paddingStyles[padding],
-				hover && "transition-all hover:shadow-md hover:ring-zinc-300 dark:hover:ring-zinc-700",
-				onClick && "cursor-pointer",
-				className
-			)}
-			onClick={onClick}
-		>
-			{children}
-		</Component>
-	);
-}
-
-// =============================================================================
-// CARD HEADER
-// =============================================================================
-
-export interface CardHeaderProps {
-	children?: React.ReactNode;
-	title?: string;
-	description?: string;
-	icon?: React.ReactNode;
-	action?: React.ReactNode;
-	className?: string;
-	titleClassName?: string;
-	size?: "sm" | "md" | "lg";
-}
-
-export function CardHeader({
-	children,
-	title,
-	description,
-	icon,
-	action,
-	className,
-	titleClassName,
-	size = "md",
-}: CardHeaderProps) {
-	if (children) {
-		return <div className={clsx("flex items-start justify-between gap-4", className)}>{children}</div>;
-	}
-
-	return (
-		<div className={clsx("flex items-start justify-between gap-4", className)}>
-			<div className="flex items-start gap-3 min-w-0">
-				{icon && (
-					<div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
-						{icon}
-					</div>
-				)}
-				<div className="min-w-0">
-					{title &&
-						(size === "lg" ? (
-							<Heading className={titleClassName}>{title}</Heading>
-						) : size === "md" ? (
-							<Subheading className={titleClassName}>{title}</Subheading>
-						) : (
-							<h4 className={clsx("text-sm font-semibold text-zinc-900 dark:text-white", titleClassName)}>{title}</h4>
-						))}
-					{description && <Text className="mt-1 text-sm text-zinc-500">{description}</Text>}
-				</div>
-			</div>
-			{action && <div className="shrink-0">{action}</div>}
-		</div>
-	);
-}
-
-// =============================================================================
-// CARD BODY
-// =============================================================================
-
-export interface CardBodyProps {
-	children: React.ReactNode;
-	className?: string;
-	noPadding?: boolean;
-}
-
-export function CardBody({ children, className, noPadding }: CardBodyProps) {
-	return <div className={clsx(!noPadding && "mt-4", className)}>{children}</div>;
-}
-
-// =============================================================================
-// CARD FOOTER
-// =============================================================================
-
-export interface CardFooterProps {
-	children: React.ReactNode;
-	className?: string;
-	border?: boolean;
-}
-
-export function CardFooter({ children, className, border = true }: CardFooterProps) {
-	return (
-		<div
-			className={clsx(
-				"mt-4 flex items-center justify-end gap-3 pt-4",
-				border && "border-t border-zinc-200 dark:border-zinc-700",
-				className
-			)}
-		>
-			{children}
-		</div>
-	);
-}
-
-// =============================================================================
-// CARD DIVIDER
-// =============================================================================
-
-export function CardDivider({ className }: { className?: string }) {
-	return <div className={clsx("my-4 border-t border-zinc-200 dark:border-zinc-700", className)} />;
-}
-
-// =============================================================================
-// CARD GRID
-// =============================================================================
-
-export interface CardGridProps {
-	children: React.ReactNode;
-	columns?: 1 | 2 | 3 | 4;
-	gap?: "sm" | "md" | "lg";
-	className?: string;
-}
-
-const columnStyles = {
-	1: "grid-cols-1",
-	2: "grid-cols-1 sm:grid-cols-2",
-	3: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
-	4: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
-};
-
-const gapStyles = {
-	sm: "gap-3",
-	md: "gap-4",
-	lg: "gap-6",
-};
-
-export function CardGrid({ children, columns = 3, gap = "md", className }: CardGridProps) {
-	return <div className={clsx("grid", columnStyles[columns], gapStyles[gap], className)}>{children}</div>;
-}
 
 // =============================================================================
 // STAT CARD (Shopper-style)
@@ -336,7 +151,7 @@ export function StatCard({
 			href={href}
 			onClick={onClick}
 			className={clsx(
-				"relative group flex flex-col rounded-xl ring-1 ring-inset transition-all",
+				"relative group flex flex-col rounded-xl shadow-sm ring-1 transition-all",
 				sizes.card,
 				styles.card,
 				(href || onClick) && "cursor-pointer hover:shadow-md",
@@ -459,7 +274,7 @@ export function MiniStat({ icon, iconColor = "zinc", label, value, sublabel, cla
 	return (
 		<div
 			className={clsx(
-				"rounded-xl bg-white p-4 ring-1 ring-inset ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800",
+				"rounded-xl bg-white p-4 shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800",
 				className
 			)}
 		>

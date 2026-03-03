@@ -11,6 +11,7 @@ import { Logo } from "@/components/logo";
 import { Strong, TextLink } from "@/components/text";
 import { useConfetti } from "@/hooks";
 import { useUpdatePassword } from "@/hooks/use-auth";
+import { useAutofillSync } from "@/hooks/use-autofill-sync";
 import { Route } from "@/routes/_auth/reset-password";
 import { FormError } from "./components";
 import { AuthShell } from "./login";
@@ -147,11 +148,17 @@ export function ResetPassword() {
 	const {
 		register,
 		handleSubmit,
+		setValue,
 		watch,
 		formState: { errors },
 	} = useForm<ResetPasswordFormData>({
 		resolver: zodResolver(resetPasswordSchema),
 		defaultValues: { password: "", confirmPassword: "" },
+	});
+
+	const { formRef, syncAutofill } = useAutofillSync(setValue, {
+		password: 'input[name="password"]',
+		confirmPassword: 'input[name="confirmPassword"]',
 	});
 
 	const passwordValue = watch("password");
@@ -194,7 +201,14 @@ export function ResetPassword() {
 			</div>
 
 			{/* Form */}
-			<form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+			<form
+				ref={formRef}
+				onSubmit={(e) => {
+					syncAutofill();
+					handleSubmit(onSubmit)(e);
+				}}
+				className="space-y-3"
+			>
 				<FormError message={displayError} />
 
 				<Field>

@@ -1,22 +1,24 @@
 import {
 	ArrowPathIcon,
+	CalendarDaysIcon,
+	CalendarIcon,
 	CheckCircleIcon,
 	DocumentArrowDownIcon,
 	DocumentTextIcon,
 	MagnifyingGlassIcon,
+	Squares2X2Icon,
 	XMarkIcon,
 } from "@heroicons/react/16/solid";
 import { useCallback, useMemo, useState } from "react";
 import { Badge } from "@/components/badge";
 import { Button } from "@/components/button";
 import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/dialog";
-import { Heading } from "@/components/heading";
 import { Input, InputGroup } from "@/components/input";
+import { PageHeader } from "@/components/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
 import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
 import { Skeleton } from "@/components/skeleton";
-import { Text } from "@/components/text";
 import { useGenerateInvoicePDF, useInfiniteInvoices, useInvoice, useOrgContext } from "@/hooks";
 import type { brand } from "@/lib/brand-client";
 import { formatCurrency, formatDate } from "@/lib/design-tokens";
@@ -27,10 +29,10 @@ type Invoice = brand.Invoice;
 
 // Period filter options
 const periodFilters = [
-	{ value: "all", label: "All" },
-	{ value: "this_month", label: "This Month" },
-	{ value: "last_month", label: "Last Month" },
-	{ value: "last_3_months", label: "3 Months" },
+	{ value: "all", label: "All", icon: Squares2X2Icon, iconColor: "text-sky-500" },
+	{ value: "this_month", label: "This Month", icon: CalendarIcon, iconColor: "text-emerald-500" },
+	{ value: "last_month", label: "Last Month", icon: CalendarDaysIcon, iconColor: "text-amber-500" },
+	{ value: "last_3_months", label: "3 Months", icon: CalendarDaysIcon, iconColor: "text-violet-500" },
 ] as const;
 
 type PeriodFilter = (typeof periodFilters)[number]["value"];
@@ -368,12 +370,7 @@ export function InvoicesList() {
 	return (
 		<div className="space-y-6">
 			{/* Header */}
-			<div className="flex items-start justify-between gap-4">
-				<div>
-					<Heading>Invoices</Heading>
-					<Text className="mt-1">Weekly billing records</Text>
-				</div>
-			</div>
+			<PageHeader title="Invoices" description="Weekly billing records" />
 
 			{/* Stats */}
 			<FinancialStatsGridBordered
@@ -411,19 +408,20 @@ export function InvoicesList() {
 				</div>
 
 				{/* Period Pills */}
-				<div className="min-w-0 flex-1 overflow-x-auto">
+				<div className="-mx-1 min-w-0 flex-1 overflow-x-auto px-1 py-1">
 					<div className="flex min-w-max gap-1.5 sm:min-w-0 sm:flex-wrap">
 						{periodFilters.map((filter) => (
 							<button
 								key={filter.value}
 								type="button"
 								onClick={() => setPeriodFilter(filter.value)}
-								className={`inline-flex shrink-0 items-center whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-200 active:scale-95 ${
+								className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium shadow-sm ring-1 transition-all duration-200 active:scale-95 ${
 									periodFilter === filter.value
-										? "bg-zinc-900 text-white shadow-sm dark:bg-white dark:text-zinc-900"
-										: "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
+										? "bg-zinc-900 text-white ring-zinc-900 dark:bg-white dark:text-zinc-900 dark:ring-white"
+										: "bg-white text-zinc-600 ring-zinc-200 hover:bg-zinc-50 dark:bg-zinc-900 dark:text-zinc-400 dark:ring-zinc-800 dark:hover:bg-zinc-800"
 								}`}
 							>
+								<filter.icon className={`size-3.5 ${periodFilter === filter.value ? "text-white dark:text-zinc-900" : filter.iconColor}`} />
 								{filter.label}
 							</button>
 						))}
@@ -439,20 +437,20 @@ export function InvoicesList() {
 					description={search ? `No results for "${search}"` : "No invoices for this period"}
 				/>
 			) : (
-				<div className="overflow-hidden rounded-xl bg-white ring-1 ring-inset ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10">
-					<div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3 dark:border-zinc-800">
+				<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
+					<div className="flex items-center justify-between border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
 						<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">
 							Invoices
 							<span className="ml-2 text-xs font-normal text-zinc-500">{filteredInvoices.length}</span>
 						</h3>
 					</div>
-					<div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+					<div className="divide-y divide-zinc-200 dark:divide-zinc-800">
 						{filteredInvoices.map((inv: Invoice) => (
 							<InvoiceRow key={inv.id} invoice={inv} onView={() => setSelectedInvoice(inv)} />
 						))}
 					</div>
 					{hasMore && (
-						<div className="flex justify-center border-t border-zinc-100 px-4 py-3 dark:border-zinc-800">
+						<div className="flex justify-center border-t border-zinc-200 px-4 py-3 dark:border-zinc-800">
 							<Button outline onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
 								{isFetchingNextPage ? (
 									<>

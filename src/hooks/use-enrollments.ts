@@ -1,6 +1,6 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { db } from "@/lib/brand-client";
-import { DEFAULT_PAGE_SIZE, getAuthenticatedClient, queryKeys } from "./api-client";
+import { CACHE, enrollmentQueryOptions, getAuthenticatedClient, infiniteEnrollmentsQueryOptions, queryKeys } from "./api-client";
 
 export function useEnrollments(
 	organizationId: string | undefined,
@@ -15,19 +15,16 @@ export function useEnrollments(
 ) {
 	const query = useQuery({
 		queryKey: queryKeys.enrollments(organizationId || "", params),
-		queryFn: async () => {
-			const client = getAuthenticatedClient();
-			return client.brand.listOrganizationEnrollments(organizationId as string, params || {});
-		},
+		queryFn: () => getAuthenticatedClient().brand.listOrganizationEnrollments(organizationId as string, params || {}),
 		enabled: !!organizationId,
-		staleTime: 30_000,
+		staleTime: CACHE.list,
 	});
 
 	return {
 		data: query.data?.data ?? [],
 		total: query.data?.total ?? 0,
 		hasMore: query.data?.hasMore ?? false,
-		loading: query.isLoading,
+		loading: query.isPending,
 		error: query.error,
 		refetch: query.refetch,
 	};
@@ -38,22 +35,8 @@ export function useInfiniteEnrollments(
 	params?: { status?: db.EnrollmentStatus; campaignId?: string }
 ) {
 	const query = useInfiniteQuery({
-		queryKey: queryKeys.infiniteEnrollments(organizationId || "", params),
-		queryFn: async ({ pageParam = 0 }) => {
-			const client = getAuthenticatedClient();
-			return client.brand.listOrganizationEnrollments(organizationId as string, {
-				...params,
-				skip: pageParam,
-				take: DEFAULT_PAGE_SIZE,
-			});
-		},
-		initialPageParam: 0,
-		getNextPageParam: (lastPage, allPages) => {
-			if (!lastPage.hasMore) return undefined;
-			return allPages.reduce((acc, page) => acc + (page.data?.length ?? 0), 0);
-		},
+		...infiniteEnrollmentsQueryOptions(organizationId || "", params),
 		enabled: !!organizationId,
-		staleTime: 30_000,
 	});
 
 	const data = query.data?.pages.flatMap((page) => page.data) ?? [];
@@ -63,7 +46,7 @@ export function useInfiniteEnrollments(
 		data,
 		total,
 		hasMore: query.hasNextPage ?? false,
-		loading: query.isLoading,
+		loading: query.isPending,
 		isFetchingNextPage: query.isFetchingNextPage,
 		error: query.error,
 		refetch: query.refetch,
@@ -77,17 +60,13 @@ export function useEnrollment(
 	enrollmentId: string | undefined
 ) {
 	const query = useQuery({
-		queryKey: queryKeys.enrollment(organizationId || "", enrollmentId || ""),
-		queryFn: async () => {
-			const client = getAuthenticatedClient();
-			return client.brand.getEnrollment(organizationId as string, enrollmentId as string);
-		},
+		...enrollmentQueryOptions(organizationId || "", enrollmentId || ""),
 		enabled: !!organizationId && !!enrollmentId,
 	});
 
 	return {
 		data: query.data ?? null,
-		loading: query.isLoading,
+		loading: query.isPending,
 		error: query.error,
 		refetch: query.refetch,
 	};
@@ -114,7 +93,7 @@ export function useCampaignEnrollments(
 		data: query.data?.data ?? [],
 		total: query.data?.total ?? 0,
 		hasMore: query.data?.hasMore ?? false,
-		loading: query.isLoading,
+		loading: query.isPending,
 		error: query.error,
 		refetch: query.refetch,
 	};

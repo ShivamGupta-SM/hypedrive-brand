@@ -3,7 +3,9 @@
  * Shared across all hook modules
  */
 
+import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import Client from "@/lib/brand-client";
+import type { db } from "@/lib/brand-client";
 import { API_URL } from "@/lib/config";
 
 // =============================================================================
@@ -140,3 +142,219 @@ export const queryKeys = {
 };
 
 export const DEFAULT_PAGE_SIZE = 20;
+
+// =============================================================================
+// CACHE TIME CONSTANTS (centralized — single source of truth)
+// =============================================================================
+
+export const CACHE = {
+	/** 30s — frequently changing lists (campaigns, enrollments, transactions) */
+	list: 30_000,
+	/** 30s — detail views that change on user action */
+	detail: 30_000,
+	/** 1 min — activity feeds, search results */
+	activity: 60_000,
+	/** 2 min — expensive aggregations (dashboard, setup progress) */
+	dashboard: 2 * 60_000,
+	/** 2 min — invitations (change when members accept) */
+	invitations: 2 * 60_000,
+	/** 5 min — auth session + organizations, member list */
+	auth: 5 * 60_000,
+	/** 5 min — campaign lookup tables, task templates */
+	lookup: 5 * 60_000,
+	/** 10 min — org settings, bank account, roles (slow-changing) */
+	settings: 10 * 60_000,
+	/** 15 min — GST details (almost never change) */
+	static: 15 * 60_000,
+} as const;
+
+// =============================================================================
+// QUERY OPTIONS FACTORIES
+// Shared between route loaders (ensureQueryData) and hooks (useQuery/useSuspenseQuery).
+// Single source of truth for queryKey + queryFn + staleTime per entity.
+// =============================================================================
+
+// -- Dashboard ----------------------------------------------------------------
+
+export const dashboardQueryOptions = (orgId: string, params?: { days?: number }) =>
+	queryOptions({
+		queryKey: [...queryKeys.dashboard(orgId), params?.days] as const,
+		queryFn: () => getAuthenticatedClient().brand.getDashboardOverview(orgId, { days: params?.days }),
+		staleTime: CACHE.dashboard,
+	});
+
+export const organizationActivityQueryOptions = (
+	orgId: string,
+	params?: { cursor?: string; limit?: number; entityType?: string }
+) =>
+	queryOptions({
+		queryKey: queryKeys.organizationActivity(orgId, params),
+		queryFn: () => getAuthenticatedClient().brand.getOrganizationActivity(orgId, params || {}),
+		staleTime: CACHE.activity,
+	});
+
+export const setupProgressQueryOptions = (orgId: string) =>
+	queryOptions({
+		queryKey: queryKeys.setupProgress(orgId),
+		queryFn: () => getAuthenticatedClient().brand.getSetupProgress(orgId),
+		staleTime: CACHE.dashboard,
+	});
+
+// -- Campaigns ----------------------------------------------------------------
+
+export const campaignQueryOptions = (orgId: string, campaignId: string) =>
+	queryOptions({
+		queryKey: queryKeys.campaign(orgId, campaignId),
+		queryFn: () => getAuthenticatedClient().brand.getCampaign(orgId, campaignId),
+		staleTime: CACHE.detail,
+	});
+
+export const campaignStatsQueryOptions = (orgId: string, campaignId: string) =>
+	queryOptions({
+		queryKey: queryKeys.campaignStats(orgId, campaignId),
+		queryFn: () => getAuthenticatedClient().brand.getCampaignStats(orgId, campaignId, {}),
+		staleTime: CACHE.detail,
+	});
+
+export const infiniteCampaignsQueryOptions = (
+	orgId: string,
+	params?: { status?: string; listingId?: string; search?: string }
+) =>
+	infiniteQueryOptions({
+		queryKey: queryKeys.infiniteCampaigns(orgId, params),
+		queryFn: ({ pageParam = 0 }) =>
+			getAuthenticatedClient().brand.listCampaigns(orgId, { ...params, skip: pageParam, take: DEFAULT_PAGE_SIZE }),
+		initialPageParam: 0,
+		getNextPageParam: (lastPage, allPages) => {
+			if (!lastPage.hasMore) return undefined;
+			return allPages.reduce((acc, page) => acc + (page.data?.length ?? 0), 0);
+		},
+		staleTime: CACHE.list,
+	});
+
+// -- Enrollments --------------------------------------------------------------
+
+export const enrollmentQueryOptions = (orgId: string, enrollmentId: string) =>
+	queryOptions({
+		queryKey: queryKeys.enrollment(orgId, enrollmentId),
+		queryFn: () => getAuthenticatedClient().brand.getEnrollment(orgId, enrollmentId),
+		staleTime: CACHE.detail,
+	});
+
+export const infiniteEnrollmentsQueryOptions = (
+	orgId: string,
+	params?: { status?: db.EnrollmentStatus; campaignId?: string }
+) =>
+	infiniteQueryOptions({
+		queryKey: queryKeys.infiniteEnrollments(orgId, params),
+		queryFn: ({ pageParam = 0 }) =>
+			getAuthenticatedClient().brand.listOrganizationEnrollments(orgId, {
+				...params,
+				skip: pageParam,
+				take: DEFAULT_PAGE_SIZE,
+			}),
+		initialPageParam: 0,
+		getNextPageParam: (lastPage, allPages) => {
+			if (!lastPage.hasMore) return undefined;
+			return allPages.reduce((acc, page) => acc + (page.data?.length ?? 0), 0);
+		},
+		staleTime: CACHE.list,
+	});
+
+// -- Listings -----------------------------------------------------------------
+
+export const listingQueryOptions = (orgId: string, listingId: string) =>
+	queryOptions({
+		queryKey: queryKeys.listing(orgId, listingId),
+		queryFn: () => getAuthenticatedClient().brand.getOrganizationListing(orgId, listingId),
+		staleTime: CACHE.detail,
+	});
+
+export const infiniteListingsQueryOptions = (
+	orgId: string,
+	params?: { categoryId?: string; platformId?: string; search?: string }
+) =>
+	infiniteQueryOptions({
+		queryKey: queryKeys.infiniteListings(orgId, params),
+		queryFn: ({ pageParam = 0 }) =>
+			getAuthenticatedClient().brand.listOrganizationListings(orgId, {
+				...params,
+				skip: pageParam,
+				take: DEFAULT_PAGE_SIZE,
+			}),
+		initialPageParam: 0,
+		getNextPageParam: (lastPage, allPages) => {
+			if (!lastPage.hasMore) return undefined;
+			return allPages.reduce((acc, page) => acc + (page.data?.length ?? 0), 0);
+		},
+		staleTime: CACHE.list,
+	});
+
+// -- Invoices -----------------------------------------------------------------
+
+export const infiniteInvoicesQueryOptions = (orgId: string, params?: { status?: db.InvoiceStatus }) =>
+	infiniteQueryOptions({
+		queryKey: queryKeys.infiniteInvoices(orgId, params),
+		queryFn: ({ pageParam = 0 }) =>
+			getAuthenticatedClient().brand.listInvoices(orgId, { ...params, skip: pageParam, take: DEFAULT_PAGE_SIZE }),
+		initialPageParam: 0,
+		getNextPageParam: (lastPage, allPages) => {
+			if (!lastPage.hasMore) return undefined;
+			return allPages.reduce((acc, page) => acc + (page.data?.length ?? 0), 0);
+		},
+		staleTime: CACHE.list,
+	});
+
+// -- Wallet -------------------------------------------------------------------
+
+export const walletQueryOptions = (orgId: string) =>
+	queryOptions({
+		queryKey: queryKeys.wallet(orgId),
+		queryFn: () => getAuthenticatedClient().brand.getOrganizationWallet(orgId),
+		staleTime: CACHE.list,
+	});
+
+export const infiniteWalletTransactionsQueryOptions = (
+	orgId: string,
+	params?: { type?: "credit" | "debit"; category?: string }
+) =>
+	infiniteQueryOptions({
+		queryKey: queryKeys.infiniteWalletTransactions(orgId, params),
+		queryFn: ({ pageParam = 0 }) =>
+			getAuthenticatedClient().brand.getOrganizationWalletTransactions(orgId, {
+				...params,
+				skip: pageParam,
+				take: DEFAULT_PAGE_SIZE,
+			}),
+		initialPageParam: 0,
+		getNextPageParam: (lastPage, allPages) => {
+			if (!lastPage.hasMore) return undefined;
+			return allPages.reduce((acc, page) => acc + (page.data?.length ?? 0), 0);
+		},
+		staleTime: CACHE.list,
+	});
+
+// -- Team ---------------------------------------------------------------------
+
+export const membersQueryOptions = (orgId: string) =>
+	queryOptions({
+		queryKey: queryKeys.members(orgId),
+		queryFn: () => getAuthenticatedClient().auth.listMembersAuth(orgId),
+		staleTime: CACHE.auth,
+	});
+
+export const invitationsQueryOptions = (orgId: string) =>
+	queryOptions({
+		queryKey: queryKeys.invitations(orgId),
+		queryFn: () => getAuthenticatedClient().auth.listInvitations(orgId),
+		staleTime: CACHE.invitations,
+	});
+
+// -- Campaigns lookup (used in enrollments list for name mapping) -------------
+
+export const campaignsLookupQueryOptions = (orgId: string) =>
+	queryOptions({
+		queryKey: queryKeys.campaigns(orgId, { take: 100 }),
+		queryFn: () => getAuthenticatedClient().brand.listCampaigns(orgId, { take: 100 }),
+		staleTime: CACHE.lookup,
+	});

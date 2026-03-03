@@ -1,8 +1,8 @@
 import { Button } from "@/components/button";
 import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/dialog";
 import { Heading } from "@/components/heading";
+import { ContentCard } from "@/components/page-header";
 import { CopyButton } from "@/components/shared";
-import { Card } from "@/components/shared/card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
 import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
@@ -731,7 +731,7 @@ export function ListingShow() {
 			{/* Main Content */}
 			<div className="grid gap-6 lg:grid-cols-2">
 				{/* Listing Details */}
-				<Card>
+				<ContentCard>
 					<div className="p-6">
 						<h3 className="text-lg font-semibold text-zinc-900 dark:text-white">Listing Details</h3>
 
@@ -773,10 +773,10 @@ export function ListingShow() {
 							</div>
 						</div>
 					</div>
-				</Card>
+				</ContentCard>
 
 				{/* Associated Campaigns */}
-				<Card>
+				<ContentCard>
 					<div className="p-6">
 						<div className="flex items-center justify-between">
 							<h3 className="text-lg font-semibold text-zinc-900 dark:text-white">Campaigns</h3>
@@ -794,7 +794,7 @@ export function ListingShow() {
 							/>
 						</div>
 					</div>
-				</Card>
+				</ContentCard>
 			</div>
 
 			{/* Edit Listing Modal */}

@@ -13,6 +13,10 @@ export {
 	queryKeys,
 } from "./api-client";
 export * from "./use-auth";
+export * from "./use-auth-2fa";
+export * from "./use-auth-passkeys";
+export * from "./use-auth-sessions";
+export * from "./use-auth-social";
 export * from "./use-campaigns";
 export * from "./use-confetti";
 // Domain hooks
@@ -20,7 +24,10 @@ export * from "./use-dashboard";
 export * from "./use-enrollments";
 export * from "./use-invoices";
 export * from "./use-listings";
+export * from "./use-notifications";
 export * from "./use-org-context";
+export * from "./use-org-roles";
+export * from "./use-org-settings";
 export * from "./use-org-slug";
 export * from "./use-organization";
 export * from "./use-storage";

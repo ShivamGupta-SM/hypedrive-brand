@@ -9307,6 +9307,7 @@ export namespace brand {
         listing?: {
             id: string
             name: string
+            platformId?: string
             /**
              * Listing price in smallest units (paise)
              */
@@ -9413,7 +9414,7 @@ export namespace brand {
         description?: string
         identifier: string
         categoryId?: string
-        platformId?: string
+        platformId: string
         price: number
         currency?: utils.CurrencyCode
         link: string
@@ -9605,13 +9606,14 @@ export namespace brand {
 
     export interface EnrollmentDetail {
         /**
-         * Creator info - SECURITY: Only profileName and city, no real name/email/avatar
+         * Creator info - SECURITY: Only profileName, city, gender - no real name/email/avatar
          */
         creator: {
             id: string
             displayId: string
             profileName: string
             city?: string
+            gender?: "male" | "female" | "other"
             approvalRate: number
             previousEnrollments: number
         }
@@ -9796,6 +9798,7 @@ export namespace brand {
             displayId: string
             profileName: string
             city?: string
+            gender?: "male" | "female" | "other"
             approvalRate: number
             previousEnrollments: number
         }
@@ -10626,6 +10629,7 @@ export namespace brand {
             this.updateOrganization = this.updateOrganization.bind(this)
             this.updatePreferences = this.updatePreferences.bind(this)
             this.verifyBankAccountDetails = this.verifyBankAccountDetails.bind(this)
+            this.verifyGST = this.verifyGST.bind(this)
             this.verifyGSTPreview = this.verifyGSTPreview.bind(this)
         }
 
@@ -11770,6 +11774,14 @@ export namespace brand {
             return await resp.json() as BankVerificationResult
         }
 
+        public async verifyGST(organizationId: string, params: {
+    gstNumber: string
+}): Promise<GSTDetailsResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/gst/verify`, JSON.stringify(params))
+            return await resp.json() as GSTDetailsResponse
+        }
+
         public async verifyGSTPreview(params: {
     gstNumber: string
 }): Promise<GSTPreviewResult> {
@@ -12202,6 +12214,7 @@ export namespace creator {
         displayName?: string
         bio?: string
         avatarUrl?: string
+        gender?: "male" | "female" | "other"
         kycStatus: KYCStatus
         panNumber?: string
         panVerified: boolean
@@ -14064,6 +14077,7 @@ export namespace creator {
     firstName: string
     lastName: string
     dob: string
+    gender?: "male" | "female" | "other"
     phoneNumber: string
     /**
      * Optional passkey assertion — if provided, phone is marked as verified

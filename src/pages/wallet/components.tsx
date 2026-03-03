@@ -141,7 +141,7 @@ export function DepositAccountDialog({
 						</p>
 					</div>
 				) : (
-					<div className="overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800">
+					<div className="overflow-hidden rounded-xl shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800">
 						{details.map((detail, idx) => {
 							const Icon = detail.icon;
 							return (

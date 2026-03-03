@@ -35,7 +35,7 @@ export function useListFiles() {
 
 	return {
 		data: query.data?.files ?? [],
-		loading: query.isLoading,
+		loading: query.isPending,
 		error: query.error,
 		refetch: query.refetch,
 	};
@@ -67,7 +67,7 @@ export function usePreviewLogoByDomain(domain: string | undefined) {
 
 	return {
 		data: query.data ?? null,
-		loading: query.isLoading,
+		loading: query.isPending,
 		error: query.error,
 		refetch: query.refetch,
 	};

@@ -724,7 +724,7 @@ function EnrollmentReviewDialog({
 
 				<div className="space-y-4">
 					{/* Enrollment Details */}
-					<div className="overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800">
+					<div className="overflow-hidden rounded-xl shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800">
 						<div className="grid grid-cols-2">
 							<div className="px-4 py-3">
 								<p className="text-[11px] font-medium text-zinc-400 dark:text-zinc-500">Order Value</p>
@@ -852,6 +852,17 @@ export function CampaignShow() {
 	const { data: platforms } = usePlatforms();
 	const [addTaskPlatformId, setAddTaskPlatformId] = useState("");
 	const { data: taskTemplates } = useTaskTemplates(addTaskPlatformId ? { platformId: addTaskPlatformId } : undefined);
+
+	// Filter templates: non-social platform templates must match listing's platform
+	const listingPlatformId = campaign?.listing?.platformId;
+	const filteredTemplates = useMemo(() => {
+		return taskTemplates.filter((tpl) => {
+			if (!tpl.platformId) return true; // generic template
+			if (tpl.platformId === listingPlatformId) return true; // same platform
+			const tplPlatform = platforms.find((p) => p.id === tpl.platformId);
+			return tplPlatform?.type === "social"; // social = cross-platform allowed
+		});
+	}, [taskTemplates, listingPlatformId, platforms]);
 
 	const [selectedEnrollment, setSelectedEnrollment] = useState<CampaignEnrollment | null>(null);
 	const [showReviewDialog, setShowReviewDialog] = useState(false);
@@ -1012,9 +1023,9 @@ export function CampaignShow() {
 	const pendingCount = enrollments.filter((e) => e.status === "awaiting_review").length;
 
 	const tabs = [
-		{ key: "overview" as const, label: "Overview", icon: ChartBarIcon },
-		{ key: "enrollments" as const, label: "Enrollments", icon: UserGroupIcon, count: enrollments.length },
-		{ key: "tasks" as const, label: "Tasks", icon: ClipboardDocumentListIcon, count: tasks.length },
+		{ key: "overview" as const, label: "Overview", icon: ChartBarIcon, iconColor: "text-sky-500" },
+		{ key: "enrollments" as const, label: "Enrollments", icon: UserGroupIcon, count: enrollments.length, iconColor: "text-emerald-500" },
+		{ key: "tasks" as const, label: "Tasks", icon: ClipboardDocumentListIcon, count: tasks.length, iconColor: "text-amber-500" },
 	];
 
 	return (
@@ -1225,13 +1236,13 @@ export function CampaignShow() {
 							type="button"
 							onClick={() => setActiveTab(tab.key)}
 							className={clsx(
-								"inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-200 active:scale-95",
+								"inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium shadow-sm ring-1 transition-all duration-200 active:scale-95",
 								isActive
-									? "bg-zinc-900 text-white shadow-sm dark:bg-white dark:text-zinc-900"
-									: "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+									? "bg-zinc-900 text-white ring-zinc-900 dark:bg-white dark:text-zinc-900 dark:ring-white"
+									: "bg-white text-zinc-600 ring-zinc-200 hover:bg-zinc-50 dark:bg-zinc-900 dark:text-zinc-400 dark:ring-zinc-800 dark:hover:bg-zinc-800"
 							)}
 						>
-							<Icon className={clsx("size-3.5", isActive ? "text-white dark:text-zinc-900" : "text-zinc-400")} />
+							<Icon className={clsx("size-3.5", isActive ? "text-white dark:text-zinc-900" : tab.iconColor)} />
 							{tab.label}
 							{tab.count !== undefined && tab.count > 0 && (
 								<span
@@ -2293,7 +2304,7 @@ export function CampaignShow() {
 					</Field>
 					<Field>
 						<Label>Task Type</Label>
-						{taskTemplates.length === 0 ? (
+						{filteredTemplates.length === 0 ? (
 							<Select disabled>
 								<option>{addTaskPlatformId ? "No tasks for this platform" : "Select a platform first"}</option>
 							</Select>
@@ -2302,7 +2313,7 @@ export function CampaignShow() {
 								<option value="" disabled>
 									Select task type…
 								</option>
-								{taskTemplates.map((tpl) => {
+								{filteredTemplates.map((tpl) => {
 									const alreadyAdded = tasks.some((t) => t.taskTemplate?.id === tpl.id);
 									return (
 										<option key={tpl.id} value={tpl.id} disabled={alreadyAdded}>

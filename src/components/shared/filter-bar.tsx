@@ -150,7 +150,7 @@ export function FilterBar({
 
 				{/* View toggle */}
 				{showViewToggle && onViewModeChange && (
-					<div className="flex items-center rounded-lg border border-zinc-200 dark:border-zinc-700">
+					<div className="flex items-center rounded-lg shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800">
 						<button
 							type="button"
 							onClick={() => onViewModeChange("list")}

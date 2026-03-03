@@ -1,6 +1,6 @@
 import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import type { db } from "@/lib/brand-client";
-import { DEFAULT_PAGE_SIZE, getAuthenticatedClient, queryKeys } from "./api-client";
+import { CACHE, getAuthenticatedClient, infiniteInvoicesQueryOptions, queryKeys } from "./api-client";
 
 export function useInvoices(
 	organizationId: string | undefined,
@@ -15,18 +15,16 @@ export function useInvoices(
 ) {
 	const query = useQuery({
 		queryKey: queryKeys.invoices(organizationId || "", params),
-		queryFn: async () => {
-			const client = getAuthenticatedClient();
-			return client.brand.listInvoices(organizationId as string, params || {});
-		},
+		queryFn: () => getAuthenticatedClient().brand.listInvoices(organizationId as string, params || {}),
 		enabled: !!organizationId,
+		staleTime: CACHE.list,
 	});
 
 	return {
 		data: query.data?.data ?? [],
 		total: query.data?.total ?? 0,
 		hasMore: query.data?.hasMore ?? false,
-		loading: query.isLoading,
+		loading: query.isPending,
 		error: query.error,
 		refetch: query.refetch,
 	};
@@ -34,20 +32,7 @@ export function useInvoices(
 
 export function useInfiniteInvoices(organizationId: string | undefined, params?: { status?: db.InvoiceStatus }) {
 	const query = useInfiniteQuery({
-		queryKey: queryKeys.infiniteInvoices(organizationId || "", params),
-		queryFn: async ({ pageParam = 0 }) => {
-			const client = getAuthenticatedClient();
-			return client.brand.listInvoices(organizationId as string, {
-				...params,
-				skip: pageParam,
-				take: DEFAULT_PAGE_SIZE,
-			});
-		},
-		initialPageParam: 0,
-		getNextPageParam: (lastPage, allPages) => {
-			if (!lastPage.hasMore) return undefined;
-			return allPages.reduce((acc, page) => acc + (page.data?.length ?? 0), 0);
-		},
+		...infiniteInvoicesQueryOptions(organizationId || "", params),
 		enabled: !!organizationId,
 	});
 
@@ -58,7 +43,7 @@ export function useInfiniteInvoices(organizationId: string | undefined, params?:
 		data,
 		total,
 		hasMore: query.hasNextPage ?? false,
-		loading: query.isLoading,
+		loading: query.isPending,
 		isFetchingNextPage: query.isFetchingNextPage,
 		error: query.error,
 		refetch: query.refetch,
@@ -78,7 +63,7 @@ export function useInvoice(organizationId: string | undefined, invoiceId: string
 
 	return {
 		data: query.data ?? null,
-		loading: query.isLoading,
+		loading: query.isPending,
 		error: query.error,
 		refetch: query.refetch,
 	};

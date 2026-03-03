@@ -3,6 +3,8 @@ import { createRootRouteWithContext, HeadContent, Outlet, Scripts } from "@tanst
 import { useEffect, useState } from "react";
 import { SkeletonTheme } from "react-loading-skeleton";
 import { Toaster } from "sonner";
+import { NotFoundPage } from "@/components/shared/not-found-page";
+import { CACHE } from "@/hooks/api-client";
 import type { types } from "@/lib/brand-client";
 import { getServerAuthWithOrgs } from "@/lib/server-auth";
 import { AbilityProvider } from "@/providers/ability-provider";
@@ -34,7 +36,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 		const result = await context.queryClient.ensureQueryData({
 			queryKey: ["auth", "session-with-orgs"],
 			queryFn: () => getServerAuthWithOrgs(),
-			staleTime: 5 * 60 * 1000,
+			staleTime: CACHE.auth,
 		});
 		return {
 			auth: {
@@ -87,6 +89,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 	}),
 	component: RootComponent,
 	errorComponent: RootErrorComponent,
+	notFoundComponent: () => <NotFoundPage />,
 });
 
 function RootErrorComponent({ error }: { error: unknown }) {

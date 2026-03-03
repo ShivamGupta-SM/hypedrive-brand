@@ -51,7 +51,7 @@ export function WalletWithdrawals() {
 			)}
 
 			{/* Withdrawal List */}
-			<div className="overflow-hidden rounded-xl bg-white ring-1 ring-inset ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10">
+			<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
 				<div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3 dark:border-zinc-800">
 					<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">
 						Withdrawal Requests
@@ -130,7 +130,7 @@ export function WalletWithdrawals() {
 							</div>
 
 							{/* Detail rows */}
-							<div className="overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800">
+							<div className="overflow-hidden rounded-xl shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800">
 								<div className="flex items-center gap-3 px-4 py-3">
 									<CalendarIcon className="size-4 shrink-0 text-zinc-400" />
 									<span className="flex-1 text-sm text-zinc-500 dark:text-zinc-400">Requested</span>

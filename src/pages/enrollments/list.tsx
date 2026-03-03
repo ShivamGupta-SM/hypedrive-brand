@@ -4,6 +4,7 @@ import {
 	ClockIcon,
 	ExclamationCircleIcon,
 	MagnifyingGlassIcon,
+	Squares2X2Icon,
 	TableCellsIcon,
 	XCircleIcon,
 	XMarkIcon,
@@ -11,12 +12,11 @@ import {
 import { useCallback, useMemo, useState } from "react";
 import { Button } from "@/components/button";
 import { EnrollmentCardFull, getEnrollmentStatusConfig, isEnrollmentOverdue } from "@/components/enrollment-card";
-import { Heading } from "@/components/heading";
 import { Input, InputGroup } from "@/components/input";
+import { PageHeader } from "@/components/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
 import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
-import { Text } from "@/components/text";
 import {
 	useBulkApproveEnrollments,
 	useBulkRejectEnrollments,
@@ -32,52 +32,6 @@ import { showToast } from "@/lib/toast";
 type Enrollment = brand.EnrollmentWithRelations;
 type EnrollmentStatus = db.EnrollmentStatus;
 type StatusFilter = "all" | EnrollmentStatus;
-
-// =============================================================================
-// TRACKER COMPONENT
-// =============================================================================
-
-type TrackerStatus = "success" | "warning" | "error" | "neutral";
-
-interface TrackerData {
-	status: TrackerStatus;
-	tooltip: string;
-}
-
-function Tracker({ data, className = "" }: { data: TrackerData[]; className?: string }) {
-	const getStatusColor = (status: TrackerStatus) => {
-		switch (status) {
-			case "success":
-				return "bg-emerald-500";
-			case "warning":
-				return "bg-amber-500";
-			case "error":
-				return "bg-red-500";
-			default:
-				return "bg-zinc-300 dark:bg-zinc-600";
-		}
-	};
-
-	if (data.length === 0) {
-		return (
-			<div className={`flex h-2 w-full items-center gap-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 ${className}`}>
-				<div className="h-full w-full rounded-full bg-zinc-200 dark:bg-zinc-700" />
-			</div>
-		);
-	}
-
-	return (
-		<div className={`flex h-2 w-full items-center gap-px overflow-hidden rounded-full ${className}`}>
-			{data.map((item, idx) => (
-				<div
-					key={`${item.status}-${item.tooltip ?? idx}`}
-					className={`h-full flex-1 ${getStatusColor(item.status)} first:rounded-l-full last:rounded-r-full transition-colors`}
-					title={item.tooltip}
-				/>
-			))}
-		</div>
-	);
-}
 
 // =============================================================================
 // EXPORT FUNCTIONALITY
@@ -244,24 +198,26 @@ function FilterTab({
 	isActive,
 	onClick,
 	icon: Icon,
+	iconColor,
 }: {
 	label: string;
 	count: number;
 	isActive: boolean;
 	onClick: () => void;
 	icon?: typeof CheckCircleIcon;
+	iconColor?: string;
 }) {
 	return (
 		<button
 			type="button"
 			onClick={onClick}
-			className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-200 active:scale-95 ${
+			className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium shadow-sm ring-1 transition-all duration-200 active:scale-95 ${
 				isActive
-					? "bg-zinc-900 text-white shadow-sm dark:bg-white dark:text-zinc-900"
-					: "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+					? "bg-zinc-900 text-white ring-zinc-900 dark:bg-white dark:text-zinc-900 dark:ring-white"
+					: "bg-white text-zinc-600 ring-zinc-200 hover:bg-zinc-50 dark:bg-zinc-900 dark:text-zinc-400 dark:ring-zinc-800 dark:hover:bg-zinc-800"
 			}`}
 		>
-			{Icon && <Icon className="size-3.5" />}
+			{Icon && <Icon className={`size-3.5 ${isActive ? "text-white dark:text-zinc-900" : iconColor || ""}`} />}
 			{label}
 			<span
 				className={`inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-semibold ${isActive ? "bg-white/20 text-white dark:bg-zinc-900/20 dark:text-zinc-900" : "bg-zinc-200 text-zinc-500 dark:bg-zinc-700 dark:text-zinc-400"}`}
@@ -344,35 +300,6 @@ export function EnrollmentsList() {
 		const rejected = enrollments.filter((e) => e.status === "permanently_rejected").length;
 		return { total: total || enrollments.length, awaitingReview, approved, rejected };
 	}, [enrollments, total]);
-
-	// Tracker data for status visualization
-	const trackerData = useMemo((): TrackerData[] => {
-		return enrollments.map((e) => {
-			switch (e.status) {
-				case "approved":
-					return {
-						status: "success" as TrackerStatus,
-						tooltip: `${e.displayId} - Approved`,
-					};
-				case "awaiting_review":
-				case "awaiting_submission":
-					return {
-						status: "warning" as TrackerStatus,
-						tooltip: `${e.displayId} - Pending`,
-					};
-				case "permanently_rejected":
-					return {
-						status: "error" as TrackerStatus,
-						tooltip: `${e.displayId} - Rejected`,
-					};
-				default:
-					return {
-						status: "neutral" as TrackerStatus,
-						tooltip: `${e.displayId} - ${e.status}`,
-					};
-			}
-		});
-	}, [enrollments]);
 
 	// Reference time for overdue calculation (stable during render)
 	const referenceTime = useMemo(() => new Date(), []);
@@ -485,53 +412,29 @@ export function EnrollmentsList() {
 	return (
 		<div className="space-y-5">
 			{/* Header */}
-			<div className="flex items-start justify-between gap-4">
-				<div>
-					<Heading>Enrollments</Heading>
-					<Text className="mt-1">Review and manage campaign enrollments</Text>
-				</div>
-				<Button
-					color="emerald"
-					onClick={handleExport}
-					disabled={exportEnrollments.isPending}
-					className="hidden shrink-0 sm:flex"
-				>
-					{exportEnrollments.isPending ? (
-						<ArrowPathIcon className="size-4 animate-spin" />
-					) : (
-						<TableCellsIcon data-slot="icon" className="size-4" />
-					)}
-					{exportEnrollments.isPending ? "Exporting..." : "Export"}
-				</Button>
-			</div>
-
-			{/* Tracker Visualization */}
-			{enrollments.length > 0 && (
-				<div className="space-y-2">
-					<div className="flex items-center justify-between">
-						<span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Status Overview</span>
-						<div className="flex items-center gap-3 text-[10px] font-medium">
-							<span className="flex items-center gap-1">
-								<span className="size-2 rounded-full bg-emerald-500" />
-								Approved
-							</span>
-							<span className="flex items-center gap-1">
-								<span className="size-2 rounded-full bg-amber-500" />
-								Pending
-							</span>
-							<span className="flex items-center gap-1">
-								<span className="size-2 rounded-full bg-red-500" />
-								Rejected
-							</span>
-						</div>
-					</div>
-					<Tracker data={trackerData} />
-				</div>
-			)}
+			<PageHeader
+				title="Enrollments"
+				description="Review and manage campaign enrollments"
+				actions={
+					<Button
+						color="emerald"
+						onClick={handleExport}
+						disabled={exportEnrollments.isPending}
+						className="hidden shrink-0 sm:flex"
+					>
+						{exportEnrollments.isPending ? (
+							<ArrowPathIcon className="size-4 animate-spin" />
+						) : (
+							<TableCellsIcon data-slot="icon" className="size-4" />
+						)}
+						{exportEnrollments.isPending ? "Exporting..." : "Export"}
+					</Button>
+				}
+			/>
 
 			{/* Overdue Alert */}
 			{overdueCount > 0 && (
-				<div className="flex items-center gap-3 rounded-xl bg-red-50 p-3 dark:bg-red-950/30">
+				<div className="flex items-center gap-3 rounded-xl bg-red-50 p-3 shadow-sm ring-1 ring-red-200 dark:bg-red-950/30 dark:ring-red-800">
 					<div className="flex size-8 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/50">
 						<ExclamationCircleIcon className="size-4 text-red-600 dark:text-red-400" />
 					</div>
@@ -583,13 +486,15 @@ export function EnrollmentsList() {
 				</div>
 
 				{/* Tab Filters */}
-				<div className="min-w-0 flex-1 overflow-x-auto">
+				<div className="-mx-1 min-w-0 flex-1 overflow-x-auto px-1 py-1">
 					<div className="flex min-w-max gap-1.5 sm:min-w-0 sm:flex-wrap">
 						<FilterTab
 							label="All"
 							count={stats.total}
 							isActive={statusFilter === "all"}
 							onClick={() => setStatusFilter("all")}
+							icon={Squares2X2Icon}
+							iconColor="text-sky-500"
 						/>
 						<FilterTab
 							label="Awaiting Review"
@@ -597,6 +502,7 @@ export function EnrollmentsList() {
 							isActive={statusFilter === "awaiting_review"}
 							onClick={() => setStatusFilter("awaiting_review")}
 							icon={ClockIcon}
+							iconColor="text-amber-500"
 						/>
 						<FilterTab
 							label="Approved"
@@ -604,6 +510,7 @@ export function EnrollmentsList() {
 							isActive={statusFilter === "approved"}
 							onClick={() => setStatusFilter("approved")}
 							icon={CheckCircleIcon}
+							iconColor="text-emerald-500"
 						/>
 						<FilterTab
 							label="Rejected"
@@ -611,6 +518,7 @@ export function EnrollmentsList() {
 							isActive={statusFilter === "permanently_rejected"}
 							onClick={() => setStatusFilter("permanently_rejected")}
 							icon={XCircleIcon}
+							iconColor="text-red-500"
 						/>
 					</div>
 				</div>

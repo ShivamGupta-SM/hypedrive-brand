@@ -5,6 +5,7 @@
 
 import { Link, useRouterState } from "@tanstack/react-router";
 import clsx from "clsx";
+import type { ComponentType, SVGProps } from "react";
 
 export interface TabNavItem {
 	label: string;
@@ -13,6 +14,9 @@ export interface TabNavItem {
 	/** If true, only mark active on exact path match (use for index/overview tabs) */
 	exact?: boolean;
 	count?: number;
+	icon?: ComponentType<SVGProps<SVGSVGElement>>;
+	/** Tailwind color class for the icon in inactive state (e.g. "text-emerald-500") */
+	iconColor?: string;
 }
 
 export interface TabNavProps {
@@ -24,7 +28,7 @@ export function TabNav({ tabs, className }: TabNavProps) {
 	const pathname = useRouterState({ select: (s) => s.location.pathname });
 
 	return (
-		<div className={clsx("-mx-4 overflow-x-auto px-4 sm:mx-0 sm:overflow-visible sm:px-0", className)}>
+		<div className={clsx("-mx-1 overflow-x-auto px-1 py-1 sm:mx-0 sm:overflow-visible sm:px-0 sm:py-0", className)}>
 			<div className="flex min-w-max gap-1.5 sm:min-w-0 sm:flex-wrap">
 				{tabs.map((tab) => {
 					const isActive = tab.exact ? pathname === tab.to : pathname.startsWith(tab.to);
@@ -34,12 +38,22 @@ export function TabNav({ tabs, className }: TabNavProps) {
 							key={tab.to}
 							to={tab.to}
 							className={clsx(
-								"inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-200 active:scale-95",
+								"inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium shadow-sm ring-1 transition-all duration-200 active:scale-95",
 								isActive
-									? "bg-zinc-900 text-white shadow-sm dark:bg-white dark:text-zinc-900"
-									: "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+									? "bg-zinc-900 text-white ring-zinc-900 dark:bg-white dark:text-zinc-900 dark:ring-white"
+									: "bg-white text-zinc-600 ring-zinc-200 hover:bg-zinc-50 dark:bg-zinc-900 dark:text-zinc-400 dark:ring-zinc-800 dark:hover:bg-zinc-800"
 							)}
 						>
+							{tab.icon && (
+								<tab.icon
+									className={clsx(
+										"size-3.5",
+										isActive
+											? "text-white dark:text-zinc-900"
+											: tab.iconColor || "text-zinc-400"
+									)}
+								/>
+							)}
 							{tab.label}
 							{tab.count !== undefined && (
 								<span

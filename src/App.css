@@ -448,6 +448,20 @@ html:has([data-theme="dark"]) {
 	background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
 }
 
+/* Slow spin for decorative stamps */
+@keyframes spin-slow {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.animate-spin-slow {
+	animation: spin-slow 20s linear infinite;
+}
+
 /* Fade in animation */
 @keyframes fade-in {
 	from {

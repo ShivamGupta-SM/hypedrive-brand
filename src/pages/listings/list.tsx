@@ -1,7 +1,10 @@
 import {
 	ArrowPathIcon,
+	ArrowsUpDownIcon,
+	CalendarIcon,
 	CubeIcon,
 	EllipsisVerticalIcon,
+	EyeIcon,
 	LinkIcon,
 	MagnifyingGlassIcon,
 	PlusIcon,
@@ -11,14 +14,13 @@ import { useMemo, useState } from "react";
 
 import { Button } from "@/components/button";
 import { Dropdown, DropdownButton, DropdownItem, DropdownMenu } from "@/components/dropdown";
-import { Heading } from "@/components/heading";
 import { Input, InputGroup } from "@/components/input";
 import { Link } from "@/components/link";
+import { PageHeader } from "@/components/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
 import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
 import { IconButton } from "@/components/shared/icon-button";
-import { Text } from "@/components/text";
 import { getAssetUrl, useInfiniteListings, useOrgContext } from "@/hooks";
 import type { brand } from "@/lib/brand-client";
 import { formatCurrency } from "@/lib/design-tokens";
@@ -327,17 +329,17 @@ export function ListingsList() {
 	return (
 		<div className="space-y-5">
 			{/* Header */}
-			<div className="flex items-start justify-between gap-4">
-				<div>
-					<Heading>Listings</Heading>
-					<Text className="mt-1">Manage your listing catalog for campaigns</Text>
-				</div>
-				{canCreateListing && (
-					<IconButton color="emerald" onClick={() => setShowCreateModal(true)}>
-						<PlusIcon className="size-5" />
-					</IconButton>
-				)}
-			</div>
+			<PageHeader
+				title="Listings"
+				description="Manage your listing catalog for campaigns"
+				actions={
+					canCreateListing ? (
+						<IconButton color="emerald" onClick={() => setShowCreateModal(true)}>
+							<PlusIcon className="size-5" />
+						</IconButton>
+					) : undefined
+				}
+			/>
 
 			{/* Stats */}
 			<FinancialStatsGridBordered
@@ -373,15 +375,15 @@ export function ListingsList() {
 				</div>
 
 				{/* Sort pills */}
-				<div className="min-w-0 flex-1 overflow-x-auto">
+				<div className="-mx-1 min-w-0 flex-1 overflow-x-auto px-1 py-1">
 					<div className="flex min-w-max gap-1.5 sm:min-w-0 sm:flex-wrap">
 						{(
 							[
-								{ value: "date", label: "Newest" },
-								{ value: "name", label: "Name A-Z" },
-								{ value: "price", label: "Price" },
-								{ value: "views", label: "Most Viewed" },
-							] as { value: string; label: string }[]
+								{ value: "date", label: "Newest", icon: CalendarIcon, iconColor: "text-sky-500" },
+								{ value: "name", label: "Name A-Z", icon: CubeIcon, iconColor: "text-violet-500" },
+								{ value: "price", label: "Price", icon: ArrowsUpDownIcon, iconColor: "text-emerald-500" },
+								{ value: "views", label: "Most Viewed", icon: EyeIcon, iconColor: "text-amber-500" },
+							] as { value: string; label: string; icon: typeof CalendarIcon; iconColor: string }[]
 						).map((opt) => {
 							const isActive = sortBy === opt.value;
 							return (
@@ -389,8 +391,9 @@ export function ListingsList() {
 									type="button"
 									key={opt.value}
 									onClick={() => setSortBy(opt.value)}
-									className={`inline-flex items-center whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-200 active:scale-95 ${isActive ? "bg-zinc-900 text-white shadow-sm dark:bg-white dark:text-zinc-900" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"}`}
+									className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium shadow-sm ring-1 transition-all duration-200 active:scale-95 ${isActive ? "bg-zinc-900 text-white ring-zinc-900 dark:bg-white dark:text-zinc-900 dark:ring-white" : "bg-white text-zinc-600 ring-zinc-200 hover:bg-zinc-50 dark:bg-zinc-900 dark:text-zinc-400 dark:ring-zinc-800 dark:hover:bg-zinc-800"}`}
 								>
+									<opt.icon className={`size-3.5 ${isActive ? "text-white dark:text-zinc-900" : opt.iconColor}`} />
 									{opt.label}
 								</button>
 							);

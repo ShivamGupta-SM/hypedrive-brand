@@ -1,20 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getAuthenticatedClient, queryKeys } from "./api-client";
+import { getAuthenticatedClient, invitationsQueryOptions, membersQueryOptions, queryKeys } from "./api-client";
 
 export function useMembers(organizationId: string | undefined) {
 	const query = useQuery({
-		queryKey: queryKeys.members(organizationId || ""),
-		queryFn: async () => {
-			const client = getAuthenticatedClient();
-			return client.auth.listMembersAuth(organizationId as string);
-		},
+		...membersQueryOptions(organizationId || ""),
 		enabled: !!organizationId,
-		staleTime: 5 * 60 * 1000, // 5 min — member list changes infrequently
 	});
 
 	return {
 		data: query.data?.members ?? [],
-		loading: query.isLoading,
+		loading: query.isPending,
 		error: query.error,
 		refetch: query.refetch,
 	};
@@ -22,18 +17,13 @@ export function useMembers(organizationId: string | undefined) {
 
 export function useInvitations(organizationId: string | undefined) {
 	const query = useQuery({
-		queryKey: queryKeys.invitations(organizationId || ""),
-		queryFn: async () => {
-			const client = getAuthenticatedClient();
-			return client.auth.listInvitations(organizationId as string);
-		},
+		...invitationsQueryOptions(organizationId || ""),
 		enabled: !!organizationId,
-		staleTime: 2 * 60 * 1000, // 2 min — invitations can change when members accept
 	});
 
 	return {
 		data: query.data?.invitations ?? [],
-		loading: query.isLoading,
+		loading: query.isPending,
 		error: query.error,
 		refetch: query.refetch,
 	};

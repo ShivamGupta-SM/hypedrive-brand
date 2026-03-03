@@ -23,9 +23,13 @@ type EnrollmentStatus = db.EnrollmentStatus;
 // AVATAR HELPER
 // =============================================================================
 
-/** Generate a DiceBear Micah avatar URL with diverse skin tones and balanced features */
-function getAvatarUrl(seed: string) {
-	return `https://api.dicebear.com/9.x/micah/svg?seed=${encodeURIComponent(seed)}&baseColor=f9c9b6,e8b298,c89070,a67457,77311d,ac6651&facialHairProbability=20&earringsProbability=30`;
+/** Generate a DiceBear Micah avatar URL with diverse skin tones and gender-aware features */
+function getAvatarUrl(seed: string, gender?: "male" | "female" | "other") {
+	const base = `https://api.dicebear.com/9.x/micah/svg?seed=${encodeURIComponent(seed)}&baseColor=f9c9b6,e8b298,c89070,a67457,77311d,ac6651`;
+	if (gender === "male") return `${base}&facialHairProbability=40&earringsProbability=5`;
+	if (gender === "female") return `${base}&facialHairProbability=0&earringsProbability=50`;
+	// Unknown/other — balanced defaults
+	return `${base}&facialHairProbability=20&earringsProbability=30`;
 }
 
 // =============================================================================
@@ -57,10 +61,6 @@ export function getEnrollmentStatusConfig(status: EnrollmentStatus): {
 }
 
 // =============================================================================
-// SHARED CONSTANTS
-// =============================================================================
-
-// =============================================================================
 // OVERDUE DETECTION
 // =============================================================================
 
@@ -70,15 +70,6 @@ export function isEnrollmentOverdue(createdAt: string, referenceTime: Date = new
 	const created = new Date(createdAt);
 	const hoursDiff = (referenceTime.getTime() - created.getTime()) / (1000 * 60 * 60);
 	return hoursDiff > OVERDUE_HOURS;
-}
-
-function OverdueAlert() {
-	return (
-		<span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-700 dark:bg-red-950/50 dark:text-red-400">
-			<ExclamationCircleIcon className="size-3" />
-			Overdue
-		</span>
-	);
 }
 
 // =============================================================================
@@ -105,8 +96,6 @@ function EnrollmentCardFull({
 	const statusConfig = getEnrollmentStatusConfig(enrollment.status);
 	const StatusIcon = statusConfig.icon;
 
-	const platformFeeDisplay = enrollment.lockedPlatformFeeDecimal;
-
 	const handleCheckboxClick = (e: React.MouseEvent) => {
 		e.preventDefault();
 		e.stopPropagation();
@@ -115,101 +104,114 @@ function EnrollmentCardFull({
 
 	const creatorName = enrollment.creator?.profileName || enrollment.creatorId.slice(-6);
 	const avatarSeed = enrollment.creator?.id || enrollment.creatorId;
+	const creatorGender = (enrollment.creator as { gender?: "male" | "female" | "other" } | undefined)?.gender;
 
 	const platformName = enrollment.platform?.name;
 	const PlatformIconComponent = platformName ? getPlatformIcon(platformName) : null;
 
 	return (
 		<div
-			className={`group relative flex flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-inset transition-all duration-200 ${isSelected ? "ring-2 ring-zinc-900 dark:ring-white" : "ring-zinc-200 hover:ring-zinc-300 hover:shadow-md dark:ring-zinc-800 dark:hover:ring-zinc-700"}`}
+			className={`group relative flex flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 transition-all duration-200 ${isSelected ? "ring-2 ring-zinc-900 dark:ring-white" : "ring-zinc-200 hover:ring-zinc-300 hover:shadow-md dark:ring-zinc-800 dark:hover:ring-zinc-700"}`}
 		>
-			{onSelect && (
-				<button
-					type="button"
-					onClick={handleCheckboxClick}
-					className="absolute left-3 top-3 z-10 flex size-5 items-center justify-center rounded border border-zinc-300 bg-white transition-colors hover:border-zinc-400 dark:border-zinc-600 dark:bg-zinc-800 dark:hover:border-zinc-500"
-				>
-					{isSelected && <CheckCircleIcon className="size-4 text-zinc-900 dark:text-white" />}
-				</button>
-			)}
-
 			<Link
 				href={`/${orgSlug}/campaigns/${enrollment.campaignId}/enrollments/${enrollment.id}`}
 				className="flex flex-1 flex-col"
 			>
-				<div className={`p-3 sm:p-4 ${onSelect ? "pl-10 sm:pl-11" : ""}`}>
-					<div className="flex items-start gap-3">
-						<div className="relative shrink-0">
-							<img
-								src={getAvatarUrl(avatarSeed)}
-								alt={creatorName}
-								className="size-11 rounded-lg bg-zinc-100 sm:size-12 dark:bg-zinc-800"
-							/>
-							{PlatformIconComponent && (
-								<div className="absolute -bottom-1 -right-1 flex size-5 items-center justify-center rounded-md border-2 border-white bg-white dark:border-zinc-900 dark:bg-zinc-900">
-									<PlatformIconComponent className={`size-3.5 ${getPlatformColor(platformName || "")}`} />
-								</div>
-							)}
+				{/* Top section: avatar + info */}
+				<div className="flex items-start gap-3 p-3.5 sm:p-4">
+					{/* Avatar with overlays */}
+					<div className="relative shrink-0">
+						<img
+							src={getAvatarUrl(avatarSeed, creatorGender)}
+							alt={creatorName}
+							className="size-10 rounded-full bg-zinc-100 ring-1 ring-zinc-200 sm:size-11 dark:bg-zinc-800 dark:ring-zinc-700"
+						/>
+						{PlatformIconComponent && (
+							<div className="absolute -bottom-0.5 -right-0.5 flex size-4.5 items-center justify-center rounded-full border-2 border-white bg-white dark:border-zinc-900 dark:bg-zinc-900">
+								<PlatformIconComponent className={`size-3 ${getPlatformColor(platformName || "")}`} />
+							</div>
+						)}
+					</div>
+
+					{/* Content */}
+					<div className="min-w-0 flex-1">
+						{/* Row 1: Name + Status */}
+						<div className="flex items-center justify-between gap-2">
+							<h3 className="truncate text-sm font-semibold text-zinc-900 dark:text-white">
+								{creatorName}
+							</h3>
+							<Badge color={statusConfig.color} className="inline-flex shrink-0 items-center gap-1 text-[11px]!">
+								<StatusIcon className="size-3" />
+								{statusConfig.label}
+							</Badge>
 						</div>
 
-						<div className="min-w-0 flex-1">
-							<div className="flex items-start justify-between gap-2">
-								<div className="min-w-0">
-									<h3 className="line-clamp-1 text-sm font-semibold text-zinc-900 sm:text-base dark:text-white">
-										{creatorName}
-									</h3>
-								</div>
-								<Badge color={statusConfig.color} className="inline-flex shrink-0 items-center gap-1 text-[11px]!">
-									<StatusIcon className="size-3" />
-									{statusConfig.label}
-								</Badge>
-							</div>
+						{/* Row 2: Campaign + meta */}
+						<div className="mt-1 flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+							<MegaphoneIcon className="size-3 shrink-0 text-zinc-400 dark:text-zinc-500" />
+							<span className="truncate">{campaignName || enrollment.campaignId.slice(-8)}</span>
+						</div>
 
-							<div className="mt-1 space-y-0.5">
-								<div className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
-									<MegaphoneIcon className="size-3 shrink-0" />
-									<span className="max-w-40 truncate">{campaignName || enrollment.campaignId.slice(-8)}</span>
-								</div>
-								<div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-zinc-500 dark:text-zinc-400">
-									<span className="font-mono">{enrollment.displayId}</span>
-									{showOverdueAlert && <OverdueAlert />}
-									<span className="text-zinc-300 dark:text-zinc-600">·</span>
-									<span>{formatDateCompact(enrollment.createdAt)}</span>
-									{enrollment.creator?.city && (
-										<>
-											<span className="text-zinc-300 dark:text-zinc-600">·</span>
-											<span>{enrollment.creator.city}</span>
-										</>
-									)}
-								</div>
-							</div>
+						{/* Row 3: ID + date + city + overdue */}
+						<div className="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] text-zinc-400 dark:text-zinc-500">
+							<span className="font-mono">{enrollment.displayId}</span>
+							<span>·</span>
+							<span>{formatDateCompact(enrollment.createdAt)}</span>
+							{enrollment.creator?.city && (
+								<>
+									<span>·</span>
+									<span>{enrollment.creator.city}</span>
+								</>
+							)}
+							{showOverdueAlert && (
+								<span className="ml-0.5 inline-flex items-center gap-0.5 rounded-full bg-red-100 px-1.5 py-px text-[10px] font-semibold text-red-600 dark:bg-red-950/50 dark:text-red-400">
+									<ExclamationCircleIcon className="size-2.5" />
+									Overdue
+								</span>
+							)}
 						</div>
 					</div>
 				</div>
 
-				<div className="h-px bg-zinc-200 dark:bg-zinc-700" />
-
-				<div className="grid grid-cols-3 divide-x divide-zinc-200 dark:divide-zinc-700">
-					<div className="flex flex-col items-center justify-center py-2">
-						<span className="text-[10px] text-zinc-400 dark:text-zinc-500">Order Value</span>
-						<span className="text-xs font-semibold tabular-nums text-zinc-900 sm:text-sm dark:text-white">
+				{/* Footer stats */}
+				<div className="grid grid-cols-3 divide-x divide-zinc-100 border-t border-zinc-100 bg-zinc-50/60 dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-800/30">
+					<div className="flex flex-col items-center justify-center py-2.5">
+						<span className="text-[10px] font-medium text-zinc-400 dark:text-zinc-500">Order Value</span>
+						<span className="mt-0.5 text-xs font-semibold tabular-nums text-zinc-900 sm:text-sm dark:text-white">
 							{formatCurrency(enrollment.orderValueDecimal)}
 						</span>
 					</div>
-					<div className="flex flex-col items-center justify-center py-2">
-						<span className="text-[10px] text-zinc-400 dark:text-zinc-500">Fee ({enrollment.lockedBillRate}%)</span>
-						<span className="text-xs font-semibold tabular-nums text-emerald-600 sm:text-sm dark:text-emerald-400">
-							{formatCurrency(platformFeeDisplay)}
+					<div className="flex flex-col items-center justify-center py-2.5">
+						<span className="text-[10px] font-medium text-zinc-400 dark:text-zinc-500">
+							Fee ({enrollment.lockedBillRate}%)
+						</span>
+						<span className="mt-0.5 text-xs font-semibold tabular-nums text-emerald-600 sm:text-sm dark:text-emerald-400">
+							{formatCurrency(enrollment.lockedPlatformFeeDecimal)}
 						</span>
 					</div>
-					<div className="flex flex-col items-center justify-center py-2">
-						<span className="text-[10px] text-zinc-400 dark:text-zinc-500">Submitted</span>
-						<span className="text-xs font-semibold tabular-nums text-zinc-700 sm:text-sm dark:text-zinc-300">
+					<div className="flex flex-col items-center justify-center py-2.5">
+						<span className="text-[10px] font-medium text-zinc-400 dark:text-zinc-500">Submitted</span>
+						<span className="mt-0.5 text-xs font-semibold tabular-nums text-zinc-700 sm:text-sm dark:text-zinc-300">
 							{formatDateCompact(enrollment.createdAt)}
 						</span>
 					</div>
 				</div>
 			</Link>
+
+			{/* Selection checkbox — overlaid top-left, outside the Link */}
+			{onSelect && (
+				<button
+					type="button"
+					onClick={handleCheckboxClick}
+					className={`absolute left-2.5 top-2.5 z-10 flex size-5 items-center justify-center rounded-md transition-all sm:opacity-0 sm:group-hover:opacity-100 ${
+						isSelected
+							? "border-0 bg-zinc-900 text-white sm:opacity-100! dark:bg-white dark:text-zinc-900"
+							: "border border-zinc-300 bg-white/90 backdrop-blur-sm hover:border-zinc-400 dark:border-zinc-600 dark:bg-zinc-800/90"
+					}`}
+				>
+					{isSelected && <CheckCircleIcon className="size-3.5" />}
+				</button>
+			)}
 		</div>
 	);
 }
@@ -232,6 +234,7 @@ function EnrollmentCardCompact({ enrollment, onClick }: CompactVariantProps) {
 	const platformName = enrollment.platform?.name;
 	const creatorName = enrollment.creator?.profileName || enrollment.creatorId.slice(-6);
 	const avatarSeed = enrollment.creator?.id || enrollment.creatorId;
+	const creatorGender = (enrollment.creator as { gender?: "male" | "female" | "other" } | undefined)?.gender;
 
 	const Wrapper = onClick ? "button" : "div";
 
@@ -242,7 +245,7 @@ function EnrollmentCardCompact({ enrollment, onClick }: CompactVariantProps) {
 		>
 			{/* Creator avatar */}
 			<img
-				src={getAvatarUrl(avatarSeed)}
+				src={getAvatarUrl(avatarSeed, creatorGender)}
 				alt={creatorName}
 				className="size-8 shrink-0 rounded-lg bg-zinc-100 dark:bg-zinc-800"
 			/>
@@ -293,7 +296,7 @@ interface InlineVariantProps {
 		orderValueDecimal: string;
 		createdAt: string;
 		campaign: { id: string; title: string };
-		creator: { id: string; name: string };
+		creator: { id: string; name: string; gender?: "male" | "female" | "other" };
 	};
 	orgSlug: string;
 	formatRelativeTime: (date: string) => string;
@@ -306,7 +309,7 @@ function EnrollmentCardInline({ enrollment, orgSlug, formatRelativeTime }: Inlin
 			className="group flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/40"
 		>
 			<img
-				src={`https://api.dicebear.com/9.x/micah/svg?seed=${encodeURIComponent(enrollment.creator.id)}`}
+				src={getAvatarUrl(enrollment.creator.id, enrollment.creator.gender)}
 				alt={enrollment.creator.name}
 				className="size-9 shrink-0 rounded-lg bg-zinc-100 dark:bg-zinc-800"
 			/>

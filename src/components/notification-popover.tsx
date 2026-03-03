@@ -16,7 +16,7 @@ import {
 	useDeleteNotifications,
 	useMarkAllNotificationsRead,
 	useMarkNotificationRead,
-} from "@/hooks/use-organization";
+} from "@/hooks/use-notifications";
 import type { notifications } from "@/lib/brand-client";
 import { useOrganizationId } from "@/store/organization-store";
 

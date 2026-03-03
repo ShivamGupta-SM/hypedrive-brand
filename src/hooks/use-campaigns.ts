@@ -1,6 +1,13 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { brand, db } from "@/lib/brand-client";
-import { DEFAULT_PAGE_SIZE, getAuthenticatedClient, queryKeys } from "./api-client";
+import {
+	CACHE,
+	campaignQueryOptions,
+	campaignStatsQueryOptions,
+	getAuthenticatedClient,
+	infiniteCampaignsQueryOptions,
+	queryKeys,
+} from "./api-client";
 
 export function useCampaigns(
 	organizationId: string | undefined,
@@ -16,19 +23,16 @@ export function useCampaigns(
 ) {
 	const query = useQuery({
 		queryKey: queryKeys.campaigns(organizationId || "", params),
-		queryFn: async () => {
-			const client = getAuthenticatedClient();
-			return client.brand.listCampaigns(organizationId as string, params || {});
-		},
+		queryFn: () => getAuthenticatedClient().brand.listCampaigns(organizationId as string, params || {}),
 		enabled: !!organizationId,
-		staleTime: 30_000,
+		staleTime: CACHE.list,
 	});
 
 	return {
 		data: query.data?.data ?? [],
 		total: query.data?.total ?? 0,
 		hasMore: query.data?.hasMore ?? false,
-		loading: query.isLoading,
+		loading: query.isPending,
 		error: query.error,
 		refetch: query.refetch,
 	};
@@ -39,22 +43,8 @@ export function useInfiniteCampaigns(
 	params?: { status?: string; listingId?: string; search?: string }
 ) {
 	const query = useInfiniteQuery({
-		queryKey: queryKeys.infiniteCampaigns(organizationId || "", params),
-		queryFn: async ({ pageParam = 0 }) => {
-			const client = getAuthenticatedClient();
-			return client.brand.listCampaigns(organizationId as string, {
-				...params,
-				skip: pageParam,
-				take: DEFAULT_PAGE_SIZE,
-			});
-		},
-		initialPageParam: 0,
-		getNextPageParam: (lastPage, allPages) => {
-			if (!lastPage.hasMore) return undefined;
-			return allPages.reduce((acc, page) => acc + (page.data?.length ?? 0), 0);
-		},
+		...infiniteCampaignsQueryOptions(organizationId || "", params),
 		enabled: !!organizationId,
-		staleTime: 30_000,
 	});
 
 	const data = query.data?.pages.flatMap((page) => page.data ?? []) ?? [];
@@ -64,7 +54,8 @@ export function useInfiniteCampaigns(
 		data,
 		total,
 		hasMore: query.hasNextPage ?? false,
-		loading: query.isLoading,
+		loading: query.isPending,
+		isFetching: query.isFetching,
 		isFetchingNextPage: query.isFetchingNextPage,
 		error: query.error,
 		refetch: query.refetch,
@@ -74,17 +65,13 @@ export function useInfiniteCampaigns(
 
 export function useCampaign(organizationId: string | undefined, campaignId: string | undefined) {
 	const query = useQuery({
-		queryKey: queryKeys.campaign(organizationId || "", campaignId || ""),
-		queryFn: async () => {
-			const client = getAuthenticatedClient();
-			return client.brand.getCampaign(organizationId as string, campaignId as string);
-		},
+		...campaignQueryOptions(organizationId || "", campaignId || ""),
 		enabled: !!organizationId && !!campaignId,
 	});
 
 	return {
 		data: query.data ?? null,
-		loading: query.isLoading,
+		loading: query.isPending,
 		error: query.error,
 		refetch: query.refetch,
 	};
@@ -92,17 +79,13 @@ export function useCampaign(organizationId: string | undefined, campaignId: stri
 
 export function useCampaignStats(organizationId: string | undefined, campaignId: string | undefined) {
 	const query = useQuery({
-		queryKey: queryKeys.campaignStats(organizationId || "", campaignId || ""),
-		queryFn: async () => {
-			const client = getAuthenticatedClient();
-			return client.brand.getCampaignStats(organizationId as string, campaignId as string, {});
-		},
+		...campaignStatsQueryOptions(organizationId || "", campaignId || ""),
 		enabled: !!organizationId && !!campaignId,
 	});
 
 	return {
 		data: query.data ?? null,
-		loading: query.isLoading,
+		loading: query.isPending,
 		error: query.error,
 		refetch: query.refetch,
 	};
@@ -272,7 +255,7 @@ export function useCampaignTasks(organizationId: string | undefined, campaignId:
 	return {
 		data: query.data?.data ?? [],
 		total: query.data?.total ?? 0,
-		loading: query.isLoading,
+		loading: query.isPending,
 		error: query.error,
 		refetch: query.refetch,
 	};
@@ -357,12 +340,12 @@ export function usePlatforms() {
 			const client = getAuthenticatedClient();
 			return client.catalog.listPlatforms({ take: 100, status: "active" });
 		},
-		staleTime: 10 * 60 * 1000, // 10 min — platforms rarely change
+		staleTime: CACHE.settings,
 	});
 
 	return {
 		data: query.data?.data ?? [],
-		loading: query.isLoading,
+		loading: query.isPending,
 		error: query.error,
 	};
 }
@@ -379,13 +362,13 @@ export function useTaskTemplates(params?: { category?: string; status?: string; 
 				...(params?.platformId ? { platformId: params.platformId } : {}),
 			});
 		},
-		staleTime: 5 * 60 * 1000, // 5 min — templates rarely change
+		staleTime: CACHE.lookup,
 	});
 
 	return {
 		data: query.data?.data ?? [],
 		total: query.data?.total ?? 0,
-		loading: query.isLoading,
+		loading: query.isPending,
 		error: query.error,
 	};
 }

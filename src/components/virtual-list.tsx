@@ -264,7 +264,7 @@ export function VirtualTable<T>({
 	};
 
 	return (
-		<div className={clsx("overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700", className)}>
+		<div className={clsx("overflow-hidden rounded-lg shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800", className)}>
 			{/* Header */}
 			<div
 				className="flex border-b border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800/50"

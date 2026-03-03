@@ -1,5 +1,4 @@
 import {
-	ArrowLeftIcon,
 	ArrowPathIcon,
 	ArrowTopRightOnSquareIcon,
 	CalendarIcon,
@@ -24,15 +23,13 @@ import { useMemo, useState } from "react";
 import { Badge } from "@/components/badge";
 import { Button } from "@/components/button";
 import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/dialog";
-import { Heading } from "@/components/heading";
 import { extractPlatformFromText, getPlatformColor, getPlatformIcon } from "@/components/icons/platform-icons";
 import { Link } from "@/components/link";
-import { Card } from "@/components/shared/card";
+import { ContentCard, DetailPageHeader } from "@/components/page-header";
 import { CopyButton } from "@/components/shared/copy-button";
 import { ErrorState } from "@/components/shared/error-state";
 import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
 import { Skeleton } from "@/components/skeleton";
-import { Text } from "@/components/text";
 import { Textarea } from "@/components/textarea";
 import {
 	useApproveEnrollment,
@@ -385,7 +382,7 @@ function ApproveDialog({
 
 			<DialogBody>
 				{/* Cost breakdown */}
-				<div className="mb-4 overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800">
+				<div className="mb-4 overflow-hidden rounded-xl shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800">
 					<div className="flex justify-between border-b border-zinc-100 px-4 py-2.5 text-xs dark:border-zinc-800">
 						<span className="text-zinc-500 dark:text-zinc-400">Bill Amount ({enrollment.lockedBillRate}%)</span>
 						<span className="font-medium text-zinc-900 dark:text-white">{formatCurrency(costs.billAmount)}</span>
@@ -657,71 +654,66 @@ export function EnrollmentShow() {
 
 	return (
 		<div className="space-y-6 pb-24 sm:pb-0">
-			{/* Back Button */}
-			<Button href={`/${orgSlug}/enrollments`} color="zinc">
-				<ArrowLeftIcon className="size-4" />
-				Enrollments
-			</Button>
-
-			{/* Header — Large icon style matching transaction detail */}
-			<div className="flex flex-wrap items-start justify-between gap-4">
-				<div className="flex items-start gap-4">
-					<div className={clsx("flex size-20 shrink-0 items-center justify-center rounded-2xl", statusConfig.bgClass)}>
-						<StatusIcon className={clsx("size-10", statusConfig.iconColor)} />
-					</div>
-					<div>
-						<Heading>{enrollment.displayId}</Heading>
-						<Text className="mt-1 inline-flex items-center gap-1">
-							{creatorName}
-							{platformName && (
-								<>
-									{" on "}
-									{HeaderPlatformIcon && <HeaderPlatformIcon className={`size-4 ${getPlatformColor(platformName)}`} />}
-									{platformName}
-								</>
-							)}
-						</Text>
-						<div className="mt-2 flex flex-wrap items-center gap-2">
-							<Badge color={statusConfig.color} className="inline-flex items-center gap-1">
-								<StatusIcon className="size-3" />
-								{statusConfig.label}
+			{/* Header */}
+			<DetailPageHeader
+				backHref={`/${orgSlug}/enrollments`}
+				backLabel="Enrollments"
+				icon={<StatusIcon className={clsx("size-10", statusConfig.iconColor)} />}
+				iconClassName={statusConfig.bgClass}
+				title={enrollment.displayId}
+				subtitle={
+					<span className="inline-flex items-center gap-1">
+						{creatorName}
+						{platformName && (
+							<>
+								{" on "}
+								{HeaderPlatformIcon && <HeaderPlatformIcon className={`size-4 ${getPlatformColor(platformName)}`} />}
+								{platformName}
+							</>
+						)}
+					</span>
+				}
+				badges={
+					<>
+						<Badge color={statusConfig.color} className="inline-flex items-center gap-1">
+							<StatusIcon className="size-3" />
+							{statusConfig.label}
+						</Badge>
+						<Badge color="zinc" className="inline-flex items-center gap-1">
+							{enrollment.paymentMode === "prefund" ? "Prefund" : "Post Submission"}
+						</Badge>
+						{enrollment.campaign?.type && (
+							<Badge color="zinc" className="capitalize">
+								{enrollment.campaign.type}
 							</Badge>
-							<Badge color="zinc" className="inline-flex items-center gap-1">
-								{enrollment.paymentMode === "prefund" ? "Prefund" : "Post Submission"}
-							</Badge>
-							{enrollment.campaign?.type && (
-								<Badge color="zinc" className="capitalize">
-									{enrollment.campaign.type}
-								</Badge>
+						)}
+					</>
+				}
+				actions={
+					canReview ? (
+						<>
+							{canRequestChanges && (
+								<Button outline onClick={() => setActiveDialog("changes")}>
+									<PencilSquareIcon className="size-4" />
+									Request Changes
+								</Button>
 							)}
-						</div>
-					</div>
-				</div>
-
-				{/* Desktop Action Buttons in header */}
-				{canReview && (
-					<div className="hidden items-center gap-2 sm:flex">
-						{canRequestChanges && (
-							<Button outline onClick={() => setActiveDialog("changes")}>
-								<PencilSquareIcon className="size-4" />
-								Request Changes
-							</Button>
-						)}
-						{canRejectEnrollment && (
-							<Button color="red" onClick={() => setActiveDialog("reject")}>
-								<XCircleIcon className="size-4" />
-								Reject
-							</Button>
-						)}
-						{canApproveEnrollment && (
-							<Button color="emerald" onClick={() => setActiveDialog("approve")}>
-								<CheckCircleIcon className="size-4" />
-								Approve & Pay
-							</Button>
-						)}
-					</div>
-				)}
-			</div>
+							{canRejectEnrollment && (
+								<Button color="red" onClick={() => setActiveDialog("reject")}>
+									<XCircleIcon className="size-4" />
+									Reject
+								</Button>
+							)}
+							{canApproveEnrollment && (
+								<Button color="emerald" onClick={() => setActiveDialog("approve")}>
+									<CheckCircleIcon className="size-4" />
+									Approve & Pay
+								</Button>
+							)}
+						</>
+					) : undefined
+				}
+			/>
 
 			{/* Stats Row — FinancialStatsGridBordered */}
 			{costs && (
@@ -751,7 +743,7 @@ export function EnrollmentShow() {
 				{/* Left Column — 2/3 width */}
 				<div className="space-y-5 lg:col-span-2">
 					{/* Enrollment Details Card */}
-					<Card padding="none">
+					<ContentCard padding="none">
 						<div className="p-6">
 							<h3 className="text-lg font-semibold text-zinc-900 dark:text-white">Enrollment Details</h3>
 
@@ -833,11 +825,11 @@ export function EnrollmentShow() {
 								/>
 							</div>
 						</div>
-					</Card>
+					</ContentCard>
 
 					{/* Billing Breakdown Card */}
 					{costs && (
-						<Card padding="none">
+						<ContentCard padding="none">
 							<div className="p-6">
 								<h3 className="text-lg font-semibold text-zinc-900 dark:text-white">Billing Breakdown</h3>
 
@@ -882,12 +874,12 @@ export function EnrollmentShow() {
 									</div>
 								</div>
 							</div>
-						</Card>
+						</ContentCard>
 					)}
 
 					{/* OCR Data */}
 					{enrollment.ocrData && (
-						<Card padding="none">
+						<ContentCard padding="none">
 							<div className="p-6">
 								<h3 className="flex items-center gap-2 text-lg font-semibold text-zinc-900 dark:text-white">
 									<PhotoIcon className="size-5 text-zinc-400" />
@@ -966,12 +958,12 @@ export function EnrollmentShow() {
 									</div>
 								</div>
 							</div>
-						</Card>
+						</ContentCard>
 					)}
 
 					{/* Required Deliverables / Tasks */}
 					{enrollment.tasks && enrollment.tasks.length > 0 && (
-						<Card padding="none">
+						<ContentCard padding="none">
 							<div className="p-6">
 								<div className="flex items-center justify-between">
 									<h3 className="flex items-center gap-2 text-lg font-semibold text-zinc-900 dark:text-white">
@@ -1155,14 +1147,14 @@ export function EnrollmentShow() {
 									})()}
 								</div>
 							</div>
-						</Card>
+						</ContentCard>
 					)}
 				</div>
 
 				{/* Right Column — 1/3 width sidebar */}
 				<div className="space-y-5">
 					{/* Campaign Card */}
-					<Card padding="none">
+					<ContentCard padding="none">
 						<div className="p-5">
 							<h4 className="mb-4 text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
 								Campaign
@@ -1192,11 +1184,11 @@ export function EnrollmentShow() {
 								<ArrowTopRightOnSquareIcon className="size-4 shrink-0 text-zinc-400" />
 							</Link>
 						</div>
-					</Card>
+					</ContentCard>
 
 					{/* Creator Card */}
 					{enrollment.creator && (
-						<Card padding="none">
+						<ContentCard padding="none">
 							<div className="p-5">
 								<h4 className="mb-4 text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
 									Creator
@@ -1242,12 +1234,12 @@ export function EnrollmentShow() {
 									</div>
 								</div>
 							</div>
-						</Card>
+						</ContentCard>
 					)}
 
 					{/* Rejection Info */}
 					{enrollment.rejection && (
-						<Card padding="none" className="border-red-200 dark:border-red-800/40">
+						<ContentCard padding="none" className="border-red-200 dark:border-red-800/40">
 							<div className="bg-red-50/50 p-5 dark:bg-red-950/10">
 								<h4 className="mb-3 flex items-center gap-2 text-sm font-semibold text-red-700 dark:text-red-400">
 									<XCircleIcon className="size-4" />
@@ -1260,12 +1252,12 @@ export function EnrollmentShow() {
 									</p>
 								)}
 							</div>
-						</Card>
+						</ContentCard>
 					)}
 
 					{/* Status Timeline */}
 					{enrollment.history && enrollment.history.length > 0 && (
-						<Card padding="none">
+						<ContentCard padding="none">
 							<div className="p-5">
 								<h4 className="mb-4 text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
 									Status History
@@ -1276,7 +1268,7 @@ export function EnrollmentShow() {
 									))}
 								</div>
 							</div>
-						</Card>
+						</ContentCard>
 					)}
 				</div>
 			</div>

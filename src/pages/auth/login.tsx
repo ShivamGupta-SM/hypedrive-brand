@@ -1,6 +1,7 @@
 import { EyeIcon, EyeSlashIcon, KeyIcon, ShieldCheckIcon } from "@heroicons/react/16/solid";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { startAuthentication } from "@simplewebauthn/browser";
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -18,6 +19,7 @@ import {
 	useTwoFactorVerifyTotp,
 } from "@/hooks";
 import { useLogin, useSocialLogin } from "@/hooks/use-auth";
+import { useAutofillSync } from "@/hooks/use-autofill-sync";
 import { setServerAuthCookie } from "@/lib/server-auth";
 import { useAuthStore } from "@/store/auth-store";
 import { FormError } from "./components";
@@ -94,6 +96,7 @@ function OAuthButton({
 export function Login() {
 	const login = useLogin();
 	const socialLogin = useSocialLogin();
+	const queryClient = useQueryClient();
 	const navigate = useNavigate();
 	const [showPassword, setShowPassword] = useState(false);
 	const [serverError, setServerError] = useState<string | null>(null);
@@ -150,6 +153,7 @@ export function Login() {
 				setTwoFactorCode("");
 				setTwoFactorError(null);
 			} else {
+				queryClient.removeQueries({ queryKey: ["auth", "session-with-orgs"] });
 				navigate({ to: "/" });
 			}
 		} catch (err) {
@@ -169,6 +173,7 @@ export function Login() {
 			if (result.token) {
 				await setServerAuthCookie({ data: { token: result.token } });
 				useAuthStore.getState().setAuthenticated(true);
+				queryClient.removeQueries({ queryKey: ["auth", "session-with-orgs"] });
 				navigate({ to: "/" });
 			}
 		} catch (err) {
@@ -189,11 +194,13 @@ export function Login() {
 			if (result.token) {
 				await setServerAuthCookie({ data: { token: result.token } });
 				useAuthStore.getState().setAuthenticated(true);
+				queryClient.removeQueries({ queryKey: ["auth", "session-with-orgs"] });
 				navigate({ to: "/" });
 			} else if (result.success) {
 				// Authenticated but no token returned — try navigating anyway
 				// (the server may have set the session cookie directly)
 				useAuthStore.getState().setAuthenticated(true);
+				queryClient.removeQueries({ queryKey: ["auth", "session-with-orgs"] });
 				navigate({ to: "/" });
 			} else {
 				setServerError("Passkey authentication failed. Please try again.");
@@ -208,6 +215,11 @@ export function Login() {
 			}
 		}
 	};
+
+	const { formRef, syncAutofill } = useAutofillSync(setValue, {
+		email: 'input[name="email"]',
+		password: 'input[name="password"]',
+	});
 
 	const anyPending = isPending || isSocialPending;
 
@@ -332,7 +344,15 @@ export function Login() {
 			</div>
 
 			{/* Form fields — tighter gap than sections */}
-			<form onSubmit={handleSubmit(onSubmit)} className="space-y-3" autoComplete="on">
+			<form
+				ref={formRef}
+				onSubmit={(e) => {
+					syncAutofill();
+					handleSubmit(onSubmit)(e);
+				}}
+				className="space-y-3"
+				autoComplete="on"
+			>
 				<FormError message={errors.email?.message || errors.password?.message || serverError} />
 
 				<Field>
@@ -343,6 +363,8 @@ export function Login() {
 						disabled={anyPending}
 						autoComplete="username"
 						autoCapitalize="none"
+						autoCorrect="off"
+						spellCheck={false}
 						inputMode="email"
 						placeholder="you@example.com"
 						data-invalid={errors.email ? true : undefined}
@@ -416,7 +438,7 @@ export function AuthShell({ children, footer }: { children: React.ReactNode; foo
 	return (
 		<div className="flex min-h-dvh flex-col items-center justify-center bg-zinc-50 px-4 py-12 dark:bg-zinc-950">
 			<div className="w-full max-w-95">
-				<div className="rounded-xl border border-zinc-200 bg-white shadow-xs dark:border-zinc-800 dark:bg-zinc-900">
+				<div className="rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
 					<div className="space-y-5 p-8">{children}</div>
 					{footer && <div className="border-t border-zinc-100 px-8 py-4 dark:border-zinc-800">{footer}</div>}
 				</div>

@@ -10,7 +10,7 @@ import {
 import { useAuthStore } from "@/store/auth-store";
 import { useOrganizationStore } from "@/store/organization-store";
 import { usePermissionsStore } from "@/store/permissions-store";
-import { clearAuthCache, getAuthenticatedClient, getAuthTokenFromCookie, queryKeys } from "./api-client";
+import { clearAuthCache, getAuthenticatedClient, queryKeys } from "./api-client";
 
 // =============================================================================
 // AUTH ERROR
@@ -153,7 +153,7 @@ export function useUserInfo() {
 	return {
 		data: query.data?.user ?? null,
 		session: query.data?.session ?? null,
-		loading: query.isLoading,
+		loading: query.isPending,
 		error: query.error,
 		refetch: query.refetch,
 	};
@@ -174,7 +174,7 @@ export function useMe() {
 
 	return {
 		data: query.data ?? null,
-		loading: query.isLoading,
+		loading: query.isPending,
 		error: query.error,
 		refetch: query.refetch,
 	};
@@ -194,7 +194,7 @@ export function useAccountInfo() {
 
 	return {
 		data: query.data ?? null,
-		loading: query.isLoading,
+		loading: query.isPending,
 		error: query.error,
 		refetch: query.refetch,
 	};
@@ -216,7 +216,7 @@ export function useFullOrganization(organizationId: string | undefined) {
 
 	return {
 		data: query.data ?? null,
-		loading: query.isLoading,
+		loading: query.isPending,
 		error: query.error,
 		refetch: query.refetch,
 	};
@@ -258,320 +258,6 @@ export function useChangeEmail() {
 		mutationFn: async (params: { newEmail: string; callbackURL?: string }) => {
 			const client = getAuthenticatedClient();
 			return client.auth.changeEmail(params);
-		},
-	});
-}
-
-// =============================================================================
-// SESSION MANAGEMENT
-// =============================================================================
-
-export function useDeviceSessions() {
-	const currentToken = getAuthTokenFromCookie();
-
-	const query = useQuery({
-		queryKey: queryKeys.deviceSessions(),
-		queryFn: async () => {
-			const client = getAuthenticatedClient();
-			return client.auth.listSessions();
-		},
-	});
-
-	return {
-		data: query.data?.sessions ?? [],
-		currentToken,
-		loading: query.isLoading,
-		error: query.error,
-		refetch: query.refetch,
-	};
-}
-
-export function useRevokeSession() {
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: async (sessionToken: string) => {
-			const client = getAuthenticatedClient();
-			return client.auth.revokeSession({ token: sessionToken });
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.deviceSessions() });
-		},
-	});
-}
-
-export function useRevokeOtherSessions() {
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: async () => {
-			const client = getAuthenticatedClient();
-			return client.auth.revokeOtherSessions();
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.deviceSessions() });
-		},
-	});
-}
-
-/**
- * Revoke ALL sessions (including current). Use for "Log out everywhere".
- */
-export function useRevokeAllSessions() {
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: async () => {
-			const client = getAuthenticatedClient();
-			return client.auth.revokeSessions();
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.deviceSessions() });
-		},
-	});
-}
-
-/**
- * Switch active session (multi-session support).
- */
-export function useSetActiveSession() {
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: async (sessionToken: string) => {
-			const client = getAuthenticatedClient();
-			return client.auth.setActiveSession({ sessionToken });
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.userInfo() });
-			queryClient.invalidateQueries({ queryKey: queryKeys.deviceSessions() });
-		},
-	});
-}
-
-// =============================================================================
-// TWO-FACTOR AUTHENTICATION
-// =============================================================================
-
-export function useTwoFactorEnable() {
-	const queryClient = useQueryClient();
-	return useMutation({
-		mutationFn: async (params: { password: string; issuer?: string }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.twoFactorEnable(params);
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.userInfo() });
-		},
-	});
-}
-
-export function useTwoFactorDisable() {
-	const queryClient = useQueryClient();
-	return useMutation({
-		mutationFn: async (params: { password: string }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.twoFactorDisable(params);
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.userInfo() });
-		},
-	});
-}
-
-export function useTwoFactorGetTotpUri() {
-	return useMutation({
-		mutationFn: async (params: { password: string }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.twoFactorGetTotpUri(params);
-		},
-	});
-}
-
-export function useTwoFactorVerifyTotp() {
-	return useMutation({
-		mutationFn: async (params: { twoFactorToken: string; code: string; trustDevice?: boolean }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.twoFactorVerifyTotp(params);
-		},
-	});
-}
-
-export function useTwoFactorGenerateBackupCodes() {
-	return useMutation({
-		mutationFn: async (params: { password: string }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.twoFactorGenerateBackupCodes(params);
-		},
-	});
-}
-
-export function useTwoFactorSendOtp() {
-	return useMutation({
-		mutationFn: async (params: { twoFactorToken: string; trustDevice?: boolean }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.twoFactorSendOtp(params);
-		},
-	});
-}
-
-export function useTwoFactorVerifyOtp() {
-	return useMutation({
-		mutationFn: async (params: { twoFactorToken: string; otp: string; trustDevice?: boolean }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.twoFactorVerifyOtp(params);
-		},
-	});
-}
-
-export function useTwoFactorViewBackupCodes() {
-	return useMutation({
-		mutationFn: async (params: { password: string }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.twoFactorViewBackupCodes(params);
-		},
-	});
-}
-
-export function useTwoFactorVerifyBackupCode() {
-	return useMutation({
-		mutationFn: async (params: { twoFactorToken: string; code: string; trustDevice?: boolean }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.twoFactorVerifyBackupCode(params);
-		},
-	});
-}
-
-// =============================================================================
-// PASSKEYS
-// =============================================================================
-
-export function usePasskeyList() {
-	const query = useQuery({
-		queryKey: queryKeys.passkeys(),
-		queryFn: async () => {
-			const client = getAuthenticatedClient();
-			return client.auth.passkeyList();
-		},
-	});
-
-	return {
-		data: query.data?.passkeys ?? [],
-		loading: query.isLoading,
-		error: query.error,
-		refetch: query.refetch,
-	};
-}
-
-export function usePasskeyRegisterOptions() {
-	return useMutation({
-		mutationFn: async (params: { name?: string; authenticatorAttachment?: "platform" | "cross-platform" }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.passkeyRegisterOptions(params);
-		},
-	});
-}
-
-export function usePasskeyRegister() {
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: async (params: { response: unknown; name?: string; challengeCookie: string }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.passkeyRegister(params);
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.passkeys() });
-		},
-	});
-}
-
-export function usePasskeyDelete() {
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: async (id: string) => {
-			const client = getAuthenticatedClient();
-			return client.auth.passkeyDelete({ id });
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.passkeys() });
-		},
-	});
-}
-
-export function usePasskeyUpdateName() {
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: async (params: { id: string; name: string }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.passkeyUpdateName(params);
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.passkeys() });
-		},
-	});
-}
-
-export function usePasskeyReauthOptions() {
-	return useMutation({
-		mutationFn: async () => {
-			const client = getAuthenticatedClient();
-			return client.auth.passkeyReauthOptions();
-		},
-	});
-}
-
-export function usePasskeyAuthenticateOptions() {
-	return useMutation({
-		mutationFn: async () => {
-			const client = getAuthenticatedClient();
-			return client.auth.passkeyAuthenticateOptions();
-		},
-	});
-}
-
-export function usePasskeyAuthenticate() {
-	return useMutation({
-		mutationFn: async (params: { response: unknown; challengeCookie: string }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.passkeyAuthenticate(params);
-		},
-	});
-}
-
-// =============================================================================
-// DEVICE SESSIONS (multi-session)
-// =============================================================================
-
-export function useDeviceSessionsList() {
-	const query = useQuery({
-		queryKey: [...queryKeys.deviceSessions(), "device"] as const,
-		queryFn: async () => {
-			const client = getAuthenticatedClient();
-			return client.auth.listDeviceSessions();
-		},
-	});
-
-	return {
-		data: query.data?.sessions ?? [],
-		loading: query.isLoading,
-		error: query.error,
-		refetch: query.refetch,
-	};
-}
-
-export function useRevokeDeviceSession() {
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: async (sessionToken: string) => {
-			const client = getAuthenticatedClient();
-			return client.auth.revokeDeviceSession({ sessionToken });
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.deviceSessions() });
 		},
 	});
 }
@@ -624,60 +310,6 @@ export function useSetPassword() {
 }
 
 // =============================================================================
-// SOCIAL ACCOUNT LINKING
-// =============================================================================
-
-export function useLinkedAccounts() {
-	const query = useQuery({
-		queryKey: queryKeys.linkedAccounts(),
-		queryFn: async () => {
-			const client = getAuthenticatedClient();
-			return client.auth.listAccounts();
-		},
-	});
-
-	return {
-		data: query.data?.accounts ?? [],
-		loading: query.isLoading,
-		error: query.error,
-		refetch: query.refetch,
-	};
-}
-
-export function useLinkSocial() {
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: async (params: {
-			provider: string;
-			callbackURL?: string;
-			errorCallbackURL?: string;
-			scopes?: string[];
-		}) => {
-			const client = getAuthenticatedClient();
-			return client.auth.linkSocial(params);
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.linkedAccounts() });
-		},
-	});
-}
-
-export function useUnlinkAccount() {
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: async (params: { providerId: string; accountId?: string }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.unlinkAccount(params);
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.linkedAccounts() });
-		},
-	});
-}
-
-// =============================================================================
 // USER INVITATIONS (received invitations)
 // =============================================================================
 
@@ -692,7 +324,7 @@ export function useUserInvitations() {
 
 	return {
 		data: query.data?.invitations ?? [],
-		loading: query.isLoading,
+		loading: query.isPending,
 		error: query.error,
 		refetch: query.refetch,
 	};
@@ -783,7 +415,7 @@ export function useOrganizationRole(organizationId: string | undefined, roleId: 
 
 	return {
 		data: query.data?.role ?? null,
-		loading: query.isLoading,
+		loading: query.isPending,
 		error: query.error,
 		refetch: query.refetch,
 	};

@@ -12,7 +12,8 @@
 
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { queryKeys } from "@/hooks/api-client";
+import { NotFoundPage } from "@/components/shared/not-found-page";
+import { CACHE, queryKeys } from "@/hooks/api-client";
 import {
 	clearCustomRolePermissions,
 	ORG_ROLE_PERMISSIONS,
@@ -49,29 +50,33 @@ export const Route = createFileRoute("/_app/$orgSlug")({
 			throw redirect({ to: "/rejected" });
 		}
 
-		// Fetch active member role server-side for RBAC, cached per org for 5 min.
+		// Fetch active member + org roles in parallel for RBAC, cached per org.
+		// Both are fired concurrently — roles are only used if the member has a custom role,
+		// but fetching speculatively avoids a sequential waterfall.
 		// Wrapped in try-catch so a transient fetch error during client hydration
 		// doesn't bubble up to the root error boundary and flash "Something went wrong".
 		let member: { role: string } | null = null;
 		let customPermissions: Record<string, string[]> | null = null;
 
 		try {
-			const result = await context.queryClient.ensureQueryData({
-				queryKey: queryKeys.activeMember(org.id),
-				queryFn: () => getActiveMemberFromServer({ data: { organizationId: org.id } }),
-				staleTime: 5 * 60 * 1000,
-			});
-			member = result.member;
-
-			// If member has a custom role (not in the hardcoded matrix), fetch its permissions
-			if (member?.role && !(member.role in ORG_ROLE_PERMISSIONS)) {
-				const { roles } = await context.queryClient.ensureQueryData({
+			const [memberResult, rolesResult] = await Promise.all([
+				context.queryClient.ensureQueryData({
+					queryKey: queryKeys.activeMember(org.id),
+					queryFn: () => getActiveMemberFromServer({ data: { organizationId: org.id } }),
+					staleTime: CACHE.auth,
+				}),
+				context.queryClient.ensureQueryData({
 					queryKey: queryKeys.organizationRoles(org.id),
 					queryFn: () => getOrgRolesFromServer({ data: { organizationId: org.id } }),
-					staleTime: 10 * 60 * 1000,
-				});
-				const memberRole = member?.role;
-				const match = roles.find((r) => r.role === memberRole);
+					staleTime: CACHE.settings,
+				}),
+			]);
+			member = memberResult.member;
+
+			// If member has a custom role (not in the hardcoded matrix), resolve its permissions
+			if (member?.role && !(member.role in ORG_ROLE_PERMISSIONS)) {
+				const memberRole = member.role;
+				const match = rolesResult.roles.find((r) => r.role === memberRole);
 				customPermissions = match?.permission ?? null;
 
 				// Register immediately for SSR-time rendering
@@ -90,7 +95,13 @@ export const Route = createFileRoute("/_app/$orgSlug")({
 		};
 	},
 	component: OrgLayoutWrapper,
+	notFoundComponent: OrgNotFound,
 });
+
+function OrgNotFound() {
+	const { orgSlug } = Route.useParams();
+	return <NotFoundPage fullScreen={false} backButtonLabel="Back to Dashboard" backButtonHref={`/${orgSlug}`} />;
+}
 
 function OrgLayoutWrapper() {
 	const { organization, organizations, activeMember, customPermissions } = Route.useRouteContext();

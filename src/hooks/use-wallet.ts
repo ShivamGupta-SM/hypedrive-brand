@@ -1,20 +1,16 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { brand, db } from "@/lib/brand-client";
-import { DEFAULT_PAGE_SIZE, getAuthenticatedClient, queryKeys } from "./api-client";
+import { CACHE, getAuthenticatedClient, infiniteWalletTransactionsQueryOptions, queryKeys, walletQueryOptions } from "./api-client";
 
 export function useWallet(organizationId: string | undefined) {
 	const query = useQuery({
-		queryKey: queryKeys.wallet(organizationId || ""),
-		queryFn: async () => {
-			const client = getAuthenticatedClient();
-			return client.brand.getOrganizationWallet(organizationId as string);
-		},
+		...walletQueryOptions(organizationId || ""),
 		enabled: !!organizationId,
 	});
 
 	return {
 		data: query.data ?? null,
-		loading: query.isLoading,
+		loading: query.isPending,
 		error: query.error,
 		refetch: query.refetch,
 	};
@@ -34,18 +30,16 @@ export function useWalletTransactions(
 ) {
 	const query = useQuery({
 		queryKey: queryKeys.walletTransactions(organizationId || "", params),
-		queryFn: async () => {
-			const client = getAuthenticatedClient();
-			return client.brand.getOrganizationWalletTransactions(organizationId as string, params || {});
-		},
+		queryFn: () => getAuthenticatedClient().brand.getOrganizationWalletTransactions(organizationId as string, params || {}),
 		enabled: !!organizationId,
+		staleTime: CACHE.list,
 	});
 
 	return {
 		data: query.data?.data ?? [],
 		total: query.data?.total ?? 0,
 		hasMore: query.data?.hasMore ?? false,
-		loading: query.isLoading,
+		loading: query.isPending,
 		error: query.error,
 		refetch: query.refetch,
 	};
@@ -59,20 +53,7 @@ export function useInfiniteWalletTransactions(
 	}
 ) {
 	const query = useInfiniteQuery({
-		queryKey: queryKeys.infiniteWalletTransactions(organizationId || "", params),
-		queryFn: async ({ pageParam = 0 }) => {
-			const client = getAuthenticatedClient();
-			return client.brand.getOrganizationWalletTransactions(organizationId as string, {
-				...params,
-				skip: pageParam,
-				take: DEFAULT_PAGE_SIZE,
-			});
-		},
-		initialPageParam: 0,
-		getNextPageParam: (lastPage, allPages) => {
-			if (!lastPage.hasMore) return undefined;
-			return allPages.reduce((acc, page) => acc + (page.data?.length ?? 0), 0);
-		},
+		...infiniteWalletTransactionsQueryOptions(organizationId || "", params),
 		enabled: !!organizationId,
 	});
 
@@ -83,7 +64,7 @@ export function useInfiniteWalletTransactions(
 		data,
 		total,
 		hasMore: query.hasNextPage ?? false,
-		loading: query.isLoading,
+		loading: query.isPending,
 		isFetchingNextPage: query.isFetchingNextPage,
 		error: query.error,
 		refetch: query.refetch,
@@ -103,7 +84,7 @@ export function useWalletHolds(organizationId: string | undefined) {
 
 	return {
 		data: query.data?.data ?? [],
-		loading: query.isLoading,
+		loading: query.isPending,
 		error: query.error,
 		refetch: query.refetch,
 	};
@@ -126,7 +107,7 @@ export function useWithdrawals(
 		data: query.data?.data ?? [],
 		total: query.data?.total ?? 0,
 		hasMore: query.data?.hasMore ?? false,
-		loading: query.isLoading,
+		loading: query.isPending,
 		error: query.error,
 		refetch: query.refetch,
 	};
@@ -159,7 +140,7 @@ export function useWithdrawalStats(organizationId: string | undefined) {
 
 	return {
 		data: query.data ?? null,
-		loading: query.isLoading,
+		loading: query.isPending,
 		error: query.error,
 		refetch: query.refetch,
 	};
@@ -177,7 +158,7 @@ export function useVirtualAccount(organizationId: string | undefined) {
 
 	return {
 		data: query.data ?? null,
-		loading: query.isLoading,
+		loading: query.isPending,
 		error: query.error,
 		refetch: query.refetch,
 	};
@@ -200,7 +181,7 @@ export function useDeposits(
 		data: query.data?.data ?? [],
 		total: query.data?.total ?? 0,
 		hasMore: query.data?.hasMore ?? false,
-		loading: query.isLoading,
+		loading: query.isPending,
 		error: query.error,
 		refetch: query.refetch,
 	};

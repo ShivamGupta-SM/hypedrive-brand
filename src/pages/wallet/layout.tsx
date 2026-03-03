@@ -1,12 +1,18 @@
-import { ArrowDownLeftIcon, ArrowUpRightIcon } from "@heroicons/react/16/solid";
+import {
+	ArrowDownLeftIcon,
+	ArrowUpRightIcon,
+	ArrowsRightLeftIcon,
+	BanknotesIcon,
+	LockClosedIcon,
+	WalletIcon,
+} from "@heroicons/react/16/solid";
 import { Outlet } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/button";
-import { Heading } from "@/components/heading";
+import { PageHeader } from "@/components/page-header";
 import { ErrorState } from "@/components/shared/error-state";
 import { IconButton } from "@/components/shared/icon-button";
 import { TabNav, type TabNavItem } from "@/components/shared/tab-nav";
-import { Text } from "@/components/text";
 import {
 	useDeposits,
 	useInfiniteWalletTransactions,
@@ -57,9 +63,9 @@ export function WalletLayout() {
 	}, [wallet]);
 
 	const isLowBalance = parseFloat(stats.available) < 500; // < ₹500
-	const loading = walletLoading || holdsLoading;
 
-	if (loading) return <LoadingSkeleton />;
+	// Only show full skeleton on initial load (no cached data), not on background refetch
+	if (walletLoading || holdsLoading) return <LoadingSkeleton />;
 	if (walletError)
 		return (
 			<ErrorState
@@ -72,10 +78,10 @@ export function WalletLayout() {
 		);
 
 	const tabs: TabNavItem[] = [
-		{ label: "Transactions", to: orgPath("/wallet"), exact: true, count: transactions.length },
-		{ label: "Holds", to: orgPath("/wallet/holds"), count: holds.length },
-		{ label: "Withdrawals", to: orgPath("/wallet/withdrawals"), count: withdrawals.length },
-		{ label: "Deposits", to: orgPath("/wallet/deposits"), count: deposits.length },
+		{ label: "Transactions", to: orgPath("/wallet"), exact: true, count: transactions?.length ?? 0, icon: ArrowsRightLeftIcon, iconColor: "text-sky-500" },
+		{ label: "Holds", to: orgPath("/wallet/holds"), count: holds?.length ?? 0, icon: LockClosedIcon, iconColor: "text-amber-500" },
+		{ label: "Withdrawals", to: orgPath("/wallet/withdrawals"), count: withdrawals?.length ?? 0, icon: WalletIcon, iconColor: "text-violet-500" },
+		{ label: "Deposits", to: orgPath("/wallet/deposits"), count: deposits?.length ?? 0, icon: BanknotesIcon, iconColor: "text-emerald-500" },
 	];
 
 	const balanceNum = parseFloat(stats.balance);
@@ -87,47 +93,47 @@ export function WalletLayout() {
 	return (
 		<div className="space-y-6">
 			{/* Header */}
-			<div className="flex items-start justify-between gap-4">
-				<div>
-					<Heading>Wallet</Heading>
-					<Text className="mt-1">Manage your campaign funds and transactions</Text>
-				</div>
-				{(canDeposit || canWithdraw) && (
-					<div className="flex items-center gap-2">
-						{/* Mobile: icon-only circle buttons */}
-						<div className="flex items-center gap-2 sm:hidden">
-							{canDeposit && (
-								<IconButton color="emerald" onClick={() => setShowDeposit(true)}>
-									<ArrowDownLeftIcon className="size-5" />
-								</IconButton>
-							)}
-							{canWithdraw && (
-								<IconButton color="zinc" onClick={() => setShowWithdraw(true)}>
-									<ArrowUpRightIcon className="size-5" />
-								</IconButton>
-							)}
+			<PageHeader
+				title="Wallet"
+				description="Manage your campaign funds and transactions"
+				actions={
+					canDeposit || canWithdraw ? (
+						<div className="flex items-center gap-2">
+							{/* Mobile: icon-only circle buttons */}
+							<div className="flex items-center gap-2 sm:hidden">
+								{canDeposit && (
+									<IconButton color="emerald" onClick={() => setShowDeposit(true)}>
+										<ArrowDownLeftIcon className="size-5" />
+									</IconButton>
+								)}
+								{canWithdraw && (
+									<IconButton color="zinc" onClick={() => setShowWithdraw(true)}>
+										<ArrowUpRightIcon className="size-5" />
+									</IconButton>
+								)}
+							</div>
+							{/* Desktop: text buttons */}
+							<div className="hidden items-center gap-2 sm:flex">
+								{canDeposit && (
+									<Button outline onClick={() => setShowDeposit(true)}>
+										<ArrowDownLeftIcon className="size-4 text-emerald-500" />
+										Add Funds
+									</Button>
+								)}
+								{canWithdraw && (
+									<Button color="dark/zinc" onClick={() => setShowWithdraw(true)}>
+										<ArrowUpRightIcon className="size-4" />
+										Withdraw
+									</Button>
+								)}
+							</div>
 						</div>
-						{/* Desktop: text buttons */}
-						<div className="hidden items-center gap-2 sm:flex">
-							{canDeposit && (
-								<Button outline onClick={() => setShowDeposit(true)}>
-									<ArrowDownLeftIcon className="size-4 text-emerald-500" />
-									Add Funds
-								</Button>
-							)}
-							{canWithdraw && (
-								<Button color="dark/zinc" onClick={() => setShowWithdraw(true)}>
-									<ArrowUpRightIcon className="size-4" />
-									Withdraw
-								</Button>
-							)}
-						</div>
-					</div>
-				)}
-			</div>
+					) : undefined
+				}
+			/>
 
 			{/* Balance Card */}
-			<div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+			<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
 				{/* Hero row — balance + bar side by side on desktop */}
 				<div className="p-4 sm:p-5">
 					<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">

@@ -12,11 +12,9 @@ import {
 } from "@heroicons/react/16/solid";
 import { useRef, useState } from "react";
 import { Button } from "@/components/button";
-import { Heading } from "@/components/heading";
 import { Input } from "@/components/input";
-import { Card } from "@/components/shared/card";
+import { ContentCard, PageHeader } from "@/components/page-header";
 import { MenuRow, MenuSection, MenuSectionHeader, MenuSeparator } from "@/components/shared/menu-list";
-import { Text } from "@/components/text";
 import { Textarea } from "@/components/textarea";
 
 // =============================================================================
@@ -131,7 +129,7 @@ function ContactForm() {
 
 	if (isSubmitted) {
 		return (
-			<div className="flex flex-col items-center rounded-xl bg-emerald-50/60 px-6 py-8 text-center ring-1 ring-inset ring-emerald-200/40 dark:bg-emerald-950/15 dark:ring-emerald-800/30">
+			<div className="flex flex-col items-center rounded-xl bg-emerald-50/60 px-6 py-8 text-center shadow-sm ring-1 ring-emerald-200 dark:bg-emerald-950/15 dark:ring-emerald-800">
 				<div className="flex size-12 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-900/40">
 					<CheckCircleIcon className="size-6 text-emerald-600 dark:text-emerald-400" />
 				</div>
@@ -188,12 +186,7 @@ export function Support() {
 	return (
 		<div className="space-y-6 pb-20">
 			{/* Header */}
-			<div className="flex items-start justify-between gap-4">
-				<div>
-					<Heading>Help & Support</Heading>
-					<Text className="mt-1">Get help with Hypedrive or contact our support team</Text>
-				</div>
-			</div>
+			<PageHeader title="Help & Support" description="Get help with Hypedrive or contact our support team" />
 
 			{/* Support Hero */}
 			<div className="overflow-hidden rounded-xl bg-zinc-900 p-5 dark:bg-zinc-800">
@@ -270,7 +263,7 @@ export function Support() {
 			{/* FAQ */}
 			<div>
 				<MenuSectionHeader>Frequently Asked Questions</MenuSectionHeader>
-				<Card padding="none">
+				<ContentCard padding="none">
 					{faqs.map((faq, index) => (
 						<FAQItem
 							key={index}
@@ -280,15 +273,15 @@ export function Support() {
 							onToggle={() => setOpenFAQ(openFAQ === index ? null : index)}
 						/>
 					))}
-				</Card>
+				</ContentCard>
 			</div>
 
 			{/* Contact Form */}
 			<div>
 				<MenuSectionHeader>Send us a message</MenuSectionHeader>
-				<Card padding="md">
+				<ContentCard padding="md">
 					<ContactForm />
-				</Card>
+				</ContentCard>
 			</div>
 		</div>
 	);

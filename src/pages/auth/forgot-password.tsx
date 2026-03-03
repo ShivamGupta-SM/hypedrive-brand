@@ -145,6 +145,8 @@ export function ForgotPassword() {
 						disabled={isPending}
 						autoComplete="username"
 						autoCapitalize="none"
+						autoCorrect="off"
+						spellCheck={false}
 						inputMode="email"
 						placeholder="you@example.com"
 						data-invalid={errors.email ? true : undefined}

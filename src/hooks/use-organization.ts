@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { brand, internal, StreamIn } from "@/lib/brand-client";
+import type { internal, StreamIn } from "@/lib/brand-client";
 import { useOrganizationStore } from "@/store/organization-store";
-import { getAuthenticatedClient, queryKeys } from "./api-client";
+import { CACHE, getAuthenticatedClient, organizationActivityQueryOptions, queryKeys, setupProgressQueryOptions } from "./api-client";
 
 // Re-export for components ABOVE the $orgSlug route tree (NotificationPopover,
 // SearchDialog, approval pages). Pages inside $orgSlug should use useOrgContext().
@@ -72,195 +72,16 @@ export function useOrganizationActivity(
 	}
 ) {
 	const query = useQuery({
-		queryKey: queryKeys.organizationActivity(organizationId || "", params),
-		queryFn: async () => {
-			const client = getAuthenticatedClient();
-			return client.brand.getOrganizationActivity(organizationId as string, {
-				cursor: params?.cursor,
-				limit: params?.limit,
-				entityType: params?.entityType,
-			});
-		},
+		...organizationActivityQueryOptions(organizationId || "", params),
 		enabled: !!organizationId,
 	});
 
 	return {
 		data: query.data ?? null,
-		loading: query.isLoading,
+		loading: query.isPending,
 		error: query.error,
 		refetch: query.refetch,
 	};
-}
-
-// =============================================================================
-// ORGANIZATION SETTINGS
-// =============================================================================
-
-export function useOrganizationSettings(organizationId: string | undefined) {
-	const query = useQuery({
-		queryKey: queryKeys.organization(organizationId || ""),
-		queryFn: async () => {
-			const client = getAuthenticatedClient();
-			return client.brand.getOrganization(organizationId as string);
-		},
-		enabled: !!organizationId,
-		staleTime: 10 * 60 * 1000, // 10 min — org settings rarely change
-	});
-
-	return {
-		data: query.data ?? null,
-		loading: query.isLoading,
-		error: query.error,
-		refetch: query.refetch,
-	};
-}
-
-export function useUpdateOrganizationSettings(organizationId: string | undefined) {
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: async (params: {
-			name?: string;
-			description?: string;
-			website?: string;
-			logo?: string;
-			businessType?: "pvt_ltd" | "llp" | "partnership" | "proprietorship" | "public_ltd" | "trust" | "society";
-			industryCategory?: string;
-			contactPerson?: string;
-			email?: string;
-			address?: string;
-			city?: string;
-			state?: string;
-			country?: string;
-			postalCode?: string;
-		}) => {
-			const client = getAuthenticatedClient();
-			return client.brand.updateOrganization(organizationId as string, params);
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.organization(organizationId || "") });
-			queryClient.invalidateQueries({ queryKey: queryKeys.organizationProfile() });
-		},
-	});
-}
-
-export function useChangeOrgPhone(organizationId: string | undefined) {
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: async (params: { phoneNumber: string; passkeyResponse: unknown; challengeId: string }) => {
-			const client = getAuthenticatedClient();
-			return client.brand.changeOrgPhone(organizationId as string, params);
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.organization(organizationId || "") });
-		},
-	});
-}
-
-// =============================================================================
-// BANK ACCOUNT
-// =============================================================================
-
-export function useBankAccount(organizationId: string | undefined) {
-	const query = useQuery({
-		queryKey: queryKeys.bankAccount(organizationId || ""),
-		queryFn: async () => {
-			const client = getAuthenticatedClient();
-			return client.brand.getOrganizationBankAccount(organizationId as string, {});
-		},
-		enabled: !!organizationId,
-		staleTime: 10 * 60 * 1000, // 10 min — bank account rarely changes
-	});
-
-	return {
-		data: query.data?.bankAccount ?? null,
-		loading: query.isLoading,
-		error: query.error,
-		refetch: query.refetch,
-	};
-}
-
-export function useVerifyBankAccount(organizationId: string | undefined) {
-	return useMutation({
-		mutationFn: async (params: brand.VerifyBankAccountDetailsRequest) => {
-			const client = getAuthenticatedClient();
-			return client.brand.verifyBankAccountDetails(organizationId as string, params);
-		},
-	});
-}
-
-export function useAddBankAccount(organizationId: string | undefined) {
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: async (params: brand.AddBankAccountRequest) => {
-			const client = getAuthenticatedClient();
-			return client.brand.addBankAccount(organizationId as string, params);
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.bankAccount(organizationId || "") });
-		},
-	});
-}
-
-export function useDeleteBankAccount() {
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: async ({ organizationId }: { organizationId: string }) => {
-			const client = getAuthenticatedClient();
-			return client.brand.deleteBankAccount(organizationId);
-		},
-		onSuccess: (_, variables) => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.bankAccount(variables.organizationId) });
-		},
-	});
-}
-
-// =============================================================================
-// GST
-// =============================================================================
-
-export function useGSTDetails(organizationId: string | undefined) {
-	const query = useQuery({
-		queryKey: queryKeys.gstDetails(organizationId || ""),
-		queryFn: async () => {
-			const client = getAuthenticatedClient();
-			return client.brand.getGSTDetails(organizationId as string);
-		},
-		enabled: !!organizationId,
-		staleTime: 15 * 60 * 1000, // 15 min — GST details almost never change
-	});
-
-	return {
-		data: query.data ?? null,
-		loading: query.isLoading,
-		error: query.error,
-		refetch: query.refetch,
-	};
-}
-
-export function useVerifyGSTPreview() {
-	return useMutation({
-		mutationFn: async (params: { gstNumber: string }) => {
-			const client = getAuthenticatedClient();
-			return client.brand.verifyGSTPreview(params);
-		},
-	});
-}
-
-/**
- * Enrich a company domain — auto-fill org details (logo, industry, name, etc.)
- * during onboarding or org creation.
- */
-export function useEnrichPreview() {
-	return useMutation({
-		mutationFn: async (params: { domain: string; name?: string }) => {
-			const client = getAuthenticatedClient();
-			return client.enrichment.enrichPreview(params);
-		},
-	});
 }
 
 // =============================================================================
@@ -269,17 +90,13 @@ export function useEnrichPreview() {
 
 export function useSetupProgress(organizationId: string | undefined) {
 	const query = useQuery({
-		queryKey: queryKeys.setupProgress(organizationId || ""),
-		queryFn: async () => {
-			const client = getAuthenticatedClient();
-			return client.brand.getSetupProgress(organizationId as string);
-		},
+		...setupProgressQueryOptions(organizationId || ""),
 		enabled: !!organizationId,
 	});
 
 	return {
 		data: query.data ?? null,
-		loading: query.isLoading,
+		loading: query.isPending,
 		error: query.error,
 		refetch: query.refetch,
 	};
@@ -392,150 +209,16 @@ export function useUnifiedSearch(
 		},
 		enabled: !!organizationId && params.q.length >= 2,
 		placeholderData: (prev) => prev,
-		staleTime: 60_000,
+		staleTime: CACHE.activity,
 	});
 
 	return {
 		data: query.data ?? null,
-		loading: query.isLoading,
+		loading: query.isPending,
 		isFetching: query.isFetching,
 		error: query.error,
 		refetch: query.refetch,
 	};
-}
-
-// =============================================================================
-// NOTIFICATION PREFERENCES
-// =============================================================================
-
-export function useUpdateNotificationPreferences(organizationId: string | undefined) {
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: async (params: Record<string, unknown>) => {
-			const client = getAuthenticatedClient();
-			return client.brand.updatePreferences(organizationId as string, params);
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: queryKeys.notificationPreferences(organizationId || ""),
-			});
-		},
-	});
-}
-
-// =============================================================================
-// NOTIFICATIONS (In-App)
-// =============================================================================
-
-/**
- * Note: listNotifications returns void from the API currently.
- * We call it anyway so the request fires; when the API is updated
- * to return data, this hook will start working automatically.
- */
-export function useNotifications(
-	organizationId: string | undefined,
-	params?: { limit?: number; offset?: number; unreadOnly?: boolean }
-) {
-	const query = useQuery({
-		queryKey: queryKeys.notifications(organizationId || "", params),
-		queryFn: async () => {
-			const client = getAuthenticatedClient();
-			return client.brand.listNotifications(organizationId as string, params || {});
-		},
-		enabled: !!organizationId,
-	});
-
-	return { data: query.data, loading: query.isLoading, error: query.error, refetch: query.refetch };
-}
-
-export function useUnreadCount(organizationId: string | undefined) {
-	const query = useQuery({
-		queryKey: queryKeys.unreadCount(organizationId || ""),
-		queryFn: async () => {
-			const client = getAuthenticatedClient();
-			return client.brand.getUnreadCount(organizationId as string);
-		},
-		enabled: !!organizationId,
-		refetchInterval: 30000, // Poll every 30s for unread count
-	});
-
-	return { data: query.data, loading: query.isLoading, error: query.error, refetch: query.refetch };
-}
-
-export function useMarkNotificationRead(organizationId: string | undefined) {
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: async (ids: string[]) => {
-			const client = getAuthenticatedClient();
-			return client.brand.markRead(organizationId as string, { ids });
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.notifications(organizationId || "") });
-			queryClient.invalidateQueries({ queryKey: queryKeys.unreadCount(organizationId || "") });
-		},
-	});
-}
-
-export function useMarkAllNotificationsRead(organizationId: string | undefined) {
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: async () => {
-			const client = getAuthenticatedClient();
-			return client.brand.markAllRead(organizationId as string);
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.notifications(organizationId || "") });
-			queryClient.invalidateQueries({ queryKey: queryKeys.unreadCount(organizationId || "") });
-		},
-	});
-}
-
-export function useArchiveNotifications(organizationId: string | undefined) {
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: async (ids: string[]) => {
-			const client = getAuthenticatedClient();
-			return client.brand.archiveNotifications(organizationId as string, { ids });
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.notifications(organizationId || "") });
-			queryClient.invalidateQueries({ queryKey: queryKeys.unreadCount(organizationId || "") });
-		},
-	});
-}
-
-export function useDeleteNotifications(organizationId: string | undefined) {
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: async (ids: string[]) => {
-			const client = getAuthenticatedClient();
-			return client.brand.deleteNotifications(organizationId as string, { ids });
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.notifications(organizationId || "") });
-			queryClient.invalidateQueries({ queryKey: queryKeys.unreadCount(organizationId || "") });
-		},
-	});
-}
-
-export function useDeleteAllNotifications(organizationId: string | undefined) {
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: async () => {
-			const client = getAuthenticatedClient();
-			return client.brand.deleteAllNotifications(organizationId as string);
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.notifications(organizationId || "") });
-			queryClient.invalidateQueries({ queryKey: queryKeys.unreadCount(organizationId || "") });
-		},
-	});
 }
 
 // =============================================================================
@@ -554,100 +237,10 @@ export function useActiveMember(organizationId: string | undefined) {
 
 	return {
 		data: query.data?.member ?? null,
-		loading: query.isLoading,
+		loading: query.isPending,
 		error: query.error,
 		refetch: query.refetch,
 	};
-}
-
-// =============================================================================
-// PUSH NOTIFICATION TOKENS
-// =============================================================================
-
-export function useRegisterPushToken(organizationId: string | undefined) {
-	return useMutation({
-		mutationFn: async (params: { token: string; platform: "ios" | "android" | "web" }) => {
-			const client = getAuthenticatedClient();
-			return client.brand.registerToken(organizationId as string, params);
-		},
-	});
-}
-
-export function useRemovePushToken(organizationId: string | undefined) {
-	return useMutation({
-		mutationFn: async (token: string) => {
-			const client = getAuthenticatedClient();
-			return client.brand.removeToken(organizationId as string, { token });
-		},
-	});
-}
-
-export function useListPushTokens(organizationId: string | undefined) {
-	const query = useQuery({
-		queryKey: queryKeys.pushTokens(organizationId || ""),
-		queryFn: async () => {
-			const client = getAuthenticatedClient();
-			return client.brand.listTokens(organizationId as string);
-		},
-		enabled: !!organizationId,
-	});
-
-	return { data: query.data, loading: query.isLoading, error: query.error, refetch: query.refetch };
-}
-
-// =============================================================================
-// ORGANIZATION ROLES
-// =============================================================================
-
-export function useOrganizationRoles(organizationId: string | undefined) {
-	const query = useQuery({
-		queryKey: queryKeys.organizationRoles(organizationId || ""),
-		queryFn: async () => {
-			const client = getAuthenticatedClient();
-			return client.auth.listOrganizationRoles(organizationId as string);
-		},
-		enabled: !!organizationId,
-		staleTime: 10 * 60 * 1000, // 10 min — roles rarely change
-	});
-
-	return {
-		data: query.data?.roles ?? [],
-		loading: query.isLoading,
-		error: query.error,
-		refetch: query.refetch,
-	};
-}
-
-export function useCreateOrganizationRole(organizationId: string | undefined) {
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: async (params: { role: string; permission?: { [key: string]: string[] } }) => {
-			const client = getAuthenticatedClient();
-			return client.auth.createOrganizationRole(organizationId as string, params);
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: queryKeys.organizationRoles(organizationId || ""),
-			});
-		},
-	});
-}
-
-export function useDeleteOrganizationRole(organizationId: string | undefined) {
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: async (roleId: string) => {
-			const client = getAuthenticatedClient();
-			return client.auth.deleteOrganizationRole(organizationId as string, roleId);
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: queryKeys.organizationRoles(organizationId || ""),
-			});
-		},
-	});
 }
 
 // =============================================================================
@@ -666,7 +259,7 @@ export function useWithdrawalDetail(organizationId: string | undefined, withdraw
 
 	return {
 		data: query.data ?? null,
-		loading: query.isLoading,
+		loading: query.isPending,
 		error: query.error,
 		refetch: query.refetch,
 	};

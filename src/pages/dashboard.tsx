@@ -17,9 +17,8 @@ import { Badge } from "@/components/badge";
 import { Button } from "@/components/button";
 import { AreaChart } from "@/components/charts";
 import { EnrollmentCardInline } from "@/components/enrollment-card";
-import { Heading } from "@/components/heading";
 import { Link } from "@/components/link";
-import { Card } from "@/components/shared/card";
+import { ContentCard, PageHeader } from "@/components/page-header";
 import { ErrorState } from "@/components/shared/error-state";
 import { IconButton } from "@/components/shared/icon-button";
 import { Skeleton } from "@/components/skeleton";
@@ -117,7 +116,7 @@ function DashboardAlertBar({
 	return (
 		<div className="space-y-2">
 			{isLowBalance && (
-				<div className="flex items-center gap-3 rounded-xl bg-amber-50/60 px-3 py-2.5 ring-1 ring-inset ring-amber-200/50 sm:px-4 sm:py-3 dark:bg-amber-950/10 dark:ring-amber-800/30">
+				<div className="flex items-center gap-3 rounded-xl bg-amber-50/60 px-3 py-2.5 shadow-sm ring-1 ring-amber-200 sm:px-4 sm:py-3 dark:bg-amber-950/10 dark:ring-amber-800">
 					<div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/30">
 						<WalletIcon className="size-4 text-amber-600 dark:text-amber-400" />
 					</div>
@@ -138,7 +137,7 @@ function DashboardAlertBar({
 				</div>
 			)}
 			{hasOverdue && (
-				<div className="flex items-center gap-3 rounded-xl bg-red-50/60 px-3 py-2.5 ring-1 ring-inset ring-red-200/50 sm:px-4 sm:py-3 dark:bg-red-950/10 dark:ring-red-800/30">
+				<div className="flex items-center gap-3 rounded-xl bg-red-50/60 px-3 py-2.5 shadow-sm ring-1 ring-red-200 sm:px-4 sm:py-3 dark:bg-red-950/10 dark:ring-red-800">
 					<div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/30">
 						<ExclamationCircleIcon className="size-4 text-red-600 dark:text-red-400" />
 					</div>
@@ -254,7 +253,7 @@ function CampaignPulse({
 	];
 
 	return (
-		<Card padding="md">
+		<ContentCard padding="md">
 			<SectionHeader title="Campaigns" icon={MegaphoneIcon} viewAllHref={`/${orgSlug}/campaigns`} />
 
 			<div className="mt-3 flex items-baseline gap-2">
@@ -277,12 +276,12 @@ function CampaignPulse({
 			</div>
 
 			{stats.endingSoon > 0 && (
-				<div className="mt-3 flex items-center gap-2 rounded-lg bg-amber-50/60 px-3 py-2 ring-1 ring-inset ring-amber-200/40 dark:bg-amber-950/10 dark:ring-amber-800/30">
+				<div className="mt-3 flex items-center gap-2 rounded-lg bg-amber-50/60 px-3 py-2 shadow-sm ring-1 ring-amber-200 dark:bg-amber-950/10 dark:ring-amber-800">
 					<ClockIcon className="size-3.5 text-amber-500" />
 					<span className="text-xs font-medium text-amber-700 dark:text-amber-400">{stats.endingSoon} ending soon</span>
 				</div>
 			)}
-		</Card>
+		</ContentCard>
 	);
 }
 
@@ -316,7 +315,7 @@ function EnrollmentStats({
 	const total = stats.totalEnrollments;
 
 	return (
-		<Card padding="md">
+		<ContentCard padding="md">
 			<SectionHeader title="Enrollments" icon={UserGroupIcon} viewAllHref={`/${orgSlug}/enrollments`} />
 
 			<div className="mt-3 flex items-baseline gap-2">
@@ -376,7 +375,7 @@ function EnrollmentStats({
 					)}
 				</div>
 			</div>
-		</Card>
+		</ContentCard>
 	);
 }
 
@@ -405,7 +404,7 @@ function EnrollmentTrendChart({
 	}));
 
 	return (
-		<Card padding="md" className="overflow-hidden">
+		<ContentCard padding="md" className="overflow-hidden">
 			<SectionHeader title="Enrollment Trend" icon={ArrowTrendingUpIcon} viewAllHref={`/${orgSlug}/enrollments`} />
 			<div className="mt-3 h-48 sm:h-56">
 				<AreaChart
@@ -420,7 +419,7 @@ function EnrollmentTrendChart({
 					showLegend
 				/>
 			</div>
-		</Card>
+		</ContentCard>
 	);
 }
 
@@ -452,7 +451,7 @@ function TopCampaignsSection({
 	};
 
 	return (
-		<Card padding="md" className="overflow-hidden">
+		<ContentCard padding="md" className="overflow-hidden">
 			<SectionHeader title="Top Campaigns" icon={MegaphoneIcon} viewAllHref={`/${orgSlug}/campaigns`} />
 			<div className="mt-3 space-y-0.5">
 				{campaigns.slice(0, 5).map((campaign) => {
@@ -485,7 +484,7 @@ function TopCampaignsSection({
 					);
 				})}
 			</div>
-		</Card>
+		</ContentCard>
 	);
 }
 
@@ -512,7 +511,7 @@ function PendingReviewsSection({
 	if (items.length === 0 && totalPending === 0) return null;
 
 	return (
-		<Card padding="md" className="overflow-hidden">
+		<ContentCard padding="md" className="overflow-hidden">
 			<SectionHeader title="Pending Reviews" icon={ClockIcon} viewAllHref={`/${orgSlug}/enrollments`}>
 				{totalPending > 0 && (
 					<span className="flex size-5 items-center justify-center rounded-full bg-amber-100 text-[10px] font-bold tabular-nums text-amber-700 dark:bg-amber-900/40 dark:text-amber-400">
@@ -551,7 +550,7 @@ function PendingReviewsSection({
 					<p className="text-xs text-zinc-400 dark:text-zinc-500">No enrollments need review</p>
 				</div>
 			)}
-		</Card>
+		</ContentCard>
 	);
 }
 
@@ -588,7 +587,7 @@ function QuickActions({ orgSlug }: { orgSlug: string }) {
 	];
 
 	return (
-		<Card padding="none">
+		<ContentCard padding="none">
 			<div className="grid grid-cols-4">
 				{links.map((link) => (
 					<Link
@@ -604,7 +603,7 @@ function QuickActions({ orgSlug }: { orgSlug: string }) {
 					</Link>
 				))}
 			</div>
-		</Card>
+		</ContentCard>
 	);
 }
 
@@ -755,7 +754,7 @@ function NewUserWelcome({ brandName, orgSlug }: { brandName: string; orgSlug: st
 			</div>
 
 			{/* How it works */}
-			<Card padding="md">
+			<ContentCard padding="md">
 				<p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
 					How it works
 				</p>
@@ -775,7 +774,7 @@ function NewUserWelcome({ brandName, orgSlug }: { brandName: string; orgSlug: st
 						</div>
 					))}
 				</div>
-			</Card>
+			</ContentCard>
 
 			{/* Quick Actions — same as returning user */}
 			<QuickActions orgSlug={orgSlug} />
@@ -818,7 +817,7 @@ function SetupProgressChecklist({ organizationId, orgSlug }: { organizationId: s
 	const progressPct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
 	return (
-		<div className="rounded-xl bg-white ring-1 ring-inset ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
+		<div className="rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
 			<div className="p-4 sm:p-5">
 				<div className="flex items-center gap-3">
 					<div className="flex size-9 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
@@ -980,21 +979,17 @@ export function Dashboard() {
 	return (
 		<div className="min-w-0 space-y-4 sm:space-y-5">
 			{/* Header */}
-			<div className="flex items-start justify-between gap-4">
-				<div className="min-w-0">
-					<Heading>
-						{getGreeting()}, {brandName}
-					</Heading>
-					<p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
-						{isNewUser ? "Welcome to your dashboard" : formattedDate}
-					</p>
-				</div>
-				{!isNewUser && (
-					<IconButton color="zinc" href={`/${orgSlug}/campaigns`}>
-						<SparklesIcon className="size-5" />
-					</IconButton>
-				)}
-			</div>
+			<PageHeader
+				title={`${getGreeting()}, ${brandName}`}
+				description={isNewUser ? "Welcome to your dashboard" : formattedDate}
+				actions={
+					!isNewUser ? (
+						<IconButton color="zinc" href={`/${orgSlug}/campaigns`}>
+							<SparklesIcon className="size-5" />
+						</IconButton>
+					) : undefined
+				}
+			/>
 
 			{/* Setup progress checklist */}
 			{organizationId && <SetupProgressChecklist organizationId={organizationId} orgSlug={orgSlug} />}
@@ -1039,12 +1034,12 @@ export function Dashboard() {
 
 					{/* Activity Feed */}
 					{organizationId && (
-						<Card padding="md" className="overflow-hidden">
+						<ContentCard padding="md" className="overflow-hidden">
 							<SectionHeader title="Recent Activity" icon={ClockIcon} />
 							<div className="mt-3">
 								<ActivityFeed organizationId={organizationId} />
 							</div>
-						</Card>
+						</ContentCard>
 					)}
 				</>
 			)}

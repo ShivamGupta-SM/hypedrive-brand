@@ -11,6 +11,7 @@ import { Logo } from "@/components/logo";
 import { Strong, TextLink } from "@/components/text";
 import { useConfetti, useSendVerificationEmail } from "@/hooks";
 import { useRegister, useSocialLogin } from "@/hooks/use-auth";
+import { useAutofillSync } from "@/hooks/use-autofill-sync";
 import { FormError } from "./components";
 import { AuthShell } from "./login";
 
@@ -181,6 +182,12 @@ export function Register() {
 		defaultValues: { email: "", name: "", password: "", acceptTerms: false },
 	});
 
+	const { formRef, syncAutofill } = useAutofillSync(setValue, {
+		name: 'input[name="name"]',
+		email: 'input[name="email"]',
+		password: 'input[name="password"]',
+	});
+
 	const acceptTerms = watch("acceptTerms");
 
 	const handleResendVerification = useCallback(() => {
@@ -273,7 +280,15 @@ export function Register() {
 			</div>
 
 			{/* Form */}
-			<form onSubmit={handleSubmit(onSubmit)} className="space-y-3" autoComplete="on">
+			<form
+				ref={formRef}
+				onSubmit={(e) => {
+					syncAutofill();
+					handleSubmit(onSubmit)(e);
+				}}
+				className="space-y-3"
+				autoComplete="on"
+			>
 				<FormError message={displayError} />
 
 				<Field>
@@ -297,6 +312,8 @@ export function Register() {
 						disabled={anyPending}
 						autoComplete="email"
 						autoCapitalize="none"
+						autoCorrect="off"
+						spellCheck={false}
 						inputMode="email"
 						placeholder="you@example.com"
 						data-invalid={errors.email ? true : undefined}

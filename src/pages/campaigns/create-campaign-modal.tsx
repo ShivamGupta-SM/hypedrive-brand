@@ -39,6 +39,7 @@ import { NumberInput } from "@/components/number-input";
 import { Select } from "@/components/select";
 import { FilterChip } from "@/components/shared/filter-chip";
 import { WizardStepper } from "@/components/shared/wizard-stepper";
+import { Skeleton } from "@/components/skeleton";
 import { Switch } from "@/components/switch";
 import { Textarea } from "@/components/textarea";
 import {
@@ -130,29 +131,44 @@ function ReviewRow({ label, value }: { label: string; value: React.ReactNode }) 
 function ReviewCard({
 	icon: Icon,
 	title,
+	color = "zinc",
 	onEdit,
 	children,
 }: {
 	icon: React.ComponentType<{ className?: string }>;
 	title: string;
-	onEdit: () => void;
+	color?: "emerald" | "sky" | "amber" | "zinc" | "violet";
+	onEdit?: () => void;
 	children: React.ReactNode;
 }) {
+	const colorMap: Record<string, { bg: string; text: string }> = {
+		emerald: { bg: "bg-emerald-50 dark:bg-emerald-950/30", text: "text-emerald-600 dark:text-emerald-400" },
+		sky: { bg: "bg-sky-50 dark:bg-sky-950/30", text: "text-sky-600 dark:text-sky-400" },
+		amber: { bg: "bg-amber-50 dark:bg-amber-950/30", text: "text-amber-600 dark:text-amber-400" },
+		violet: { bg: "bg-violet-50 dark:bg-violet-950/30", text: "text-violet-600 dark:text-violet-400" },
+		zinc: { bg: "bg-zinc-100 dark:bg-zinc-800", text: "text-zinc-500 dark:text-zinc-400" },
+	};
+	const { bg, text } = colorMap[color] ?? colorMap.zinc;
+
 	return (
-		<div className="rounded-xl border border-zinc-200 p-3 sm:p-4 dark:border-zinc-700/50">
+		<div className="rounded-xl p-3 shadow-sm ring-1 ring-zinc-200 sm:p-4 dark:ring-zinc-800">
 			<div className="flex items-center justify-between">
 				<div className="flex items-center gap-2">
-					<Icon className="size-4 text-zinc-400" />
+					<div className={clsx("flex size-7 items-center justify-center rounded-lg", bg)}>
+						<Icon className={clsx("size-3.5", text)} />
+					</div>
 					<h4 className="text-xs font-medium text-zinc-900 sm:text-sm dark:text-white">{title}</h4>
 				</div>
-				<button
-					type="button"
-					onClick={onEdit}
-					className="flex items-center gap-1 text-xs font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
-				>
-					<PencilSquareIcon className="size-3" />
-					Edit
-				</button>
+				{onEdit && (
+					<button
+						type="button"
+						onClick={onEdit}
+						className="flex items-center gap-1 text-xs font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
+					>
+						<PencilSquareIcon className="size-3" />
+						Edit
+					</button>
+				)}
 			</div>
 			{children}
 		</div>
@@ -205,7 +221,7 @@ function TaskRequirementsDialog({
 					{/* Instructions */}
 					<Field>
 						<div className="flex items-center justify-between">
-							<Label>Instructions</Label>
+							<Label>Creator Instructions</Label>
 							<span
 								className={clsx(
 									"text-xs tabular-nums",
@@ -215,6 +231,7 @@ function TaskRequirementsDialog({
 								{instructions.length}/1000
 							</span>
 						</div>
+						<Description>Visible to creators when they view the task</Description>
 						<Textarea
 							value={instructions}
 							onChange={(e) => setInstructions(e.target.value)}
@@ -473,10 +490,10 @@ function TaskRequirementsDialog({
 									</div>
 								)}
 
-								{/* Seller Instructions */}
+								{/* Internal Notes */}
 								<Field>
-									<Label>Seller Instructions</Label>
-									<Description>Additional instructions visible only to the brand</Description>
+									<Label>Internal Notes</Label>
+									<Description>Private — only visible to your team, not creators</Description>
 									<Textarea
 										value={req.sellerInstructions ?? ""}
 										onChange={(e) => updateReq({ sellerInstructions: e.target.value })}
@@ -585,6 +602,31 @@ export function CreateCampaignModal({
 	const editingTask = editingTaskIdx !== null ? tasks[editingTaskIdx] : null;
 
 	const selectedListing = useMemo(() => listings.find((l) => l.id === listingId) ?? null, [listings, listingId]);
+
+	// Filter platforms: only show social platforms + listing's own platform
+	const filteredPlatforms = useMemo(() => {
+		const listingPlatformId = selectedListing?.platformId;
+		return platforms.filter((p) => p.type === "social" || p.id === listingPlatformId);
+	}, [platforms, selectedListing?.platformId]);
+
+	// Filter templates: non-social platform templates must match listing's platform
+	const filteredTemplates = useMemo(() => {
+		const listingPlatformId = selectedListing?.platformId;
+		return taskTemplates.filter((tpl) => {
+			if (!tpl.platformId) return true; // generic template
+			if (tpl.platformId === listingPlatformId) return true; // same platform
+			const tplPlatform = platforms.find((p) => p.id === tpl.platformId);
+			return tplPlatform?.type === "social"; // social = cross-platform allowed
+		});
+	}, [taskTemplates, selectedListing?.platformId, platforms]);
+
+	// Reset platform selection if it's no longer valid for the chosen listing
+	// biome-ignore lint/correctness/useExhaustiveDependencies: only reset when filtered list changes
+	useEffect(() => {
+		if (selectedPlatformId && !filteredPlatforms.some((p) => p.id === selectedPlatformId)) {
+			setSelectedPlatformId("");
+		}
+	}, [filteredPlatforms]);
 
 	// ---- Scroll to top on step change ----
 
@@ -750,12 +792,11 @@ export function CreateCampaignModal({
 					icon={MegaphoneIcon}
 					iconColor="emerald"
 					title="Create Campaign"
-					description={`Step ${step + 1} of ${STEPS.length} · ${STEPS[step]}`}
 					onClose={handleClose}
 				/>
 
 				{/* Stepper */}
-				<div className="mt-4" ref={stepTopRef}>
+				<div className="mt-3 border-t border-zinc-100 pt-4 dark:border-zinc-800" ref={stepTopRef}>
 					<WizardStepper steps={STEPS} currentStep={step} completedSteps={completedSteps} onStepClick={goToStep} />
 				</div>
 
@@ -764,6 +805,14 @@ export function CreateCampaignModal({
 					{/* Step 0: Select Listing */}
 					{step === 0 && (
 						<div className="space-y-4">
+							{/* Section header */}
+							<div className="flex items-center gap-2">
+								<div className="flex size-7 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
+									<CubeIcon className="size-3.5 text-zinc-500 dark:text-zinc-400" />
+								</div>
+								<p className="text-sm font-medium text-zinc-900 dark:text-white">Select a Listing</p>
+							</div>
+
 							<InputGroup>
 								<MagnifyingGlassIcon data-slot="icon" />
 								<Input
@@ -776,19 +825,30 @@ export function CreateCampaignModal({
 
 							{errors.listingId && <p className="text-sm text-red-500">{errors.listingId.message}</p>}
 
-							<div className="-mx-1 -my-1 max-h-72 space-y-1.5 overflow-y-auto px-1 py-1">
+							<div className="max-h-72 overflow-y-auto rounded-xl ring-1 ring-zinc-200 dark:ring-zinc-800">
 								{listingsLoading ? (
-									<div className="flex items-center justify-center py-12">
-										<ArrowPathIcon className="size-5 animate-spin text-zinc-400" />
+									<div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+										{Array.from({ length: 4 }).map((_, i) => (
+											<div key={i} className="flex items-center gap-3 px-3 py-2.5">
+												<Skeleton width={44} height={44} borderRadius={8} />
+												<div className="flex-1 space-y-1.5">
+													<Skeleton width="60%" height={14} />
+													<Skeleton width="30%" height={12} />
+												</div>
+											</div>
+										))}
 									</div>
 								) : listings.length === 0 ? (
-									<div className="rounded-xl bg-zinc-50 py-10 text-center dark:bg-zinc-800/50">
-										<CubeIcon className="mx-auto size-8 text-zinc-300 dark:text-zinc-600" />
-										<p className="mt-2 text-sm font-medium text-zinc-500">No listings found</p>
-										<p className="mt-0.5 text-xs text-zinc-400">Create a listing first</p>
+									<div className="rounded-xl border-2 border-dashed border-zinc-200 py-10 text-center dark:border-zinc-700">
+										<div className="mx-auto flex size-12 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800">
+											<CubeIcon className="size-6 text-zinc-400 dark:text-zinc-500" />
+										</div>
+										<p className="mt-3 text-sm font-medium text-zinc-500">No listings found</p>
+										<p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">Create a product listing first, then come back to create a campaign.</p>
 									</div>
 								) : (
-									listings.map((listing) => {
+									<div className="divide-y divide-zinc-100 p-1 dark:divide-zinc-800">
+									{listings.map((listing) => {
 										const selected = listingId === listing.id;
 										return (
 											<button
@@ -796,7 +856,7 @@ export function CreateCampaignModal({
 												type="button"
 												onClick={() => setValue("listingId", listing.id, { shouldValidate: true })}
 												className={clsx(
-													"flex w-full items-center gap-3 rounded-xl p-3 text-left transition-all",
+													"flex w-full items-center gap-3 rounded-lg p-2.5 text-left transition-all",
 													selected
 														? "bg-emerald-50 ring-2 ring-emerald-500/60 dark:bg-emerald-950/30 dark:ring-emerald-500/40"
 														: "hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
@@ -820,7 +880,8 @@ export function CreateCampaignModal({
 												{selected && <CheckCircleIcon className="size-5 shrink-0 text-emerald-500" />}
 											</button>
 										);
-									})
+									})}
+									</div>
 								)}
 							</div>
 						</div>
@@ -828,6 +889,13 @@ export function CreateCampaignModal({
 
 					{/* Step 1: Campaign Details */}
 					{step === 1 && (
+						<div className="rounded-xl p-3 shadow-sm ring-1 ring-zinc-200 sm:p-4 dark:ring-zinc-800">
+							<div className="mb-3 flex items-center gap-2 sm:mb-4">
+								<div className="flex size-7 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-950/30">
+									<MegaphoneIcon className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+								</div>
+								<p className="text-sm font-medium text-zinc-900 dark:text-white">Campaign Details</p>
+							</div>
 						<FieldGroup>
 							<Field>
 								<Label>
@@ -929,15 +997,18 @@ export function CreateCampaignModal({
 								</div>
 							</Field>
 						</FieldGroup>
+						</div>
 					)}
 
 					{/* Step 2: Schedule & Settings */}
 					{step === 2 && (
 						<div className="space-y-5">
 							{/* Schedule Section */}
-							<div className="rounded-xl border border-zinc-200 p-3 sm:p-4 dark:border-zinc-700/50">
+							<div className="rounded-xl p-3 shadow-sm ring-1 ring-zinc-200 sm:p-4 dark:ring-zinc-800">
 								<div className="mb-3 flex items-center gap-2 sm:mb-4">
-									<CalendarIcon className="size-4 text-zinc-400" />
+									<div className="flex size-7 items-center justify-center rounded-lg bg-sky-50 dark:bg-sky-950/30">
+										<CalendarIcon className="size-3.5 text-sky-600 dark:text-sky-400" />
+									</div>
 									<p className="text-sm font-medium text-zinc-900 dark:text-white">Campaign Schedule</p>
 								</div>
 								<div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -993,9 +1064,11 @@ export function CreateCampaignModal({
 							</div>
 
 							{/* Capacity & Terms Section */}
-							<div className="rounded-xl border border-zinc-200 p-3 sm:p-4 dark:border-zinc-700/50">
+							<div className="rounded-xl p-3 shadow-sm ring-1 ring-zinc-200 sm:p-4 dark:ring-zinc-800">
 								<div className="mb-3 flex items-center gap-2 sm:mb-4">
-									<CubeIcon className="size-4 text-zinc-400" />
+									<div className="flex size-7 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-950/30">
+										<CubeIcon className="size-3.5 text-amber-600 dark:text-amber-400" />
+									</div>
 									<p className="text-sm font-medium text-zinc-900 dark:text-white">Capacity & Terms</p>
 								</div>
 								<FieldGroup className="space-y-4!">
@@ -1043,45 +1116,65 @@ export function CreateCampaignModal({
 							</div>
 
 							{/* Task Selection Section */}
-							<div className="rounded-xl border border-zinc-200 p-3 sm:p-4 dark:border-zinc-700/50">
-								<div className="mb-1">
-									<div className="flex items-center gap-2">
-										<RocketLaunchIcon className="size-4 text-zinc-400" />
-										<p className="text-sm font-medium text-zinc-900 dark:text-white">Tasks</p>
-										{tasks.length > 0 && <Badge color="emerald">{tasks.length}</Badge>}
-										<Badge color="zinc" className="ml-auto">
-											Optional
-										</Badge>
+							<div className="rounded-xl p-3 shadow-sm ring-1 ring-zinc-200 sm:p-4 dark:ring-zinc-800">
+								<div className="flex items-center gap-2">
+									<div className="flex size-7 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-950/30">
+										<RocketLaunchIcon className="size-3.5 text-emerald-600 dark:text-emerald-400" />
 									</div>
-									<p className="mt-1.5 text-xs text-zinc-500 dark:text-zinc-400">
-										Add tasks to submit for approval immediately, or skip to save as draft.
-									</p>
+									<div className="min-w-0 flex-1">
+										<p className="text-sm font-medium text-zinc-900 dark:text-white">Creator Tasks</p>
+									</div>
+									{tasks.length > 0 && (
+										<span className="flex size-5 items-center justify-center rounded-full bg-emerald-100 text-[10px] font-bold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+											{tasks.length}
+										</span>
+									)}
+									<Badge color="zinc">Optional</Badge>
 								</div>
+								<p className="mt-1 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
+									Define what creators need to do. Add tasks now to submit for approval, or skip to save as draft.
+								</p>
 
 								{/* Added tasks */}
 								{tasks.length > 0 && (
-									<div className="mt-3 space-y-2">
-										{tasks.map((task, idx) => (
-											<div
-												key={task.id}
-												className="rounded-lg border border-zinc-100 bg-zinc-50/50 p-2.5 dark:border-zinc-700/50 dark:bg-zinc-800/30"
-											>
-												<div className="flex items-center justify-between">
-													<div className="flex items-center gap-2 min-w-0">
-														<span className="flex size-5 shrink-0 items-center justify-center rounded bg-zinc-200 text-[10px] font-bold text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">
-															{idx + 1}
-														</span>
-														{(() => {
-															const PIcon = task.platformName ? getPlatformIcon(task.platformName) : null;
-															return PIcon ? (
-																<PIcon className={`size-4 shrink-0 ${getPlatformColor(task.platformName || "")}`} />
-															) : null;
-														})()}
-														<span className="truncate text-sm font-medium text-zinc-900 dark:text-white">
+									<div className="mt-3 divide-y divide-zinc-100 overflow-hidden rounded-lg border border-zinc-100 dark:divide-zinc-700/50 dark:border-zinc-700/50">
+										{tasks.map((task, idx) => {
+											const PIcon = task.platformName ? getPlatformIcon(task.platformName) : null;
+											const hasCustomizations =
+												task.instructions ||
+												(task.requirements?.requiredHashtags?.length ?? 0) > 0 ||
+												(task.requirements?.requiredMentions?.length ?? 0) > 0;
+											return (
+												<div
+													key={task.id}
+													className="group flex items-center gap-2.5 bg-white px-3 py-2.5 transition-colors hover:bg-zinc-50/80 dark:bg-zinc-900 dark:hover:bg-zinc-800/50"
+												>
+													{/* Number */}
+													<span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-zinc-100 text-[10px] font-bold tabular-nums text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+														{idx + 1}
+													</span>
+
+													{/* Platform icon */}
+													{PIcon && (
+														<PIcon className={`size-4 shrink-0 ${getPlatformColor(task.platformName || "")}`} />
+													)}
+
+													{/* Name + meta */}
+													<div className="min-w-0 flex-1">
+														<p className="truncate text-sm font-medium text-zinc-900 dark:text-white">
 															{task.taskTemplateName}
-														</span>
+														</p>
+														{task.instructions ? (
+															<p className="truncate text-[11px] text-zinc-400 dark:text-zinc-500">
+																{task.instructions}
+															</p>
+														) : hasCustomizations ? (
+															<p className="text-[11px] text-emerald-600 dark:text-emerald-400">Customized</p>
+														) : null}
 													</div>
-													<div className="flex items-center gap-1 shrink-0">
+
+													{/* Actions */}
+													<div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
 														<button
 															type="button"
 															onClick={() => {
@@ -1089,47 +1182,44 @@ export function CreateCampaignModal({
 																setHashtagInput("");
 																setMentionInput("");
 															}}
-															className="rounded p-1 text-zinc-400 hover:bg-zinc-200 hover:text-zinc-600 dark:hover:bg-zinc-700 dark:hover:text-zinc-300"
+															className="rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-700 dark:hover:text-zinc-200"
+															title="Edit task"
 														>
 															<PencilSquareIcon className="size-3.5" />
 														</button>
 														<button
 															type="button"
 															onClick={() => setTasks((prev) => prev.filter((_, i) => i !== idx))}
-															className="rounded p-1 text-zinc-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/30 dark:hover:text-red-400"
+															className="rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/30 dark:hover:text-red-400"
+															title="Remove task"
 														>
 															<XMarkIcon className="size-3.5" />
 														</button>
 													</div>
 												</div>
-												{task.instructions && (
-													<p className="mt-1 ml-7 text-xs text-zinc-500 dark:text-zinc-400 line-clamp-1">
-														{task.instructions}
-													</p>
-												)}
-											</div>
-										))}
+											);
+										})}
 									</div>
 								)}
 
-								{/* Add task — Platform then Task Type */}
-								<div className="mt-3 space-y-2">
-									<div className="flex items-end gap-2">
-										<Field className="flex-1">
-											<Label>Platform</Label>
+								{/* Add task — Platform + Task Type */}
+								<div className={clsx("space-y-3", tasks.length > 0 ? "mt-3" : "mt-4")}>
+									<div className="grid grid-cols-2 gap-2">
+										<Field>
+											<Label className="text-[11px]! uppercase tracking-wider text-zinc-400! dark:text-zinc-500!">
+												Platform
+											</Label>
 											{platformsLoading ? (
-												<div className="flex items-center py-2">
-													<ArrowPathIcon className="size-4 animate-spin text-zinc-400" />
-												</div>
+												<Select disabled>
+													<option>Loading…</option>
+												</Select>
 											) : (
 												<Select
 													value={selectedPlatformId}
-													onChange={(e) => {
-														setSelectedPlatformId(e.target.value);
-													}}
+													onChange={(e) => setSelectedPlatformId(e.target.value)}
 												>
 													<option value="">All platforms</option>
-													{platforms.map((p) => (
+													{filteredPlatforms.map((p) => (
 														<option key={p.id} value={p.id}>
 															{p.name}
 														</option>
@@ -1137,30 +1227,32 @@ export function CreateCampaignModal({
 												</Select>
 											)}
 										</Field>
-										<Field className="flex-1">
-											<Label>{tasks.length > 0 ? "Add another task" : "Task type"}</Label>
+										<Field>
+											<Label className="text-[11px]! uppercase tracking-wider text-zinc-400! dark:text-zinc-500!">
+												Task Type
+											</Label>
 											{templatesLoading ? (
-												<div className="flex items-center py-2">
-													<ArrowPathIcon className="size-4 animate-spin text-zinc-400" />
-												</div>
-											) : taskTemplates.length === 0 ? (
+												<Select disabled>
+													<option>Loading…</option>
+												</Select>
+											) : filteredTemplates.length === 0 ? (
 												<Select disabled>
 													<option>
-														{selectedPlatformId ? "No tasks for this platform" : "Select a platform first"}
+														{selectedPlatformId ? "No tasks available" : "Select platform first"}
 													</option>
 												</Select>
 											) : (
 												<Select
 													value=""
 													onChange={(e) => {
-														const tpl = taskTemplates.find((t) => t.id === e.target.value);
+														const tpl = filteredTemplates.find((t) => t.id === e.target.value);
 														if (!tpl) return;
-														const platform = platforms.find((p) => p.id === tpl.platformId);
+														const p = platforms.find((pl) => pl.id === tpl.platformId);
 														const entry: TaskEntry = {
 															id: nextTaskId(),
 															taskTemplateId: tpl.id,
 															taskTemplateName: tpl.name,
-															platformName: platform?.name || tpl.platformName,
+															platformName: p?.name || tpl.platformName,
 															category: tpl.category,
 															instructions: "",
 															requirements: tpl.defaultRequirements ?? {},
@@ -1169,14 +1261,14 @@ export function CreateCampaignModal({
 													}}
 												>
 													<option value="" disabled>
-														Select task type…
+														{tasks.length > 0 ? "Add another…" : "Select task…"}
 													</option>
-													{taskTemplates.map((tpl) => {
+													{filteredTemplates.map((tpl) => {
 														const alreadyAdded = tasks.some((t) => t.taskTemplateId === tpl.id);
 														return (
 															<option key={tpl.id} value={tpl.id} disabled={alreadyAdded}>
 																{tpl.name}
-																{alreadyAdded ? " (added)" : ""}
+																{alreadyAdded ? " ✓" : ""}
 															</option>
 														);
 													})}
@@ -1214,7 +1306,7 @@ export function CreateCampaignModal({
 					{step === 3 && (
 						<div className="space-y-4">
 							{/* Selected Listing */}
-							<ReviewCard icon={CubeIcon} title="Selected Listing" onEdit={() => goToStep(0)}>
+							<ReviewCard icon={CubeIcon} title="Selected Listing" color="zinc" onEdit={() => goToStep(0)}>
 								<div className="mt-3 flex items-center gap-3">
 									{selectedListing?.listingImages?.[0]?.imageUrl ? (
 										<img
@@ -1239,7 +1331,7 @@ export function CreateCampaignModal({
 							</ReviewCard>
 
 							{/* Campaign Details */}
-							<ReviewCard icon={MegaphoneIcon} title="Campaign Details" onEdit={() => goToStep(1)}>
+							<ReviewCard icon={MegaphoneIcon} title="Campaign Details" color="emerald" onEdit={() => goToStep(1)}>
 								<dl className="mt-3 space-y-2">
 									<ReviewRow label="Title" value={title || "—"} />
 									{description && (
@@ -1271,7 +1363,7 @@ export function CreateCampaignModal({
 							</ReviewCard>
 
 							{/* Schedule & Settings */}
-							<ReviewCard icon={CalendarIcon} title="Schedule & Settings" onEdit={() => goToStep(2)}>
+							<ReviewCard icon={CalendarIcon} title="Schedule & Settings" color="sky" onEdit={() => goToStep(2)}>
 								<dl className="mt-3 space-y-2">
 									<ReviewRow
 										label="Dates"
@@ -1289,34 +1381,47 @@ export function CreateCampaignModal({
 											}
 										/>
 									)}
-									{tasks.length > 0 && (
-										<ReviewRow
-											label={`Task${tasks.length > 1 ? "s" : ""}`}
-											value={
-												<div className="flex flex-wrap justify-end gap-1">
-													{tasks.map((t) => (
-														<Badge key={t.id} color="zinc">
-															{t.taskTemplateName}
-														</Badge>
-													))}
-												</div>
-											}
-										/>
-									)}
 								</dl>
 							</ReviewCard>
+
+							{/* Tasks */}
+							{tasks.length > 0 && (
+								<ReviewCard icon={RocketLaunchIcon} title={`Creator Tasks (${tasks.length})`} color="emerald" onEdit={() => goToStep(2)}>
+									<div className="mt-3 divide-y divide-zinc-100 overflow-hidden rounded-lg border border-zinc-100 dark:divide-zinc-700/50 dark:border-zinc-700/50">
+										{tasks.map((task, idx) => {
+											const PIcon = task.platformName ? getPlatformIcon(task.platformName) : null;
+											return (
+												<div key={task.id} className="flex items-center gap-2.5 bg-white px-3 py-2.5 dark:bg-zinc-900">
+													<span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-zinc-100 text-[10px] font-bold tabular-nums text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+														{idx + 1}
+													</span>
+													{PIcon && (
+														<PIcon className={`size-4 shrink-0 ${getPlatformColor(task.platformName || "")}`} />
+													)}
+													<p className="min-w-0 truncate text-sm font-medium text-zinc-900 dark:text-white">
+														{task.taskTemplateName}
+													</p>
+												</div>
+											);
+										})}
+									</div>
+								</ReviewCard>
+							)}
 						</div>
 					)}
 				</DialogBody>
 
 				<DialogActions>
-					<div className="flex flex-1 items-center">
+					<div className="flex flex-1 items-center gap-3">
 						{step > 0 && (
 							<Button type="button" onClick={() => goToStep(step - 1)} outline>
 								<ChevronLeftIcon />
 								Back
 							</Button>
 						)}
+						<span className="hidden text-xs tabular-nums text-zinc-400 dark:text-zinc-500 sm:block">
+							Step {step + 1} of {STEPS.length}
+						</span>
 					</div>
 					{step === 0 && (
 						<Button plain onClick={handleClose}>

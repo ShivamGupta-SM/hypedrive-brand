@@ -85,7 +85,7 @@ export function FinancialStatsGridBordered({ stats, loading = false, columns = 4
 	if (loading) {
 		return (
 			<dl
-				className={`grid ${gridColsClass} gap-px overflow-hidden rounded-xl border border-zinc-200 bg-zinc-200 shadow-sm dark:border-zinc-700 dark:bg-zinc-700`}
+				className={`grid ${gridColsClass} gap-px overflow-hidden rounded-xl bg-zinc-200 shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-700 dark:ring-zinc-800`}
 			>
 				{Array.from({ length: stats.length || columns }).map((_, i) => (
 					<div
@@ -103,7 +103,7 @@ export function FinancialStatsGridBordered({ stats, loading = false, columns = 4
 
 	return (
 		<dl
-			className={`grid ${gridColsClass} gap-px overflow-hidden rounded-xl border border-zinc-200 bg-zinc-200 shadow-sm dark:border-zinc-700 dark:bg-zinc-700`}
+			className={`grid ${gridColsClass} gap-px overflow-hidden rounded-xl bg-zinc-200 shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-700 dark:ring-zinc-800`}
 		>
 			{stats.map((stat) => (
 				<div

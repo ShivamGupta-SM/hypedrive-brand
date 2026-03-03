@@ -1,4 +1,7 @@
 // Shared components
+
+// Page-level layout components (upgraded system)
+export * from "../page-header";
 export * from "./card";
 export * from "./copy-button";
 export * from "./empty-state";
@@ -14,9 +17,5 @@ export {
 	TabButton,
 	TabGroup,
 } from "./filter-chip";
-export * from "./info-panel";
 export * from "./menu-list";
-export * from "./page-container";
-export * from "./section";
-export * from "./stats-row";
 export * from "./tab-nav";

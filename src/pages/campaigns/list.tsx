@@ -1,8 +1,13 @@
 import {
 	ArrowPathIcon,
+	CheckCircleIcon,
+	DocumentTextIcon,
 	ExclamationTriangleIcon,
 	MagnifyingGlassIcon,
+	NoSymbolIcon,
+	PauseCircleIcon,
 	PlusIcon,
+	Squares2X2Icon,
 	TableCellsIcon,
 	XMarkIcon,
 } from "@heroicons/react/16/solid";
@@ -10,14 +15,13 @@ import clsx from "clsx";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/button";
 import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/dialog";
-import { Heading } from "@/components/heading";
 import { Input, InputGroup } from "@/components/input";
+import { PageHeader } from "@/components/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
 import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
 import { IconButton } from "@/components/shared/icon-button";
 import { Skeleton } from "@/components/skeleton";
-import { Text } from "@/components/text";
 import {
 	useCancelCampaign,
 	useDuplicateCampaign,
@@ -282,17 +286,17 @@ export function CampaignsList() {
 	return (
 		<div className="space-y-6">
 			{/* Header */}
-			<div className="flex items-start justify-between gap-4">
-				<div>
-					<Heading>Campaigns</Heading>
-					<Text className="mt-1">Manage your marketing campaigns and track performance</Text>
-				</div>
-				{canCreate && (
-					<IconButton color="zinc" onClick={() => setShowCreateModal(true)}>
-						<PlusIcon className="size-5" />
-					</IconButton>
-				)}
-			</div>
+			<PageHeader
+				title="Campaigns"
+				description="Manage your marketing campaigns and track performance"
+				actions={
+					canCreate ? (
+						<IconButton color="zinc" onClick={() => setShowCreateModal(true)}>
+							<PlusIcon className="size-5" />
+						</IconButton>
+					) : undefined
+				}
+			/>
 
 			{/* Stats */}
 			<FinancialStatsGridBordered
@@ -346,15 +350,15 @@ export function CampaignsList() {
 			</div>
 
 			{/* Status Tabs — pill style */}
-			<div className="-mx-0.5 flex items-center gap-1.5 overflow-x-auto px-0.5 py-0.5 scrollbar-hide">
+			<div className="-mx-1 flex items-center gap-1.5 overflow-x-auto px-1 py-1 scrollbar-hide">
 				{(
 					[
-						{ value: "all", label: "All", count: statusCounts.all },
-						{ value: "active", label: "Active", count: statusCounts.active },
-						{ value: "paused", label: "Paused", count: statusCounts.paused },
-						{ value: "ended", label: "Ended", count: statusCounts.ended },
-						{ value: "draft", label: "Draft", count: statusCounts.draft },
-					] as { value: StatusFilter; label: string; count: number }[]
+						{ value: "all", label: "All", count: statusCounts.all, icon: Squares2X2Icon, iconColor: "text-sky-500" },
+						{ value: "active", label: "Active", count: statusCounts.active, icon: CheckCircleIcon, iconColor: "text-emerald-500" },
+						{ value: "paused", label: "Paused", count: statusCounts.paused, icon: PauseCircleIcon, iconColor: "text-amber-500" },
+						{ value: "ended", label: "Ended", count: statusCounts.ended, icon: NoSymbolIcon, iconColor: "text-red-500" },
+						{ value: "draft", label: "Draft", count: statusCounts.draft, icon: DocumentTextIcon, iconColor: "text-zinc-400" },
+					] as { value: StatusFilter; label: string; count: number; icon: typeof Squares2X2Icon; iconColor: string }[]
 				).map((tab) => {
 					const isActive = statusFilter === tab.value;
 					return (
@@ -363,12 +367,13 @@ export function CampaignsList() {
 							key={tab.value}
 							onClick={() => setStatusFilter(tab.value)}
 							className={clsx(
-								"inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-200 active:scale-95",
+								"inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium shadow-sm ring-1 transition-all duration-200 active:scale-95",
 								isActive
-									? "bg-zinc-900 text-white shadow-sm dark:bg-white dark:text-zinc-900"
-									: "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+									? "bg-zinc-900 text-white ring-zinc-900 dark:bg-white dark:text-zinc-900 dark:ring-white"
+									: "bg-white text-zinc-600 ring-zinc-200 hover:bg-zinc-50 dark:bg-zinc-900 dark:text-zinc-400 dark:ring-zinc-800 dark:hover:bg-zinc-800"
 							)}
 						>
+							<tab.icon className={clsx("size-3.5", isActive ? "text-white dark:text-zinc-900" : tab.iconColor)} />
 							{tab.label}
 							<span
 								className={clsx(

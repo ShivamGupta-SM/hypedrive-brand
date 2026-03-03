@@ -1,6 +1,5 @@
 import {
 	ArrowDownLeftIcon,
-	ArrowLeftIcon,
 	ArrowUpRightIcon,
 	BanknotesIcon,
 	CalendarIcon,
@@ -11,14 +10,11 @@ import {
 import { getRouteApi } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { Badge } from "@/components/badge";
-import { Button } from "@/components/button";
-import { Heading } from "@/components/heading";
+import { ContentCard, DetailPageHeader } from "@/components/page-header";
 import { CopyButton } from "@/components/shared";
-import { Card } from "@/components/shared/card";
 import { ErrorState } from "@/components/shared/error-state";
 import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
 import { Skeleton } from "@/components/skeleton";
-import { Text } from "@/components/text";
 import { useOrgContext, useWalletTransactions } from "@/hooks";
 import { usePageTitle } from "@/hooks/use-breadcrumb";
 import { formatCurrency, formatDateTime } from "@/lib/design-tokens";
@@ -137,49 +133,35 @@ export function TransactionShow() {
 
 	return (
 		<div className="space-y-6">
-			{/* Back Button */}
-			<Button href={`/${orgSlug}/wallet`} color="zinc">
-				<ArrowLeftIcon className="size-4" />
-				Wallet
-			</Button>
-
 			{/* Header */}
-			<div className="flex flex-wrap items-start justify-between gap-4">
-				<div className="flex items-start gap-4">
-					{/* Transaction Icon */}
-					<div className={`flex size-20 shrink-0 items-center justify-center rounded-2xl ${typeConfig.bgClass}`}>
-						<TypeIcon
-							className={`size-10 ${
-								typeConfig.color === "emerald"
-									? "text-emerald-500"
-									: typeConfig.color === "red"
-										? "text-red-500"
-										: typeConfig.color === "amber"
-											? "text-amber-500"
-											: typeConfig.color === "sky"
-												? "text-sky-500"
-												: "text-zinc-500"
-							}`}
-						/>
-					</div>
-
-					<div>
-						<div className="flex items-center gap-2">
-							<Heading>
-								{isCredit ? "+" : isDebit ? "-" : ""}
-								{formatCurrency(transaction.amountDecimal)}
-							</Heading>
-						</div>
-						<Text className="mt-1">{transaction.description || typeConfig.label}</Text>
-						<div className="mt-2 flex flex-wrap items-center gap-2">
-							<Badge color={typeConfig.color} className="inline-flex items-center gap-1">
-								<TypeIcon className="size-3" />
-								{typeConfig.label}
-							</Badge>
-						</div>
-					</div>
-				</div>
-			</div>
+			<DetailPageHeader
+				backHref={`/${orgSlug}/wallet`}
+				backLabel="Wallet"
+				icon={
+					<TypeIcon
+						className={`size-10 ${
+							typeConfig.color === "emerald"
+								? "text-emerald-500"
+								: typeConfig.color === "red"
+									? "text-red-500"
+									: typeConfig.color === "amber"
+										? "text-amber-500"
+										: typeConfig.color === "sky"
+											? "text-sky-500"
+											: "text-zinc-500"
+						}`}
+					/>
+				}
+				iconClassName={typeConfig.bgClass}
+				title={`${isCredit ? "+" : isDebit ? "-" : ""}${formatCurrency(transaction.amountDecimal)}`}
+				subtitle={transaction.description || typeConfig.label}
+				badges={
+					<Badge color={typeConfig.color} className="inline-flex items-center gap-1">
+						<TypeIcon className="size-3" />
+						{typeConfig.label}
+					</Badge>
+				}
+			/>
 
 			{/* Stats Row */}
 			<FinancialStatsGridBordered
@@ -208,7 +190,7 @@ export function TransactionShow() {
 			/>
 
 			{/* Transaction Details */}
-			<Card>
+			<ContentCard>
 				<div className="p-6">
 					<h3 className="text-lg font-semibold text-zinc-900 dark:text-white">Transaction Details</h3>
 
@@ -335,7 +317,7 @@ export function TransactionShow() {
 						</div>
 					</div>
 				</div>
-			</Card>
+			</ContentCard>
 		</div>
 	);
 }

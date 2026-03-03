@@ -1,22 +1,26 @@
 import {
 	BanknotesIcon,
+	BuildingOfficeIcon,
 	BuildingStorefrontIcon,
+	CalendarDaysIcon,
 	CameraIcon,
 	CheckCircleIcon,
 	CreditCardIcon,
+	ExclamationTriangleIcon,
 	GlobeAltIcon,
 	HashtagIcon,
 	IdentificationIcon,
 	MapPinIcon,
 	PhoneIcon,
 	ReceiptPercentIcon,
+	ShieldCheckIcon,
 	TrashIcon,
 	UserCircleIcon,
 } from "@heroicons/react/16/solid";
 import { startAuthentication } from "@simplewebauthn/browser";
 import type React from "react";
 import { useEffect, useMemo, useState } from "react";
-import { Badge } from "@/components/badge";
+import { Badge, BadgeButton } from "@/components/badge";
 import { Button } from "@/components/button";
 import { Combobox, ComboboxLabel, ComboboxOption } from "@/components/combobox";
 import { CountryFlag } from "@/components/country-flag";
@@ -44,6 +48,8 @@ import {
 	usePasskeyReauthOptions,
 	useUpdateOrganizationSettings,
 	useVerifyBankAccount,
+	useVerifyGST,
+	useVerifyGSTPreview,
 } from "@/hooks";
 import { useOrgSlug } from "@/hooks/use-org-slug";
 import {
@@ -696,6 +702,196 @@ function ChangePhonePanel({
 }
 
 // =============================================================================
+// VERIFY / UPDATE GST PANEL
+// =============================================================================
+
+const GST_REGEX = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/;
+
+interface GSTPreview {
+	legalName: string;
+	tradeName?: string;
+	gstStatus: string;
+	address?: string;
+	city?: string;
+	state?: string;
+	pinCode?: string;
+	businessType?: string;
+	registrationDate?: string;
+	stateCode: string;
+}
+
+function GSTPreviewDetail({ label, value, icon: Icon }: { label: string; value?: string; icon: React.ComponentType<{ className?: string }> }) {
+	if (!value) return null;
+	return (
+		<div className="flex items-start gap-2.5 py-1.5">
+			<div className="flex size-6 shrink-0 items-center justify-center rounded-md bg-emerald-100 dark:bg-emerald-900/40">
+				<Icon className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+			</div>
+			<div className="min-w-0">
+				<p className="text-[11px] font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-500">{label}</p>
+				<p className="text-sm text-zinc-800 dark:text-zinc-200">{value}</p>
+			</div>
+		</div>
+	);
+}
+
+function VerifyGSTPanel({
+	organizationId,
+	currentGST,
+}: {
+	organizationId: string | undefined;
+	currentGST?: string;
+}) {
+	const panelNav = usePanelNav();
+	const pop = () => panelNav?.popPanel();
+
+	const [gstNumber, setGstNumber] = useState(currentGST || "");
+	const [error, setError] = useState<string | null>(null);
+	const [previewData, setPreviewData] = useState<GSTPreview | null>(null);
+
+	const verifyPreview = useVerifyGSTPreview();
+	const verifyGST = useVerifyGST();
+
+	const isValidGST = GST_REGEX.test(gstNumber.trim().toUpperCase());
+	const isChanged = gstNumber.trim().toUpperCase() !== (currentGST || "").toUpperCase();
+
+	const handlePreview = async () => {
+		setError(null);
+		setPreviewData(null);
+		const formatted = gstNumber.trim().toUpperCase();
+		if (!isValidGST) {
+			setError("Enter a valid 15-character GSTIN (e.g. 29AABCI5013R1ZB)");
+			return;
+		}
+		try {
+			const result = await verifyPreview.mutateAsync({ gstNumber: formatted });
+			setPreviewData({
+				legalName: result.legalName,
+				tradeName: result.tradeName,
+				gstStatus: result.gstStatus,
+				address: result.address,
+				city: result.city,
+				state: result.state,
+				pinCode: result.pinCode,
+				businessType: result.businessType,
+				registrationDate: result.registrationDate,
+				stateCode: result.stateCode,
+			});
+		} catch (err) {
+			setError(getAPIErrorMessage(err, "GST verification failed"));
+		}
+	};
+
+	const handleSave = async () => {
+		if (!organizationId) return;
+		setError(null);
+		const formatted = gstNumber.trim().toUpperCase();
+		try {
+			await verifyGST.mutateAsync({ organizationId, gstNumber: formatted });
+			showToast.success("GST verified and saved");
+			pop();
+		} catch (err) {
+			setError(getAPIErrorMessage(err, "Failed to save GST"));
+		}
+	};
+
+	const isPending = verifyPreview.isPending || verifyGST.isPending;
+
+	// Build full address from preview parts
+	const fullAddress = previewData
+		? [previewData.address, previewData.city, previewData.state, previewData.pinCode].filter(Boolean).join(", ")
+		: undefined;
+
+	return (
+		<div className="space-y-4">
+			{/* Input */}
+			<div>
+				<Field>
+					<Label>GSTIN</Label>
+					<div className="flex gap-2">
+						<Input
+							value={gstNumber}
+							onChange={(e) => {
+								setGstNumber(e.target.value.toUpperCase());
+								setPreviewData(null);
+							}}
+							placeholder="29AABCI5013R1ZB"
+							maxLength={15}
+							className="flex-1 font-mono text-base tracking-widest"
+							disabled={!!previewData}
+						/>
+						{!previewData ? (
+							<Button
+								color="dark/zinc"
+								onClick={handlePreview}
+								disabled={isPending || !isValidGST}
+							>
+								{verifyPreview.isPending ? "Checking..." : "Verify"}
+							</Button>
+						) : (
+							<Button plain onClick={() => setPreviewData(null)}>
+								Edit
+							</Button>
+						)}
+					</div>
+				</Field>
+				{!previewData && !error && (
+					<p className="mt-1.5 text-xs text-zinc-400 dark:text-zinc-500">
+						We'll verify this with the GST portal. Required for campaigns & invoicing.
+					</p>
+				)}
+			</div>
+
+			{/* Error */}
+			{error && (
+				<div className="flex items-start gap-2.5 rounded-xl bg-red-50 px-3.5 py-3 ring-1 ring-red-200/60 dark:bg-red-950/20 dark:ring-red-900/40">
+					<ExclamationTriangleIcon className="mt-0.5 size-4 shrink-0 text-red-500 dark:text-red-400" />
+					<p className="text-sm text-red-700 dark:text-red-300">{error}</p>
+				</div>
+			)}
+
+			{/* Preview Card */}
+			{previewData && (
+				<div className="overflow-hidden rounded-xl ring-1 ring-zinc-200 dark:ring-zinc-700">
+					{/* Header */}
+					<div className="flex items-center gap-2.5 bg-emerald-50 px-4 py-2.5 dark:bg-emerald-950/30">
+						<ShieldCheckIcon className="size-4 text-emerald-600 dark:text-emerald-400" />
+						<span className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+							Verified — {previewData.gstStatus}
+						</span>
+					</div>
+
+					{/* Details Grid */}
+					<div className="grid grid-cols-1 gap-x-4 px-4 py-3 sm:grid-cols-2">
+						<GSTPreviewDetail icon={UserCircleIcon} label="Legal Name" value={previewData.legalName} />
+						<GSTPreviewDetail icon={BuildingOfficeIcon} label="Trade Name" value={previewData.tradeName} />
+						<GSTPreviewDetail icon={BuildingStorefrontIcon} label="Business Type" value={previewData.businessType} />
+						<GSTPreviewDetail icon={CalendarDaysIcon} label="Registered" value={previewData.registrationDate} />
+						<div className="sm:col-span-2">
+							<GSTPreviewDetail icon={MapPinIcon} label="Registered Address" value={fullAddress} />
+						</div>
+					</div>
+				</div>
+			)}
+
+			{/* Actions */}
+			<div className="flex items-center justify-between border-t border-zinc-100 pt-4 dark:border-zinc-800">
+				<Button plain onClick={pop} disabled={isPending}>
+					Cancel
+				</Button>
+				<Button
+					color="emerald"
+					onClick={handleSave}
+					disabled={isPending || !previewData}
+				>
+					{verifyGST.isPending ? "Saving..." : isChanged ? "Save New GST" : "Confirm & Save"}
+				</Button>
+			</div>
+		</div>
+	);
+}
+
+// =============================================================================
 // ORGANIZATION SETTINGS PAGE
 // =============================================================================
 
@@ -760,6 +956,16 @@ export function Settings({ section = "all" }: { section?: OrgSettingsSection } =
 				"change-phone",
 				"Change Phone Number",
 				<ChangePhonePanel organizationId={organizationId} currentPhone={orgDetails?.phoneNumber || ""} />
+			);
+		}
+	};
+
+	const openVerifyGST = () => {
+		if (panelNav) {
+			panelNav.pushPanel(
+				"verify-gst",
+				"Verify GST",
+				<VerifyGSTPanel organizationId={organizationId} currentGST={gstDetails?.gstDetails?.gstNumber} />
 			);
 		}
 	};
@@ -842,33 +1048,114 @@ export function Settings({ section = "all" }: { section?: OrgSettingsSection } =
 	);
 
 	// --- Section: GST ---
+	const gst = gstDetails?.gstDetails;
+	const gstIsVerified = gst?.isVerified === true;
+	const hasGST = !!gst?.gstNumber;
+	const billingAddress = [orgData?.address, orgData?.city, orgData?.state, orgData?.postalCode].filter(Boolean).join(", ");
+
 	const gstSection = (
-		<div>
+		<div className="space-y-1.5">
 			<MenuSectionHeader>GST & Compliance</MenuSectionHeader>
-			<MenuSection>
-				<MenuRow
-					icon={IdentificationIcon}
-					iconColor="amber"
-					label="GST Number"
-					value={isGSTLoading ? "Loading..." : gstDetails?.gstDetails?.gstNumber || "Not set"}
-					isFirst
-				/>
-				<MenuSeparator />
-				<MenuRow
-					icon={UserCircleIcon}
-					iconColor="amber"
-					label="Legal Name"
-					value={isGSTLoading ? "Loading..." : gstDetails?.gstDetails?.legalName || "—"}
-				/>
-				<MenuSeparator />
-				<MenuRow
-					icon={CheckCircleIcon}
-					iconColor="emerald"
-					label="GST Status"
-					value={isGSTLoading ? "Loading..." : gstDetails?.gstDetails?.gstNumber ? "Verified" : "Not verified"}
-					isLast
-				/>
-			</MenuSection>
+
+			{isGSTLoading ? (
+				<div className="h-44 animate-pulse rounded-xl bg-zinc-100 dark:bg-zinc-800" />
+			) : !hasGST ? (
+				/* ── Empty State: No GST ── */
+				<div className="overflow-hidden rounded-xl ring-1 ring-zinc-200/80 dark:ring-zinc-700/60">
+					<div className="flex flex-col items-center gap-3 px-6 py-8 text-center">
+						<div className="flex size-12 items-center justify-center rounded-2xl bg-amber-100 dark:bg-amber-900/40">
+							<IdentificationIcon className="size-6 text-amber-600 dark:text-amber-400" />
+						</div>
+						<div>
+							<p className="text-sm font-medium text-zinc-800 dark:text-zinc-200">No GST number added</p>
+							<p className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500">
+								Add your GSTIN to create campaigns, listings, and generate invoices
+							</p>
+						</div>
+						{canUpdateOrganization && (
+							<Button color="amber" className="mt-1" onClick={openVerifyGST}>
+								Add & Verify GST
+							</Button>
+						)}
+					</div>
+				</div>
+			) : (
+				/* ── GST Details Card ── */
+				<div className="overflow-hidden rounded-xl ring-1 ring-zinc-200/80 dark:ring-zinc-700/60">
+					{/* Status Banner */}
+					<div className={`flex items-center justify-between px-4 py-2 ${
+						gstIsVerified
+							? "bg-emerald-50 dark:bg-emerald-950/20"
+							: "bg-amber-50 dark:bg-amber-950/20"
+					}`}>
+						<div className="flex items-center gap-2">
+							{gstIsVerified ? (
+								<ShieldCheckIcon className="size-4 text-emerald-600 dark:text-emerald-400" />
+							) : (
+								<ExclamationTriangleIcon className="size-4 text-amber-600 dark:text-amber-400" />
+							)}
+							<span className={`text-xs font-semibold uppercase tracking-wide ${
+								gstIsVerified
+									? "text-emerald-700 dark:text-emerald-300"
+									: "text-amber-700 dark:text-amber-300"
+							}`}>
+								{gstIsVerified ? "Verified" : "Pending Verification"}
+							</span>
+							{gst.verifiedAt && (
+								<span className="text-[10px] text-zinc-400 dark:text-zinc-500">
+									· {new Date(gst.verifiedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+								</span>
+							)}
+						</div>
+						{canUpdateOrganization && (
+							<BadgeButton
+								color={gstIsVerified ? "zinc" : "amber"}
+								onClick={openVerifyGST}
+							>
+								{gstIsVerified ? "Change" : "Verify Now"}
+							</BadgeButton>
+						)}
+					</div>
+
+					{/* GSTIN + Legal Name */}
+					<div className="px-4 py-3">
+						<div className="flex items-baseline justify-between gap-3">
+							<p className="font-mono text-lg font-semibold tracking-widest text-zinc-900 dark:text-white">
+								{gst.gstNumber}
+							</p>
+							<CopyButton value={gst.gstNumber} label="GST Number" />
+						</div>
+						<p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
+							{gst.legalName}
+							{gst.tradeName && gst.tradeName !== gst.legalName && (
+								<span className="text-zinc-300 dark:text-zinc-600"> · {gst.tradeName}</span>
+							)}
+						</p>
+					</div>
+
+					{/* Billing Address */}
+					<div className="border-t border-zinc-100 px-4 py-3 dark:border-zinc-800">
+						<div className="flex items-start gap-2.5">
+							<MapPinIcon className="mt-0.5 size-3.5 shrink-0 text-zinc-400 dark:text-zinc-500" />
+							<div className="min-w-0 flex-1">
+								<p className="text-[11px] font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+									Billing Address
+								</p>
+								{billingAddress ? (
+									<p className="mt-0.5 text-sm text-zinc-700 dark:text-zinc-300">{billingAddress}</p>
+								) : (
+									<p className="mt-0.5 text-sm italic text-zinc-400 dark:text-zinc-500">
+										Not set — update in{" "}
+										<button type="button" className="underline" onClick={canUpdateOrganization ? openEditOrg : undefined}>
+											Organization Details
+										</button>
+									</p>
+								)}
+							</div>
+						</div>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 
