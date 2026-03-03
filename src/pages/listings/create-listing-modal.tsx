@@ -23,7 +23,8 @@ import { Input, InputGroup } from "@/components/input";
 import { CurrencyInput } from "@/components/number-input";
 import { WizardStepper } from "@/components/shared/wizard-stepper";
 import { Textarea } from "@/components/textarea";
-import { useCreateListing, useFileUpload, useOrgSlug } from "@/hooks";
+import { Select } from "@/components/select";
+import { useCreateListing, useFileUpload, useOrgSlug, usePlatforms } from "@/hooks";
 import { showToast } from "@/lib/toast";
 
 // =============================================================================
@@ -37,6 +38,7 @@ const listingSchema = z.object({
 		.min(1, "SKU is required")
 		.max(40, "SKU too long")
 		.regex(/^[A-Z0-9_-]+$/, "Only uppercase letters, numbers, hyphens, underscores"),
+	platformId: z.string().min(1, "Platform is required"),
 	price: z.number({ error: "Price is required" }).positive("Must be greater than 0"),
 	description: z.string().max(500, "Max 500 characters").optional(),
 	link: z.string().min(1, "Link is required").url("Must be a valid URL"),
@@ -71,7 +73,7 @@ function ReviewCard({
 	children: React.ReactNode;
 }) {
 	return (
-		<div className="rounded-xl border border-zinc-200 p-3 sm:p-4 dark:border-zinc-700/50">
+		<div className="rounded-xl p-3 shadow-sm ring-1 ring-zinc-200 sm:p-4 dark:ring-zinc-800">
 			<div className="flex items-center justify-between">
 				<div className="flex items-center gap-2">
 					<Icon className="size-4 text-zinc-400" />
@@ -113,6 +115,7 @@ export function CreateListingModal({
 	const stepTopRef = useRef<HTMLDivElement>(null);
 
 	const createListing = useCreateListing(organizationId);
+	const { data: platforms, loading: platformsLoading } = usePlatforms();
 	const fileUpload = useFileUpload();
 	const navigate = useNavigate();
 	const orgSlug = useOrgSlug();
@@ -127,12 +130,13 @@ export function CreateListingModal({
 		formState: { errors },
 	} = useForm<ListingFormValues>({
 		resolver: zodResolver(listingSchema),
-		defaultValues: { name: "", identifier: "", description: "", link: "" },
+		defaultValues: { name: "", identifier: "", platformId: "", description: "", link: "" },
 		mode: "onSubmit",
 	});
 
 	const name = watch("name");
 	const identifier = watch("identifier");
+	const platformId = watch("platformId");
 	const price = watch("price");
 	const description = watch("description") ?? "";
 	const link = watch("link");
@@ -165,7 +169,7 @@ export function CreateListingModal({
 		const s = stepRef.current;
 		let valid = false;
 		if (s === 0) {
-			valid = await trigger(["name", "identifier", "price", "description"]);
+			valid = await trigger(["name", "identifier", "platformId", "price", "description"]);
 		} else if (s === 1) {
 			valid = await trigger(["link"]);
 		}
@@ -237,6 +241,7 @@ export function CreateListingModal({
 					name: data.name.trim(),
 					description: data.description?.trim() || undefined,
 					identifier: data.identifier.trim(),
+					platformId: data.platformId,
 					price: Math.round(data.price * 100),
 					link: data.link.trim(),
 					listingImages:
@@ -306,6 +311,28 @@ export function CreateListingModal({
 									/>
 								</InputGroup>
 								{errors.identifier && <ErrorMessage>{errors.identifier.message}</ErrorMessage>}
+							</Field>
+
+							<Field>
+								<Label>
+									Platform <span className="text-red-500">*</span>
+								</Label>
+								<Description>Where is this product listed?</Description>
+								{platformsLoading ? (
+									<Select disabled>
+										<option>Loading platforms…</option>
+									</Select>
+								) : (
+									<Select {...register("platformId")} invalid={!!errors.platformId}>
+										<option value="">Select a platform</option>
+										{platforms.map((p) => (
+											<option key={p.id} value={p.id}>
+												{p.name}
+											</option>
+										))}
+									</Select>
+								)}
+								{errors.platformId && <ErrorMessage>{errors.platformId.message}</ErrorMessage>}
 							</Field>
 
 							<Field>
@@ -442,6 +469,7 @@ export function CreateListingModal({
 								<dl className="mt-3 space-y-2">
 									<ReviewRow label="Name" value={name || "—"} />
 									<ReviewRow label="SKU" value={identifier || "—"} />
+									<ReviewRow label="Platform" value={platforms.find((p) => p.id === platformId)?.name || "—"} />
 									<ReviewRow
 										label="Price"
 										value={price ? `₹${price.toLocaleString("en-IN", { minimumFractionDigits: 2 })}` : "—"}
