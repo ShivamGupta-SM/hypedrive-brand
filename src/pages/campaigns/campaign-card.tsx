@@ -190,7 +190,7 @@ export function CampaignCard({
 								<img src={productImage} alt={listingName ?? "Product"} className="size-full object-contain p-1 sm:p-1.5" />
 							) : (
 								<div className="flex size-full items-center justify-center">
-									<MegaphoneIcon className="size-6 text-zinc-300 sm:size-7 dark:text-zinc-600" />
+									<MegaphoneIcon className="size-6 text-zinc-400 sm:size-7 dark:text-zinc-600" />
 								</div>
 							)}
 						</div>

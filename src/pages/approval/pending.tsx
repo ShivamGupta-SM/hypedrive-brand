@@ -67,15 +67,15 @@ export function PendingApproval({ organization }: { organization: { name: string
 						<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">What happens next?</h3>
 						<ul className="mt-3 space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
 							<li className="flex items-start gap-2">
-								<span className="shrink-0 text-zinc-400 dark:text-zinc-500">•</span>
+								<span className="shrink-0 text-zinc-500 dark:text-zinc-400">•</span>
 								Our team reviews your organization details
 							</li>
 							<li className="flex items-start gap-2">
-								<span className="shrink-0 text-zinc-400 dark:text-zinc-500">•</span>
+								<span className="shrink-0 text-zinc-500 dark:text-zinc-400">•</span>
 								You'll receive an email notification
 							</li>
 							<li className="flex items-start gap-2">
-								<span className="shrink-0 text-zinc-400 dark:text-zinc-500">•</span>
+								<span className="shrink-0 text-zinc-500 dark:text-zinc-400">•</span>
 								Access your dashboard once approved
 							</li>
 						</ul>

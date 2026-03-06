@@ -79,7 +79,7 @@ function LoadingSkeleton() {
 			<div className="overflow-hidden rounded-xl bg-white ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
 				<div className="flex flex-col lg:flex-row">
 					{/* Image area */}
-					<div className="shrink-0 border-b border-zinc-100 bg-zinc-50/50 p-3 sm:p-4 lg:w-80 lg:border-b-0 lg:border-r lg:p-5 xl:w-96 dark:border-zinc-800 dark:bg-zinc-800/20">
+					<div className="shrink-0 border-b border-zinc-200 bg-zinc-50/50 p-3 sm:p-4 lg:w-80 lg:border-b-0 lg:border-r lg:p-5 xl:w-96 dark:border-zinc-800 dark:bg-zinc-800/20">
 						<Skeleton width="100%" height={0} borderRadius={12} className="aspect-square!" />
 					</div>
 					{/* Info area */}
@@ -616,9 +616,9 @@ function EditListingModal({
 
 								{formData.listingImages.length === 0 && (
 									<div className="mt-3 rounded-xl border-2 border-dashed border-zinc-200 p-6 text-center dark:border-zinc-700">
-										<PhotoIcon className="mx-auto size-8 text-zinc-400 dark:text-zinc-500" />
+										<PhotoIcon className="mx-auto size-8 text-zinc-500 dark:text-zinc-400" />
 										<p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">No images added yet</p>
-										<p className="text-xs text-zinc-400 dark:text-zinc-500">
+										<p className="text-xs text-zinc-500 dark:text-zinc-400">
 											Add image URLs above to showcase your listing
 										</p>
 									</div>
@@ -780,10 +780,10 @@ export function ListingShow() {
 		<div className="space-y-4 sm:space-y-5">
 			{/* Product Hero Card */}
 			<div className="relative overflow-hidden rounded-xl bg-white ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-				<div className={clsx("pointer-events-none absolute inset-x-0 top-0 h-24 bg-linear-to-b sm:h-32", listing.isActive ? "from-emerald-500/20 via-emerald-500/5 to-transparent dark:from-emerald-500/15 dark:via-emerald-500/5" : "from-zinc-500/15 via-zinc-500/5 to-transparent dark:from-zinc-500/10 dark:via-zinc-500/5")} />
+				<div className={clsx("pointer-events-none absolute inset-px top-px h-24 rounded-t-[11px] bg-linear-to-b sm:h-32", listing.isActive ? "from-emerald-500/20 via-emerald-500/5 to-transparent dark:from-emerald-500/15 dark:via-emerald-500/5" : "from-zinc-500/15 via-zinc-500/5 to-transparent dark:from-zinc-500/10 dark:via-zinc-500/5")} />
 				<div className="relative flex flex-col lg:flex-row">
 					{/* Image gallery */}
-					<div className="shrink-0 border-b border-zinc-100 bg-zinc-50/50 p-3 sm:p-4 lg:w-80 lg:border-b-0 lg:border-r lg:p-5 xl:w-96 dark:border-zinc-800 dark:bg-zinc-800/20">
+					<div className="shrink-0 border-b border-zinc-200 bg-zinc-50/50 p-3 sm:p-4 lg:w-80 lg:border-b-0 lg:border-r lg:p-5 xl:w-96 dark:border-zinc-800 dark:bg-zinc-800/20">
 						<ImageGallery images={images} />
 					</div>
 
@@ -827,9 +827,9 @@ export function ListingShow() {
 							)}
 
 							{/* Quick details */}
-							<dl className="grid grid-cols-2 gap-x-4 gap-y-2.5 border-t border-zinc-100 pt-4 dark:border-zinc-800">
+							<dl className="grid grid-cols-2 gap-x-4 gap-y-2.5 border-t border-zinc-200 pt-4 dark:border-zinc-800">
 								<div>
-									<dt className="text-[11px] font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+									<dt className="text-[11px] font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
 										SKU
 									</dt>
 									<dd className="mt-0.5 flex items-center gap-1">
@@ -839,7 +839,7 @@ export function ListingShow() {
 								</div>
 								{platform && (
 									<div>
-										<dt className="text-[11px] font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+										<dt className="text-[11px] font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
 											Platform
 										</dt>
 										<dd className="mt-0.5 flex items-center gap-1.5">
@@ -849,13 +849,13 @@ export function ListingShow() {
 									</div>
 								)}
 								<div>
-									<dt className="text-[11px] font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+									<dt className="text-[11px] font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
 										Created
 									</dt>
 									<dd className="mt-0.5 text-sm text-zinc-900 dark:text-white">{formatDate(listing.createdAt)}</dd>
 								</div>
 								<div>
-									<dt className="text-[11px] font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+									<dt className="text-[11px] font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
 										Updated
 									</dt>
 									<dd className="mt-0.5 text-sm text-zinc-900 dark:text-white">{formatDate(listing.updatedAt)}</dd>
@@ -886,7 +886,7 @@ export function ListingShow() {
 
 						{/* Actions bar */}
 						{(canUpdate || canDelete) && (
-							<div className="flex items-center gap-1.5 border-t border-zinc-100 px-4 py-2.5 sm:px-5 dark:border-zinc-800">
+							<div className="flex items-center gap-1.5 border-t border-zinc-200 px-4 py-2.5 sm:px-5 dark:border-zinc-800">
 								<div className="ml-auto flex items-center gap-1.5">
 									{canDelete && (
 										<button

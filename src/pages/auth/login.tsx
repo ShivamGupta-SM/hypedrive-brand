@@ -373,9 +373,9 @@ export function AuthShell({ children, footer }: { children: React.ReactNode; foo
 			<div className="w-full max-w-95">
 				<div className="rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
 					<div className="space-y-5 p-8">{children}</div>
-					{footer && <div className="border-t border-zinc-100 px-8 py-4 dark:border-zinc-800">{footer}</div>}
+					{footer && <div className="border-t border-zinc-200 px-8 py-4 dark:border-zinc-800">{footer}</div>}
 				</div>
-				<p className="mt-6 text-center text-xs text-zinc-400 dark:text-zinc-500">
+				<p className="mt-6 text-center text-xs text-zinc-500 dark:text-zinc-400">
 					© {new Date().getFullYear()} Hypedrive, Inc.
 				</p>
 			</div>

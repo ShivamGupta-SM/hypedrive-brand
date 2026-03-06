@@ -359,7 +359,7 @@ function CodeAuditPage() {
 						key={item.file}
 						href={`#audit-${i + 1}`}
 						className={`grid grid-cols-[1fr_auto_auto_auto] items-center gap-4 px-4 py-3 text-sm transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50 ${
-							i < auditItems.length - 1 ? "border-b border-zinc-100 dark:border-zinc-800" : ""
+							i < auditItems.length - 1 ? "border-b border-zinc-200 dark:border-zinc-800" : ""
 						}`}
 					>
 						<div>
@@ -585,7 +585,7 @@ function CodeAuditPage() {
 								<div
 									key={row.label}
 									className={`flex items-center gap-3 px-4 py-3 ${
-										i < arr.length - 1 ? "border-b border-zinc-100 dark:border-zinc-800" : ""
+										i < arr.length - 1 ? "border-b border-zinc-200 dark:border-zinc-800" : ""
 									}`}
 								>
 									<span className="shrink-0 text-zinc-400">{row.icon}</span>
@@ -864,7 +864,7 @@ function CodeAuditPage() {
 								height={240}
 								className="rounded-lg border border-zinc-200 dark:border-zinc-800"
 								renderItem={(item) => (
-									<div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3 text-sm dark:border-zinc-800">
+									<div className="flex items-center justify-between border-b border-zinc-200 px-4 py-3 text-sm dark:border-zinc-800">
 										<span className="text-zinc-900 dark:text-white">{item.name}</span>
 										<span className="font-medium text-zinc-600 dark:text-zinc-400">{formatCurrency(item.amount)}</span>
 									</div>

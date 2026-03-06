@@ -101,7 +101,7 @@ export function FilterBar({
 								<button
 									type="button"
 									onClick={() => onSearchChange("")}
-									className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+									className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-zinc-400 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-300"
 								>
 									<XMarkIcon className="size-4" />
 								</button>
@@ -294,7 +294,7 @@ export function ActiveFilters({ className, filters, onRemove, onClearAll }: Acti
 					<button
 						type="button"
 						onClick={() => onRemove(filter.field)}
-						className="rounded-full p-0.5 text-zinc-400 hover:bg-zinc-200 hover:text-zinc-600 dark:hover:bg-zinc-700 dark:hover:text-zinc-300"
+						className="rounded-full p-0.5 text-zinc-400 hover:bg-zinc-200 hover:text-zinc-600 dark:text-zinc-400 dark:hover:bg-zinc-700 dark:hover:text-zinc-300"
 					>
 						<XMarkIcon className="size-3.5" />
 					</button>

@@ -106,7 +106,7 @@ function ListingCard({ listing, orgSlug, canEdit, selected }: ListingCardProps) 
 					/>
 				) : (
 					<div className="flex h-full w-full items-center justify-center">
-						<CubeIcon className="size-10 text-zinc-300 dark:text-zinc-600" />
+						<CubeIcon className="size-10 text-zinc-400 dark:text-zinc-600" />
 					</div>
 				)}
 				{/* Views overlay badge */}
@@ -131,7 +131,7 @@ function ListingCard({ listing, orgSlug, canEdit, selected }: ListingCardProps) 
 				<h3 className="line-clamp-2 text-sm font-semibold leading-snug text-zinc-900 dark:text-white">
 					{listing.name}
 				</h3>
-				<p className="mt-1 text-[11px] text-zinc-400 dark:text-zinc-500">
+				<p className="mt-1 text-[11px] text-zinc-500 dark:text-zinc-400">
 					{listing.identifier}
 				</p>
 				<div className="mt-auto flex items-end justify-between pt-2">

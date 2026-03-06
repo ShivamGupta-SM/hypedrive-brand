@@ -43,7 +43,7 @@ export function WalletHolds() {
 					/>
 				</div>
 			) : (
-				<div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+				<div className="divide-y divide-zinc-200 dark:divide-zinc-800">
 					{holds.map((hold) => (
 						<HoldRow key={hold.id} hold={hold} />
 					))}

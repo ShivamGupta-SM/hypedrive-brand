@@ -91,13 +91,13 @@ export function ContentHeader() {
 					<Link
 						to="/$orgSlug"
 						params={{ orgSlug }}
-						className="flex items-center text-zinc-400 transition-colors hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
+						className="flex items-center text-zinc-500 transition-colors hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-300"
 					>
 						<HomeIcon className="size-4" />
 					</Link>
 					{crumbs.map((crumb, i) => (
 						<span key={`${i}-${crumb.label}`} className="flex items-center gap-1.5">
-							<ChevronRightIcon className="size-3.5 text-zinc-300 dark:text-zinc-600" />
+							<ChevronRightIcon className="size-3.5 text-zinc-400 dark:text-zinc-500" />
 							{i < crumbs.length - 1 && crumb.href ? (
 								<Link
 									to={crumb.href}

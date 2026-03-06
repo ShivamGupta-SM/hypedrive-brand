@@ -308,7 +308,7 @@ export function VirtualTable<T>({
 								role={onRowClick ? "button" : undefined}
 								tabIndex={onRowClick ? 0 : undefined}
 								className={clsx(
-									"absolute left-0 top-0 flex w-full border-b border-zinc-100 dark:border-zinc-800",
+									"absolute left-0 top-0 flex w-full border-b border-zinc-200 dark:border-zinc-800",
 									onRowClick && "cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50",
 									getRowClassName(item, virtualItem.index)
 								)}

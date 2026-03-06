@@ -1,7 +1,6 @@
 import {
 	BanknotesIcon,
 	BuildingOfficeIcon,
-	BuildingStorefrontIcon,
 	CalendarDaysIcon,
 	CameraIcon,
 	CheckCircleIcon,
@@ -9,6 +8,7 @@ import {
 	ExclamationTriangleIcon,
 	GlobeAltIcon,
 	HashtagIcon,
+	HomeModernIcon,
 	IdentificationIcon,
 	MapPinIcon,
 	PhoneIcon,
@@ -96,7 +96,7 @@ function SettingsSkeleton({ isDialog = false }: { isDialog?: boolean }) {
 					<div className="h-3 w-28 animate-pulse rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
 					<div className="overflow-hidden rounded-xl ring-1 ring-zinc-200/80 dark:ring-zinc-700/60">
 						{Array.from({ length: rows }).map((_, i) => (
-							<div key={i} className="flex items-center gap-3 border-b border-zinc-100 px-4 py-3 last:border-b-0 dark:border-zinc-800">
+							<div key={i} className="flex items-center gap-3 border-b border-zinc-200 px-4 py-3 last:border-b-0 dark:border-zinc-800">
 								<div className="size-8 shrink-0 animate-pulse rounded-lg bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
 								<div className="flex-1">
 									<div className="h-3 w-20 animate-pulse rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
@@ -463,7 +463,7 @@ function EditOrganizationPanel({
 				</Field>
 			</form>
 
-			<div className="flex justify-end gap-3 border-t border-zinc-100 pt-4 dark:border-zinc-800">
+			<div className="flex justify-end gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-800">
 				<Button plain onClick={pop} disabled={isPending}>
 					Cancel
 				</Button>
@@ -620,7 +620,7 @@ function AddBankAccountPanel({ organizationId }: { organizationId: string | unde
 				</div>
 			)}
 
-			<div className="flex justify-end gap-3 border-t border-zinc-100 pt-4 dark:border-zinc-800">
+			<div className="flex justify-end gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-800">
 				<Button plain onClick={pop}>
 					Cancel
 				</Button>
@@ -715,7 +715,7 @@ function ChangePhonePanel({
 				/>
 			</Field>
 
-			<div className="flex justify-end gap-3 border-t border-zinc-100 pt-4 dark:border-zinc-800">
+			<div className="flex justify-end gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-800">
 				<Button plain onClick={pop} disabled={isPending}>
 					Cancel
 				</Button>
@@ -885,7 +885,7 @@ function VerifyGSTPanel({ organizationId, currentGST }: { organizationId: string
 					<div className="grid grid-cols-1 gap-x-4 px-4 py-3 sm:grid-cols-2">
 						<GSTPreviewDetail icon={UserCircleIcon} label="Legal Name" value={previewData.legalName} />
 						<GSTPreviewDetail icon={BuildingOfficeIcon} label="Trade Name" value={previewData.tradeName} />
-						<GSTPreviewDetail icon={BuildingStorefrontIcon} label="Business Type" value={previewData.businessType} />
+						<GSTPreviewDetail icon={HomeModernIcon} label="Business Type" value={previewData.businessType} />
 						<GSTPreviewDetail icon={CalendarDaysIcon} label="Registered" value={previewData.registrationDate} />
 						<div className="sm:col-span-2">
 							<GSTPreviewDetail icon={MapPinIcon} label="Registered Address" value={fullAddress} />
@@ -895,7 +895,7 @@ function VerifyGSTPanel({ organizationId, currentGST }: { organizationId: string
 			)}
 
 			{/* Actions */}
-			<div className="flex items-center justify-between border-t border-zinc-100 pt-4 dark:border-zinc-800">
+			<div className="flex items-center justify-between border-t border-zinc-200 pt-4 dark:border-zinc-800">
 				<Button plain onClick={pop} disabled={isPending}>
 					Cancel
 				</Button>
@@ -1024,7 +1024,7 @@ export function Settings({ section = "all" }: { section?: OrgSettingsSection } =
 				{!isDialog && <MenuSectionHeader>Organization Details</MenuSectionHeader>}
 				<MenuSection>
 					<MenuRow
-						icon={BuildingStorefrontIcon}
+						icon={HomeModernIcon}
 						iconColor="sky"
 						label="Organization Name"
 						value={organization?.name || "—"}
@@ -1144,13 +1144,13 @@ export function Settings({ section = "all" }: { section?: OrgSettingsSection } =
 						<p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
 							{gst.legalName}
 							{gst.tradeName && gst.tradeName !== gst.legalName && (
-								<span className="text-zinc-300 dark:text-zinc-600"> · {gst.tradeName}</span>
+								<span className="text-zinc-400 dark:text-zinc-500"> · {gst.tradeName}</span>
 							)}
 						</p>
 					</div>
 
 					{/* Billing Address */}
-					<div className="border-t border-zinc-100 px-4 py-3 dark:border-zinc-800">
+					<div className="border-t border-zinc-200 px-4 py-3 dark:border-zinc-800">
 						<div className="flex items-start gap-2.5">
 							<MapPinIcon className="mt-0.5 size-3.5 shrink-0 text-zinc-500 dark:text-zinc-400" />
 							<div className="min-w-0 flex-1">
@@ -1267,8 +1267,8 @@ export function Settings({ section = "all" }: { section?: OrgSettingsSection } =
 
 			{section === "all" && (
 				<div className="flex flex-col items-center gap-2 pt-8">
-					<Logo className="h-5 w-auto text-zinc-400 dark:text-zinc-500" />
-					<p className="text-xs text-zinc-400 dark:text-zinc-500">v1.0.0</p>
+					<Logo className="h-5 w-auto text-zinc-500 dark:text-zinc-400" />
+					<p className="text-xs text-zinc-500 dark:text-zinc-400">v1.0.0</p>
 				</div>
 			)}
 		</div>

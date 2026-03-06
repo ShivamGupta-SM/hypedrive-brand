@@ -74,13 +74,13 @@ export function WalletTransactions() {
 					</div>
 				) : (
 					<>
-						<div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+						<div className="divide-y divide-zinc-200 dark:divide-zinc-800">
 							{transactions.map((transaction) => (
 								<TransactionRow key={transaction.id} transaction={transaction} orgSlug={orgSlug} />
 							))}
 						</div>
 						{hasMore && (
-							<div className="flex justify-center border-t border-zinc-100 px-4 py-3 dark:border-zinc-800">
+							<div className="flex justify-center border-t border-zinc-200 px-4 py-3 dark:border-zinc-800">
 								<Button outline onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
 									{isFetchingNextPage ? (
 										<>

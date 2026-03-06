@@ -152,7 +152,7 @@ export function DepositAccountDialog({
 									key={detail.key}
 									className={clsx(
 										"group flex items-center gap-3 px-4 py-3 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/40",
-										idx > 0 && "border-t border-zinc-100 dark:border-zinc-800"
+										idx > 0 && "border-t border-zinc-200 dark:border-zinc-800"
 									)}
 								>
 									<div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
@@ -173,7 +173,7 @@ export function DepositAccountDialog({
 										<button
 											type="button"
 											onClick={() => copyToClipboard(detail.value, detail.label)}
-											className="shrink-0 rounded-lg p-1.5 text-zinc-300 transition-colors hover:bg-zinc-100 hover:text-zinc-500 dark:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+											className="shrink-0 rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-500 dark:text-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
 										>
 											<DocumentDuplicateIcon className="size-3.5" />
 										</button>

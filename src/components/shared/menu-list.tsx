@@ -167,7 +167,7 @@ export function MenuRow({
 			)}
 			{suffix}
 			{isInteractive && !destructive && !suffix && (
-				<ChevronRightIcon className="size-4 shrink-0 text-zinc-300 dark:text-zinc-600" />
+				<ChevronRightIcon className="size-4 shrink-0 text-zinc-400 dark:text-zinc-500" />
 			)}
 		</Component>
 	);

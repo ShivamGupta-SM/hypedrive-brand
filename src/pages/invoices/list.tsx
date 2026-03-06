@@ -9,6 +9,7 @@ import {
 	DocumentTextIcon,
 	ExclamationTriangleIcon,
 	MagnifyingGlassIcon,
+	TableCellsIcon,
 	XMarkIcon,
 } from "@heroicons/react/16/solid";
 import { getRouteApi, useNavigate } from "@tanstack/react-router";
@@ -29,7 +30,7 @@ import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-
 import { SelectionCheckbox } from "@/components/shared/selection-checkbox";
 import { Skeleton } from "@/components/skeleton";
 import { useInfiniteInvoices, useInvoice } from "@/features/invoices/hooks";
-import { useBatchInvoices, useGenerateInvoicePDF } from "@/features/invoices/mutations";
+import { useBatchInvoices, useExportInvoiceEnrollments, useGenerateInvoicePDF } from "@/features/invoices/mutations";
 import { useOrgContext } from "@/hooks/use-org-context";
 import type { brand, db } from "@/lib/brand-client";
 import { formatCurrency, formatDate, formatDateCompact } from "@/lib/design-tokens";
@@ -79,7 +80,7 @@ const statusConfig: Record<
 		color: "zinc",
 		dotClass: "bg-zinc-400",
 		bgClass: "bg-zinc-100 dark:bg-zinc-800",
-		iconText: "text-zinc-400 dark:text-zinc-500",
+		iconText: "text-zinc-500 dark:text-zinc-400",
 	},
 	unpaid: {
 		label: "Unpaid",
@@ -107,7 +108,7 @@ const statusConfig: Record<
 		color: "zinc",
 		dotClass: "bg-zinc-400",
 		bgClass: "bg-zinc-100 dark:bg-zinc-800",
-		iconText: "text-zinc-400 dark:text-zinc-500",
+		iconText: "text-zinc-500 dark:text-zinc-400",
 	},
 };
 
@@ -190,7 +191,7 @@ function InvoicesSkeleton() {
 				{[1, 2, 3, 4, 5].map((i) => (
 					<div
 						key={i}
-						className="flex items-center gap-3 border-b border-zinc-100 px-4 py-3 last:border-0 dark:border-zinc-800"
+						className="flex items-center gap-3 border-b border-zinc-200 px-4 py-3 last:border-0 dark:border-zinc-800"
 					>
 						<Skeleton width={18} height={18} borderRadius={4} />
 						<Skeleton width={32} height={32} borderRadius={8} />
@@ -217,8 +218,28 @@ function InvoiceDetailDialog({ invoice, onClose }: { invoice: Invoice | null; on
 	const { organization } = useOrgContext();
 	const canDownload = useCan("invoice", "download");
 	const generatePDF = useGenerateInvoicePDF(organization?.id);
+	const exportEnrollments = useExportInvoiceEnrollments(organization?.id);
 	const { data: freshInvoice } = useInvoice(organization?.id, invoice?.id);
 	const inv = freshInvoice ?? invoice;
+
+	const handleExportEnrollments = async () => {
+		if (!inv) return;
+		try {
+			const result = await exportEnrollments.mutateAsync(inv.id);
+			const blob = new Blob([result.csv], { type: "text/csv;charset=utf-8;" });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = result.filename;
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+			URL.revokeObjectURL(url);
+			showToast.success(`Exported ${result.totalCount} enrollment${result.totalCount !== 1 ? "s" : ""}`);
+		} catch (err) {
+			showToast.error(err, "Failed to export enrollments");
+		}
+	};
 
 	const handleDownloadPDF = async () => {
 		if (!inv) return;
@@ -270,7 +291,7 @@ function InvoiceDetailDialog({ invoice, onClose }: { invoice: Invoice | null; on
 				{/* FROM / TO */}
 				<div className="grid grid-cols-2 gap-4 sm:gap-6">
 					<div>
-						<p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">From</p>
+						<p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">From</p>
 						<Logo className="mt-1.5 h-5 w-auto text-zinc-900 dark:text-white" />
 						<p className="mt-1 text-[11px] leading-relaxed text-zinc-500 sm:text-xs dark:text-zinc-400">
 							Hypedrive Technologies Pvt. Ltd.
@@ -279,7 +300,7 @@ function InvoiceDetailDialog({ invoice, onClose }: { invoice: Invoice | null; on
 						</p>
 					</div>
 					<div>
-						<p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+						<p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
 							Bill To
 						</p>
 						<p className="mt-1.5 text-sm font-semibold text-zinc-900 dark:text-white">{orgName}</p>
@@ -300,7 +321,7 @@ function InvoiceDetailDialog({ invoice, onClose }: { invoice: Invoice | null; on
 						{ label: "Enrollments", value: String(inv.enrollmentCount) },
 					].map((item) => (
 						<div key={item.label} className="bg-white px-3 py-2.5 sm:px-4 sm:py-3 dark:bg-zinc-900">
-							<p className="text-[9px] font-medium uppercase tracking-wider text-zinc-400 sm:text-[10px] dark:text-zinc-500">
+							<p className="text-[9px] font-medium uppercase tracking-wider text-zinc-500 sm:text-[10px] dark:text-zinc-400">
 								{item.label}
 							</p>
 							<p
@@ -318,14 +339,14 @@ function InvoiceDetailDialog({ invoice, onClose }: { invoice: Invoice | null; on
 
 				{/* LINE ITEMS — mobile stacked */}
 				<div className="space-y-2 sm:hidden">
-					<p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+					<p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
 						Line Items
 					</p>
 					{inv.lineItems && inv.lineItems.length > 0 ? (
 						inv.lineItems.map((item) => (
 							<div
 								key={item.id}
-								className="flex items-center justify-between gap-3 rounded-lg border border-zinc-100 px-3 py-2.5 dark:border-zinc-800"
+								className="flex items-center justify-between gap-3 rounded-lg border border-zinc-200 px-3 py-2.5 dark:border-zinc-800"
 							>
 								<div className="min-w-0 flex-1">
 									<p className="truncate text-sm text-zinc-900 dark:text-white">{item.description}</p>
@@ -339,7 +360,7 @@ function InvoiceDetailDialog({ invoice, onClose }: { invoice: Invoice | null; on
 							</div>
 						))
 					) : (
-						<div className="flex items-center justify-between gap-3 rounded-lg border border-zinc-100 px-3 py-2.5 dark:border-zinc-800">
+						<div className="flex items-center justify-between gap-3 rounded-lg border border-zinc-200 px-3 py-2.5 dark:border-zinc-800">
 							<div>
 								<p className="text-sm text-zinc-900 dark:text-white">Campaign Enrollments</p>
 								<p className="text-[11px] text-zinc-500 dark:text-zinc-400">
@@ -358,16 +379,16 @@ function InvoiceDetailDialog({ invoice, onClose }: { invoice: Invoice | null; on
 					<table className="w-full">
 						<thead>
 							<tr className="border-b-2 border-zinc-200 dark:border-zinc-700">
-								<th className="pb-2 text-left text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+								<th className="pb-2 text-left text-[10px] font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
 									Description
 								</th>
-								<th className="whitespace-nowrap pb-2 text-center text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+								<th className="whitespace-nowrap pb-2 text-center text-[10px] font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
 									Qty
 								</th>
-								<th className="whitespace-nowrap pb-2 pl-4 text-right text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+								<th className="whitespace-nowrap pb-2 pl-4 text-right text-[10px] font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
 									Rate
 								</th>
-								<th className="whitespace-nowrap pb-2 pl-4 text-right text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+								<th className="whitespace-nowrap pb-2 pl-4 text-right text-[10px] font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
 									Amount
 								</th>
 							</tr>
@@ -375,7 +396,7 @@ function InvoiceDetailDialog({ invoice, onClose }: { invoice: Invoice | null; on
 						<tbody>
 							{inv.lineItems && inv.lineItems.length > 0 ? (
 								inv.lineItems.map((item, idx) => (
-									<tr key={item.id} className={clsx(idx > 0 && "border-t border-zinc-100 dark:border-zinc-800")}>
+									<tr key={item.id} className={clsx(idx > 0 && "border-t border-zinc-200 dark:border-zinc-800")}>
 										<td className="py-2.5 pr-4 text-sm text-zinc-900 dark:text-white">{item.description}</td>
 										<td className="whitespace-nowrap py-2.5 text-center text-sm tabular-nums text-zinc-600 dark:text-zinc-400">
 											{item.quantity}
@@ -482,7 +503,7 @@ function InvoiceDetailDialog({ invoice, onClose }: { invoice: Invoice | null; on
 
 				{inv.notes && (
 					<div className="rounded-lg border border-zinc-200 bg-zinc-50/50 p-3 dark:border-zinc-700 dark:bg-zinc-800/30">
-						<p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+						<p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
 							Notes
 						</p>
 						<p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{inv.notes}</p>
@@ -491,10 +512,26 @@ function InvoiceDetailDialog({ invoice, onClose }: { invoice: Invoice | null; on
 			</DialogBody>
 
 			<DialogActions>
-				<p className="mr-auto hidden text-xs text-zinc-400 sm:block dark:text-zinc-500">support@hypedrive.in</p>
+				<p className="mr-auto hidden text-xs text-zinc-500 sm:block dark:text-zinc-400">support@hypedrive.in</p>
 				<Button plain onClick={onClose}>
 					Close
 				</Button>
+				{canDownload && inv.enrollmentCount > 0 && (
+					<Button outline onClick={handleExportEnrollments} disabled={exportEnrollments.isPending}>
+						{exportEnrollments.isPending ? (
+							<>
+								<ArrowPathIcon className="size-4 animate-spin" />
+								<span className="hidden sm:inline">Exporting...</span>
+							</>
+						) : (
+							<>
+								<TableCellsIcon data-slot="icon" className="size-4" />
+								<span className="hidden sm:inline">Export Enrollments</span>
+								<span className="sm:hidden">CSV</span>
+							</>
+						)}
+					</Button>
+				)}
 				{canDownload && (
 					<Button color="dark/zinc" onClick={handleDownloadPDF} disabled={generatePDF.isPending}>
 						{generatePDF.isPending ? (
@@ -799,7 +836,7 @@ export function InvoicesList() {
 					</div>
 
 					{/* Invoice rows */}
-					<div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+					<div className="divide-y divide-zinc-200 dark:divide-zinc-800">
 						{invoices.map((inv) => {
 							const cfg = getStatusConfig(inv.status);
 							const selected = selectedIds.has(inv.id);
@@ -839,7 +876,7 @@ export function InvoicesList() {
 											<p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
 												{formatDateCompact(inv.periodStart ?? "")} – {formatDateCompact(inv.periodEnd ?? "")}
 												{inv.enrollmentCount > 0 && (
-													<span className="ml-1.5 text-zinc-400 dark:text-zinc-500">
+													<span className="ml-1.5 text-zinc-500 dark:text-zinc-400">
 														&middot; {inv.enrollmentCount} enrollment{inv.enrollmentCount !== 1 ? "s" : ""}
 													</span>
 												)}

@@ -136,7 +136,7 @@ function InfoRow({
 		<div
 			className={clsx(
 				"flex items-center justify-between gap-3 sm:gap-4",
-				!isLast && "border-b border-zinc-100 pb-3 sm:pb-4 dark:border-zinc-800"
+				!isLast && "border-b border-zinc-200 pb-3 sm:pb-4 dark:border-zinc-800"
 			)}
 		>
 			<div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
@@ -151,7 +151,7 @@ function InfoRow({
 				<div className="min-w-0">
 					<p className="text-xs font-medium text-zinc-900 sm:text-sm dark:text-white">{label}</p>
 					{sublabel && (
-						<p className="truncate text-[11px] text-zinc-400 sm:text-sm sm:text-zinc-500 dark:text-zinc-500 sm:dark:text-zinc-400">
+						<p className="truncate text-[11px] text-zinc-500 sm:text-sm dark:text-zinc-400">
 							{sublabel}
 						</p>
 					)}
@@ -187,7 +187,7 @@ function SectionHeader({
 	title: string;
 }) {
 	return (
-		<div className="flex items-center gap-2 border-b border-zinc-100 px-3.5 py-2.5 sm:gap-2.5 sm:px-5 sm:py-3 dark:border-zinc-800">
+		<div className="flex items-center gap-2 border-b border-zinc-200 px-3.5 py-2.5 sm:gap-2.5 sm:px-5 sm:py-3 dark:border-zinc-800">
 			<div className={clsx("flex size-5 items-center justify-center rounded-md sm:size-6", iconBg)}>
 				<span className={clsx("size-3 sm:size-3.5", iconColor)}>{icon}</span>
 			</div>
@@ -203,7 +203,7 @@ function SectionHeader({
 function QuickDetail({ label, children }: { label: string; children: React.ReactNode }) {
 	return (
 		<div>
-			<dt className="text-[10px] font-medium uppercase tracking-wide text-zinc-400 sm:text-[11px] dark:text-zinc-500">
+			<dt className="text-[10px] font-medium uppercase tracking-wide text-zinc-500 sm:text-[11px] dark:text-zinc-400">
 				{label}
 			</dt>
 			<dd className="mt-0.5 text-xs text-zinc-900 sm:text-sm dark:text-white">{children}</dd>
@@ -234,7 +234,7 @@ function LoadingSkeleton() {
 						<Skeleton width={65} height={20} borderRadius={12} />
 						<Skeleton width={80} height={20} borderRadius={12} />
 					</div>
-					<div className="grid grid-cols-2 gap-2.5 border-t border-zinc-100 pt-3 sm:gap-3 sm:pt-4 dark:border-zinc-800">
+					<div className="grid grid-cols-2 gap-2.5 border-t border-zinc-200 pt-3 sm:gap-3 sm:pt-4 dark:border-zinc-800">
 						{[1, 2, 3, 4].map((i) => (
 							<div key={i} className="space-y-1">
 								<Skeleton width={45} height={9} borderRadius={4} />
@@ -305,7 +305,7 @@ export function TransactionShow() {
 		<div className="space-y-4 sm:space-y-5">
 			{/* Hero Card */}
 			<div className="relative overflow-hidden rounded-xl bg-white ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-				<div className={clsx("pointer-events-none absolute inset-x-0 top-0 h-24 bg-linear-to-b sm:h-32", typeConfig.gradientClass)} />
+				<div className={clsx("pointer-events-none absolute inset-px top-px h-24 rounded-t-[11px] bg-linear-to-b sm:h-32", typeConfig.gradientClass)} />
 				<div className="relative space-y-2.5 p-4 sm:space-y-3 sm:p-6">
 					{/* Amount + Icon + ID */}
 					<div className="flex items-center justify-between gap-3">
@@ -352,7 +352,7 @@ export function TransactionShow() {
 					</div>
 
 					{/* Quick details grid */}
-					<dl className="grid grid-cols-2 gap-x-3 gap-y-2 border-t border-zinc-100 pt-3 sm:gap-x-4 sm:gap-y-2.5 sm:pt-4 dark:border-zinc-800">
+					<dl className="grid grid-cols-2 gap-x-3 gap-y-2 border-t border-zinc-200 pt-3 sm:gap-x-4 sm:gap-y-2.5 sm:pt-4 dark:border-zinc-800">
 						<QuickDetail label="Date">
 							{createdDate.toLocaleDateString("en-IN", {
 								month: "short",

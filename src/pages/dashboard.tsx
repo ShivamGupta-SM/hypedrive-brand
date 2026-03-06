@@ -114,19 +114,21 @@ function DashboardAlertBar({
 			{isLowBalance && (
 				<AlertBanner
 					variant="warning"
+					size="sm"
 					title="Low wallet balance"
 					description={
 						runwayDays > 0
 							? `~${runwayDays} day${runwayDays !== 1 ? "s" : ""} of runway remaining`
 							: "Add funds to continue running campaigns"
 					}
-					icon={<WalletIcon className="size-4 sm:size-5" />}
+					icon={<WalletIcon className="size-4" />}
 					action={{ label: "Add Funds", href: `/${orgSlug}/wallet` }}
 				/>
 			)}
 			{hasOverdue && (
 				<AlertBanner
-					variant="error"
+					variant="warning"
+					size="sm"
 					title={`${overdueEnrollments} overdue enrollment${overdueEnrollments !== 1 ? "s" : ""}`}
 					description="Pending review for more than 48 hours"
 					action={{ label: "Review Now", href: `/${orgSlug}/enrollments` }}
@@ -160,7 +162,7 @@ function WalletHero({
 	const runwayDays = stats.avgDailySpend > 0 ? Math.floor(stats.walletBalance / stats.avgDailySpend) : null;
 
 	return (
-		<div className="overflow-hidden rounded-xl bg-zinc-900 p-4 sm:p-5 dark:bg-zinc-800">
+		<div className="overflow-hidden rounded-xl bg-zinc-900 p-4 shadow-md ring-1 ring-zinc-950/10 sm:p-5 dark:bg-zinc-800 dark:ring-zinc-700">
 			<div className="flex items-start justify-between gap-4">
 				<div className="min-w-0">
 					<p className="text-xs font-medium text-zinc-400">Available Balance</p>
@@ -488,7 +490,7 @@ function TopCampaignsSection({
 									</div>
 								) : (
 									<div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-zinc-100 ring-1 ring-zinc-200/80 dark:bg-zinc-800 dark:ring-zinc-700">
-										<MegaphoneIcon className="size-4 text-zinc-400 dark:text-zinc-500" />
+										<MegaphoneIcon className="size-4 text-zinc-500 dark:text-zinc-400" />
 									</div>
 								)}
 								<div className="min-w-0 flex-1">
@@ -717,7 +719,7 @@ function ActivityFeed({ organizationId }: { organizationId: string }) {
 
 	return (
 		<div className="relative space-y-0.5">
-			<div className="pointer-events-none absolute bottom-3 left-[0.85rem] top-3 w-px bg-zinc-100 dark:bg-zinc-800" />
+			<div className="pointer-events-none absolute bottom-3 left-[0.85rem] top-3 w-px bg-zinc-200 dark:bg-zinc-800" />
 			{activities.map((entry) => {
 				const meta = activityIcons[entry.entityType] ?? activityIcons.organization;
 				return (
@@ -781,7 +783,7 @@ function NewUserWelcome({ brandName, orgSlug }: { brandName: string; orgSlug: st
 	return (
 		<div className="space-y-4">
 			{/* Hero banner */}
-			<div className="relative overflow-hidden rounded-2xl bg-zinc-900 dark:bg-zinc-800">
+			<div className="relative overflow-hidden rounded-2xl bg-zinc-900 shadow-md ring-1 ring-zinc-800 dark:bg-zinc-800 dark:ring-zinc-700">
 				<div className="pointer-events-none absolute -right-20 -top-20 size-64 rounded-full bg-emerald-500/8 blur-3xl" />
 				<div className="pointer-events-none absolute -bottom-16 -left-8 size-48 rounded-full bg-sky-500/6 blur-3xl" />
 

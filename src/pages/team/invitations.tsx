@@ -142,7 +142,7 @@ export function TeamInvitations() {
 													{timeLeft}
 												</span>
 											) : (
-												<span className="text-xs text-zinc-400 dark:text-zinc-500">No expiry</span>
+												<span className="text-xs text-zinc-500 dark:text-zinc-400">No expiry</span>
 											)}
 										</div>
 									</div>
@@ -186,7 +186,7 @@ export function TeamInvitations() {
 												{invitation.email}
 											</p>
 											{invitation.createdAt && (
-												<p className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500">
+												<p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
 													Sent {formatSentDate(invitation.createdAt)}
 												</p>
 											)}

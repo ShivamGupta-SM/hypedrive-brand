@@ -232,7 +232,7 @@ function ChangePasswordPanel() {
 			)}
 
 			{!success && (
-				<div className="flex justify-end gap-3 border-t border-zinc-100 pt-4 dark:border-zinc-800">
+				<div className="flex justify-end gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-800">
 					<Button plain onClick={handleClose} disabled={changePassword.isPending}>
 						Cancel
 					</Button>
@@ -333,7 +333,7 @@ function ChangeEmailPanel({ currentEmail }: { currentEmail: string }) {
 			)}
 
 			{!success && (
-				<div className="flex justify-end gap-3 border-t border-zinc-100 pt-4 dark:border-zinc-800">
+				<div className="flex justify-end gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-800">
 					<Button plain onClick={handleClose} disabled={changeEmail.isPending}>
 						Cancel
 					</Button>
@@ -529,7 +529,7 @@ function ActiveSessionsPanel() {
 			)}
 
 			{hasMultiple && (
-				<div className="flex justify-end gap-3 border-t border-zinc-100 pt-4 dark:border-zinc-800">
+				<div className="flex justify-end gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-800">
 					<Button outline onClick={() => revokeOtherSessions.mutate()} disabled={revokeOtherSessions.isPending}>
 						{revokeOtherSessions.isPending ? "Revoking..." : "Sign Out Other Sessions"}
 					</Button>
@@ -703,7 +703,7 @@ function EditUserProfilePanel({ initialName, initialImage }: { initialName: stri
 			)}
 
 			{!success && (
-				<div className="flex justify-end gap-3 border-t border-zinc-100 pt-4 dark:border-zinc-800">
+				<div className="flex justify-end gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-800">
 					<Button plain onClick={handleClose} disabled={isPending}>
 						Cancel
 					</Button>
@@ -929,7 +929,7 @@ function TwoFactorPanel({ isEnabled }: { isEnabled: boolean }) {
 				</div>
 			)}
 
-			<div className="flex justify-end gap-3 border-t border-zinc-100 pt-4 dark:border-zinc-800">
+			<div className="flex justify-end gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-800">
 				{step === "done" ? (
 					<Button color="dark/zinc" onClick={handleClose}>
 						Done
@@ -1062,7 +1062,7 @@ function PasskeysPanel() {
 				</div>
 			) : passkeys.length === 0 ? (
 				<div className="rounded-xl bg-zinc-50 p-6 text-center dark:bg-zinc-800/50">
-					<FingerPrintIcon className="mx-auto size-8 text-zinc-300 dark:text-zinc-600" />
+					<FingerPrintIcon className="mx-auto size-8 text-zinc-400 dark:text-zinc-500" />
 					<p className="mt-2 text-sm font-medium text-zinc-600 dark:text-zinc-400">No passkeys registered</p>
 					<p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
 						Add a passkey to sign in faster and more securely.
@@ -1134,7 +1134,7 @@ function PasskeysPanel() {
 				</div>
 			)}
 
-			<div className="flex justify-end gap-3 border-t border-zinc-100 pt-4 dark:border-zinc-800">
+			<div className="flex justify-end gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-800">
 				<Button plain onClick={() => panelNav?.popPanel()}>
 					Close
 				</Button>
@@ -1252,7 +1252,7 @@ function ViewBackupCodesPanel() {
 				</div>
 			)}
 
-			<div className="flex justify-end gap-3 border-t border-zinc-100 pt-4 dark:border-zinc-800">
+			<div className="flex justify-end gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-800">
 				<Button plain onClick={() => panelNav?.popPanel()}>
 					{codes.length > 0 ? "Close" : "Cancel"}
 				</Button>
@@ -1357,7 +1357,7 @@ function SetPasswordPanel() {
 				</div>
 			)}
 
-			<div className="flex justify-end gap-3 border-t border-zinc-100 pt-4 dark:border-zinc-800">
+			<div className="flex justify-end gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-800">
 				<Button plain onClick={() => panelNav?.popPanel()}>
 					{success ? "Close" : "Cancel"}
 				</Button>
@@ -1457,7 +1457,7 @@ function DeleteAccountPanel() {
 				</div>
 			</div>
 
-			<div className="flex justify-end gap-3 border-t border-zinc-100 pt-4 dark:border-zinc-800">
+			<div className="flex justify-end gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-800">
 				<Button plain onClick={() => panelNav?.popPanel()} disabled={deleteUser.isPending}>
 					Cancel
 				</Button>
@@ -1605,7 +1605,7 @@ function LinkedAccountsPanel() {
 				</div>
 			)}
 
-			<div className="flex justify-end gap-3 border-t border-zinc-100 pt-4 dark:border-zinc-800">
+			<div className="flex justify-end gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-800">
 				<Button plain onClick={() => panelNav?.popPanel()}>
 					Close
 				</Button>
@@ -2063,7 +2063,7 @@ export function AccountSettings({ section = "all" }: { section?: AccountSettings
 
 			{section === "all" && (
 				<div className="pt-4 text-center">
-					<p className="text-xs text-zinc-400 dark:text-zinc-500">Hypedrive Brand v1.0.0</p>
+					<p className="text-xs text-zinc-500 dark:text-zinc-400">Hypedrive Brand v1.0.0</p>
 				</div>
 			)}
 		</div>

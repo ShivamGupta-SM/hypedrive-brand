@@ -44,7 +44,7 @@ function TriggerButton({
 				className={clsx(
 					"relative flex w-full items-center justify-between gap-2 rounded-lg text-left px-[calc(--spacing(3.5)-1px)] py-[calc(--spacing(2.5)-1px)] sm:px-[calc(--spacing(3)-1px)] sm:py-[calc(--spacing(1.5)-1px)]",
 					"text-base/6 sm:text-sm/6",
-					displayValue ? "text-zinc-950 dark:text-white" : "text-zinc-500 dark:text-zinc-500",
+					displayValue ? "text-zinc-950 dark:text-white" : "text-zinc-500 dark:text-zinc-400",
 					error
 						? "border border-red-500 hover:border-red-500 dark:border-red-600 dark:hover:border-red-600"
 						: "border border-zinc-950/10 hover:border-zinc-950/20 dark:border-white/10 dark:hover:border-white/20",
@@ -105,10 +105,10 @@ const dayPickerClassNames = {
 		"h-8 w-8 rounded-lg text-sm transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500",
 	selected:
 		"[&>button]:bg-zinc-900 [&>button]:text-white [&>button]:hover:bg-zinc-800 dark:[&>button]:bg-white dark:[&>button]:text-zinc-900 dark:[&>button]:hover:bg-zinc-100",
-	today: "[&>button]:font-bold [&>button]:ring-1 [&>button]:ring-zinc-300 dark:[&>button]:ring-zinc-600",
-	outside: "[&>button]:text-zinc-300 dark:[&>button]:text-zinc-600",
+	today: "[&>button]:font-bold [&>button]:ring-1 [&>button]:ring-zinc-300 dark:[&>button]:ring-zinc-500",
+	outside: "[&>button]:text-zinc-300 dark:[&>button]:text-zinc-500",
 	disabled:
-		"[&>button]:text-zinc-300 dark:[&>button]:text-zinc-600 [&>button]:cursor-not-allowed [&>button]:hover:bg-transparent dark:[&>button]:hover:bg-transparent",
+		"[&>button]:text-zinc-300 dark:[&>button]:text-zinc-500 [&>button]:cursor-not-allowed [&>button]:hover:bg-transparent dark:[&>button]:hover:bg-transparent",
 	range_start:
 		"[&>button]:bg-zinc-900 [&>button]:text-white [&>button]:rounded-lg dark:[&>button]:bg-white dark:[&>button]:text-zinc-900",
 	range_end:

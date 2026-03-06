@@ -13,7 +13,7 @@ import {
 	ExclamationTriangleIcon,
 	InformationCircleIcon,
 	XCircleIcon,
-} from "@heroicons/react/24/outline";
+} from "@heroicons/react/24/solid";
 import clsx from "clsx";
 import { type ReactNode, useId } from "react";
 import { Button } from "@/components/button";
@@ -98,7 +98,7 @@ export function DetailPageHeader({
 	return (
 		<div className={clsx("relative", className)}>
 			{gradientClass && (
-				<div className={clsx("pointer-events-none absolute inset-x-0 top-0 h-24 bg-linear-to-b sm:h-32", gradientClass)} />
+				<div className={clsx("pointer-events-none absolute inset-px top-px h-24 rounded-t-[11px] bg-linear-to-b sm:h-32", gradientClass)} />
 			)}
 			{/* Main header row */}
 			<div className="relative flex flex-wrap items-start justify-between gap-4">
@@ -439,10 +439,10 @@ const cardPaddingStyles = {
 };
 
 const cardVariantStyles = {
-	default: "bg-white ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800",
+	default: "bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800",
 	bordered: "bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800",
-	elevated: "bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800",
-	subtle: "bg-zinc-50 dark:bg-zinc-800/50",
+	elevated: "bg-white shadow-md ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800",
+	subtle: "bg-zinc-50 ring-1 ring-zinc-200/80 dark:bg-zinc-800/50 dark:ring-zinc-800",
 	interactive:
 		"bg-white ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800 hover:ring-zinc-300 dark:hover:ring-zinc-700 transition-all cursor-pointer",
 	hero: "bg-emerald-600 dark:bg-emerald-700",
@@ -804,7 +804,7 @@ const alertVariants = {
 	info: {
 		bg: "bg-blue-50 dark:bg-blue-950/30",
 		ring: "ring-blue-200/60 dark:ring-blue-800/40",
-		iconBg: "bg-blue-500",
+		iconBg: "bg-blue-500 dark:bg-blue-600",
 		title: "text-blue-800 dark:text-blue-200",
 		text: "text-blue-700 dark:text-blue-300",
 		button: "blue" as const,
@@ -812,7 +812,7 @@ const alertVariants = {
 	warning: {
 		bg: "bg-amber-50 dark:bg-amber-950/30",
 		ring: "ring-amber-200/60 dark:ring-amber-800/40",
-		iconBg: "bg-amber-500",
+		iconBg: "bg-amber-500 dark:bg-amber-600",
 		title: "text-amber-800 dark:text-amber-200",
 		text: "text-amber-700 dark:text-amber-300",
 		button: "amber" as const,
@@ -820,7 +820,7 @@ const alertVariants = {
 	error: {
 		bg: "bg-red-50 dark:bg-red-950/30",
 		ring: "ring-red-200/60 dark:ring-red-800/40",
-		iconBg: "bg-red-500",
+		iconBg: "bg-red-500 dark:bg-red-600",
 		title: "text-red-800 dark:text-red-200",
 		text: "text-red-700 dark:text-red-300",
 		button: "red" as const,
@@ -828,7 +828,7 @@ const alertVariants = {
 	danger: {
 		bg: "bg-red-50 dark:bg-red-950/30",
 		ring: "ring-red-200/60 dark:ring-red-800/40",
-		iconBg: "bg-red-500",
+		iconBg: "bg-red-500 dark:bg-red-600",
 		title: "text-red-800 dark:text-red-200",
 		text: "text-red-700 dark:text-red-300",
 		button: "red" as const,
@@ -836,7 +836,7 @@ const alertVariants = {
 	success: {
 		bg: "bg-emerald-50 dark:bg-emerald-950/30",
 		ring: "ring-emerald-200/60 dark:ring-emerald-800/40",
-		iconBg: "bg-emerald-500",
+		iconBg: "bg-emerald-500 dark:bg-emerald-600",
 		title: "text-emerald-800 dark:text-emerald-200",
 		text: "text-emerald-700 dark:text-emerald-300",
 		button: "green" as const,
@@ -872,8 +872,8 @@ export function AlertBanner({
 	return (
 		<div
 			className={clsx(
-				"flex items-center gap-3 rounded-xl shadow-sm ring-1",
-				sm ? "p-2.5 sm:p-3" : "p-3.5 sm:p-4",
+				"flex items-center rounded-xl shadow-sm ring-1",
+				sm ? "gap-2.5 p-2.5 sm:p-3" : "gap-3 p-3.5 sm:p-4",
 				styles.bg,
 				styles.ring,
 				className
@@ -881,10 +881,10 @@ export function AlertBanner({
 		>
 			<div className={clsx(
 				"flex shrink-0 items-center justify-center rounded-full text-white",
-				sm ? "size-7 sm:size-8" : "size-9 sm:size-10",
+				sm ? "size-8" : "size-9 sm:size-10",
 				styles.iconBg
 			)}>
-				{icon || <DefaultIcon className={sm ? "size-3.5 sm:size-4" : "size-4 sm:size-5"} />}
+				{icon || <DefaultIcon className={sm ? "size-4" : "size-4.5 sm:size-5"} />}
 			</div>
 			<div className="min-w-0 flex-1">
 				{title && <p className={clsx("font-medium", sm ? "text-sm" : "text-sm sm:text-base", styles.title)}>{title}</p>}
@@ -1090,7 +1090,7 @@ export interface EmptyMessageProps {
 export function EmptyMessage({ children, className, message = "No data available", icon }: EmptyMessageProps) {
 	return (
 		<div className={clsx("flex flex-col items-center justify-center py-8 text-center", className)}>
-			{icon && <div className="mb-3 text-zinc-300 dark:text-zinc-600">{icon}</div>}
+			{icon && <div className="mb-3 text-zinc-400 dark:text-zinc-500">{icon}</div>}
 			<p className="text-sm text-zinc-500 dark:text-zinc-400">{message}</p>
 			{children}
 		</div>

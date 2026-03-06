@@ -261,7 +261,7 @@ export function FilterDropdown<T extends string = string>(props: FilterDropdownP
 							{showSearch && (
 								<div className="px-1.5 pt-1 pb-1.5">
 									<div className="relative">
-										<MagnifyingGlassIcon className="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-zinc-400 dark:text-zinc-500" />
+										<MagnifyingGlassIcon className="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-zinc-500 dark:text-zinc-400" />
 										<input
 											ref={searchRef}
 											type="text"
@@ -282,7 +282,7 @@ export function FilterDropdown<T extends string = string>(props: FilterDropdownP
 							{/* Options */}
 							<div className="max-h-64 overflow-y-auto overscroll-contain scrollbar-hide">
 								{filtered.length === 0 ? (
-									<div className="px-3 py-4 text-center text-sm text-zinc-400 dark:text-zinc-500">
+									<div className="px-3 py-4 text-center text-sm text-zinc-500 dark:text-zinc-400">
 										No results
 									</div>
 								) : grouped ? (
@@ -304,7 +304,7 @@ export function FilterDropdown<T extends string = string>(props: FilterDropdownP
 											return (
 												<Fragment key={g.key}>
 													{/* Section heading */}
-													<div className="px-3 pt-2.5 pb-1 text-[11px] font-semibold tracking-wide text-zinc-400 uppercase dark:text-zinc-500">
+													<div className="px-3 pt-2.5 pb-1 text-[11px] font-semibold tracking-wide text-zinc-500 uppercase dark:text-zinc-400">
 														{g.label}
 													</div>
 													{items.map((opt) => (
@@ -388,7 +388,7 @@ function OptionItem<T extends string>({
 				<option.icon
 					className={clsx(
 						"size-4 shrink-0",
-						selected ? "text-white/70 dark:text-zinc-900/60" : (option.iconColor || "text-zinc-400 dark:text-zinc-500"),
+						selected ? "text-white/70 dark:text-zinc-900/60" : (option.iconColor || "text-zinc-500 dark:text-zinc-400"),
 					)}
 				/>
 			)}

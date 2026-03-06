@@ -295,7 +295,7 @@ function RolePickerOption({
 				<p
 					className={clsx(
 						"text-xs",
-						selected ? "text-zinc-400 dark:text-zinc-500" : "text-zinc-500 dark:text-zinc-400"
+						selected ? "text-zinc-500 dark:text-zinc-400" : "text-zinc-500 dark:text-zinc-400"
 					)}
 				>
 					{role.description}
@@ -483,7 +483,7 @@ export function MemberRow({
 					{joinedAgo && (
 						<span className="hidden shrink-0 items-center gap-1.5 sm:flex">
 							<span className="text-zinc-300 dark:text-zinc-600">&middot;</span>
-							<span className="text-xs text-zinc-400 dark:text-zinc-500" title={joinedFull || undefined}>
+							<span className="text-xs text-zinc-500 dark:text-zinc-400" title={joinedFull || undefined}>
 								{joinedAgo}
 							</span>
 						</span>
@@ -1174,11 +1174,11 @@ export function RolesSection({ organizationId }: { organizationId: string | unde
 	if (loading) {
 		return (
 			<div className="overflow-hidden rounded-xl bg-white ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-				<div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3 dark:border-zinc-800">
+				<div className="flex items-center justify-between border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
 					<div className="h-5 w-24 animate-pulse rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
 					<div className="h-8 w-24 animate-pulse rounded-lg bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
 				</div>
-				<div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+				<div className="divide-y divide-zinc-200 dark:divide-zinc-800">
 					{[1, 2].map((i) => (
 						<div key={i} className="flex items-center gap-3 px-4 py-3.5">
 							<div className="size-10 animate-pulse rounded-full bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
@@ -1195,7 +1195,7 @@ export function RolesSection({ organizationId }: { organizationId: string | unde
 
 	return (
 		<div className="overflow-hidden rounded-xl bg-white ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-			<div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3 dark:border-zinc-800">
+			<div className="flex items-center justify-between border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
 				<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">
 					Custom Roles
 					{roles.length > 0 && (
@@ -1218,7 +1218,7 @@ export function RolesSection({ organizationId }: { organizationId: string | unde
 						/>
 					</div>
 				) : (
-					<div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+					<div className="divide-y divide-zinc-200 dark:divide-zinc-800">
 						{roles.map((role) => {
 							const permCount = Object.keys(role.permission || {}).length;
 							const totalActions = Object.values(role.permission || {}).reduce(

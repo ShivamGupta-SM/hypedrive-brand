@@ -9,12 +9,12 @@
 import * as Headless from "@headlessui/react";
 import {
 	AdjustmentsHorizontalIcon,
-	BuildingStorefrontIcon,
 	ChevronLeftIcon,
 	Cog6ToothIcon,
 	ComputerDesktopIcon,
 	CreditCardIcon,
 	FingerPrintIcon,
+	HomeModernIcon,
 	IdentificationIcon,
 	MoonIcon,
 	ShieldCheckIcon,
@@ -135,7 +135,7 @@ const ORG_NAV: NavItem[] = [
 		tab: "org",
 		section: "profile" as OrgSettingsSection,
 		label: "General",
-		icon: BuildingStorefrontIcon,
+		icon: HomeModernIcon,
 	},
 	{
 		id: "org-gst",
@@ -211,7 +211,7 @@ function TabSwitcher({
 						: "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
 				}`}
 			>
-				<BuildingStorefrontIcon className="size-3.5" />
+				<HomeModernIcon className="size-3.5" />
 				Workspace
 			</button>
 			<button
@@ -250,7 +250,7 @@ function NavButton({ item, active, onClick }: { item: NavItem; active: boolean; 
 				className={`size-4 transition-colors duration-100 ${
 					active
 						? "text-zinc-800 dark:text-zinc-200"
-						: "text-zinc-400 group-hover:text-zinc-600 dark:text-zinc-500 dark:group-hover:text-zinc-300"
+						: "text-zinc-500 group-hover:text-zinc-600 dark:text-zinc-400 dark:group-hover:text-zinc-300"
 				}`}
 			/>
 			<span className="truncate text-[13px] font-medium">{item.label}</span>
@@ -375,7 +375,7 @@ export function SettingsDialog({ open, onClose, initialTab = "org" }: SettingsDi
 										onClick={() => setActivePanel(null)}
 										className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"
 									>
-										<ChevronLeftIcon className="size-4 text-zinc-400 dark:text-zinc-500" />
+										<ChevronLeftIcon className="size-4 text-zinc-500 dark:text-zinc-400" />
 										{activePanel.title}
 									</button>
 								) : (

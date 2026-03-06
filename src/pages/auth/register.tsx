@@ -59,7 +59,7 @@ function VerifyEmailScreen({
 			</div>
 
 			<div className="space-y-3">
-				<div className="flex items-start gap-3 rounded-lg border border-zinc-100 bg-zinc-50 p-3.5 dark:border-zinc-800 dark:bg-zinc-800/50">
+				<div className="flex items-start gap-3 rounded-lg border border-zinc-200 bg-zinc-50 p-3.5 dark:border-zinc-800 dark:bg-zinc-800/50">
 					<div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white shadow-xs dark:bg-zinc-700">
 						<EnvelopeIcon className="size-4 text-zinc-500 dark:text-zinc-400" />
 					</div>

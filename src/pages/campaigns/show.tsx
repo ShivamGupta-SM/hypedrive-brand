@@ -542,7 +542,7 @@ function EditCampaignModal({
 											<p
 												className={clsx(
 													"text-xs",
-													formData.isPublic ? "text-zinc-400 dark:text-zinc-500" : "text-zinc-500 dark:text-zinc-400"
+													formData.isPublic ? "text-zinc-500 dark:text-zinc-400" : "text-zinc-500 dark:text-zinc-400"
 												)}
 											>
 												Anyone can join
@@ -565,7 +565,7 @@ function EditCampaignModal({
 											<p
 												className={clsx(
 													"text-xs",
-													!formData.isPublic ? "text-zinc-400 dark:text-zinc-500" : "text-zinc-500 dark:text-zinc-400"
+													!formData.isPublic ? "text-zinc-500 dark:text-zinc-400" : "text-zinc-500 dark:text-zinc-400"
 												)}
 											>
 												Invite only
@@ -844,7 +844,7 @@ export function CampaignShow() {
 		<div className="space-y-4 sm:space-y-5">
 			{/* Header Card */}
 			<header className="relative overflow-hidden rounded-xl bg-white ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-				<div className={clsx("pointer-events-none absolute inset-x-0 top-0 h-24 bg-linear-to-b sm:h-32", statusConfig.gradientClass)} />
+				<div className={clsx("pointer-events-none absolute inset-px top-px h-24 rounded-t-[11px] bg-linear-to-b sm:h-32", statusConfig.gradientClass)} />
 				<div className="relative p-4 sm:p-5">
 					{/* Thumbnail + Title row — always side by side */}
 					<div className="flex items-start gap-3 sm:gap-4">
@@ -923,7 +923,7 @@ export function CampaignShow() {
 
 				{/* Actions bar */}
 				{canUpdateCampaign && (
-					<div className="flex items-center gap-2 border-t border-zinc-100 px-4 py-2.5 sm:px-5 dark:border-zinc-800">
+					<div className="flex items-center gap-2 border-t border-zinc-200 px-4 py-2.5 sm:px-5 dark:border-zinc-800">
 						{/* Primary actions — driven by allowedActions from API */}
 						{campaign.allowedActions?.includes("SUBMIT_FOR_APPROVAL") && (
 							<button
@@ -1285,7 +1285,7 @@ export function CampaignShow() {
 									</div>
 									<h3 className="text-xs font-semibold text-zinc-900 sm:text-sm dark:text-white">Configuration</h3>
 								</div>
-								<div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+								<div className="divide-y divide-zinc-200 dark:divide-zinc-800">
 									{[
 										{
 											label: "Bill Rate",
@@ -2388,7 +2388,7 @@ function CampaignTimeline({ campaign }: { campaign: brand.CampaignWithStats }) {
 						<div className="min-w-0 flex-1 pt-0.5">
 							<p className="text-sm font-medium text-zinc-900 dark:text-white">{event.label}</p>
 							{event.description && <p className="mt-0.5 line-clamp-2 text-xs text-zinc-500 dark:text-zinc-400">{event.description}</p>}
-							<p className="mt-1 text-[10px] text-zinc-400 dark:text-zinc-500">{formatDateTime(event.date)}</p>
+							<p className="mt-1 text-[10px] text-zinc-500 dark:text-zinc-400">{formatDateTime(event.date)}</p>
 						</div>
 					</div>
 				);

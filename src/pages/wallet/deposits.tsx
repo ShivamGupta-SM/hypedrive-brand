@@ -68,7 +68,7 @@ export function WalletDeposits() {
 					/>
 				</div>
 			) : (
-				<div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+				<div className="divide-y divide-zinc-200 dark:divide-zinc-800">
 					{deposits.map((d) => (
 						<DepositRow key={d.id} deposit={d} />
 					))}

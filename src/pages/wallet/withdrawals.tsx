@@ -93,7 +93,7 @@ export function WalletWithdrawals() {
 						/>
 					</div>
 				) : (
-					<div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+					<div className="divide-y divide-zinc-200 dark:divide-zinc-800">
 						{withdrawals.map((w) => (
 							<WithdrawalRow
 								key={w.id}
@@ -157,7 +157,7 @@ export function WalletWithdrawals() {
 									</span>
 								</div>
 								{withdrawalDetail.processedAt && (
-									<div className="flex items-center gap-3 border-t border-zinc-100 px-4 py-3 dark:border-zinc-800">
+									<div className="flex items-center gap-3 border-t border-zinc-200 px-4 py-3 dark:border-zinc-800">
 										<CheckCircleIcon className="size-4 shrink-0 text-zinc-400" />
 										<span className="flex-1 text-sm text-zinc-500 dark:text-zinc-400">Processed</span>
 										<span className="text-sm font-medium text-zinc-900 dark:text-white">
@@ -165,10 +165,10 @@ export function WalletWithdrawals() {
 										</span>
 									</div>
 								)}
-								<div className="flex items-center gap-3 border-t border-zinc-100 px-4 py-3 dark:border-zinc-800">
+								<div className="flex items-center gap-3 border-t border-zinc-200 px-4 py-3 dark:border-zinc-800">
 									<HashtagIcon className="size-4 shrink-0 text-zinc-400" />
 									<span className="flex-1 text-sm text-zinc-500 dark:text-zinc-400">ID</span>
-									<span className="max-w-40 truncate font-mono text-xs text-zinc-400">{withdrawalDetail.id}</span>
+									<span className="max-w-40 truncate font-mono text-xs text-zinc-500 dark:text-zinc-400">{withdrawalDetail.id}</span>
 								</div>
 							</div>
 

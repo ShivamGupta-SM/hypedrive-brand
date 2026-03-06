@@ -7,7 +7,7 @@ import {
 	PlusIcon,
 	XMarkIcon,
 } from "@heroicons/react/16/solid";
-import { BuildingStorefrontIcon } from "@heroicons/react/20/solid";
+import { HomeModernIcon } from "@heroicons/react/20/solid";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import clsx from "clsx";
 import { useCallback, useState } from "react";
@@ -146,8 +146,8 @@ function OrgList({
 			<div className={clsx("overflow-y-auto scrollbar-hide", isMobile ? "max-h-[55vh] px-3 py-2" : "max-h-72 p-1.5")}>
 				{organizations.length === 0 ? (
 					<div className={clsx("text-center", isMobile ? "px-4 py-14" : "px-3 py-8")}>
-						<BuildingStorefrontIcon
-							className={clsx("mx-auto text-zinc-300 dark:text-zinc-600", isMobile ? "size-12" : "size-8")}
+						<HomeModernIcon
+							className={clsx("mx-auto text-zinc-400 dark:text-zinc-500", isMobile ? "size-12" : "size-8")}
 						/>
 						<p className={clsx("mt-3 font-medium text-zinc-500 dark:text-zinc-400", isMobile ? "text-base" : "text-sm")}>
 							No organizations yet
@@ -519,7 +519,7 @@ export function MobileOrgSwitcher({
 				<span className="truncate text-sm/5 font-semibold text-zinc-900 dark:text-white">
 					{displayOrg.name || "Select"}
 				</span>
-				<ChevronDownIcon className="-ml-0.5 size-3.5 shrink-0 text-zinc-400 dark:text-zinc-500" />
+				<ChevronDownIcon className="-ml-0.5 size-3.5 shrink-0 text-zinc-500 dark:text-zinc-400" />
 			</button>
 
 			<MobileOrgSheet

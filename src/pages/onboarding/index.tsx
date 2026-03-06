@@ -1,7 +1,7 @@
 import { CheckCircleIcon as CheckCircleSolidIcon, XCircleIcon } from "@heroicons/react/16/solid";
 import {
 	ArrowRightStartOnRectangleIcon,
-	BuildingStorefrontIcon,
+	HomeModernIcon,
 	DocumentTextIcon,
 	ExclamationTriangleIcon,
 	IdentificationIcon,
@@ -192,7 +192,7 @@ function OrganizationStep({
 		<form onSubmit={handleSubmit} className="space-y-6">
 			<div className="text-center">
 				<div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800">
-					<BuildingStorefrontIcon className="size-7 text-zinc-500 dark:text-zinc-400" />
+					<HomeModernIcon className="size-7 text-zinc-500 dark:text-zinc-400" />
 				</div>
 				<h2 className="text-xl font-semibold text-zinc-900 dark:text-white">Create Your Organization</h2>
 				<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
@@ -638,7 +638,7 @@ function SuccessStep({ orgName, organizationId }: { orgName: string; organizatio
 													? "text-red-700 dark:text-red-400"
 													: status === "active"
 														? "text-zinc-900 dark:text-white"
-														: "text-zinc-400 dark:text-zinc-500"
+														: "text-zinc-500 dark:text-zinc-400"
 										}`}
 									>
 										{meta.label}

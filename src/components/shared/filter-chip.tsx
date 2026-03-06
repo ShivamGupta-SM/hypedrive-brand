@@ -219,7 +219,7 @@ export function SearchInput({ value, onChange, placeholder = "Search...", classN
 				<button
 					type="button"
 					onClick={() => onChange("")}
-					className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-0.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+					className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-0.5 text-zinc-400 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-300"
 				>
 					<XMarkIcon className="size-4" />
 				</button>

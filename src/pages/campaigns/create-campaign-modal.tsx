@@ -233,7 +233,7 @@ function TaskRequirementsDialog({
 					</Field>
 
 					{/* Collapsible Requirements */}
-					<div className="border-t border-zinc-100 pt-3 dark:border-zinc-700/50">
+					<div className="border-t border-zinc-200 pt-3 dark:border-zinc-700/50">
 						<button
 							type="button"
 							onClick={() => setShowReqs(!showReqs)}
@@ -784,7 +784,7 @@ export function CreateCampaignModal({
 				<DialogHeader icon={MegaphoneIcon} iconColor="emerald" title="Create Campaign" onClose={handleClose} />
 
 				{/* Stepper */}
-				<div className="mt-3 border-t border-zinc-100 pt-4 dark:border-zinc-800" ref={stepTopRef}>
+				<div className="mt-3 border-t border-zinc-200 pt-4 dark:border-zinc-800" ref={stepTopRef}>
 					<WizardStepper steps={STEPS} currentStep={step} completedSteps={completedSteps} onStepClick={goToStep} />
 				</div>
 
@@ -815,7 +815,7 @@ export function CreateCampaignModal({
 
 							<div className="max-h-72 overflow-y-auto rounded-xl ring-1 ring-zinc-200 dark:ring-zinc-800">
 								{listingsLoading ? (
-									<div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+									<div className="divide-y divide-zinc-200 dark:divide-zinc-800">
 										{Array.from({ length: 4 }).map((_, i) => (
 											<div key={i} className="flex items-center gap-3 px-3 py-2.5">
 												<Skeleton width={44} height={44} borderRadius={8} />
@@ -837,7 +837,7 @@ export function CreateCampaignModal({
 										</p>
 									</div>
 								) : (
-									<div className="divide-y divide-zinc-100 p-1 dark:divide-zinc-800">
+									<div className="divide-y divide-zinc-200 p-1 dark:divide-zinc-800">
 										{listings.map((listing) => {
 											const selected = listingId === listing.id;
 											return (
@@ -1127,7 +1127,7 @@ export function CreateCampaignModal({
 
 								{/* Added tasks */}
 								{tasks.length > 0 && (
-									<div className="mt-3 divide-y divide-zinc-100 overflow-hidden rounded-lg border border-zinc-100 dark:divide-zinc-700/50 dark:border-zinc-700/50">
+									<div className="mt-3 divide-y divide-zinc-200 overflow-hidden rounded-lg border border-zinc-200 dark:divide-zinc-700/50 dark:border-zinc-700/50">
 										{tasks.map((task, idx) => {
 											const PIcon = task.platformName ? getPlatformIcon(task.platformName) : null;
 											const hasCustomizations =
@@ -1196,7 +1196,7 @@ export function CreateCampaignModal({
 								<div className={clsx("space-y-3", tasks.length > 0 ? "mt-3" : "mt-4")}>
 									<div className="grid grid-cols-2 gap-2">
 										<Field>
-											<Label className="text-[11px] uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+											<Label className="text-[11px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
 												Platform
 											</Label>
 											{platformsLoading ? (
@@ -1215,7 +1215,7 @@ export function CreateCampaignModal({
 											)}
 										</Field>
 										<Field>
-											<Label className="text-[11px] uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+											<Label className="text-[11px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
 												Task Type
 											</Label>
 											{templatesLoading ? (
@@ -1377,7 +1377,7 @@ export function CreateCampaignModal({
 									color="emerald"
 									onEdit={() => goToStep(2)}
 								>
-									<div className="mt-3 divide-y divide-zinc-100 overflow-hidden rounded-lg border border-zinc-100 dark:divide-zinc-700/50 dark:border-zinc-700/50">
+									<div className="mt-3 divide-y divide-zinc-200 overflow-hidden rounded-lg border border-zinc-200 dark:divide-zinc-700/50 dark:border-zinc-700/50">
 										{tasks.map((task, idx) => {
 											const PIcon = task.platformName ? getPlatformIcon(task.platformName) : null;
 											return (

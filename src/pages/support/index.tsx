@@ -67,7 +67,7 @@ function FAQItem({
 	const contentRef = useRef<HTMLDivElement>(null);
 
 	return (
-		<div className="border-b border-zinc-100 last:border-b-0 dark:border-zinc-800">
+		<div className="border-b border-zinc-200 last:border-b-0 dark:border-zinc-800">
 			<button
 				type="button"
 				onClick={onToggle}
@@ -205,9 +205,9 @@ export function Support() {
 						<LifebuoyIcon className="size-5 text-white" />
 					</div>
 					<div className="min-w-0">
-						<p className="text-xs font-semibold uppercase tracking-widest text-zinc-400">Support Center</p>
+						<p className="text-xs font-semibold uppercase tracking-widest text-zinc-500">Support Center</p>
 						<h2 className="mt-0.5 text-base font-semibold text-white sm:text-lg">How can we help you?</h2>
-						<p className="mt-1 text-sm leading-relaxed text-white/50">
+						<p className="mt-1 text-sm leading-relaxed text-white/60">
 							Browse FAQs, check documentation, or reach out to our team directly.
 						</p>
 					</div>

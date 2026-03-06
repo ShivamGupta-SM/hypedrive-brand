@@ -582,7 +582,7 @@ export function SearchDialog({
 													onClick={() => setQuery(search.query)}
 													className="flex flex-1 items-center gap-3 text-left"
 												>
-													<ClockIcon className="size-4 shrink-0 text-zinc-300 dark:text-zinc-600" />
+													<ClockIcon className="size-4 shrink-0 text-zinc-400 dark:text-zinc-500" />
 													<span className="flex-1 text-sm text-zinc-700 dark:text-zinc-300">{search.query}</span>
 												</button>
 												<button
@@ -594,7 +594,7 @@ export function SearchDialog({
 												</button>
 											</div>
 										))}
-										<div className="my-2 h-px bg-zinc-100 dark:bg-zinc-800" />
+										<div className="my-2 h-px bg-zinc-200 dark:bg-zinc-800" />
 									</>
 								)}
 								<div className="px-2.5 py-1.5">
@@ -650,7 +650,7 @@ export function SearchDialog({
 						{/* No results */}
 						{hasQuery && !loading && !searchError && filteredResults.length === 0 && (
 							<div className="py-8 text-center">
-								<MagnifyingGlassIcon className="mx-auto size-6 text-zinc-300 dark:text-zinc-600" />
+								<MagnifyingGlassIcon className="mx-auto size-6 text-zinc-400 dark:text-zinc-500" />
 								<p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
 									No results for &ldquo;{debouncedQuery}&rdquo;
 									{filter !== "all" && ` in ${filter}`}
@@ -737,8 +737,8 @@ export function SearchDialog({
 
 								{/* Has more results notice */}
 								{hasMore && (
-									<div className="mt-1 border-t border-zinc-100 px-2 py-2 dark:border-zinc-800">
-										<p className="text-center text-xs text-zinc-400">
+									<div className="mt-1 border-t border-zinc-200 px-2 py-2 dark:border-zinc-800">
+										<p className="text-center text-xs text-zinc-500 dark:text-zinc-400">
 											Showing top results — refine your query to narrow down
 										</p>
 									</div>

@@ -52,7 +52,7 @@ function PasswordStrength({ password }: { password: string }) {
 					{check.valid ? (
 						<CheckCircleIcon className="size-3.5 shrink-0 text-emerald-500" />
 					) : (
-						<XCircleIcon className="size-3.5 shrink-0 text-zinc-300 dark:text-zinc-600" />
+						<XCircleIcon className="size-3.5 shrink-0 text-zinc-400 dark:text-zinc-500" />
 					)}
 					<span
 						className={`text-xs ${check.valid ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-500 dark:text-zinc-400"}`}

@@ -158,7 +158,7 @@ function EnrollmentCardFull({
 						</div>
 
 						{/* Row 3: ID + date + city + overdue */}
-						<div className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] text-zinc-400 dark:text-zinc-500">
+						<div className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] text-zinc-500 dark:text-zinc-400">
 							<span className="font-mono">{enrollment.displayId}</span>
 							<span>·</span>
 							<span>{formatDateCompact(enrollment.createdAt)}</span>
@@ -273,7 +273,7 @@ function EnrollmentCardCompact({ enrollment, onClick }: CompactVariantProps) {
 					</div>
 
 					{/* Row 2: ID + date + platform */}
-					<div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] text-zinc-400 dark:text-zinc-500">
+					<div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] text-zinc-500 dark:text-zinc-400">
 						<span className="font-mono">{enrollment.displayId}</span>
 						<span>·</span>
 						<span>{formatDateCompact(enrollment.createdAt)}</span>
