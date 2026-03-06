@@ -19,7 +19,7 @@ import { useCan } from "@/components/shared/can";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
 import { SelectionCheckbox } from "@/components/shared/selection-checkbox";
-import { FilterPills, type FilterPillOption } from "@/components/shared/filter-pills";
+import { FilterDropdown, type FilterOption } from "@/components/shared/filter-dropdown";
 import { Skeleton } from "@/components/skeleton";
 import { useInfiniteCampaigns } from "@/features/campaigns/hooks";
 import {
@@ -87,7 +87,7 @@ interface CampaignsGridProps {
 	status?: db.CampaignStatus;
 }
 
-const sortPillOptions: FilterPillOption[] = [
+const sortOptions: FilterOption[] = [
 	{ value: "newest", label: "Newest", icon: CalendarIcon, iconColor: "text-sky-500" },
 	{ value: "oldest", label: "Oldest", icon: CalendarIcon, iconColor: "text-zinc-400" },
 	{ value: "title", label: "Title A-Z", icon: ArrowsUpDownIcon, iconColor: "text-violet-500" },
@@ -242,23 +242,18 @@ export function CampaignsGrid({ status }: CampaignsGridProps) {
 
 	return (
 		<div className="space-y-4">
-			{/* Toolbar: Sort + count + Export */}
-			<div className="flex items-center justify-between gap-3">
-				<div className="flex items-center gap-3">
-					<FilterPills options={sortPillOptions} value={sortBy} onChange={(value) => navigate({ search: ((prev: Record<string, unknown>) => ({ ...prev, sort: value === "newest" ? undefined : value })) as never })} />
-					<span className="hidden text-xs text-zinc-500 sm:inline dark:text-zinc-400">
-						{campaignCount} campaign{campaignCount !== 1 ? "s" : ""}
-						{q && ` matching "${q}"`}
-					</span>
-				</div>
+			{/* Toolbar */}
+			<div className="flex items-center gap-2">
+				<FilterDropdown label="Sort" options={sortOptions} value={sortBy} onChange={(value) => navigate({ search: ((prev: Record<string, unknown>) => ({ ...prev, sort: value === "newest" ? undefined : value })) as never })} />
+				<div className="flex-1" />
 				{campaigns.length > 0 && (
 					<Button
+						size="sm"
 						color="emerald"
 						onClick={() => exportCampaignsToCSV(campaigns)}
-						className="shrink-0"
 					>
 						<TableCellsIcon data-slot="icon" className="size-4" />
-						<span className="hidden sm:inline">Export</span>
+						Export
 					</Button>
 				)}
 			</div>

@@ -6,6 +6,7 @@ import {
 	CurrencyRupeeIcon,
 	ExclamationTriangleIcon,
 	TableCellsIcon,
+	XCircleIcon,
 	XMarkIcon,
 } from "@heroicons/react/16/solid";
 import { getRouteApi } from "@tanstack/react-router";
@@ -18,7 +19,7 @@ import { EnrollmentCardFull, getEnrollmentStatusConfig, isEnrollmentOverdue } fr
 import { BulkActionsBar } from "@/components/shared/bulk-actions-bar";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
-import { FilterPills, type FilterPillOption } from "@/components/shared/filter-pills";
+import { FilterDropdown, type FilterOption } from "@/components/shared/filter-dropdown";
 import { useCampaigns } from "@/features/campaigns/hooks";
 import { useInfiniteEnrollments } from "@/features/enrollments/hooks";
 import {
@@ -79,10 +80,10 @@ export function EnrollmentsGridSkeleton() {
 				{[1, 2, 3, 4].map((i) => (
 					<div
 						key={i}
-						className="overflow-hidden rounded-xl bg-white ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800"
+						className="overflow-hidden rounded-xl bg-white shadow-xs ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800"
 					>
-						<div className="flex items-start gap-3 p-3 sm:p-4">
-							<div className="size-11 shrink-0 animate-pulse rounded-lg bg-zinc-200 sm:size-12 dark:bg-zinc-700" />
+						<div className="flex items-start gap-3.5 p-3.5 sm:gap-4 sm:p-4">
+							<div className="size-12 shrink-0 animate-pulse rounded-full bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
 							<div className="min-w-0 flex-1 space-y-2">
 								<div className="h-4 w-2/3 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
 								<div className="h-3 w-1/2 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
@@ -90,9 +91,9 @@ export function EnrollmentsGridSkeleton() {
 							</div>
 						</div>
 						<div className="h-px bg-zinc-200 dark:bg-zinc-700" />
-						<div className="grid grid-cols-3 divide-x divide-zinc-200 dark:divide-zinc-700">
+						<div className="grid grid-cols-3 divide-x divide-zinc-200 bg-zinc-50/50 dark:divide-zinc-700 dark:bg-zinc-800/30">
 							{[1, 2, 3].map((j) => (
-								<div key={j} className="flex flex-col items-center gap-1 py-2.5">
+								<div key={j} className="flex flex-col items-center gap-1 py-2.5 sm:py-3">
 									<div className="h-2.5 w-10 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
 									<div className="h-3.5 w-14 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
 								</div>
@@ -109,7 +110,7 @@ export function EnrollmentsGridSkeleton() {
 // ENROLLMENTS GRID
 // =============================================================================
 
-const sortPillOptions: FilterPillOption[] = [
+const sortOptions: FilterOption[] = [
 	{ value: "newest", label: "Newest", icon: CalendarIcon, iconColor: "text-sky-500" },
 	{ value: "oldest", label: "Oldest", icon: CalendarIcon, iconColor: "text-zinc-400" },
 	{ value: "orderValue", label: "Order Value", icon: CurrencyRupeeIcon, iconColor: "text-emerald-500" },
@@ -284,27 +285,22 @@ export function EnrollmentsGrid({ status }: EnrollmentsGridProps) {
 				/>
 			) : (
 				<div className="space-y-4">
-					{/* Toolbar: Sort + count + Export */}
-					<div className="flex items-center justify-between gap-3">
-						<div className="flex items-center gap-3">
-							<FilterPills options={sortPillOptions} value={sortBy} onChange={setSortBy} />
-							<span className="hidden text-xs text-zinc-500 sm:inline dark:text-zinc-400">
-								{enrollments.length} enrollment{enrollments.length !== 1 ? "s" : ""}
-								{q && ` matching "${q}"`}
-							</span>
-						</div>
+					{/* Toolbar */}
+					<div className="flex items-center gap-2">
+						<FilterDropdown label="Sort" options={sortOptions} value={sortBy} onChange={setSortBy} />
+						<div className="flex-1" />
 						<Button
+							size="sm"
 							color="emerald"
 							onClick={handleExport}
 							disabled={exportEnrollments.isPending}
-							className="shrink-0"
 						>
 							{exportEnrollments.isPending ? (
-								<ArrowPathIcon className="size-4 animate-spin" />
+								<ArrowPathIcon data-slot="icon" className="size-4 animate-spin" />
 							) : (
 								<TableCellsIcon data-slot="icon" className="size-4" />
 							)}
-							<span className="hidden sm:inline">{exportEnrollments.isPending ? "Exporting..." : "Export"}</span>
+							Export
 						</Button>
 					</div>
 
@@ -354,7 +350,7 @@ export function EnrollmentsGrid({ status }: EnrollmentsGridProps) {
 					Approve
 				</Button>
 				<Button color="red" onClick={handleBulkRejectRequest} disabled={isBulkLoading}>
-					<XMarkIcon data-slot="icon" className="size-4" />
+					<XCircleIcon data-slot="icon" className="size-4" />
 					Reject
 				</Button>
 			</BulkActionsBar>

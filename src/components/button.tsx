@@ -1,21 +1,33 @@
 import * as Headless from "@headlessui/react";
+import { ArrowPathIcon } from "@heroicons/react/16/solid";
 import clsx from "clsx";
 import type React from "react";
 import { forwardRef } from "react";
 import { Link } from "./link";
 
+const sizeStyles = {
+	default: [
+		"px-[calc(--spacing(3.5)-1px)] py-[calc(--spacing(2.5)-1px)] sm:px-[calc(--spacing(3)-1px)] sm:py-[calc(--spacing(1.5)-1px)] sm:text-sm/6",
+		"*:data-[slot=icon]:-mx-0.5 *:data-[slot=icon]:my-0.5 *:data-[slot=icon]:size-5 *:data-[slot=icon]:shrink-0 *:data-[slot=icon]:self-center *:data-[slot=icon]:text-(--btn-icon) sm:*:data-[slot=icon]:my-1 sm:*:data-[slot=icon]:size-4 forced-colors:[--btn-icon:ButtonText] forced-colors:data-hover:[--btn-icon:ButtonText]",
+	],
+	sm: [
+		"px-[calc(--spacing(3)-1px)] py-[calc(--spacing(1.5)-1px)] text-sm/6",
+		"*:data-[slot=icon]:-mx-0.5 *:data-[slot=icon]:my-0.5 *:data-[slot=icon]:size-4 *:data-[slot=icon]:shrink-0 *:data-[slot=icon]:self-center *:data-[slot=icon]:text-(--btn-icon) forced-colors:[--btn-icon:ButtonText] forced-colors:data-hover:[--btn-icon:ButtonText]",
+	],
+};
+
 const styles = {
 	base: [
 		// Base
 		"relative isolate inline-flex items-center justify-center gap-x-2 rounded-lg border text-base/6 font-semibold",
-		// Sizing
-		"px-[calc(--spacing(3.5)-1px)] py-[calc(--spacing(2.5)-1px)] sm:px-[calc(--spacing(3)-1px)] sm:py-[calc(--spacing(1.5)-1px)] sm:text-sm/6",
+		// Transitions — smooth hover/active micro-interactions
+		"transition-all duration-150 ease-out",
+		// Active press — subtle scale down
+		"data-active:scale-[0.97]",
 		// Focus
 		"focus:not-data-focus:outline-hidden data-focus:outline-2 data-focus:outline-offset-2 data-focus:outline-blue-500",
 		// Disabled
-		"data-disabled:opacity-50",
-		// Icon
-		"*:data-[slot=icon]:-mx-0.5 *:data-[slot=icon]:my-0.5 *:data-[slot=icon]:size-5 *:data-[slot=icon]:shrink-0 *:data-[slot=icon]:self-center *:data-[slot=icon]:text-(--btn-icon) sm:*:data-[slot=icon]:my-1 sm:*:data-[slot=icon]:size-4 forced-colors:[--btn-icon:ButtonText] forced-colors:data-hover:[--btn-icon:ButtonText]",
+		"data-disabled:opacity-50 data-disabled:pointer-events-none",
 	],
 	solid: [
 		// Optical border, implemented as the button background to avoid corner artifacts
@@ -26,6 +38,10 @@ const styles = {
 		"before:absolute before:inset-0 before:-z-10 before:rounded-[calc(var(--radius-lg)-1px)] before:bg-(--btn-bg)",
 		// Drop shadow, applied to the inset `before` layer so it blends with the border
 		"before:shadow-sm",
+		// Hover — lift shadow
+		"data-hover:before:shadow-md",
+		// Transition on pseudo layers
+		"before:transition-shadow before:duration-150",
 		// Background color is moved to control and shadow is removed in dark mode so hide `before` pseudo
 		"dark:before:hidden",
 		// Dark mode: Subtle white outline is applied using a border
@@ -44,8 +60,11 @@ const styles = {
 	outline: [
 		// Base
 		"border-zinc-950/10 text-zinc-950 data-active:bg-zinc-950/2.5 data-hover:bg-zinc-950/2.5",
+		// Hover border darken
+		"data-hover:border-zinc-950/20",
 		// Dark mode
 		"dark:border-white/15 dark:text-white dark:[--btn-bg:transparent] dark:data-active:bg-white/5 dark:data-hover:bg-white/5",
+		"dark:data-hover:border-white/25",
 		// Icon
 		"[--btn-icon:var(--color-zinc-500)] data-active:[--btn-icon:var(--color-zinc-700)] data-hover:[--btn-icon:var(--color-zinc-700)] dark:data-active:[--btn-icon:var(--color-zinc-400)] dark:data-hover:[--btn-icon:var(--color-zinc-400)]",
 	],
@@ -163,34 +182,63 @@ type ButtonProps = (
 	| { color?: keyof typeof styles.colors; outline?: never; plain?: never }
 	| { color?: never; outline: true; plain?: never }
 	| { color?: never; outline?: never; plain: true }
-) & { className?: string; children: React.ReactNode } & (
+) & {
+	className?: string;
+	children: React.ReactNode;
+	size?: keyof typeof sizeStyles;
+	loading?: boolean;
+} & (
 		| ({ href?: never } & Omit<Headless.ButtonProps, "as" | "className">)
 		| ({ href: string } & Omit<React.ComponentPropsWithoutRef<typeof Link>, "className">)
 	);
 
 export const Button = forwardRef(function Button(
-	{ color, outline, plain, className, children, ...props }: ButtonProps,
-	ref: React.ForwardedRef<HTMLElement>
+	{ color, outline, plain, className, children, size = "default", loading, ...props }: ButtonProps,
+	ref: React.ForwardedRef<HTMLElement>,
 ) {
+	const isDisabled = props.disabled || loading;
 	const classes = clsx(
 		className,
 		styles.base,
-		outline ? styles.outline : plain ? styles.plain : clsx(styles.solid, styles.colors[color ?? "dark/zinc"])
+		sizeStyles[size],
+		outline ? styles.outline : plain ? styles.plain : clsx(styles.solid, styles.colors[color ?? "dark/zinc"]),
+	);
+
+	const inner = loading ? (
+		<TouchTarget>
+			<span className="flex items-center gap-x-2 opacity-0" aria-hidden="true">{children}</span>
+			<span className="absolute inset-0 flex items-center justify-center">
+				<ArrowPathIcon className="size-4 animate-spin" />
+			</span>
+		</TouchTarget>
+	) : (
+		<TouchTarget>{children}</TouchTarget>
 	);
 
 	return typeof props.href === "string" ? (
-		<Link {...props} className={classes} ref={ref as React.ForwardedRef<HTMLAnchorElement>}>
-			<TouchTarget>{children}</TouchTarget>
+		<Link
+			{...props}
+			className={classes}
+			ref={ref as React.ForwardedRef<HTMLAnchorElement>}
+			aria-busy={loading || undefined}
+		>
+			{inner}
 		</Link>
 	) : (
-		<Headless.Button {...props} className={clsx(classes, "cursor-default")} ref={ref}>
-			<TouchTarget>{children}</TouchTarget>
+		<Headless.Button
+			{...props}
+			disabled={isDisabled}
+			className={clsx(classes, "cursor-default")}
+			ref={ref}
+			aria-busy={loading || undefined}
+		>
+			{inner}
 		</Headless.Button>
 	);
 });
 
 /**
- * Expand the hit area to at least 44×44px on touch devices
+ * Expand the hit area to at least 44x44px on touch devices
  */
 export function TouchTarget({ children }: { children: React.ReactNode }) {
 	return (
