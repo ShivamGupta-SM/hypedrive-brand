@@ -1,6 +1,6 @@
 import { ArrowPathIcon, ClockIcon } from "@heroicons/react/24/outline";
 import { useNavigate, useRouter } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/button";
 import { Logo } from "@/components/logo";
 import { useLogout } from "@/features/auth/hooks";
@@ -10,6 +10,14 @@ export function PendingApproval({ organization }: { organization: { name: string
 	const navigate = useNavigate();
 	const router = useRouter();
 	const [loading, setLoading] = useState(false);
+
+	// Auto-poll every 30 seconds
+	useEffect(() => {
+		const interval = setInterval(() => {
+			router.invalidate();
+		}, 30_000);
+		return () => clearInterval(interval);
+	}, [router]);
 
 	const handleCheckStatus = async () => {
 		setLoading(true);
@@ -30,7 +38,7 @@ export function PendingApproval({ organization }: { organization: { name: string
 
 	return (
 		<div className="flex min-h-dvh flex-col bg-white dark:bg-zinc-950">
-			<div className="flex flex-1 flex-col items-center justify-center px-6 py-12">
+			<div className="flex flex-1 flex-col items-center justify-center px-4 py-8 sm:px-6 sm:py-12">
 				<div className="w-full max-w-md text-center">
 					{/* Logo */}
 					<Logo className="mx-auto mb-8 h-8 w-auto text-zinc-950 dark:text-white" />
@@ -59,15 +67,15 @@ export function PendingApproval({ organization }: { organization: { name: string
 						<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">What happens next?</h3>
 						<ul className="mt-3 space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
 							<li className="flex items-start gap-2">
-								<span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-amber-500" />
+								<span className="shrink-0 text-zinc-400 dark:text-zinc-500">•</span>
 								Our team reviews your organization details
 							</li>
 							<li className="flex items-start gap-2">
-								<span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-zinc-300 dark:bg-zinc-600" />
+								<span className="shrink-0 text-zinc-400 dark:text-zinc-500">•</span>
 								You'll receive an email notification
 							</li>
 							<li className="flex items-start gap-2">
-								<span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-zinc-300 dark:bg-zinc-600" />
+								<span className="shrink-0 text-zinc-400 dark:text-zinc-500">•</span>
 								Access your dashboard once approved
 							</li>
 						</ul>
@@ -75,9 +83,11 @@ export function PendingApproval({ organization }: { organization: { name: string
 
 					{/* Actions */}
 					<div className="mt-8 flex flex-col gap-3">
-						<Button onClick={handleCheckStatus} disabled={loading} color="dark/zinc" className="w-full">
+						<Button onClick={handleCheckStatus} disabled={loading} aria-busy={loading} color="dark/zinc" className="w-full">
 							<ArrowPathIcon className={`size-4 ${loading ? "animate-spin" : ""}`} />
+						<output aria-live="polite">
 							{loading ? "Checking..." : "Check Status"}
+						</output>
 						</Button>
 
 						<Button onClick={handleSignOut} outline className="w-full">

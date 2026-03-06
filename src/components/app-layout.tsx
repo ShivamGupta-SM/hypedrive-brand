@@ -141,11 +141,11 @@ export function AppLayout({
 								className="flex size-8 cursor-default items-center justify-center rounded-full hover:bg-zinc-950/5 dark:hover:bg-white/5"
 							>
 								{user?.image ? (
-									<Avatar src={user.image} className="size-6 outline-0!" />
+									<Avatar src={user.image} className="size-6 outline-0" />
 								) : (
 									<Avatar
 										initials={user?.name?.charAt(0).toUpperCase() || "U"}
-										className="size-6 bg-zinc-900 text-[10px] text-white outline-0! dark:bg-white dark:text-zinc-900"
+										className="size-6 bg-zinc-900 text-[10px] text-white outline-0 dark:bg-white dark:text-zinc-900"
 									/>
 								)}
 							</DropdownButton>

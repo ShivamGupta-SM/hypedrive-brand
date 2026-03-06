@@ -365,20 +365,6 @@ export const iconBg = {
 } as const;
 
 // =============================================================================
-// PROGRESS BAR COLORS
-// =============================================================================
-
-export function getProgressColor(percent: number): string {
-	if (percent >= 90) return "bg-red-500";
-	if (percent >= 70) return "bg-amber-500";
-	return "bg-emerald-500";
-}
-
-export function getProgressTrack(): string {
-	return "bg-zinc-200 dark:bg-zinc-700";
-}
-
-// =============================================================================
 // UTILITY FUNCTIONS
 // =============================================================================
 
@@ -420,15 +406,6 @@ export function formatCurrency(amount: number | string, currency = "INR"): strin
  */
 export function formatNumber(value: number): string {
 	return new Intl.NumberFormat("en-IN").format(value);
-}
-
-/**
- * Format compact number (1K, 1M, etc.)
- */
-export function formatCompactNumber(num: number): string {
-	if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
-	if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
-	return num.toString();
 }
 
 /**
@@ -511,14 +488,3 @@ export function formatRelativeTime(dateStr: string): string {
 	return formatDate(dateStr);
 }
 
-/**
- * Get current date formatted for display
- */
-export function getCurrentDateFormatted(): string {
-	return new Date().toLocaleDateString("en-IN", {
-		weekday: "long",
-		year: "numeric",
-		month: "long",
-		day: "numeric",
-	});
-}

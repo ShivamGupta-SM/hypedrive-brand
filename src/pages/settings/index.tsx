@@ -296,7 +296,7 @@ function EditOrganizationPanel({
 				</Field>
 
 				<Field>
-					<Label>Organization Name *</Label>
+					<Label>Organization Name <span className="text-red-500">*</span></Label>
 					<Input
 						value={formData.name}
 						onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
@@ -522,7 +522,7 @@ function AddBankAccountPanel({ organizationId }: { organizationId: string | unde
 			)}
 
 			<Field>
-				<Label>Account Number</Label>
+				<Label>Account Number <span className="text-red-500">*</span></Label>
 				<Input
 					value={accountNumber}
 					onChange={(e) => {
@@ -534,7 +534,7 @@ function AddBankAccountPanel({ organizationId }: { organizationId: string | unde
 				/>
 			</Field>
 			<Field>
-				<Label>IFSC Code</Label>
+				<Label>IFSC Code <span className="text-red-500">*</span></Label>
 				<Input
 					value={ifscCode}
 					onChange={(e) => {

@@ -6,6 +6,7 @@ import {
 	MegaphoneIcon,
 	XCircleIcon,
 } from "@heroicons/react/16/solid";
+import clsx from "clsx";
 import { Badge } from "@/components/badge";
 import { getPlatformColor, getPlatformIcon } from "@/components/icons/platform-icons";
 import { Link } from "@/components/link";
@@ -111,7 +112,12 @@ function EnrollmentCardFull({
 
 	return (
 		<div
-			className={`group relative flex flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 transition-all duration-200 dark:bg-zinc-900 ${isSelected ? "ring-2 ring-zinc-900 dark:ring-white" : "ring-zinc-200 hover:ring-zinc-300 hover:shadow-md dark:ring-zinc-800 dark:hover:ring-zinc-700"}`}
+			className={clsx(
+				"group relative flex flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 transition-all duration-200 dark:bg-zinc-900",
+				isSelected
+					? "ring-2 ring-zinc-900 dark:ring-white"
+					: "ring-zinc-200 hover:ring-zinc-300 hover:shadow-md dark:ring-zinc-800 dark:hover:ring-zinc-700"
+			)}
 		>
 			<Link
 				href={`/${orgSlug}/campaigns/${enrollment.campaignId}/enrollments/${enrollment.id}`}
@@ -128,7 +134,7 @@ function EnrollmentCardFull({
 						/>
 						{PlatformIconComponent && (
 							<div className="absolute -bottom-0.5 -right-0.5 flex size-4.5 items-center justify-center rounded-full border-2 border-white bg-white dark:border-zinc-900 dark:bg-zinc-900">
-								<PlatformIconComponent className={`size-3 ${getPlatformColor(platformName || "")}`} />
+								<PlatformIconComponent className={clsx("size-3", getPlatformColor(platformName || ""))} />
 							</div>
 						)}
 					</div>
@@ -201,11 +207,12 @@ function EnrollmentCardFull({
 				<button
 					type="button"
 					onClick={handleCheckboxClick}
-					className={`absolute left-2.5 top-2.5 z-10 flex size-5 items-center justify-center rounded-md transition-all sm:opacity-0 sm:group-hover:opacity-100 ${
+					className={clsx(
+						"absolute left-2.5 top-2.5 z-10 flex size-5 items-center justify-center rounded-md transition-all",
 						isSelected
-							? "border-0 bg-zinc-900 text-white sm:opacity-100! dark:bg-white dark:text-zinc-900"
-							: "border border-zinc-300 bg-white/90 backdrop-blur-sm hover:border-zinc-400 dark:border-zinc-600 dark:bg-zinc-800/90"
-					}`}
+							? "border-0 bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
+							: "border border-zinc-300 bg-white/90 backdrop-blur-sm hover:border-zinc-400 sm:opacity-0 sm:group-hover:opacity-100 dark:border-zinc-600 dark:bg-zinc-800/90"
+					)}
 				>
 					{isSelected && <CheckCircleIcon className="size-3.5" />}
 				</button>
@@ -239,7 +246,10 @@ function EnrollmentCardCompact({ enrollment, onClick }: CompactVariantProps) {
 	return (
 		<Wrapper
 			{...(onClick ? { type: "button" as const, onClick } : {})}
-			className={`group flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors ${onClick ? "cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50" : ""}`}
+			className={clsx(
+				"group flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors",
+				onClick && "cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+			)}
 		>
 			{/* Creator avatar */}
 			<img

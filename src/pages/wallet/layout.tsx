@@ -119,7 +119,7 @@ export function WalletLayout() {
 	const availPercent = balanceNum > 0 ? (availNum / balanceNum) * 100 : 0;
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-5">
 			{/* Header */}
 			<PageHeader
 				title="Wallet"
@@ -248,11 +248,11 @@ export function WalletLayout() {
 				</div>
 			</div>
 
-			{/* URL-based tab navigation */}
-			<TabNav tabs={tabs} />
-
-			{/* Child route renders here */}
-			<Outlet />
+			{/* URL-based tab navigation + child content */}
+			<div className="space-y-3">
+				<TabNav tabs={tabs} />
+				<Outlet />
+			</div>
 
 			{/* Dialogs at layout level — accessible from any tab */}
 			<DepositAccountDialog

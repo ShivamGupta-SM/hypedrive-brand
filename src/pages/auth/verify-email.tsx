@@ -41,7 +41,7 @@ export function VerifyEmail() {
 			<Logo className="h-7 w-auto text-zinc-950 dark:text-white" />
 
 			{status === "loading" && (
-				<div className="text-center">
+				<output className="block text-center" aria-live="polite">
 					<div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
 						<svg className="size-7 animate-spin text-zinc-400" fill="none" viewBox="0 0 24 24" aria-hidden="true">
 							<circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -56,12 +56,12 @@ export function VerifyEmail() {
 					<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
 						Please wait while we confirm your email address.
 					</p>
-				</div>
+				</output>
 			)}
 
 			{status === "success" && (
 				<>
-					<div className="text-center">
+					<output className="block text-center" aria-live="polite">
 						<div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-950/40">
 							<CheckCircleIcon className="size-7 text-emerald-500 dark:text-emerald-400" />
 						</div>
@@ -69,7 +69,7 @@ export function VerifyEmail() {
 						<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
 							Your email is confirmed. Redirecting to sign in…
 						</p>
-					</div>
+					</output>
 					<Button href="/login" className="w-full" color="dark/zinc">
 						Sign in now
 					</Button>
@@ -78,7 +78,7 @@ export function VerifyEmail() {
 
 			{status === "error" && (
 				<>
-					<div className="text-center">
+					<div className="text-center" role="alert" aria-live="assertive">
 						<div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-red-50 dark:bg-red-950/40">
 							<XCircleIcon className="size-7 text-red-500 dark:text-red-400" />
 						</div>

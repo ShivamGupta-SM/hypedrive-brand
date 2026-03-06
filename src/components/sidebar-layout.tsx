@@ -104,7 +104,7 @@ export function SidebarLayout({
 				<div className="flex min-h-0 flex-1 flex-col lg:p-2.5 lg:pl-2">
 					<div className="flex min-h-0 flex-1 flex-col bg-white lg:rounded-2xl lg:shadow-sm lg:ring-1 lg:ring-zinc-950/5 dark:bg-zinc-900 dark:lg:ring-white/10">
 						{contentHeader}
-						<div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
+						<div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto scrollbar-hide">
 							<div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-8">{children}</div>
 						</div>
 					</div>

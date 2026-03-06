@@ -24,7 +24,7 @@ export function SidebarBody({ className, ...props }: React.ComponentPropsWithout
 			{...props}
 			className={clsx(
 				className,
-				"flex flex-1 flex-col overflow-y-auto p-4 [&>[data-slot=section]+[data-slot=section]]:mt-2.5"
+				"flex flex-1 flex-col overflow-y-auto scrollbar-hide p-4 [&>[data-slot=section]+[data-slot=section]]:mt-2.5"
 			)}
 		/>
 	);

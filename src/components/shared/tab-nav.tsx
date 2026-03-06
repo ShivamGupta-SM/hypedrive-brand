@@ -28,7 +28,7 @@ export function TabNav({ tabs, className }: TabNavProps) {
 	const pathname = useRouterState({ select: (s) => s.location.pathname });
 
 	return (
-		<div className={clsx("-mx-1 overflow-x-auto px-1 py-1 sm:mx-0 sm:overflow-visible sm:px-0 sm:py-0", className)}>
+		<div className={clsx("-mx-1 overflow-x-auto scrollbar-hide px-1 py-1 sm:mx-0 sm:overflow-visible sm:px-0 sm:py-0", className)}>
 			<div className="flex min-w-max gap-1.5 sm:min-w-0 sm:flex-wrap">
 				{tabs.map((tab) => {
 					const isActive = tab.exact ? pathname === tab.to : pathname.startsWith(tab.to);

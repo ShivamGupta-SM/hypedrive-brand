@@ -116,7 +116,7 @@ function OrgListContent({
 	return (
 		<>
 			{/* Organization list */}
-			<div className={clsx("overflow-y-auto", isMobile ? "max-h-[50vh] px-3 py-2" : "max-h-64 p-1.5")}>
+			<div className={clsx("overflow-y-auto scrollbar-hide", isMobile ? "max-h-[50vh] px-3 py-2" : "max-h-64 p-1.5")}>
 				<div className={clsx(isMobile ? "space-y-1.5" : "space-y-0.5")}>
 					{organizations.map((org) => {
 						const isCurrent = org.id === currentOrganization?.id;

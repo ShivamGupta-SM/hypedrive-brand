@@ -17,7 +17,7 @@ export function Rejected({ organization }: { organization: { name: string } | nu
 
 	return (
 		<div className="flex min-h-dvh flex-col bg-white dark:bg-zinc-950">
-			<div className="flex flex-1 flex-col items-center justify-center px-6 py-12">
+			<div className="flex flex-1 flex-col items-center justify-center px-4 py-8 sm:px-6 sm:py-12">
 				<div className="w-full max-w-md text-center">
 					{/* Logo */}
 					<Logo className="mx-auto mb-8 h-8 w-auto text-zinc-950 dark:text-white" />
@@ -43,9 +43,9 @@ export function Rejected({ organization }: { organization: { name: string } | nu
 					{/* Rejection notice */}
 					<div className="mt-6 rounded-xl bg-red-50 p-5 text-left dark:bg-red-950/30">
 						<h3 className="text-sm font-semibold text-red-800 dark:text-red-300">Application Status</h3>
-						<p className="mt-2 text-sm text-red-700 dark:text-red-400">
+						<output aria-live="polite" className="mt-2 block text-sm text-red-700 dark:text-red-400">
 							Your application has been reviewed and was not approved. Please contact support for more details.
-						</p>
+						</output>
 					</div>
 
 					{/* What you can do */}
@@ -53,15 +53,15 @@ export function Rejected({ organization }: { organization: { name: string } | nu
 						<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">What you can do</h3>
 						<ul className="mt-3 space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
 							<li className="flex items-start gap-2">
-								<span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-zinc-400 dark:bg-zinc-500" />
+								<span className="shrink-0 text-zinc-400 dark:text-zinc-500">•</span>
 								Review the rejection reason above
 							</li>
 							<li className="flex items-start gap-2">
-								<span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-zinc-400 dark:bg-zinc-500" />
+								<span className="shrink-0 text-zinc-400 dark:text-zinc-500">•</span>
 								Contact support if you have questions
 							</li>
 							<li className="flex items-start gap-2">
-								<span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-zinc-400 dark:bg-zinc-500" />
+								<span className="shrink-0 text-zinc-400 dark:text-zinc-500">•</span>
 								Submit a new application with updated information
 							</li>
 						</ul>

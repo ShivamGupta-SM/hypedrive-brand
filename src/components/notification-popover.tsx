@@ -334,7 +334,7 @@ function NotificationPanelContent({
 				</div>
 			) : (
 				/* Notification list */
-				<div className="max-h-80 overflow-y-auto py-1">
+				<div className="max-h-80 overflow-y-auto scrollbar-hide py-1">
 					{notifications.map((notification) => (
 						<NotificationItem
 							key={notification.id}

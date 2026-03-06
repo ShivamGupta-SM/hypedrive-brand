@@ -46,9 +46,6 @@ export function WalletWithdrawals() {
 
 	return (
 		<div className="space-y-4">
-			{/* Status filter pills */}
-			<FilterPills options={statusFilterOptions} value={statusFilter} onChange={(v) => setStatusFilter(v as StatusFilter)} />
-
 			{/* Withdrawal Stats */}
 			{withdrawalStats && (
 				<div className="grid grid-cols-2 gap-3 sm:gap-4">
@@ -72,13 +69,11 @@ export function WalletWithdrawals() {
 
 			{/* Withdrawal List */}
 			<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-				<div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3 dark:border-zinc-800">
-					<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">
-						Withdrawal Requests
-						{withdrawals.length > 0 && (
-							<span className="ml-2 text-xs font-normal text-zinc-500 dark:text-zinc-400">{withdrawals.length}</span>
-						)}
-					</h3>
+				<div className="flex items-center justify-between border-b border-zinc-100 px-4 py-2.5 dark:border-zinc-800">
+					<FilterPills options={statusFilterOptions} value={statusFilter} onChange={(v) => setStatusFilter(v as StatusFilter)} />
+					{withdrawals.length > 0 && (
+						<span className="text-xs tabular-nums text-zinc-400 dark:text-zinc-500">{withdrawals.length}</span>
+					)}
 				</div>
 				{withdrawalsLoading ? (
 					<div className="space-y-2 p-4">

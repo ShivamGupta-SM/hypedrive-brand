@@ -110,7 +110,7 @@ function ImageGallery({ images }: { images: string[] }) {
 
 			{/* Thumbnails */}
 			{otherImages.length > 0 && (
-				<div className="flex gap-2 overflow-x-auto pb-1">
+				<div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
 					{otherImages.slice(0, 4).map((imgUrl, i) => (
 						<div
 							key={`${imgUrl}-${i}`}

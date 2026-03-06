@@ -196,18 +196,27 @@ export function EnrollmentsGrid({ status }: EnrollmentsGridProps) {
 		setSelectedIds(new Set());
 	}, []);
 
+	// Bulk approve dialog state
+	const [showBulkApproveDialog, setShowBulkApproveDialog] = useState(false);
+
 	// Bulk reject dialog state
 	const [showBulkRejectDialog, setShowBulkRejectDialog] = useState(false);
 	const [bulkRejectReason, setBulkRejectReason] = useState("");
 
 	// Bulk action handlers
-	const handleBulkApprove = useCallback(async () => {
+	const handleBulkApproveRequest = useCallback(() => {
+		if (selectedIds.size === 0) return;
+		setShowBulkApproveDialog(true);
+	}, [selectedIds.size]);
+
+	const handleBulkApproveConfirm = useCallback(async () => {
 		if (selectedIds.size === 0) return;
 		setIsBulkLoading(true);
 		try {
 			await bulkApprove.mutateAsync({ enrollmentIds: Array.from(selectedIds) });
 			showToast.success(`${selectedIds.size} enrollment${selectedIds.size > 1 ? "s" : ""} approved`);
 			setSelectedIds(new Set());
+			setShowBulkApproveDialog(false);
 			refetch();
 		} catch (err) {
 			showToast.error(err, "Failed to approve enrollments");
@@ -272,7 +281,7 @@ export function EnrollmentsGrid({ status }: EnrollmentsGridProps) {
 	}
 
 	return (
-		<>
+		<div className="space-y-4">
 			{/* Enrollments List */}
 			{enrollments.length === 0 ? (
 				<EmptyState
@@ -286,47 +295,45 @@ export function EnrollmentsGrid({ status }: EnrollmentsGridProps) {
 				/>
 			) : (
 				<div className="space-y-4">
-					{/* Sort pills */}
-					<FilterPills options={sortPillOptions} value={sortBy} onChange={setSortBy} />
-
-					{/* Results header: Select All + count + Export */}
-					<div className="flex items-center justify-between">
+					{/* Toolbar: Sort + Select All + count + Export */}
+					<div className="flex items-center justify-between gap-3">
 						<div className="flex items-center gap-3">
+							<FilterPills options={sortPillOptions} value={sortBy} onChange={setSortBy} />
 							{actionableCount > 0 && (
 								<button
 									type="button"
 									onClick={handleSelectAll}
-									className="hidden items-center gap-2 text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white sm:flex"
+									className="hidden items-center gap-2 text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white sm:flex"
 								>
 									<span
-										className={`flex size-4 items-center justify-center rounded border transition-colors ${
+										className={`flex size-3.5 items-center justify-center rounded border transition-colors ${
 											selectedIds.size === actionableCount && actionableCount > 0
 												? "border-zinc-900 bg-zinc-900 dark:border-white dark:bg-white"
 												: "border-zinc-300 dark:border-zinc-600"
 										}`}
 									>
 										{selectedIds.size === actionableCount && actionableCount > 0 && (
-											<CheckCircleIcon className="size-3 text-white dark:text-zinc-900" />
+											<CheckCircleIcon className="size-2.5 text-white dark:text-zinc-900" />
 										)}
 									</span>
 									Select all ({actionableCount})
 								</button>
 							)}
-							<span className="text-xs text-zinc-500 dark:text-zinc-400">
+							<span className="hidden text-xs text-zinc-500 sm:inline dark:text-zinc-400">
 								{enrollments.length} enrollment{enrollments.length !== 1 ? "s" : ""}
 								{q && ` matching "${q}"`}
 							</span>
 						</div>
 						<Button
-							color="emerald"
+							outline
 							onClick={handleExport}
 							disabled={exportEnrollments.isPending}
-							className="hidden shrink-0 sm:flex"
+							className="hidden shrink-0 sm:inline-flex"
 						>
 							{exportEnrollments.isPending ? (
 								<ArrowPathIcon className="size-4 animate-spin" />
 							) : (
-								<TableCellsIcon data-slot="icon" className="size-4" />
+								<TableCellsIcon data-slot="icon" className="size-4 text-emerald-500" />
 							)}
 							{exportEnrollments.isPending ? "Exporting..." : "Export"}
 						</Button>
@@ -369,7 +376,7 @@ export function EnrollmentsGrid({ status }: EnrollmentsGridProps) {
 
 			{/* Floating Bulk Actions Bar */}
 			<BulkActionsBar selectedCount={selectedIds.size} onClear={clearSelection}>
-				<Button color="emerald" onClick={handleBulkApprove} disabled={isBulkLoading}>
+				<Button color="emerald" onClick={handleBulkApproveRequest} disabled={isBulkLoading}>
 					{isBulkLoading ? (
 						<ArrowPathIcon data-slot="icon" className="size-4 animate-spin" />
 					) : (
@@ -382,6 +389,35 @@ export function EnrollmentsGrid({ status }: EnrollmentsGridProps) {
 					Reject
 				</Button>
 			</BulkActionsBar>
+
+			{/* Bulk Approve Confirmation Dialog */}
+			<Dialog open={showBulkApproveDialog} onClose={() => setShowBulkApproveDialog(false)} size="sm">
+				<DialogHeader
+					icon={CheckCircleIcon}
+					iconColor="emerald"
+					title="Approve Enrollments"
+					description={`Approve ${selectedIds.size} enrollment${selectedIds.size > 1 ? "s" : ""}?`}
+					onClose={() => setShowBulkApproveDialog(false)}
+				/>
+				<DialogActions>
+					<Button plain onClick={() => setShowBulkApproveDialog(false)} disabled={isBulkLoading}>
+						Cancel
+					</Button>
+					<Button color="emerald" onClick={handleBulkApproveConfirm} disabled={isBulkLoading}>
+						{isBulkLoading ? (
+							<>
+								<ArrowPathIcon className="size-4 animate-spin" />
+								Approving...
+							</>
+						) : (
+							<>
+								<CheckCircleIcon className="size-4" />
+								Approve
+							</>
+						)}
+					</Button>
+				</DialogActions>
+			</Dialog>
 
 			{/* Bulk Reject Reason Dialog */}
 			<Dialog open={showBulkRejectDialog} onClose={() => setShowBulkRejectDialog(false)} size="sm">
@@ -428,6 +464,6 @@ export function EnrollmentsGrid({ status }: EnrollmentsGridProps) {
 					</Button>
 				</DialogActions>
 			</Dialog>
-		</>
+		</div>
 	);
 }

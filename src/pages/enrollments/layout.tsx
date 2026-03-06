@@ -8,6 +8,7 @@ import {
 	XMarkIcon,
 } from "@heroicons/react/16/solid";
 import { Link, Outlet } from "@tanstack/react-router";
+import { useMemo } from "react";
 import { Button } from "@/components/button";
 import { isEnrollmentOverdue } from "@/components/enrollment-card";
 import { Input, InputGroup } from "@/components/input";
@@ -50,7 +51,7 @@ function EnrollmentsLayoutSkeleton() {
 			{/* Search + Tabs skeleton */}
 			<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
 				<div className="h-10 w-full animate-pulse rounded-lg bg-zinc-200 skeleton-shimmer sm:w-64 dark:bg-zinc-800" />
-				<div className="flex gap-1.5 overflow-x-auto">
+				<div className="flex gap-1.5 overflow-x-auto scrollbar-hide">
 					{[80, 110, 80, 75].map((w, i) => (
 						<div
 							key={i}
@@ -105,6 +106,14 @@ export function EnrollmentsLayout() {
 	// All enrollments for stats + tab counts
 	const { data: enrollments, loading, total } = useInfiniteEnrollments(organizationId, {});
 
+	// Count overdue enrollments
+	const overdueCount = useMemo(() => {
+		const referenceTime = new Date();
+		return enrollments.filter(
+			(e) => e.status === "awaiting_review" && isEnrollmentOverdue(e.createdAt, referenceTime),
+		).length;
+	}, [enrollments]);
+
 	if (loading) return <EnrollmentsLayoutSkeleton />;
 
 	const stats = {
@@ -113,12 +122,6 @@ export function EnrollmentsLayout() {
 		approved: enrollments.filter((e) => e.status === "approved").length,
 		rejected: enrollments.filter((e) => e.status === "permanently_rejected").length,
 	};
-
-	// Count overdue enrollments
-	const referenceTime = new Date();
-	const overdueCount = enrollments.filter(
-		(e) => e.status === "awaiting_review" && isEnrollmentOverdue(e.createdAt, referenceTime),
-	).length;
 
 	const tabs: TabNavItem[] = [
 		{

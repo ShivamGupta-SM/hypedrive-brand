@@ -93,7 +93,7 @@ export function AcceptInvite() {
 		return (
 			<AuthShell>
 				<Logo className="h-7 w-auto text-zinc-950 dark:text-white" />
-				<div className="text-center">
+				<div className="text-center" role="status" aria-live="polite">
 					<div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
 						<svg className="size-7 animate-spin text-zinc-400" fill="none" viewBox="0 0 24 24" aria-hidden="true">
 							<circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -115,7 +115,7 @@ export function AcceptInvite() {
 		return (
 			<AuthShell>
 				<Logo className="h-7 w-auto text-zinc-950 dark:text-white" />
-				<div className="text-center">
+				<div className="text-center" role="status" aria-live="polite">
 					<div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-950/40">
 						<CheckCircleIcon className="size-7 text-emerald-500 dark:text-emerald-400" />
 					</div>
@@ -150,7 +150,7 @@ export function AcceptInvite() {
 		return (
 			<AuthShell>
 				<Logo className="h-7 w-auto text-zinc-950 dark:text-white" />
-				<div className="text-center">
+				<div className="text-center" role="alert" aria-live="assertive">
 					<div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-red-50 dark:bg-red-950/40">
 						<ExclamationTriangleIcon className="size-7 text-red-500 dark:text-red-400" />
 					</div>

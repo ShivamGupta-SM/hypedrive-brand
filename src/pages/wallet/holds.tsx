@@ -1,4 +1,5 @@
 import { EmptyState } from "@/components/shared/empty-state";
+import { ErrorState } from "@/components/shared/error-state";
 import { Skeleton } from "@/components/skeleton";
 import { useWalletHolds } from "@/features/wallet/hooks";
 import { useOrgContext } from "@/hooks/use-org-context";
@@ -7,7 +8,11 @@ import { HoldRow } from "./components";
 export function WalletHolds() {
 	const { organizationId } = useOrgContext();
 
-	const { data: holds, loading } = useWalletHolds(organizationId);
+	const { data: holds, loading, error, refetch } = useWalletHolds(organizationId);
+
+	if (error) {
+		return <ErrorState message="Failed to load holds. Please try again." onRetry={refetch} />;
+	}
 
 	return (
 		<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">

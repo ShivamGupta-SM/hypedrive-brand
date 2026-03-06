@@ -1196,7 +1196,7 @@ export function CreateCampaignModal({
 								<div className={clsx("space-y-3", tasks.length > 0 ? "mt-3" : "mt-4")}>
 									<div className="grid grid-cols-2 gap-2">
 										<Field>
-											<Label className="text-[11px]! uppercase tracking-wider text-zinc-400! dark:text-zinc-500!">
+											<Label className="text-[11px] uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
 												Platform
 											</Label>
 											{platformsLoading ? (
@@ -1215,7 +1215,7 @@ export function CreateCampaignModal({
 											)}
 										</Field>
 										<Field>
-											<Label className="text-[11px]! uppercase tracking-wider text-zinc-400! dark:text-zinc-500!">
+											<Label className="text-[11px] uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
 												Task Type
 											</Label>
 											{templatesLoading ? (

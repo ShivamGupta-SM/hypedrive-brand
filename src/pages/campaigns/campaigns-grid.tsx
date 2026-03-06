@@ -10,7 +10,8 @@ import {
 	TableCellsIcon,
 	XMarkIcon,
 } from "@heroicons/react/16/solid";
-import { getRouteApi } from "@tanstack/react-router";
+import clsx from "clsx";
+import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { useCallback, useState } from "react";
 import { Button } from "@/components/button";
 import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/dialog";
@@ -102,14 +103,14 @@ const sortMap = {
 
 export function CampaignsGrid({ status }: CampaignsGridProps) {
 	const { organizationId, orgSlug } = useOrgContext();
-	const { q } = campaignsRouteApi.useSearch();
+	const { q, sort } = campaignsRouteApi.useSearch();
+	const navigate = useNavigate();
+	const sortBy = sort || "newest";
 
 	const canCreate = useCan("campaign", "create");
 	const canDelete = useCan("campaign", "delete");
 	const canPause = useCan("campaign", "pause");
 	const canResume = useCan("campaign", "resume");
-
-	const [sortBy, setSortBy] = useState("newest");
 	const [actionPendingId, setActionPendingId] = useState<string | null>(null);
 	const [cancelConfirm, setCancelConfirm] = useState<{ id: string; title: string } | null>(null);
 
@@ -240,26 +241,26 @@ export function CampaignsGrid({ status }: CampaignsGridProps) {
 	}
 
 	return (
-		<>
-			{/* Sort + Results count + Export */}
-			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-				<FilterPills options={sortPillOptions} value={sortBy} onChange={setSortBy} />
-				<div className="flex items-center justify-between gap-3 sm:justify-end">
-					<span className="text-xs text-zinc-500 dark:text-zinc-400">
+		<div className="space-y-4">
+			{/* Toolbar: Sort + count + Export */}
+			<div className="flex items-center justify-between gap-3">
+				<div className="flex items-center gap-3">
+					<FilterPills options={sortPillOptions} value={sortBy} onChange={(value) => navigate({ search: (prev: Record<string, unknown>) => ({ ...prev, sort: value === "newest" ? undefined : value }) })} />
+					<span className="hidden text-xs text-zinc-500 sm:inline dark:text-zinc-400">
 						{campaignCount} campaign{campaignCount !== 1 ? "s" : ""}
 						{q && ` matching "${q}"`}
 					</span>
-					{campaigns.length > 0 && (
-						<Button
-							color="emerald"
-							onClick={() => exportCampaignsToCSV(campaigns)}
-							className="hidden shrink-0 sm:inline-flex"
-						>
-							<TableCellsIcon data-slot="icon" className="size-4" />
-							Export
-						</Button>
-					)}
 				</div>
+				{campaigns.length > 0 && (
+					<Button
+						outline
+						onClick={() => exportCampaignsToCSV(campaigns)}
+						className="hidden shrink-0 sm:inline-flex"
+					>
+						<TableCellsIcon data-slot="icon" className="size-4 text-emerald-500" />
+						Export
+					</Button>
+				)}
 			</div>
 
 			{/* Results grid */}
@@ -274,11 +275,12 @@ export function CampaignsGrid({ status }: CampaignsGridProps) {
 								<button
 									type="button"
 									onClick={(e) => { e.preventDefault(); toggleSelect(campaign.id); }}
-									className={`absolute left-2 top-2 z-10 flex size-5 items-center justify-center rounded border transition-all ${
+									className={clsx(
+										"absolute left-2 top-2 z-10 flex size-5 items-center justify-center rounded border transition-all",
 										selectedIds.has(campaign.id)
 											? "border-zinc-900 bg-zinc-900 dark:border-white dark:bg-white"
 											: "border-zinc-300 bg-white opacity-0 group-hover:opacity-100 dark:border-zinc-600 dark:bg-zinc-800"
-									}`}
+									)}
 								>
 									{selectedIds.has(campaign.id) && (
 										<CheckCircleIcon className="size-3.5 text-white dark:text-zinc-900" />
@@ -384,6 +386,6 @@ export function CampaignsGrid({ status }: CampaignsGridProps) {
 					</Button>
 				</DialogActions>
 			</Dialog>
-		</>
+		</div>
 	);
 }

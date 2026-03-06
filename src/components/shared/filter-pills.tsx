@@ -35,7 +35,7 @@ export function FilterPills<T extends string = string>({
 	return (
 		<div
 			className={clsx(
-				"inline-flex items-center gap-0.5 rounded-lg bg-zinc-100 p-0.5 dark:bg-zinc-800",
+				"inline-flex items-center gap-0.5 rounded-lg bg-zinc-950/6 p-1 dark:bg-white/6",
 				className,
 			)}
 		>
@@ -47,17 +47,17 @@ export function FilterPills<T extends string = string>({
 						key={opt.value}
 						onClick={() => onChange(opt.value)}
 						className={clsx(
-							"inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 py-1 text-xs font-medium transition-all",
+							"inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1.5 text-[13px] font-medium transition-all",
 							isActive
-								? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-white"
+								? "bg-white text-zinc-900 shadow-sm ring-1 ring-zinc-950/5 dark:bg-zinc-700 dark:text-white dark:ring-white/10"
 								: "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200",
 						)}
 					>
 						{opt.icon && (
 							<opt.icon
 								className={clsx(
-									"size-3",
-									isActive ? "text-zinc-700 dark:text-zinc-200" : opt.iconColor || "text-zinc-400",
+									"size-3.5",
+									isActive ? opt.iconColor || "text-zinc-600 dark:text-zinc-300" : opt.iconColor || "text-zinc-400",
 								)}
 							/>
 						)}

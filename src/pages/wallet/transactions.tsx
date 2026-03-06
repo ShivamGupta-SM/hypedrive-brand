@@ -7,6 +7,7 @@ import {
 import { useState } from "react";
 import { Button } from "@/components/button";
 import { EmptyState } from "@/components/shared/empty-state";
+import { ErrorState } from "@/components/shared/error-state";
 import { FilterPills, type FilterPillOption } from "@/components/shared/filter-pills";
 import { Skeleton } from "@/components/skeleton";
 import { useInfiniteWalletTransactions } from "@/features/wallet/hooks";
@@ -28,6 +29,8 @@ export function WalletTransactions() {
 	const {
 		data: transactions,
 		loading,
+		error,
+		refetch,
 		hasMore,
 		isFetchingNextPage,
 		fetchNextPage,
@@ -35,20 +38,18 @@ export function WalletTransactions() {
 		type: typeFilter === "all" ? undefined : typeFilter,
 	});
 
-	return (
-		<div className="space-y-4">
-			{/* Type filter pills */}
-			<FilterPills options={typeFilterOptions} value={typeFilter} onChange={(v) => setTypeFilter(v as TypeFilter)} />
+	if (error) {
+		return <ErrorState message="Failed to load transactions. Please try again." onRetry={refetch} />;
+	}
 
-			<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-				<div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3 dark:border-zinc-800">
-					<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">
-						{typeFilter === "all" ? "All Transactions" : typeFilter === "credit" ? "Credits" : "Debits"}
-						{transactions.length > 0 && (
-							<span className="ml-2 text-xs font-normal text-zinc-500 dark:text-zinc-400">{transactions.length}</span>
-						)}
-					</h3>
-				</div>
+	return (
+		<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
+			<div className="flex items-center justify-between border-b border-zinc-100 px-4 py-2.5 dark:border-zinc-800">
+				<FilterPills options={typeFilterOptions} value={typeFilter} onChange={(v) => setTypeFilter(v as TypeFilter)} />
+				{transactions.length > 0 && (
+					<span className="text-xs tabular-nums text-zinc-400 dark:text-zinc-500">{transactions.length}</span>
+				)}
+			</div>
 				{loading ? (
 					<div className="space-y-2 p-4">
 						{[1, 2, 3, 4, 5].map((i) => (
@@ -91,6 +92,5 @@ export function WalletTransactions() {
 					</>
 				)}
 			</div>
-		</div>
 	);
 }

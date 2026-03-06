@@ -106,7 +106,7 @@ export function TransactionShow() {
 	const { organizationId, orgSlug } = useOrgContext();
 
 	// Fetch transactions — limit to a smaller page size since we only need one
-	const { data: transactions, loading, error, refetch } = useWalletTransactions(organizationId, { take: 20 });
+	const { data: transactions, loading, error, refetch } = useWalletTransactions(organizationId, { take: 100 });
 
 	const transaction = useMemo(() => {
 		return transactions.find((t) => t.id === transactionId) || null;

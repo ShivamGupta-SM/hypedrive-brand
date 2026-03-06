@@ -4,6 +4,7 @@ import {
 } from "@heroicons/react/16/solid";
 import { useState } from "react";
 import { EmptyState } from "@/components/shared/empty-state";
+import { ErrorState } from "@/components/shared/error-state";
 import { FilterPills, type FilterPillOption } from "@/components/shared/filter-pills";
 import { Skeleton } from "@/components/skeleton";
 import { useDeposits } from "@/features/wallet/hooks";
@@ -31,45 +32,44 @@ export function WalletDeposits() {
 	const [sortBy, setSortBy] = useState<SortValue>("newest");
 	const activeSort = sortMap[sortBy] || sortMap.newest;
 
-	const { data: deposits, loading: depositsLoading } = useDeposits(organizationId, {
+	const { data: deposits, loading: depositsLoading, error, refetch } = useDeposits(organizationId, {
 		sortBy: activeSort.sortBy,
 		sortOrder: activeSort.sortOrder,
 	});
 
-	return (
-		<div className="space-y-4">
-			{/* Sort pills */}
-			<FilterPills options={sortPillOptions} value={sortBy} onChange={setSortBy} />
+	if (error) {
+		return <ErrorState message="Failed to load deposits. Please try again." onRetry={refetch} />;
+	}
 
-			<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-				<div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3 dark:border-zinc-800">
-					<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">
-						Deposit History
-						{deposits.length > 0 && <span className="ml-2 text-xs font-normal text-zinc-500 dark:text-zinc-400">{deposits.length}</span>}
-					</h3>
-				</div>
-				{depositsLoading ? (
-					<div className="space-y-2 p-4">
-						{[1, 2].map((i) => (
-							<Skeleton key={i} width="100%" height={56} borderRadius={8} />
-						))}
-					</div>
-				) : deposits.length === 0 ? (
-					<div className="p-4">
-						<EmptyState
-							preset="generic"
-							title="No deposits yet"
-							description="Your deposit history will appear here once you add funds."
-						/>
-					</div>
-				) : (
-					<div className="divide-y divide-zinc-100 dark:divide-zinc-800">
-						{deposits.map((d) => (
-							<DepositRow key={d.id} deposit={d} />
-						))}
-					</div>
+	return (
+		<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
+			<div className="flex items-center justify-between border-b border-zinc-100 px-4 py-2.5 dark:border-zinc-800">
+				<FilterPills options={sortPillOptions} value={sortBy} onChange={setSortBy} />
+				{deposits.length > 0 && (
+					<span className="text-xs tabular-nums text-zinc-400 dark:text-zinc-500">{deposits.length}</span>
 				)}
 			</div>
+			{depositsLoading ? (
+				<div className="space-y-2 p-4">
+					{[1, 2].map((i) => (
+						<Skeleton key={i} width="100%" height={56} borderRadius={8} />
+					))}
+				</div>
+			) : deposits.length === 0 ? (
+				<div className="p-4">
+					<EmptyState
+						preset="generic"
+						title="No deposits yet"
+						description="Your deposit history will appear here once you add funds."
+					/>
+				</div>
+			) : (
+				<div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+					{deposits.map((d) => (
+						<DepositRow key={d.id} deposit={d} />
+					))}
+				</div>
+			)}
 		</div>
 	);
 }

@@ -40,254 +40,6 @@
 	--font-sans: "Geist Variable", "Geist Fallback", sans-serif;
 	--font-sans--font-feature-settings: "cv11";
 	--font-serif: "Instrument Serif", Georgia, serif;
-
-	/* ==========================================================================
-	   ALIGNUI SEMANTIC DESIGN TOKENS
-	   Semantic color system for AlignUI-inspired component patterns.
-	   Based on the Hypedrive brand palette mapped to AlignUI naming conventions.
-	   ========================================================================== */
-
-	/* --- Background tokens --- */
-	--color-bg-white-0: #ffffff;
-	--color-bg-weak-50: #fafafa;
-	--color-bg-soft-200: #f4f4f5;
-	--color-bg-sub-300: #e4e4e7;
-	--color-bg-strong-950: #09090b;
-
-	/* Dark mode backgrounds */
-	--color-bg-white-0-dark: #18181b;
-	--color-bg-weak-50-dark: #1c1c1f;
-	--color-bg-soft-200-dark: #27272a;
-
-	/* --- Text tokens --- */
-	--color-text-strong-950: #09090b;
-	--color-text-sub-600: #52525b;
-	--color-text-soft-400: #a1a1aa;
-	--color-text-disabled-300: #d4d4d8;
-	--color-text-white-0: #ffffff;
-
-	/* Dark mode text */
-	--color-text-strong-950-dark: #fafafa;
-	--color-text-sub-600-dark: #a1a1aa;
-	--color-text-soft-400-dark: #71717a;
-
-	/* --- Stroke/border tokens --- */
-	--color-stroke-soft-200: #e4e4e7;
-	--color-stroke-sub-300: #d4d4d8;
-	--color-stroke-strong-950: #09090b;
-
-	/* --- Primary color tokens (Emerald brand) --- */
-	--color-primary-base: #059669;
-	--color-primary-light: #d1fae5;
-	--color-primary-lighter: #ecfdf5;
-	--color-primary-dark: #047857;
-	--color-primary-darker: #065f46;
-
-	/* --- Semantic status tokens --- */
-	/* Success */
-	--color-success-base: #10b981;
-	--color-success-light: #a7f3d0;
-	--color-success-lighter: #d1fae5;
-	--color-success-dark: #059669;
-
-	/* Warning */
-	--color-warning-base: #f59e0b;
-	--color-warning-light: #fcd34d;
-	--color-warning-lighter: #fef3c7;
-	--color-warning-dark: #d97706;
-
-	/* Error */
-	--color-error-base: #ef4444;
-	--color-error-light: #fca5a5;
-	--color-error-lighter: #fee2e2;
-	--color-error-dark: #dc2626;
-
-	/* Information (sky) */
-	--color-information-base: #0ea5e9;
-	--color-information-light: #7dd3fc;
-	--color-information-lighter: #e0f2fe;
-	--color-information-dark: #0284c7;
-
-	/* Faded/disabled */
-	--color-faded-base: #a1a1aa;
-	--color-faded-light: #d4d4d8;
-
-	/* --- Border radius tokens --- */
-	--radius-10: 10px;
-	--radius-16: 16px;
-	--radius-20: 20px;
-
-	/* --- Typography scale (AlignUI naming) --- */
-	--text-title-h1: 2.25rem;
-	--text-title-h2: 1.875rem;
-	--text-title-h3: 1.5rem;
-	--text-title-h4: 1.25rem;
-	--text-title-h5: 1.125rem;
-	--text-label-xs: 0.6875rem;
-	--text-label-sm: 0.8125rem;
-	--text-label-md: 0.9375rem;
-	--text-paragraph-xs: 0.75rem;
-	--text-paragraph-sm: 0.875rem;
-	--text-paragraph-md: 1rem;
-	--text-subheading-xs: 0.6875rem;
-
-	/* --- Shadow tokens --- */
-	--shadow-regular: 0 1px 3px 0 rgba(9, 9, 11, 0.08), 0 0 1px 0 rgba(9, 9, 11, 0.04);
-	--shadow-regular-md: 0 4px 8px -2px rgba(9, 9, 11, 0.1), 0 0 1px 0 rgba(9, 9, 11, 0.06);
-	--shadow-regular-lg: 0 8px 16px -4px rgba(9, 9, 11, 0.12), 0 0 1px 0 rgba(9, 9, 11, 0.06);
-
-	/* ==========================================================================
-	   HYPEDRIVE BRAND COLOR PALETTE
-	   A clean, minimal color system for a brand admin panel
-	   ========================================================================== */
-
-	/* --------------------------------------------------------------------------
-	   PRIMARY COLORS
-	   Main brand colors used for primary actions and key UI elements
-	   -------------------------------------------------------------------------- */
-
-	/* Primary: Emerald - Used for revenue, earnings, positive states */
-	--color-primary-50: #ecfdf5;
-	--color-primary-100: #d1fae5;
-	--color-primary-200: #a7f3d0;
-	--color-primary-300: #6ee7b7;
-	--color-primary-400: #34d399;
-	--color-primary-500: #10b981;
-	--color-primary-600: #059669;
-	--color-primary-700: #047857;
-	--color-primary-800: #065f46;
-	--color-primary-900: #064e3b;
-	--color-primary-950: #022c22;
-
-	/* --------------------------------------------------------------------------
-	   SEMANTIC COLORS
-	   Status colors with specific meanings throughout the app
-	   -------------------------------------------------------------------------- */
-
-	/* Success: Emerald - Approved, completed, positive balance */
-	--color-success-light: #d1fae5;
-	--color-success: #10b981;
-	--color-success-dark: #059669;
-	--color-success-text: #047857;
-	--color-success-text-dark: #34d399;
-
-	/* Warning: Amber - Pending, needs attention, caution */
-	--color-warning-light: #fef3c7;
-	--color-warning: #f59e0b;
-	--color-warning-dark: #d97706;
-	--color-warning-text: #92400e;
-	--color-warning-text-dark: #fcd34d;
-
-	/* Error: Red - Rejected, failed, issues */
-	--color-error-light: #fee2e2;
-	--color-error: #ef4444;
-	--color-error-dark: #dc2626;
-	--color-error-text: #b91c1c;
-	--color-error-text-dark: #fca5a5;
-
-	/* Info: Sky - Under review, processing, informational */
-	--color-info-light: #e0f2fe;
-	--color-info: #0ea5e9;
-	--color-info-dark: #0284c7;
-	--color-info-text: #0369a1;
-	--color-info-text-dark: #7dd3fc;
-
-	/* --------------------------------------------------------------------------
-	   NEUTRAL COLORS
-	   Zinc-based neutrals for text, backgrounds, and borders
-	   -------------------------------------------------------------------------- */
-
-	/* Light mode surfaces */
-	--color-surface-primary: #ffffff;
-	--color-surface-secondary: #fafafa;
-	--color-surface-tertiary: #f4f4f5;
-	--color-surface-elevated: #ffffff;
-
-	/* Dark mode surfaces */
-	--color-surface-primary-dark: #18181b;
-	--color-surface-secondary-dark: #27272a;
-	--color-surface-tertiary-dark: #3f3f46;
-	--color-surface-elevated-dark: #27272a;
-
-	/* Text colors - Light mode */
-	--color-text-primary: #09090b;
-	--color-text-secondary: #71717a;
-	--color-text-tertiary: #a1a1aa;
-	--color-text-disabled: #d4d4d8;
-
-	/* Text colors - Dark mode */
-	--color-text-primary-dark: #fafafa;
-	--color-text-secondary-dark: #a1a1aa;
-	--color-text-tertiary-dark: #71717a;
-	--color-text-disabled-dark: #52525b;
-
-	/* Border colors */
-	--color-border-light: rgba(9, 9, 11, 0.1);
-	--color-border-medium: rgba(9, 9, 11, 0.15);
-	--color-border-strong: rgba(9, 9, 11, 0.2);
-	--color-border-light-dark: rgba(255, 255, 255, 0.1);
-	--color-border-medium-dark: rgba(255, 255, 255, 0.15);
-	--color-border-strong-dark: rgba(255, 255, 255, 0.2);
-
-	/* --------------------------------------------------------------------------
-	   INTERACTIVE STATES
-	   Hover, active, focus states for consistency
-	   -------------------------------------------------------------------------- */
-
-	/* Hover overlays */
-	--color-hover-light: rgba(9, 9, 11, 0.05);
-	--color-hover-medium: rgba(9, 9, 11, 0.1);
-	--color-hover-light-dark: rgba(255, 255, 255, 0.05);
-	--color-hover-medium-dark: rgba(255, 255, 255, 0.1);
-
-	/* Focus ring */
-	--color-focus-ring: #3b82f6;
-
-	/* --------------------------------------------------------------------------
-	   ACCENT COLORS
-	   Secondary accent colors for highlights and badges
-	   -------------------------------------------------------------------------- */
-
-	/* Bonus/Reward accent: Amber/Gold */
-	--color-accent-bonus: #f59e0b;
-	--color-accent-bonus-light: #fef3c7;
-	--color-accent-bonus-text: #92400e;
-	--color-accent-bonus-text-dark: #fcd34d;
-
-	/* --------------------------------------------------------------------------
-	   ENROLLMENT STATUS COLORS
-	   Specific colors for enrollment/campaign statuses
-	   -------------------------------------------------------------------------- */
-
-	/* Awaiting submission - Amber */
-	--color-status-awaiting-submission: #d97706;
-	--color-status-awaiting-submission-dark: #fbbf24;
-	--color-status-awaiting-submission-bg: #fef3c7;
-	--color-status-awaiting-submission-bg-dark: rgba(251, 191, 36, 0.15);
-
-	/* Awaiting review - Sky */
-	--color-status-awaiting-review: #0284c7;
-	--color-status-awaiting-review-dark: #38bdf8;
-	--color-status-awaiting-review-bg: #e0f2fe;
-	--color-status-awaiting-review-bg-dark: rgba(56, 189, 248, 0.15);
-
-	/* Changes requested - Amber */
-	--color-status-changes-requested: #d97706;
-	--color-status-changes-requested-dark: #fbbf24;
-	--color-status-changes-requested-bg: #fef3c7;
-	--color-status-changes-requested-bg-dark: rgba(251, 191, 36, 0.15);
-
-	/* Approved - Emerald */
-	--color-status-approved: #059669;
-	--color-status-approved-dark: #34d399;
-	--color-status-approved-bg: #d1fae5;
-	--color-status-approved-bg-dark: rgba(52, 211, 153, 0.15);
-
-	/* Rejected - Red */
-	--color-status-rejected: #dc2626;
-	--color-status-rejected-dark: #f87171;
-	--color-status-rejected-bg: #fee2e2;
-	--color-status-rejected-bg-dark: rgba(248, 113, 113, 0.15);
 }
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
@@ -325,59 +77,19 @@ input:not(:-webkit-autofill) {
 	animation-name: onAutoFillCancel;
 }
 
-/* Hide scrollbars globally */
-* {
+/* ==========================================================================
+   SCROLLBAR HIDING
+   Applied to scrollable containers, not globally.
+   Use the `scrollbar-hide` class on elements with overflow-auto/scroll.
+   ========================================================================== */
+
+.scrollbar-hide {
 	scrollbar-width: none;
 	-ms-overflow-style: none;
 }
 
-*::-webkit-scrollbar {
+.scrollbar-hide::-webkit-scrollbar {
 	display: none;
-}
-
-/* ==========================================================================
-   iOS SAFE AREA UTILITIES
-   Handle notch, home indicator, and dynamic island on iOS devices
-   ========================================================================== */
-
-.pt-safe {
-	padding-top: env(safe-area-inset-top);
-}
-
-.pb-safe {
-	padding-bottom: env(safe-area-inset-bottom);
-}
-
-.pl-safe {
-	padding-left: env(safe-area-inset-left);
-}
-
-.pr-safe {
-	padding-right: env(safe-area-inset-right);
-}
-
-.p-safe {
-	padding-top: env(safe-area-inset-top);
-	padding-bottom: env(safe-area-inset-bottom);
-	padding-left: env(safe-area-inset-left);
-	padding-right: env(safe-area-inset-right);
-}
-
-/* Margin variants */
-.mt-safe {
-	margin-top: env(safe-area-inset-top);
-}
-
-.mb-safe {
-	margin-bottom: env(safe-area-inset-bottom);
-}
-
-.ml-safe {
-	margin-left: env(safe-area-inset-left);
-}
-
-.mr-safe {
-	margin-right: env(safe-area-inset-right);
 }
 
 /* ==========================================================================
@@ -385,10 +97,9 @@ input:not(:-webkit-autofill) {
    Prevent rubber-band scrolling and set status bar background
    ========================================================================== */
 
-/* Safari uses the html/body background for status bar color when no theme-color is set */
 html {
-	background-color: #f5f5f4; /* stone-100 */
-	overscroll-behavior: none; /* Prevent iOS rubber-band scrolling on root */
+	background-color: #fafafa; /* zinc-50 */
+	overscroll-behavior: none;
 }
 
 body {
@@ -401,60 +112,10 @@ html:has([data-theme="dark"]) {
 }
 
 /* ==========================================================================
-   SKELETON LOADING COLORS
-   CSS variables for react-loading-skeleton dark mode support
+   SHIMMER ANIMATION
+   Loading skeleton shine effect
    ========================================================================== */
 
-/* Skeleton colors are handled by SkeletonTheme provider in __root.tsx */
-
-/* =============================================================================
-   GLAZE/SHIMMER ANIMATION
-   Subtle shine effect for balance text and other highlights
-   ============================================================================= */
-
-@keyframes glaze {
-	0%,
-	90% {
-		background-position: 100% 100%;
-	}
-	100% {
-		background-position: 0% 0%;
-	}
-}
-
-.text-glaze {
-	background: linear-gradient(
-		-45deg,
-		currentColor 0%,
-		currentColor 40%,
-		rgba(255, 255, 255, 0.6) 50%,
-		currentColor 60%,
-		currentColor 100%
-	);
-	background-size: 300% 300%;
-	background-clip: text;
-	-webkit-background-clip: text;
-	-webkit-text-fill-color: transparent;
-	animation: glaze 8s ease-out infinite;
-}
-
-/* Dark mode glaze - slightly brighter highlight */
-[data-theme="dark"] .text-glaze {
-	background: linear-gradient(
-		-45deg,
-		currentColor 0%,
-		currentColor 40%,
-		rgba(255, 255, 255, 0.75) 50%,
-		currentColor 60%,
-		currentColor 100%
-	);
-	background-size: 300% 300%;
-	background-clip: text;
-	-webkit-background-clip: text;
-	-webkit-text-fill-color: transparent;
-}
-
-/* Shimmer animation for loading skeletons */
 @keyframes shimmer {
 	0% {
 		transform: translateX(-100%);
@@ -480,6 +141,11 @@ html:has([data-theme="dark"]) {
 [data-theme="dark"] .skeleton-shimmer::after {
 	background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
 }
+
+/* ==========================================================================
+   UTILITY ANIMATIONS
+   Reusable animation classes for UI transitions
+   ========================================================================== */
 
 /* Slow spin for decorative stamps */
 @keyframes spin-slow {
@@ -509,108 +175,6 @@ html:has([data-theme="dark"]) {
 
 .animate-fade-in {
 	animation: fade-in 0.3s ease-out;
-}
-
-/* Pulse animation for attention elements */
-@keyframes pulse-soft {
-	0%,
-	100% {
-		opacity: 1;
-	}
-	50% {
-		opacity: 0.7;
-	}
-}
-
-.animate-pulse-soft {
-	animation: pulse-soft 2s ease-in-out infinite;
-}
-
-/* Scale in animation for cards */
-@keyframes scale-in {
-	from {
-		opacity: 0;
-		transform: scale(0.95);
-	}
-	to {
-		opacity: 1;
-		transform: scale(1);
-	}
-}
-
-.animate-scale-in {
-	animation: scale-in 0.2s ease-out;
-}
-
-/* Slide up animation */
-@keyframes slide-up {
-	from {
-		opacity: 0;
-		transform: translateY(10px);
-	}
-	to {
-		opacity: 1;
-		transform: translateY(0);
-	}
-}
-
-.animate-slide-up {
-	animation: slide-up 0.3s ease-out;
-}
-
-/* ==========================================================================
-   DOCUMENT SCAN ANIMATION
-   Clean, minimal scanning effect for document verification
-   ========================================================================== */
-
-@keyframes scan {
-	0% {
-		top: 8%;
-	}
-	50% {
-		top: 88%;
-	}
-	100% {
-		top: 8%;
-	}
-}
-
-/* Scanner container - holds the scanning elements */
-.scanner-container {
-	position: absolute;
-	inset: 16px;
-	z-index: 10;
-	pointer-events: none;
-}
-
-/* Scanner line - single crisp horizontal line */
-.scanner-line {
-	position: absolute;
-	left: -12px;
-	right: -12px;
-	height: 1px;
-	background: #18181b;
-	animation: scan 2.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-	will-change: top;
-}
-
-/* Scanner line glow - soft blur effect */
-.scanner-line::after {
-	content: "";
-	position: absolute;
-	inset: 0;
-	background: linear-gradient(90deg, transparent, #10b981, transparent);
-	filter: blur(3px);
-	opacity: 0.8;
-}
-
-/* Dark mode */
-[data-theme="dark"] .scanner-line {
-	background: #fafafa;
-}
-
-[data-theme="dark"] .scanner-line::after {
-	background: linear-gradient(90deg, transparent, #34d399, transparent);
 }
 
 /* ==========================================================================

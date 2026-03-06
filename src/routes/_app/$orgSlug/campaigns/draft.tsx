@@ -7,10 +7,10 @@ export const Route = createFileRoute("/_app/$orgSlug/campaigns/draft")({
 	head: () => ({
 		meta: [{ title: "Draft Campaigns | Hypedrive" }],
 	}),
-	loader: async ({ context }) => {
+	loader: ({ context }) => {
 		const orgId = context.organization?.id;
 		if (!orgId) return;
-		await context.queryClient.prefetchInfiniteQuery(infiniteCampaignsQueryOptions(orgId, { status: "draft" }));
+		context.queryClient.prefetchInfiniteQuery(infiniteCampaignsQueryOptions(orgId, { status: "draft" }));
 	},
 	component: () => <CampaignsGrid status="draft" />,
 	errorComponent: RouteErrorComponent,

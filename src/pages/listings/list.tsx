@@ -12,6 +12,8 @@ import {
 	TrashIcon,
 	XMarkIcon,
 } from "@heroicons/react/16/solid";
+import clsx from "clsx";
+import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { useCallback, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/button";
@@ -41,7 +43,7 @@ type Listing = brand.ListingWithStats;
 // =============================================================================
 
 function Shimmer({ className }: { className?: string }) {
-	return <div className={`animate-pulse rounded-md bg-zinc-200 dark:bg-zinc-700 ${className || ""}`} />;
+	return <div className={clsx("animate-pulse rounded-md bg-zinc-200 dark:bg-zinc-700", className)} />;
 }
 
 // =============================================================================
@@ -187,9 +189,9 @@ function ListingCardSkeleton() {
 
 			<div className="h-px bg-zinc-200 dark:bg-zinc-700" />
 
-			{/* Footer Stats - 3 columns */}
-			<div className="grid grid-cols-3 divide-x divide-zinc-200 dark:divide-zinc-700">
-				{[1, 2, 3].map((i) => (
+			{/* Footer Stats - 2 columns */}
+			<div className="grid grid-cols-2 divide-x divide-zinc-200 dark:divide-zinc-700">
+				{[1, 2].map((i) => (
 					<div key={i} className="flex flex-col items-center justify-center py-2">
 						<Shimmer className="h-2.5 w-8" />
 						<Shimmer className="mt-0.5 h-3.5 w-10" />
@@ -235,7 +237,7 @@ function ListingsListSkeleton() {
 			{/* Search + Sort pills */}
 			<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
 				<Shimmer className="h-10 w-full rounded-lg sm:w-64" />
-				<div className="flex gap-1.5 overflow-x-auto">
+				<div className="flex gap-1.5 overflow-x-auto scrollbar-hide">
 					{[75, 80, 65, 95].map((w, i) => (
 						<Shimmer key={i} className="h-9 shrink-0 rounded-full" style={{ width: w }} />
 					))}
@@ -256,8 +258,12 @@ function ListingsListSkeleton() {
 // PRODUCTS LIST
 // =============================================================================
 
+const listingsRouteApi = getRouteApi("/_app/$orgSlug/listings");
+
 export function ListingsList() {
 	const { organizationId, orgSlug } = useOrgContext();
+	const { q, sort } = listingsRouteApi.useSearch();
+	const navigate = useNavigate();
 
 	// Permission checks
 	const canCreateListing = useCan("listing", "create");
@@ -265,8 +271,8 @@ export function ListingsList() {
 
 	const canDeleteListing = useCan("listing", "delete");
 
-	const [searchQuery, setSearchQuery] = useState("");
-	const [sortBy, setSortBy] = useState("date");
+	const searchQuery = q || "";
+	const sortBy = sort || "date";
 	const [showCreateModal, setShowCreateModal] = useState(false);
 
 	// Batch selection state
@@ -284,13 +290,15 @@ export function ListingsList() {
 
 	const clearSelection = useCallback(() => setSelectedIds(new Set()), []);
 
-	// Debounced search for API
-	const [debouncedSearch, setDebouncedSearch] = useState("");
+	// Debounced search — writes to URL params
 	const searchTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+	const [localSearch, setLocalSearch] = useState(searchQuery);
 	const handleSearchChange = (value: string) => {
-		setSearchQuery(value);
+		setLocalSearch(value);
 		clearTimeout(searchTimerRef.current);
-		searchTimerRef.current = setTimeout(() => setDebouncedSearch(value), 300);
+		searchTimerRef.current = setTimeout(() => {
+			navigate({ search: (prev: Record<string, unknown>) => ({ ...prev, q: value || undefined }) });
+		}, 300);
 	};
 
 	// Map sort pill to API sort params
@@ -310,7 +318,7 @@ export function ListingsList() {
 		isFetchingNextPage,
 		fetchNextPage,
 	} = useInfiniteListings(organizationId, {
-		q: debouncedSearch || undefined,
+		q: searchQuery || undefined,
 		...sortMapping[sortBy],
 	});
 
@@ -335,16 +343,15 @@ export function ListingsList() {
 			filters.push({
 				key: "search",
 				label: `"${searchQuery}"`,
-				onRemove: () => { setSearchQuery(""); setDebouncedSearch(""); },
+				onRemove: () => { setLocalSearch(""); navigate({ search: (prev: Record<string, unknown>) => ({ ...prev, q: undefined }) }); },
 			});
 		}
 		return filters;
-	}, [searchQuery]);
+	}, [searchQuery, navigate]);
 
 	const clearAllFilters = () => {
-		setSearchQuery("");
-		setDebouncedSearch("");
-		setSortBy("date");
+		setLocalSearch("");
+		navigate({ search: { } });
 	};
 
 	const handleBatchAction = useCallback(async (action: "delete") => {
@@ -403,15 +410,15 @@ export function ListingsList() {
 						<MagnifyingGlassIcon data-slot="icon" />
 						<Input
 							type="text"
-							value={searchQuery}
+							value={localSearch}
 							onChange={(e) => handleSearchChange(e.target.value)}
 							placeholder="Search listings..."
 							aria-label="Search listings"
 						/>
-						{searchQuery && (
+						{localSearch && (
 							<button
 								type="button"
-								onClick={() => setSearchQuery("")}
+								onClick={() => handleSearchChange("")}
 								className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
 							>
 								<XMarkIcon className="size-4" />
@@ -421,7 +428,7 @@ export function ListingsList() {
 				</div>
 
 				{/* Sort pills */}
-				<div className="-mx-1 min-w-0 flex-1 overflow-x-auto px-1 py-1">
+				<div className="-mx-1 min-w-0 flex-1 overflow-x-auto scrollbar-hide px-1 py-1">
 					<div className="flex min-w-max gap-1.5 sm:min-w-0 sm:flex-wrap">
 						{(
 							[
@@ -436,10 +443,15 @@ export function ListingsList() {
 								<button
 									type="button"
 									key={opt.value}
-									onClick={() => setSortBy(opt.value)}
-									className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium shadow-sm ring-1 transition-all duration-200 active:scale-95 ${isActive ? "bg-zinc-900 text-white ring-zinc-900 dark:bg-white dark:text-zinc-900 dark:ring-white" : "bg-white text-zinc-600 ring-zinc-200 hover:bg-zinc-50 dark:bg-zinc-900 dark:text-zinc-400 dark:ring-zinc-800 dark:hover:bg-zinc-800"}`}
+									onClick={() => navigate({ search: (prev: Record<string, unknown>) => ({ ...prev, sort: opt.value === "date" ? undefined : opt.value }) })}
+									className={clsx(
+										"inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium shadow-sm ring-1 transition-all duration-200 active:scale-95",
+										isActive
+											? "bg-zinc-900 text-white ring-zinc-900 dark:bg-white dark:text-zinc-900 dark:ring-white"
+											: "bg-white text-zinc-600 ring-zinc-200 hover:bg-zinc-50 dark:bg-zinc-900 dark:text-zinc-400 dark:ring-zinc-800 dark:hover:bg-zinc-800"
+									)}
 								>
-									<opt.icon className={`size-3.5 ${isActive ? "text-white dark:text-zinc-900" : opt.iconColor}`} />
+									<opt.icon className={clsx("size-3.5", isActive ? "text-white dark:text-zinc-900" : opt.iconColor)} />
 									{opt.label}
 								</button>
 							);
@@ -476,11 +488,12 @@ export function ListingsList() {
 								<button
 									type="button"
 									onClick={(e) => { e.preventDefault(); toggleSelect(listing.id); }}
-									className={`absolute left-2 top-2 z-10 flex size-5 items-center justify-center rounded border transition-all ${
+									className={clsx(
+										"absolute left-2 top-2 z-10 flex size-5 items-center justify-center rounded border transition-all",
 										selectedIds.has(listing.id)
 											? "border-zinc-900 bg-zinc-900 dark:border-white dark:bg-white"
 											: "border-zinc-300 bg-white opacity-0 group-hover:opacity-100 dark:border-zinc-600 dark:bg-zinc-800"
-									}`}
+									)}
 								>
 									{selectedIds.has(listing.id) && (
 										<CheckCircleIcon className="size-3.5 text-white dark:text-zinc-900" />

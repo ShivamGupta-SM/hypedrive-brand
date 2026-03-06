@@ -10,7 +10,7 @@ export function BulkActionsBar({ selectedCount, onClear, children }: BulkActions
 	if (selectedCount === 0) return null;
 
 	return (
-		<div className="fixed inset-x-0 bottom-6 z-30 lg:left-60">
+		<div className="fixed inset-x-0 bottom-6 z-30 lg:left-[var(--sidebar-width,15rem)]">
 			{/* Bar is always dark — force dark theme so child Buttons (outline, plain) render for dark bg */}
 			<div
 				data-theme="dark"

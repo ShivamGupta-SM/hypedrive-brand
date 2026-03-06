@@ -335,7 +335,7 @@ export function SettingsDialog({ open, onClose, initialTab = "org" }: SettingsDi
 							</button>
 						</div>
 
-						<nav className="flex-1 overflow-y-auto px-2 py-3">
+						<nav className="flex-1 overflow-y-auto scrollbar-hide px-2 py-3">
 							{/* Workspace group */}
 							<div className="mb-1">
 								<p className="mb-1 px-2.5 text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
@@ -429,7 +429,7 @@ export function SettingsDialog({ open, onClose, initialTab = "org" }: SettingsDi
 							</div>
 
 							{/* Scrollable content */}
-							<div className="flex-1 overflow-y-auto">
+							<div className="flex-1 overflow-y-auto scrollbar-hide">
 								{activePanel ? (
 									<div key={activePanel.id} className="px-4 py-5 pb-10 sm:px-6">
 										{activePanel.content}

@@ -56,7 +56,7 @@ function CampaignsLayoutSkeleton() {
 			{/* Search + Tabs */}
 			<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
 				<Skeleton height={40} width={256} borderRadius={8} containerClassName="w-full sm:w-64 shrink-0" />
-				<div className="flex gap-1.5 overflow-x-auto">
+				<div className="flex gap-1.5 overflow-x-auto scrollbar-hide">
 					{[80, 70, 75, 65, 60].map((w, i) => (
 						<Skeleton key={i} width={w} height={36} borderRadius={999} />
 					))}

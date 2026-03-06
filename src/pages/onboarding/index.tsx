@@ -199,7 +199,7 @@ function OrganizationStep({
 			</div>
 
 			{error && (
-				<div className="rounded-xl bg-red-50 p-3 dark:bg-red-950/30">
+				<div className="rounded-lg bg-red-50 p-3 dark:bg-red-950/30">
 					<p className="text-sm text-red-600 dark:text-red-400">{error}</p>
 				</div>
 			)}
@@ -380,7 +380,7 @@ function GSTStep({
 			</div>
 
 			{error && (
-				<div className="rounded-xl bg-red-50 p-3 dark:bg-red-950/30">
+				<div className="rounded-lg bg-red-50 p-3 dark:bg-red-950/30">
 					<p className="text-sm text-red-600 dark:text-red-400">{error}</p>
 				</div>
 			)}
@@ -415,7 +415,7 @@ function GSTStep({
 				</div>
 
 				{verified && data.gstLegalName && (
-					<div className="rounded-xl bg-emerald-50 p-4 dark:bg-emerald-950/20">
+					<div className="rounded-lg bg-emerald-50 p-4 dark:bg-emerald-950/20">
 						<div className="space-y-2">
 							<div>
 								<p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">Legal Name</p>
@@ -482,12 +482,12 @@ function ReviewStep({
 			</div>
 
 			{error && (
-				<div className="rounded-xl bg-red-50 p-3 dark:bg-red-950/30">
+				<div className="rounded-lg bg-red-50 p-3 dark:bg-red-950/30">
 					<p className="text-sm text-red-600 dark:text-red-400">{error}</p>
 				</div>
 			)}
 
-			<div className="rounded-xl bg-zinc-50 p-4 dark:bg-zinc-900">
+			<div className="rounded-lg bg-zinc-50 p-4 dark:bg-zinc-900">
 				<dl className="space-y-3">
 					<div>
 						<dt className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Organization Name</dt>
@@ -528,7 +528,7 @@ function ReviewStep({
 				</dl>
 			</div>
 
-			<div className="rounded-xl bg-amber-50 p-4 dark:bg-amber-950/30">
+			<div className="rounded-lg bg-amber-50 p-4 dark:bg-amber-950/30">
 				<p className="text-sm text-amber-700 dark:text-amber-300">
 					<strong>Note:</strong> After submission, your organization will be reviewed by our team. This usually takes
 					1-2 business days.
@@ -611,7 +611,7 @@ function SuccessStep({ orgName, organizationId }: { orgName: string; organizatio
 			</div>
 
 			{/* Live setup steps */}
-			<div className="rounded-xl bg-zinc-50 p-4 dark:bg-zinc-900">
+			<div className="rounded-lg bg-zinc-50 p-4 dark:bg-zinc-900">
 				<div className="space-y-1">
 					{allSteps.map((stepKey) => {
 						const meta = STEP_LABELS[stepKey] || { label: stepKey, description: "" };
@@ -682,7 +682,7 @@ function SuccessStep({ orgName, organizationId }: { orgName: string; organizatio
 
 			{/* Stream error */}
 			{stream.error && (
-				<div className="rounded-xl bg-amber-50 p-3 dark:bg-amber-950/30">
+				<div className="rounded-lg bg-amber-50 p-3 dark:bg-amber-950/30">
 					<p className="text-sm text-amber-700 dark:text-amber-300">
 						Live updates disconnected. Your setup is still processing in the background.
 					</p>
@@ -691,13 +691,13 @@ function SuccessStep({ orgName, organizationId }: { orgName: string; organizatio
 
 			{/* What happens next */}
 			{stream.isComplete ? (
-				<div className="rounded-xl bg-emerald-50 p-4 dark:bg-emerald-950/20">
+				<div className="rounded-lg bg-emerald-50 p-4 dark:bg-emerald-950/20">
 					<p className="text-sm text-emerald-700 dark:text-emerald-300">
 						Setup complete! Your organization will be reviewed by our team. This usually takes 1-2 business days.
 					</p>
 				</div>
 			) : (
-				<div className="rounded-xl bg-amber-50 p-4 dark:bg-amber-950/30">
+				<div className="rounded-lg bg-amber-50 p-4 dark:bg-amber-950/30">
 					<p className="text-sm text-amber-700 dark:text-amber-300">
 						<strong>Note:</strong> After setup, your organization will be reviewed by our team. This usually takes 1-2
 						business days.

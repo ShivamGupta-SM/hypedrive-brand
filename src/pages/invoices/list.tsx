@@ -70,7 +70,7 @@ function InvoicesSkeleton() {
 			{/* Search + Filter pills */}
 			<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
 				<Skeleton height={40} borderRadius={8} containerClassName="w-full sm:w-64 shrink-0" />
-				<div className="flex gap-1.5 overflow-x-auto">
+				<div className="flex gap-1.5 overflow-x-auto scrollbar-hide">
 					{[70, 90, 90, 80].map((w, i) => (
 						<Skeleton key={i} width={w} height={36} borderRadius={9999} />
 					))}
@@ -249,6 +249,7 @@ function InvoiceDetailModal({ invoice, onClose }: { invoice: Invoice | null; onC
 				</div>
 
 				{/* Totals */}
+				{/* GST split: CGST 9% + SGST 9% (standard 18% GST) */}
 				<div className="space-y-2 border-t border-zinc-200 pt-3 dark:border-zinc-700">
 					<div className="flex justify-between text-xs text-zinc-500 dark:text-zinc-400">
 						<span>Subtotal</span>
@@ -473,7 +474,7 @@ export function InvoicesList() {
 				</div>
 
 				{/* Period Pills */}
-				<div className="-mx-1 min-w-0 flex-1 overflow-x-auto px-1 py-1">
+				<div className="-mx-1 min-w-0 flex-1 overflow-x-auto scrollbar-hide px-1 py-1">
 					<div className="flex min-w-max gap-1.5 sm:min-w-0 sm:flex-wrap">
 						{periodFilters.map((filter) => (
 							<button

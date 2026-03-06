@@ -5,46 +5,18 @@ import {
 	CurrencyRupeeIcon,
 	EllipsisVerticalIcon,
 	MegaphoneIcon,
-	PauseCircleIcon,
-	PlayCircleIcon,
 	UsersIcon,
-	XCircleIcon,
 } from "@heroicons/react/16/solid";
 import clsx from "clsx";
 import { Dropdown, DropdownButton, DropdownItem, DropdownMenu } from "@/components/dropdown";
 import { getPlatformColor, getPlatformIcon } from "@/components/icons/platform-icons";
 import { Link } from "@/components/link";
 import { Skeleton } from "@/components/skeleton";
-import type { brand, db } from "@/lib/brand-client";
+import type { brand } from "@/lib/brand-client";
 import { formatDateCompact, formatPrice } from "@/lib/design-tokens";
+import { type StatusColor, getStatusConfig } from "./utils";
 
 type Campaign = brand.CampaignWithStats;
-type CampaignStatus = db.CampaignStatus;
-
-// =============================================================================
-// STATUS CONFIG
-// =============================================================================
-
-type StatusColor = "lime" | "sky" | "amber" | "zinc" | "emerald" | "red";
-
-export function getStatusConfig(status: CampaignStatus): {
-	label: string;
-	icon: typeof CheckCircleIcon;
-	color: StatusColor;
-} {
-	const statusMap: Record<string, { label: string; icon: typeof CheckCircleIcon; color: StatusColor }> = {
-		active: { label: "Active", icon: PlayCircleIcon, color: "lime" },
-		draft: { label: "Draft", icon: ClockIcon, color: "zinc" },
-		pending_approval: { label: "Pending", icon: ClockIcon, color: "amber" },
-		approved: { label: "Approved", icon: CheckCircleIcon, color: "sky" },
-		paused: { label: "Paused", icon: PauseCircleIcon, color: "amber" },
-		ended: { label: "Ended", icon: CheckCircleIcon, color: "zinc" },
-		cancelled: { label: "Cancelled", icon: XCircleIcon, color: "red" },
-		rejected: { label: "Rejected", icon: XCircleIcon, color: "red" },
-		archived: { label: "Archived", icon: ClockIcon, color: "zinc" },
-	};
-	return statusMap[status] || { label: status, icon: ClockIcon, color: "zinc" };
-}
 
 // Chip color classes — solid bg with white text for strong visibility
 const chipColors: Record<StatusColor, string> = {

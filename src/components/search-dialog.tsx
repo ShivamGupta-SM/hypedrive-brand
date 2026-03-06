@@ -526,7 +526,7 @@ export function SearchDialog({
 
 					{/* Filter Tabs */}
 					{hasQuery && facets && (
-						<div className="flex gap-1 overflow-x-auto border-b border-zinc-200 px-5 py-2 dark:border-zinc-800">
+						<div className="flex gap-1 overflow-x-auto scrollbar-hide border-b border-zinc-200 px-5 py-2 dark:border-zinc-800">
 							{tabs.map((tab) => (
 								<button
 									key={tab.key}
@@ -550,7 +550,7 @@ export function SearchDialog({
 					)}
 
 					{/* Results list */}
-					<div ref={listRef} className="max-h-[420px] overflow-y-auto px-2 py-2">
+					<div ref={listRef} className="max-h-[420px] overflow-y-auto scrollbar-hide px-2 py-2">
 						{/* Empty state — recent searches + quick actions */}
 						{!hasQuery && (
 							<>

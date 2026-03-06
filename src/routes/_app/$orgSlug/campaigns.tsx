@@ -7,6 +7,7 @@ import { CampaignsLayout } from "@/pages/campaigns";
 
 const searchSchema = z.object({
 	q: z.string().optional().catch(undefined),
+	sort: z.enum(["newest", "oldest", "title", "startDate"]).optional().catch(undefined),
 });
 
 export const Route = createFileRoute("/_app/$orgSlug/campaigns")({

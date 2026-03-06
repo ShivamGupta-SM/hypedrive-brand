@@ -77,44 +77,12 @@ import { useOrgContext } from "@/hooks/use-org-context";
 import type { brand, db } from "@/lib/brand-client";
 import { formatCurrency } from "@/lib/design-tokens";
 import { showToast } from "@/lib/toast";
+import { getStatusConfig } from "./utils";
 
 const routeApi = getRouteApi("/_app/$orgSlug/campaigns_/$id");
 
-type CampaignStatus = db.CampaignStatus;
 type CampaignEnrollment = brand.EnrollmentWithRelations;
 type EnrollmentStatus = db.EnrollmentStatus;
-
-// =============================================================================
-// STATUS CONFIG
-// =============================================================================
-
-function getStatusConfig(status: CampaignStatus): {
-	label: string;
-	icon: typeof CheckCircleIcon;
-	color: "lime" | "sky" | "amber" | "zinc" | "emerald" | "red";
-} {
-	const statusMap: Record<
-		string,
-		{
-			label: string;
-			icon: typeof CheckCircleIcon;
-			color: "lime" | "sky" | "amber" | "zinc" | "emerald" | "red";
-		}
-	> = {
-		active: { label: "Active", icon: PlayCircleIcon, color: "lime" },
-		draft: { label: "Draft", icon: ClockIcon, color: "zinc" },
-		pending_approval: { label: "Pending", icon: ClockIcon, color: "amber" },
-		approved: { label: "Approved", icon: CheckCircleIcon, color: "sky" },
-		paused: { label: "Paused", icon: PauseCircleIcon, color: "amber" },
-		ended: { label: "Ended", icon: CheckCircleIcon, color: "zinc" },
-		completed: { label: "Completed", icon: CheckCircleIcon, color: "emerald" },
-		cancelled: { label: "Cancelled", icon: XCircleIcon, color: "red" },
-		rejected: { label: "Rejected", icon: XCircleIcon, color: "red" },
-		expired: { label: "Expired", icon: ClockIcon, color: "zinc" },
-		archived: { label: "Archived", icon: ClockIcon, color: "zinc" },
-	};
-	return statusMap[status] || { label: status, icon: ClockIcon, color: "zinc" };
-}
 
 const CAMPAIGN_TYPE_CONFIG: Record<
 	string,
@@ -1238,7 +1206,7 @@ export function CampaignShow() {
 			)}
 
 			{/* Tab Navigation */}
-			<div className="-mx-1 flex gap-1 sm:gap-1.5 overflow-x-auto px-1 py-0.5 scrollbar-none">
+			<div className="-mx-1 flex gap-1 sm:gap-1.5 overflow-x-auto px-1 py-0.5 scrollbar-hide">
 				{tabs.map((tab) => {
 					const Icon = tab.icon;
 					const isActive = activeTab === tab.key;
@@ -1606,7 +1574,7 @@ export function CampaignShow() {
 						</div>
 
 						{/* Filter Tabs with counts */}
-						<div className="flex gap-1 overflow-x-auto scrollbar-none border-b border-zinc-200 px-3.5 sm:px-4 py-1.5 sm:py-2 dark:border-zinc-700">
+						<div className="flex gap-1 overflow-x-auto scrollbar-hide border-b border-zinc-200 px-3.5 sm:px-4 py-1.5 sm:py-2 dark:border-zinc-700">
 							{(
 								[
 									{

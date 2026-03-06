@@ -107,11 +107,16 @@ function ContactForm() {
 	});
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [isSubmitted, setIsSubmitted] = useState(false);
+	const [validationError, setValidationError] = useState<string | null>(null);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		if (!formData.subject.trim() || !formData.message.trim()) return;
+		if (!formData.subject.trim() || !formData.message.trim()) {
+			setValidationError("Please fill in both subject and message fields.");
+			return;
+		}
 
+		setValidationError(null);
 		setIsSubmitting(true);
 		try {
 			const subject = encodeURIComponent(formData.subject);
@@ -143,6 +148,11 @@ function ContactForm() {
 
 	return (
 		<form onSubmit={handleSubmit} className="space-y-3.5">
+			{validationError && (
+				<div className="rounded-lg bg-red-50 p-3 dark:bg-red-950/30">
+					<p className="text-sm text-red-600 dark:text-red-400">{validationError}</p>
+				</div>
+			)}
 			<div>
 				<label htmlFor="support-subject" className="mb-1.5 block text-sm font-medium text-zinc-900 dark:text-white">
 					Subject
@@ -221,8 +231,7 @@ export function Support() {
 						icon={ChatBubbleLeftRightIcon}
 						iconColor="emerald"
 						label="Live Chat"
-						value="9 AM – 6 PM IST"
-						onClick={() => window.open("mailto:support@hypedrive.com?subject=Live Chat Request")}
+						value="Coming soon"
 					/>
 					<MenuSeparator />
 					<MenuRow
