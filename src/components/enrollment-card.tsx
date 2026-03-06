@@ -114,9 +114,9 @@ function EnrollmentCardFull({
 	return (
 		<div
 			className={clsx(
-				"group relative flex flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 transition-all duration-200 dark:bg-zinc-900",
+				"group relative flex flex-col rounded-xl bg-white shadow-xs ring-1 transition-all dark:bg-zinc-900",
 				isSelected
-					? "outline-2 outline-zinc-900 ring-zinc-200 dark:outline-white dark:ring-zinc-800"
+					? "ring-sky-300 bg-sky-50/50 dark:ring-sky-700 dark:bg-sky-950/20"
 					: "ring-zinc-200 hover:ring-zinc-300 hover:shadow-md dark:ring-zinc-800 dark:hover:ring-zinc-700"
 			)}
 		>
@@ -125,16 +125,16 @@ function EnrollmentCardFull({
 				className="flex flex-1 flex-col"
 			>
 				{/* Top section: avatar + info */}
-				<div className="flex items-start gap-3 p-3.5 sm:p-4">
-					{/* Avatar with overlays */}
+				<div className="flex items-start gap-3.5 p-3.5 sm:gap-4 sm:p-4">
+					{/* Avatar — bigger with platform overlay */}
 					<div className="relative shrink-0">
 						<img
 							src={getAvatarUrl(avatarSeed, creatorGender)}
 							alt={creatorName}
-							className="size-10 rounded-full bg-zinc-100 ring-1 ring-zinc-200 sm:size-11 dark:bg-zinc-800 dark:ring-zinc-700"
+							className="size-12 rounded-full bg-zinc-100 ring-1 ring-zinc-200 dark:bg-zinc-800 dark:ring-zinc-700"
 						/>
 						{PlatformIconComponent && (
-							<div className="absolute -bottom-0.5 -right-0.5 flex size-4.5 items-center justify-center rounded-full border-2 border-white bg-white dark:border-zinc-900 dark:bg-zinc-900">
+							<div className="absolute -bottom-0.5 -right-0.5 flex size-5 items-center justify-center rounded-full border-2 border-white bg-white shadow-sm dark:border-zinc-900 dark:bg-zinc-900">
 								<PlatformIconComponent className={clsx("size-3", getPlatformColor(platformName || ""))} />
 							</div>
 						)}
@@ -151,14 +151,14 @@ function EnrollmentCardFull({
 							</Badge>
 						</div>
 
-						{/* Row 2: Campaign + meta */}
-						<div className="mt-1 flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
-							<MegaphoneIcon className="size-3 shrink-0 text-zinc-500 dark:text-zinc-400" />
+						{/* Row 2: Campaign */}
+						<div className="mt-0.5 flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+							<MegaphoneIcon className="size-3 shrink-0" />
 							<span className="truncate">{campaignName || enrollment.campaignId.slice(-8)}</span>
 						</div>
 
 						{/* Row 3: ID + date + city + overdue */}
-						<div className="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] text-zinc-500 dark:text-zinc-400">
+						<div className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] text-zinc-400 dark:text-zinc-500">
 							<span className="font-mono">{enrollment.displayId}</span>
 							<span>·</span>
 							<span>{formatDateCompact(enrollment.createdAt)}</span>
@@ -179,14 +179,14 @@ function EnrollmentCardFull({
 				</div>
 
 				{/* Footer stats */}
-				<div className="grid grid-cols-3 divide-x divide-zinc-100 border-t border-zinc-100 bg-zinc-50/60 dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-800/30">
-					<div className="flex flex-col items-center justify-center py-2.5">
+				<div className="mt-auto grid grid-cols-3 divide-x divide-zinc-200 border-t border-zinc-200 bg-zinc-50/50 dark:divide-zinc-700 dark:border-zinc-800 dark:bg-zinc-800/30">
+					<div className="flex flex-col items-center justify-center py-2.5 sm:py-3">
 						<span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">Order Value</span>
 						<span className="mt-0.5 text-xs font-semibold tabular-nums text-zinc-900 sm:text-sm dark:text-white">
 							{formatCurrency(enrollment.orderValueDecimal)}
 						</span>
 					</div>
-					<div className="flex flex-col items-center justify-center py-2.5">
+					<div className="flex flex-col items-center justify-center py-2.5 sm:py-3">
 						<span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">
 							Fee ({enrollment.lockedBillRate}%)
 						</span>
@@ -194,7 +194,7 @@ function EnrollmentCardFull({
 							{formatCurrency(enrollment.lockedPlatformFeeDecimal)}
 						</span>
 					</div>
-					<div className="flex flex-col items-center justify-center py-2.5">
+					<div className="flex flex-col items-center justify-center py-2.5 sm:py-3">
 						<span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">Submitted</span>
 						<span className="mt-0.5 text-xs font-semibold tabular-nums text-zinc-700 sm:text-sm dark:text-zinc-300">
 							{formatDateCompact(enrollment.createdAt)}
@@ -215,7 +215,7 @@ function EnrollmentCardFull({
 }
 
 // =============================================================================
-// COMPACT VARIANT — Row layout for dialogs/modals (campaign detail)
+// COMPACT VARIANT — Mini card for campaign detail, dialogs (same shape as Full)
 // =============================================================================
 
 interface CompactVariantProps {
@@ -227,9 +227,8 @@ function EnrollmentCardCompact({ enrollment, onClick }: CompactVariantProps) {
 	const statusConfig = getEnrollmentStatusConfig(enrollment.status);
 	const StatusIcon = statusConfig.icon;
 
-	const platformFeeAmount = enrollment.lockedPlatformFeeDecimal;
-
 	const platformName = enrollment.platform?.name;
+	const PlatformIconComponent = platformName ? getPlatformIcon(platformName) : null;
 	const creatorName = enrollment.creator?.profileName || enrollment.creatorId.slice(-6);
 	const avatarSeed = enrollment.creator?.id || enrollment.creatorId;
 	const creatorGender = (enrollment.creator as { gender?: "male" | "female" | "other" } | undefined)?.gender;
@@ -240,54 +239,83 @@ function EnrollmentCardCompact({ enrollment, onClick }: CompactVariantProps) {
 		<Wrapper
 			{...(onClick ? { type: "button" as const, onClick } : {})}
 			className={clsx(
-				"group flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors",
-				onClick && "cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+				"group relative flex w-full flex-col overflow-hidden rounded-xl bg-white text-left shadow-xs ring-1 transition-all dark:bg-zinc-900",
+				onClick
+					? "ring-zinc-200 hover:ring-zinc-300 hover:shadow-md dark:ring-zinc-800 dark:hover:ring-zinc-700 cursor-pointer"
+					: "ring-zinc-200 dark:ring-zinc-800"
 			)}
 		>
-			{/* Creator avatar */}
-			<img
-				src={getAvatarUrl(avatarSeed, creatorGender)}
-				alt={creatorName}
-				className="size-8 shrink-0 rounded-lg bg-zinc-100 dark:bg-zinc-800"
-			/>
-
-			{/* Info */}
-			<div className="min-w-0 flex-1">
-				<div className="flex items-center gap-2">
-					<p className="truncate text-sm font-medium text-zinc-900 dark:text-white">{creatorName}</p>
-					<Badge color={statusConfig.color} className="inline-flex shrink-0 items-center gap-0.5 text-[10px]!">
-						<StatusIcon className="size-2.5" />
-						{statusConfig.label}
-					</Badge>
-				</div>
-				<p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
-					<span className="font-mono">{enrollment.displayId}</span>
-					<span className="mx-1 text-zinc-300 dark:text-zinc-600">·</span>
-					{formatDateCompact(enrollment.createdAt)}
-					{platformName && (
-						<>
-							<span className="mx-1 text-zinc-300 dark:text-zinc-600">·</span>
-							{platformName}
-						</>
+			{/* Top section: avatar + info */}
+			<div className="flex items-start gap-3 p-3 sm:gap-3.5 sm:p-3.5">
+				{/* Avatar with platform overlay */}
+				<div className="relative shrink-0">
+					<img
+						src={getAvatarUrl(avatarSeed, creatorGender)}
+						alt={creatorName}
+						className="size-10 rounded-full bg-zinc-100 ring-1 ring-zinc-200 dark:bg-zinc-800 dark:ring-zinc-700"
+					/>
+					{PlatformIconComponent && (
+						<div className="absolute -bottom-0.5 -right-0.5 flex size-4.5 items-center justify-center rounded-full border-2 border-white bg-white shadow-sm dark:border-zinc-900 dark:bg-zinc-900">
+							<PlatformIconComponent className={clsx("size-2.5", getPlatformColor(platformName || ""))} />
+						</div>
 					)}
-				</p>
+				</div>
+
+				{/* Content */}
+				<div className="min-w-0 flex-1">
+					{/* Row 1: Name + Status */}
+					<div className="flex items-center justify-between gap-2">
+						<h3 className="truncate text-sm font-semibold text-zinc-900 dark:text-white">{creatorName}</h3>
+						<Badge color={statusConfig.color} className="inline-flex shrink-0 items-center gap-0.5 text-[10px]!">
+							<StatusIcon className="size-2.5" />
+							{statusConfig.label}
+						</Badge>
+					</div>
+
+					{/* Row 2: ID + date + platform */}
+					<div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] text-zinc-400 dark:text-zinc-500">
+						<span className="font-mono">{enrollment.displayId}</span>
+						<span>·</span>
+						<span>{formatDateCompact(enrollment.createdAt)}</span>
+						{enrollment.creator?.city && (
+							<>
+								<span>·</span>
+								<span>{enrollment.creator.city}</span>
+							</>
+						)}
+					</div>
+				</div>
 			</div>
 
-			{/* Value */}
-			<div className="shrink-0 text-right">
-				<p className="text-sm font-semibold tabular-nums text-zinc-900 dark:text-white">
-					{formatCurrency(enrollment.orderValueDecimal)}
-				</p>
-				<p className="text-[11px] tabular-nums text-emerald-600 dark:text-emerald-400">
-					+{formatCurrency(platformFeeAmount)}
-				</p>
+			{/* Footer stats — same structure as Full variant */}
+			<div className="mt-auto grid grid-cols-3 divide-x divide-zinc-200 border-t border-zinc-200 bg-zinc-50/50 dark:divide-zinc-700 dark:border-zinc-800 dark:bg-zinc-800/30">
+				<div className="flex flex-col items-center justify-center py-2">
+					<span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">Order Value</span>
+					<span className="mt-0.5 text-xs font-semibold tabular-nums text-zinc-900 dark:text-white">
+						{formatCurrency(enrollment.orderValueDecimal)}
+					</span>
+				</div>
+				<div className="flex flex-col items-center justify-center py-2">
+					<span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">
+						Fee ({enrollment.lockedBillRate}%)
+					</span>
+					<span className="mt-0.5 text-xs font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">
+						{formatCurrency(enrollment.lockedPlatformFeeDecimal)}
+					</span>
+				</div>
+				<div className="flex flex-col items-center justify-center py-2">
+					<span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">Submitted</span>
+					<span className="mt-0.5 text-xs font-semibold tabular-nums text-zinc-700 dark:text-zinc-300">
+						{formatDateCompact(enrollment.createdAt)}
+					</span>
+				</div>
 			</div>
 		</Wrapper>
 	);
 }
 
 // =============================================================================
-// INLINE VARIANT — Minimal row for dashboard pending reviews
+// INLINE VARIANT — Mini card for dashboard pending reviews (limited data shape)
 // =============================================================================
 
 interface InlineVariantProps {
@@ -307,22 +335,47 @@ function EnrollmentCardInline({ enrollment, orgSlug, formatRelativeTime }: Inlin
 	return (
 		<Link
 			href={`/${orgSlug}/enrollments/${enrollment.id}`}
-			className="group flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/40"
+			className="group relative flex flex-col overflow-hidden rounded-xl bg-white shadow-xs ring-1 ring-zinc-200 transition-all hover:ring-zinc-300 hover:shadow-md dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:ring-zinc-700"
 		>
-			<img
-				src={getAvatarUrl(enrollment.creator.id, enrollment.creator.gender)}
-				alt={enrollment.creator.name}
-				className="size-9 shrink-0 rounded-lg bg-zinc-100 dark:bg-zinc-800"
-			/>
-			<div className="min-w-0 flex-1">
-				<p className="truncate text-sm font-medium text-zinc-900 dark:text-white">{enrollment.campaign.title}</p>
-				<p className="text-xs text-zinc-500 dark:text-zinc-400">
-					{enrollment.creator.name} · {formatCurrency(enrollment.orderValueDecimal)}
-				</p>
+			{/* Top section: avatar + info */}
+			<div className="flex items-start gap-3 p-3">
+				<img
+					src={getAvatarUrl(enrollment.creator.id, enrollment.creator.gender)}
+					alt={enrollment.creator.name}
+					className="size-10 shrink-0 rounded-full bg-zinc-100 ring-1 ring-zinc-200 dark:bg-zinc-800 dark:ring-zinc-700"
+				/>
+				<div className="min-w-0 flex-1">
+					<div className="flex items-center justify-between gap-2">
+						<h3 className="truncate text-sm font-semibold text-zinc-900 dark:text-white">
+							{enrollment.creator.name}
+						</h3>
+						<Badge color="amber" className="inline-flex shrink-0 items-center gap-0.5 text-[10px]!">
+							<ClockIcon className="size-2.5" />
+							Pending
+						</Badge>
+					</div>
+					<div className="mt-0.5 flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+						<MegaphoneIcon className="size-3 shrink-0" />
+						<span className="truncate">{enrollment.campaign.title}</span>
+					</div>
+				</div>
 			</div>
-			<span className="hidden shrink-0 text-[11px] tabular-nums text-zinc-400 sm:block dark:text-zinc-500">
-				{formatRelativeTime(enrollment.createdAt)}
-			</span>
+
+			{/* Footer stats */}
+			<div className="mt-auto grid grid-cols-2 divide-x divide-zinc-200 border-t border-zinc-200 bg-zinc-50/50 dark:divide-zinc-700 dark:border-zinc-800 dark:bg-zinc-800/30">
+				<div className="flex flex-col items-center justify-center py-2">
+					<span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">Order Value</span>
+					<span className="mt-0.5 text-xs font-semibold tabular-nums text-zinc-900 dark:text-white">
+						{formatCurrency(enrollment.orderValueDecimal)}
+					</span>
+				</div>
+				<div className="flex flex-col items-center justify-center py-2">
+					<span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">Submitted</span>
+					<span className="mt-0.5 text-xs font-semibold tabular-nums text-zinc-700 dark:text-zinc-300">
+						{formatRelativeTime(enrollment.createdAt)}
+					</span>
+				</div>
+			</div>
 		</Link>
 	);
 }

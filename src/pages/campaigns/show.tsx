@@ -141,57 +141,59 @@ function LoadingSkeleton() {
 			{/* Stats */}
 			<FinancialStatsGridBordered
 				stats={[
-					{ name: "Total Enrollments", value: "" },
+					{ name: "Order Value", value: "" },
+					{ name: "Avg. Order", value: "" },
+					{ name: "Enrollments", value: "" },
 					{ name: "Approved", value: "" },
-					{ name: "Pending Review", value: "" },
-					{ name: "Total Order Value", value: "" },
+					{ name: "Pending", value: "" },
 				]}
 				loading
-				columns={4}
+				columns={5}
 			/>
 
-			{/* Progress Cards */}
-			<div className="grid gap-3 sm:gap-4 sm:grid-cols-2">
-				{[1, 2].map((i) => (
-					<div
-						key={i}
-						className="rounded-xl bg-white p-3.5 sm:p-4 shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800"
-					>
-						<div className="flex items-center justify-between mb-3">
-							<Skeleton width={120} height={14} borderRadius={6} />
-							<Skeleton width={60} height={14} borderRadius={6} />
+			{/* Progress Card */}
+			<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
+				<div className="grid sm:grid-cols-2">
+					{[1, 2].map((i) => (
+						<div key={i} className="p-3.5 sm:p-4">
+							<div className="mb-2.5 flex items-center justify-between">
+								<Skeleton width={110} height={14} borderRadius={6} />
+								<Skeleton width={50} height={14} borderRadius={6} />
+							</div>
+							<Skeleton width="100%" height={8} borderRadius={4} />
+							<div className="mt-2 flex gap-3">
+								<Skeleton width={60} height={10} borderRadius={4} />
+								<Skeleton width={60} height={10} borderRadius={4} />
+								<Skeleton width={60} height={10} borderRadius={4} />
+							</div>
 						</div>
-						<Skeleton width="100%" height={8} borderRadius={4} />
-						<Skeleton width={100} height={10} borderRadius={4} className="mt-2" />
-					</div>
-				))}
+					))}
+				</div>
 			</div>
 
 			{/* Content Grid */}
-			<div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
-				<div className="lg:col-span-2 space-y-4 sm:space-y-6">
-					<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-						<div className="border-b border-zinc-200 px-3.5 sm:px-4 py-2.5 sm:py-3 dark:border-zinc-700">
-							<Skeleton width={140} height={16} />
-						</div>
-						<div className="space-y-3 p-3.5 sm:p-5">
-							{[1, 2, 3].map((i) => (
-								<Skeleton key={i} width="100%" height={36} borderRadius={8} />
-							))}
-						</div>
+			<div className="grid gap-4 sm:gap-5 lg:grid-cols-2">
+				<div className="space-y-4 sm:space-y-5">
+					<Skeleton width="100%" height={52} borderRadius={12} />
+					<div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
+						{[1, 2, 3, 4].map((i) => (
+							<Skeleton key={i} width="100%" height={120} borderRadius={12} />
+						))}
 					</div>
 				</div>
-				<div className="space-y-4 sm:space-y-6">
-					<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-						<div className="border-b border-zinc-200 px-3.5 sm:px-4 py-2.5 sm:py-3 dark:border-zinc-700">
-							<Skeleton width={120} height={16} />
+				<div className="space-y-4 sm:space-y-5">
+					{[1, 2].map((i) => (
+						<div key={i} className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
+							<div className="border-b border-zinc-200 px-3.5 py-2.5 sm:px-4 sm:py-3 dark:border-zinc-700">
+								<Skeleton width={100 + i * 20} height={16} />
+							</div>
+							<div className="space-y-2 p-3.5 sm:p-4">
+								{[1, 2, 3, 4].map((j) => (
+									<Skeleton key={j} width="100%" height={32} borderRadius={6} />
+								))}
+							</div>
 						</div>
-						<div className="space-y-2 p-3.5 sm:p-4">
-							{[1, 2, 3, 4].map((i) => (
-								<Skeleton key={i} width="100%" height={32} borderRadius={6} />
-							))}
-						</div>
-					</div>
+					))}
 				</div>
 			</div>
 		</div>
@@ -841,8 +843,9 @@ export function CampaignShow() {
 	return (
 		<div className="space-y-4 sm:space-y-5">
 			{/* Header Card */}
-			<header className="overflow-hidden rounded-xl bg-white ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-				<div className="p-4 sm:p-5">
+			<header className="relative overflow-hidden rounded-xl bg-white ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
+				<div className={clsx("pointer-events-none absolute inset-x-0 top-0 h-24 bg-linear-to-b sm:h-32", statusConfig.gradientClass)} />
+				<div className="relative p-4 sm:p-5">
 					{/* Thumbnail + Title row — always side by side */}
 					<div className="flex items-start gap-3 sm:gap-4">
 						{/* Thumbnail */}
@@ -1076,51 +1079,44 @@ export function CampaignShow() {
 			{/* ============================================================= */}
 			{activeTab === "overview" && (
 				<div className="space-y-4 sm:space-y-5">
-					{/* Stats Row — 4 stats */}
-					<div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
-						{[
+					{/* Stats Row */}
+					<FinancialStatsGridBordered
+						stats={[
 							{
-								label: "Order Value",
+								name: "Order Value",
 								value: formatCurrency(stats?.totalOrderValueDecimal ?? "0"),
-								accent: "text-emerald-600 dark:text-emerald-400",
+								changeType: "positive" as const,
 							},
 							{
-								label: "Enrollments",
+								name: "Avg. Order",
+								value: formatCurrency(stats?.averageOrderValueDecimal ?? "0"),
+							},
+							{
+								name: "Enrollments",
 								value: `${stats?.totalEnrollments ?? 0}${campaign.maxEnrollments ? ` / ${campaign.maxEnrollments}` : ""}`,
-								accent: "text-zinc-900 dark:text-white",
 							},
 							{
-								label: "Approved",
-								value: String(stats?.approvedEnrollments ?? 0),
-								accent: "text-emerald-600 dark:text-emerald-400",
+								name: "Approved",
+								value: stats?.approvedEnrollments ?? 0,
+								changeType: "positive" as const,
 							},
 							{
-								label: "Pending",
-								value: String(stats?.pendingEnrollments ?? 0),
-								accent:
-									(stats?.pendingEnrollments ?? 0) > 0
-										? "text-amber-600 dark:text-amber-400"
-										: "text-zinc-900 dark:text-white",
+								name: "Pending",
+								value: stats?.pendingEnrollments ?? 0,
+								changeType: (stats?.pendingEnrollments ?? 0) > 0 ? ("negative" as const) : undefined,
 							},
-						].map((stat) => (
-							<div
-								key={stat.label}
-								className="rounded-xl bg-white p-3 sm:p-4 shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800"
-							>
-								<p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">{stat.label}</p>
-								<p className={`mt-1 text-lg font-semibold tabular-nums sm:text-xl ${stat.accent}`}>{stat.value}</p>
-							</div>
-						))}
-					</div>
+						]}
+						columns={5}
+					/>
 
-					{/* Progress Section — Enrollment bar + Timeline bar in one card */}
+					{/* Progress Bars */}
 					<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-						<div className="grid divide-y sm:grid-cols-2 sm:divide-x sm:divide-y-0 divide-zinc-200 dark:divide-zinc-700">
-							{/* Enrollment progress */}
+						<div className="grid divide-y divide-zinc-200 sm:grid-cols-2 sm:divide-x sm:divide-y-0 dark:divide-zinc-700">
+							{/* Enrollment Slots */}
 							<div className="p-3.5 sm:p-4">
-								<div className="mb-2 flex items-center justify-between">
+								<div className="mb-2.5 flex items-center justify-between">
 									<span className="flex items-center gap-1.5 text-xs font-medium text-zinc-700 dark:text-zinc-300">
-										<UserGroupIcon className="size-3.5 text-zinc-400" />
+										<UserGroupIcon className="size-3.5 text-emerald-500" />
 										Enrollment Slots
 									</span>
 									<span className="text-xs font-semibold tabular-nums text-zinc-900 dark:text-white">
@@ -1164,11 +1160,11 @@ export function CampaignShow() {
 									))}
 								</div>
 							</div>
-							{/* Timeline progress */}
+							{/* Timeline */}
 							<div className="p-3.5 sm:p-4">
-								<div className="mb-2 flex items-center justify-between">
+								<div className="mb-2.5 flex items-center justify-between">
 									<span className="flex items-center gap-1.5 text-xs font-medium text-zinc-700 dark:text-zinc-300">
-										<CalendarIcon className="size-3.5 text-zinc-400" />
+										<CalendarIcon className="size-3.5 text-sky-500" />
 										Timeline
 									</span>
 									<span className="text-xs font-semibold tabular-nums text-zinc-900 dark:text-white">
@@ -1193,19 +1189,19 @@ export function CampaignShow() {
 						</div>
 					</div>
 
-					{/* Two-column layout: Main + Sidebar */}
-					<div className="grid gap-4 sm:gap-5 lg:grid-cols-5">
-						{/* Left — Main Content */}
-						<div className="space-y-4 sm:space-y-5 lg:col-span-3">
-							{/* Task Summary — compact clickable banner */}
+					{/* Two-column layout */}
+					<div className="grid gap-4 sm:gap-5 lg:grid-cols-2">
+						{/* Left — Enrollments */}
+						<div className="flex flex-col gap-4 sm:gap-5">
+							{/* Task Summary */}
 							{tasks.length > 0 && (
 								<button
 									type="button"
 									onClick={() => setActiveTab("tasks")}
-									className="flex w-full items-center gap-3 rounded-xl bg-white p-3 sm:p-4 shadow-sm ring-1 ring-zinc-200 transition-colors hover:bg-zinc-50 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:bg-zinc-800/80"
+									className="flex w-full items-center gap-3 rounded-xl bg-white p-3 shadow-sm ring-1 ring-zinc-200 transition-colors hover:bg-zinc-50 sm:p-3.5 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:bg-zinc-800/80"
 								>
 									<div className="flex -space-x-1.5">
-										{tasks.slice(0, 4).map((task) => {
+										{tasks.slice(0, 3).map((task) => {
 											const taskPlatform =
 												task.taskTemplate?.platformName || extractPlatformFromText(task.taskTemplate?.name || "");
 											const TaskIcon = taskPlatform ? getPlatformIcon(taskPlatform) : null;
@@ -1222,15 +1218,15 @@ export function CampaignShow() {
 												</div>
 											);
 										})}
-										{tasks.length > 4 && (
+										{tasks.length > 3 && (
 											<div className="flex size-7 items-center justify-center rounded-full bg-zinc-200 text-[10px] font-bold text-zinc-600 ring-2 ring-white dark:bg-zinc-700 dark:text-zinc-300 dark:ring-zinc-900">
-												+{tasks.length - 4}
+												+{tasks.length - 3}
 											</div>
 										)}
 									</div>
 									<div className="min-w-0 flex-1 text-left">
 										<p className="text-sm font-medium text-zinc-900 dark:text-white">
-											{tasks.length} task{tasks.length !== 1 ? "s" : ""} configured
+											{tasks.length} task{tasks.length !== 1 ? "s" : ""}
 										</p>
 										<p className="text-xs text-zinc-500 dark:text-zinc-400">
 											{tasks.filter((t) => t.isRequired).length} required
@@ -1242,24 +1238,26 @@ export function CampaignShow() {
 
 							{/* Recent Enrollments */}
 							{enrollments.length > 0 ? (
-								<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-									<div className="flex items-center justify-between border-b border-zinc-200 px-3.5 sm:px-4 py-2.5 sm:py-3 dark:border-zinc-700">
-										<div className="flex items-center gap-2">
-											<UserGroupIcon className="size-4 text-sky-500" />
-											<h3 className="text-xs sm:text-sm font-semibold text-zinc-900 dark:text-white">
+								<div className="flex-1">
+									<div className="flex items-center justify-between px-0.5 pb-2.5">
+										<div className="flex items-center gap-2.5">
+											<div className="flex size-6 items-center justify-center rounded-md bg-sky-100 dark:bg-sky-900/30">
+												<UserGroupIcon className="size-3.5 text-sky-500" />
+											</div>
+											<h3 className="text-xs font-semibold text-zinc-900 sm:text-sm dark:text-white">
 												Recent Enrollments
 											</h3>
 										</div>
 										<button
 											type="button"
 											onClick={() => setActiveTab("enrollments")}
-											className="text-xs font-medium text-zinc-500 underline-offset-2 hover:text-zinc-900 hover:underline dark:text-zinc-400 dark:hover:text-white"
+											className="text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
 										>
 											View all &rarr;
 										</button>
 									</div>
-									<div className="divide-y divide-zinc-100 dark:divide-zinc-800">
-										{enrollments.slice(0, 5).map((enrollment) => (
+									<div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
+										{enrollments.slice(0, 4).map((enrollment) => (
 											<EnrollmentCardCompact
 												key={enrollment.id}
 												enrollment={enrollment}
@@ -1269,23 +1267,23 @@ export function CampaignShow() {
 									</div>
 								</div>
 							) : (
-								<div className="overflow-hidden rounded-xl bg-white p-6 shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-									<EmptyState
-										preset="enrollments"
-										title="No enrollments yet"
-										description="Enrollments will appear here when shoppers join this campaign"
-									/>
-								</div>
+								<EmptyState
+									preset="enrollments"
+									title="No enrollments yet"
+									description="Enrollments will appear here when shoppers join this campaign"
+								/>
 							)}
 						</div>
 
-						{/* Right — Sidebar */}
-						<div className="space-y-4 sm:space-y-5 lg:col-span-2">
-							{/* Campaign Configuration */}
+						{/* Right — Details */}
+						<div className="flex flex-col gap-4 sm:gap-5">
+							{/* Configuration */}
 							<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-								<div className="flex items-center gap-2 border-b border-zinc-200 px-3.5 sm:px-4 py-2.5 sm:py-3 dark:border-zinc-700">
-									<CubeIcon className="size-4 text-violet-500" />
-									<h3 className="text-xs sm:text-sm font-semibold text-zinc-900 dark:text-white">Configuration</h3>
+								<div className="flex items-center gap-2.5 border-b border-zinc-200 px-3.5 py-2.5 sm:px-4 sm:py-3 dark:border-zinc-700">
+									<div className="flex size-6 items-center justify-center rounded-md bg-violet-100 dark:bg-violet-900/30">
+										<CubeIcon className="size-3.5 text-violet-500" />
+									</div>
+									<h3 className="text-xs font-semibold text-zinc-900 sm:text-sm dark:text-white">Configuration</h3>
 								</div>
 								<div className="divide-y divide-zinc-100 dark:divide-zinc-800">
 									{[
@@ -1310,7 +1308,7 @@ export function CampaignShow() {
 									].map((row) => {
 										const RowIcon = row.icon;
 										return (
-											<div key={row.label} className="flex items-center justify-between px-3.5 sm:px-4 py-2.5">
+											<div key={row.label} className="flex items-center justify-between px-3.5 py-2.5 sm:px-4">
 												<span className="text-xs text-zinc-500 dark:text-zinc-400">{row.label}</span>
 												<span
 													className={`inline-flex items-center gap-1 text-xs font-medium ${row.valueClass || "text-zinc-900 dark:text-white"}`}
@@ -1325,10 +1323,12 @@ export function CampaignShow() {
 							</div>
 
 							{/* Activity Timeline */}
-							<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-								<div className="flex items-center gap-2 border-b border-zinc-200 px-3.5 sm:px-4 py-2.5 sm:py-3 dark:border-zinc-700">
-									<ClockIcon className="size-4 text-zinc-400" />
-									<h3 className="text-xs sm:text-sm font-semibold text-zinc-900 dark:text-white">Activity</h3>
+							<div className="flex-1 overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
+								<div className="flex items-center gap-2.5 border-b border-zinc-200 px-3.5 py-2.5 sm:px-4 sm:py-3 dark:border-zinc-700">
+									<div className="flex size-6 items-center justify-center rounded-md bg-sky-100 dark:bg-sky-900/30">
+										<ClockIcon className="size-3.5 text-sky-500" />
+									</div>
+									<h3 className="text-xs font-semibold text-zinc-900 sm:text-sm dark:text-white">Activity</h3>
 								</div>
 								<div className="p-3.5 sm:p-4">
 									<CampaignTimeline campaign={campaign} />
@@ -1338,14 +1338,16 @@ export function CampaignShow() {
 							{/* Terms & Conditions */}
 							{(campaign as brand.CampaignWithStats & { termsAndConditions?: string }).termsAndConditions && (
 								<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-									<div className="flex items-center gap-2 border-b border-zinc-200 px-3.5 sm:px-4 py-2.5 sm:py-3 dark:border-zinc-700">
-										<ClipboardDocumentListIcon className="size-4 text-zinc-400" />
-										<h3 className="text-xs sm:text-sm font-semibold text-zinc-900 dark:text-white">
+									<div className="flex items-center gap-2.5 border-b border-zinc-200 px-3.5 py-2.5 sm:px-4 sm:py-3 dark:border-zinc-700">
+										<div className="flex size-6 items-center justify-center rounded-md bg-violet-100 dark:bg-violet-900/30">
+											<ClipboardDocumentListIcon className="size-3.5 text-violet-500" />
+										</div>
+										<h3 className="text-xs font-semibold text-zinc-900 sm:text-sm dark:text-white">
 											Terms & Conditions
 										</h3>
 									</div>
 									<div className="p-3.5 sm:p-4">
-										<p className="whitespace-pre-wrap text-xs sm:text-sm text-zinc-600 dark:text-zinc-400">
+										<p className="whitespace-pre-wrap text-xs text-zinc-600 sm:text-sm dark:text-zinc-400">
 											{(campaign as brand.CampaignWithStats & { termsAndConditions?: string }).termsAndConditions}
 										</p>
 									</div>
@@ -1360,155 +1362,197 @@ export function CampaignShow() {
 			{/* ENROLLMENTS TAB */}
 			{/* ============================================================= */}
 			{activeTab === "enrollments" && (
-				<div className="space-y-3 sm:space-y-4">
-					{/* Enrollment Card */}
-					<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-						{/* Header with actions */}
-						<div className="flex items-center justify-between border-b border-zinc-200 px-3.5 sm:px-4 py-2.5 sm:py-3 dark:border-zinc-700">
-							<div className="flex items-center gap-2">
-								<UserGroupIcon className="size-4 text-zinc-400" />
-								<h3 className="text-xs sm:text-sm font-semibold text-zinc-900 dark:text-white">Enrollments</h3>
+				<div className="space-y-4">
+					{/* Header + Actions */}
+					<div className="flex items-start justify-between gap-4">
+						<div className="flex items-center gap-2.5">
+							<div className="flex size-6 items-center justify-center rounded-md bg-sky-100 dark:bg-sky-900/30">
+								<UserGroupIcon className="size-3.5 text-sky-500" />
 							</div>
-							<div className="flex items-center gap-2">
-								<Button
-									outline
-									onClick={async () => {
-										try {
-											const result = await exportEnrollments.mutateAsync({ campaignId });
-											const blob = new Blob([result.csv], { type: "text/csv" });
-											const url = URL.createObjectURL(blob);
-											const a = document.createElement("a");
-											a.href = url;
-											a.download = result.filename || "enrollments.csv";
-											a.click();
-											URL.revokeObjectURL(url);
-											showToast.success("Export downloaded");
-										} catch (err) {
-											showToast.error(err, "Failed to export enrollments");
-										}
-									}}
-									disabled={exportEnrollments.isPending}
-								>
-									<TableCellsIcon data-slot="icon" className="size-4" />
-									<span className="hidden sm:inline">
-										{exportEnrollments.isPending ? "Exporting..." : "Export CSV"}
-									</span>
-								</Button>
-								<Link
-									href={`/${orgSlug}/enrollments?campaignId=${campaignId}`}
-									className="hidden sm:inline text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
-								>
-									Full view →
-								</Link>
+							<div>
+								<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">Enrollments</h3>
+								<p className="text-xs text-zinc-500 dark:text-zinc-400">
+									{enrollments.length} total enrollment{enrollments.length !== 1 ? "s" : ""}
+								</p>
 							</div>
 						</div>
-
-						{/* Filter Tabs with counts */}
-						<div className="flex gap-1 overflow-x-auto scrollbar-hide border-b border-zinc-200 px-3.5 sm:px-4 py-1.5 sm:py-2 dark:border-zinc-700">
-							{(
-								[
-									{
-										value: "all" as const,
-										label: "All",
-										icon: UserGroupIcon,
-										count: enrollments.length,
-									},
-									{
-										value: "awaiting_review" as const,
-										label: "Pending",
-										icon: ClockIcon,
-										count: enrollments.filter((e) => e.status === "awaiting_review").length,
-									},
-									{
-										value: "approved" as const,
-										label: "Approved",
-										icon: CheckCircleIcon,
-										count: enrollments.filter((e) => e.status === "approved").length,
-									},
-									{
-										value: "awaiting_submission" as const,
-										label: "In Progress",
-										icon: ArrowPathIcon,
-										count: enrollments.filter((e) => e.status === "awaiting_submission").length,
-									},
-									{
-										value: "permanently_rejected" as const,
-										label: "Rejected",
-										icon: XCircleIcon,
-										count: enrollments.filter((e) => e.status === "permanently_rejected").length,
-									},
-								] as const
-							).map((tab) => {
-								const TabIcon = tab.icon;
-								const isActive = enrollmentFilter === tab.value;
-								return (
-									<button
-										key={tab.value}
-										type="button"
-										onClick={() => setEnrollmentFilter(tab.value)}
-										className={clsx(
-											"flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
-											isActive
-												? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
-												: "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
-										)}
-									>
-										<TabIcon className="size-3.5" />
-										{tab.label}
-										{tab.count > 0 && (
-											<span
-												className={clsx(
-													"ml-0.5 inline-flex h-[16px] min-w-[16px] items-center justify-center rounded-full px-1 text-[10px] font-semibold",
-													isActive
-														? "bg-white/20 text-white dark:bg-zinc-900/20 dark:text-zinc-900"
-														: "bg-zinc-200/70 text-zinc-500 dark:bg-zinc-700 dark:text-zinc-400"
-												)}
-											>
-												{tab.count}
-											</span>
-										)}
-									</button>
-								);
-							})}
-						</div>
-
-						{/* Enrollment List */}
-						<div className="overflow-x-auto">
-							{enrollmentsLoading ? (
-								<div className="space-y-3 p-5">
-									{[1, 2, 3, 4, 5].map((i) => (
-										<Skeleton key={i} width="100%" height={56} borderRadius={8} />
-									))}
-								</div>
-							) : filteredEnrollments.length === 0 ? (
-								<div className="p-6">
-									<EmptyState
-										preset="enrollments"
-										title={
-											enrollmentFilter === "all"
-												? "No enrollments yet"
-												: `No ${enrollmentFilter.replace(/_/g, " ")} enrollments`
-										}
-										description={
-											enrollmentFilter === "all"
-												? "Enrollments will appear here when shoppers join this campaign"
-												: "Try selecting a different filter"
-										}
-									/>
-								</div>
-							) : (
-								<div className="divide-y divide-zinc-100 dark:divide-zinc-800">
-									{filteredEnrollments.map((enrollment) => (
-										<EnrollmentCardCompact
-											key={enrollment.id}
-											enrollment={enrollment}
-											onClick={() => handleEnrollmentClick(enrollment)}
-										/>
-									))}
-								</div>
-							)}
+						<div className="flex items-center gap-2">
+							<Button
+								outline
+								onClick={async () => {
+									try {
+										const result = await exportEnrollments.mutateAsync({ campaignId });
+										const blob = new Blob([result.csv], { type: "text/csv" });
+										const url = URL.createObjectURL(blob);
+										const a = document.createElement("a");
+										a.href = url;
+										a.download = result.filename || "enrollments.csv";
+										a.click();
+										URL.revokeObjectURL(url);
+										showToast.success("Export downloaded");
+									} catch (err) {
+										showToast.error(err, "Failed to export enrollments");
+									}
+								}}
+								disabled={exportEnrollments.isPending}
+							>
+								<TableCellsIcon data-slot="icon" className="size-4" />
+								<span className="hidden sm:inline">
+									{exportEnrollments.isPending ? "Exporting..." : "Export CSV"}
+								</span>
+							</Button>
+							<Link
+								href={`/${orgSlug}/enrollments?campaignId=${campaignId}`}
+								className="hidden rounded-lg px-2.5 py-1.5 text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900 sm:inline dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"
+							>
+								Full view →
+							</Link>
 						</div>
 					</div>
+
+					{/* Stats Summary */}
+					<FinancialStatsGridBordered
+						stats={[
+							{ name: "Total", value: enrollments.length },
+							{
+								name: "Pending",
+								value: enrollments.filter((e) => e.status === "awaiting_review").length,
+							},
+							{
+								name: "Approved",
+								value: enrollments.filter((e) => e.status === "approved").length,
+								changeType: "positive" as const,
+							},
+							{
+								name: "Rejected",
+								value: enrollments.filter((e) => e.status === "permanently_rejected").length,
+								changeType: "negative" as const,
+							},
+						]}
+						columns={4}
+					/>
+
+					{/* Filter Pills */}
+					<div className="flex gap-1.5 overflow-x-auto scrollbar-hide">
+						{(
+							[
+								{
+									value: "all" as const,
+									label: "All",
+									icon: UserGroupIcon,
+									count: enrollments.length,
+								},
+								{
+									value: "awaiting_review" as const,
+									label: "Pending",
+									icon: ClockIcon,
+									count: enrollments.filter((e) => e.status === "awaiting_review").length,
+								},
+								{
+									value: "approved" as const,
+									label: "Approved",
+									icon: CheckCircleIcon,
+									count: enrollments.filter((e) => e.status === "approved").length,
+								},
+								{
+									value: "awaiting_submission" as const,
+									label: "In Progress",
+									icon: ArrowPathIcon,
+									count: enrollments.filter((e) => e.status === "awaiting_submission").length,
+								},
+								{
+									value: "permanently_rejected" as const,
+									label: "Rejected",
+									icon: XCircleIcon,
+									count: enrollments.filter((e) => e.status === "permanently_rejected").length,
+								},
+							] as const
+						).map((tab) => {
+							const TabIcon = tab.icon;
+							const isActive = enrollmentFilter === tab.value;
+							return (
+								<button
+									key={tab.value}
+									type="button"
+									onClick={() => setEnrollmentFilter(tab.value)}
+									className={clsx(
+										"flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
+										isActive
+											? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
+											: "bg-zinc-100 text-zinc-500 hover:bg-zinc-200 hover:text-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:hover:text-zinc-300"
+									)}
+								>
+									<TabIcon className="size-3.5" />
+									{tab.label}
+									{tab.count > 0 && (
+										<span
+											className={clsx(
+												"ml-0.5 inline-flex h-[16px] min-w-[16px] items-center justify-center rounded-full px-1 text-[10px] font-semibold",
+												isActive
+													? "bg-white/20 text-white dark:bg-zinc-900/20 dark:text-zinc-900"
+													: "bg-zinc-200/70 text-zinc-500 dark:bg-zinc-700 dark:text-zinc-400"
+											)}
+										>
+											{tab.count}
+										</span>
+									)}
+								</button>
+							);
+						})}
+					</div>
+
+					{/* Enrollment Cards Grid */}
+					{enrollmentsLoading ? (
+						<div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
+							{[1, 2, 3, 4].map((i) => (
+								<div
+									key={i}
+									className="overflow-hidden rounded-xl bg-white shadow-xs ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800"
+								>
+									<div className="flex items-start gap-3 p-3 sm:gap-3.5 sm:p-3.5">
+										<div className="size-10 shrink-0 animate-pulse rounded-full bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+										<div className="min-w-0 flex-1 space-y-2">
+											<div className="h-4 w-2/3 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
+											<div className="h-3 w-1/2 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
+										</div>
+									</div>
+									<div className="h-px bg-zinc-200 dark:bg-zinc-700" />
+									<div className="grid grid-cols-3 divide-x divide-zinc-200 bg-zinc-50/50 dark:divide-zinc-700 dark:bg-zinc-800/30">
+										{[1, 2, 3].map((j) => (
+											<div key={j} className="flex flex-col items-center gap-1 py-2">
+												<div className="h-2.5 w-8 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
+												<div className="h-3 w-12 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
+											</div>
+										))}
+									</div>
+								</div>
+							))}
+						</div>
+					) : filteredEnrollments.length === 0 ? (
+						<EmptyState
+							preset="enrollments"
+							title={
+								enrollmentFilter === "all"
+									? "No enrollments yet"
+									: `No ${enrollmentFilter.replace(/_/g, " ")} enrollments`
+							}
+							description={
+								enrollmentFilter === "all"
+									? "Enrollments will appear here when shoppers join this campaign"
+									: "Try selecting a different filter"
+							}
+						/>
+					) : (
+						<div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
+							{filteredEnrollments.map((enrollment) => (
+								<EnrollmentCardCompact
+									key={enrollment.id}
+									enrollment={enrollment}
+									onClick={() => handleEnrollmentClick(enrollment)}
+								/>
+							))}
+						</div>
+					)}
 				</div>
 			)}
 
@@ -1516,54 +1560,86 @@ export function CampaignShow() {
 			{/* TASKS TAB */}
 			{/* ============================================================= */}
 			{activeTab === "tasks" && (
-				<div className="space-y-3 sm:space-y-4">
+				<div className="space-y-4">
+					{/* Header + Actions */}
+					<div className="flex items-start justify-between gap-4">
+						<div className="flex items-center gap-2.5">
+							<div className="flex size-6 items-center justify-center rounded-md bg-amber-100 dark:bg-amber-900/30">
+								<ClipboardDocumentListIcon className="size-3.5 text-amber-500" />
+							</div>
+							<div>
+								<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">Campaign Tasks</h3>
+								<p className="text-xs text-zinc-500 dark:text-zinc-400">
+									{tasks.length} task{tasks.length !== 1 ? "s" : ""} · {tasks.filter((t) => t.isRequired).length} required
+								</p>
+							</div>
+						</div>
+						{canUpdateCampaign && ["draft", "rejected", "paused"].includes(campaign.status) && (
+							<Button outline onClick={() => setShowAddTaskPicker(true)} disabled={addTask.isPending}>
+								<PlusIcon className="size-4" />
+								Add Task
+							</Button>
+						)}
+					</div>
+
+					{/* Stats Summary */}
+					<FinancialStatsGridBordered
+						stats={[
+							{ name: "Total Tasks", value: tasks.length },
+							{ name: "Required", value: tasks.filter((t) => t.isRequired).length },
+							{ name: "Optional", value: tasks.filter((t) => !t.isRequired).length },
+							{
+								name: "Platforms",
+								value: new Set(
+									tasks
+										.map((t) => t.taskTemplate?.platformName || extractPlatformFromText(t.taskTemplate?.name || ""))
+										.filter(Boolean),
+								).size,
+							},
+						]}
+						columns={4}
+					/>
+
+					{/* Task Cards */}
 					{tasksLoading ? (
-						<div className="space-y-3">
+						<div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
 							{[1, 2].map((i) => (
-								<Skeleton key={i} width="100%" height={72} borderRadius={12} />
+								<div
+									key={i}
+									className="overflow-hidden rounded-xl bg-white shadow-xs ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800"
+								>
+									<div className="flex items-start gap-3 p-3.5 sm:p-4">
+										<div className="size-9 shrink-0 animate-pulse rounded-full bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+										<div className="min-w-0 flex-1 space-y-2">
+											<div className="h-4 w-2/3 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
+											<div className="h-3 w-full animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
+										</div>
+									</div>
+								</div>
 							))}
 						</div>
 					) : tasks.length === 0 ? (
-						<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 p-6 dark:bg-zinc-900 dark:ring-zinc-800">
-							<EmptyState
-								title="No tasks configured"
-								description="Add tasks that shoppers must complete for this campaign"
-							/>
-							{canUpdateCampaign && ["draft", "rejected", "paused"].includes(campaign.status) && (
-								<div className="mt-4 flex justify-center">
-									<Button outline onClick={() => setShowAddTaskPicker(true)} disabled={addTask.isPending}>
-										<PlusIcon className="size-4" />
-										Add Task
-									</Button>
-								</div>
-							)}
-						</div>
+						<EmptyState
+							title="No tasks configured"
+							description="Add tasks that shoppers must complete for this campaign"
+						/>
 					) : (
-						<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-							{/* Header */}
-							<div className="flex items-center justify-between border-b border-zinc-200 px-3.5 sm:px-4 py-2.5 sm:py-3 dark:border-zinc-700">
-								<div className="flex items-center gap-2">
-									<ClipboardDocumentListIcon className="size-4 text-violet-500" />
-									<h3 className="text-xs sm:text-sm font-semibold text-zinc-900 dark:text-white">Campaign Tasks</h3>
-								</div>
-								{canUpdateCampaign && ["draft", "rejected", "paused"].includes(campaign.status) && (
-									<Button outline onClick={() => setShowAddTaskPicker(true)} disabled={addTask.isPending}>
-										<PlusIcon className="size-4" />
-										Add Task
-									</Button>
-								)}
-							</div>
-							<div className="divide-y divide-zinc-100 dark:divide-zinc-800">
-								{tasks.map((task, idx) => {
-									const taskPlatform =
-										task.taskTemplate?.platformName || extractPlatformFromText(task.taskTemplate?.name || "");
-									const TaskIcon = taskPlatform ? getPlatformIcon(taskPlatform) : null;
-									return (
-										<div key={task.id} className="group flex items-start gap-3 px-3.5 sm:px-4 py-3.5">
-											{/* Gradient platform icon */}
+						<div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
+							{tasks.map((task, idx) => {
+								const taskPlatform =
+									task.taskTemplate?.platformName || extractPlatformFromText(task.taskTemplate?.name || "");
+								const TaskIcon = taskPlatform ? getPlatformIcon(taskPlatform) : null;
+								return (
+									<div
+										key={task.id}
+										className="group relative overflow-hidden rounded-xl bg-white shadow-xs ring-1 ring-zinc-200 transition-all hover:ring-zinc-300 hover:shadow-md dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:ring-zinc-700"
+									>
+										{/* Main content */}
+										<div className="flex items-start gap-3 p-3.5 sm:p-4">
+											{/* Gradient platform icon with step number */}
 											<div className="relative shrink-0">
 												<div
-													className={`flex size-9 items-center justify-center rounded-full bg-gradient-to-br ${getPlatformGradient(taskPlatform || "")}`}
+													className={`flex size-10 items-center justify-center rounded-full bg-gradient-to-br ${getPlatformGradient(taskPlatform || "")}`}
 												>
 													{TaskIcon ? (
 														<TaskIcon className="size-4.5 text-white" />
@@ -1571,30 +1647,28 @@ export function CampaignShow() {
 														<ClipboardDocumentListIcon className="size-4.5 text-white" />
 													)}
 												</div>
-												<span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-zinc-900 text-[9px] font-bold text-white ring-2 ring-white dark:bg-white dark:text-zinc-900 dark:ring-zinc-900">
+												<span className="absolute -top-1 -right-1 flex size-4.5 items-center justify-center rounded-full bg-zinc-900 text-[9px] font-bold text-white ring-2 ring-white dark:bg-white dark:text-zinc-900 dark:ring-zinc-900">
 													{idx + 1}
 												</span>
 											</div>
 											{/* Content */}
 											<div className="min-w-0 flex-1">
 												<div className="flex items-start justify-between gap-2">
-													<p className="text-sm font-medium text-zinc-900 dark:text-white">
+													<p className="text-sm font-semibold text-zinc-900 dark:text-white">
 														{task.taskTemplate?.name || `Task #${idx + 1}`}
 													</p>
-													<div className="flex shrink-0 items-center gap-1.5">
-														{task.isRequired ? (
-															<span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-semibold text-rose-700 dark:bg-rose-900/30 dark:text-rose-400">
-																Required
-															</span>
-														) : (
-															<span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
-																Optional
-															</span>
-														)}
-													</div>
+													{task.isRequired ? (
+														<span className="shrink-0 rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-semibold text-rose-700 dark:bg-rose-900/30 dark:text-rose-400">
+															Required
+														</span>
+													) : (
+														<span className="shrink-0 rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+															Optional
+														</span>
+													)}
 												</div>
 												{task.instructions && (
-													<p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2">
+													<p className="mt-1 text-xs leading-relaxed text-zinc-500 line-clamp-2 dark:text-zinc-400">
 														{task.instructions}
 													</p>
 												)}
@@ -1648,44 +1722,45 @@ export function CampaignShow() {
 													</div>
 												)}
 											</div>
-											{/* Actions */}
-											{canUpdateCampaign && ["draft", "rejected", "paused"].includes(campaign.status) && (
-												<div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-													<button
-														type="button"
-														onClick={() => {
-															setEditingTaskId(task.id);
-															setEditingTaskInstructions(task.instructions || "");
-															setEditingTaskRequirements(task.requirements || {});
-															setEditingTaskCategory(task.taskTemplate?.category);
-															setHashtagInput("");
-															setMentionInput("");
-														}}
-														className="rounded p-1.5 text-zinc-400 hover:bg-zinc-200 hover:text-zinc-600 dark:hover:bg-zinc-700 dark:hover:text-zinc-300"
-														title="Edit task"
-													>
-														<PencilIcon className="size-3.5" />
-													</button>
-													<button
-														type="button"
-														onClick={() => {
-															removeTask.mutate(task.id, {
-																onSuccess: () => showToast.success("Task removed"),
-																onError: (err) => showToast.error(err, "Failed to remove task"),
-															});
-														}}
-														disabled={removeTask.isPending}
-														className="rounded p-1.5 text-zinc-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/30 dark:hover:text-red-400"
-														title="Remove task"
-													>
-														<TrashIcon className="size-3.5" />
-													</button>
-												</div>
-											)}
 										</div>
-									);
-								})}
-							</div>
+
+										{/* Edit/Remove actions — floating top-right */}
+										{canUpdateCampaign && ["draft", "rejected", "paused"].includes(campaign.status) && (
+											<div className="absolute right-2 top-2 flex items-center gap-0.5 rounded-lg bg-white/80 p-0.5 opacity-0 shadow-sm ring-1 ring-zinc-200 backdrop-blur-sm transition-opacity group-hover:opacity-100 dark:bg-zinc-900/80 dark:ring-zinc-700">
+												<button
+													type="button"
+													onClick={() => {
+														setEditingTaskId(task.id);
+														setEditingTaskInstructions(task.instructions || "");
+														setEditingTaskRequirements(task.requirements || {});
+														setEditingTaskCategory(task.taskTemplate?.category);
+														setHashtagInput("");
+														setMentionInput("");
+													}}
+													className="rounded p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+													title="Edit task"
+												>
+													<PencilIcon className="size-3.5" />
+												</button>
+												<button
+													type="button"
+													onClick={() => {
+														removeTask.mutate(task.id, {
+															onSuccess: () => showToast.success("Task removed"),
+															onError: (err) => showToast.error(err, "Failed to remove task"),
+														});
+													}}
+													disabled={removeTask.isPending}
+													className="rounded p-1.5 text-zinc-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/30 dark:hover:text-red-400"
+													title="Remove task"
+												>
+													<TrashIcon className="size-3.5" />
+												</button>
+											</div>
+										)}
+									</div>
+								);
+							})}
 						</div>
 					)}
 				</div>

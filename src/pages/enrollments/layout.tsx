@@ -1,18 +1,16 @@
 import {
 	CheckCircleIcon,
 	ClockIcon,
-	ExclamationCircleIcon,
 	MagnifyingGlassIcon,
 	Squares2X2Icon,
 	XCircleIcon,
 	XMarkIcon,
 } from "@heroicons/react/16/solid";
-import { Link, Outlet } from "@tanstack/react-router";
+import { Outlet } from "@tanstack/react-router";
 import { useMemo } from "react";
-import { Button } from "@/components/button";
 import { isEnrollmentOverdue } from "@/components/enrollment-card";
 import { Input, InputGroup } from "@/components/input";
-import { PageHeader } from "@/components/page-header";
+import { AlertBanner, PageHeader } from "@/components/page-header";
 import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
 import { TabNav, type TabNavItem } from "@/components/shared/tab-nav";
 import { useInfiniteEnrollments } from "@/features/enrollments/hooks";
@@ -67,10 +65,10 @@ function EnrollmentsLayoutSkeleton() {
 				{[1, 2, 3, 4].map((i) => (
 					<div
 						key={i}
-						className="overflow-hidden rounded-xl bg-white ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800"
+						className="overflow-hidden rounded-xl bg-white shadow-xs ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800"
 					>
-						<div className="flex items-start gap-3 p-3 sm:p-4">
-							<div className="size-11 shrink-0 animate-pulse rounded-lg bg-zinc-200 sm:size-12 dark:bg-zinc-700" />
+						<div className="flex items-start gap-3.5 p-3.5 sm:gap-4 sm:p-4">
+							<div className="size-12 shrink-0 animate-pulse rounded-full bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
 							<div className="min-w-0 flex-1 space-y-2">
 								<div className="h-4 w-2/3 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
 								<div className="h-3 w-1/2 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
@@ -78,9 +76,9 @@ function EnrollmentsLayoutSkeleton() {
 							</div>
 						</div>
 						<div className="h-px bg-zinc-200 dark:bg-zinc-700" />
-						<div className="grid grid-cols-3 divide-x divide-zinc-200 dark:divide-zinc-700">
+						<div className="grid grid-cols-3 divide-x divide-zinc-200 bg-zinc-50/50 dark:divide-zinc-700 dark:bg-zinc-800/30">
 							{[1, 2, 3].map((j) => (
-								<div key={j} className="flex flex-col items-center gap-1 py-2.5">
+								<div key={j} className="flex flex-col items-center gap-1 py-2.5 sm:py-3">
 									<div className="h-2.5 w-10 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
 									<div className="h-3.5 w-14 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
 								</div>
@@ -166,22 +164,12 @@ export function EnrollmentsLayout() {
 
 			{/* Overdue Alert */}
 			{overdueCount > 0 && (
-				<div className="flex items-center gap-3 rounded-xl bg-red-50 p-3 shadow-sm ring-1 ring-red-200 dark:bg-red-950/30 dark:ring-red-800">
-					<div className="flex size-8 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/50">
-						<ExclamationCircleIcon className="size-4 text-red-600 dark:text-red-400" />
-					</div>
-					<div className="flex-1">
-						<p className="text-sm font-medium text-red-800 dark:text-red-200">
-							{overdueCount} enrollment{overdueCount !== 1 ? "s" : ""} overdue
-						</p>
-						<p className="text-xs text-red-600 dark:text-red-400">Pending review for more than 48 hours</p>
-					</div>
-					<Link to={orgPath("/enrollments/awaiting-review")}>
-						<Button color="red" className="text-xs!">
-							View
-						</Button>
-					</Link>
-				</div>
+				<AlertBanner
+					variant="warning"
+					title={`${overdueCount} enrollment${overdueCount !== 1 ? "s" : ""} overdue`}
+					description="Pending review for more than 48 hours"
+					action={{ label: "View", href: orgPath("/enrollments/awaiting-review") }}
+				/>
 			)}
 
 			{/* Stats */}
@@ -221,8 +209,10 @@ export function EnrollmentsLayout() {
 				<TabNav tabs={tabs} />
 			</div>
 
-			{/* Child route renders here */}
-			<Outlet />
+			{/* Child route renders here — tighter gap from tabs */}
+			<div className="-mt-2">
+				<Outlet />
+			</div>
 		</div>
 	);
 }

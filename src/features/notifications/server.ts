@@ -21,6 +21,15 @@ export const listNotificationsServer = createServerFn({ method: "GET" })
 		return context.client.brand.listNotifications(data.orgId, data.params || {});
 	});
 
+// -- Unread Count -------------------------------------------------------------
+
+export const getUnreadCountServer = createServerFn({ method: "GET" })
+	.middleware([authMiddleware])
+	.inputValidator((input: { orgId: string }) => input)
+	.handler(async ({ context, data }) => {
+		return context.client.brand.getUnreadCount(data.orgId);
+	});
+
 // -- Notification Preferences -------------------------------------------------
 
 export const getNotificationPreferencesServer = createServerFn({ method: "GET" })

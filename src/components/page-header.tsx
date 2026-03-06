@@ -4,10 +4,10 @@
  * info panels, and skeletons.
  *
  * This file is the single source for page-level layout primitives.
- * Component-level primitives (StatCard, MiniStat) live in shared/card.tsx.
+ * Stat grids live in shared/financial-stats-grid.tsx.
  */
 
-import { ArrowLeftIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
+import { ChevronRightIcon } from "@heroicons/react/20/solid";
 import {
 	CheckCircleIcon,
 	ExclamationTriangleIcon,
@@ -30,7 +30,9 @@ export interface PageHeaderProps {
 	description?: string;
 	badge?: ReactNode;
 	actions?: ReactNode;
+	/** @deprecated Back buttons removed — breadcrumbs handle navigation */
 	backHref?: string;
+	/** @deprecated Back buttons removed — breadcrumbs handle navigation */
 	backLabel?: string;
 	className?: string;
 	children?: ReactNode;
@@ -41,21 +43,11 @@ export function PageHeader({
 	description,
 	badge,
 	actions,
-	backHref,
-	backLabel,
 	className,
 	children,
 }: PageHeaderProps) {
 	return (
-		<div className={clsx("space-y-4", className)}>
-			{/* Back Button */}
-			{backHref && (
-				<Button href={backHref} color="zinc">
-					<ArrowLeftIcon className="size-4" />
-					{backLabel || "Back"}
-				</Button>
-			)}
-
+		<div className={className}>
 			{/* Main Header */}
 			<div className="flex items-start justify-between gap-2 sm:gap-4">
 				<div className="min-w-0 flex-1">
@@ -78,8 +70,10 @@ export function PageHeader({
 // =============================================================================
 
 export interface DetailPageHeaderProps {
-	backHref: string;
-	backLabel: string;
+	/** @deprecated Back buttons removed — breadcrumbs handle navigation */
+	backHref?: string;
+	/** @deprecated Back buttons removed — breadcrumbs handle navigation */
+	backLabel?: string;
 	icon: ReactNode;
 	iconClassName?: string;
 	title: string;
@@ -87,11 +81,11 @@ export interface DetailPageHeaderProps {
 	badges?: ReactNode;
 	actions?: ReactNode;
 	className?: string;
+	/** Gradient class for a subtle top gradient overlay (e.g. "from-emerald-500/20 via-emerald-500/5 to-transparent") */
+	gradientClass?: string;
 }
 
 export function DetailPageHeader({
-	backHref,
-	backLabel,
 	icon,
 	iconClassName,
 	title,
@@ -99,17 +93,15 @@ export function DetailPageHeader({
 	badges,
 	actions,
 	className,
+	gradientClass,
 }: DetailPageHeaderProps) {
 	return (
-		<div className={clsx("space-y-4", className)}>
-			{/* Back button */}
-			<Button href={backHref} color="zinc">
-				<ArrowLeftIcon className="size-4" />
-				{backLabel}
-			</Button>
-
+		<div className={clsx("relative", className)}>
+			{gradientClass && (
+				<div className={clsx("pointer-events-none absolute inset-x-0 top-0 h-24 bg-linear-to-b sm:h-32", gradientClass)} />
+			)}
 			{/* Main header row */}
-			<div className="flex flex-wrap items-start justify-between gap-4">
+			<div className="relative flex flex-wrap items-start justify-between gap-4">
 				<div className="flex items-start gap-4">
 					<div className={clsx("flex size-20 shrink-0 items-center justify-center rounded-2xl", iconClassName)}>
 						{icon}
@@ -793,6 +785,7 @@ export function TwoColumnLayout({
 
 export interface AlertBannerProps {
 	variant: "info" | "warning" | "error" | "success" | "danger";
+	size?: "sm" | "md";
 	title?: string;
 	description?: string;
 	children?: ReactNode;
@@ -860,6 +853,7 @@ const alertDefaultIcons = {
 
 export function AlertBanner({
 	variant,
+	size = "md",
 	title,
 	description,
 	children,
@@ -871,42 +865,52 @@ export function AlertBanner({
 }: AlertBannerProps) {
 	const styles = alertVariants[variant];
 	const DefaultIcon = alertDefaultIcons[variant];
+	const sm = size === "sm";
+
+	const hasActions = actions || action;
 
 	return (
 		<div
 			className={clsx(
-				"flex flex-col gap-3 rounded-xl p-4 shadow-sm ring-1 sm:flex-row sm:items-center",
+				"flex items-center gap-3 rounded-xl shadow-sm ring-1",
+				sm ? "p-2.5 sm:p-3" : "p-3.5 sm:p-4",
 				styles.bg,
 				styles.ring,
 				className
 			)}
 		>
-			<div className={clsx("flex size-10 shrink-0 items-center justify-center rounded-full text-white", styles.iconBg)}>
-				{icon || <DefaultIcon className="size-5" />}
+			<div className={clsx(
+				"flex shrink-0 items-center justify-center rounded-full text-white",
+				sm ? "size-7 sm:size-8" : "size-9 sm:size-10",
+				styles.iconBg
+			)}>
+				{icon || <DefaultIcon className={sm ? "size-3.5 sm:size-4" : "size-4 sm:size-5"} />}
 			</div>
 			<div className="min-w-0 flex-1">
-				{title && <p className={clsx("font-medium", styles.title)}>{title}</p>}
-				{description && <p className={clsx("mt-0.5 text-sm", styles.text)}>{description}</p>}
-				{children && <div className={clsx("text-sm", title && "mt-1", styles.text)}>{children}</div>}
+				{title && <p className={clsx("font-medium", sm ? "text-sm" : "text-sm sm:text-base", styles.title)}>{title}</p>}
+				{description && <p className={clsx("mt-0.5", sm ? "text-xs" : "text-xs sm:text-sm", styles.text)}>{description}</p>}
+				{children && <div className={clsx(sm ? "text-xs" : "text-xs sm:text-sm", title && "mt-1", styles.text)}>{children}</div>}
 			</div>
-			<div className="flex shrink-0 items-center gap-2">
-				{actions}
-				{action && (
-					<Button color={styles.button} onClick={action.onClick} href={action.href} className="shrink-0">
-						{action.label}
-					</Button>
-				)}
-				{onDismiss && (
-					<button
-						type="button"
-						onClick={onDismiss}
-						className="shrink-0 rounded-lg p-2 text-zinc-500 transition-colors hover:bg-black/5 hover:text-zinc-700 dark:hover:bg-white/10 dark:hover:text-zinc-300"
-						aria-label="Dismiss"
-					>
-						<XCircleIcon className="size-5" />
-					</button>
-				)}
-			</div>
+			{hasActions && (
+				<div className="flex shrink-0 items-center gap-2">
+					{actions}
+					{action && (
+						<Button color={styles.button} onClick={action.onClick} href={action.href} className={clsx("shrink-0", sm && "text-xs!")}>
+							{action.label}
+						</Button>
+					)}
+				</div>
+			)}
+			{onDismiss && (
+				<button
+					type="button"
+					onClick={onDismiss}
+					className="shrink-0 rounded-lg p-1.5 text-zinc-500 transition-colors hover:bg-black/5 hover:text-zinc-700 sm:p-2 dark:hover:bg-white/10 dark:hover:text-zinc-300"
+					aria-label="Dismiss"
+				>
+					<XCircleIcon className={sm ? "size-4" : "size-4 sm:size-5"} />
+				</button>
+			)}
 		</div>
 	);
 }
@@ -997,15 +1001,15 @@ export function InfoPanel({
 	const DefaultIcon = infoPanelDefaultIcons[variant];
 
 	return (
-		<div className={clsx("rounded-lg border p-4", styles.container, styles.border, className)}>
-			<div className="flex gap-3">
-				{showIcon && <div className="shrink-0">{icon || <DefaultIcon className={clsx("size-5", styles.icon)} />}</div>}
+		<div className={clsx("rounded-lg border p-3.5 sm:p-4", styles.container, styles.border, className)}>
+			<div className="flex gap-2.5 sm:gap-3">
+				{showIcon && <div className="shrink-0 mt-0.5 sm:mt-0">{icon || <DefaultIcon className={clsx("size-4 sm:size-5", styles.icon)} />}</div>}
 				<div className="min-w-0 flex-1">
-					{title && <h4 className={clsx("font-medium", styles.title)}>{title}</h4>}
-					<div className={clsx("text-sm", title && "mt-1", styles.content)}>{children}</div>
+					{title && <h4 className={clsx("text-sm font-medium sm:text-base", styles.title)}>{title}</h4>}
+					<div className={clsx("text-xs sm:text-sm", title && "mt-1", styles.content)}>{children}</div>
 					{action && (
-						<div className="mt-3">
-							<Button color={styles.button} onClick={action.onClick} href={action.href} className="text-sm">
+						<div className="mt-2.5 sm:mt-3">
+							<Button color={styles.button} onClick={action.onClick} href={action.href} className="text-xs sm:text-sm">
 								{action.label}
 							</Button>
 						</div>
@@ -1020,7 +1024,7 @@ export function InfoPanel({
 							styles.icon
 						)}
 					>
-						<XCircleIcon className="size-5" />
+						<XCircleIcon className="size-4 sm:size-5" />
 					</button>
 				)}
 			</div>
@@ -1294,16 +1298,3 @@ export function CardSkeleton({ className }: { className?: string }) {
 // =============================================================================
 // STAT CARD SKELETON
 // =============================================================================
-
-export function StatCardSkeleton() {
-	return (
-		<div className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800 sm:p-5">
-			<div className="flex items-start justify-between">
-				<div className="size-11 rounded-lg bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
-				<div className="h-4 w-12 rounded bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
-			</div>
-			<div className="mt-4 h-8 w-24 rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
-			<div className="mt-2 h-4 w-20 rounded bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
-		</div>
-	);
-}

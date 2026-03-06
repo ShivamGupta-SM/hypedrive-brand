@@ -17,9 +17,26 @@ export const getWalletServer = createServerFn({ method: "GET" })
 
 export const getWalletHoldsServer = createServerFn({ method: "GET" })
 	.middleware([authMiddleware])
-	.inputValidator((input: { orgId: string }) => input)
+	.inputValidator(
+		(input: {
+			orgId: string;
+			params?: {
+				campaignId?: string;
+				createdFrom?: string;
+				createdTo?: string;
+				expiresFrom?: string;
+				expiresTo?: string;
+				sortBy?: "createdAt" | "expiresAt" | "amount";
+				sortOrder?: "asc" | "desc";
+				skip?: number;
+				take?: number;
+				cursor?: string;
+				limit?: number;
+			};
+		}) => input
+	)
 	.handler(async ({ context, data }) => {
-		return context.client.brand.getWalletHolds(data.orgId, {});
+		return context.client.brand.getWalletHolds(data.orgId, data.params || {});
 	});
 
 export const listWithdrawalsServer = createServerFn({ method: "GET" })
@@ -95,6 +112,13 @@ export const getWalletTransactionsServer = createServerFn({ method: "GET" })
 	)
 	.handler(async ({ context, data }) => {
 		return context.client.brand.getOrganizationWalletTransactions(data.orgId, data.params);
+	});
+
+export const getWalletTransactionServer = createServerFn({ method: "GET" })
+	.middleware([authMiddleware])
+	.inputValidator((input: { orgId: string; transactionId: string }) => input)
+	.handler(async ({ context, data }) => {
+		return context.client.brand.getOrganizationWalletTransaction(data.orgId, data.transactionId);
 	});
 
 export const getVirtualAccountServer = createServerFn({ method: "GET" })

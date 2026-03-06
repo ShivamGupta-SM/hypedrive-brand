@@ -29,10 +29,10 @@ export function Dialog({
 		<Headless.Dialog {...props}>
 			<Headless.DialogBackdrop
 				transition
-				className="fixed inset-0 flex w-screen justify-center overflow-y-auto bg-zinc-950/30 px-2 py-2 backdrop-blur-[3px] transition duration-300 focus:outline-0 data-closed:opacity-0 data-enter:ease-out data-leave:ease-in sm:px-6 sm:py-8 lg:px-8 lg:py-16 dark:bg-zinc-950/60"
+				className="fixed inset-0 z-50 flex w-screen justify-center overflow-y-auto bg-zinc-950/30 px-2 py-2 backdrop-blur-[3px] transition duration-300 focus:outline-0 data-closed:opacity-0 data-enter:ease-out data-leave:ease-in sm:px-6 sm:py-8 lg:px-8 lg:py-16 dark:bg-zinc-950/60"
 			/>
 
-			<div className="fixed inset-0 w-screen overflow-y-auto pt-6 sm:pt-0">
+			<div className="fixed inset-0 z-50 w-screen overflow-y-auto pt-6 sm:pt-0">
 				<div className="grid min-h-full grid-rows-[1fr_auto] justify-items-center sm:grid-rows-[1fr_auto_3fr] sm:p-4">
 					<Headless.DialogPanel
 						transition

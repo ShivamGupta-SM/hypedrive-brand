@@ -1,11 +1,12 @@
 import {
+	ArrowDownLeftIcon,
 	BanknotesIcon,
 	CalendarIcon,
 } from "@heroicons/react/16/solid";
 import { useState } from "react";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
-import { FilterPills, type FilterPillOption } from "@/components/shared/filter-pills";
+import { FilterDropdown, type FilterOption } from "@/components/shared/filter-dropdown";
 import { Skeleton } from "@/components/skeleton";
 import { useDeposits } from "@/features/wallet/hooks";
 import { useOrgContext } from "@/hooks/use-org-context";
@@ -20,7 +21,7 @@ const sortMap = {
 
 type SortValue = keyof typeof sortMap;
 
-const sortPillOptions: FilterPillOption<SortValue>[] = [
+const sortOptions: FilterOption<SortValue>[] = [
 	{ value: "newest", label: "Newest", icon: CalendarIcon, iconColor: "text-sky-500" },
 	{ value: "oldest", label: "Oldest", icon: CalendarIcon, iconColor: "text-zinc-400" },
 	{ value: "amount-high", label: "Highest", icon: BanknotesIcon, iconColor: "text-emerald-500" },
@@ -43,11 +44,14 @@ export function WalletDeposits() {
 
 	return (
 		<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-			<div className="flex items-center justify-between border-b border-zinc-100 px-4 py-2.5 dark:border-zinc-800">
-				<FilterPills options={sortPillOptions} value={sortBy} onChange={setSortBy} />
-				{deposits.length > 0 && (
-					<span className="text-xs tabular-nums text-zinc-400 dark:text-zinc-500">{deposits.length}</span>
-				)}
+			<div className="flex items-center justify-between border-b border-zinc-200 px-3.5 py-2.5 sm:px-4 sm:py-3 dark:border-zinc-700">
+				<div className="flex items-center gap-2.5">
+					<div className="flex size-6 items-center justify-center rounded-md bg-emerald-100 dark:bg-emerald-900/30">
+						<ArrowDownLeftIcon className="size-3.5 text-emerald-500" />
+					</div>
+					<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">Deposits</h3>
+				</div>
+				<FilterDropdown label="Sort" options={sortOptions} value={sortBy} onChange={setSortBy} />
 			</div>
 			{depositsLoading ? (
 				<div className="space-y-2 p-4">

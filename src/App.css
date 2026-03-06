@@ -78,11 +78,57 @@ input:not(:-webkit-autofill) {
 }
 
 /* ==========================================================================
-   SCROLLBAR HIDING
-   Applied to scrollable containers, not globally.
-   Use the `scrollbar-hide` class on elements with overflow-auto/scroll.
+   SCROLLBAR STYLES
+   Thin, subtle scrollbars for all scrollable containers.
+   Use `scrollbar-hide` to completely hide scrollbars when needed.
    ========================================================================== */
 
+/* ── Global thin scrollbar ── */
+*,
+*::before,
+*::after {
+	scrollbar-width: thin;
+	scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+}
+
+[data-theme="dark"] *,
+[data-theme="dark"] *::before,
+[data-theme="dark"] *::after {
+	scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+}
+
+/* Webkit (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+	width: 6px;
+	height: 6px;
+}
+
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+	background: rgba(0, 0, 0, 0.15);
+	border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+	background: rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+	background: rgba(255, 255, 255, 0.2);
+}
+
+::-webkit-scrollbar-corner {
+	background: transparent;
+}
+
+/* ── Hide scrollbar utility ── */
 .scrollbar-hide {
 	scrollbar-width: none;
 	-ms-overflow-style: none;
@@ -163,40 +209,96 @@ html:has([data-theme="dark"]) {
 
 /* ==========================================================================
    BULK ACTIONS BAR
-   Entrance animation + Catalyst Button overrides for compact action pills.
+   Floating glassmorphic bar with enter/exit animations.
+   Catalyst Button overrides for compact action pills.
    ========================================================================== */
 
-@keyframes slideUp {
+@keyframes bulkBarIn {
 	from {
 		opacity: 0;
-		transform: translateY(12px);
+		transform: translateY(100%) scale(0.95);
 	}
 	to {
 		opacity: 1;
-		transform: translateY(0);
+		transform: translateY(0) scale(1);
 	}
 }
 
-[data-bulk-actions] button {
-	--radius: 0.625rem; /* 10px — rounded-lg(ish) to match bar aesthetic */
-	border-radius: var(--radius);
-	padding: 0.375rem 0.5rem;
-	font-size: 13px;
-	font-weight: 500;
-	gap: 0.375rem;
-	align-items: center; /* Catalyst uses items-baseline — wrong for icon buttons */
+@keyframes bulkBarOut {
+	from {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+	to {
+		opacity: 0;
+		transform: translateY(100%) scale(0.95);
+	}
 }
 
-/* Catalyst solid buttons use ::before and ::after with their own border-radius.
-   Match them to prevent the double-border / mismatched-radius artifact. */
-[data-bulk-actions] button::before,
-[data-bulk-actions] button::after {
-	border-radius: calc(var(--radius) - 1px);
+@keyframes countBump {
+	0% {
+		transform: scale(1);
+	}
+	40% {
+		transform: scale(1.25);
+	}
+	100% {
+		transform: scale(1);
+	}
+}
+
+[data-bulk-bar][data-state="open"] {
+	animation: bulkBarIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-bulk-bar][data-state="closed"] {
+	animation: bulkBarOut 0.2s cubic-bezier(0.4, 0, 1, 1) forwards;
+	pointer-events: none;
+}
+
+/* Count number bump on change */
+[data-bulk-count][data-bump] {
+	animation: countBump 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ── Compact Catalyst Button overrides ──
+   Force full pill shape on all Catalyst buttons inside the bar.
+   Double attribute selector for specificity over Catalyst's inline .rounded-lg */
+[data-bulk-bar] [data-bulk-actions] button {
+	border-radius: 9999px;
+	padding: 0.3125rem 0.625rem;
+	font-size: 12px;
+	font-weight: 600;
+	gap: 0.25rem;
+	align-items: center;
+	line-height: 1;
+	transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.15s ease;
+}
+
+[data-bulk-bar] [data-bulk-actions] button:active {
+	transform: scale(0.95);
+}
+
+[data-bulk-bar] [data-bulk-actions] button::before,
+[data-bulk-bar] [data-bulk-actions] button::after {
+	border-radius: 9999px;
+}
+
+[data-bulk-bar] [data-bulk-actions] button [data-slot="icon"] {
+	width: 0.875rem;
+	height: 0.875rem;
 }
 
 @media (min-width: 640px) {
-	[data-bulk-actions] button {
+	[data-bulk-bar] [data-bulk-actions] button {
 		padding: 0.375rem 0.75rem;
+		font-size: 13px;
+		gap: 0.3125rem;
+	}
+
+	[data-bulk-bar] [data-bulk-actions] button [data-slot="icon"] {
+		width: 1rem;
+		height: 1rem;
 	}
 }
 

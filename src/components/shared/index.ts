@@ -2,7 +2,6 @@
 
 // Page-level layout components (upgraded system)
 export * from "../page-header";
-export * from "./card";
 export * from "./copy-button";
 export * from "./empty-state";
 export * from "./filter-bar";

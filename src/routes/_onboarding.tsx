@@ -16,22 +16,27 @@ export const Route = createFileRoute("/_onboarding")({
 
 		const organizations = context.organizations ?? [];
 
+		// If user has at least one active org, they're intentionally creating
+		// a new one from the brand switcher — allow through to onboarding.
+		const hasActiveOrg = organizations.some((o) => o.status === "active");
+		if (hasActiveOrg) return;
+
+		// No active orgs — check if they have any pending/suspended orgs
 		if (organizations.length > 0) {
 			const org = organizations[0];
 			const status = org.status;
 
-			if (status === "active") {
-				throw redirect({ to: "/$orgSlug", params: { orgSlug: org.slug } });
-			}
 			if (status === "onboarding") {
 				throw redirect({ to: "/pending-approval" });
 			}
 			if (status === "suspended") {
 				throw redirect({ to: "/rejected" });
 			}
+			// active case already handled above
+			throw redirect({ to: "/$orgSlug", params: { orgSlug: org.slug } });
 		}
 
-		// No orgs — allow onboarding
+		// No orgs at all — allow onboarding
 	},
 	component: OnboardingLayoutWrapper,
 });

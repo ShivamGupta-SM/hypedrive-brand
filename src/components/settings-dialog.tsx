@@ -17,7 +17,6 @@ import {
 	FingerPrintIcon,
 	IdentificationIcon,
 	MoonIcon,
-	ReceiptPercentIcon,
 	ShieldCheckIcon,
 	SunIcon,
 	UserCircleIcon,
@@ -66,19 +65,18 @@ function applyTheme(theme: ThemeOption) {
 	}
 }
 
-function SidebarThemeToggle() {
-	const [theme, setTheme] = useState<ThemeOption>("system");
+function getStoredTheme(): ThemeOption {
+	if (typeof window === "undefined") return "system";
+	return (localStorage.getItem("theme") as ThemeOption) || "system";
+}
 
-	useEffect(() => {
-		const stored = localStorage.getItem("theme") as ThemeOption | null;
-		if (stored) setTheme(stored);
-	}, []);
+function SidebarThemeToggle() {
+	const [theme, setTheme] = useState<ThemeOption>(getStoredTheme);
 
 	useEffect(() => {
 		localStorage.setItem("theme", theme);
 		applyTheme(theme);
 
-		// Listen for OS theme changes when set to "system"
 		if (theme === "system") {
 			const mql = window.matchMedia("(prefers-color-scheme: dark)");
 			const handler = () => applyTheme("system");
@@ -94,25 +92,22 @@ function SidebarThemeToggle() {
 	];
 
 	return (
-		<div className="shrink-0 border-t border-zinc-200/80 px-2 py-3 dark:border-zinc-800">
-			<p className="mb-1.5 px-2.5 text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
-				Appearance
-			</p>
-			<div className="flex gap-0.5 rounded-xl bg-zinc-200/60 p-1 dark:bg-zinc-800/80">
+		<div className="shrink-0 border-t border-zinc-950/5 px-3 py-3 dark:border-white/5">
+			<div className="flex rounded-lg bg-zinc-950/5 p-0.5 dark:bg-white/5">
 				{options.map(({ id, icon: Icon, label }) => (
 					<button
 						key={id}
 						type="button"
 						onClick={() => setTheme(id)}
 						title={label}
-						className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg py-1.5 text-xs font-medium transition-all duration-150 ${
+						className={`flex flex-1 items-center justify-center gap-1.5 rounded-md py-1.5 text-[11px] font-medium transition-all duration-150 ${
 							theme === id
-								? "bg-white text-zinc-900 shadow-sm ring-1 ring-zinc-200/80 dark:bg-zinc-700 dark:text-white dark:ring-zinc-600"
+								? "bg-white text-zinc-900 shadow-sm ring-1 ring-zinc-950/5 dark:bg-zinc-700 dark:text-white dark:ring-white/10"
 								: "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
 						}`}
 					>
 						<Icon className="size-3.5" />
-						<span className="hidden sm:inline">{label}</span>
+						{label}
 					</button>
 				))}
 			</div>
@@ -131,92 +126,61 @@ interface NavItem {
 	tab: SettingsTab;
 	section: OrgSettingsSection | AccountSettingsSection;
 	label: string;
-	description: string;
 	icon: React.ComponentType<{ className?: string }>;
-	iconColor: string;
-	iconBgActive: string;
 }
 
-const NAV_ITEMS: NavItem[] = [
+const ORG_NAV: NavItem[] = [
 	{
 		id: "org-profile",
 		tab: "org",
 		section: "profile" as OrgSettingsSection,
-		label: "Organization",
-		description: "Profile & contact details",
+		label: "General",
 		icon: BuildingStorefrontIcon,
-		iconColor: "text-sky-600 dark:text-sky-400",
-		iconBgActive: "bg-sky-100 dark:bg-sky-900/50",
 	},
 	{
 		id: "org-gst",
 		tab: "org",
 		section: "gst" as OrgSettingsSection,
 		label: "GST & Compliance",
-		description: "Tax registration details",
 		icon: IdentificationIcon,
-		iconColor: "text-amber-600 dark:text-amber-400",
-		iconBgActive: "bg-amber-100 dark:bg-amber-900/50",
 	},
 	{
 		id: "org-bank",
 		tab: "org",
 		section: "bank" as OrgSettingsSection,
 		label: "Bank Account",
-		description: "Withdrawal destination",
 		icon: CreditCardIcon,
-		iconColor: "text-emerald-600 dark:text-emerald-400",
-		iconBgActive: "bg-emerald-100 dark:bg-emerald-900/50",
 	},
-	{
-		id: "org-billing",
-		tab: "org",
-		section: "billing" as OrgSettingsSection,
-		label: "Billing",
-		description: "Invoices & payment history",
-		icon: ReceiptPercentIcon,
-		iconColor: "text-violet-600 dark:text-violet-400",
-		iconBgActive: "bg-violet-100 dark:bg-violet-900/50",
-	},
+];
+
+const ACCOUNT_NAV: NavItem[] = [
 	{
 		id: "account-profile",
 		tab: "account",
 		section: "profile" as AccountSettingsSection,
-		label: "My Profile",
-		description: "Name, email & linked accounts",
+		label: "Profile",
 		icon: UserCircleIcon,
-		iconColor: "text-sky-600 dark:text-sky-400",
-		iconBgActive: "bg-sky-100 dark:bg-sky-900/50",
 	},
 	{
 		id: "account-security",
 		tab: "account",
 		section: "security" as AccountSettingsSection,
 		label: "Security",
-		description: "2FA, sessions & backup codes",
 		icon: ShieldCheckIcon,
-		iconColor: "text-emerald-600 dark:text-emerald-400",
-		iconBgActive: "bg-emerald-100 dark:bg-emerald-900/50",
 	},
 	{
 		id: "account-passkeys",
 		tab: "account",
 		section: "passkeys" as AccountSettingsSection,
 		label: "Passkeys",
-		description: "Face ID & biometric login",
 		icon: FingerPrintIcon,
-		iconColor: "text-violet-600 dark:text-violet-400",
-		iconBgActive: "bg-violet-100 dark:bg-violet-900/50",
 	},
 	{
 		id: "account-preferences",
 		tab: "account",
 		section: "preferences" as AccountSettingsSection,
 		label: "Preferences",
-		description: "Notifications & danger zone",
 		icon: AdjustmentsHorizontalIcon,
-		iconColor: "text-zinc-600 dark:text-zinc-400",
-		iconBgActive: "bg-zinc-200 dark:bg-zinc-700",
 	},
 ];
 
@@ -224,6 +188,47 @@ const DEFAULT_ITEM: Record<SettingsTab, string> = {
 	org: "org-profile",
 	account: "account-profile",
 };
+
+// =============================================================================
+// TAB SWITCHER — top of sidebar
+// =============================================================================
+
+function TabSwitcher({
+	activeTab,
+	onChange,
+}: {
+	activeTab: SettingsTab;
+	onChange: (tab: SettingsTab) => void;
+}) {
+	return (
+		<div className="flex rounded-lg bg-zinc-950/5 p-0.5 dark:bg-white/5">
+			<button
+				type="button"
+				onClick={() => onChange("org")}
+				className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all duration-150 ${
+					activeTab === "org"
+						? "bg-white text-zinc-900 shadow-sm ring-1 ring-zinc-950/5 dark:bg-zinc-700 dark:text-white dark:ring-white/10"
+						: "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+				}`}
+			>
+				<BuildingStorefrontIcon className="size-3.5" />
+				Workspace
+			</button>
+			<button
+				type="button"
+				onClick={() => onChange("account")}
+				className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all duration-150 ${
+					activeTab === "account"
+						? "bg-white text-zinc-900 shadow-sm ring-1 ring-zinc-950/5 dark:bg-zinc-700 dark:text-white dark:ring-white/10"
+						: "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+				}`}
+			>
+				<UserCircleIcon className="size-3.5" />
+				Account
+			</button>
+		</div>
+	);
+}
 
 // =============================================================================
 // NAV ITEM BUTTON
@@ -235,25 +240,20 @@ function NavButton({ item, active, onClick }: { item: NavItem; active: boolean; 
 		<button
 			type="button"
 			onClick={onClick}
-			className={`group flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition-all duration-150 ${
+			className={`group flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-all duration-100 ${
 				active
-					? "bg-white text-zinc-900 shadow-sm ring-1 ring-zinc-200/80 dark:bg-zinc-800 dark:text-white dark:ring-zinc-700/80"
-					: "text-zinc-500 hover:bg-white/70 hover:text-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-800/60 dark:hover:text-zinc-200"
+					? "bg-white text-zinc-900 shadow-sm ring-1 ring-zinc-950/5 dark:bg-zinc-800 dark:text-white dark:ring-white/10"
+					: "text-zinc-600 hover:bg-white/60 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800/40 dark:hover:text-zinc-200"
 			}`}
 		>
-			<div
-				className={`flex size-7 shrink-0 items-center justify-center rounded-lg transition-all duration-150 ${
+			<Icon
+				className={`size-4 transition-colors duration-100 ${
 					active
-						? `${item.iconBgActive} ${item.iconColor}`
-						: "bg-zinc-200/70 text-zinc-500 group-hover:bg-zinc-200 group-hover:text-zinc-700 dark:bg-zinc-800 dark:text-zinc-400 dark:group-hover:bg-zinc-700 dark:group-hover:text-zinc-300"
+						? "text-zinc-800 dark:text-zinc-200"
+						: "text-zinc-400 group-hover:text-zinc-600 dark:text-zinc-500 dark:group-hover:text-zinc-300"
 				}`}
-			>
-				<Icon className="size-3.5" />
-			</div>
-			<div className="min-w-0 flex-1">
-				<p className="truncate text-sm font-medium leading-tight">{item.label}</p>
-				<p className="mt-0.5 truncate text-xs leading-tight text-zinc-500 dark:text-zinc-400">{item.description}</p>
-			</div>
+			/>
+			<span className="truncate text-[13px] font-medium">{item.label}</span>
 		</button>
 	);
 }
@@ -286,41 +286,45 @@ export function SettingsDialog({ open, onClose, initialTab = "org" }: SettingsDi
 		popPanel: () => setActivePanel(null),
 	};
 
+	const allItems = [...ORG_NAV, ...ACCOUNT_NAV];
+	const activeItem = allItems.find((i) => i.id === activeId) ?? allItems[0];
+	const activeTab = activeItem.tab;
+	const navItems = activeTab === "org" ? ORG_NAV : ACCOUNT_NAV;
+
+	const handleTabChange = (tab: SettingsTab) => {
+		setActiveId(DEFAULT_ITEM[tab]);
+		setActivePanel(null);
+	};
+
 	const handleNavClick = (id: string) => {
 		setActiveId(id);
 		setActivePanel(null);
 		setMobilePane("content");
 	};
 
-	const activeItem = NAV_ITEMS.find((i) => i.id === activeId) ?? NAV_ITEMS[0];
-	const activeTab = activeItem.tab;
-	const orgItems = NAV_ITEMS.filter((i) => i.tab === "org");
-	const accountItems = NAV_ITEMS.filter((i) => i.tab === "account");
-
 	const orgSection = activeTab === "org" ? (activeItem.section as OrgSettingsSection) : "profile";
 	const accountSection = activeTab === "account" ? (activeItem.section as AccountSettingsSection) : "profile";
-
-	const ActiveIcon = activeItem.icon;
 
 	return (
 		<Headless.Dialog open={open} onClose={onClose} className="relative z-40">
 			<Headless.DialogBackdrop
 				transition
-				className="fixed inset-0 bg-black/30 backdrop-blur-sm transition duration-200 ease-out data-closed:opacity-0 dark:bg-black/60"
+				className="fixed inset-0 bg-black/25 backdrop-blur-sm transition duration-200 ease-out data-closed:opacity-0 dark:bg-black/50"
 			/>
 
-			<div className="fixed inset-0 flex items-end justify-center sm:items-center sm:p-8">
+			<div className="fixed inset-0 flex items-end justify-center sm:items-center sm:p-4">
 				<Headless.DialogPanel
 					transition
-					className="flex h-full w-full overflow-hidden bg-white shadow-2xl ring-1 ring-black/8 transition duration-200 ease-out data-closed:opacity-0 sm:h-[88vh] sm:max-h-195 sm:max-w-230 sm:rounded-2xl dark:bg-zinc-950 dark:ring-white/8"
+					className="flex h-full w-full overflow-hidden bg-white shadow-2xl ring-1 ring-zinc-950/5 transition duration-200 ease-out data-closed:translate-y-4 data-closed:opacity-0 sm:h-[min(92vh,860px)] sm:max-w-260 sm:rounded-2xl sm:data-closed:translate-y-2 sm:data-closed:scale-[0.98] dark:bg-zinc-950 dark:ring-white/10"
 				>
 					{/* ── Left Sidebar ── */}
 					<div
-						className={`flex w-full shrink-0 flex-col bg-zinc-50/80 dark:bg-zinc-900 sm:flex sm:w-58 ${mobilePane === "nav" ? "flex" : "hidden"}`}
+						className={`flex w-full shrink-0 flex-col bg-zinc-50 dark:bg-zinc-900/80 sm:flex sm:w-56 ${mobilePane === "nav" ? "flex" : "hidden"}`}
 					>
-						<div className="flex h-14 shrink-0 items-center justify-between border-b border-zinc-200/80 px-4 dark:border-zinc-800">
+						{/* Sidebar header */}
+						<div className="flex h-14 shrink-0 items-center justify-between border-b border-zinc-950/5 px-4 dark:border-white/5">
 							<div className="flex items-center gap-2.5">
-								<div className="flex size-7 items-center justify-center rounded-lg bg-zinc-900 dark:bg-zinc-100">
+								<div className="flex size-7 items-center justify-center rounded-lg bg-zinc-900 dark:bg-zinc-200">
 									<Cog6ToothIcon className="size-3.5 text-white dark:text-zinc-900" />
 								</div>
 								<span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Settings</span>
@@ -328,100 +332,72 @@ export function SettingsDialog({ open, onClose, initialTab = "org" }: SettingsDi
 							<button
 								type="button"
 								onClick={onClose}
-								className="flex size-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-500 sm:hidden dark:hover:bg-red-950/40 dark:hover:text-red-400"
+								className="flex size-7 items-center justify-center rounded-md text-zinc-400 transition-colors hover:bg-zinc-200/60 hover:text-zinc-600 sm:hidden dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
 								aria-label="Close settings"
 							>
 								<XMarkIcon className="size-4" />
 							</button>
 						</div>
 
-						<nav className="flex-1 overflow-y-auto scrollbar-hide px-2 py-3">
-							{/* Workspace group */}
-							<div className="mb-1">
-								<p className="mb-1 px-2.5 text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
-									Workspace
-								</p>
-								<div className="space-y-0.5">
-									{orgItems.map((item) => (
-										<NavButton
-											key={item.id}
-											item={item}
-											active={activeId === item.id}
-											onClick={() => handleNavClick(item.id)}
-										/>
-									))}
-								</div>
-							</div>
+						{/* Tab switcher */}
+						<div className="shrink-0 px-3 pt-3">
+							<TabSwitcher activeTab={activeTab} onChange={handleTabChange} />
+						</div>
 
-							<div className="my-3 border-t border-zinc-200/80 dark:border-zinc-800" />
-
-							{/* Account group */}
-							<div>
-								<p className="mb-1 px-2.5 text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
-									Account
-								</p>
-								<div className="space-y-0.5">
-									{accountItems.map((item) => (
-										<NavButton
-											key={item.id}
-											item={item}
-											active={activeId === item.id}
-											onClick={() => handleNavClick(item.id)}
-										/>
-									))}
-								</div>
+						{/* Nav items */}
+						<nav className="flex-1 overflow-y-auto px-3 pt-3 pb-2 scrollbar-hide">
+							<div className="space-y-0.5">
+								{navItems.map((item) => (
+									<NavButton
+										key={item.id}
+										item={item}
+										active={activeId === item.id}
+										onClick={() => handleNavClick(item.id)}
+									/>
+								))}
 							</div>
 						</nav>
 
-						{/* Theme toggle pinned to sidebar bottom */}
+						{/* Theme toggle */}
 						<SidebarThemeToggle />
 					</div>
 
 					{/* ── Right Content ── */}
 					<PanelNavContext.Provider value={panelNav}>
 						<div
-							className={`flex min-w-0 flex-1 flex-col border-l border-zinc-200/80 dark:border-zinc-800 ${mobilePane === "content" ? "flex" : "hidden"} sm:flex`}
+							className={`flex min-w-0 flex-1 flex-col border-l border-zinc-950/5 dark:border-white/5 ${mobilePane === "content" ? "flex" : "hidden"} sm:flex`}
 						>
-							{/* Header */}
-							<div className="flex h-14 shrink-0 items-center justify-between border-b border-zinc-200/80 px-4 sm:px-6 dark:border-zinc-800">
+							{/* Content header */}
+							<div className="flex h-14 shrink-0 items-center justify-between border-b border-zinc-950/5 px-5 sm:px-6 dark:border-white/5">
 								{activePanel ? (
 									<button
 										type="button"
 										onClick={() => setActivePanel(null)}
-										className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-semibold text-zinc-800 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:text-zinc-100 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+										className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"
 									>
-										<ChevronLeftIcon className="size-4 text-zinc-400" />
-										<span>{activePanel.title}</span>
+										<ChevronLeftIcon className="size-4 text-zinc-400 dark:text-zinc-500" />
+										{activePanel.title}
 									</button>
 								) : (
-									<div className="flex items-center gap-2">
+									<div className="flex items-center gap-1.5">
+										{/* Mobile back button */}
 										<button
 											type="button"
 											onClick={() => setMobilePane("nav")}
-											className="flex size-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700 sm:hidden dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+											className="flex size-7 items-center justify-center rounded-md text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700 sm:hidden dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
 											aria-label="Back to menu"
 										>
 											<ChevronLeftIcon className="size-4" />
 										</button>
-										<Headless.DialogTitle className="flex items-center gap-2">
-											<div
-												className={`flex size-7 items-center justify-center rounded-lg ${activeItem.iconBgActive} ${activeItem.iconColor}`}
-											>
-												<ActiveIcon className="size-3.5" />
-											</div>
-											<div className="flex items-baseline gap-2">
-												<span className="text-sm font-semibold text-zinc-900 dark:text-white">{activeItem.label}</span>
-												<span className="hidden text-xs text-zinc-500 dark:text-zinc-400 sm:inline">
-													{activeItem.description}
-												</span>
-											</div>
+										<Headless.DialogTitle className="text-[15px] font-semibold text-zinc-900 dark:text-white">
+											{activeItem.label}
 										</Headless.DialogTitle>
 									</div>
 								)}
 								<button
 									type="button"
 									onClick={onClose}
-									className="flex size-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/40 dark:hover:text-red-400"
+									className="flex size-7 items-center justify-center rounded-md text-zinc-400 transition-colors hover:bg-zinc-200/60 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
 									aria-label="Close settings"
 								>
 									<XMarkIcon className="size-4" />
@@ -431,7 +407,7 @@ export function SettingsDialog({ open, onClose, initialTab = "org" }: SettingsDi
 							{/* Scrollable content */}
 							<div className="flex-1 overflow-y-auto scrollbar-hide">
 								{activePanel ? (
-									<div key={activePanel.id} className="px-4 py-5 pb-10 sm:px-6">
+									<div key={activePanel.id} className="px-5 py-5 pb-10 sm:px-6">
 										{activePanel.content}
 									</div>
 								) : activeTab === "org" ? (

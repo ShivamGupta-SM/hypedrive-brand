@@ -4,7 +4,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/hooks/api-client";
-import { notificationsQueryOptions, pushTokensQueryOptions } from "./queries";
+import { notificationsQueryOptions, notificationUnreadCountQueryOptions, pushTokensQueryOptions } from "./queries";
 import {
 	archiveNotificationsServer,
 	deleteAllNotificationsServer,
@@ -47,6 +47,15 @@ export function useNotifications(
 	return { data: query.data, loading: query.isPending && !query.data, error: query.error, refetch: query.refetch };
 }
 
+export function useNotificationUnreadCount(organizationId: string | undefined) {
+	const query = useQuery({
+		...notificationUnreadCountQueryOptions(organizationId || ""),
+		enabled: !!organizationId,
+	});
+
+	return { data: query.data, loading: query.isPending && !query.data, error: query.error, refetch: query.refetch };
+}
+
 export function useMarkNotificationRead(organizationId: string | undefined) {
 	const queryClient = useQueryClient();
 
@@ -56,6 +65,7 @@ export function useMarkNotificationRead(organizationId: string | undefined) {
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.notifications(organizationId || "") });
+			queryClient.invalidateQueries({ queryKey: queryKeys.notificationUnreadCount(organizationId || "") });
 		},
 	});
 }
@@ -69,6 +79,7 @@ export function useMarkAllNotificationsRead(organizationId: string | undefined) 
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.notifications(organizationId || "") });
+			queryClient.invalidateQueries({ queryKey: queryKeys.notificationUnreadCount(organizationId || "") });
 		},
 	});
 }
@@ -95,6 +106,7 @@ export function useDeleteNotifications(organizationId: string | undefined) {
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.notifications(organizationId || "") });
+			queryClient.invalidateQueries({ queryKey: queryKeys.notificationUnreadCount(organizationId || "") });
 		},
 	});
 }
@@ -108,6 +120,7 @@ export function useDeleteAllNotifications(organizationId: string | undefined) {
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.notifications(organizationId || "") });
+			queryClient.invalidateQueries({ queryKey: queryKeys.notificationUnreadCount(organizationId || "") });
 		},
 	});
 }

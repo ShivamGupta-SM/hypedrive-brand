@@ -147,19 +147,6 @@ export function TableRowSkeleton({ columns = 4, className }: { columns?: number;
 	);
 }
 
-/** Stat card skeleton */
-export function StatCardSkeleton({ className }: { className?: string }) {
-	return (
-		<div
-			className={clsx("rounded-xl bg-white p-4 ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800", className)}
-		>
-			<Skeleton width={40} height={40} borderRadius={8} />
-			<Skeleton width={80} height={28} className="mt-4" />
-			<Skeleton width={60} height={16} className="mt-1" />
-		</div>
-	);
-}
-
 /** List item skeleton */
 export function ListItemSkeleton({ className }: { className?: string }) {
 	return (

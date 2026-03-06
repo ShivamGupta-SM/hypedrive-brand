@@ -209,8 +209,10 @@ export function CampaignsLayout() {
 				<TabNav tabs={tabs} />
 			</div>
 
-			{/* Child route renders here */}
-			<Outlet />
+			{/* Child route renders here — tighter gap from tabs */}
+			<div className="-mt-2">
+				<Outlet />
+			</div>
 
 			{/* Create Campaign Modal */}
 			<CreateCampaignModal

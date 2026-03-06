@@ -16,16 +16,19 @@ import { Avatar } from "@/components/avatar";
 import { SidebarItem } from "@/components/sidebar";
 import { getInitials } from "@/lib/design-tokens";
 
-/** Richer palette — each org gets a distinct but professional color */
+// =============================================================================
+// ORG COLORS — vibrant, distinct palette for avatar backgrounds
+// =============================================================================
+
 const ORG_COLORS = [
-	{ bg: "bg-zinc-800", border: "border-zinc-700" },
-	{ bg: "bg-slate-700", border: "border-slate-600" },
-	{ bg: "bg-stone-700", border: "border-stone-600" },
-	{ bg: "bg-neutral-700", border: "border-neutral-600" },
-	{ bg: "bg-zinc-700", border: "border-zinc-600" },
-	{ bg: "bg-slate-800", border: "border-slate-700" },
-	{ bg: "bg-stone-800", border: "border-stone-700" },
-	{ bg: "bg-neutral-800", border: "border-neutral-700" },
+	{ bg: "bg-violet-600", text: "text-violet-50" },
+	{ bg: "bg-sky-600", text: "text-sky-50" },
+	{ bg: "bg-emerald-600", text: "text-emerald-50" },
+	{ bg: "bg-amber-600", text: "text-amber-50" },
+	{ bg: "bg-rose-600", text: "text-rose-50" },
+	{ bg: "bg-indigo-600", text: "text-indigo-50" },
+	{ bg: "bg-teal-600", text: "text-teal-50" },
+	{ bg: "bg-fuchsia-600", text: "text-fuchsia-50" },
 ];
 
 function getOrgColor(id: string) {
@@ -33,16 +36,18 @@ function getOrgColor(id: string) {
 	return ORG_COLORS[index % ORG_COLORS.length];
 }
 
-/** Small colored dot for org status — only renders for non-active states */
+// =============================================================================
+// STATUS INDICATORS
+// =============================================================================
+
 const STATUS_COLORS: Record<string, string> = {
 	onboarding: "bg-sky-400",
 	suspended: "bg-red-400",
 };
 
-/** Text colors for org status shown in org list — only whitelisted statuses render */
-const STATUS_TEXT_COLORS: Record<string, string> = {
-	onboarding: "text-sky-600 dark:text-sky-400",
-	suspended: "text-red-600 dark:text-red-400",
+const STATUS_LABELS: Record<string, { text: string; className: string }> = {
+	onboarding: { text: "Onboarding", className: "bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-400" },
+	suspended: { text: "Suspended", className: "bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-400" },
 };
 
 function StatusDot({ status }: { status?: string }) {
@@ -50,10 +55,17 @@ function StatusDot({ status }: { status?: string }) {
 	if (!color) return null;
 	return (
 		<span
-			className={clsx("absolute -right-0.5 -top-0.5 size-2.5 rounded-full ring-2 ring-white dark:ring-zinc-900", color)}
+			className={clsx(
+				"absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full ring-2 ring-white dark:ring-zinc-900",
+				color
+			)}
 		/>
 	);
 }
+
+// =============================================================================
+// ORG AVATAR — vibrant colored initials or logo
+// =============================================================================
 
 function OrgAvatar({
 	org,
@@ -61,31 +73,44 @@ function OrgAvatar({
 	selected = false,
 }: {
 	org: Organization;
-	size?: "xs" | "sm" | "md" | "lg";
+	size?: "xs" | "sm" | "md";
 	selected?: boolean;
 }) {
 	const colors = getOrgColor(org.id);
-	const sizeClass =
-		size === "lg" ? "size-11" : size === "md" ? "size-9" : size === "sm" ? "size-7 sm:size-6" : "size-6";
-	const textSize = size === "lg" ? "text-sm" : size === "md" ? "text-xs" : size === "sm" ? "text-[10px]" : "text-[9px]";
+	const sizeClasses = {
+		xs: "size-6",
+		sm: "size-7 sm:size-6",
+		md: "size-9",
+	};
+	const textSizes = {
+		xs: "text-[9px]",
+		sm: "text-[10px]",
+		md: "text-xs",
+	};
 
 	return (
 		<span className="relative shrink-0">
 			{org.logo ? (
 				<Avatar
 					src={org.logo}
-					className={clsx(sizeClass, "outline-0!", selected && "ring-2 ring-zinc-900 dark:ring-white")}
+					square
+					className={clsx(
+						sizeClasses[size],
+						"outline-0!",
+						selected && "ring-2 ring-emerald-500 ring-offset-1 ring-offset-white dark:ring-offset-zinc-900"
+					)}
 				/>
 			) : (
 				<Avatar
 					initials={getInitials(org.name)}
+					square
 					className={clsx(
-						sizeClass,
-						textSize,
+						sizeClasses[size],
+						textSizes[size],
 						"outline-0!",
 						colors.bg,
-						"text-white",
-						selected && "ring-2 ring-zinc-900 dark:ring-white"
+						colors.text,
+						selected && "ring-2 ring-emerald-500 ring-offset-1 ring-offset-white dark:ring-offset-zinc-900"
 					)}
 				/>
 			)}
@@ -94,8 +119,11 @@ function OrgAvatar({
 	);
 }
 
-/** Shared org list content — used by both desktop popover and mobile bottom sheet */
-function OrgListContent({
+// =============================================================================
+// ORG LIST — shared between desktop popover and mobile sheet
+// =============================================================================
+
+function OrgList({
 	organizations,
 	currentOrganization,
 	onSelect,
@@ -111,83 +139,69 @@ function OrgListContent({
 	variant: "desktop" | "mobile";
 }) {
 	const isMobile = variant === "mobile";
-	const avatarSize = isMobile ? "lg" : "md";
 
 	return (
 		<>
-			{/* Organization list */}
-			<div className={clsx("overflow-y-auto scrollbar-hide", isMobile ? "max-h-[50vh] px-3 py-2" : "max-h-64 p-1.5")}>
-				<div className={clsx(isMobile ? "space-y-1.5" : "space-y-0.5")}>
-					{organizations.map((org) => {
-						const isCurrent = org.id === currentOrganization?.id;
-						return (
-							<button
-								key={org.id}
-								type="button"
-								onClick={() => onSelect(org)}
-								className={clsx(
-									"flex w-full items-center text-left transition-colors",
-									isMobile ? "gap-4 rounded-2xl px-3.5 py-3" : "gap-3 rounded-lg px-2.5 py-2",
-									isCurrent
-										? isMobile
-											? "bg-zinc-100 dark:bg-zinc-800"
-											: "bg-zinc-950/5 dark:bg-white/6"
-										: isMobile
-											? "active:bg-zinc-50 dark:active:bg-zinc-800/50"
-											: "hover:bg-zinc-950/3 dark:hover:bg-white/4"
-								)}
-							>
-								<OrgAvatar org={org} size={avatarSize} selected={isCurrent} />
-								<div className="min-w-0 flex-1">
-									<span
-										className={clsx(
-											"block truncate",
-											isMobile ? "text-base/5" : "text-sm/5",
-											isCurrent
-												? "font-bold text-zinc-950 dark:text-white"
-												: "font-semibold text-zinc-800 dark:text-zinc-200"
-										)}
-									>
-										{org.name}
-									</span>
-									{org.status &&
-										STATUS_TEXT_COLORS[org.status] && (
-											<span
-												className={clsx(
-													"mt-1 block font-medium capitalize",
-													isMobile ? "text-xs" : "text-[11px]",
-													STATUS_TEXT_COLORS[org.status]
-												)}
-											>
-												{org.status}
-											</span>
-										)}
-								</div>
-								{isCurrent && (
-									<span
-										className={clsx(
-											"flex shrink-0 items-center justify-center rounded-full bg-zinc-900 shadow-sm dark:bg-white",
-											isMobile ? "size-7" : "size-5"
-										)}
-									>
-										<CheckIcon className={clsx("text-white dark:text-zinc-900", isMobile ? "size-4" : "size-3")} />
-									</span>
-								)}
-							</button>
-						);
-					})}
-				</div>
-
-				{organizations.length === 0 && (
-					<div className={clsx("text-center", isMobile ? "px-4 py-12" : "px-3 py-6")}>
+			{/* Org list */}
+			<div className={clsx("overflow-y-auto scrollbar-hide", isMobile ? "max-h-[55vh] px-3 py-2" : "max-h-72 p-1.5")}>
+				{organizations.length === 0 ? (
+					<div className={clsx("text-center", isMobile ? "px-4 py-14" : "px-3 py-8")}>
 						<BuildingStorefrontIcon
 							className={clsx("mx-auto text-zinc-300 dark:text-zinc-600", isMobile ? "size-12" : "size-8")}
 						/>
-						<p
-							className={clsx("mt-3 font-medium text-zinc-500 dark:text-zinc-400", isMobile ? "text-base" : "text-sm")}
-						>
+						<p className={clsx("mt-3 font-medium text-zinc-500 dark:text-zinc-400", isMobile ? "text-base" : "text-sm")}>
 							No organizations yet
 						</p>
+					</div>
+				) : (
+					<div className={clsx(isMobile ? "space-y-1" : "space-y-0.5")}>
+						{organizations.map((org) => {
+							const isCurrent = org.id === currentOrganization?.id;
+							const statusInfo = org.status ? STATUS_LABELS[org.status] : undefined;
+
+							return (
+								<button
+									key={org.id}
+									type="button"
+									onClick={() => onSelect(org)}
+									className={clsx(
+										"group flex w-full items-center text-left transition-all duration-100",
+										isMobile ? "gap-3.5 rounded-xl px-3 py-3" : "gap-2.5 rounded-lg px-2.5 py-2",
+										isCurrent
+											? "bg-zinc-950/5 dark:bg-white/6"
+											: "hover:bg-zinc-950/3 active:bg-zinc-950/5 dark:hover:bg-white/4 dark:active:bg-white/6"
+									)}
+								>
+									<OrgAvatar org={org} size={isMobile ? "md" : "md"} selected={isCurrent} />
+									<div className="min-w-0 flex-1">
+										<span
+											className={clsx(
+												"block truncate",
+												isMobile ? "text-[15px]/5" : "text-sm/5",
+												isCurrent
+													? "font-semibold text-zinc-950 dark:text-white"
+													: "font-medium text-zinc-800 dark:text-zinc-200"
+											)}
+										>
+											{org.name}
+										</span>
+										{statusInfo && (
+											<span
+												className={clsx(
+													"mt-0.5 inline-flex rounded-md px-1.5 py-0.5 text-[10px] font-medium leading-none",
+													statusInfo.className
+												)}
+											>
+												{statusInfo.text}
+											</span>
+										)}
+									</div>
+									{isCurrent && (
+										<CheckIcon className="size-4 shrink-0 text-emerald-500 dark:text-emerald-400" />
+									)}
+								</button>
+							);
+						})}
 					</div>
 				)}
 			</div>
@@ -195,27 +209,27 @@ function OrgListContent({
 			{/* Footer actions */}
 			<div
 				className={clsx(
-					"border-t border-zinc-200/80 dark:border-zinc-700/80",
-					isMobile ? "px-3 py-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))]" : "p-1.5"
+					"border-t border-zinc-950/5 dark:border-white/5",
+					isMobile ? "px-3 py-2 pb-[max(0.75rem,env(safe-area-inset-bottom))]" : "p-1.5"
 				)}
 			>
 				<button
 					type="button"
 					onClick={onNewOrg}
 					className={clsx(
-						"flex w-full items-center transition-colors",
+						"flex w-full items-center transition-colors duration-100",
 						isMobile
-							? "gap-3.5 rounded-2xl px-3.5 py-3 text-base font-semibold text-zinc-700 active:bg-zinc-50 dark:text-zinc-300 dark:active:bg-zinc-800/50"
-							: "gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-950/3 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-white/4 dark:hover:text-white"
+							? "gap-3 rounded-xl px-3 py-2.5 text-[15px] font-medium text-zinc-600 active:bg-zinc-950/3 dark:text-zinc-400 dark:active:bg-white/4"
+							: "gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-500 hover:bg-zinc-950/3 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-white/4 dark:hover:text-zinc-200"
 					)}
 				>
 					<span
 						className={clsx(
-							"flex shrink-0 items-center justify-center bg-zinc-100 dark:bg-zinc-800",
-							isMobile ? "size-9 rounded-xl" : "size-5 rounded-md"
+							"flex shrink-0 items-center justify-center rounded-lg bg-zinc-950/5 dark:bg-white/5",
+							isMobile ? "size-9" : "size-7"
 						)}
 					>
-						<PlusIcon className={clsx("text-zinc-600 dark:text-zinc-400", isMobile ? "size-5" : "size-3.5")} />
+						<PlusIcon className={clsx("text-zinc-500 dark:text-zinc-400", isMobile ? "size-4" : "size-3.5")} />
 					</span>
 					New organization
 				</button>
@@ -223,19 +237,19 @@ function OrgListContent({
 					type="button"
 					onClick={onSettings}
 					className={clsx(
-						"flex w-full items-center transition-colors",
+						"flex w-full items-center transition-colors duration-100",
 						isMobile
-							? "gap-3.5 rounded-2xl px-3.5 py-3 text-base font-semibold text-zinc-700 active:bg-zinc-50 dark:text-zinc-300 dark:active:bg-zinc-800/50"
-							: "gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-950/3 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-white/4 dark:hover:text-white"
+							? "gap-3 rounded-xl px-3 py-2.5 text-[15px] font-medium text-zinc-600 active:bg-zinc-950/3 dark:text-zinc-400 dark:active:bg-white/4"
+							: "gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-500 hover:bg-zinc-950/3 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-white/4 dark:hover:text-zinc-200"
 					)}
 				>
 					<span
 						className={clsx(
-							"flex shrink-0 items-center justify-center bg-zinc-100 dark:bg-zinc-800",
-							isMobile ? "size-9 rounded-xl" : "size-5 rounded-md"
+							"flex shrink-0 items-center justify-center rounded-lg bg-zinc-950/5 dark:bg-white/5",
+							isMobile ? "size-9" : "size-7"
 						)}
 					>
-						<Cog6ToothIcon className={clsx("text-zinc-600 dark:text-zinc-400", isMobile ? "size-5" : "size-3.5")} />
+						<Cog6ToothIcon className={clsx("text-zinc-500 dark:text-zinc-400", isMobile ? "size-4" : "size-3.5")} />
 					</span>
 					Settings
 				</button>
@@ -244,7 +258,10 @@ function OrgListContent({
 	);
 }
 
-/** Mobile bottom sheet — inspired by the mockup's rounded-top design */
+// =============================================================================
+// MOBILE BOTTOM SHEET
+// =============================================================================
+
 function MobileOrgSheet({
 	open,
 	onClose,
@@ -266,37 +283,34 @@ function MobileOrgSheet({
 		<Headless.Dialog open={open} onClose={onClose} className="relative z-50">
 			<Headless.DialogBackdrop
 				transition
-				className="fixed inset-0 bg-black/30 backdrop-blur-sm transition data-closed:opacity-0 data-enter:duration-200 data-enter:ease-out data-leave:duration-150 data-leave:ease-in"
+				className="fixed inset-0 bg-black/25 backdrop-blur-sm transition data-closed:opacity-0 data-enter:duration-200 data-enter:ease-out data-leave:duration-150 data-leave:ease-in"
 			/>
 
 			<div className="fixed inset-0 flex items-end">
 				<Headless.DialogPanel
 					transition
-					className="max-h-[85vh] w-full overflow-hidden rounded-t-3xl bg-white shadow-xl transition duration-300 ease-out data-closed:translate-y-full dark:bg-zinc-900"
+					className="max-h-[85vh] w-full overflow-hidden rounded-t-2xl bg-white shadow-2xl ring-1 ring-zinc-950/5 transition duration-300 ease-out data-closed:translate-y-full dark:bg-zinc-900 dark:ring-white/10"
 				>
 					{/* Drag handle */}
 					<div className="flex justify-center pb-1 pt-3">
-						<div className="h-1 w-10 rounded-full bg-zinc-300 dark:bg-zinc-700" />
+						<div className="h-1 w-9 rounded-full bg-zinc-300 dark:bg-zinc-700" />
 					</div>
 
 					{/* Header */}
-					<div className="flex items-center justify-between px-5 pb-4 pt-2">
-						<div>
-							<Headless.DialogTitle className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">
-								Switch Brand
-							</Headless.DialogTitle>
-							<p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">Select an organization to manage</p>
-						</div>
+					<div className="flex items-center justify-between px-4 pb-3 pt-1">
+						<Headless.DialogTitle className="text-lg font-semibold text-zinc-900 dark:text-white">
+							Switch Organization
+						</Headless.DialogTitle>
 						<button
 							type="button"
 							onClick={onClose}
-							className="flex size-9 items-center justify-center rounded-full bg-zinc-100 transition-colors active:bg-zinc-200 dark:bg-zinc-800 dark:active:bg-zinc-700"
+							className="flex size-8 items-center justify-center rounded-full bg-zinc-950/5 transition-colors active:bg-zinc-950/10 dark:bg-white/5 dark:active:bg-white/10"
 						>
-							<XMarkIcon className="size-4.5 text-zinc-500 dark:text-zinc-400" />
+							<XMarkIcon className="size-4 text-zinc-500 dark:text-zinc-400" />
 						</button>
 					</div>
 
-					<OrgListContent
+					<OrgList
 						organizations={organizations}
 						currentOrganization={currentOrganization}
 						onSelect={onSelect}
@@ -310,7 +324,10 @@ function MobileOrgSheet({
 	);
 }
 
-/** Shared hook for org switching logic — pure props, no Zustand */
+// =============================================================================
+// SWITCHING LOGIC HOOK
+// =============================================================================
+
 function useOrgSwitching({
 	organizations,
 	currentOrganization,
@@ -386,6 +403,10 @@ function useOrgSwitching({
 	};
 }
 
+// =============================================================================
+// DESKTOP SIDEBAR SWITCHER (Popover)
+// =============================================================================
+
 export function OrganizationSwitcher({
 	organizations,
 	currentOrganization,
@@ -428,11 +449,11 @@ export function OrganizationSwitcher({
 							)}
 						>
 							{/* Header */}
-							<div className="border-b border-zinc-100 px-3.5 pb-2.5 pt-3 dark:border-zinc-800">
+							<div className="border-b border-zinc-950/5 px-3.5 pb-2.5 pt-3 dark:border-white/5">
 								<p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Switch organization</p>
 							</div>
 
-							<OrgListContent
+							<OrgList
 								organizations={organizations}
 								currentOrganization={currentOrganization}
 								onSelect={(org) => handleDesktopSelect(org, close)}
@@ -467,7 +488,10 @@ export function OrganizationSwitcher({
 	);
 }
 
-/** Compact org switcher trigger for mobile header bar */
+// =============================================================================
+// MOBILE HEADER BAR SWITCHER (compact trigger)
+// =============================================================================
+
 export function MobileOrgSwitcher({
 	organizations,
 	currentOrganization,
@@ -488,14 +512,14 @@ export function MobileOrgSwitcher({
 			<button
 				type="button"
 				onClick={() => setMobileOpen(true)}
-				className="flex min-w-0 items-center gap-1.5 rounded-lg px-1.5 py-1 transition-colors hover:bg-zinc-100 active:bg-zinc-100 dark:hover:bg-zinc-800 dark:active:bg-zinc-800"
+				className="flex min-w-0 items-center gap-1.5 rounded-lg px-1.5 py-1 transition-colors hover:bg-zinc-950/5 active:bg-zinc-950/5 dark:hover:bg-white/5 dark:active:bg-white/5"
 				aria-label="Switch organization"
 			>
 				<OrgAvatar org={displayOrg} size="xs" />
 				<span className="truncate text-sm/5 font-semibold text-zinc-900 dark:text-white">
 					{displayOrg.name || "Select"}
 				</span>
-				<ChevronDownIcon className="-ml-0.5 size-3.5 shrink-0 text-zinc-500 dark:text-zinc-400" />
+				<ChevronDownIcon className="-ml-0.5 size-3.5 shrink-0 text-zinc-400 dark:text-zinc-500" />
 			</button>
 
 			<MobileOrgSheet

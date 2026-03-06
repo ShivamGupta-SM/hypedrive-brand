@@ -13,7 +13,7 @@ interface StatItem {
 interface FinancialStatsGridProps {
 	stats: StatItem[];
 	loading?: boolean;
-	columns?: 2 | 3 | 4 | 5;
+	columns?: 2 | 3 | 4 | 5 | 6;
 }
 
 export function FinancialStatsGrid({ stats, loading = false, columns = 4 }: FinancialStatsGridProps) {
@@ -22,6 +22,7 @@ export function FinancialStatsGrid({ stats, loading = false, columns = 4 }: Fina
 		3: "grid-cols-2 lg:grid-cols-3",
 		4: "grid-cols-2 lg:grid-cols-4",
 		5: "grid-cols-2 md:grid-cols-3 lg:grid-cols-5",
+		6: "grid-cols-2 md:grid-cols-3 lg:grid-cols-6",
 	}[columns];
 
 	if (loading) {
@@ -30,11 +31,11 @@ export function FinancialStatsGrid({ stats, loading = false, columns = 4 }: Fina
 				{Array.from({ length: stats.length || columns }).map((_, i) => (
 					<div
 						key={`skeleton-${i}`}
-						className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 bg-white px-3 py-6 sm:px-6 xl:px-8 dark:bg-zinc-900"
+						className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 bg-white px-3 py-4 sm:px-5 dark:bg-zinc-900"
 					>
 						<div className="h-3 w-16 sm:h-4 sm:w-24 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
 						<div className="h-3 w-10 sm:h-4 sm:w-12 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
-						<div className="mt-2 h-6 w-20 sm:h-8 sm:w-32 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
+						<div className="mt-1 h-5 w-16 sm:h-7 sm:w-24 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
 					</div>
 				))}
 			</dl>
@@ -46,7 +47,7 @@ export function FinancialStatsGrid({ stats, loading = false, columns = 4 }: Fina
 			{stats.map((stat) => (
 				<div
 					key={stat.name}
-					className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 bg-white px-3 py-5 sm:px-6 sm:py-8 xl:px-8 dark:bg-zinc-900"
+					className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 bg-white px-3 py-3.5 sm:px-5 sm:py-5 dark:bg-zinc-900"
 				>
 					<dt className="text-xs sm:text-sm/6 font-medium text-zinc-500 dark:text-zinc-400">{stat.name}</dt>
 					{stat.change && (
@@ -62,7 +63,7 @@ export function FinancialStatsGrid({ stats, loading = false, columns = 4 }: Fina
 							{stat.change}
 						</dd>
 					)}
-					<dd className="w-full flex-none text-xl sm:text-3xl/10 font-medium tracking-tight text-zinc-900 dark:text-white">
+					<dd className="w-full flex-none text-lg sm:text-2xl/8 font-semibold tracking-tight text-zinc-900 dark:text-white">
 						{typeof stat.value === "number" ? stat.value.toLocaleString() : stat.value}
 					</dd>
 				</div>
@@ -80,6 +81,7 @@ export function FinancialStatsGridBordered({ stats, loading = false, columns = 4
 		3: "grid-cols-2 lg:grid-cols-3",
 		4: "grid-cols-2 lg:grid-cols-4",
 		5: "grid-cols-2 md:grid-cols-3 lg:grid-cols-5",
+		6: "grid-cols-2 md:grid-cols-3 lg:grid-cols-6",
 	}[columns];
 
 	if (loading) {
@@ -90,11 +92,11 @@ export function FinancialStatsGridBordered({ stats, loading = false, columns = 4
 				{Array.from({ length: stats.length || columns }).map((_, i) => (
 					<div
 						key={`skeleton-${i}`}
-						className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 bg-white px-3 py-5 sm:px-6 sm:py-6 dark:bg-zinc-900"
+						className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 bg-white px-2.5 py-2 sm:px-5 sm:py-4 dark:bg-zinc-900"
 					>
-						<div className="h-3 w-16 sm:h-4 sm:w-24 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
-						<div className="h-3 w-10 sm:h-4 sm:w-12 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
-						<div className="mt-2 h-5 w-16 sm:h-7 sm:w-28 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
+						<div className="h-2.5 w-12 sm:h-4 sm:w-24 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
+						<div className="h-2.5 w-8 sm:h-4 sm:w-12 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
+						<div className="mt-1 h-4 w-14 sm:h-7 sm:w-28 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
 					</div>
 				))}
 			</dl>
@@ -108,12 +110,12 @@ export function FinancialStatsGridBordered({ stats, loading = false, columns = 4
 			{stats.map((stat) => (
 				<div
 					key={stat.name}
-					className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 bg-white px-3 py-4 sm:px-6 sm:py-6 dark:bg-zinc-900"
+					className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 bg-white px-2.5 py-2 sm:px-5 sm:py-4 dark:bg-zinc-900"
 				>
-					<dt className="text-xs sm:text-sm/6 font-medium text-zinc-500 dark:text-zinc-400">{stat.name}</dt>
+					<dt className="text-[11px] sm:text-sm/6 font-medium text-zinc-500 dark:text-zinc-400">{stat.name}</dt>
 					{stat.change && (
 						<dd
-							className={`text-xs font-medium ${
+							className={`text-[10px] sm:text-xs font-medium ${
 								stat.changeType === "negative"
 									? "text-rose-600 dark:text-rose-400"
 									: stat.changeType === "positive"
@@ -124,7 +126,7 @@ export function FinancialStatsGridBordered({ stats, loading = false, columns = 4
 							{stat.change}
 						</dd>
 					)}
-					<dd className="w-full flex-none text-lg sm:text-2xl/8 lg:text-3xl/10 font-medium tracking-tight text-zinc-900 dark:text-white">
+					<dd className="w-full flex-none text-base/6 sm:text-2xl/8 font-semibold tracking-tight text-zinc-900 dark:text-white">
 						{typeof stat.value === "number" ? stat.value.toLocaleString() : stat.value}
 					</dd>
 				</div>

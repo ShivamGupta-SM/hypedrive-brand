@@ -4,7 +4,6 @@ import {
 	CheckCircleIcon,
 	ChevronRightIcon,
 	ClockIcon,
-	ExclamationCircleIcon,
 	MegaphoneIcon,
 	RocketLaunchIcon,
 	ShoppingBagIcon,
@@ -18,7 +17,7 @@ import { Button } from "@/components/button";
 import { AreaChart } from "@/components/charts";
 import { EnrollmentCardInline } from "@/components/enrollment-card";
 import { Link } from "@/components/link";
-import { ContentCard, PageHeader } from "@/components/page-header";
+import { AlertBanner, ContentCard, PageHeader } from "@/components/page-header";
 import { ErrorState } from "@/components/shared/error-state";
 import { IconButton } from "@/components/shared/icon-button";
 import { Skeleton } from "@/components/skeleton";
@@ -47,45 +46,42 @@ function getGreeting(): string {
 // SECTION HEADER
 // =============================================================================
 
+const sectionIconColors = {
+	emerald: { bg: "bg-emerald-100 dark:bg-emerald-900/30", icon: "text-emerald-500" },
+	sky: { bg: "bg-sky-100 dark:bg-sky-900/30", icon: "text-sky-500" },
+	amber: { bg: "bg-amber-100 dark:bg-amber-900/30", icon: "text-amber-500" },
+	violet: { bg: "bg-violet-100 dark:bg-violet-900/30", icon: "text-violet-500" },
+	rose: { bg: "bg-rose-100 dark:bg-rose-900/30", icon: "text-rose-500" },
+	zinc: { bg: "bg-zinc-100 dark:bg-zinc-800", icon: "text-zinc-500 dark:text-zinc-400" },
+};
+
+type SectionIconColor = keyof typeof sectionIconColors;
+
 function SectionHeader({
 	title,
 	icon: Icon,
 	img,
-	viewAllHref,
-	viewAllLabel = "View all",
+	iconColor = "zinc",
 	children,
 }: {
 	title: string;
 	icon?: React.ElementType;
 	img?: string;
-	viewAllHref?: string;
-	viewAllLabel?: string;
+	iconColor?: SectionIconColor;
 	children?: React.ReactNode;
 }) {
+	const colors = sectionIconColors[iconColor];
 	return (
-		<div className="flex items-center justify-between gap-4">
-			<div className="flex items-center gap-2.5">
-				{img ? (
-					<img src={img} alt="" className="size-7 object-contain drop-shadow-sm" />
-				) : Icon ? (
-					<div className="flex size-7 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
-						<Icon className="size-3.5 text-zinc-500 dark:text-zinc-400" />
-					</div>
-				) : null}
-				<h2 className="text-sm font-semibold text-zinc-900 dark:text-white">{title}</h2>
-			</div>
-			<div className="flex items-center gap-2">
-				{children}
-				{viewAllHref && (
-					<Link
-						href={viewAllHref}
-						className="group flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium text-zinc-500 transition-all hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"
-					>
-						{viewAllLabel}
-						<ChevronRightIcon className="size-3.5 transition-transform group-hover:translate-x-0.5" />
-					</Link>
-				)}
-			</div>
+		<div className="flex items-center gap-2.5">
+			{img ? (
+				<img src={img} alt="" className="size-6 object-contain drop-shadow-sm" />
+			) : Icon ? (
+				<div className={`flex size-6 items-center justify-center rounded-md ${colors.bg}`}>
+					<Icon className={`size-3.5 ${colors.icon}`} />
+				</div>
+			) : null}
+			<h2 className="text-sm font-semibold text-zinc-900 dark:text-white">{title}</h2>
+			{children}
 		</div>
 	);
 }
@@ -116,44 +112,25 @@ function DashboardAlertBar({
 	return (
 		<div className="space-y-2">
 			{isLowBalance && (
-				<div className="flex items-center gap-3 rounded-xl bg-amber-50/60 px-3 py-2.5 shadow-sm ring-1 ring-amber-200 sm:px-4 sm:py-3 dark:bg-amber-950/10 dark:ring-amber-800">
-					<div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/30">
-						<WalletIcon className="size-4 text-amber-600 dark:text-amber-400" />
-					</div>
-					<div className="min-w-0 flex-1">
-						<p className="text-sm font-medium text-zinc-900 dark:text-white">Low wallet balance</p>
-						<p className="text-xs text-zinc-500 dark:text-zinc-400">
-							{runwayDays > 0
-								? `~${runwayDays} day${runwayDays !== 1 ? "s" : ""} of runway remaining`
-								: "Add funds to continue running campaigns"}
-						</p>
-					</div>
-					<Link
-						href={`/${orgSlug}/wallet`}
-						className="hidden shrink-0 rounded-lg px-2.5 py-1 text-xs font-medium text-zinc-600 transition-colors hover:bg-amber-100 hover:text-zinc-900 sm:block dark:text-zinc-400 dark:hover:bg-amber-900/20 dark:hover:text-white"
-					>
-						Add Funds
-					</Link>
-				</div>
+				<AlertBanner
+					variant="warning"
+					title="Low wallet balance"
+					description={
+						runwayDays > 0
+							? `~${runwayDays} day${runwayDays !== 1 ? "s" : ""} of runway remaining`
+							: "Add funds to continue running campaigns"
+					}
+					icon={<WalletIcon className="size-4 sm:size-5" />}
+					action={{ label: "Add Funds", href: `/${orgSlug}/wallet` }}
+				/>
 			)}
 			{hasOverdue && (
-				<div className="flex items-center gap-3 rounded-xl bg-red-50/60 px-3 py-2.5 shadow-sm ring-1 ring-red-200 sm:px-4 sm:py-3 dark:bg-red-950/10 dark:ring-red-800">
-					<div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/30">
-						<ExclamationCircleIcon className="size-4 text-red-600 dark:text-red-400" />
-					</div>
-					<div className="min-w-0 flex-1">
-						<p className="text-sm font-medium text-zinc-900 dark:text-white">
-							{overdueEnrollments} overdue enrollment{overdueEnrollments !== 1 ? "s" : ""}
-						</p>
-						<p className="text-xs text-zinc-500 dark:text-zinc-400">Pending review for more than 48 hours</p>
-					</div>
-					<Link
-						href={`/${orgSlug}/enrollments`}
-						className="hidden shrink-0 rounded-lg px-2.5 py-1 text-xs font-medium text-zinc-600 transition-colors hover:bg-red-100 hover:text-zinc-900 sm:block dark:text-zinc-400 dark:hover:bg-red-900/20 dark:hover:text-white"
-					>
-						Review Now
-					</Link>
-				</div>
+				<AlertBanner
+					variant="error"
+					title={`${overdueEnrollments} overdue enrollment${overdueEnrollments !== 1 ? "s" : ""}`}
+					description="Pending review for more than 48 hours"
+					action={{ label: "Review Now", href: `/${orgSlug}/enrollments` }}
+				/>
 			)}
 		</div>
 	);
@@ -253,34 +230,44 @@ function CampaignPulse({
 	];
 
 	return (
-		<ContentCard padding="md">
-			<SectionHeader title="Campaigns" icon={MegaphoneIcon} viewAllHref={`/${orgSlug}/campaigns`} />
-
-			<div className="mt-3 flex items-baseline gap-2">
-				<span className="text-2xl font-semibold tabular-nums text-zinc-900 dark:text-white">
-					{stats.totalCampaigns}
-				</span>
-				<span className="text-sm text-zinc-500 dark:text-zinc-400">total</span>
+		<ContentCard padding="none">
+			<div className="flex items-center justify-between border-b border-zinc-200 px-3.5 py-2.5 sm:px-4 sm:py-3 dark:border-zinc-700">
+				<SectionHeader title="Campaigns" icon={MegaphoneIcon} iconColor="violet" />
+				<Link
+					href={`/${orgSlug}/campaigns`}
+					className="group flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium text-zinc-500 transition-all hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"
+				>
+					View all
+					<ChevronRightIcon className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+				</Link>
 			</div>
-
-			<div className="mt-3 space-y-2">
-				{items.map((item) => (
-					<div key={item.label} className="flex items-center justify-between">
-						<div className="flex items-center gap-2">
-							<div className={`size-2 rounded-full ${item.dotClass}`} />
-							<span className="text-sm text-zinc-600 dark:text-zinc-400">{item.label}</span>
-						</div>
-						<span className="text-sm font-medium tabular-nums text-zinc-900 dark:text-white">{item.value}</span>
-					</div>
-				))}
-			</div>
-
-			{stats.endingSoon > 0 && (
-				<div className="mt-3 flex items-center gap-2 rounded-lg bg-amber-50/60 px-3 py-2 shadow-sm ring-1 ring-amber-200 dark:bg-amber-950/10 dark:ring-amber-800">
-					<ClockIcon className="size-3.5 text-amber-500" />
-					<span className="text-xs font-medium text-amber-700 dark:text-amber-400">{stats.endingSoon} ending soon</span>
+			<div className="px-3.5 py-3 sm:px-4">
+				<div className="flex items-baseline gap-2">
+					<span className="text-2xl font-semibold tabular-nums text-zinc-900 dark:text-white">
+						{stats.totalCampaigns}
+					</span>
+					<span className="text-sm text-zinc-500 dark:text-zinc-400">total</span>
 				</div>
-			)}
+
+				<div className="mt-3 space-y-2">
+					{items.map((item) => (
+						<div key={item.label} className="flex items-center justify-between">
+							<div className="flex items-center gap-2">
+								<div className={`size-2 rounded-full ${item.dotClass}`} />
+								<span className="text-sm text-zinc-600 dark:text-zinc-400">{item.label}</span>
+							</div>
+							<span className="text-sm font-medium tabular-nums text-zinc-900 dark:text-white">{item.value}</span>
+						</div>
+					))}
+				</div>
+
+				{stats.endingSoon > 0 && (
+					<div className="mt-3 flex items-center gap-2 rounded-lg bg-amber-50/60 px-3 py-2 shadow-sm ring-1 ring-amber-200 dark:bg-amber-950/10 dark:ring-amber-800">
+						<ClockIcon className="size-3.5 text-amber-500" />
+						<span className="text-xs font-medium text-amber-700 dark:text-amber-400">{stats.endingSoon} ending soon</span>
+					</div>
+				)}
+			</div>
 		</ContentCard>
 	);
 }
@@ -315,64 +302,74 @@ function EnrollmentStats({
 	const total = stats.totalEnrollments;
 
 	return (
-		<ContentCard padding="md">
-			<SectionHeader title="Enrollments" icon={UserGroupIcon} viewAllHref={`/${orgSlug}/enrollments`} />
-
-			<div className="mt-3 flex items-baseline gap-2">
-				<span className="text-2xl font-semibold tabular-nums text-zinc-900 dark:text-white">
-					{stats.totalEnrollments.toLocaleString()}
-				</span>
-				{stats.enrollmentTrend !== 0 && (
-					<span
-						className={`flex items-center gap-0.5 text-xs font-medium ${
-							stats.enrollmentTrend > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"
-						}`}
-					>
-						<ArrowTrendingUpIcon className={`size-3.5 ${stats.enrollmentTrend < 0 ? "rotate-180" : ""}`} />
-						{Math.abs(stats.enrollmentTrend)}%
-					</span>
-				)}
+		<ContentCard padding="none">
+			<div className="flex items-center justify-between border-b border-zinc-200 px-3.5 py-2.5 sm:px-4 sm:py-3 dark:border-zinc-700">
+				<SectionHeader title="Enrollments" icon={UserGroupIcon} iconColor="sky" />
+				<Link
+					href={`/${orgSlug}/enrollments`}
+					className="group flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium text-zinc-500 transition-all hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"
+				>
+					View all
+					<ChevronRightIcon className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+				</Link>
 			</div>
-
-			{/* Progress bar */}
-			{total > 0 && (
-				<div className="mt-3 space-y-2.5">
-					<div className="flex h-2 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
-						{segments.map((seg) => (
-							<div
-								key={seg.label}
-								className={`${seg.color} first:rounded-l-full last:rounded-r-full transition-all duration-500`}
-								style={{ width: `${(seg.count / total) * 100}%` }}
-							/>
-						))}
-					</div>
-					<div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-						{segments.map((seg) => (
-							<div key={seg.label} className="flex items-center gap-1.5">
-								<div className={`size-2 rounded-full ${seg.color}`} />
-								<span className="text-xs text-zinc-500 dark:text-zinc-400">{seg.label}</span>
-								<span className="text-xs font-medium tabular-nums text-zinc-700 dark:text-zinc-300">{seg.count}</span>
-							</div>
-						))}
-					</div>
-				</div>
-			)}
-
-			{/* Approval rate */}
-			<div className="mt-3 flex items-center justify-between rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800/50">
-				<span className="text-xs text-zinc-500 dark:text-zinc-400">Approval Rate</span>
-				<div className="flex items-center gap-1.5">
-					<span className="text-sm font-semibold tabular-nums text-zinc-900 dark:text-white">{approvalRate}%</span>
-					{stats.approvalRateTrend !== 0 && (
+			<div className="px-3.5 py-3 sm:px-4">
+				<div className="flex items-baseline gap-2">
+					<span className="text-2xl font-semibold tabular-nums text-zinc-900 dark:text-white">
+						{stats.totalEnrollments.toLocaleString()}
+					</span>
+					{stats.enrollmentTrend !== 0 && (
 						<span
-							className={`text-[10px] font-medium ${
-								stats.approvalRateTrend > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-500 dark:text-red-400"
+							className={`flex items-center gap-0.5 text-xs font-medium ${
+								stats.enrollmentTrend > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"
 							}`}
 						>
-							{stats.approvalRateTrend > 0 ? "+" : ""}
-							{stats.approvalRateTrend}%
+							<ArrowTrendingUpIcon className={`size-3.5 ${stats.enrollmentTrend < 0 ? "rotate-180" : ""}`} />
+							{Math.abs(stats.enrollmentTrend)}%
 						</span>
 					)}
+				</div>
+
+				{/* Progress bar */}
+				{total > 0 && (
+					<div className="mt-3 space-y-2.5">
+						<div className="flex h-2 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+							{segments.map((seg) => (
+								<div
+									key={seg.label}
+									className={`${seg.color} first:rounded-l-full last:rounded-r-full transition-all duration-500`}
+									style={{ width: `${(seg.count / total) * 100}%` }}
+								/>
+							))}
+						</div>
+						<div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+							{segments.map((seg) => (
+								<div key={seg.label} className="flex items-center gap-1.5">
+									<div className={`size-2 rounded-full ${seg.color}`} />
+									<span className="text-xs text-zinc-500 dark:text-zinc-400">{seg.label}</span>
+									<span className="text-xs font-medium tabular-nums text-zinc-700 dark:text-zinc-300">{seg.count}</span>
+								</div>
+							))}
+						</div>
+					</div>
+				)}
+
+				{/* Approval rate */}
+				<div className="mt-3 flex items-center justify-between rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800/50">
+					<span className="text-xs text-zinc-500 dark:text-zinc-400">Approval Rate</span>
+					<div className="flex items-center gap-1.5">
+						<span className="text-sm font-semibold tabular-nums text-zinc-900 dark:text-white">{approvalRate}%</span>
+						{stats.approvalRateTrend !== 0 && (
+							<span
+								className={`text-[10px] font-medium ${
+									stats.approvalRateTrend > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-500 dark:text-red-400"
+								}`}
+							>
+								{stats.approvalRateTrend > 0 ? "+" : ""}
+								{stats.approvalRateTrend}%
+							</span>
+						)}
+					</div>
 				</div>
 			</div>
 		</ContentCard>
@@ -404,20 +401,31 @@ function EnrollmentTrendChart({
 	}));
 
 	return (
-		<ContentCard padding="md" className="overflow-hidden">
-			<SectionHeader title="Enrollment Trend" icon={ArrowTrendingUpIcon} viewAllHref={`/${orgSlug}/enrollments`} />
-			<div className="mt-3 h-48 sm:h-56">
-				<AreaChart
-					data={formattedData}
-					series={[
-						{ dataKey: "enrollments", name: "Total" },
-						{ dataKey: "approved", name: "Approved" },
-					]}
-					xAxisKey="date"
-					height={224}
-					showGrid
-					showLegend
-				/>
+		<ContentCard padding="none" className="overflow-hidden">
+			<div className="flex items-center justify-between border-b border-zinc-200 px-3.5 py-2.5 sm:px-4 sm:py-3 dark:border-zinc-700">
+				<SectionHeader title="Enrollment Trend" icon={ArrowTrendingUpIcon} iconColor="emerald" />
+				<Link
+					href={`/${orgSlug}/enrollments`}
+					className="group flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium text-zinc-500 transition-all hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"
+				>
+					View all
+					<ChevronRightIcon className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+				</Link>
+			</div>
+			<div className="px-3.5 py-3 sm:px-4">
+				<div className="h-48 sm:h-56">
+					<AreaChart
+						data={formattedData}
+						series={[
+							{ dataKey: "enrollments", name: "Total" },
+							{ dataKey: "approved", name: "Approved" },
+						]}
+						xAxisKey="date"
+						height={224}
+						showGrid
+						showLegend
+					/>
+				</div>
 			</div>
 		</ContentCard>
 	);
@@ -451,38 +459,76 @@ function TopCampaignsSection({
 	};
 
 	return (
-		<ContentCard padding="md" className="overflow-hidden">
-			<SectionHeader title="Top Campaigns" icon={MegaphoneIcon} viewAllHref={`/${orgSlug}/campaigns`} />
-			<div className="mt-3 space-y-0.5">
-				{campaigns.slice(0, 5).map((campaign) => {
+		<ContentCard padding="none" className="overflow-hidden">
+			<div className="flex items-center justify-between border-b border-zinc-200 px-3.5 py-2.5 sm:px-4 sm:py-3 dark:border-zinc-700">
+				<SectionHeader title="Top Campaigns" icon={MegaphoneIcon} iconColor="violet" />
+				<Link
+					href={`/${orgSlug}/campaigns`}
+					className="group flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium text-zinc-500 transition-all hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"
+				>
+					View all
+					<ChevronRightIcon className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+				</Link>
+			</div>
+			<div className="px-3.5 py-3 sm:px-4">
+				<div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
+				{campaigns.slice(0, 4).map((campaign) => {
 					const sc = statusConfig[campaign.status] || statusConfig.active;
 					return (
 						<Link
 							key={campaign.id}
 							href={`/${orgSlug}/campaigns/${campaign.id}`}
-							className="group flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/40"
+							className="group relative flex flex-col overflow-hidden rounded-xl bg-white shadow-xs ring-1 ring-zinc-200 transition-all hover:ring-zinc-300 hover:shadow-md dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:ring-zinc-700"
 						>
-							{campaign.listingImage ? (
-								<div className="size-9 shrink-0 overflow-hidden rounded-lg bg-zinc-100 p-1 dark:bg-zinc-800">
-									<img src={getAssetUrl(campaign.listingImage)} alt="" className="size-full object-contain" />
+							{/* Top section: image + info */}
+							<div className="flex items-start gap-3 p-3">
+								{campaign.listingImage ? (
+									<div className="size-10 shrink-0 overflow-hidden rounded-lg bg-zinc-100 ring-1 ring-zinc-200/80 p-1 dark:bg-zinc-800 dark:ring-zinc-700">
+										<img src={getAssetUrl(campaign.listingImage)} alt="" className="size-full object-contain" />
+									</div>
+								) : (
+									<div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-zinc-100 ring-1 ring-zinc-200/80 dark:bg-zinc-800 dark:ring-zinc-700">
+										<MegaphoneIcon className="size-4 text-zinc-400 dark:text-zinc-500" />
+									</div>
+								)}
+								<div className="min-w-0 flex-1">
+									<div className="flex items-center justify-between gap-2">
+										<h3 className="truncate text-sm font-semibold text-zinc-900 dark:text-white">{campaign.name}</h3>
+										<Badge color={sc.color} className="inline-flex shrink-0 items-center gap-0.5 text-[10px]!">
+											{sc.label}
+										</Badge>
+									</div>
+									<p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+										{campaign.enrollments} enrolled · {campaign.approvalRate}% approved
+									</p>
 								</div>
-							) : (
-								<div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
-									<MegaphoneIcon className="size-4 text-zinc-400 dark:text-zinc-500" />
-								</div>
-							)}
-							<div className="min-w-0 flex-1">
-								<p className="truncate text-sm font-medium text-zinc-900 dark:text-white">{campaign.name}</p>
-								<p className="text-xs text-zinc-500 dark:text-zinc-400">
-									{campaign.enrollments} enrolled · {campaign.approvalRate}% approved
-								</p>
 							</div>
-							<Badge color={sc.color} className="hidden shrink-0 sm:inline-flex">
-								{sc.label}
-							</Badge>
+
+							{/* Footer stats */}
+							<div className="mt-auto grid grid-cols-3 divide-x divide-zinc-200 border-t border-zinc-200 bg-zinc-50/50 dark:divide-zinc-700 dark:border-zinc-800 dark:bg-zinc-800/30">
+								<div className="flex flex-col items-center justify-center py-2">
+									<span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">Enrolled</span>
+									<span className="mt-0.5 text-xs font-semibold tabular-nums text-zinc-900 dark:text-white">
+										{campaign.enrollments}
+									</span>
+								</div>
+								<div className="flex flex-col items-center justify-center py-2">
+									<span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">Approval</span>
+									<span className="mt-0.5 text-xs font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">
+										{campaign.approvalRate}%
+									</span>
+								</div>
+								<div className="flex flex-col items-center justify-center py-2">
+									<span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">Days Left</span>
+									<span className={`mt-0.5 text-xs font-semibold tabular-nums ${campaign.daysLeft <= 3 ? "text-red-600 dark:text-red-400" : campaign.daysLeft <= 7 ? "text-amber-600 dark:text-amber-400" : "text-zinc-700 dark:text-zinc-300"}`}>
+										{campaign.daysLeft > 0 ? campaign.daysLeft : "—"}
+									</span>
+								</div>
+							</div>
 						</Link>
 					);
 				})}
+				</div>
 			</div>
 		</ContentCard>
 	);
@@ -511,45 +557,57 @@ function PendingReviewsSection({
 	if (items.length === 0 && totalPending === 0) return null;
 
 	return (
-		<ContentCard padding="md" className="overflow-hidden">
-			<SectionHeader title="Pending Reviews" icon={ClockIcon} viewAllHref={`/${orgSlug}/enrollments`}>
-				{totalPending > 0 && (
-					<span className="flex size-5 items-center justify-center rounded-full bg-amber-100 text-[10px] font-bold tabular-nums text-amber-700 dark:bg-amber-900/40 dark:text-amber-400">
-						{totalPending > 99 ? "99+" : totalPending}
-					</span>
-				)}
-			</SectionHeader>
-
-			{items.length > 0 ? (
-				<div className="mt-3 space-y-0.5">
-					{items.slice(0, 5).map((item) => (
-						<EnrollmentCardInline
-							key={item.id}
-							enrollment={item}
-							orgSlug={orgSlug}
-							formatRelativeTime={formatRelativeTime}
-						/>
-					))}
-
-					{totalPending > 5 && (
-						<Link
-							href={`/${orgSlug}/enrollments`}
-							className="group flex items-center justify-center gap-1 rounded-lg py-2 text-xs font-medium text-zinc-500 transition-colors hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800/40 dark:hover:text-white"
-						>
-							View all {totalPending} pending
-							<ChevronRightIcon className="size-3.5 transition-transform group-hover:translate-x-0.5" />
-						</Link>
+		<ContentCard padding="none" className="overflow-hidden">
+			<div className="flex items-center justify-between border-b border-zinc-200 px-3.5 py-2.5 sm:px-4 sm:py-3 dark:border-zinc-700">
+				<SectionHeader title="Pending Reviews" icon={ClockIcon} iconColor="amber">
+					{totalPending > 0 && (
+						<span className="flex size-5 items-center justify-center rounded-full bg-amber-100 text-[10px] font-bold tabular-nums text-amber-700 dark:bg-amber-900/40 dark:text-amber-400">
+							{totalPending > 99 ? "99+" : totalPending}
+						</span>
 					)}
-				</div>
-			) : (
-				<div className="mt-4 flex flex-col items-center rounded-lg bg-zinc-50 py-6 text-center dark:bg-zinc-800/30">
-					<div className="flex size-10 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800">
-						<CheckCircleIcon className="size-5 text-emerald-500" />
+				</SectionHeader>
+				<Link
+					href={`/${orgSlug}/enrollments`}
+					className="group flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium text-zinc-500 transition-all hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"
+				>
+					View all
+					<ChevronRightIcon className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+				</Link>
+			</div>
+			<div className="px-3.5 py-3 sm:px-4">
+				{items.length > 0 ? (
+					<div className="space-y-3">
+						<div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
+							{items.slice(0, 4).map((item) => (
+								<EnrollmentCardInline
+									key={item.id}
+									enrollment={item}
+									orgSlug={orgSlug}
+									formatRelativeTime={formatRelativeTime}
+								/>
+							))}
+						</div>
+
+						{totalPending > 4 && (
+							<Link
+								href={`/${orgSlug}/enrollments`}
+								className="group flex items-center justify-center gap-1 rounded-lg py-2 text-xs font-medium text-zinc-500 transition-colors hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800/40 dark:hover:text-white"
+							>
+								View all {totalPending} pending
+								<ChevronRightIcon className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+							</Link>
+						)}
 					</div>
-					<p className="mt-2 text-sm font-medium text-zinc-500 dark:text-zinc-400">All caught up</p>
-					<p className="text-xs text-zinc-500 dark:text-zinc-400">No enrollments need review</p>
-				</div>
-			)}
+				) : (
+					<div className="flex flex-col items-center rounded-lg bg-zinc-50 py-6 text-center dark:bg-zinc-800/30">
+						<div className="flex size-10 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800">
+							<CheckCircleIcon className="size-5 text-emerald-500" />
+						</div>
+						<p className="mt-2 text-sm font-medium text-zinc-500 dark:text-zinc-400">All caught up</p>
+						<p className="text-xs text-zinc-500 dark:text-zinc-400">No enrollments need review</p>
+					</div>
+				)}
+			</div>
 		</ContentCard>
 	);
 }
@@ -1034,9 +1092,11 @@ export function Dashboard() {
 
 					{/* Activity Feed */}
 					{organizationId && (
-						<ContentCard padding="md" className="overflow-hidden">
-							<SectionHeader title="Recent Activity" icon={ClockIcon} />
-							<div className="mt-3">
+						<ContentCard padding="none" className="overflow-hidden">
+							<div className="flex items-center justify-between border-b border-zinc-200 px-3.5 py-2.5 sm:px-4 sm:py-3 dark:border-zinc-700">
+								<SectionHeader title="Recent Activity" icon={ClockIcon} iconColor="sky" />
+							</div>
+							<div className="px-3.5 py-3 sm:px-4">
 								<ActivityFeed organizationId={organizationId} />
 							</div>
 						</ContentCard>

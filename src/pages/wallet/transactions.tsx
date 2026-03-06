@@ -2,19 +2,20 @@ import {
 	ArrowDownLeftIcon,
 	ArrowPathIcon,
 	ArrowUpRightIcon,
+	ArrowsRightLeftIcon,
 	Squares2X2Icon,
 } from "@heroicons/react/16/solid";
 import { useState } from "react";
 import { Button } from "@/components/button";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
-import { FilterPills, type FilterPillOption } from "@/components/shared/filter-pills";
+import { FilterDropdown, type FilterOption } from "@/components/shared/filter-dropdown";
 import { Skeleton } from "@/components/skeleton";
 import { useInfiniteWalletTransactions } from "@/features/wallet/hooks";
 import { useOrgContext } from "@/hooks/use-org-context";
 import { TransactionRow } from "./components";
 
-const typeFilterOptions: FilterPillOption[] = [
+const typeFilterOptions: FilterOption[] = [
 	{ value: "all", label: "All", icon: Squares2X2Icon, iconColor: "text-sky-500" },
 	{ value: "credit", label: "Credits", icon: ArrowDownLeftIcon, iconColor: "text-emerald-500" },
 	{ value: "debit", label: "Debits", icon: ArrowUpRightIcon, iconColor: "text-red-500" },
@@ -23,7 +24,7 @@ const typeFilterOptions: FilterPillOption[] = [
 type TypeFilter = "all" | "credit" | "debit";
 
 export function WalletTransactions() {
-	const { organizationId } = useOrgContext();
+	const { organizationId, orgSlug } = useOrgContext();
 	const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
 
 	const {
@@ -44,11 +45,14 @@ export function WalletTransactions() {
 
 	return (
 		<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-			<div className="flex items-center justify-between border-b border-zinc-100 px-4 py-2.5 dark:border-zinc-800">
-				<FilterPills options={typeFilterOptions} value={typeFilter} onChange={(v) => setTypeFilter(v as TypeFilter)} />
-				{transactions.length > 0 && (
-					<span className="text-xs tabular-nums text-zinc-400 dark:text-zinc-500">{transactions.length}</span>
-				)}
+			<div className="flex items-center justify-between border-b border-zinc-200 px-3.5 py-2.5 sm:px-4 sm:py-3 dark:border-zinc-700">
+				<div className="flex items-center gap-2.5">
+					<div className="flex size-6 items-center justify-center rounded-md bg-sky-100 dark:bg-sky-900/30">
+						<ArrowsRightLeftIcon className="size-3.5 text-sky-500" />
+					</div>
+					<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">Transactions</h3>
+				</div>
+				<FilterDropdown label="Type" options={typeFilterOptions} value={typeFilter} onChange={(v) => setTypeFilter(v as TypeFilter)} />
 			</div>
 				{loading ? (
 					<div className="space-y-2 p-4">
@@ -72,7 +76,7 @@ export function WalletTransactions() {
 					<>
 						<div className="divide-y divide-zinc-100 dark:divide-zinc-800">
 							{transactions.map((transaction) => (
-								<TransactionRow key={transaction.id} transaction={transaction} />
+								<TransactionRow key={transaction.id} transaction={transaction} orgSlug={orgSlug} />
 							))}
 						</div>
 						{hasMore && (

@@ -13,14 +13,14 @@ import { Badge } from "@/components/badge";
 import { Button } from "@/components/button";
 import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/dialog";
 import { EmptyState } from "@/components/shared/empty-state";
-import { FilterPills, type FilterPillOption } from "@/components/shared/filter-pills";
+import { FilterDropdown, type FilterOption } from "@/components/shared/filter-dropdown";
 import { Skeleton } from "@/components/skeleton";
 import { useWithdrawalDetail, useWithdrawalStats, useWithdrawals } from "@/features/wallet/hooks";
 import { useOrgContext } from "@/hooks/use-org-context";
 import { formatCurrency, formatDateTime } from "@/lib/design-tokens";
 import { WithdrawalRow } from "./components";
 
-const statusFilterOptions: FilterPillOption[] = [
+const statusFilterOptions: FilterOption[] = [
 	{ value: "all", label: "All", icon: Squares2X2Icon, iconColor: "text-sky-500" },
 	{ value: "pending", label: "Pending", icon: ClockIcon, iconColor: "text-amber-500" },
 	{ value: "completed", label: "Completed", icon: CheckCircleIcon, iconColor: "text-emerald-500" },
@@ -69,11 +69,14 @@ export function WalletWithdrawals() {
 
 			{/* Withdrawal List */}
 			<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-				<div className="flex items-center justify-between border-b border-zinc-100 px-4 py-2.5 dark:border-zinc-800">
-					<FilterPills options={statusFilterOptions} value={statusFilter} onChange={(v) => setStatusFilter(v as StatusFilter)} />
-					{withdrawals.length > 0 && (
-						<span className="text-xs tabular-nums text-zinc-400 dark:text-zinc-500">{withdrawals.length}</span>
-					)}
+				<div className="flex items-center justify-between border-b border-zinc-200 px-3.5 py-2.5 sm:px-4 sm:py-3 dark:border-zinc-700">
+					<div className="flex items-center gap-2.5">
+						<div className="flex size-6 items-center justify-center rounded-md bg-rose-100 dark:bg-rose-900/30">
+							<ArrowUpRightIcon className="size-3.5 text-rose-500" />
+						</div>
+						<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">Withdrawals</h3>
+					</div>
+					<FilterDropdown label="Status" options={statusFilterOptions} value={statusFilter} onChange={(v) => setStatusFilter(v as StatusFilter)} />
 				</div>
 				{withdrawalsLoading ? (
 					<div className="space-y-2 p-4">

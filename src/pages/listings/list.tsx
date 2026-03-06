@@ -1,11 +1,11 @@
 import {
 	ArrowPathIcon,
 	ArrowsUpDownIcon,
+	ArrowUpRightIcon,
 	CalendarIcon,
 	CubeIcon,
 	EllipsisVerticalIcon,
 	EyeIcon,
-	LinkIcon,
 	MagnifyingGlassIcon,
 	PlusIcon,
 	TrashIcon,
@@ -24,6 +24,7 @@ import { BulkActionsBar } from "@/components/shared/bulk-actions-bar";
 import { SelectionCheckbox } from "@/components/shared/selection-checkbox";
 import { useCan } from "@/components/shared/can";
 import { EmptyState } from "@/components/shared/empty-state";
+import { FilterDropdown } from "@/components/shared/filter-dropdown";
 import { ErrorState } from "@/components/shared/error-state";
 import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
 import { IconButton } from "@/components/shared/icon-button";
@@ -79,92 +80,88 @@ interface ListingCardProps {
 	listing: Listing;
 	orgSlug: string;
 	canEdit?: boolean;
+	selected?: boolean;
 }
 
-function ListingCard({ listing, orgSlug, canEdit }: ListingCardProps) {
+function ListingCard({ listing, orgSlug, canEdit, selected }: ListingCardProps) {
 	const imageUrl = listing.listingImages?.[0] ? getAssetUrl(listing.listingImages[0].imageUrl) : null;
 
 	return (
-		<div className="flex flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-			{/* Listing Image */}
-			<div className="relative aspect-square w-full overflow-hidden bg-zinc-100 dark:bg-zinc-800">
+		<Link
+			href={`/${orgSlug}/listings/${listing.id}`}
+			className={clsx(
+				"group/card flex flex-col overflow-hidden rounded-xl shadow-xs ring-1 transition-all hover:shadow-md dark:bg-zinc-900",
+				selected
+					? "ring-sky-300 bg-sky-50/50 dark:ring-sky-700 dark:bg-sky-950/20"
+					: "bg-white ring-zinc-200 hover:ring-zinc-300 dark:ring-zinc-800 dark:hover:ring-zinc-700"
+			)}
+		>
+			{/* Product Image */}
+			<div className="relative aspect-4/3 w-full overflow-hidden bg-zinc-100 dark:bg-zinc-800">
 				{imageUrl ? (
-					<img src={imageUrl} alt={listing.name} className="h-full w-full object-contain p-2" />
+					<img
+						src={imageUrl}
+						alt={listing.name}
+						className="h-full w-full object-contain p-3 transition-transform duration-300 group-hover/card:scale-105"
+					/>
 				) : (
 					<div className="flex h-full w-full items-center justify-center">
-						<CubeIcon className="size-12 text-zinc-300 dark:text-zinc-600" />
+						<CubeIcon className="size-10 text-zinc-300 dark:text-zinc-600" />
 					</div>
+				)}
+				{/* Views overlay badge */}
+				<div className="absolute bottom-2 left-2 flex items-center gap-1 rounded-md bg-black/60 px-1.5 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">
+					<EyeIcon className="size-3" />
+					{listing.views.toLocaleString("en-IN")}
+				</div>
+				{/* External link badge */}
+				{listing.link && (
+					<button
+						type="button"
+						onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (listing.link) window.open(listing.link, "_blank"); }}
+						className="absolute bottom-2 right-2 flex items-center justify-center rounded-md bg-black/60 p-1 text-white backdrop-blur-sm transition-colors hover:bg-black/80"
+					>
+						<ArrowUpRightIcon className="size-3" />
+					</button>
 				)}
 			</div>
 
 			{/* Content */}
-			<div className="flex flex-1 flex-col gap-1.5 p-2.5 sm:p-3">
-				<Link href={`/${orgSlug}/listings/${listing.id}`}>
-					<h3 className="line-clamp-2 text-sm font-semibold leading-snug text-zinc-900 dark:text-white">
-						{listing.name}
-					</h3>
-				</Link>
-				<p className="text-xs text-zinc-500 dark:text-zinc-400">SKU: {listing.identifier}</p>
-				<p className="mt-auto text-base font-bold text-zinc-900 dark:text-white">
-					{formatCurrency(listing.priceDecimal)}
+			<div className="flex flex-1 flex-col p-3">
+				<h3 className="line-clamp-2 text-sm font-semibold leading-snug text-zinc-900 dark:text-white">
+					{listing.name}
+				</h3>
+				<p className="mt-1 text-[11px] text-zinc-400 dark:text-zinc-500">
+					{listing.identifier}
 				</p>
-			</div>
-
-			{/* Edge-to-edge divider */}
-			<div className="h-px bg-zinc-200 dark:bg-zinc-700" />
-
-			{/* Footer Stats - 2-column layout: Views | Link */}
-			<div className="grid grid-cols-2 divide-x divide-zinc-200 dark:divide-zinc-700">
-				{/* Views */}
-				<div className="flex flex-col items-center justify-center py-2">
-					<span className="text-[10px] text-zinc-500 dark:text-zinc-400">Views</span>
-					<span className="text-xs font-semibold text-zinc-900 sm:text-sm dark:text-white">
-						{listing.views.toLocaleString("en-IN")}
-					</span>
-				</div>
-
-				{/* Listing Link */}
-				<div className="flex flex-col items-center justify-center py-2">
-					<span className="text-[10px] text-zinc-500 dark:text-zinc-400">Link</span>
-					{listing.link ? (
-						<a
-							href={listing.link}
-							target="_blank"
-							rel="noopener noreferrer"
-							className="text-xs font-semibold text-sky-600 hover:text-sky-700 sm:text-sm dark:text-sky-400 dark:hover:text-sky-300"
-						>
-							<LinkIcon className="size-4" />
-						</a>
-					) : (
-						<span className="text-xs text-zinc-400 sm:text-sm">—</span>
+				<div className="mt-auto flex items-end justify-between pt-2">
+					<p className="text-base font-bold text-zinc-900 dark:text-white">
+						{formatCurrency(listing.priceDecimal)}
+					</p>
+					{canEdit && (
+						<Dropdown>
+							<DropdownButton
+								plain
+								aria-label="More options"
+								className="rounded-lg p-1 opacity-0 transition-opacity group-hover/card:opacity-100"
+								onClick={(e: React.MouseEvent) => e.preventDefault()}
+							>
+								<EllipsisVerticalIcon className="size-4 text-zinc-400" />
+							</DropdownButton>
+							<DropdownMenu anchor="bottom end">
+								<DropdownItem href={`/${orgSlug}/listings/${listing.id}`}>View details</DropdownItem>
+								<DropdownItem href={`/${orgSlug}/listings/${listing.id}/edit`}>Edit listing</DropdownItem>
+								{listing.link && (
+									<DropdownItem href={listing.link} target="_blank">
+										Open listing link
+									</DropdownItem>
+								)}
+							</DropdownMenu>
+						</Dropdown>
 					)}
 				</div>
 			</div>
-
-			{/* Actions footer */}
-			<div className="flex items-center justify-between border-t border-zinc-200 px-3 py-2 dark:border-zinc-700">
-				<Link
-					href={`/${orgSlug}/listings/${listing.id}`}
-					className="text-xs font-medium text-zinc-500 hover:text-zinc-900 sm:text-sm dark:text-zinc-400 dark:hover:text-zinc-200"
-				>
-					View details
-				</Link>
-				<Dropdown>
-					<DropdownButton plain aria-label="More options" className="-m-2.5 p-2.5">
-						<EllipsisVerticalIcon className="size-5 text-zinc-500 dark:text-zinc-400" />
-					</DropdownButton>
-					<DropdownMenu anchor="bottom end">
-						<DropdownItem href={`/${orgSlug}/listings/${listing.id}`}>View details</DropdownItem>
-						{canEdit && <DropdownItem href={`/${orgSlug}/listings/${listing.id}/edit`}>Edit listing</DropdownItem>}
-						{listing.link && (
-							<DropdownItem href={listing.link} target="_blank">
-								Open listing link
-							</DropdownItem>
-						)}
-					</DropdownMenu>
-				</Dropdown>
-			</div>
-		</div>
+		</Link>
 	);
 }
 
@@ -174,35 +171,17 @@ function ListingCard({ listing, orgSlug, canEdit }: ListingCardProps) {
 
 function ListingCardSkeleton() {
 	return (
-		<div className="flex flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
+		<div className="flex flex-col overflow-hidden rounded-xl bg-white shadow-xs ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
 			{/* Image */}
-			<div className="relative aspect-square w-full overflow-hidden bg-zinc-100 dark:bg-zinc-800">
+			<div className="aspect-4/3 w-full bg-zinc-100 dark:bg-zinc-800">
 				<Shimmer className="h-full w-full rounded-none" />
 			</div>
 
 			{/* Content */}
-			<div className="flex flex-1 flex-col p-2.5 sm:p-3">
+			<div className="flex flex-1 flex-col p-3">
 				<Shimmer className="h-4 w-3/4" />
-				<Shimmer className="mt-1.5 h-3 w-1/2" />
-				<Shimmer className="mt-2 h-5 w-20" />
-			</div>
-
-			<div className="h-px bg-zinc-200 dark:bg-zinc-700" />
-
-			{/* Footer Stats - 2 columns */}
-			<div className="grid grid-cols-2 divide-x divide-zinc-200 dark:divide-zinc-700">
-				{[1, 2].map((i) => (
-					<div key={i} className="flex flex-col items-center justify-center py-2">
-						<Shimmer className="h-2.5 w-8" />
-						<Shimmer className="mt-0.5 h-3.5 w-10" />
-					</div>
-				))}
-			</div>
-
-			{/* Actions */}
-			<div className="flex items-center justify-between border-t border-zinc-200 px-3 py-2 dark:border-zinc-700">
-				<Shimmer className="h-3 w-16" />
-				<Shimmer className="size-5 rounded" />
+				<Shimmer className="mt-1.5 h-3 w-1/3" />
+				<Shimmer className="mt-3 h-5 w-16" />
 			</div>
 		</div>
 	);
@@ -427,37 +406,18 @@ export function ListingsList() {
 					</InputGroup>
 				</div>
 
-				{/* Sort pills */}
-				<div className="-mx-1 min-w-0 flex-1 overflow-x-auto scrollbar-hide px-1 py-1">
-					<div className="flex min-w-max gap-1.5 sm:min-w-0 sm:flex-wrap">
-						{(
-							[
-								{ value: "date", label: "Newest", icon: CalendarIcon, iconColor: "text-sky-500" },
-								{ value: "name", label: "Name A-Z", icon: CubeIcon, iconColor: "text-violet-500" },
-								{ value: "price", label: "Price", icon: ArrowsUpDownIcon, iconColor: "text-emerald-500" },
-								{ value: "views", label: "Most Viewed", icon: EyeIcon, iconColor: "text-amber-500" },
-							] as { value: string; label: string; icon: typeof CalendarIcon; iconColor: string }[]
-						).map((opt) => {
-							const isActive = sortBy === opt.value;
-							return (
-								<button
-									type="button"
-									key={opt.value}
-									onClick={() => navigate({ search: ((prev: Record<string, unknown>) => ({ ...prev, sort: opt.value === "date" ? undefined : opt.value })) as never })}
-									className={clsx(
-										"inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium shadow-sm ring-1 transition-all duration-200 active:scale-95",
-										isActive
-											? "bg-zinc-900 text-white ring-zinc-900 dark:bg-white dark:text-zinc-900 dark:ring-white"
-											: "bg-white text-zinc-600 ring-zinc-200 hover:bg-zinc-50 dark:bg-zinc-900 dark:text-zinc-400 dark:ring-zinc-800 dark:hover:bg-zinc-800"
-									)}
-								>
-									<opt.icon className={clsx("size-3.5", isActive ? "text-white dark:text-zinc-900" : opt.iconColor)} />
-									{opt.label}
-								</button>
-							);
-						})}
-					</div>
-				</div>
+				{/* Sort dropdown */}
+				<FilterDropdown
+					label="Sort"
+					options={[
+						{ value: "date", label: "Newest", icon: CalendarIcon, iconColor: "text-sky-500" },
+						{ value: "name", label: "Name A-Z", icon: CubeIcon, iconColor: "text-violet-500" },
+						{ value: "price", label: "Price", icon: ArrowsUpDownIcon, iconColor: "text-emerald-500" },
+						{ value: "views", label: "Most Viewed", icon: EyeIcon, iconColor: "text-amber-500" },
+					]}
+					value={sortBy}
+					onChange={(value) => navigate({ search: ((prev: Record<string, unknown>) => ({ ...prev, sort: value === "date" ? undefined : value })) as never })}
+				/>
 			</div>
 
 			{/* Active filter chips */}
@@ -483,12 +443,12 @@ export function ListingsList() {
 				<>
 					<div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
 						{filteredListings.map((listing) => (
-							<div key={listing.id} className={clsx("group relative rounded-xl transition-shadow", selectedIds.has(listing.id) && "outline-2 outline-zinc-900 dark:outline-white")}>
+							<div key={listing.id} className="group relative rounded-xl">
 								<SelectionCheckbox
 									selected={selectedIds.has(listing.id)}
 									onToggle={(e) => { e.preventDefault(); toggleSelect(listing.id); }}
 								/>
-								<ListingCard listing={listing} orgSlug={orgSlug} canEdit={canUpdateListing} />
+								<ListingCard listing={listing} orgSlug={orgSlug} canEdit={canUpdateListing} selected={selectedIds.has(listing.id)} />
 							</div>
 						))}
 					</div>

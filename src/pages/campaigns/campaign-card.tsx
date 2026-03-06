@@ -178,43 +178,42 @@ export function CampaignCard({
 	return (
 		<Link
 			href={`/${orgSlug}/campaigns/${campaign.id}`}
-			className="group flex h-full flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 transition-shadow duration-200 hover:shadow-md dark:bg-zinc-900 dark:ring-zinc-800"
+			className="group flex h-full flex-col overflow-hidden rounded-xl bg-white shadow-xs ring-1 ring-zinc-200 transition-all hover:shadow-md hover:ring-zinc-300 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:ring-zinc-700"
 		>
-			{/* == Desktop == */}
-			<div className="hidden flex-1 sm:flex sm:flex-col">
-				{/* -- Header: large thumb + title + status -- */}
-				<div className="flex items-start gap-3.5 p-4">
-					{/* Product Image — 80px like shopper */}
+			{/* Header: product image + title + meta */}
+			<div className="flex flex-1 flex-col">
+				<div className="flex items-start gap-3 p-3 sm:gap-4 sm:p-4">
+					{/* Product Image — responsive 56px / 80px */}
 					<div className="relative shrink-0">
-						<div className="size-20 overflow-hidden rounded-xl bg-zinc-100 ring-1 ring-zinc-200/80 dark:bg-zinc-800 dark:ring-zinc-700">
+						<div className="size-14 overflow-hidden rounded-xl bg-zinc-100 ring-1 ring-zinc-200/80 sm:size-20 dark:bg-zinc-800 dark:ring-zinc-700">
 							{productImage ? (
-								<img src={productImage} alt={listingName ?? "Product"} className="size-full object-contain p-1.5" />
+								<img src={productImage} alt={listingName ?? "Product"} className="size-full object-contain p-1 sm:p-1.5" />
 							) : (
 								<div className="flex size-full items-center justify-center">
-									<MegaphoneIcon className="size-7 text-zinc-300 dark:text-zinc-600" />
+									<MegaphoneIcon className="size-6 text-zinc-300 sm:size-7 dark:text-zinc-600" />
 								</div>
 							)}
 						</div>
 						{PlatformIcon && (
-							<div className="absolute -bottom-1 -right-1 flex size-6 items-center justify-center rounded-lg border-2 border-white bg-white shadow-sm dark:border-zinc-900 dark:bg-zinc-900">
-								<PlatformIcon className={clsx("size-3.5", platformColor)} />
+							<div className="absolute -bottom-1 -right-1 flex size-5 items-center justify-center rounded-md border-2 border-white bg-white shadow-sm sm:size-6 sm:rounded-lg dark:border-zinc-900 dark:bg-zinc-900">
+								<PlatformIcon className={clsx("size-3 sm:size-3.5", platformColor)} />
 							</div>
 						)}
 					</div>
 
-					{/* Title + Meta — height-matched to 80px thumbnail */}
+					{/* Title + Meta */}
 					<div className="min-w-0 flex-1">
 						<div className="flex items-start justify-between gap-2">
-							<h3 className="line-clamp-1 text-sm/5 font-semibold text-zinc-900 dark:text-white">{campaign.title}</h3>
+							<h3 className="line-clamp-2 text-sm/5 font-semibold text-zinc-900 dark:text-white">{campaign.title}</h3>
 							{dropdownMenu}
 						</div>
-						{listingName && <p className="line-clamp-1 text-xs text-zinc-500 dark:text-zinc-400">{listingName}</p>}
+						{listingName && <p className="mt-0.5 line-clamp-1 text-xs text-zinc-500 dark:text-zinc-400">{listingName}</p>}
 
-						{/* Inline meta row — all chips identical structure */}
-						<div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+						{/* Chips row */}
+						<div className="mt-2 flex flex-wrap items-center gap-1.5">
 							<span
 								className={clsx(
-									"inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold",
+									"inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-semibold",
 									chipColors[statusConfig.color]
 								)}
 							>
@@ -224,7 +223,7 @@ export function CampaignCard({
 							{displayPrice && (
 								<span
 									className={clsx(
-										"inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold",
+										"inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-semibold",
 										chipColors.emerald
 									)}
 								>
@@ -234,7 +233,7 @@ export function CampaignCard({
 							)}
 							<span
 								className={clsx(
-									"inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold",
+									"inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-semibold",
 									chipColors.sky
 								)}
 							>
@@ -245,9 +244,9 @@ export function CampaignCard({
 					</div>
 				</div>
 
-				{/* -- Progress bar (for live campaigns with caps) -- */}
+				{/* Progress bar (live campaigns with caps) */}
 				{isLive && hasCap && (
-					<div className="px-4 pb-3">
+					<div className="px-3 pb-3 sm:px-4">
 						<div className="flex items-center justify-between pb-1">
 							<span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">Enrollment Progress</span>
 							<span className="text-[10px] font-semibold tabular-nums text-zinc-500 dark:text-zinc-400">
@@ -266,38 +265,35 @@ export function CampaignCard({
 					</div>
 				)}
 
-				{/* -- Edge-to-edge divider -- */}
+				{/* Divider */}
 				<div className="mt-auto h-px bg-zinc-200 dark:bg-zinc-700" />
 
-				{/* -- Footer stats: 3-col with vertical dividers -- */}
+				{/* Footer stats: 3-col */}
 				<div className="grid grid-cols-3 divide-x divide-zinc-200 bg-zinc-50/50 dark:divide-zinc-700 dark:bg-zinc-800/30">
-					{/* Enrolled */}
-					<div className="flex flex-col items-center justify-center py-3">
+					<div className="flex flex-col items-center justify-center py-2.5 sm:py-3">
 						<span className="flex items-center gap-1 text-[10px] font-medium text-zinc-500 dark:text-zinc-400">
 							<UsersIcon className="size-3 shrink-0" />
 							Enrolled
 						</span>
-						<span className="mt-0.5 text-sm font-semibold tabular-nums text-zinc-900 dark:text-white">
+						<span className="mt-0.5 text-xs font-semibold tabular-nums text-zinc-900 sm:text-sm dark:text-white">
 							{campaign.currentEnrollments}
 							{hasCap && (
-								<span className="text-xs font-normal text-zinc-500 dark:text-zinc-400">/{campaign.maxEnrollments}</span>
+								<span className="text-[10px] font-normal text-zinc-500 sm:text-xs dark:text-zinc-400">/{campaign.maxEnrollments}</span>
 							)}
 						</span>
 					</div>
 
-					{/* Pending */}
-					<div className="flex flex-col items-center justify-center py-3">
+					<div className="flex flex-col items-center justify-center py-2.5 sm:py-3">
 						<span className="flex items-center gap-1 text-[10px] font-medium text-zinc-500 dark:text-zinc-400">
 							<ClockIcon className="size-3 shrink-0" />
 							Pending
 						</span>
-						<span className="mt-0.5 text-sm font-semibold tabular-nums text-amber-600 dark:text-amber-400">
+						<span className="mt-0.5 text-xs font-semibold tabular-nums text-amber-600 sm:text-sm dark:text-amber-400">
 							{campaign.pendingCount}
 						</span>
 					</div>
 
-					{/* Days Left / Approved — gauge for live, static for others */}
-					<div className="flex flex-col items-center justify-center py-2">
+					<div className="flex flex-col items-center justify-center py-2 sm:py-2.5">
 						{showGauge && daysLeft !== null ? (
 							<DeadlineGauge daysRemaining={daysLeft} />
 						) : (
@@ -306,135 +302,7 @@ export function CampaignCard({
 									<CheckCircleIcon className="size-3 shrink-0" />
 									Approved
 								</span>
-								<span className="mt-0.5 text-sm font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">
-									{campaign.approvedCount}
-								</span>
-							</>
-						)}
-					</div>
-				</div>
-			</div>
-
-			{/* == Mobile — same vertical card layout as desktop == */}
-			<div className="flex flex-1 flex-col sm:hidden">
-				{/* -- Header: thumb + title + status -- */}
-				<div className="flex items-center gap-3 p-3">
-					<div className="relative shrink-0">
-						<div className="size-16 overflow-hidden rounded-xl bg-zinc-100 ring-1 ring-zinc-200/80 dark:bg-zinc-800 dark:ring-zinc-700">
-							{productImage ? (
-								<img src={productImage} alt={listingName ?? "Product"} className="size-full object-contain p-1" />
-							) : (
-								<div className="flex size-full items-center justify-center">
-									<MegaphoneIcon className="size-6 text-zinc-300 dark:text-zinc-600" />
-								</div>
-							)}
-						</div>
-						{PlatformIcon && (
-							<div className="absolute -bottom-1 -right-1 flex size-5 items-center justify-center rounded-md border-2 border-white bg-white shadow-sm dark:border-zinc-900 dark:bg-zinc-900">
-								<PlatformIcon className={clsx("size-3", platformColor)} />
-							</div>
-						)}
-					</div>
-
-					<div className="min-w-0 flex-1">
-						<div className="flex items-center justify-between gap-1">
-							<h3 className="line-clamp-1 text-sm/4 font-semibold text-zinc-900 dark:text-white">{campaign.title}</h3>
-							{dropdownMenu}
-						</div>
-						{listingName && <p className="line-clamp-1 text-xs/4 text-zinc-500 dark:text-zinc-400">{listingName}</p>}
-						<div className="mt-0.5 flex flex-wrap items-center gap-1">
-							<span
-								className={clsx(
-									"inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[10px] font-semibold",
-									chipColors[statusConfig.color]
-								)}
-							>
-								<StatusIcon className="size-2.5 shrink-0" />
-								{statusConfig.label}
-							</span>
-							{displayPrice && (
-								<span
-									className={clsx(
-										"inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[10px] font-semibold",
-										chipColors.emerald
-									)}
-								>
-									<CurrencyRupeeIcon className="size-2.5 shrink-0" />
-									{displayPrice.replace("₹", "")}
-								</span>
-							)}
-							<span
-								className={clsx(
-									"inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[10px] font-semibold",
-									chipColors.sky
-								)}
-							>
-								<CalendarDaysIcon className="size-2.5 shrink-0" />
-								{formatDateCompact(campaign.startDate)} – {formatDateCompact(campaign.endDate)}
-							</span>
-						</div>
-					</div>
-				</div>
-
-				{/* -- Progress bar -- */}
-				{isLive && hasCap && (
-					<div className="px-3 pb-2.5">
-						<div className="flex items-center justify-between pb-1">
-							<span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">Enrollment Progress</span>
-							<span className="text-[10px] font-semibold tabular-nums text-zinc-500 dark:text-zinc-400">
-								{campaign.currentEnrollments}/{campaign.maxEnrollments}
-							</span>
-						</div>
-						<div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
-							<div
-								className={clsx(
-									"h-full rounded-full transition-all duration-500",
-									progress >= 90 ? "bg-red-500" : progress >= 70 ? "bg-amber-500" : "bg-emerald-500"
-								)}
-								style={{ width: `${progress}%` }}
-							/>
-						</div>
-					</div>
-				)}
-
-				{/* -- Edge-to-edge divider -- */}
-				<div className="mt-auto h-px bg-zinc-200 dark:bg-zinc-700" />
-
-				{/* -- Footer stats: 3-col with vertical dividers -- */}
-				<div className="grid grid-cols-3 divide-x divide-zinc-200 bg-zinc-50/50 dark:divide-zinc-700 dark:bg-zinc-800/30">
-					<div className="flex flex-col items-center justify-center py-2.5">
-						<span className="flex items-center gap-1 text-[10px] font-medium text-zinc-500 dark:text-zinc-400">
-							<UsersIcon className="size-2.5 shrink-0" />
-							Enrolled
-						</span>
-						<span className="mt-0.5 text-xs font-semibold tabular-nums text-zinc-900 dark:text-white">
-							{campaign.currentEnrollments}
-							{hasCap && (
-								<span className="text-[10px] font-normal text-zinc-500 dark:text-zinc-400">
-									/{campaign.maxEnrollments}
-								</span>
-							)}
-						</span>
-					</div>
-					<div className="flex flex-col items-center justify-center py-2.5">
-						<span className="flex items-center gap-1 text-[10px] font-medium text-zinc-500 dark:text-zinc-400">
-							<ClockIcon className="size-2.5 shrink-0" />
-							Pending
-						</span>
-						<span className="mt-0.5 text-xs font-semibold tabular-nums text-amber-600 dark:text-amber-400">
-							{campaign.pendingCount}
-						</span>
-					</div>
-					<div className="flex flex-col items-center justify-center py-2">
-						{showGauge && daysLeft !== null ? (
-							<DeadlineGauge daysRemaining={daysLeft} />
-						) : (
-							<>
-								<span className="flex items-center gap-1 text-[10px] font-medium text-zinc-500 dark:text-zinc-400">
-									<CheckCircleIcon className="size-2.5 shrink-0" />
-									Approved
-								</span>
-								<span className="mt-0.5 text-xs font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">
+								<span className="mt-0.5 text-xs font-semibold tabular-nums text-emerald-600 sm:text-sm dark:text-emerald-400">
 									{campaign.approvedCount}
 								</span>
 							</>
@@ -452,49 +320,34 @@ export function CampaignCard({
 
 export function CampaignCardSkeleton() {
 	return (
-		<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-			{/* Desktop */}
-			<div className="hidden sm:block">
-				<div className="flex items-start gap-3.5 p-4">
-					<Skeleton width={80} height={80} borderRadius={12} className="shrink-0" />
-					<div className="min-w-0 flex-1">
-						<Skeleton width="80%" height={18} borderRadius={4} />
-						<Skeleton width="55%" height={14} borderRadius={3} className="mt-1" />
-						<div className="mt-2.5 flex items-center gap-1.5">
-							<Skeleton width={56} height={20} borderRadius={6} />
-							<Skeleton width={50} height={20} borderRadius={6} />
-							<Skeleton width={90} height={14} borderRadius={3} />
-						</div>
+		<div className="overflow-hidden rounded-xl bg-white shadow-xs ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
+			<div className="flex items-start gap-3 p-3 sm:gap-4 sm:p-4">
+				<div className="size-14 shrink-0 animate-pulse rounded-xl bg-zinc-200 skeleton-shimmer sm:size-20 dark:bg-zinc-700" />
+				<div className="min-w-0 flex-1">
+					<Skeleton width="80%" height={18} borderRadius={4} />
+					<Skeleton width="55%" height={14} borderRadius={3} className="mt-1" />
+					<div className="mt-2 flex items-center gap-1.5">
+						<Skeleton width={56} height={20} borderRadius={6} />
+						<Skeleton width={50} height={20} borderRadius={6} />
+						<Skeleton width={90} height={20} borderRadius={6} />
 					</div>
-				</div>
-				<div className="px-4 pb-3">
-					<div className="flex items-center justify-between pb-1">
-						<Skeleton width={90} height={10} borderRadius={3} />
-						<Skeleton width={30} height={10} borderRadius={3} />
-					</div>
-					<Skeleton height={6} borderRadius={999} />
-				</div>
-				<div className="h-px bg-zinc-200 dark:bg-zinc-700" />
-				<div className="grid grid-cols-3 divide-x divide-zinc-200 bg-zinc-50/50 dark:divide-zinc-700 dark:bg-zinc-800/30">
-					{[1, 2, 3].map((i) => (
-						<div key={i} className="flex flex-col items-center gap-1 py-3">
-							<Skeleton width={48} height={10} borderRadius={3} />
-							<Skeleton width={32} height={18} borderRadius={4} />
-						</div>
-					))}
 				</div>
 			</div>
-			{/* Mobile */}
-			<div className="flex items-center gap-3 p-3 sm:hidden">
-				<Skeleton width={56} height={56} borderRadius={12} className="shrink-0" />
-				<div className="min-w-0 flex-1">
-					<Skeleton width="75%" height={15} borderRadius={4} />
-					<div className="mt-1 flex items-center gap-1.5">
-						<Skeleton width={52} height={18} borderRadius={6} />
-						<Skeleton width={36} height={12} borderRadius={3} />
-					</div>
-					<Skeleton width="60%" height={11} borderRadius={3} className="mt-1" />
+			<div className="px-3 pb-3 sm:px-4">
+				<div className="flex items-center justify-between pb-1">
+					<Skeleton width={90} height={10} borderRadius={3} />
+					<Skeleton width={30} height={10} borderRadius={3} />
 				</div>
+				<Skeleton height={6} borderRadius={999} />
+			</div>
+			<div className="h-px bg-zinc-200 dark:bg-zinc-700" />
+			<div className="grid grid-cols-3 divide-x divide-zinc-200 bg-zinc-50/50 dark:divide-zinc-700 dark:bg-zinc-800/30">
+				{[1, 2, 3].map((i) => (
+					<div key={i} className="flex flex-col items-center gap-1 py-2.5 sm:py-3">
+						<Skeleton width={48} height={10} borderRadius={3} />
+						<Skeleton width={32} height={18} borderRadius={4} />
+					</div>
+				))}
 			</div>
 		</div>
 	);

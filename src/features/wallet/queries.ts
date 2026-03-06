@@ -8,6 +8,7 @@ import {
 	getVirtualAccountServer,
 	getWalletHoldsServer,
 	getWalletServer,
+	getWalletTransactionServer,
 	getWalletTransactionsServer,
 	getWithdrawalDetailServer,
 	getWithdrawalStatsServer,
@@ -22,10 +23,25 @@ export const walletQueryOptions = (orgId: string) =>
 		staleTime: CACHE.list,
 	});
 
-export const walletHoldsQueryOptions = (orgId: string) =>
+export const walletHoldsQueryOptions = (
+	orgId: string,
+	params?: {
+		campaignId?: string;
+		createdFrom?: string;
+		createdTo?: string;
+		expiresFrom?: string;
+		expiresTo?: string;
+		sortBy?: "createdAt" | "expiresAt" | "amount";
+		sortOrder?: "asc" | "desc";
+		skip?: number;
+		take?: number;
+		cursor?: string;
+		limit?: number;
+	}
+) =>
 	queryOptions({
-		queryKey: queryKeys.walletHolds(orgId),
-		queryFn: () => getWalletHoldsServer({ data: { orgId } }),
+		queryKey: queryKeys.walletHolds(orgId, params),
+		queryFn: () => getWalletHoldsServer({ data: { orgId, params } }),
 		staleTime: CACHE.list,
 	});
 
@@ -97,6 +113,13 @@ export const virtualAccountQueryOptions = (orgId: string) =>
 	queryOptions({
 		queryKey: queryKeys.virtualAccount(orgId),
 		queryFn: () => getVirtualAccountServer({ data: { orgId } }),
+		staleTime: CACHE.list,
+	});
+
+export const walletTransactionQueryOptions = (orgId: string, transactionId: string) =>
+	queryOptions({
+		queryKey: queryKeys.walletTransaction(orgId, transactionId),
+		queryFn: () => getWalletTransactionServer({ data: { orgId, transactionId } }),
 		staleTime: CACHE.list,
 	});
 

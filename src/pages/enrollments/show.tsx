@@ -57,6 +57,7 @@ function getStatusConfig(status: EnrollmentStatus): {
 	color: "lime" | "amber" | "red" | "zinc" | "emerald" | "orange" | "sky";
 	bgClass: string;
 	iconColor: string;
+	gradientClass: string;
 } {
 	const statusMap: Record<
 		EnrollmentStatus,
@@ -66,6 +67,7 @@ function getStatusConfig(status: EnrollmentStatus): {
 			color: "lime" | "amber" | "red" | "zinc" | "emerald" | "orange" | "sky";
 			bgClass: string;
 			iconColor: string;
+			gradientClass: string;
 		}
 	> = {
 		awaiting_submission: {
@@ -74,6 +76,7 @@ function getStatusConfig(status: EnrollmentStatus): {
 			color: "zinc",
 			bgClass: "bg-zinc-100 dark:bg-zinc-800",
 			iconColor: "text-zinc-500 dark:text-zinc-400",
+			gradientClass: "from-zinc-500/15 via-zinc-500/5 to-transparent dark:from-zinc-500/10 dark:via-zinc-500/5",
 		},
 		awaiting_review: {
 			label: "Awaiting Review",
@@ -81,6 +84,7 @@ function getStatusConfig(status: EnrollmentStatus): {
 			color: "amber",
 			bgClass: "bg-amber-50 dark:bg-amber-950/30",
 			iconColor: "text-amber-500",
+			gradientClass: "from-amber-500/20 via-amber-500/5 to-transparent dark:from-amber-500/15 dark:via-amber-500/5",
 		},
 		changes_requested: {
 			label: "Changes Requested",
@@ -88,6 +92,7 @@ function getStatusConfig(status: EnrollmentStatus): {
 			color: "orange",
 			bgClass: "bg-orange-50 dark:bg-orange-950/30",
 			iconColor: "text-orange-500",
+			gradientClass: "from-orange-500/20 via-orange-500/5 to-transparent dark:from-orange-500/15 dark:via-orange-500/5",
 		},
 		approved: {
 			label: "Approved",
@@ -95,6 +100,7 @@ function getStatusConfig(status: EnrollmentStatus): {
 			color: "emerald",
 			bgClass: "bg-emerald-50 dark:bg-emerald-950/30",
 			iconColor: "text-emerald-500",
+			gradientClass: "from-emerald-500/20 via-emerald-500/5 to-transparent dark:from-emerald-500/15 dark:via-emerald-500/5",
 		},
 		permanently_rejected: {
 			label: "Rejected",
@@ -102,6 +108,7 @@ function getStatusConfig(status: EnrollmentStatus): {
 			color: "red",
 			bgClass: "bg-red-50 dark:bg-red-950/30",
 			iconColor: "text-red-500",
+			gradientClass: "from-red-500/20 via-red-500/5 to-transparent dark:from-red-500/15 dark:via-red-500/5",
 		},
 		cancelled: {
 			label: "Cancelled",
@@ -109,6 +116,7 @@ function getStatusConfig(status: EnrollmentStatus): {
 			color: "zinc",
 			bgClass: "bg-zinc-100 dark:bg-zinc-800",
 			iconColor: "text-zinc-400",
+			gradientClass: "from-zinc-500/15 via-zinc-500/5 to-transparent dark:from-zinc-500/10 dark:via-zinc-500/5",
 		},
 		expired: {
 			label: "Expired",
@@ -116,6 +124,7 @@ function getStatusConfig(status: EnrollmentStatus): {
 			color: "zinc",
 			bgClass: "bg-zinc-100 dark:bg-zinc-800",
 			iconColor: "text-zinc-400",
+			gradientClass: "from-zinc-500/15 via-zinc-500/5 to-transparent dark:from-zinc-500/10 dark:via-zinc-500/5",
 		},
 	};
 	return (
@@ -125,6 +134,7 @@ function getStatusConfig(status: EnrollmentStatus): {
 			color: "zinc",
 			bgClass: "bg-zinc-100 dark:bg-zinc-800",
 			iconColor: "text-zinc-400",
+			gradientClass: "from-zinc-500/15 via-zinc-500/5 to-transparent dark:from-zinc-500/10 dark:via-zinc-500/5",
 		}
 	);
 }
@@ -668,10 +678,9 @@ export function EnrollmentShow() {
 		<div className="space-y-6 pb-24 sm:pb-0">
 			{/* Header */}
 			<DetailPageHeader
-				backHref={`/${orgSlug}/enrollments`}
-				backLabel="Enrollments"
 				icon={<StatusIcon className={clsx("size-10", statusConfig.iconColor)} />}
 				iconClassName={statusConfig.bgClass}
+				gradientClass={statusConfig.gradientClass}
 				title={enrollment.displayId}
 				subtitle={
 					<span className="inline-flex items-center gap-1">
@@ -756,10 +765,14 @@ export function EnrollmentShow() {
 				<div className="space-y-5 lg:col-span-2">
 					{/* Enrollment Details Card */}
 					<ContentCard padding="none">
+						<div className="flex items-center gap-2.5 border-b border-zinc-200 px-3.5 py-2.5 sm:px-4 sm:py-3 dark:border-zinc-700">
+							<div className="flex size-6 items-center justify-center rounded-md bg-sky-100 dark:bg-sky-900/30">
+								<HashtagIcon className="size-3.5 text-sky-500" />
+							</div>
+							<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">Enrollment Details</h3>
+						</div>
 						<div className="p-6">
-							<h3 className="text-lg font-semibold text-zinc-900 dark:text-white">Enrollment Details</h3>
-
-							<div className="mt-6 space-y-4">
+							<div className="space-y-4">
 								<InfoRow
 									icon={<HashtagIcon className="size-5" />}
 									label="Order ID"
@@ -842,10 +855,14 @@ export function EnrollmentShow() {
 					{/* Billing Breakdown Card */}
 					{costs && (
 						<ContentCard padding="none">
+							<div className="flex items-center gap-2.5 border-b border-zinc-200 px-3.5 py-2.5 sm:px-4 sm:py-3 dark:border-zinc-700">
+								<div className="flex size-6 items-center justify-center rounded-md bg-emerald-100 dark:bg-emerald-900/30">
+									<CurrencyRupeeIcon className="size-3.5 text-emerald-500" />
+								</div>
+								<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">Billing Breakdown</h3>
+							</div>
 							<div className="p-6">
-								<h3 className="text-lg font-semibold text-zinc-900 dark:text-white">Billing Breakdown</h3>
-
-								<div className="mt-6 space-y-4">
+								<div className="space-y-4">
 									<InfoRow
 										icon={<ShieldCheckIcon className="size-5" />}
 										label={`Bill Rate (${enrollment.lockedBillRate}%)`}
@@ -892,13 +909,14 @@ export function EnrollmentShow() {
 					{/* OCR Data */}
 					{enrollment.ocrData && (
 						<ContentCard padding="none">
+							<div className="flex items-center gap-2.5 border-b border-zinc-200 px-3.5 py-2.5 sm:px-4 sm:py-3 dark:border-zinc-700">
+								<div className="flex size-6 items-center justify-center rounded-md bg-violet-100 dark:bg-violet-900/30">
+									<PhotoIcon className="size-3.5 text-violet-500" />
+								</div>
+								<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">Order Screenshot & OCR</h3>
+							</div>
 							<div className="p-6">
-								<h3 className="flex items-center gap-2 text-lg font-semibold text-zinc-900 dark:text-white">
-									<PhotoIcon className="size-5 text-zinc-400" />
-									Order Screenshot & OCR
-								</h3>
-
-								<div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
+								<div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
 									{enrollment.ocrData.screenshotUrl && (
 										<a
 											href={getAssetUrl(enrollment.ocrData.screenshotUrl)}
@@ -977,16 +995,18 @@ export function EnrollmentShow() {
 					{/* Required Deliverables / Tasks */}
 					{enrollment.tasks && enrollment.tasks.length > 0 && (
 						<ContentCard padding="none">
-							<div className="p-6">
-								<div className="flex items-center justify-between">
-									<h3 className="flex items-center gap-2 text-lg font-semibold text-zinc-900 dark:text-white">
-										<ShoppingBagIcon className="size-5 text-emerald-500" />
-										Required Deliverables
-									</h3>
-									<span className="text-sm text-zinc-500 dark:text-zinc-400">
-										{submittedTasks.length}/{totalTasks} completed
-									</span>
+							<div className="flex items-center justify-between border-b border-zinc-200 px-3.5 py-2.5 sm:px-4 sm:py-3 dark:border-zinc-700">
+								<div className="flex items-center gap-2.5">
+									<div className="flex size-6 items-center justify-center rounded-md bg-emerald-100 dark:bg-emerald-900/30">
+										<ShoppingBagIcon className="size-3.5 text-emerald-500" />
+									</div>
+									<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">Required Deliverables</h3>
 								</div>
+								<span className="text-sm text-zinc-500 dark:text-zinc-400">
+									{submittedTasks.length}/{totalTasks} completed
+								</span>
+							</div>
+							<div className="p-6">
 
 								{/* Progress bar */}
 								<div className="mt-4 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700">

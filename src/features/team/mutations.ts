@@ -17,8 +17,10 @@ export function useInviteMember(organizationId: string | undefined) {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: async (params: { email: string; role: "owner" | "admin" | "member" }) => {
-			return inviteMemberServer({ data: { orgId: organizationId as string, ...params, idempotencyKey: crypto.randomUUID() } });
+		mutationFn: async (params: { email: string; role: string }) => {
+			return inviteMemberServer({
+				data: { orgId: organizationId as string, ...params, idempotencyKey: crypto.randomUUID() },
+			});
 		},
 		onSuccess: () => {
 			if (organizationId) {
@@ -47,7 +49,7 @@ export function useUpdateMemberRole(organizationId: string | undefined) {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: async (params: { memberId: string; role: "owner" | "admin" | "member" }) => {
+		mutationFn: async (params: { memberId: string; role: string }) => {
 			return updateMemberRoleServer({
 				data: { orgId: organizationId as string, memberId: params.memberId, role: params.role },
 			});
@@ -79,8 +81,10 @@ export function useAddMember(organizationId: string | undefined) {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: async (params: { userId: string; role: "owner" | "admin" | "member" }) => {
-			return addMemberServer({ data: { orgId: organizationId as string, ...params, idempotencyKey: crypto.randomUUID() } });
+		mutationFn: async (params: { userId: string; role: string }) => {
+			return addMemberServer({
+				data: { orgId: organizationId as string, ...params, idempotencyKey: crypto.randomUUID() },
+			});
 		},
 		onSuccess: () => {
 			if (organizationId) {

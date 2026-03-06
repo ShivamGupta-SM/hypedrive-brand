@@ -96,25 +96,25 @@ function UserProfileCard({
 			.toUpperCase() || "U";
 
 	return (
-		<div className="overflow-hidden rounded-2xl bg-zinc-900 ring-1 ring-white/5 dark:bg-zinc-800">
+		<div className="overflow-hidden rounded-2xl bg-zinc-900 ring-1 ring-white/5 dark:bg-zinc-800/80">
 			<div className="flex items-center justify-between px-5 py-4">
-				<div className="flex items-center gap-4">
+				<div className="flex items-center gap-3.5">
 					{image ? (
-						<img src={image} alt={name} className="size-14 shrink-0 rounded-2xl object-cover ring-1 ring-white/10" />
+						<img src={image} alt={name} className="size-12 shrink-0 rounded-xl object-cover ring-1 ring-white/10" />
 					) : (
-						<div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-zinc-700 text-lg font-bold text-white ring-1 ring-white/10 dark:bg-zinc-600">
+						<div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-zinc-700 text-base font-bold text-white ring-1 ring-white/10 dark:bg-zinc-600">
 							{initials}
 						</div>
 					)}
 					<div className="min-w-0">
-						<h2 className="truncate text-base font-semibold text-white">{name}</h2>
-						<p className="mt-0.5 truncate text-sm text-zinc-400">{email}</p>
+						<h2 className="truncate text-[15px] font-semibold text-white">{name}</h2>
+						<p className="mt-0.5 truncate text-xs text-zinc-400">{email}</p>
 					</div>
 				</div>
 				<button
 					type="button"
 					onClick={onEditProfile}
-					className="ml-3 shrink-0 rounded-xl bg-white/8 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-white/15 hover:text-white"
+					className="shrink-0 rounded-lg bg-white/10 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-white/15 hover:text-white"
 					aria-label="Edit profile"
 				>
 					Edit
@@ -425,6 +425,73 @@ function ActiveSessionsPanel() {
 	const sessionList = hasDeviceSessions ? deviceSessions : sessions;
 	const hasMultiple = sessionList.length > 1;
 
+	const renderSessionCard = (
+		session: { id: string; token: string; current?: boolean; lastActive?: string; createdAt?: string; location?: string } & Record<string, unknown>,
+		isCurrent: boolean,
+		onRevoke: (token: string) => void,
+		revoking: boolean,
+		showSwitch?: boolean,
+	) => {
+		const DeviceIcon = getDeviceIcon(session);
+		return (
+			<div
+				key={session.id}
+				className={`flex items-center gap-3.5 rounded-xl p-3.5 ${
+					isCurrent
+						? "bg-emerald-50 ring-1 ring-emerald-200/80 dark:bg-emerald-950/30 dark:ring-emerald-800/60"
+						: "bg-zinc-50 dark:bg-zinc-800/50"
+				}`}
+			>
+				<div
+					className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${
+						isCurrent ? "bg-emerald-100 dark:bg-emerald-900/50" : "bg-zinc-200 dark:bg-zinc-700"
+					}`}
+				>
+					<DeviceIcon
+						className={`size-4.5 ${isCurrent ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-500 dark:text-zinc-400"}`}
+					/>
+				</div>
+				<div className="min-w-0 flex-1">
+					<div className="flex items-center gap-2">
+						<p className="text-sm font-medium text-zinc-900 dark:text-white">{getDeviceLabel(session)}</p>
+						{isCurrent && (
+							<span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-medium text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
+								Current
+							</span>
+						)}
+					</div>
+					<div className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+						{session.location && <span>{session.location}</span>}
+						{session.location && <span>·</span>}
+						<span>{formatDate(session.lastActive || session.createdAt)}</span>
+					</div>
+				</div>
+				{!isCurrent && (
+					<div className="flex items-center gap-1">
+						{showSwitch && (
+							<button
+								type="button"
+								onClick={() => setActiveSession.mutate(session.token)}
+								disabled={setActiveSession.isPending}
+								className="rounded-md px-2 py-1 text-xs font-medium text-zinc-500 transition-colors hover:bg-zinc-200 hover:text-zinc-900 dark:hover:bg-zinc-700 dark:hover:text-white"
+							>
+								Switch
+							</button>
+						)}
+						<button
+							type="button"
+							onClick={() => onRevoke(session.token)}
+							disabled={revoking}
+							className="flex size-7 items-center justify-center rounded-md text-zinc-400 transition-colors hover:bg-zinc-200 hover:text-red-500 dark:hover:bg-zinc-700"
+						>
+							<XMarkIcon className="size-4" />
+						</button>
+					</div>
+				)}
+			</div>
+		);
+	};
+
 	return (
 		<div className="space-y-5">
 			<div className="flex items-start gap-4">
@@ -438,124 +505,26 @@ function ActiveSessionsPanel() {
 			</div>
 
 			{loading ? (
-				<div className="space-y-3">
+				<div className="space-y-2.5">
 					{[1, 2].map((i) => (
-						<div key={i} className="h-20 animate-pulse rounded-xl bg-zinc-100 dark:bg-zinc-800" />
+						<div key={i} className="h-18 animate-pulse rounded-xl bg-zinc-100 dark:bg-zinc-800" />
 					))}
 				</div>
 			) : hasDeviceSessions ? (
-				<div className="space-y-3">
-					{deviceSessions.map((session) => {
-						const DeviceIcon = getDeviceIcon(session);
-						const isCurrent = session.current;
-						return (
-							<div
-								key={session.id}
-								className={`flex items-center gap-4 rounded-xl p-4 ${
-									isCurrent
-										? "bg-emerald-50 ring-1 ring-emerald-200 dark:bg-emerald-950/30 dark:ring-emerald-800"
-										: "bg-zinc-50 dark:bg-zinc-800/50"
-								}`}
-							>
-								<div
-									className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${
-										isCurrent ? "bg-emerald-100 dark:bg-emerald-900/50" : "bg-zinc-200 dark:bg-zinc-700"
-									}`}
-								>
-									<DeviceIcon
-										className={`size-5 ${isCurrent ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-500 dark:text-zinc-400"}`}
-									/>
-								</div>
-								<div className="min-w-0 flex-1">
-									<div className="flex items-center gap-2">
-										<p className="text-sm font-medium text-zinc-900 dark:text-white">{getDeviceLabel(session)}</p>
-										{isCurrent && (
-											<span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
-												Current
-											</span>
-										)}
-									</div>
-									<div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
-										{session.location && <span>{session.location}</span>}
-										{session.location && <span>·</span>}
-										<span>{formatDate(session.lastActive || session.createdAt)}</span>
-									</div>
-								</div>
-								{!isCurrent && (
-									<div className="flex items-center gap-1">
-										<button
-											type="button"
-											onClick={() => setActiveSession.mutate(session.token)}
-											disabled={setActiveSession.isPending}
-											className="rounded-lg px-2 py-1 text-xs font-medium text-zinc-500 transition-colors hover:bg-zinc-200 hover:text-zinc-900 dark:hover:bg-zinc-700 dark:hover:text-white"
-										>
-											Switch
-										</button>
-										<button
-											type="button"
-											onClick={() => revokeDeviceSession.mutate(session.token)}
-											disabled={revokeDeviceSession.isPending}
-											className="flex size-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-200 hover:text-red-500 dark:hover:bg-zinc-700"
-										>
-											<XMarkIcon className="size-4" />
-										</button>
-									</div>
-								)}
-							</div>
-						);
-					})}
+				<div className="space-y-2.5">
+					{deviceSessions.map((session) =>
+						renderSessionCard(session, !!session.current, (t) => revokeDeviceSession.mutate(t), revokeDeviceSession.isPending, true)
+					)}
 				</div>
 			) : sessions.length === 0 ? (
 				<div className="rounded-xl bg-zinc-50 p-6 text-center dark:bg-zinc-800/50">
 					<p className="text-sm text-zinc-500 dark:text-zinc-400">No active sessions found</p>
 				</div>
 			) : (
-				<div className="space-y-3">
-					{sessions.map((session) => {
-						const DeviceIcon = getDeviceIcon(session);
-						const isCurrent = session.token === currentToken;
-						return (
-							<div
-								key={session.id}
-								className={`flex items-center gap-4 rounded-xl p-4 ${
-									isCurrent
-										? "bg-emerald-50 ring-1 ring-emerald-200 dark:bg-emerald-950/30 dark:ring-emerald-800"
-										: "bg-zinc-50 dark:bg-zinc-800/50"
-								}`}
-							>
-								<div
-									className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${
-										isCurrent ? "bg-emerald-100 dark:bg-emerald-900/50" : "bg-zinc-200 dark:bg-zinc-700"
-									}`}
-								>
-									<DeviceIcon
-										className={`size-5 ${isCurrent ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-500 dark:text-zinc-400"}`}
-									/>
-								</div>
-								<div className="min-w-0 flex-1">
-									<div className="flex items-center gap-2">
-										<p className="text-sm font-medium text-zinc-900 dark:text-white">{getDeviceLabel(session)}</p>
-										{isCurrent && (
-											<span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
-												Current
-											</span>
-										)}
-									</div>
-									<p className="text-xs text-zinc-500 dark:text-zinc-400">Last active: {formatDate(session.createdAt)}</p>
-								</div>
-								{!isCurrent && (
-									<button
-										type="button"
-										onClick={() => revokeSession.mutate(session.token)}
-										disabled={revokeSession.isPending}
-										className="flex size-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-200 hover:text-red-500 dark:hover:bg-zinc-700"
-									>
-										<XMarkIcon className="size-4" />
-									</button>
-								)}
-							</div>
-						);
-					})}
+				<div className="space-y-2.5">
+					{sessions.map((session) =>
+						renderSessionCard(session, session.token === currentToken, (t) => revokeSession.mutate(t), revokeSession.isPending)
+					)}
 				</div>
 			)}
 
@@ -615,9 +584,7 @@ function EditUserProfilePanel({ initialName, initialImage }: { initialName: stri
 
 			let imageUrl: string | undefined;
 
-			// Upload avatar if changed
 			if (avatarFile) {
-				// Upload flow — request signed URL then upload to S3
 				const { uploadUrl, fileUrl } = await requestUploadUrlServer({
 					data: {
 						filename: avatarFile.name,
@@ -640,8 +607,6 @@ function EditUserProfilePanel({ initialName, initialImage }: { initialName: stri
 				},
 			});
 
-			// Optimistic update — patch the auth session cache so sidebar/avatar
-			// reflects the new name/image immediately without a full refetch.
 			queryClient.setQueryData(["auth", "session-with-orgs"], (old: Record<string, unknown> | undefined) => {
 				if (!old?.user) return old;
 				const prevUser = old.user as Record<string, unknown>;
@@ -654,7 +619,6 @@ function EditUserProfilePanel({ initialName, initialImage }: { initialName: stri
 					},
 				};
 			});
-			// Re-run router beforeLoad so context.auth.user reflects the update
 			router.invalidate();
 
 			setSuccess(true);
@@ -674,7 +638,6 @@ function EditUserProfilePanel({ initialName, initialImage }: { initialName: stri
 		setAvatarPreview(initialImage || null);
 	}, [initialImage]);
 
-	// Cleanup object URL on unmount
 	useEffect(() => {
 		return () => {
 			if (avatarPreview?.startsWith("blob:")) {
@@ -712,7 +675,6 @@ function EditUserProfilePanel({ initialName, initialImage }: { initialName: stri
 						</div>
 					)}
 
-					{/* Avatar upload */}
 					<div className="flex flex-col items-center gap-2">
 						<p className="text-sm font-medium text-zinc-900 dark:text-white">Profile Picture</p>
 						<AvatarUpload
@@ -932,7 +894,7 @@ function TwoFactorPanel({ isEnabled }: { isEnabled: boolean }) {
 						{backupCodes.map((codeItem) => (
 							<code
 								key={codeItem}
-								className="rounded bg-white px-2 py-1 text-center text-sm font-mono text-zinc-800 dark:bg-zinc-700 dark:text-zinc-200"
+								className="rounded bg-white px-2 py-1 text-center font-mono text-sm text-zinc-800 dark:bg-zinc-700 dark:text-zinc-200"
 							>
 								{codeItem}
 							</code>
@@ -1093,7 +1055,7 @@ function PasskeysPanel() {
 			)}
 
 			{loading ? (
-				<div className="space-y-3">
+				<div className="space-y-2.5">
 					{[1, 2].map((i) => (
 						<div key={i} className="h-16 animate-pulse rounded-xl bg-zinc-100 dark:bg-zinc-800" />
 					))}
@@ -1153,7 +1115,7 @@ function PasskeysPanel() {
 											setEditingId(pk.id);
 											setEditName(pk.name || "");
 										}}
-										className="flex size-8 items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-200 hover:text-zinc-600 dark:hover:bg-zinc-700"
+										className="flex size-7 items-center justify-center rounded-md text-zinc-400 hover:bg-zinc-200 hover:text-zinc-600 dark:hover:bg-zinc-700"
 									>
 										<PencilSquareIcon className="size-3.5" />
 									</button>
@@ -1161,7 +1123,7 @@ function PasskeysPanel() {
 										type="button"
 										onClick={() => handleDelete(pk.id)}
 										disabled={deletePasskey.isPending}
-										className="flex size-8 items-center justify-center rounded-lg text-zinc-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/30"
+										className="flex size-7 items-center justify-center rounded-md text-zinc-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/30"
 									>
 										<TrashIcon className="size-3.5" />
 									</button>
@@ -1566,32 +1528,32 @@ function LinkedAccountsPanel() {
 			</div>
 
 			{loading ? (
-				<div className="space-y-3">
+				<div className="space-y-2.5">
 					{[1, 2].map((i) => (
 						<div key={i} className="h-16 animate-pulse rounded-xl bg-zinc-100 dark:bg-zinc-800" />
 					))}
 				</div>
 			) : (
-				<div className="space-y-3">
+				<div className="space-y-2.5">
 					{SOCIAL_PROVIDERS.map((provider) => {
 						const linked = accounts.find((a) => a.providerId === provider.id);
 						const ProviderIcon = provider.icon;
 						return (
 							<div
 								key={provider.id}
-								className={`flex items-center gap-4 rounded-xl p-4 ${
+								className={`flex items-center gap-3.5 rounded-xl p-3.5 ${
 									linked
-										? "bg-emerald-50 ring-1 ring-emerald-200 dark:bg-emerald-950/30 dark:ring-emerald-800"
+										? "bg-emerald-50 ring-1 ring-emerald-200/80 dark:bg-emerald-950/30 dark:ring-emerald-800/60"
 										: "bg-zinc-50 dark:bg-zinc-800/50"
 								}`}
 							>
 								<div
-									className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${
+									className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${
 										linked ? "bg-emerald-100 dark:bg-emerald-900/50" : "bg-zinc-200 dark:bg-zinc-700"
 									}`}
 								>
 									<ProviderIcon
-										className={`size-5 ${linked ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-500 dark:text-zinc-400"}`}
+										className={`size-4.5 ${linked ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-500 dark:text-zinc-400"}`}
 									/>
 								</div>
 								<div className="min-w-0 flex-1">
@@ -1621,10 +1583,10 @@ function LinkedAccountsPanel() {
 						.map((account) => (
 							<div
 								key={account.id}
-								className="flex items-center gap-4 rounded-xl bg-emerald-50 p-4 ring-1 ring-emerald-200 dark:bg-emerald-950/30 dark:ring-emerald-800"
+								className="flex items-center gap-3.5 rounded-xl bg-emerald-50 p-3.5 ring-1 ring-emerald-200/80 dark:bg-emerald-950/30 dark:ring-emerald-800/60"
 							>
-								<div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/50">
-									<GlobeAltIcon className="size-5 text-emerald-600 dark:text-emerald-400" />
+								<div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/50">
+									<GlobeAltIcon className="size-4.5 text-emerald-600 dark:text-emerald-400" />
 								</div>
 								<div className="min-w-0 flex-1">
 									<p className="text-sm font-medium capitalize text-zinc-900 dark:text-white">{account.providerId}</p>
@@ -1707,14 +1669,14 @@ function PendingInvitationsSection() {
 					{invitations.map((invitation, index) => (
 						<div
 							key={invitation.id}
-							className={`flex items-center gap-4 px-4 py-4 ${
-								index === 0 ? "rounded-t-2xl" : ""
-							} ${index === invitations.length - 1 ? "rounded-b-2xl" : ""}`}
+							className={`flex items-center gap-3.5 px-4 py-3.5 ${
+								index === 0 ? "rounded-t-xl" : ""
+							} ${index === invitations.length - 1 ? "rounded-b-xl" : ""}`}
 						>
 							<div
-								className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${duotoneColors.violet.bg}`}
+								className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${duotoneColors.violet.bg}`}
 							>
-								<EnvelopeOpenIcon className={`size-5 ${duotoneColors.violet.icon}`} />
+								<EnvelopeOpenIcon className={`size-4.5 ${duotoneColors.violet.icon}`} />
 							</div>
 							<div className="min-w-0 flex-1">
 								<p className="text-sm font-medium text-zinc-900 dark:text-white">Organization invitation</p>
@@ -1760,7 +1722,7 @@ export function AccountSettings({ section = "all" }: { section?: AccountSettings
 	const { data: sessions } = useDeviceSessions();
 	const panelNav = usePanelNav();
 
-	// Notification preferences — local optimistic state for toggles
+	// Notification preferences
 	const updateNotifPrefs = useUpdateNotificationPreferences(organizationId);
 	const [emailNotifications, setEmailNotifications] = useState(true);
 	const [pushNotifications, setPushNotifications] = useState(() => {
@@ -1770,7 +1732,6 @@ export function AccountSettings({ section = "all" }: { section?: AccountSettings
 		return false;
 	});
 
-	// Push notification tokens (API returns void — token list not available yet)
 	const removePushToken = useRemovePushToken(organizationId);
 	const pushTokens: { token: string; platform: string }[] = [];
 
@@ -1778,7 +1739,7 @@ export function AccountSettings({ section = "all" }: { section?: AccountSettings
 	const { data: userInfoData } = useUserInfo();
 	const is2FAEnabled = userInfoData?.twoFactorEnabled ?? false;
 
-	// Check if user has a credential (password) account — if not, show "Set Password"
+	// Check if user has a credential (password) account
 	const { data: linkedAccounts } = useLinkedAccounts();
 	const hasPasswordAccount = linkedAccounts.some((a) => a.providerId === "credential");
 
@@ -1788,17 +1749,12 @@ export function AccountSettings({ section = "all" }: { section?: AccountSettings
 			updateNotifPrefs.mutate({ emailEnabled: value });
 		} else {
 			if (value) {
-				// Request browser notification permission
-				if (!("Notification" in window)) {
-					return; // Browser doesn't support notifications
-				}
-
+				if (!("Notification" in window)) return;
 				const permission = await Notification.requestPermission();
 				if (permission === "granted") {
 					setPushNotifications(true);
 					updateNotifPrefs.mutate({ pushEnabled: true });
 				} else {
-					// Permission denied or dismissed — keep toggle off
 					setPushNotifications(false);
 				}
 			} else {
@@ -1835,6 +1791,7 @@ export function AccountSettings({ section = "all" }: { section?: AccountSettings
 
 	const sessionCount = sessions?.length ?? 0;
 	const show = (s: AccountSettingsSection) => section === "all" || section === s;
+	const isDialog = section !== "all";
 
 	// Panel openers
 	const openEditProfile = () =>
@@ -1874,7 +1831,7 @@ export function AccountSettings({ section = "all" }: { section?: AccountSettings
 				onEditProfile={openEditProfile}
 			/>
 			<div>
-				<MenuSectionHeader>Account</MenuSectionHeader>
+				{!isDialog && <MenuSectionHeader>Account</MenuSectionHeader>}
 				<MenuSection>
 					<MenuRow
 						icon={EnvelopeIcon}
@@ -1928,7 +1885,7 @@ export function AccountSettings({ section = "all" }: { section?: AccountSettings
 	// --- Section: Security ---
 	const securitySection = (
 		<div>
-			<MenuSectionHeader>Security</MenuSectionHeader>
+			{!isDialog && <MenuSectionHeader>Security</MenuSectionHeader>}
 			<MenuSection>
 				<MenuRow
 					icon={ShieldCheckIcon}
@@ -1968,7 +1925,7 @@ export function AccountSettings({ section = "all" }: { section?: AccountSettings
 	// --- Section: Passkeys ---
 	const passkeysSection = (
 		<div>
-			<MenuSectionHeader>Passkeys</MenuSectionHeader>
+			{!isDialog && <MenuSectionHeader>Passkeys</MenuSectionHeader>}
 			<MenuSection>
 				<MenuRow
 					icon={FingerPrintIcon}
@@ -2019,12 +1976,12 @@ export function AccountSettings({ section = "all" }: { section?: AccountSettings
 							<div key={token.token}>
 								{index > 0 && <MenuSeparator />}
 								<div
-									className={`flex items-center gap-4 px-4 py-3 ${index === 0 ? "rounded-t-2xl" : ""} ${index === pushTokens.length - 1 ? "rounded-b-2xl" : ""}`}
+									className={`flex items-center gap-3.5 px-4 py-3 ${index === 0 ? "rounded-t-xl" : ""} ${index === pushTokens.length - 1 ? "rounded-b-xl" : ""}`}
 								>
 									<div
-										className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${duotoneColors.sky.bg}`}
+										className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${duotoneColors.sky.bg}`}
 									>
-										<DevicePhoneMobileIcon className={`size-5 ${duotoneColors.sky.icon}`} />
+										<DevicePhoneMobileIcon className={`size-4.5 ${duotoneColors.sky.icon}`} />
 									</div>
 									<div className="min-w-0 flex-1">
 										<p className="text-sm font-medium capitalize text-zinc-900 dark:text-white">
@@ -2042,7 +1999,7 @@ export function AccountSettings({ section = "all" }: { section?: AccountSettings
 											}
 										}}
 										disabled={removePushToken.isPending}
-										className="flex size-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/30"
+										className="flex size-7 items-center justify-center rounded-md text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/30"
 									>
 										<XMarkIcon className="size-4" />
 									</button>
@@ -2090,11 +2047,8 @@ export function AccountSettings({ section = "all" }: { section?: AccountSettings
 		</>
 	);
 
-	const isDialog = section !== "all";
-
 	return (
-		<div className={isDialog ? "space-y-6 px-4 py-5 pb-10 sm:px-6" : "space-y-6 pb-20"}>
-			{/* Page heading — only in full-page mode */}
+		<div className={isDialog ? "space-y-5 px-5 py-5 pb-10 sm:px-6" : "space-y-6 pb-20"}>
 			{section === "all" && (
 				<div>
 					<Heading>Account Settings</Heading>
@@ -2107,7 +2061,6 @@ export function AccountSettings({ section = "all" }: { section?: AccountSettings
 			{show("passkeys") && passkeysSection}
 			{show("preferences") && preferencesSection}
 
-			{/* App version — only in full-page mode */}
 			{section === "all" && (
 				<div className="pt-4 text-center">
 					<p className="text-xs text-zinc-400 dark:text-zinc-500">Hypedrive Brand v1.0.0</p>

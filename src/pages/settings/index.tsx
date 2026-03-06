@@ -12,7 +12,6 @@ import {
 	IdentificationIcon,
 	MapPinIcon,
 	PhoneIcon,
-	ReceiptPercentIcon,
 	ShieldCheckIcon,
 	TrashIcon,
 	UserCircleIcon,
@@ -64,20 +63,19 @@ import { showToast } from "@/lib/toast";
 // SKELETON LOADING
 // =============================================================================
 
-function OrganizationSettingsSkeleton({ isDialog = false }: { isDialog?: boolean }) {
+function SettingsSkeleton({ isDialog = false }: { isDialog?: boolean }) {
 	return (
-		<div className={isDialog ? "space-y-6 px-4 py-5 pb-10 sm:px-6" : "space-y-6 pb-20"}>
-			{/* Header — Heading + Text */}
+		<div className={isDialog ? "space-y-5 px-4 py-5 pb-10 sm:px-5" : "space-y-6 pb-20"}>
 			{!isDialog && (
 				<div>
 					<div className="h-8 w-48 animate-pulse rounded-lg bg-zinc-200 skeleton-shimmer dark:bg-zinc-800" />
 					<div className="mt-2 h-4 w-64 animate-pulse rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-800" />
 				</div>
 			)}
-			{/* Profile Card — dark card with avatar + name + 3-col stats */}
-			<div className="overflow-hidden rounded-2xl bg-zinc-900 ring-1 ring-white/5 dark:bg-zinc-800">
-				<div className="flex items-center gap-3 px-4 py-4 sm:gap-4 sm:px-5">
-					<div className="size-12 shrink-0 animate-pulse rounded-xl bg-zinc-700 skeleton-shimmer sm:size-14 sm:rounded-2xl" />
+			{/* Profile card */}
+			<div className="overflow-hidden rounded-2xl bg-zinc-900 dark:bg-zinc-800">
+				<div className="flex items-center gap-3 px-5 py-4">
+					<div className="size-12 shrink-0 animate-pulse rounded-xl bg-zinc-700 skeleton-shimmer" />
 					<div className="min-w-0 flex-1">
 						<div className="h-4 w-36 animate-pulse rounded bg-zinc-700 skeleton-shimmer" />
 						<div className="mt-2 h-3 w-20 animate-pulse rounded bg-zinc-700 skeleton-shimmer" />
@@ -85,51 +83,30 @@ function OrganizationSettingsSkeleton({ isDialog = false }: { isDialog?: boolean
 				</div>
 				<div className="grid grid-cols-3 divide-x divide-white/8 border-t border-white/8">
 					{[1, 2, 3].map((i) => (
-						<div key={i} className="px-3 py-2.5 text-center sm:px-4 sm:py-3">
+						<div key={i} className="px-3 py-2.5 text-center">
 							<div className="mx-auto h-4 w-10 animate-pulse rounded bg-zinc-700 skeleton-shimmer" />
 							<div className="mx-auto mt-1.5 h-2.5 w-14 animate-pulse rounded bg-zinc-700/60 skeleton-shimmer" />
 						</div>
 					))}
 				</div>
 			</div>
-			{/* Organization Details — header + 4 menu rows */}
-			<div className="space-y-1.5">
-				<div className="h-4 w-36 animate-pulse rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
-				<div className="overflow-hidden rounded-xl ring-1 ring-zinc-200/80 dark:ring-zinc-700/60">
-					{[1, 2, 3, 4].map((i) => (
-						<div key={i} className="flex items-center gap-3 border-b border-zinc-100 px-4 py-3.5 last:border-b-0 dark:border-zinc-800">
-							<div className="size-8 shrink-0 animate-pulse rounded-lg bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
-							<div className="flex-1">
-								<div className="h-3 w-24 animate-pulse rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
-								<div className="mt-1.5 h-3.5 w-40 animate-pulse rounded bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
+			{/* Details rows */}
+			{[4, 3, 2].map((rows) => (
+				<div key={rows} className="space-y-1.5">
+					<div className="h-3 w-28 animate-pulse rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+					<div className="overflow-hidden rounded-xl ring-1 ring-zinc-200/80 dark:ring-zinc-700/60">
+						{Array.from({ length: rows }).map((_, i) => (
+							<div key={i} className="flex items-center gap-3 border-b border-zinc-100 px-4 py-3 last:border-b-0 dark:border-zinc-800">
+								<div className="size-8 shrink-0 animate-pulse rounded-lg bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
+								<div className="flex-1">
+									<div className="h-3 w-20 animate-pulse rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+									<div className="mt-1.5 h-3.5 w-36 animate-pulse rounded bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
+								</div>
 							</div>
-						</div>
-					))}
-				</div>
-			</div>
-			{/* GST & Compliance — header + card */}
-			<div className="space-y-1.5">
-				<div className="h-4 w-28 animate-pulse rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
-				<div className="h-44 animate-pulse rounded-xl bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
-			</div>
-			{/* Bank Account — header + card */}
-			<div className="space-y-1.5">
-				<div className="h-4 w-24 animate-pulse rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
-				<div className="h-36 animate-pulse rounded-xl bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
-			</div>
-			{/* Billing — header + single row */}
-			<div className="space-y-1.5">
-				<div className="h-4 w-16 animate-pulse rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
-				<div className="overflow-hidden rounded-xl ring-1 ring-zinc-200/80 dark:ring-zinc-700/60">
-					<div className="flex items-center gap-3 px-4 py-3.5">
-						<div className="size-8 shrink-0 animate-pulse rounded-lg bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
-						<div className="flex-1">
-							<div className="h-3 w-16 animate-pulse rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
-							<div className="mt-1.5 h-3.5 w-32 animate-pulse rounded bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
-						</div>
+						))}
 					</div>
 				</div>
-			</div>
+			))}
 		</div>
 	);
 }
@@ -162,34 +139,33 @@ function OrganizationProfileCard({
 	const logoUrl = logo ? getAssetUrl(logo) : null;
 
 	return (
-		<div className="overflow-hidden rounded-2xl bg-zinc-900 ring-1 ring-white/5 dark:bg-zinc-800">
-			<div className="flex items-center justify-between px-4 py-4 sm:px-5">
-				<div className="flex items-center gap-3 sm:gap-4">
-					<div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-zinc-700 text-base font-bold text-white ring-1 ring-white/10 sm:size-14 sm:rounded-2xl sm:text-lg dark:bg-zinc-600">
+		<div className="overflow-hidden rounded-2xl bg-zinc-900 ring-1 ring-white/5 dark:bg-zinc-800/80">
+			<div className="flex items-center justify-between px-5 py-4">
+				<div className="flex items-center gap-3.5">
+					<div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-zinc-700 text-base font-bold text-white ring-1 ring-white/10 dark:bg-zinc-600">
 						{logoUrl ? <img src={logoUrl} alt={name} className="size-full object-cover" /> : initials}
 					</div>
 					<div className="min-w-0">
-						<h2 className="truncate text-sm font-semibold text-white sm:text-base">{name}</h2>
-						<p className="mt-0.5 truncate text-xs text-zinc-400 sm:text-sm">Organization</p>
+						<h2 className="truncate text-[15px] font-semibold text-white">{name}</h2>
+						<p className="mt-0.5 truncate text-xs text-zinc-400">Organization</p>
 					</div>
 				</div>
 				{canEdit && (
 					<button
 						type="button"
 						onClick={onEditProfile}
-						className="ml-3 shrink-0 rounded-xl bg-white/8 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-white/15 hover:text-white"
+						className="shrink-0 rounded-lg bg-white/10 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-white/15 hover:text-white"
 						aria-label="Edit organization"
 					>
 						Edit
 					</button>
 				)}
 			</div>
-			{/* Stats strip */}
 			<div className="grid grid-cols-3 divide-x divide-white/8 border-t border-white/8">
 				{stats.map((stat) => (
-					<div key={stat.label} className="px-3 py-2.5 text-center sm:px-4 sm:py-3">
-						<p className="text-sm font-bold text-white sm:text-base">{stat.value}</p>
-						<p className="mt-0.5 text-[10px] font-medium text-zinc-400 sm:text-[11px]">{stat.label}</p>
+					<div key={stat.label} className="px-3 py-2.5 text-center">
+						<p className="text-sm font-semibold text-white">{stat.value}</p>
+						<p className="mt-0.5 text-[10px] font-medium uppercase tracking-wider text-zinc-500">{stat.label}</p>
 					</div>
 				))}
 			</div>
@@ -849,7 +825,6 @@ function VerifyGSTPanel({ organizationId, currentGST }: { organizationId: string
 
 	const isPending = verifyPreview.isPending || verifyGST.isPending;
 
-	// Build full address from preview parts
 	const fullAddress = previewData
 		? [previewData.address, previewData.city, previewData.state, previewData.pinCode].filter(Boolean).join(", ")
 		: undefined;
@@ -901,15 +876,12 @@ function VerifyGSTPanel({ organizationId, currentGST }: { organizationId: string
 			{/* Preview Card */}
 			{previewData && (
 				<div className="overflow-hidden rounded-xl ring-1 ring-zinc-200 dark:ring-zinc-700">
-					{/* Header */}
 					<div className="flex items-center gap-2.5 bg-emerald-50 px-4 py-2.5 dark:bg-emerald-950/30">
 						<ShieldCheckIcon className="size-4 text-emerald-600 dark:text-emerald-400" />
 						<span className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
 							Verified — {previewData.gstStatus}
 						</span>
 					</div>
-
-					{/* Details Grid */}
 					<div className="grid grid-cols-1 gap-x-4 px-4 py-3 sm:grid-cols-2">
 						<GSTPreviewDetail icon={UserCircleIcon} label="Legal Name" value={previewData.legalName} />
 						<GSTPreviewDetail icon={BuildingOfficeIcon} label="Trade Name" value={previewData.tradeName} />
@@ -939,10 +911,10 @@ function VerifyGSTPanel({ organizationId, currentGST }: { organizationId: string
 // ORGANIZATION SETTINGS PAGE
 // =============================================================================
 
-export type OrgSettingsSection = "profile" | "gst" | "bank" | "billing" | "all";
+export type OrgSettingsSection = "profile" | "gst" | "bank" | "all";
 
 export function Settings({ section = "all" }: { section?: OrgSettingsSection } = {}) {
-	const { organization, organizationId, orgSlug } = useOrgContext();
+	const { organization, organizationId } = useOrgContext();
 	const { data: orgDetails } = useOrganizationSettings(organizationId);
 	const { data: dashboardData, loading: isLoadingStats } = useDashboard(organizationId);
 	const { data: bankAccount, loading: isBankLoading, refetch: refetchBank } = useBankAccount(organizationId);
@@ -1027,7 +999,7 @@ export function Settings({ section = "all" }: { section?: OrgSettingsSection } =
 	const loading = isLoadingStats;
 
 	if (loading) {
-		return <OrganizationSettingsSkeleton isDialog={section !== "all"} />;
+		return <SettingsSkeleton isDialog={section !== "all"} />;
 	}
 
 	const orgData = orgDetails;
@@ -1049,7 +1021,7 @@ export function Settings({ section = "all" }: { section?: OrgSettingsSection } =
 				canEdit={canUpdateOrganization}
 			/>
 			<div>
-				<MenuSectionHeader>Organization Details</MenuSectionHeader>
+				{!isDialog && <MenuSectionHeader>Organization Details</MenuSectionHeader>}
 				<MenuSection>
 					<MenuRow
 						icon={BuildingStorefrontIcon}
@@ -1098,22 +1070,21 @@ export function Settings({ section = "all" }: { section?: OrgSettingsSection } =
 		.join(", ");
 
 	const gstSection = (
-		<div className="space-y-1.5">
-			<MenuSectionHeader>GST & Compliance</MenuSectionHeader>
+		<div>
+			{!isDialog && <MenuSectionHeader>GST & Compliance</MenuSectionHeader>}
 
 			{isGSTLoading ? (
 				<div className="h-44 animate-pulse rounded-xl bg-zinc-100 dark:bg-zinc-800" />
 			) : !hasGST ? (
-				/* ── Empty State: No GST ── */
 				<div className="overflow-hidden rounded-xl ring-1 ring-zinc-200/80 dark:ring-zinc-700/60">
 					<div className="flex flex-col items-center gap-3 px-6 py-8 text-center">
-						<div className="flex size-12 items-center justify-center rounded-2xl bg-amber-100 dark:bg-amber-900/40">
-							<IdentificationIcon className="size-6 text-amber-600 dark:text-amber-400" />
+						<div className="flex size-11 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/40">
+							<IdentificationIcon className="size-5 text-amber-600 dark:text-amber-400" />
 						</div>
 						<div>
 							<p className="text-sm font-medium text-zinc-800 dark:text-zinc-200">No GST number added</p>
 							<p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
-								Add your GSTIN to create campaigns, listings, and generate invoices
+								Required for campaigns, listings, and invoicing
 							</p>
 						</div>
 						{canUpdateOrganization && (
@@ -1124,7 +1095,6 @@ export function Settings({ section = "all" }: { section?: OrgSettingsSection } =
 					</div>
 				</div>
 			) : (
-				/* ── GST Details Card ── */
 				<div className="overflow-hidden rounded-xl ring-1 ring-zinc-200/80 dark:ring-zinc-700/60">
 					{/* Status Banner */}
 					<div
@@ -1212,7 +1182,7 @@ export function Settings({ section = "all" }: { section?: OrgSettingsSection } =
 	// --- Section: Bank ---
 	const bankSection = (
 		<div>
-			<MenuSectionHeader>Bank Account</MenuSectionHeader>
+			{!isDialog && <MenuSectionHeader>Bank Account</MenuSectionHeader>}
 			{isBankLoading ? (
 				<div className="h-36 animate-pulse rounded-xl bg-zinc-100 dark:bg-zinc-800" />
 			) : bankAccount ? (
@@ -1265,8 +1235,8 @@ export function Settings({ section = "all" }: { section?: OrgSettingsSection } =
 				</MenuSection>
 			) : (
 				<div className="flex flex-col items-center gap-3 rounded-xl bg-zinc-50 py-8 ring-1 ring-zinc-200/80 dark:bg-zinc-800/60 dark:ring-zinc-700/60">
-					<div className="flex size-12 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-700/60">
-						<BanknotesIcon className="size-6 text-zinc-500 dark:text-zinc-400" />
+					<div className="flex size-11 items-center justify-center rounded-xl bg-zinc-200/80 dark:bg-zinc-700/60">
+						<BanknotesIcon className="size-5 text-zinc-500 dark:text-zinc-400" />
 					</div>
 					<div className="text-center">
 						<p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">No bank account added</p>
@@ -1282,37 +1252,18 @@ export function Settings({ section = "all" }: { section?: OrgSettingsSection } =
 		</div>
 	);
 
-	// --- Section: Billing ---
-	const billingSection = (
-		<div>
-			<MenuSectionHeader>Billing</MenuSectionHeader>
-			<MenuSection>
-				<MenuRow
-					icon={ReceiptPercentIcon}
-					iconColor="sky"
-					label="Invoices"
-					value="View billing history"
-					href={`/${orgSlug}/invoices`}
-					isFirst
-					isLast
-				/>
-			</MenuSection>
-		</div>
-	);
-
 	return (
-		<div className={isDialog ? "space-y-6 px-4 py-5 pb-10 sm:px-6" : "space-y-6 pb-20"}>
+		<div className={isDialog ? "space-y-5 px-5 py-5 pb-10 sm:px-6" : "space-y-6 pb-20"}>
 			{section === "all" && (
 				<div>
 					<Heading>Organization Settings</Heading>
-					<Text className="mt-1">Manage your organization profile, billing, and compliance</Text>
+					<Text className="mt-1">Manage your organization profile and compliance</Text>
 				</div>
 			)}
 
 			{show("profile") && profileSection}
 			{show("gst") && gstSection}
 			{show("bank") && bankSection}
-			{show("billing") && billingSection}
 
 			{section === "all" && (
 				<div className="flex flex-col items-center gap-2 pt-8">

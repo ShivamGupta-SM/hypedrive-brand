@@ -58,7 +58,6 @@ import { Select } from "@/components/select";
 // ═══════════════════════════════════════════════════════════════
 // CURRENT COMPONENTS (actively used)
 // ═══════════════════════════════════════════════════════════════
-import { StatCard } from "@/components/shared/card";
 // ═══════════════════════════════════════════════════════════════
 // DEAD COMPONENTS (currently unused in production)
 // ═══════════════════════════════════════════════════════════════

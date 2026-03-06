@@ -1,27 +1,6 @@
-import { Button } from "@/components/button";
-import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/dialog";
-import { Heading } from "@/components/heading";
-import { ContentCard } from "@/components/page-header";
-import { CopyButton } from "@/components/shared";
-import { EmptyState } from "@/components/shared/empty-state";
-import { ErrorState } from "@/components/shared/error-state";
-import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
-import { Skeleton } from "@/components/skeleton";
-import { Text } from "@/components/text";
-import { useListing } from "@/features/listings/hooks";
-import { useDeleteListing, useUpdateListing } from "@/features/listings/mutations";
-import { getAPIErrorMessage, getAssetUrl } from "@/hooks/api-client";
-import { usePageTitle } from "@/hooks/use-breadcrumb";
-import { useOrgContext } from "@/hooks/use-org-context";
-import type { brand } from "@/lib/brand-client";
-
-type Listing = brand.ListingWithStats;
-
 import {
-	ArrowLeftIcon,
 	ArrowPathIcon,
-	ArrowTopRightOnSquareIcon,
-	CalendarIcon,
+	ArrowUpRightIcon,
 	CheckCircleIcon,
 	ChevronLeftIcon,
 	ChevronRightIcon,
@@ -29,6 +8,7 @@ import {
 	CurrencyRupeeIcon,
 	ExclamationTriangleIcon,
 	LinkIcon,
+	MegaphoneIcon,
 	PencilIcon,
 	PhotoIcon,
 	PlusIcon,
@@ -39,11 +19,54 @@ import {
 import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import clsx from "clsx";
 import { useCallback, useEffect, useState } from "react";
+
+import { Badge } from "@/components/badge";
+import { Button } from "@/components/button";
+import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/dialog";
+import { Heading } from "@/components/heading";
+import { extractPlatformFromText, getPlatformColor, getPlatformIcon } from "@/components/icons/platform-icons";
+import { CopyButton } from "@/components/shared";
 import { useCan } from "@/components/shared/can";
+import { EmptyState } from "@/components/shared/empty-state";
+import { ErrorState } from "@/components/shared/error-state";
+import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
+import { Skeleton } from "@/components/skeleton";
+import { useCampaigns } from "@/features/campaigns/hooks";
+import { useCancelCampaign, useDuplicateCampaign, usePauseCampaign, useResumeCampaign } from "@/features/campaigns/mutations";
+import { useListing } from "@/features/listings/hooks";
+import { useDeleteListing, useUpdateListing } from "@/features/listings/mutations";
+import { getAPIErrorMessage, getAssetUrl } from "@/hooks/api-client";
+import { usePageTitle } from "@/hooks/use-breadcrumb";
+import { useOrgContext } from "@/hooks/use-org-context";
+import type { brand } from "@/lib/brand-client";
 import { formatCurrency } from "@/lib/design-tokens";
 import { showToast } from "@/lib/toast";
+import { CampaignCard, CampaignCardSkeleton } from "@/pages/campaigns/campaign-card";
+
+type Listing = brand.ListingWithStats;
 
 const routeApi = getRouteApi("/_app/$orgSlug/listings_/$id");
+
+// =============================================================================
+// HELPERS
+// =============================================================================
+
+function detectPlatform(listing: Listing) {
+	const platform = extractPlatformFromText(listing.link) || extractPlatformFromText(listing.name);
+	if (!platform) return null;
+	const PlatformIcon = getPlatformIcon(platform);
+	const colorClass = getPlatformColor(platform);
+	const label = platform.charAt(0).toUpperCase() + platform.slice(1);
+	return { name: platform, label, Icon: PlatformIcon, colorClass };
+}
+
+function formatDate(dateStr: string) {
+	return new Date(dateStr).toLocaleDateString("en-IN", {
+		month: "short",
+		day: "numeric",
+		year: "numeric",
+	});
+}
 
 // =============================================================================
 // LOADING SKELETON
@@ -51,36 +74,54 @@ const routeApi = getRouteApi("/_app/$orgSlug/listings_/$id");
 
 function LoadingSkeleton() {
 	return (
-		<div className="space-y-6 animate-fade-in">
-			{/* Back button */}
-			<Skeleton width={120} height={36} borderRadius={8} />
-
-			{/* Header */}
-			<div className="flex flex-col gap-6 lg:flex-row lg:items-start">
-				<Skeleton width={200} height={200} borderRadius={16} />
-				<div className="flex-1 space-y-3">
-					<Skeleton width={250} height={32} borderRadius={8} />
-					<Skeleton width={150} height={20} borderRadius={6} />
-					<div className="flex gap-2">
-						<Skeleton width={80} height={24} borderRadius={12} />
-						<Skeleton width={80} height={24} borderRadius={12} />
+		<div className="animate-fade-in space-y-4 sm:space-y-5">
+			{/* Hero Card */}
+			<div className="overflow-hidden rounded-xl bg-white ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
+				<div className="flex flex-col lg:flex-row">
+					{/* Image area */}
+					<div className="shrink-0 border-b border-zinc-100 bg-zinc-50/50 p-3 sm:p-4 lg:w-80 lg:border-b-0 lg:border-r lg:p-5 xl:w-96 dark:border-zinc-800 dark:bg-zinc-800/20">
+						<Skeleton width="100%" height={0} borderRadius={12} className="aspect-square!" />
 					</div>
-					<Skeleton width={120} height={28} borderRadius={8} />
+					{/* Info area */}
+					<div className="flex-1 p-4 sm:p-5">
+						<div className="flex items-start justify-between gap-3">
+							<Skeleton width={200} height={24} borderRadius={8} />
+							<Skeleton width={80} height={32} borderRadius={8} />
+						</div>
+						<div className="mt-3 flex gap-1.5">
+							<Skeleton width={55} height={20} borderRadius={12} />
+							<Skeleton width={70} height={20} borderRadius={12} />
+							<Skeleton width={80} height={20} borderRadius={12} />
+						</div>
+						<Skeleton width="80%" height={14} borderRadius={6} className="mt-3" />
+						<Skeleton width="60%" height={14} borderRadius={6} className="mt-1.5" />
+						<div className="mt-5 grid grid-cols-2 gap-3">
+							{[1, 2, 3, 4].map((i) => (
+								<div key={i} className="space-y-1">
+									<Skeleton width={50} height={10} borderRadius={4} />
+									<Skeleton width={80} height={16} borderRadius={6} />
+								</div>
+							))}
+						</div>
+						<Skeleton width={140} height={36} borderRadius={8} className="mt-5" />
+					</div>
 				</div>
 			</div>
 
 			{/* Stats */}
-			<div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-				{[1, 2, 3, 4].map((i) => (
-					<Skeleton key={i} width="100%" height={100} borderRadius={12} />
-				))}
-			</div>
+			<FinancialStatsGridBordered
+				stats={[
+					{ name: "Total Views", value: "" },
+					{ name: "Campaigns", value: "" },
+					{ name: "Price", value: "" },
+					{ name: "Created", value: "" },
+				]}
+				loading
+				columns={4}
+			/>
 
-			{/* Content */}
-			<div className="grid gap-6 lg:grid-cols-2">
-				<Skeleton width="100%" height={300} borderRadius={12} />
-				<Skeleton width="100%" height={300} borderRadius={12} />
-			</div>
+			{/* Campaigns card */}
+			<Skeleton width="100%" height={100} borderRadius={12} />
 		</div>
 	);
 }
@@ -90,40 +131,75 @@ function LoadingSkeleton() {
 // =============================================================================
 
 function ImageGallery({ images }: { images: string[] }) {
+	const [activeIndex, setActiveIndex] = useState(0);
+
 	if (images.length === 0) {
 		return (
-			<div className="flex aspect-square w-full max-w-sm items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800">
-				<CubeIcon className="size-20 text-zinc-300 dark:text-zinc-600" />
+			<div className="flex aspect-square w-full items-center justify-center rounded-xl bg-zinc-50 dark:bg-zinc-800/50">
+				<CubeIcon className="size-12 text-zinc-300 dark:text-zinc-600" />
 			</div>
 		);
 	}
 
-	const primaryImage = images[0];
-	const otherImages = images.slice(1);
+	const thumbnails = images.length > 1 ? images : null;
 
 	return (
-		<div className="space-y-3">
-			{/* Main image */}
-			<div className="aspect-square w-full max-w-sm overflow-hidden rounded-2xl bg-zinc-100 dark:bg-zinc-800">
-				<img src={getAssetUrl(primaryImage)} alt="Listing" className="h-full w-full object-contain p-2" />
+		<div className="space-y-2">
+			{/* Main image + vertical thumbs on sm+ */}
+			<div className="flex gap-2.5">
+				{/* Vertical thumbnail strip — sm+ only */}
+				{thumbnails && (
+					<div className="-m-1 hidden shrink-0 flex-col gap-1.5 overflow-y-auto p-1 sm:flex">
+						{thumbnails.map((imgUrl, i) => (
+							<button
+								key={`${imgUrl}-${i}`}
+								type="button"
+								onClick={() => setActiveIndex(i)}
+								className={clsx(
+									"size-12 shrink-0 overflow-hidden rounded-lg bg-white ring-1 transition-all dark:bg-zinc-800",
+									i === activeIndex
+										? "ring-2 ring-zinc-900 dark:ring-white"
+										: "ring-zinc-200 hover:ring-zinc-300 dark:ring-zinc-700 dark:hover:ring-zinc-500"
+								)}
+							>
+								<img
+									src={getAssetUrl(imgUrl)}
+									alt={`Listing ${i + 1}`}
+									className="h-full w-full object-contain p-0.5"
+								/>
+							</button>
+						))}
+					</div>
+				)}
+
+				{/* Main image */}
+				<div className="aspect-square w-full overflow-hidden rounded-xl bg-white ring-1 ring-zinc-200 dark:bg-zinc-800/50 dark:ring-zinc-700">
+					<img
+						src={getAssetUrl(images[activeIndex])}
+						alt="Listing"
+						className="h-full w-full object-contain p-3 sm:p-4"
+					/>
+				</div>
 			</div>
 
-			{/* Thumbnails */}
-			{otherImages.length > 0 && (
-				<div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
-					{otherImages.slice(0, 4).map((imgUrl, i) => (
-						<div
-							key={`${imgUrl}-${i}`}
-							className="size-16 shrink-0 overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-800"
+			{/* Horizontal thumbnails — mobile only, below main image */}
+			{thumbnails && (
+				<div className="scrollbar-hide -m-1 flex gap-1.5 overflow-x-auto p-1 sm:hidden">
+					{thumbnails.map((imgUrl, i) => (
+						<button
+							key={`thumb-${imgUrl}-${i}`}
+							type="button"
+							onClick={() => setActiveIndex(i)}
+							className={clsx(
+								"size-11 shrink-0 overflow-hidden rounded-lg bg-white ring-1 transition-all dark:bg-zinc-800",
+								i === activeIndex
+									? "ring-2 ring-zinc-900 dark:ring-white"
+									: "ring-zinc-200 hover:ring-zinc-300 dark:ring-zinc-700"
+							)}
 						>
-							<img src={getAssetUrl(imgUrl)} alt={`Listing ${i + 2}`} className="h-full w-full object-contain p-1" />
-						</div>
+							<img src={getAssetUrl(imgUrl)} alt={`Listing ${i + 1}`} className="h-full w-full object-contain p-0.5" />
+						</button>
 					))}
-					{otherImages.length > 4 && (
-						<div className="flex size-16 shrink-0 items-center justify-center rounded-lg bg-zinc-100 text-sm font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
-							+{otherImages.length - 4}
-						</div>
-					)}
 				</div>
 			)}
 		</div>
@@ -390,7 +466,8 @@ function EditListingModal({
 									htmlFor="edit-listing-price"
 									className="mb-1.5 block text-sm font-medium text-zinc-900 dark:text-white"
 								>
-									Price (₹) <span className="text-red-500">*</span>
+									Price ({listing.currency === "INR" ? "\u20B9" : listing.currency}){" "}
+									<span className="text-red-500">*</span>
 								</label>
 								<div className="relative">
 									<CurrencyRupeeIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
@@ -504,7 +581,7 @@ function EditListingModal({
 												<img
 													src={getAssetUrl(imgUrl)}
 													alt={`Listing ${idx + 1}`}
-													className="size-12 rounded-lg object-contain bg-zinc-100 dark:bg-zinc-800"
+													className="size-12 rounded-lg bg-zinc-100 object-contain dark:bg-zinc-800"
 													onError={(e) => {
 														(e.target as HTMLImageElement).src =
 															"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'%3E%3Cpath fill='%23a1a1aa' d='M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'/%3E%3C/svg%3E";
@@ -522,7 +599,7 @@ function EditListingModal({
 																: "text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
 														)}
 													>
-														{idx === 0 ? "✓ Primary" : "Set as primary"}
+														{idx === 0 ? "Primary" : "Set as primary"}
 													</button>
 												</div>
 												<button
@@ -541,7 +618,9 @@ function EditListingModal({
 									<div className="mt-3 rounded-xl border-2 border-dashed border-zinc-200 p-6 text-center dark:border-zinc-700">
 										<PhotoIcon className="mx-auto size-8 text-zinc-400 dark:text-zinc-500" />
 										<p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">No images added yet</p>
-										<p className="text-xs text-zinc-400 dark:text-zinc-500">Add image URLs above to showcase your listing</p>
+										<p className="text-xs text-zinc-400 dark:text-zinc-500">
+											Add image URLs above to showcase your listing
+										</p>
 									</div>
 								)}
 							</div>
@@ -588,7 +667,7 @@ function EditListingModal({
 }
 
 // =============================================================================
-// PRODUCT SHOW PAGE
+// LISTING SHOW PAGE
 // =============================================================================
 
 export function ListingShow() {
@@ -616,11 +695,61 @@ export function ListingShow() {
 	} = useListing(organizationId, listingId);
 	usePageTitle(listing?.name ?? null);
 
-	const loading = listingLoading;
+	// Campaigns for this listing
+	const {
+		data: campaigns,
+		loading: campaignsLoading,
+	} = useCampaigns(organizationId, { listingId, take: 6 });
 
-	const handleRefetch = () => {
-		refetchListing();
-	};
+	const pauseCampaign = usePauseCampaign();
+	const resumeCampaign = useResumeCampaign();
+	const cancelCampaign = useCancelCampaign();
+	const duplicateCampaign = useDuplicateCampaign();
+
+	const canPauseCampaign = useCan("campaign", "update");
+	const canResumeCampaign = useCan("campaign", "update");
+	const canDeleteCampaign = useCan("campaign", "delete");
+	const canCreateCampaign = useCan("campaign", "create");
+
+	const handlePauseCampaign = useCallback(async (id: string) => {
+		if (!organizationId) return;
+		try {
+			await pauseCampaign.mutateAsync({ organizationId, campaignId: id });
+			showToast.success("Campaign paused");
+		} catch (err) {
+			showToast.error(err, "Failed to pause campaign");
+		}
+	}, [organizationId, pauseCampaign]);
+
+	const handleResumeCampaign = useCallback(async (id: string) => {
+		if (!organizationId) return;
+		try {
+			await resumeCampaign.mutateAsync({ organizationId, campaignId: id });
+			showToast.success("Campaign resumed");
+		} catch (err) {
+			showToast.error(err, "Failed to resume campaign");
+		}
+	}, [organizationId, resumeCampaign]);
+
+	const handleCancelCampaign = useCallback(async (id: string) => {
+		if (!organizationId) return;
+		try {
+			await cancelCampaign.mutateAsync({ organizationId, campaignId: id });
+			showToast.success("Campaign cancelled");
+		} catch (err) {
+			showToast.error(err, "Failed to cancel campaign");
+		}
+	}, [organizationId, cancelCampaign]);
+
+	const handleDuplicateCampaign = useCallback(async (id: string) => {
+		if (!organizationId) return;
+		try {
+			await duplicateCampaign.mutateAsync({ organizationId, campaignId: id });
+			showToast.success("Campaign duplicated");
+		} catch (err) {
+			showToast.error(err, "Failed to duplicate campaign");
+		}
+	}, [organizationId, duplicateCampaign]);
 
 	const handleDelete = useCallback(async () => {
 		if (!listingId) return;
@@ -634,172 +763,230 @@ export function ListingShow() {
 		}
 	}, [listingId, deleteListing, navigate, orgSlug]);
 
-	if (loading) {
+	if (listingLoading) {
 		return <LoadingSkeleton />;
 	}
 
 	if (listingError || !listing) {
-		return <ErrorState message="Failed to load listing details. Please try again." onRetry={handleRefetch} />;
+		return <ErrorState message="Failed to load listing details. Please try again." onRetry={refetchListing} />;
 	}
 
-	return (
-		<div className="space-y-6">
-			{/* Back Button */}
-			<Button href={`/${orgSlug}/listings`} color="zinc">
-				<ArrowLeftIcon className="size-4" />
-				Listings
-			</Button>
+	const platform = detectPlatform(listing);
+	const canUpdate = listing.allowedActions ? (listing.allowedActions as string[]).includes("update") : canUpdateGlobal;
+	const canDelete = listing.allowedActions ? (listing.allowedActions as string[]).includes("delete") : canDeleteGlobal;
+	const images = listing.listingImages?.map((img) => img.imageUrl) || [];
 
-			{/* Header */}
-			<div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-				<div className="flex flex-col gap-6 sm:flex-row sm:items-start">
-					{/* Listing Images */}
-					<div className="shrink-0">
-						<ImageGallery images={listing.listingImages?.map((img) => img.imageUrl) || []} />
+	return (
+		<div className="space-y-4 sm:space-y-5">
+			{/* Product Hero Card */}
+			<div className="relative overflow-hidden rounded-xl bg-white ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
+				<div className={clsx("pointer-events-none absolute inset-x-0 top-0 h-24 bg-linear-to-b sm:h-32", listing.isActive ? "from-emerald-500/20 via-emerald-500/5 to-transparent dark:from-emerald-500/15 dark:via-emerald-500/5" : "from-zinc-500/15 via-zinc-500/5 to-transparent dark:from-zinc-500/10 dark:via-zinc-500/5")} />
+				<div className="relative flex flex-col lg:flex-row">
+					{/* Image gallery */}
+					<div className="shrink-0 border-b border-zinc-100 bg-zinc-50/50 p-3 sm:p-4 lg:w-80 lg:border-b-0 lg:border-r lg:p-5 xl:w-96 dark:border-zinc-800 dark:bg-zinc-800/20">
+						<ImageGallery images={images} />
 					</div>
 
-					{/* Listing Info */}
-					<div className="space-y-3">
-						<div className="flex items-center gap-2">
-							<Heading>{listing.name}</Heading>
+					{/* Product info */}
+					<div className="flex min-w-0 flex-1 flex-col">
+						<div className="flex-1 space-y-4 p-4 sm:p-5">
+							{/* Title + price */}
+							<div className="flex items-start justify-between gap-2">
+								<Heading className="text-base/snug sm:text-lg/snug">{listing.name}</Heading>
+								<span className="shrink-0 rounded-lg bg-emerald-50 px-2 py-0.5 text-sm font-bold text-emerald-700 sm:px-2.5 sm:py-1 sm:text-base dark:bg-emerald-950/30 dark:text-emerald-400">
+									{formatCurrency(listing.priceDecimal)}
+								</span>
+							</div>
+
+							{/* Badges */}
+							<div className="flex flex-wrap items-center gap-1.5">
+								<Badge color={listing.isActive ? "emerald" : "zinc"} className="text-[11px]">
+									{listing.isActive ? "Active" : "Inactive"}
+								</Badge>
+								{listing.identifier && (
+									<Badge color="zinc" className="font-mono text-[11px]">
+										{listing.identifier}
+									</Badge>
+								)}
+								{platform?.Icon && (
+									<Badge color="zinc" className="inline-flex items-center gap-1 text-[11px]">
+										<platform.Icon className={clsx("size-3", platform.colorClass)} />
+										{platform.label}
+									</Badge>
+								)}
+								{listing.campaignCount > 0 && (
+									<Badge color="sky" className="text-[11px]">
+										{listing.campaignCount} campaign{listing.campaignCount !== 1 ? "s" : ""}
+									</Badge>
+								)}
+							</div>
+
+							{/* Description */}
+							{listing.description && (
+								<p className="text-[13px] leading-relaxed text-zinc-500 dark:text-zinc-400">{listing.description}</p>
+							)}
+
+							{/* Quick details */}
+							<dl className="grid grid-cols-2 gap-x-4 gap-y-2.5 border-t border-zinc-100 pt-4 dark:border-zinc-800">
+								<div>
+									<dt className="text-[11px] font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+										SKU
+									</dt>
+									<dd className="mt-0.5 flex items-center gap-1">
+										<span className="font-mono text-sm text-zinc-900 dark:text-white">{listing.identifier}</span>
+										<CopyButton value={listing.identifier ?? ""} label="SKU" />
+									</dd>
+								</div>
+								{platform && (
+									<div>
+										<dt className="text-[11px] font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+											Platform
+										</dt>
+										<dd className="mt-0.5 flex items-center gap-1.5">
+											{platform.Icon && <platform.Icon className={clsx("size-3.5", platform.colorClass)} />}
+											<span className="text-sm text-zinc-900 dark:text-white">{platform.label}</span>
+										</dd>
+									</div>
+								)}
+								<div>
+									<dt className="text-[11px] font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+										Created
+									</dt>
+									<dd className="mt-0.5 text-sm text-zinc-900 dark:text-white">{formatDate(listing.createdAt)}</dd>
+								</div>
+								<div>
+									<dt className="text-[11px] font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+										Updated
+									</dt>
+									<dd className="mt-0.5 text-sm text-zinc-900 dark:text-white">{formatDate(listing.updatedAt)}</dd>
+								</div>
+							</dl>
+
+							{/* Platform link */}
+							{listing.link && (
+								<div className="flex items-center gap-1.5">
+									<a
+										href={listing.link}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="group inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 transition-all hover:border-zinc-300 hover:bg-zinc-50 sm:px-3.5 sm:py-2 sm:text-sm dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-600"
+									>
+										{platform?.Icon ? (
+											<platform.Icon className={clsx("size-3.5 sm:size-4", platform.colorClass)} />
+										) : (
+											<LinkIcon className="size-3.5 text-zinc-400 sm:size-4" />
+										)}
+										{platform ? `View on ${platform.label}` : "View Listing"}
+										<ArrowUpRightIcon className="size-3 text-zinc-400 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 sm:size-3.5" />
+									</a>
+									<CopyButton value={listing.link} label="Link" />
+								</div>
+							)}
 						</div>
 
-						<div className="flex items-center gap-1">
-							<p className="text-sm text-zinc-500 dark:text-zinc-400">SKU: {listing.identifier}</p>
-							<CopyButton value={listing.identifier ?? ""} label="SKU" />
-						</div>
-
-						<p className="text-2xl font-bold text-zinc-900 dark:text-white">{formatCurrency(listing.priceDecimal)}</p>
-
-						{listing.description && <Text className="max-w-lg">{listing.description}</Text>}
-
-						{listing.link && (
-							<a
-								href={listing.link}
-								target="_blank"
-								rel="noopener noreferrer"
-								className="inline-flex items-center gap-1.5 text-sm font-medium text-sky-600 hover:text-sky-700 dark:text-sky-400 dark:hover:text-sky-300"
-							>
-								<LinkIcon className="size-4" />
-								View Listing Page
-								<ArrowTopRightOnSquareIcon className="size-3" />
-							</a>
+						{/* Actions bar */}
+						{(canUpdate || canDelete) && (
+							<div className="flex items-center gap-1.5 border-t border-zinc-100 px-4 py-2.5 sm:px-5 dark:border-zinc-800">
+								<div className="ml-auto flex items-center gap-1.5">
+									{canDelete && (
+										<button
+											type="button"
+											onClick={() => setShowDeleteConfirm(true)}
+											className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-medium text-red-600 transition-all hover:bg-red-50 dark:border-zinc-700 dark:text-red-400 dark:hover:bg-red-950/30"
+										>
+											<TrashIcon className="size-3.5" />
+											Delete
+										</button>
+									)}
+									{canUpdate && (
+										<button
+											type="button"
+											onClick={() => setShowEditModal(true)}
+											className="inline-flex items-center gap-1.5 rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
+										>
+											<PencilIcon className="size-3.5" />
+											Edit Listing
+										</button>
+									)}
+								</div>
+							</div>
 						)}
 					</div>
 				</div>
-
-				{/* Actions — prefer server-driven allowedActions */}
-				{(() => {
-					const canUpdate = listing?.allowedActions
-						? (listing.allowedActions as string[]).includes("update")
-						: canUpdateGlobal;
-					const canDelete = listing?.allowedActions
-						? (listing.allowedActions as string[]).includes("delete")
-						: canDeleteGlobal;
-					if (!canUpdate && !canDelete) return null;
-					return (
-						<div className="flex gap-2">
-							{canUpdate && (
-								<Button onClick={() => setShowEditModal(true)} outline>
-									<PencilIcon className="size-4" />
-									Edit
-								</Button>
-							)}
-							{canDelete && (
-								<Button onClick={() => setShowDeleteConfirm(true)} outline>
-									<TrashIcon className="size-4 text-red-500" />
-									<span className="text-red-600 dark:text-red-400">Delete</span>
-								</Button>
-							)}
-						</div>
-					);
-				})()}
 			</div>
 
-			{/* Stats Row */}
+			{/* Stats Grid */}
 			<FinancialStatsGridBordered
 				stats={[
 					{ name: "Total Views", value: listing.views.toLocaleString("en-IN") },
+					{ name: "Campaigns", value: listing.campaignCount.toString() },
 					{ name: "Price", value: formatCurrency(listing.priceDecimal) },
-					{
-						name: "Created",
-						value: new Date(listing.createdAt).toLocaleDateString("en-IN", {
-							month: "short",
-							day: "numeric",
-							year: "numeric",
-						}),
-					},
+					{ name: "Created", value: formatDate(listing.createdAt) },
 				]}
-				columns={3}
+				columns={4}
 			/>
 
-			{/* Main Content */}
-			<div className="grid gap-6 lg:grid-cols-2">
-				{/* Listing Details */}
-				<ContentCard>
-					<div className="p-6">
-						<h3 className="text-lg font-semibold text-zinc-900 dark:text-white">Listing Details</h3>
-
-						<div className="mt-6 space-y-4">
-							{/* SKU */}
-							<div className="flex items-center justify-between border-b border-zinc-200 pb-4 dark:border-zinc-700">
-								<div className="flex items-center gap-3">
-									<div className="flex size-10 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
-										<TagIcon className="size-5 text-zinc-500 dark:text-zinc-400" />
-									</div>
-									<div>
-										<p className="text-sm font-medium text-zinc-900 dark:text-white">SKU</p>
-										<p className="text-sm text-zinc-500 dark:text-zinc-400">Listing identifier</p>
-									</div>
-								</div>
-								<div className="flex items-center gap-1">
-									<span className="font-mono text-sm text-zinc-900 dark:text-white">{listing.identifier}</span>
-									<CopyButton value={listing.identifier ?? ""} label="SKU" />
-								</div>
-							</div>
-
-							{/* Created/Updated */}
-							<div className="flex items-center justify-between pt-2">
-								<div className="flex items-center gap-3">
-									<div className="flex size-10 items-center justify-center rounded-lg bg-sky-50 dark:bg-sky-950/30">
-										<CalendarIcon className="size-5 text-sky-500" />
-									</div>
-									<div>
-										<p className="text-sm font-medium text-zinc-900 dark:text-white">Last Updated</p>
-										<p className="text-sm text-zinc-500 dark:text-zinc-400">
-											{new Date(listing.updatedAt).toLocaleDateString("en-IN", {
-												month: "long",
-												day: "numeric",
-												year: "numeric",
-											})}
-										</p>
-									</div>
-								</div>
-							</div>
+			{/* Campaigns */}
+			<div>
+				<div className="flex items-center justify-between px-0.5 pb-2.5">
+					<div className="flex items-center gap-2.5">
+						<div className="flex size-6 items-center justify-center rounded-md bg-violet-100 dark:bg-violet-900/30">
+							<MegaphoneIcon className="size-3.5 text-violet-500" />
 						</div>
+						<h3 className="text-xs font-semibold text-zinc-900 sm:text-sm dark:text-white">
+							Campaigns
+							{listing.campaignCount > 0 && (
+								<span className="ml-1.5 rounded-full bg-sky-50 px-2 py-0.5 text-[11px] font-medium text-sky-700 ring-1 ring-sky-200 dark:bg-sky-950/30 dark:text-sky-400 dark:ring-sky-800">
+									{listing.campaignCount}
+								</span>
+							)}
+						</h3>
 					</div>
-				</ContentCard>
-
-				{/* Associated Campaigns */}
-				<ContentCard>
-					<div className="p-6">
-						<div className="flex items-center justify-between">
-							<h3 className="text-lg font-semibold text-zinc-900 dark:text-white">Campaigns</h3>
-						</div>
-
-						<div className="mt-6">
-							<EmptyState
-								preset="campaigns"
-								title="View campaigns"
-								description="Browse campaigns associated with this listing"
-								action={{
-									label: "View Campaigns",
-									href: `/${orgSlug}/campaigns`,
-								}}
+					{listing.campaignCount > 0 && (
+						<button
+							type="button"
+							onClick={() => navigate({ to: "/$orgSlug/campaigns", params: { orgSlug } })}
+							className="text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+						>
+							View all &rarr;
+						</button>
+					)}
+				</div>
+				{campaignsLoading ? (
+					<div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3.5 lg:grid-cols-3">
+						{[1, 2, 3].map((i) => (
+							<CampaignCardSkeleton key={i} />
+						))}
+					</div>
+				) : campaigns.length > 0 ? (
+					<div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3.5 lg:grid-cols-3">
+						{campaigns.map((campaign) => (
+							<CampaignCard
+								key={campaign.id}
+								campaign={campaign}
+								orgSlug={orgSlug}
+								onPause={handlePauseCampaign}
+								onResume={handleResumeCampaign}
+								onDelete={handleCancelCampaign}
+								onDuplicate={handleDuplicateCampaign}
+								canPause={canPauseCampaign}
+								canResume={canResumeCampaign}
+								canDelete={canDeleteCampaign}
+								canCreate={canCreateCampaign}
 							/>
-						</div>
+						))}
 					</div>
-				</ContentCard>
+				) : (
+					<EmptyState
+						preset="campaigns"
+						title="No campaigns"
+						description="Create a campaign to promote this listing"
+						action={{
+							label: "Create Campaign",
+							href: `/${orgSlug}/campaigns`,
+						}}
+					/>
+				)}
 			</div>
 
 			{/* Edit Listing Modal */}

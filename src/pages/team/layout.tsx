@@ -8,6 +8,7 @@ import {
 } from "@heroicons/react/16/solid";
 import { Outlet } from "@tanstack/react-router";
 import { useState } from "react";
+import { Button } from "@/components/button";
 import { Input, InputGroup } from "@/components/input";
 import { PageHeader } from "@/components/page-header";
 import { useCan } from "@/components/shared/can";
@@ -17,9 +18,8 @@ import { TabNav, type TabNavItem } from "@/components/shared/tab-nav";
 import { useInvitations, useMembers } from "@/features/team/hooks";
 import { useOrgContext } from "@/hooks/use-org-context";
 import { useOrgPath } from "@/hooks/use-org-slug";
-import { InviteMemberModal, TeamSkeleton } from "./components";
-
 import { Route } from "@/routes/_app/$orgSlug/team";
+import { InviteMemberModal, TeamSkeleton } from "./components";
 
 export function TeamLayout() {
 	const { organizationId } = useOrgContext();
@@ -33,13 +33,12 @@ export function TeamLayout() {
 
 	const [showInviteModal, setShowInviteModal] = useState(false);
 
-	if (membersLoading || invitationsLoading) return <TeamSkeleton />;
-
 	const totalMembers = members.length;
-	const ownerCount = members.filter((m) => m.role === "owner").length;
-	const adminCount = members.filter((m) => m.role === "admin").length;
-	const memberCount = members.filter((m) => m.role === "member").length;
+	const adminCount = members.filter((m) => m.role === "owner" || m.role === "admin").length;
+	const memberCount = totalMembers - adminCount;
 	const pendingInvitations = invitations.length;
+
+	if (membersLoading || invitationsLoading) return <TeamSkeleton />;
 
 	const tabs: TabNavItem[] = [
 		{
@@ -77,27 +76,32 @@ export function TeamLayout() {
 				description="Manage your organization's team members, invitations, and roles"
 				actions={
 					canInviteMembers ? (
-						<IconButton color="zinc" onClick={() => setShowInviteModal(true)}>
-							<UserPlusIcon className="size-5" />
-						</IconButton>
+						<div className="flex items-center gap-2">
+							<div className="flex items-center gap-2 sm:hidden">
+								<IconButton color="zinc" onClick={() => setShowInviteModal(true)}>
+									<UserPlusIcon className="size-5" />
+								</IconButton>
+							</div>
+							<div className="hidden items-center gap-2 sm:flex">
+								<Button color="dark/zinc" onClick={() => setShowInviteModal(true)}>
+									<UserPlusIcon className="size-4" />
+									Invite Member
+								</Button>
+							</div>
+						</div>
 					) : undefined
 				}
 			/>
 
 			{/* Stats */}
 			<FinancialStatsGridBordered
+				columns={4}
 				stats={[
 					{ name: "Total Members", value: totalMembers },
-					{ name: "Admins", value: ownerCount + adminCount },
+					{ name: "Admins", value: adminCount },
 					{ name: "Members", value: memberCount },
-					{
-						name: "Pending Invites",
-						value: pendingInvitations,
-						change: pendingInvitations > 0 ? "action needed" : undefined,
-						changeType: pendingInvitations > 0 ? "negative" : undefined,
-					},
+					{ name: "Pending Invites", value: pendingInvitations },
 				]}
-				columns={4}
 			/>
 
 			{/* Search + Tabs */}

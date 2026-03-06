@@ -82,7 +82,7 @@ export const queryKeys = {
 	wallet: (orgId: string) => ["wallet", orgId] as const,
 	walletTransactions: (orgId: string, params?: Record<string, unknown>) =>
 		["wallet", orgId, "transactions", params] as const,
-	walletHolds: (orgId: string) => ["wallet", orgId, "holds"] as const,
+	walletHolds: (orgId: string, params?: Record<string, unknown>) => ["wallet", orgId, "holds", params] as const,
 	infiniteWalletTransactions: (orgId: string, params?: Record<string, unknown>) =>
 		["infiniteWalletTransactions", orgId, params] as const,
 	withdrawals: (orgId: string, params?: Record<string, unknown>) => ["wallet", orgId, "withdrawals", params] as const,
@@ -105,6 +105,7 @@ export const queryKeys = {
 	passkeys: () => ["passkeys"] as const,
 	notifications: (orgId: string, params?: Record<string, unknown>) => ["notifications", orgId, params] as const,
 	files: () => ["files"] as const,
+	walletTransaction: (orgId: string, transactionId: string) => ["wallet", orgId, "transaction", transactionId] as const,
 	withdrawal: (orgId: string, withdrawalId: string) => ["wallet", orgId, "withdrawal", withdrawalId] as const,
 	organizationRoles: (orgId: string) => ["organizationRoles", orgId] as const,
 	logoPreview: (domain: string) => ["logoPreview", domain] as const,
@@ -114,6 +115,7 @@ export const queryKeys = {
 	platforms: () => ["platforms"] as const,
 	taskTemplates: (params?: Record<string, unknown>) => ["taskTemplates", params] as const,
 	pushTokens: (orgId: string) => ["pushTokens", orgId] as const,
+	notificationUnreadCount: (orgId: string) => ["notificationUnreadCount", orgId] as const,
 };
 
 export const DEFAULT_PAGE_SIZE = 20;

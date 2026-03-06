@@ -15,6 +15,7 @@ import {
 	virtualAccountQueryOptions,
 	walletHoldsQueryOptions,
 	walletQueryOptions,
+	walletTransactionQueryOptions,
 	walletTransactionsQueryOptions,
 	withdrawalDetailQueryOptions,
 	withdrawalStatsQueryOptions,
@@ -90,9 +91,22 @@ export function useInfiniteWalletTransactions(
 	};
 }
 
-export function useWalletHolds(organizationId: string | undefined) {
+export function useWalletHolds(
+	organizationId: string | undefined,
+	params?: {
+		campaignId?: string;
+		createdFrom?: string;
+		createdTo?: string;
+		expiresFrom?: string;
+		expiresTo?: string;
+		sortBy?: "createdAt" | "expiresAt" | "amount";
+		sortOrder?: "asc" | "desc";
+		skip?: number;
+		take?: number;
+	}
+) {
 	const query = useQuery({
-		...walletHoldsQueryOptions(organizationId || ""),
+		...walletHoldsQueryOptions(organizationId || "", params),
 		enabled: !!organizationId,
 	});
 
@@ -181,6 +195,20 @@ export function useDeposits(
 		data: query.data?.data ?? [],
 		total: query.data?.total ?? 0,
 		hasMore: query.data?.hasMore ?? false,
+		loading: query.isPending && !query.data,
+		error: query.error,
+		refetch: query.refetch,
+	};
+}
+
+export function useWalletTransaction(organizationId: string | undefined, transactionId: string | undefined) {
+	const query = useQuery({
+		...walletTransactionQueryOptions(organizationId || "", transactionId || ""),
+		enabled: !!organizationId && !!transactionId,
+	});
+
+	return {
+		data: query.data ?? null,
 		loading: query.isPending && !query.data,
 		error: query.error,
 		refetch: query.refetch,

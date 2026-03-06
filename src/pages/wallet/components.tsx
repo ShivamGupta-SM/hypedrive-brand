@@ -18,6 +18,7 @@ import {
 	UserIcon,
 } from "@heroicons/react/16/solid";
 import { startAuthentication } from "@simplewebauthn/browser";
+import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
 import { useState } from "react";
 import { Badge } from "@/components/badge";
@@ -203,11 +204,15 @@ export function DepositAccountDialog({
 // TRANSACTION ROW
 // =============================================================================
 
-export function TransactionRow({ transaction }: { transaction: WalletTransaction }) {
+export function TransactionRow({ transaction, orgSlug }: { transaction: WalletTransaction; orgSlug: string }) {
 	const isCredit = transaction.type === "credit";
 
 	return (
-		<div className="flex items-center gap-3 px-4 py-3">
+		<Link
+			to="/$orgSlug/wallet/transactions/$id"
+			params={{ orgSlug, id: transaction.id }}
+			className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+		>
 			<div
 				className={`flex size-8 shrink-0 items-center justify-center rounded-lg ${
 					isCredit ? "bg-emerald-50 dark:bg-emerald-950/30" : "bg-red-50 dark:bg-red-950/30"
@@ -240,7 +245,7 @@ export function TransactionRow({ transaction }: { transaction: WalletTransaction
 				{isCredit ? "+" : "-"}
 				{formatCurrency(transaction.amountDecimal)}
 			</p>
-		</div>
+		</Link>
 	);
 }
 

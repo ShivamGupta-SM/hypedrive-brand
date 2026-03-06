@@ -16,15 +16,14 @@ import {
 	XMarkIcon,
 } from "@heroicons/react/16/solid";
 import clsx from "clsx";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Badge } from "@/components/badge";
-import { SelectionCheckbox, SelectionCheckboxSpacer } from "@/components/shared/selection-checkbox";
 import { Button } from "@/components/button";
 import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/dialog";
 import { Dropdown, DropdownButton, DropdownItem, DropdownMenu } from "@/components/dropdown";
 import { Input } from "@/components/input";
 import { EmptyState } from "@/components/shared/empty-state";
-import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
+import { SelectionCheckbox, SelectionCheckboxSpacer } from "@/components/shared/selection-checkbox";
 import { Skeleton } from "@/components/skeleton";
 import {
 	useCreateOrganizationRole,
@@ -32,11 +31,19 @@ import {
 	useOrganizationRoles,
 	useUpdateOrganizationRole,
 } from "@/features/organization/hooks-roles";
+import { useUserSearch } from "@/features/team/hooks";
 import { useInviteMember, useRemoveMember, useUpdateMemberRole } from "@/features/team/mutations";
 import { getAPIErrorMessage } from "@/hooks/api-client";
 import type { types } from "@/lib/brand-client";
 import type { OrgResource } from "@/lib/permissions/definitions";
-import { ACTION_LABELS, ORG_RESOURCE_LABELS, ORG_STATEMENT } from "@/lib/permissions/definitions";
+import {
+	ACTION_LABELS,
+	ORG_RESOURCE_LABELS,
+	ORG_ROLE_DESCRIPTIONS,
+	ORG_ROLE_LABELS,
+	ORG_ROLES,
+	ORG_STATEMENT,
+} from "@/lib/permissions/definitions";
 import { showToast } from "@/lib/toast";
 
 export type Member = types.MemberResponse;
@@ -50,7 +57,54 @@ export interface Invitation {
 	createdAt: string;
 }
 
-export type MemberRole = "owner" | "admin" | "member";
+// =============================================================================
+// ROLE OPTION — unified shape used by role pickers
+// =============================================================================
+
+interface RoleOption {
+	/** Role slug sent to the API */
+	value: string;
+	/** Human-readable label */
+	label: string;
+	/** Short description shown under the label */
+	description: string;
+	/** Whether this is a built-in role (owner/admin/…) vs custom */
+	builtIn: boolean;
+}
+
+/**
+ * Merge built-in roles (from definitions.ts) with custom org roles (from API).
+ * Excludes "owner" by default since it requires passkey escalation.
+ */
+function useAvailableRoles(organizationId: string | undefined, { excludeOwner = true } = {}) {
+	const { data: customRoles, loading } = useOrganizationRoles(organizationId);
+
+	const roles = useMemo<RoleOption[]>(() => {
+		// Built-in roles from the permission matrix
+		const builtIn: RoleOption[] = ORG_ROLES.filter((r) => (excludeOwner ? r !== "owner" : true)).map((r) => ({
+			value: r,
+			label: ORG_ROLE_LABELS[r],
+			description: ORG_ROLE_DESCRIPTIONS[r],
+			builtIn: true,
+		}));
+
+		// Custom roles from the API
+		const custom: RoleOption[] = customRoles.map((r) => {
+			const permCount = Object.values(r.permission || {}).reduce((sum, actions) => sum + (actions?.length || 0), 0);
+			return {
+				value: r.role,
+				label: formatRoleName(r.role),
+				description:
+					permCount > 0 ? `${permCount} custom permission${permCount !== 1 ? "s" : ""}` : "No permissions configured",
+				builtIn: false,
+			};
+		});
+
+		return [...builtIn, ...custom];
+	}, [customRoles, excludeOwner]);
+
+	return { roles, loading };
+}
 
 // =============================================================================
 // LOADING SKELETON — matches standard layout pattern (campaigns/enrollments)
@@ -65,20 +119,36 @@ export function TeamSkeleton() {
 					<Skeleton width={96} height={28} borderRadius={8} />
 					<Skeleton width={320} height={16} borderRadius={6} className="mt-2" />
 				</div>
-				<Skeleton width={40} height={40} borderRadius={8} />
+				<Skeleton width={120} height={40} borderRadius={8} />
 			</div>
 
-			{/* Stats */}
-			<FinancialStatsGridBordered
-				stats={[
-					{ name: "Total Members", value: "" },
-					{ name: "Admins", value: "" },
-					{ name: "Members", value: "" },
-					{ name: "Pending Invites", value: "" },
-				]}
-				loading
-				columns={4}
-			/>
+			{/* Hero card */}
+			<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
+				<div className="p-4 sm:p-5">
+					<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+						<div>
+							<Skeleton width={100} height={12} borderRadius={4} />
+							<Skeleton width={160} height={32} borderRadius={6} className="mt-1" />
+						</div>
+						<div className="sm:max-w-xs flex-1">
+							<Skeleton height={8} borderRadius={999} />
+							<div className="mt-1.5 flex gap-3">
+								<Skeleton width={60} height={10} borderRadius={4} />
+								<Skeleton width={60} height={10} borderRadius={4} />
+								<Skeleton width={60} height={10} borderRadius={4} />
+							</div>
+						</div>
+					</div>
+				</div>
+				<div className="grid grid-cols-3 gap-px border-t border-zinc-200 bg-zinc-200 dark:border-zinc-700 dark:bg-zinc-700">
+					{[1, 2, 3].map((i) => (
+						<div key={i} className="bg-white px-4 py-3 sm:px-5 dark:bg-zinc-900">
+							<Skeleton width={70} height={10} borderRadius={4} />
+							<Skeleton width={30} height={16} borderRadius={4} className="mt-1" />
+						</div>
+					))}
+				</div>
+			</div>
 
 			{/* Search + Tabs */}
 			<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -90,20 +160,31 @@ export function TeamSkeleton() {
 				</div>
 			</div>
 
-			{/* Member list card */}
-			<div className="overflow-hidden rounded-xl bg-white ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-				<div className="divide-y divide-zinc-100 dark:divide-zinc-800">
-					{[1, 2, 3, 4, 5].map((i) => (
-						<div key={i} className="flex items-center gap-3 px-4 py-3.5">
-							<div className="size-10 shrink-0 animate-pulse rounded-full bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
-							<div className="flex-1 space-y-1.5">
-								<Skeleton width={100 + i * 12} height={14} borderRadius={6} />
-								<Skeleton width={140 + i * 15} height={12} borderRadius={6} />
+			{/* Member card grid */}
+			<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+				{[1, 2, 3, 4, 5, 6].map((i) => (
+					<div
+						key={i}
+						className="overflow-hidden rounded-xl bg-white shadow-xs ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800"
+					>
+						<div className="flex items-start gap-3.5 p-4 sm:p-5">
+							<div className="size-12 shrink-0 animate-pulse rounded-full bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+							<div className="flex-1">
+								<Skeleton width={80 + i * 8} height={14} borderRadius={6} />
+								<Skeleton width={120 + i * 6} height={12} borderRadius={6} className="mt-1.5" />
 							</div>
-							<Skeleton width={60} height={22} borderRadius={999} />
 						</div>
-					))}
-				</div>
+						<div className="grid grid-cols-2 divide-x divide-zinc-200 border-t border-zinc-200 bg-zinc-50/50 dark:divide-zinc-700 dark:border-zinc-800 dark:bg-zinc-800/30">
+							<div className="flex items-center justify-center py-2.5">
+								<Skeleton width={60} height={20} borderRadius={999} />
+							</div>
+							<div className="flex flex-col items-center justify-center gap-0.5 py-2.5">
+								<Skeleton width={30} height={10} borderRadius={4} />
+								<Skeleton width={50} height={14} borderRadius={4} />
+							</div>
+						</div>
+					</div>
+				))}
 			</div>
 		</div>
 	);
@@ -113,21 +194,131 @@ export function TeamSkeleton() {
 // ROLE BADGE CONFIG
 // =============================================================================
 
-const ROLE_CONFIG: Record<string, { label: string; color: "amber" | "sky" | "zinc" | "violet" }> = {
+const ROLE_CONFIG: Record<
+	string,
+	{ label: string; color: "amber" | "sky" | "zinc" | "violet" | "lime" | "cyan" | "rose" }
+> = {
 	owner: { label: "Owner", color: "amber" },
 	admin: { label: "Admin", color: "sky" },
+	campaignManager: { label: "Campaign Manager", color: "violet" },
+	financeManager: { label: "Finance Manager", color: "lime" },
+	listingManager: { label: "Listing Manager", color: "cyan" },
 	member: { label: "Member", color: "zinc" },
 };
 
-export function getRoleBadgeConfig(role: string): { label: string; color: "amber" | "sky" | "zinc" | "violet" } {
+export function getRoleBadgeConfig(role: string): {
+	label: string;
+	color: "amber" | "sky" | "zinc" | "violet" | "lime" | "cyan" | "rose";
+} {
 	return ROLE_CONFIG[role] || { label: formatRoleName(role), color: "violet" };
 }
 
 /** Format a raw role slug into human-readable label: "content_manager" → "Content Manager" */
 export function formatRoleName(name: string): string {
-	return name
-		.replace(/[_-]/g, " ")
-		.replace(/\b\w/g, (c) => c.toUpperCase());
+	return name.replace(/[_-]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+// =============================================================================
+// ROLE PICKER OPTION — shared between invite modal & change role dialog
+// =============================================================================
+
+function RolePickerOption({
+	role,
+	selected,
+	current,
+	onSelect,
+}: {
+	role: RoleOption;
+	selected: boolean;
+	/** Show a "current" indicator (used in change-role dialog) */
+	current?: boolean;
+	onSelect: () => void;
+}) {
+	return (
+		<button
+			type="button"
+			onClick={onSelect}
+			className={clsx(
+				"flex w-full items-center gap-3 rounded-xl p-3 text-left ring-1 transition-all",
+				selected
+					? "bg-zinc-900 text-white ring-zinc-900 dark:bg-white dark:text-zinc-900 dark:ring-white"
+					: "bg-white text-zinc-700 ring-zinc-200 hover:bg-zinc-50 dark:bg-zinc-800 dark:text-zinc-300 dark:ring-zinc-700 dark:hover:bg-zinc-700/60"
+			)}
+		>
+			{/* Role icon */}
+			<div
+				className={clsx(
+					"flex size-9 shrink-0 items-center justify-center rounded-lg",
+					selected
+						? "bg-white/15 dark:bg-zinc-900/15"
+						: role.builtIn
+							? "bg-zinc-100 dark:bg-zinc-700"
+							: "bg-violet-50 dark:bg-violet-900/30"
+				)}
+			>
+				{role.builtIn ? (
+					<ShieldCheckIcon className={clsx("size-4", selected ? "" : "text-zinc-500 dark:text-zinc-400")} />
+				) : (
+					<ShieldCheckIcon className={clsx("size-4", selected ? "" : "text-violet-500 dark:text-violet-400")} />
+				)}
+			</div>
+
+			{/* Content */}
+			<div className="min-w-0 flex-1">
+				<div className="flex items-center gap-2">
+					<p className="text-sm font-medium">{role.label}</p>
+					{!role.builtIn && (
+						<span
+							className={clsx(
+								"rounded px-1.5 py-px text-[10px] font-semibold",
+								selected
+									? "bg-white/15 text-white/80 dark:bg-zinc-900/15 dark:text-zinc-900/80"
+									: "bg-violet-50 text-violet-600 dark:bg-violet-500/10 dark:text-violet-400"
+							)}
+						>
+							custom
+						</span>
+					)}
+					{current && (
+						<span
+							className={clsx(
+								"rounded px-1.5 py-px text-[10px] font-semibold",
+								selected
+									? "bg-white/15 text-white/80 dark:bg-zinc-900/15 dark:text-zinc-900/80"
+									: "bg-sky-50 text-sky-600 dark:bg-sky-500/10 dark:text-sky-400"
+							)}
+						>
+							current
+						</span>
+					)}
+				</div>
+				<p
+					className={clsx(
+						"text-xs",
+						selected ? "text-zinc-400 dark:text-zinc-500" : "text-zinc-500 dark:text-zinc-400"
+					)}
+				>
+					{role.description}
+				</p>
+			</div>
+
+			{/* Check indicator */}
+			<div
+				className={clsx(
+					"flex size-5 shrink-0 items-center justify-center rounded-full border transition-colors",
+					selected
+						? "border-white bg-white text-zinc-900 dark:border-zinc-900 dark:bg-zinc-900 dark:text-white"
+						: "border-zinc-300 dark:border-zinc-600"
+				)}
+			>
+				{selected && (
+					<svg className="size-3" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+						<path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+					</svg>
+				)}
+			</div>
+		</button>
+	);
 }
 
 // =============================================================================
@@ -153,7 +344,17 @@ function hashToIndex(str: string, len: number): number {
 	return Math.abs(hash) % len;
 }
 
-function MemberAvatar({ name, userId }: { name?: string; userId: string }) {
+export function MemberAvatar({
+	name,
+	userId,
+	image,
+	size = "md",
+}: {
+	name?: string;
+	userId: string;
+	image?: string | null;
+	size?: "sm" | "md" | "lg";
+}) {
 	const initials = name
 		? name
 				.split(" ")
@@ -165,11 +366,28 @@ function MemberAvatar({ name, userId }: { name?: string; userId: string }) {
 
 	const colorIdx = hashToIndex(userId, AVATAR_COLORS.length);
 
+	const sizeClasses = {
+		sm: "size-8 text-[10px]",
+		md: "size-10 text-xs",
+		lg: "size-12 text-sm",
+	};
+
+	if (image) {
+		return (
+			<img
+				src={image}
+				alt={name || "Member"}
+				className={clsx("shrink-0 rounded-full object-cover ring-1 ring-zinc-200 dark:ring-zinc-700", sizeClasses[size])}
+			/>
+		);
+	}
+
 	return (
 		<div
 			className={clsx(
-				"flex size-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br text-xs font-bold text-white shadow-sm",
-				AVATAR_COLORS[colorIdx],
+				"flex shrink-0 items-center justify-center rounded-full bg-linear-to-br font-bold text-white shadow-sm",
+				sizeClasses[size],
+				AVATAR_COLORS[colorIdx]
 			)}
 		>
 			{initials}
@@ -181,7 +399,7 @@ function MemberAvatar({ name, userId }: { name?: string; userId: string }) {
 // MEMBER ROW
 // =============================================================================
 
-function formatJoinedAgo(dateStr: string): string {
+export function formatJoinedAgo(dateStr: string): string {
 	const diff = Date.now() - new Date(dateStr).getTime();
 	const days = Math.floor(diff / (1000 * 60 * 60 * 24));
 	if (days === 0) return "Today";
@@ -207,7 +425,7 @@ export function MemberRow({
 	member: Member;
 	isCurrentUser: boolean;
 	canManage: boolean;
-	onChangeRole: (role: MemberRole) => void;
+	onChangeRole: () => void;
 	onRemove: () => void;
 	/** Whether to reserve space for the checkbox column (alignment) */
 	showCheckbox?: boolean;
@@ -228,8 +446,8 @@ export function MemberRow({
 	return (
 		<div className="group/row flex items-center gap-3 px-4 py-3 transition-colors hover:bg-zinc-50 sm:py-3.5 dark:hover:bg-zinc-800/40">
 			{/* Checkbox column — always reserve space when list is in selection mode */}
-			{showCheckbox && (
-				checkable ? (
+			{showCheckbox &&
+				(checkable ? (
 					<SelectionCheckbox
 						variant="inline"
 						selected={selected}
@@ -238,12 +456,11 @@ export function MemberRow({
 					/>
 				) : (
 					<SelectionCheckboxSpacer />
-				)
-			)}
+				))}
 
 			{/* Avatar with role indicator ring */}
 			<div className="relative">
-				<MemberAvatar name={member.user?.name} userId={member.userId} />
+				<MemberAvatar name={member.user?.name} userId={member.userId} image={member.user?.image} />
 				{member.role === "owner" && (
 					<span className="absolute -bottom-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-amber-500 ring-2 ring-white dark:ring-zinc-900">
 						<ShieldCheckIcon className="size-2.5 text-white" />
@@ -278,14 +495,14 @@ export function MemberRow({
 			<Badge color={roleConfig.color}>{roleConfig.label}</Badge>
 
 			{/* Actions — always reserve space when canManage for alignment */}
-			{canManage && (
-				!isCurrentUser && member.role !== "owner" ? (
+			{canManage &&
+				(!isCurrentUser && member.role !== "owner" ? (
 					<Dropdown>
 						<DropdownButton plain aria-label="Member options">
 							<EllipsisVerticalIcon className="size-5 text-zinc-400" />
 						</DropdownButton>
 						<DropdownMenu anchor="bottom end">
-							<DropdownItem onClick={() => onChangeRole("admin")}>
+							<DropdownItem onClick={onChangeRole}>
 								<ShieldCheckIcon className="size-4" />
 								Change Role
 							</DropdownItem>
@@ -297,8 +514,7 @@ export function MemberRow({
 					</Dropdown>
 				) : (
 					<div className="w-9 shrink-0" />
-				)
-			)}
+				))}
 		</div>
 	);
 }
@@ -339,22 +555,32 @@ export function InvitationRow({
 		<div
 			className={clsx(
 				"group flex items-center gap-3 px-4 py-3 transition-colors sm:py-3.5",
-				isExpired ? "bg-zinc-50/50 dark:bg-zinc-800/20" : "hover:bg-zinc-50 dark:hover:bg-zinc-800/40",
+				isExpired ? "bg-zinc-50/50 dark:bg-zinc-800/20" : "hover:bg-zinc-50 dark:hover:bg-zinc-800/40"
 			)}
 		>
 			{/* Avatar circle */}
 			<div
 				className={clsx(
 					"flex size-10 shrink-0 items-center justify-center rounded-full",
-					isExpired ? "bg-red-100 dark:bg-red-900/30" : "bg-amber-100 dark:bg-amber-900/30",
+					isExpired ? "bg-red-100 dark:bg-red-900/30" : "bg-amber-100 dark:bg-amber-900/30"
 				)}
 			>
-				<EnvelopeIcon className={clsx("size-4", isExpired ? "text-red-500 dark:text-red-400" : "text-amber-600 dark:text-amber-400")} />
+				<EnvelopeIcon
+					className={clsx(
+						"size-4",
+						isExpired ? "text-red-500 dark:text-red-400" : "text-amber-600 dark:text-amber-400"
+					)}
+				/>
 			</div>
 
 			{/* Info */}
 			<div className="min-w-0 flex-1">
-				<p className={clsx("truncate text-sm font-medium", isExpired ? "text-zinc-500 dark:text-zinc-400" : "text-zinc-900 dark:text-white")}>
+				<p
+					className={clsx(
+						"truncate text-sm font-medium",
+						isExpired ? "text-zinc-500 dark:text-zinc-400" : "text-zinc-900 dark:text-white"
+					)}
+				>
 					{invitation.email}
 				</p>
 				<div className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
@@ -385,7 +611,11 @@ export function InvitationRow({
 					</DropdownButton>
 					<DropdownMenu anchor="bottom end">
 						<DropdownItem onClick={onCancel} disabled={isCancelling}>
-							{isCancelling ? <ArrowPathIcon className="size-4 animate-spin" /> : <XMarkIcon className="size-4 text-red-500" />}
+							{isCancelling ? (
+								<ArrowPathIcon className="size-4 animate-spin" />
+							) : (
+								<XMarkIcon className="size-4 text-red-500" />
+							)}
 							Revoke Invitation
 						</DropdownItem>
 					</DropdownMenu>
@@ -411,10 +641,24 @@ export function InviteMemberModal({
 	onSuccess: () => void;
 }) {
 	const [email, setEmail] = useState("");
-	const [role, setRole] = useState<MemberRole>("member");
+	const [role, setRole] = useState("member");
 	const [error, setError] = useState<string | null>(null);
-
+	const [debouncedQuery, setDebouncedQuery] = useState("");
+	const [showSuggestions, setShowSuggestions] = useState(false);
+	const { roles: availableRoles, loading: rolesLoading } = useAvailableRoles(organizationId);
 	const inviteMember = useInviteMember(organizationId);
+	const { users: suggestedUsers, isLoading: isSearching } = useUserSearch(organizationId, debouncedQuery);
+
+	// Debounce email input for search
+	useEffect(() => {
+		const timer = setTimeout(() => setDebouncedQuery(email), 300);
+		return () => clearTimeout(timer);
+	}, [email]);
+
+	// Show suggestions when we have results
+	useEffect(() => {
+		setShowSuggestions(suggestedUsers.length > 0 && email.length >= 2);
+	}, [suggestedUsers, email]);
 
 	const handleSubmit = useCallback(async () => {
 		if (!email.trim()) {
@@ -441,11 +685,16 @@ export function InviteMemberModal({
 		setEmail("");
 		setRole("member");
 		setError(null);
+		setShowSuggestions(false);
+		setDebouncedQuery("");
 		onClose();
 	}, [onClose]);
 
+	const selectedRoleOption = availableRoles.find((r) => r.value === role);
+	const matchedUser = suggestedUsers.find((u) => u.email === email.trim());
+
 	return (
-		<Dialog open={isOpen} onClose={handleClose} size="md">
+		<Dialog open={isOpen} onClose={handleClose} size="lg">
 			<DialogHeader
 				icon={EnvelopeIcon}
 				iconColor="emerald"
@@ -455,14 +704,42 @@ export function InviteMemberModal({
 			/>
 
 			<DialogBody>
-				<div className="space-y-4">
+				<div className="space-y-5">
 					{error && (
 						<div className="flex items-start gap-2.5 rounded-xl bg-red-50 p-3 dark:bg-red-950/30">
 							<ExclamationTriangleIcon className="mt-0.5 size-4 shrink-0 text-red-500" />
 							<span className="text-sm text-red-700 dark:text-red-300">{error}</span>
 						</div>
 					)}
-					<div>
+
+					{/* Preview card — shows who you're inviting */}
+					<div className="flex items-center gap-3 rounded-xl bg-zinc-50 p-3.5 dark:bg-zinc-800/50">
+						{matchedUser?.image ? (
+							<img src={matchedUser.image} alt="" className="size-10 shrink-0 rounded-full object-cover" />
+						) : (
+							<div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+								{email.includes("@") ? (
+									<span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+										{email.charAt(0).toUpperCase()}
+									</span>
+								) : (
+									<UserIcon className="size-4 text-emerald-600 dark:text-emerald-400" />
+								)}
+							</div>
+						)}
+						<div className="min-w-0 flex-1">
+							<p className="truncate text-sm font-medium text-zinc-900 dark:text-white">
+								{matchedUser?.name || email.trim() || "New team member"}
+							</p>
+							<p className="text-xs text-zinc-500 dark:text-zinc-400">
+								{matchedUser ? matchedUser.email : selectedRoleOption ? `Invited as ${selectedRoleOption.label}` : "Select a role below"}
+							</p>
+						</div>
+						{selectedRoleOption && <Badge color={getRoleBadgeConfig(role).color}>{selectedRoleOption.label}</Badge>}
+					</div>
+
+					{/* Email field with autocomplete */}
+					<div className="relative">
 						<label htmlFor="invite-email" className="mb-1.5 block text-sm font-medium text-zinc-900 dark:text-white">
 							Email Address
 						</label>
@@ -470,41 +747,98 @@ export function InviteMemberModal({
 							id="invite-email"
 							type="email"
 							value={email}
-							onChange={(e) => setEmail(e.target.value)}
+							onChange={(e) => {
+								setEmail(e.target.value);
+								setError(null);
+							}}
+							onFocus={() => {
+								if (suggestedUsers.length > 0 && email.length >= 2) setShowSuggestions(true);
+							}}
+							onBlur={() => {
+								// Delay to allow click on suggestion
+								setTimeout(() => setShowSuggestions(false), 200);
+							}}
 							placeholder="colleague@company.com"
+							autoComplete="off"
 						/>
+
+						{/* User suggestions dropdown */}
+						{showSuggestions && (
+							<div
+								className="absolute left-0 right-0 z-50 mt-1 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-lg dark:border-zinc-700 dark:bg-zinc-900"
+							>
+								{isSearching && (
+									<div className="px-3 py-2 text-xs text-zinc-400">Searching...</div>
+								)}
+								{suggestedUsers.map((user) => (
+									<button
+										key={user.id}
+										type="button"
+										className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800"
+										onMouseDown={(e) => {
+											// Prevent input blur
+											e.preventDefault();
+											setEmail(user.email);
+											setShowSuggestions(false);
+										}}
+									>
+										{user.image ? (
+											<img
+												src={user.image}
+												alt=""
+												className="size-8 rounded-full object-cover"
+											/>
+										) : (
+											<div className="flex size-8 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+												<span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+													{user.name.charAt(0).toUpperCase()}
+												</span>
+											</div>
+										)}
+										<div className="min-w-0 flex-1">
+											<p className="truncate text-sm font-medium text-zinc-900 dark:text-white">
+												{user.name}
+											</p>
+											<p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
+												{user.email}
+											</p>
+										</div>
+										{user.isMember && (
+											<Badge color="zinc">Member</Badge>
+										)}
+									</button>
+								))}
+							</div>
+						)}
 					</div>
+
+					{/* Role picker */}
 					<div>
 						<span id="role-label" className="mb-1.5 block text-sm font-medium text-zinc-900 dark:text-white">
 							Role
 						</span>
-						{/* biome-ignore lint/a11y/useSemanticElements: styled button group, not a form fieldset */}
-						<div role="group" aria-labelledby="role-label" className="grid grid-cols-2 gap-2">
-							{(["admin", "member"] as const).map((r) => {
-								const config = getRoleBadgeConfig(r);
-								return (
-									<button
-										key={r}
-										type="button"
-										onClick={() => setRole(r)}
-										className={clsx(
-											"flex items-center gap-2.5 rounded-xl p-3 text-left ring-1 transition-all",
-											role === r
-												? "bg-zinc-900 text-white ring-zinc-900 dark:bg-white dark:text-zinc-900 dark:ring-white"
-												: "bg-white text-zinc-700 ring-zinc-200 hover:bg-zinc-50 dark:bg-zinc-800 dark:text-zinc-300 dark:ring-zinc-700 dark:hover:bg-zinc-700/60",
-										)}
-									>
-										{r === "admin" ? <ShieldCheckIcon className="size-5" /> : <UserIcon className="size-5" />}
-										<div>
-											<p className="text-sm font-medium">{config.label}</p>
-											<p className={clsx("text-xs", role === r ? "text-zinc-500 dark:text-zinc-400" : "text-zinc-500 dark:text-zinc-400")}>
-												{r === "admin" ? "Can manage team" : "Standard access"}
-											</p>
-										</div>
-									</button>
-								);
-							})}
-						</div>
+						{rolesLoading ? (
+							<div className="space-y-2">
+								{[1, 2].map((i) => (
+									<div
+										key={i}
+										className="h-15 animate-pulse rounded-xl bg-zinc-100 skeleton-shimmer dark:bg-zinc-800"
+									/>
+								))}
+							</div>
+						) : (
+							/* biome-ignore lint/a11y/useSemanticElements: styled button group, not a form fieldset */
+							<div role="group" aria-labelledby="role-label" className="-m-1 max-h-80 space-y-2 overflow-y-auto p-1">
+								{availableRoles.map((r) => (
+									<RolePickerOption
+										key={r.value}
+										role={r}
+										selected={role === r.value}
+										onSelect={() => setRole(r.value)}
+									/>
+								))}
+							</div>
+						)}
 					</div>
 				</div>
 			</DialogBody>
@@ -548,8 +882,17 @@ export function ChangeRoleDialog({
 	organizationId: string | undefined;
 	onSuccess: () => void;
 }) {
-	const [selectedRole, setSelectedRole] = useState<MemberRole>("member");
+	const [selectedRole, setSelectedRole] = useState("member");
+	const { roles: availableRoles, loading: rolesLoading } = useAvailableRoles(organizationId);
 	const updateRole = useUpdateMemberRole(organizationId);
+
+	// Sync selected role with current member role when dialog opens
+	const memberRole = member?.role;
+	const prevMemberRef = useState<string | null>(null);
+	if (memberRole && prevMemberRef[0] !== memberRole) {
+		prevMemberRef[1](memberRole);
+		setSelectedRole(memberRole);
+	}
 
 	const handleSubmit = useCallback(async () => {
 		if (!member) return;
@@ -564,53 +907,78 @@ export function ChangeRoleDialog({
 
 	if (!member) return null;
 
+	const isSameRole = selectedRole === member.role;
+	const currentRoleConfig = getRoleBadgeConfig(member.role);
+	const newRoleConfig = getRoleBadgeConfig(selectedRole);
+
 	return (
-		<Dialog open={open} onClose={onClose} size="sm">
+		<Dialog open={open} onClose={onClose} size="lg">
 			<DialogHeader
 				icon={ShieldCheckIcon}
 				iconColor="sky"
 				title="Change Role"
-				description={`Update role for ${member.user?.name || "this member"}`}
+				description="Select a new role for this team member"
 				onClose={onClose}
 			/>
 			<DialogBody>
-				<div className="space-y-2">
-					{(["admin", "member"] as const).map((r) => {
-						const config = getRoleBadgeConfig(r);
-						return (
-							<button
-								key={r}
-								type="button"
-								onClick={() => setSelectedRole(r)}
-								className={clsx(
-									"flex w-full items-center gap-3 rounded-xl p-3 text-left ring-1 transition-all",
-									selectedRole === r
-										? "bg-zinc-900 text-white ring-zinc-900 dark:bg-white dark:text-zinc-900 dark:ring-white"
-										: "bg-white text-zinc-700 ring-zinc-200 hover:bg-zinc-50 dark:bg-zinc-800 dark:text-zinc-300 dark:ring-zinc-700 dark:hover:bg-zinc-700/60",
-								)}
-							>
-								{r === "admin" ? <ShieldCheckIcon className="size-5" /> : <UserIcon className="size-5" />}
-								<div>
-									<p className="font-medium">{config.label}</p>
-									<p
-										className={clsx(
-											"text-sm",
-											selectedRole === r ? "text-zinc-400 dark:text-zinc-500" : "text-zinc-500 dark:text-zinc-400",
-										)}
+				<div className="space-y-5">
+					{/* Member identity card */}
+					<div className="flex items-center gap-3 rounded-xl bg-zinc-50 p-3.5 dark:bg-zinc-800/50">
+						<MemberAvatar name={member.user?.name} userId={member.userId} image={member.user?.image} size="md" />
+						<div className="min-w-0 flex-1">
+							<p className="truncate text-sm font-medium text-zinc-900 dark:text-white">
+								{member.user?.name || "Team Member"}
+							</p>
+							<p className="truncate text-xs text-zinc-500 dark:text-zinc-400">{member.user?.email || member.userId}</p>
+						</div>
+						{/* Role transition indicator */}
+						<div className="flex shrink-0 items-center gap-1.5">
+							<Badge color={currentRoleConfig.color}>{currentRoleConfig.label}</Badge>
+							{!isSameRole && (
+								<>
+									<svg
+										className="size-3.5 text-zinc-400"
+										fill="none"
+										viewBox="0 0 24 24"
+										strokeWidth={2}
+										stroke="currentColor"
+										aria-hidden="true"
 									>
-										{r === "admin" ? "Can manage team and settings" : "Standard access to resources"}
-									</p>
-								</div>
-							</button>
-						);
-					})}
+										<path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+									</svg>
+									<Badge color={newRoleConfig.color}>{newRoleConfig.label}</Badge>
+								</>
+							)}
+						</div>
+					</div>
+
+					{/* Role picker */}
+					{rolesLoading ? (
+						<div className="space-y-2">
+							{[1, 2, 3].map((i) => (
+								<div key={i} className="h-15 animate-pulse rounded-xl bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
+							))}
+						</div>
+					) : (
+						<div className="-m-1 max-h-80 space-y-2 overflow-y-auto p-1">
+							{availableRoles.map((r) => (
+								<RolePickerOption
+									key={r.value}
+									role={r}
+									selected={selectedRole === r.value}
+									current={r.value === member.role}
+									onSelect={() => setSelectedRole(r.value)}
+								/>
+							))}
+						</div>
+					)}
 				</div>
 			</DialogBody>
 			<DialogActions>
 				<Button plain onClick={onClose}>
 					Cancel
 				</Button>
-				<Button color="emerald" onClick={handleSubmit} disabled={updateRole.isPending}>
+				<Button color="emerald" onClick={handleSubmit} disabled={updateRole.isPending || isSameRole}>
 					{updateRole.isPending ? (
 						<>
 							<ArrowPathIcon className="size-4 animate-spin" />
@@ -657,16 +1025,35 @@ export function RemoveMemberDialog({
 
 	if (!member) return null;
 
+	const roleConfig = getRoleBadgeConfig(member.role);
+
 	return (
-		<Dialog open={open} onClose={onClose} size="sm">
+		<Dialog open={open} onClose={onClose} size="md">
 			<DialogHeader icon={TrashIcon} iconColor="red" title="Remove Team Member" onClose={onClose} />
 			<DialogBody>
-				<div className="flex items-start gap-2.5 rounded-xl bg-red-50 p-3 dark:bg-red-950/30">
-					<ExclamationTriangleIcon className="mt-0.5 size-4 shrink-0 text-red-500" />
-					<p className="text-sm text-red-700 dark:text-red-300">
-						Are you sure you want to remove <strong>{member.user?.name || "this member"}</strong> from the
-						organization? This action cannot be undone.
-					</p>
+				<div className="space-y-4">
+					{/* Member being removed */}
+					<div className="flex items-center gap-3 rounded-xl bg-zinc-50 p-3.5 dark:bg-zinc-800/50">
+						<MemberAvatar name={member.user?.name} userId={member.userId} image={member.user?.image} size="md" />
+						<div className="min-w-0 flex-1">
+							<p className="truncate text-sm font-medium text-zinc-900 dark:text-white">
+								{member.user?.name || "Team Member"}
+							</p>
+							<p className="truncate text-xs text-zinc-500 dark:text-zinc-400">{member.user?.email || member.userId}</p>
+						</div>
+						<Badge color={roleConfig.color}>{roleConfig.label}</Badge>
+					</div>
+
+					{/* Warning */}
+					<div className="flex items-start gap-2.5 rounded-xl bg-red-50 p-3 dark:bg-red-950/30">
+						<ExclamationTriangleIcon className="mt-0.5 size-4 shrink-0 text-red-500" />
+						<div className="text-sm text-red-700 dark:text-red-300">
+							<p className="font-medium">This action cannot be undone</p>
+							<p className="mt-0.5">
+								This member will lose access to the organization immediately. They will need a new invitation to rejoin.
+							</p>
+						</div>
+					</div>
 				</div>
 			</DialogBody>
 			<DialogActions>
@@ -728,13 +1115,10 @@ export function RolesSection({ organizationId }: { organizationId: string | unde
 		}
 	}, [newRoleName, createRole]);
 
-	const handleEditRole = useCallback(
-		(role: { id: string; role: string; permission: { [key: string]: string[] } }) => {
-			setEditingRole(role);
-			setEditPermissions(role.permission || {});
-		},
-		[],
-	);
+	const handleEditRole = useCallback((role: { id: string; role: string; permission: { [key: string]: string[] } }) => {
+		setEditingRole(role);
+		setEditPermissions(role.permission || {});
+	}, []);
 
 	const togglePermission = useCallback((resource: string, action: string) => {
 		setEditPermissions((prev) => {
@@ -784,7 +1168,7 @@ export function RolesSection({ organizationId }: { organizationId: string | unde
 				setDeletingRoleId(null);
 			}
 		},
-		[deleteRole],
+		[deleteRole]
 	);
 
 	if (loading) {
@@ -814,7 +1198,9 @@ export function RolesSection({ organizationId }: { organizationId: string | unde
 			<div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3 dark:border-zinc-800">
 				<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">
 					Custom Roles
-					{roles.length > 0 && <span className="ml-2 text-xs font-normal text-zinc-500 dark:text-zinc-400">{roles.length}</span>}
+					{roles.length > 0 && (
+						<span className="ml-2 text-xs font-normal text-zinc-500 dark:text-zinc-400">{roles.length}</span>
+					)}
 				</h3>
 				<Button color="dark/zinc" onClick={() => setShowCreateDialog(true)}>
 					<PlusIcon className="size-4" />
@@ -837,7 +1223,7 @@ export function RolesSection({ organizationId }: { organizationId: string | unde
 							const permCount = Object.keys(role.permission || {}).length;
 							const totalActions = Object.values(role.permission || {}).reduce(
 								(sum, actions) => sum + (actions?.length || 0),
-								0,
+								0
 							);
 							return (
 								<div
@@ -864,10 +1250,7 @@ export function RolesSection({ organizationId }: { organizationId: string | unde
 												<PencilIcon className="size-4" />
 												Edit Permissions
 											</DropdownItem>
-											<DropdownItem
-												onClick={() => handleDeleteRole(role.id)}
-												disabled={deletingRoleId === role.id}
-											>
+											<DropdownItem onClick={() => handleDeleteRole(role.id)} disabled={deletingRoleId === role.id}>
 												<TrashIcon className="size-4 text-red-500" />
 												Delete Role
 											</DropdownItem>
@@ -969,7 +1352,7 @@ export function RolesSection({ organizationId }: { organizationId: string | unde
 													? "border-emerald-500 bg-emerald-500 text-white"
 													: someSelected
 														? "border-emerald-500 bg-emerald-500/20"
-														: "border-zinc-300 dark:border-zinc-600",
+														: "border-zinc-300 dark:border-zinc-600"
 											)}
 										>
 											{allSelected && (
@@ -1006,7 +1389,7 @@ export function RolesSection({ organizationId }: { organizationId: string | unde
 														"rounded-lg px-2.5 py-1 text-xs font-medium transition-all",
 														isActive
 															? "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-300 dark:ring-emerald-800"
-															: "bg-white text-zinc-500 ring-1 ring-zinc-200 hover:bg-zinc-100 hover:text-zinc-700 dark:bg-zinc-800 dark:text-zinc-400 dark:ring-zinc-700 dark:hover:bg-zinc-700 dark:hover:text-zinc-300",
+															: "bg-white text-zinc-500 ring-1 ring-zinc-200 hover:bg-zinc-100 hover:text-zinc-700 dark:bg-zinc-800 dark:text-zinc-400 dark:ring-zinc-700 dark:hover:bg-zinc-700 dark:hover:text-zinc-300"
 													)}
 												>
 													{ACTION_LABELS[action] || action}

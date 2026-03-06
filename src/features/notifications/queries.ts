@@ -5,7 +5,7 @@
 
 import { queryOptions } from "@tanstack/react-query";
 import { CACHE, queryKeys } from "@/hooks/api-client";
-import { getNotificationPreferencesServer, listNotificationsServer, listPushTokensServer } from "./server";
+import { getNotificationPreferencesServer, getUnreadCountServer, listNotificationsServer, listPushTokensServer } from "./server";
 
 // -- Notifications (In-App) ---------------------------------------------------
 
@@ -17,6 +17,15 @@ export const notificationsQueryOptions = (
 		queryKey: queryKeys.notifications(orgId, params),
 		queryFn: () => listNotificationsServer({ data: { orgId, params } }),
 		staleTime: CACHE.list,
+	});
+
+// -- Unread Count -------------------------------------------------------------
+
+export const notificationUnreadCountQueryOptions = (orgId: string) =>
+	queryOptions({
+		queryKey: queryKeys.notificationUnreadCount(orgId),
+		queryFn: () => getUnreadCountServer({ data: { orgId } }),
+		staleTime: CACHE.detail,
 	});
 
 // -- Notification Preferences -------------------------------------------------

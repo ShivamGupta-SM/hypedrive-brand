@@ -30,7 +30,7 @@ export function SelectionCheckbox({ selected, onToggle, variant = "overlay", ind
 			className={clsx(
 				BASE,
 				variant === "overlay" && "absolute left-2 top-2 z-10",
-				isFilled ? FILLED : [EMPTY, variant === "overlay" && "opacity-0 group-hover:opacity-100", className],
+				isFilled ? FILLED : [EMPTY, variant === "overlay" && "opacity-0 group-hover:opacity-100 group-hover/card:opacity-100 group-hover/row:opacity-100", className],
 			)}
 		>
 			{selected && <CheckIcon className={ICON} />}
