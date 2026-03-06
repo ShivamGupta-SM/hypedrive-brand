@@ -2,7 +2,7 @@
  * Campaign Query Hooks — read-only data access.
  */
 
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import {
 	campaignQueryOptions,
 	campaignStatsQueryOptions,
@@ -53,6 +53,7 @@ export function useInfiniteCampaigns(
 	const query = useInfiniteQuery({
 		...infiniteCampaignsQueryOptions(organizationId || "", params),
 		enabled: !!organizationId,
+		placeholderData: keepPreviousData,
 	});
 
 	const data = query.data?.pages.flatMap((page) => page.data ?? []) ?? [];

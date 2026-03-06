@@ -28,7 +28,7 @@ import {
 	UserGroupIcon,
 	XCircleIcon,
 } from "@heroicons/react/16/solid";
-import { getRouteApi } from "@tanstack/react-router";
+import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import clsx from "clsx";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Badge } from "@/components/badge";
@@ -69,7 +69,7 @@ import {
 	useUpdateCampaignTask,
 } from "@/features/campaigns/mutations";
 import { useCampaignEnrollments } from "@/features/enrollments/hooks";
-import { useApproveEnrollment, useExportEnrollments, useRejectEnrollment } from "@/features/enrollments/mutations";
+import { useExportEnrollments } from "@/features/enrollments/mutations";
 import { getAPIErrorMessage } from "@/hooks/api-client";
 import { usePageTitle } from "@/hooks/use-breadcrumb";
 import { useConfetti } from "@/hooks/use-confetti";
@@ -616,170 +616,6 @@ function EditCampaignModal({
 }
 
 // =============================================================================
-// ENROLLMENT REVIEW DIALOG
-// =============================================================================
-
-function EnrollmentReviewDialog({
-	open,
-	onClose,
-	enrollment,
-	organizationId,
-	onSuccess,
-}: {
-	open: boolean;
-	onClose: () => void;
-	enrollment: CampaignEnrollment | null;
-	organizationId: string;
-	onSuccess: () => void;
-}) {
-	const [rejectReason, setRejectReason] = useState("");
-	const [error, setError] = useState<string | null>(null);
-
-	const approveEnrollment = useApproveEnrollment(organizationId);
-	const rejectEnrollment = useRejectEnrollment(organizationId);
-
-	const handleApprove = async () => {
-		if (!enrollment) return;
-		setError(null);
-		try {
-			await approveEnrollment.mutateAsync({
-				enrollmentId: enrollment.id,
-			});
-			onSuccess();
-			onClose();
-		} catch (err) {
-			setError(getAPIErrorMessage(err, "Failed to approve enrollment"));
-		}
-	};
-
-	const handleReject = async () => {
-		if (!enrollment || !rejectReason.trim()) return;
-		setError(null);
-		try {
-			await rejectEnrollment.mutateAsync({
-				enrollmentId: enrollment.id,
-				reason: rejectReason,
-			});
-			onSuccess();
-			onClose();
-			setRejectReason("");
-		} catch (err) {
-			setError(getAPIErrorMessage(err, "Failed to reject enrollment"));
-		}
-	};
-
-	if (!enrollment) return null;
-
-	const isPending = approveEnrollment.isPending || rejectEnrollment.isPending;
-
-	return (
-		<Dialog open={open} onClose={onClose} size="md">
-			<DialogHeader
-				icon={ClipboardDocumentListIcon}
-				iconColor="sky"
-				title="Review Enrollment"
-				description={enrollment.displayId}
-				onClose={onClose}
-			/>
-
-			<DialogBody>
-				{error && (
-					<div className="mb-4 flex items-start gap-2.5 rounded-xl bg-red-50 p-3 dark:bg-red-950/30">
-						<ExclamationTriangleIcon className="mt-0.5 size-4 shrink-0 text-red-500" />
-						<p className="text-sm text-red-700 dark:text-red-300">{error}</p>
-					</div>
-				)}
-
-				<div className="space-y-4">
-					{/* Enrollment Details */}
-					<div className="overflow-hidden rounded-xl shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800">
-						<div className="grid grid-cols-2">
-							<div className="px-4 py-3">
-								<p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">Order Value</p>
-								<p className="mt-0.5 text-sm font-semibold text-zinc-900 dark:text-white">
-									{formatCurrency(enrollment.orderValueDecimal)}
-								</p>
-							</div>
-							<div className="border-l border-zinc-100 px-4 py-3 dark:border-zinc-800">
-								<p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">Bill Rate</p>
-								<p className="mt-0.5 text-sm font-semibold text-emerald-600 dark:text-emerald-400">
-									{enrollment.lockedBillRate}%
-								</p>
-							</div>
-							<div className="border-t border-zinc-100 px-4 py-3 dark:border-zinc-800">
-								<p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">Created</p>
-								<p className="mt-0.5 text-sm font-medium text-zinc-900 dark:text-white">
-									{enrollment.createdAt
-										? new Date(enrollment.createdAt).toLocaleDateString("en-IN", {
-												month: "short",
-												day: "numeric",
-												year: "numeric",
-											})
-										: "—"}
-								</p>
-							</div>
-							<div className="border-t border-l border-zinc-100 px-4 py-3 dark:border-zinc-800">
-								<p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">Status</p>
-								<Badge color="amber" className="mt-0.5">
-									{enrollment.status}
-								</Badge>
-							</div>
-						</div>
-					</div>
-
-					{/* Reject Reason */}
-					<div>
-						<label htmlFor="reject-reason" className="block text-sm font-medium text-zinc-900 dark:text-white">
-							Rejection Reason (required to reject)
-						</label>
-						<Textarea
-							id="reject-reason"
-							value={rejectReason}
-							onChange={(e) => setRejectReason(e.target.value)}
-							placeholder="Enter reason for rejection..."
-							rows={3}
-							className="mt-2"
-						/>
-					</div>
-				</div>
-			</DialogBody>
-
-			<DialogActions>
-				<Button plain onClick={onClose} disabled={isPending}>
-					Cancel
-				</Button>
-				<Button color="red" onClick={handleReject} disabled={isPending || !rejectReason.trim()}>
-					{rejectEnrollment.isPending ? (
-						<>
-							<ArrowPathIcon className="size-4 animate-spin" />
-							Rejecting...
-						</>
-					) : (
-						<>
-							<XCircleIcon className="size-4" />
-							Reject
-						</>
-					)}
-				</Button>
-				<Button color="emerald" onClick={handleApprove} disabled={isPending}>
-					{approveEnrollment.isPending ? (
-						<>
-							<ArrowPathIcon className="size-4 animate-spin" />
-							Approving...
-						</>
-					) : (
-						<>
-							<CheckCircleIcon className="size-4" />
-							Approve
-						</>
-					)}
-				</Button>
-			</DialogActions>
-		</Dialog>
-	);
-}
-
-// =============================================================================
 // CAMPAIGN SHOW PAGE
 // =============================================================================
 
@@ -789,7 +625,7 @@ export function CampaignShow() {
 
 	// Permission checks
 	const canUpdateCampaign = useCan("campaign", "update");
-	const canApproveEnrollment = useCan("enrollment", "approve");
+
 
 	const {
 		data: campaign,
@@ -832,8 +668,6 @@ export function CampaignShow() {
 		});
 	}, [taskTemplates, listingPlatformId, platforms]);
 
-	const [selectedEnrollment, setSelectedEnrollment] = useState<CampaignEnrollment | null>(null);
-	const [showReviewDialog, setShowReviewDialog] = useState(false);
 	const [showEditModal, setShowEditModal] = useState(false);
 	const [showAddTaskPicker, setShowAddTaskPicker] = useState(false);
 	const [addTaskTemplateId, setAddTaskTemplateId] = useState("");
@@ -907,17 +741,13 @@ export function CampaignShow() {
 		}
 	};
 
-	const handleEnrollmentClick = (enrollment: CampaignEnrollment) => {
-		// Only allow opening review dialog if user has approve permission
-		if (enrollment.status === "awaiting_review" && canApproveEnrollment) {
-			setSelectedEnrollment(enrollment);
-			setShowReviewDialog(true);
-		}
-	};
+	const navigate = useNavigate();
 
-	const handleReviewSuccess = () => {
-		refetchEnrollments();
-		refetchStats();
+	const handleEnrollmentClick = (enrollment: CampaignEnrollment) => {
+		navigate({
+			to: "/$orgSlug/campaigns/$campaignId/enrollments/$id",
+			params: { orgSlug, campaignId, id: enrollment.id },
+		});
 	};
 
 	// Format dates
@@ -1092,7 +922,7 @@ export function CampaignShow() {
 				{canUpdateCampaign && (
 					<div className="flex items-center gap-2 border-t border-zinc-100 px-4 py-2.5 sm:px-5 dark:border-zinc-800">
 						{/* Primary actions — driven by allowedActions from API */}
-						{campaign.allowedActions?.includes("submit") && (
+						{campaign.allowedActions?.includes("SUBMIT_FOR_APPROVAL") && (
 							<button
 								type="button"
 								onClick={handleSubmit}
@@ -1103,7 +933,7 @@ export function CampaignShow() {
 								{submitCampaign.isPending ? "Submitting..." : "Submit for Review"}
 							</button>
 						)}
-						{campaign.allowedActions?.includes("pause") && (
+						{campaign.allowedActions?.includes("PAUSE") && (
 							<button
 								type="button"
 								onClick={handlePause}
@@ -1114,7 +944,7 @@ export function CampaignShow() {
 								{pauseCampaign.isPending ? "Pausing..." : "Pause"}
 							</button>
 						)}
-						{campaign.allowedActions?.includes("resume") && (
+						{campaign.allowedActions?.includes("RESUME") && (
 							<button
 								type="button"
 								onClick={handleResume}
@@ -1125,7 +955,7 @@ export function CampaignShow() {
 								{resumeCampaign.isPending ? "Resuming..." : "Resume"}
 							</button>
 						)}
-						{campaign.allowedActions?.includes("archive") && (
+						{campaign.allowedActions?.includes("ARCHIVE") && (
 							<button
 								type="button"
 								onClick={handleArchive}
@@ -1138,7 +968,7 @@ export function CampaignShow() {
 						)}
 
 						<div className="ml-auto flex items-center gap-1.5">
-							{campaign.allowedActions?.includes("end") && (
+							{campaign.allowedActions?.includes("END") && (
 								<button
 									type="button"
 									onClick={() => setShowEndConfirm(true)}
@@ -1672,11 +1502,7 @@ export function CampaignShow() {
 										<EnrollmentCardCompact
 											key={enrollment.id}
 											enrollment={enrollment}
-											onClick={
-												enrollment.status === "awaiting_review" && canApproveEnrollment
-													? () => handleEnrollmentClick(enrollment)
-													: undefined
-											}
+											onClick={() => handleEnrollmentClick(enrollment)}
 										/>
 									))}
 								</div>
@@ -1864,18 +1690,6 @@ export function CampaignShow() {
 					)}
 				</div>
 			)}
-
-			{/* Review Dialog */}
-			<EnrollmentReviewDialog
-				open={showReviewDialog}
-				onClose={() => {
-					setShowReviewDialog(false);
-					setSelectedEnrollment(null);
-				}}
-				enrollment={selectedEnrollment}
-				organizationId={organizationId || ""}
-				onSuccess={handleReviewSuccess}
-			/>
 
 			{/* Edit Campaign Modal */}
 			<EditCampaignModal

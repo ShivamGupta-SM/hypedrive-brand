@@ -183,15 +183,6 @@ export function EnrollmentsGrid({ status }: EnrollmentsGridProps) {
 		});
 	}, []);
 
-	const handleSelectAll = useCallback(() => {
-		const actionableIds = enrollments.filter((e) => e.status === "awaiting_review").map((e) => e.id);
-		if (selectedIds.size === actionableIds.length && actionableIds.length > 0) {
-			setSelectedIds(new Set());
-		} else {
-			setSelectedIds(new Set(actionableIds));
-		}
-	}, [enrollments, selectedIds.size]);
-
 	const clearSelection = useCallback(() => {
 		setSelectedIds(new Set());
 	}, []);
@@ -270,8 +261,6 @@ export function EnrollmentsGrid({ status }: EnrollmentsGridProps) {
 		}
 	}, [exportEnrollments, status, enrollments]);
 
-	const actionableCount = enrollments.filter((e) => e.status === "awaiting_review").length;
-
 	if (loading) {
 		return <EnrollmentsGridSkeleton />;
 	}
@@ -295,47 +284,27 @@ export function EnrollmentsGrid({ status }: EnrollmentsGridProps) {
 				/>
 			) : (
 				<div className="space-y-4">
-					{/* Toolbar: Sort + Select All + count + Export */}
+					{/* Toolbar: Sort + count + Export */}
 					<div className="flex items-center justify-between gap-3">
 						<div className="flex items-center gap-3">
 							<FilterPills options={sortPillOptions} value={sortBy} onChange={setSortBy} />
-							{actionableCount > 0 && (
-								<button
-									type="button"
-									onClick={handleSelectAll}
-									className="hidden items-center gap-2 text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white sm:flex"
-								>
-									<span
-										className={`flex size-3.5 items-center justify-center rounded border transition-colors ${
-											selectedIds.size === actionableCount && actionableCount > 0
-												? "border-zinc-900 bg-zinc-900 dark:border-white dark:bg-white"
-												: "border-zinc-300 dark:border-zinc-600"
-										}`}
-									>
-										{selectedIds.size === actionableCount && actionableCount > 0 && (
-											<CheckCircleIcon className="size-2.5 text-white dark:text-zinc-900" />
-										)}
-									</span>
-									Select all ({actionableCount})
-								</button>
-							)}
 							<span className="hidden text-xs text-zinc-500 sm:inline dark:text-zinc-400">
 								{enrollments.length} enrollment{enrollments.length !== 1 ? "s" : ""}
 								{q && ` matching "${q}"`}
 							</span>
 						</div>
 						<Button
-							outline
+							color="emerald"
 							onClick={handleExport}
 							disabled={exportEnrollments.isPending}
-							className="hidden shrink-0 sm:inline-flex"
+							className="shrink-0"
 						>
 							{exportEnrollments.isPending ? (
 								<ArrowPathIcon className="size-4 animate-spin" />
 							) : (
-								<TableCellsIcon data-slot="icon" className="size-4 text-emerald-500" />
+								<TableCellsIcon data-slot="icon" className="size-4" />
 							)}
-							{exportEnrollments.isPending ? "Exporting..." : "Export"}
+							<span className="hidden sm:inline">{exportEnrollments.isPending ? "Exporting..." : "Export"}</span>
 						</Button>
 					</div>
 

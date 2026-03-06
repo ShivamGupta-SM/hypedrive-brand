@@ -84,7 +84,7 @@ export function useBankAccount(organizationId: string | undefined) {
 	});
 
 	return {
-		data: query.data?.bankAccount ?? null,
+		data: query.data ?? null,
 		loading: query.isPending && !query.data,
 		error: query.error,
 		refetch: query.refetch,

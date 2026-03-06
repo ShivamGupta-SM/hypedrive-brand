@@ -2,7 +2,7 @@
  * Enrollment Query Hooks.
  */
 
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import type { db } from "@/lib/brand-client";
 import {
 	campaignEnrollmentsQueryOptions,
@@ -50,6 +50,7 @@ export function useInfiniteEnrollments(
 	const query = useInfiniteQuery({
 		...infiniteEnrollmentsQueryOptions(organizationId || "", params),
 		enabled: !!organizationId,
+		placeholderData: keepPreviousData,
 	});
 
 	const data = query.data?.pages.flatMap((page) => page.data) ?? [];

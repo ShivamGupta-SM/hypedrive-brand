@@ -4,10 +4,10 @@ import { depositsQueryOptions } from "@/features/wallet/queries";
 import { WalletDeposits } from "@/pages/wallet";
 
 export const Route = createFileRoute("/_app/$orgSlug/wallet/deposits")({
-	loader: async ({ context }) => {
+	loader: ({ context }) => {
 		const orgId = context.organization?.id;
 		if (!orgId) return;
-		await context.queryClient.ensureQueryData(depositsQueryOptions(orgId));
+		context.queryClient.prefetchQuery(depositsQueryOptions(orgId));
 	},
 	head: () => ({
 		meta: [{ title: "Deposits | Wallet | Hypedrive" }],

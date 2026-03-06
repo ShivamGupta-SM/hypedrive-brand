@@ -1,7 +1,8 @@
-import { CheckCircleIcon, TrashIcon } from "@heroicons/react/16/solid";
+import { TrashIcon } from "@heroicons/react/16/solid";
 import { useCallback, useMemo, useState } from "react";
 import { Button } from "@/components/button";
 import { BulkActionsBar } from "@/components/shared/bulk-actions-bar";
+import { SelectionCheckbox } from "@/components/shared/selection-checkbox";
 import { useCan } from "@/components/shared/can";
 import { EmptyState } from "@/components/shared/empty-state";
 import { useMembers } from "@/features/team/hooks";
@@ -98,22 +99,12 @@ export function TeamMembers() {
 				{/* Column header */}
 				{filteredMembers.length > 0 && canManageMembers && selectableMembers.length > 0 && (
 					<div className="flex items-center gap-3 border-b border-zinc-100 px-4 py-2 dark:border-zinc-800">
-						<button
-							type="button"
-							onClick={toggleSelectAll}
-							className={`flex size-4 items-center justify-center rounded border transition-all ${
-								allSelected
-									? "border-zinc-900 bg-zinc-900 dark:border-white dark:bg-white"
-									: selectedIds.size > 0
-										? "border-zinc-900 bg-zinc-900/20 dark:border-white dark:bg-white/20"
-										: "border-zinc-300 dark:border-zinc-600"
-							}`}
-						>
-							{allSelected && <CheckCircleIcon className="size-3 text-white dark:text-zinc-900" />}
-							{!allSelected && selectedIds.size > 0 && (
-								<div className="h-0.5 w-2 rounded-full bg-zinc-900 dark:bg-white" />
-							)}
-						</button>
+						<SelectionCheckbox
+							variant="inline"
+							selected={allSelected}
+							indeterminate={!allSelected && selectedIds.size > 0}
+							onToggle={toggleSelectAll}
+						/>
 						<span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
 							{selectedIds.size > 0
 								? `${selectedIds.size} selected`
@@ -183,7 +174,7 @@ export function TeamMembers() {
 			{/* Floating Batch Actions Bar */}
 			<BulkActionsBar selectedCount={selectedIds.size} onClear={clearSelection}>
 				<Button color="red" onClick={handleBatchRemove} disabled={isBatchLoading}>
-					<TrashIcon className="size-4" /> Remove
+					<TrashIcon data-slot="icon" className="size-4" /> Remove
 				</Button>
 			</BulkActionsBar>
 

@@ -32,7 +32,7 @@ export const walletHoldsQueryOptions = (orgId: string) =>
 export const withdrawalsQueryOptions = (
 	orgId: string,
 	params?: {
-		status?: string;
+		status?: "otp_pending" | "pending" | "approved" | "rejected" | "queued" | "processing" | "completed" | "failed" | "cancelled" | "reversed";
 		requestedFrom?: string;
 		requestedTo?: string;
 		amountMin?: number;

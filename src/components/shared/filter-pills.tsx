@@ -47,7 +47,7 @@ export function FilterPills<T extends string = string>({
 						key={opt.value}
 						onClick={() => onChange(opt.value)}
 						className={clsx(
-							"inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1.5 text-[13px] font-medium transition-all",
+							"inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-all sm:px-2.5 sm:py-1",
 							isActive
 								? "bg-white text-zinc-900 shadow-sm ring-1 ring-zinc-950/5 dark:bg-zinc-700 dark:text-white dark:ring-white/10"
 								: "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200",

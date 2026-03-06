@@ -64,20 +64,72 @@ import { showToast } from "@/lib/toast";
 // SKELETON LOADING
 // =============================================================================
 
-function OrganizationSettingsSkeleton() {
+function OrganizationSettingsSkeleton({ isDialog = false }: { isDialog?: boolean }) {
 	return (
-		<div className="space-y-6 pb-20">
-			<div>
-				<div className="h-8 w-48 animate-pulse rounded-lg bg-zinc-200 skeleton-shimmer dark:bg-zinc-800" />
-				<div className="mt-2 h-4 w-64 animate-pulse rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-800" />
-			</div>
-			<div className="h-48 animate-pulse rounded-2xl bg-zinc-200 skeleton-shimmer dark:bg-zinc-800" />
-			{[1, 2, 3].map((i) => (
-				<div key={i} className="space-y-2">
-					<div className="h-4 w-28 animate-pulse rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-800" />
-					<div className="h-36 animate-pulse rounded-xl bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
+		<div className={isDialog ? "space-y-6 px-4 py-5 pb-10 sm:px-6" : "space-y-6 pb-20"}>
+			{/* Header — Heading + Text */}
+			{!isDialog && (
+				<div>
+					<div className="h-8 w-48 animate-pulse rounded-lg bg-zinc-200 skeleton-shimmer dark:bg-zinc-800" />
+					<div className="mt-2 h-4 w-64 animate-pulse rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-800" />
 				</div>
-			))}
+			)}
+			{/* Profile Card — dark card with avatar + name + 3-col stats */}
+			<div className="overflow-hidden rounded-2xl bg-zinc-900 ring-1 ring-white/5 dark:bg-zinc-800">
+				<div className="flex items-center gap-3 px-4 py-4 sm:gap-4 sm:px-5">
+					<div className="size-12 shrink-0 animate-pulse rounded-xl bg-zinc-700 skeleton-shimmer sm:size-14 sm:rounded-2xl" />
+					<div className="min-w-0 flex-1">
+						<div className="h-4 w-36 animate-pulse rounded bg-zinc-700 skeleton-shimmer" />
+						<div className="mt-2 h-3 w-20 animate-pulse rounded bg-zinc-700 skeleton-shimmer" />
+					</div>
+				</div>
+				<div className="grid grid-cols-3 divide-x divide-white/8 border-t border-white/8">
+					{[1, 2, 3].map((i) => (
+						<div key={i} className="px-3 py-2.5 text-center sm:px-4 sm:py-3">
+							<div className="mx-auto h-4 w-10 animate-pulse rounded bg-zinc-700 skeleton-shimmer" />
+							<div className="mx-auto mt-1.5 h-2.5 w-14 animate-pulse rounded bg-zinc-700/60 skeleton-shimmer" />
+						</div>
+					))}
+				</div>
+			</div>
+			{/* Organization Details — header + 4 menu rows */}
+			<div className="space-y-1.5">
+				<div className="h-4 w-36 animate-pulse rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+				<div className="overflow-hidden rounded-xl ring-1 ring-zinc-200/80 dark:ring-zinc-700/60">
+					{[1, 2, 3, 4].map((i) => (
+						<div key={i} className="flex items-center gap-3 border-b border-zinc-100 px-4 py-3.5 last:border-b-0 dark:border-zinc-800">
+							<div className="size-8 shrink-0 animate-pulse rounded-lg bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
+							<div className="flex-1">
+								<div className="h-3 w-24 animate-pulse rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+								<div className="mt-1.5 h-3.5 w-40 animate-pulse rounded bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
+							</div>
+						</div>
+					))}
+				</div>
+			</div>
+			{/* GST & Compliance — header + card */}
+			<div className="space-y-1.5">
+				<div className="h-4 w-28 animate-pulse rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+				<div className="h-44 animate-pulse rounded-xl bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
+			</div>
+			{/* Bank Account — header + card */}
+			<div className="space-y-1.5">
+				<div className="h-4 w-24 animate-pulse rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+				<div className="h-36 animate-pulse rounded-xl bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
+			</div>
+			{/* Billing — header + single row */}
+			<div className="space-y-1.5">
+				<div className="h-4 w-16 animate-pulse rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+				<div className="overflow-hidden rounded-xl ring-1 ring-zinc-200/80 dark:ring-zinc-700/60">
+					<div className="flex items-center gap-3 px-4 py-3.5">
+						<div className="size-8 shrink-0 animate-pulse rounded-lg bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
+						<div className="flex-1">
+							<div className="h-3 w-16 animate-pulse rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+							<div className="mt-1.5 h-3.5 w-32 animate-pulse rounded bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 	);
 }
@@ -975,7 +1027,7 @@ export function Settings({ section = "all" }: { section?: OrgSettingsSection } =
 	const loading = isLoadingStats;
 
 	if (loading) {
-		return <OrganizationSettingsSkeleton />;
+		return <OrganizationSettingsSkeleton isDialog={section !== "all"} />;
 	}
 
 	const orgData = orgDetails;

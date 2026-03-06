@@ -16,6 +16,7 @@ import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/di
 import { Input, InputGroup } from "@/components/input";
 import { PageHeader } from "@/components/page-header";
 import { BulkActionsBar } from "@/components/shared/bulk-actions-bar";
+import { SelectionCheckbox } from "@/components/shared/selection-checkbox";
 import { useCan } from "@/components/shared/can";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
@@ -103,21 +104,12 @@ function InvoiceRow({
 	onToggleSelect: () => void;
 }) {
 	return (
-		<div className="group flex w-full items-center gap-0 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
-			{/* Selection checkbox */}
-			<button
-				type="button"
-				onClick={(e) => { e.stopPropagation(); onToggleSelect(); }}
-				className={`ml-3 flex size-5 shrink-0 items-center justify-center rounded border transition-all ${
-					selected
-						? "border-zinc-900 bg-zinc-900 dark:border-white dark:bg-white"
-						: "border-zinc-300 bg-white opacity-0 group-hover:opacity-100 dark:border-zinc-600 dark:bg-zinc-800"
-				}`}
-			>
-				{selected && (
-					<CheckCircleIcon className="size-3.5 text-white dark:text-zinc-900" />
-				)}
-			</button>
+		<div className="group flex w-full items-center gap-0 pl-3 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
+			<SelectionCheckbox
+				variant="inline"
+				selected={selected}
+				onToggle={(e) => { e.stopPropagation(); onToggleSelect(); }}
+			/>
 			<button
 				type="button"
 				onClick={onView}
@@ -330,6 +322,7 @@ export function InvoicesList() {
 	const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 	const [isBatchLoading, setIsBatchLoading] = useState(false);
 	const batchInvoices = useBatchInvoices();
+	const generatePDF = useGenerateInvoicePDF(organizationId);
 
 	const toggleSelect = useCallback((id: string) => {
 		setSelectedIds((prev) => {
@@ -506,22 +499,14 @@ export function InvoicesList() {
 				/>
 			) : (
 				<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-					<div className="flex items-center justify-between border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
+					<div className="flex items-center justify-between border-b border-zinc-200 py-3 pr-4 pl-3 dark:border-zinc-800">
 						<div className="flex items-center gap-3">
-							{/* Select All checkbox */}
-							<button
-								type="button"
-								onClick={toggleSelectAll}
-								className={`flex size-5 items-center justify-center rounded border transition-all ${
-									allVisibleSelected
-										? "border-zinc-900 bg-zinc-900 dark:border-white dark:bg-white"
-										: "border-zinc-300 bg-white dark:border-zinc-600 dark:bg-zinc-800"
-								}`}
-							>
-								{allVisibleSelected && (
-									<CheckCircleIcon className="size-3.5 text-white dark:text-zinc-900" />
-								)}
-							</button>
+							<SelectionCheckbox
+								variant="inline"
+								selected={allVisibleSelected}
+								indeterminate={!allVisibleSelected && selectedIds.size > 0}
+								onToggle={toggleSelectAll}
+							/>
 							<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">
 								Invoices
 								<span className="ml-2 text-xs font-normal text-zinc-500 dark:text-zinc-400">{filteredInvoices.length}</span>
@@ -559,15 +544,36 @@ export function InvoicesList() {
 			{/* Floating Batch Actions Bar */}
 			<BulkActionsBar selectedCount={selectedIds.size} onClear={clearSelection}>
 				<Button color="emerald" onClick={() => handleBatchAction("mark_paid")} disabled={isBatchLoading}>
-					<CheckCircleIcon className="size-4" /> Mark Paid
+					<CheckCircleIcon data-slot="icon" className="size-4" /> Mark Paid
 				</Button>
-				<Button color="emerald" onClick={() => {
+				<Button color="emerald" onClick={async () => {
 					const selected = filteredInvoices.filter((inv: Invoice) => selectedIds.has(inv.id));
-					for (const inv of selected) {
-						if (inv.pdfUrl) window.open(inv.pdfUrl, "_blank");
+					if (selected.length === 0) return;
+					setIsBatchLoading(true);
+					let downloaded = 0;
+					try {
+						for (const inv of selected) {
+							if (inv.pdfUrl) {
+								window.open(inv.pdfUrl, "_blank");
+								downloaded++;
+							} else {
+								try {
+									const result = await generatePDF.mutateAsync(inv.id);
+									if (result.pdfUrl) {
+										window.open(result.pdfUrl, "_blank");
+										downloaded++;
+									}
+								} catch {
+									// skip individual failures
+								}
+							}
+						}
+						if (downloaded > 0) showToast.success(`Downloaded ${downloaded} PDF${downloaded !== 1 ? "s" : ""}`);
+					} finally {
+						setIsBatchLoading(false);
 					}
-				}} disabled={isBatchLoading}>
-					<DocumentArrowDownIcon className="size-4" /> Download PDFs
+				}} disabled={isBatchLoading || generatePDF.isPending}>
+					<DocumentArrowDownIcon data-slot="icon" className="size-4" /> {isBatchLoading ? "Downloading..." : "Download PDFs"}
 				</Button>
 			</BulkActionsBar>
 

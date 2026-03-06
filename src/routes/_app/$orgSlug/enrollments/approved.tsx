@@ -8,13 +8,11 @@ export const Route = createFileRoute("/_app/$orgSlug/enrollments/approved")({
 	head: () => ({
 		meta: [{ title: "Approved | Enrollments | Hypedrive" }],
 	}),
-	loader: async ({ context }) => {
+	loader: ({ context }) => {
 		const orgId = context.organization?.id;
 		if (!orgId) return;
-		await Promise.all([
-			context.queryClient.prefetchInfiniteQuery(infiniteEnrollmentsQueryOptions(orgId, { status: "approved" })),
-			context.queryClient.ensureQueryData(campaignsLookupQueryOptions(orgId)),
-		]);
+		context.queryClient.prefetchInfiniteQuery(infiniteEnrollmentsQueryOptions(orgId, { status: "approved" }));
+		context.queryClient.prefetchQuery(campaignsLookupQueryOptions(orgId));
 	},
 	component: () => <EnrollmentsGrid status="approved" />,
 	errorComponent: RouteErrorComponent,

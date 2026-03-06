@@ -5,7 +5,6 @@
 
 import {
 	ArrowPathIcon,
-	CheckCircleIcon,
 	EllipsisVerticalIcon,
 	EnvelopeIcon,
 	ExclamationTriangleIcon,
@@ -19,6 +18,7 @@ import {
 import clsx from "clsx";
 import { useCallback, useState } from "react";
 import { Badge } from "@/components/badge";
+import { SelectionCheckbox, SelectionCheckboxSpacer } from "@/components/shared/selection-checkbox";
 import { Button } from "@/components/button";
 import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/dialog";
 import { Dropdown, DropdownButton, DropdownItem, DropdownMenu } from "@/components/dropdown";
@@ -230,20 +230,14 @@ export function MemberRow({
 			{/* Checkbox column — always reserve space when list is in selection mode */}
 			{showCheckbox && (
 				checkable ? (
-					<button
-						type="button"
-						onClick={onToggleSelect}
-						className={clsx(
-							"flex size-4 shrink-0 items-center justify-center rounded border transition-all",
-							selected
-								? "border-zinc-900 bg-zinc-900 dark:border-white dark:bg-white"
-								: "border-zinc-300 opacity-0 group-hover/row:opacity-100 dark:border-zinc-600",
-						)}
-					>
-						{selected && <CheckCircleIcon className="size-3 text-white dark:text-zinc-900" />}
-					</button>
+					<SelectionCheckbox
+						variant="inline"
+						selected={selected}
+						onToggle={() => onToggleSelect?.()}
+						className="opacity-0 group-hover/row:opacity-100"
+					/>
 				) : (
-					<div className="size-4 shrink-0" />
+					<SelectionCheckboxSpacer />
 				)
 			)}
 

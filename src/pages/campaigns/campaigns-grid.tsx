@@ -3,7 +3,6 @@ import {
 	ArrowPathIcon,
 	ArrowsUpDownIcon,
 	CalendarIcon,
-	CheckCircleIcon,
 	ExclamationTriangleIcon,
 	PauseIcon,
 	PlayIcon,
@@ -19,6 +18,7 @@ import { BulkActionsBar } from "@/components/shared/bulk-actions-bar";
 import { useCan } from "@/components/shared/can";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
+import { SelectionCheckbox } from "@/components/shared/selection-checkbox";
 import { FilterPills, type FilterPillOption } from "@/components/shared/filter-pills";
 import { Skeleton } from "@/components/skeleton";
 import { useInfiniteCampaigns } from "@/features/campaigns/hooks";
@@ -245,7 +245,7 @@ export function CampaignsGrid({ status }: CampaignsGridProps) {
 			{/* Toolbar: Sort + count + Export */}
 			<div className="flex items-center justify-between gap-3">
 				<div className="flex items-center gap-3">
-					<FilterPills options={sortPillOptions} value={sortBy} onChange={(value) => navigate({ search: (prev: Record<string, unknown>) => ({ ...prev, sort: value === "newest" ? undefined : value }) })} />
+					<FilterPills options={sortPillOptions} value={sortBy} onChange={(value) => navigate({ search: ((prev: Record<string, unknown>) => ({ ...prev, sort: value === "newest" ? undefined : value })) as never })} />
 					<span className="hidden text-xs text-zinc-500 sm:inline dark:text-zinc-400">
 						{campaignCount} campaign{campaignCount !== 1 ? "s" : ""}
 						{q && ` matching "${q}"`}
@@ -253,12 +253,12 @@ export function CampaignsGrid({ status }: CampaignsGridProps) {
 				</div>
 				{campaigns.length > 0 && (
 					<Button
-						outline
+						color="emerald"
 						onClick={() => exportCampaignsToCSV(campaigns)}
-						className="hidden shrink-0 sm:inline-flex"
+						className="shrink-0"
 					>
-						<TableCellsIcon data-slot="icon" className="size-4 text-emerald-500" />
-						Export
+						<TableCellsIcon data-slot="icon" className="size-4" />
+						<span className="hidden sm:inline">Export</span>
 					</Button>
 				)}
 			</div>
@@ -270,22 +270,11 @@ export function CampaignsGrid({ status }: CampaignsGridProps) {
 				<>
 					<div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3.5 lg:grid-cols-3">
 						{campaigns.map((campaign) => (
-							<div key={campaign.id} className="group relative">
-								{/* Selection checkbox (desktop hover) */}
-								<button
-									type="button"
-									onClick={(e) => { e.preventDefault(); toggleSelect(campaign.id); }}
-									className={clsx(
-										"absolute left-2 top-2 z-10 flex size-5 items-center justify-center rounded border transition-all",
-										selectedIds.has(campaign.id)
-											? "border-zinc-900 bg-zinc-900 dark:border-white dark:bg-white"
-											: "border-zinc-300 bg-white opacity-0 group-hover:opacity-100 dark:border-zinc-600 dark:bg-zinc-800"
-									)}
-								>
-									{selectedIds.has(campaign.id) && (
-										<CheckCircleIcon className="size-3.5 text-white dark:text-zinc-900" />
-									)}
-								</button>
+							<div key={campaign.id} className={clsx("group relative rounded-xl transition-shadow", selectedIds.has(campaign.id) && "outline-2 outline-zinc-900 dark:outline-white")}>
+								<SelectionCheckbox
+									selected={selectedIds.has(campaign.id)}
+									onToggle={(e) => { e.preventDefault(); toggleSelect(campaign.id); }}
+								/>
 								<CampaignCard
 									campaign={campaign}
 									orgSlug={orgSlug}
@@ -337,16 +326,16 @@ export function CampaignsGrid({ status }: CampaignsGridProps) {
 			<BulkActionsBar selectedCount={selectedIds.size} onClear={clearSelection}>
 				{canPause && status === "active" && (
 					<Button color="amber" onClick={() => handleBatchAction("pause")} disabled={isBatchLoading}>
-						<PauseIcon className="size-4" /> Pause
+						<PauseIcon data-slot="icon" className="size-4" /> Pause
 					</Button>
 				)}
 				{canResume && status === "paused" && (
 					<Button color="emerald" onClick={() => handleBatchAction("resume")} disabled={isBatchLoading}>
-						<PlayIcon className="size-4" /> Resume
+						<PlayIcon data-slot="icon" className="size-4" /> Resume
 					</Button>
 				)}
 				<Button outline onClick={() => handleBatchAction("archive")} disabled={isBatchLoading}>
-					<ArchiveBoxIcon className="size-4" /> Archive
+					<ArchiveBoxIcon data-slot="icon" className="size-4" /> Archive
 				</Button>
 			</BulkActionsBar>
 

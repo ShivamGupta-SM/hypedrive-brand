@@ -1711,9 +1711,11 @@ export namespace admin {
         status?: string
         type?: string
         organizationId?: string
-        q?: string
         startDateFrom?: string
         startDateTo?: string
+        sortBy?: string
+        sortOrder?: "asc" | "desc"
+        q?: string
         skip?: number
         take?: number
     }
@@ -1723,8 +1725,8 @@ export namespace admin {
         payoutReady?: boolean
         isBanned?: boolean
         q?: string
-        createdFrom?: string
-        createdTo?: string
+        dateFrom?: string
+        dateTo?: string
         sortBy?: "createdAt" | "firstName" | "lastName" | "enrollmentCount"
         sortOrder?: "asc" | "desc"
         skip?: number
@@ -1767,9 +1769,11 @@ export namespace admin {
         status?: string
         campaignId?: string
         creatorId?: string
+        dateFrom?: string
+        dateTo?: string
+        sortBy?: string
+        sortOrder?: "asc" | "desc"
         q?: string
-        fromDate?: string
-        toDate?: string
         skip?: number
         take?: number
     }
@@ -1778,9 +1782,11 @@ export namespace admin {
         status?: string
         campaignId?: string
         creatorId?: string
+        dateFrom?: string
+        dateTo?: string
+        sortBy?: string
+        sortOrder?: "asc" | "desc"
         q?: string
-        fromDate?: string
-        toDate?: string
         skip?: number
         take?: number
     }
@@ -3585,12 +3591,14 @@ export namespace admin {
             const query = makeRecord<string, string | string[]>({
                 campaignId: params.campaignId,
                 creatorId:  params.creatorId,
-                fromDate:   params.fromDate,
+                dateFrom:   params.dateFrom,
+                dateTo:     params.dateTo,
                 q:          params.q,
                 skip:       params.skip === undefined ? undefined : String(params.skip),
+                sortBy:     params.sortBy,
+                sortOrder:  params.sortOrder === undefined ? undefined : String(params.sortOrder),
                 status:     params.status,
                 take:       params.take === undefined ? undefined : String(params.take),
-                toDate:     params.toDate,
             })
 
             // Now make the actual call to the API
@@ -5213,6 +5221,8 @@ export namespace admin {
                 organizationId: params.organizationId,
                 q:              params.q,
                 skip:           params.skip === undefined ? undefined : String(params.skip),
+                sortBy:         params.sortBy,
+                sortOrder:      params.sortOrder === undefined ? undefined : String(params.sortOrder),
                 startDateFrom:  params.startDateFrom,
                 startDateTo:    params.startDateTo,
                 status:         params.status,
@@ -5315,8 +5325,8 @@ export namespace admin {
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
-                createdFrom: params.createdFrom,
-                createdTo:   params.createdTo,
+                dateFrom:    params.dateFrom,
+                dateTo:      params.dateTo,
                 isBanned:    params.isBanned === undefined ? undefined : String(params.isBanned),
                 kycVerified: params.kycVerified === undefined ? undefined : String(params.kycVerified),
                 payoutReady: params.payoutReady === undefined ? undefined : String(params.payoutReady),
@@ -5441,12 +5451,14 @@ export namespace admin {
             const query = makeRecord<string, string | string[]>({
                 campaignId: params.campaignId,
                 creatorId:  params.creatorId,
-                fromDate:   params.fromDate,
+                dateFrom:   params.dateFrom,
+                dateTo:     params.dateTo,
                 q:          params.q,
                 skip:       params.skip === undefined ? undefined : String(params.skip),
+                sortBy:     params.sortBy,
+                sortOrder:  params.sortOrder === undefined ? undefined : String(params.sortOrder),
                 status:     params.status,
                 take:       params.take === undefined ? undefined : String(params.take),
-                toDate:     params.toDate,
             })
 
             // Now make the actual call to the API
@@ -6053,8 +6065,8 @@ export namespace admin {
     requiresApproval?: boolean
     amountMin?: number
     amountMax?: number
-    requestedFrom?: string
-    requestedTo?: string
+    dateFrom?: string
+    dateTo?: string
 }): Promise<{
     data: AdminWithdrawalResponse[]
     total: number
@@ -6070,10 +6082,10 @@ export namespace admin {
             const query = makeRecord<string, string | string[]>({
                 amountMax:        params.amountMax === undefined ? undefined : String(params.amountMax),
                 amountMin:        params.amountMin === undefined ? undefined : String(params.amountMin),
+                dateFrom:         params.dateFrom,
+                dateTo:           params.dateTo,
                 holderType:       params.holderType === undefined ? undefined : String(params.holderType),
                 q:                params.q,
-                requestedFrom:    params.requestedFrom,
-                requestedTo:      params.requestedTo,
                 requiresApproval: params.requiresApproval === undefined ? undefined : String(params.requiresApproval),
                 skip:             params.skip === undefined ? undefined : String(params.skip),
                 sortBy:           params.sortBy,
@@ -7305,6 +7317,9 @@ export namespace auth {
         public async addMember(organizationId: string, params: {
     userId: string
     role: "owner" | "admin" | "member"
+    /**
+     * Optional idempotency key to prevent duplicate additions from retries
+     */
     idempotencyKey?: string
 }): Promise<types.MemberResponse> {
             // Now make the actual call to the API
@@ -8172,6 +8187,9 @@ export namespace auth {
         public async inviteMemberAuth(organizationId: string, params: {
     email: string
     role: "owner" | "admin" | "member"
+    /**
+     * Optional idempotency key to prevent duplicate invitations from retries
+     */
     idempotencyKey?: string
 }): Promise<{
     invitation: types.InvitationResponse
@@ -11479,9 +11497,7 @@ export namespace brand {
          */
         public async getOrganizationBankAccount(organizationId: string, params: {
     showFull?: boolean
-}): Promise<{
-    bankAccount: OrganizationBankAccount | null
-}> {
+}): Promise<OrganizationBankAccount> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
                 showFull: params.showFull === undefined ? undefined : String(params.showFull),
@@ -11489,9 +11505,7 @@ export namespace brand {
 
             // Now make the actual call to the API
             const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/bank-accounts`, undefined, {query})
-            return await resp.json() as {
-    bankAccount: OrganizationBankAccount | null
-}
+            return await resp.json() as OrganizationBankAccount
         }
 
         /**
@@ -12841,6 +12855,11 @@ export namespace creator {
          * Challenge ID from GET /auth/passkey/reauth-options
          */
         challengeId: string
+
+        /**
+         * Idempotency key to prevent duplicate withdrawal requests
+         */
+        idempotencyKey?: string
     }
 
     export interface Creator {

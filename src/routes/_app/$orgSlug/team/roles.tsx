@@ -4,10 +4,10 @@ import { organizationRolesQueryOptions } from "@/features/team/queries";
 import { TeamRoles } from "@/pages/team";
 
 export const Route = createFileRoute("/_app/$orgSlug/team/roles")({
-	loader: async ({ context }) => {
+	loader: ({ context }) => {
 		const orgId = context.organization?.id;
 		if (!orgId) return;
-		await context.queryClient.ensureQueryData(organizationRolesQueryOptions(orgId));
+		context.queryClient.prefetchQuery(organizationRolesQueryOptions(orgId));
 	},
 	head: () => ({
 		meta: [{ title: "Roles | Team | Hypedrive" }],

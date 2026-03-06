@@ -28,7 +28,7 @@ export const listWithdrawalsServer = createServerFn({ method: "GET" })
 		(input: {
 			orgId: string;
 			params: {
-				status?: string;
+				status?: "otp_pending" | "pending" | "approved" | "rejected" | "queued" | "processing" | "completed" | "failed" | "cancelled" | "reversed";
 				requestedFrom?: string;
 				requestedTo?: string;
 				amountMin?: number;

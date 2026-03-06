@@ -3,7 +3,7 @@
  */
 
 import { useEffect, useRef, useState } from "react";
-import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import Client from "@/lib/brand-client";
 
 import { API_URL } from "@/lib/config";
@@ -72,6 +72,7 @@ export function useInfiniteWalletTransactions(
 	const query = useInfiniteQuery({
 		...infiniteWalletTransactionsQueryOptions(organizationId || "", params),
 		enabled: !!organizationId,
+		placeholderData: keepPreviousData,
 	});
 
 	const data = query.data?.pages.flatMap((page) => page.data) ?? [];
@@ -106,7 +107,7 @@ export function useWalletHolds(organizationId: string | undefined) {
 export function useWithdrawals(
 	organizationId: string | undefined,
 	params?: {
-		status?: string;
+		status?: "otp_pending" | "pending" | "approved" | "rejected" | "queued" | "processing" | "completed" | "failed" | "cancelled" | "reversed";
 		sortBy?: "requestedAt" | "amount" | "status";
 		sortOrder?: "asc" | "desc";
 		skip?: number;
@@ -116,6 +117,7 @@ export function useWithdrawals(
 	const query = useQuery({
 		...withdrawalsQueryOptions(organizationId || "", params),
 		enabled: !!organizationId,
+		placeholderData: keepPreviousData,
 	});
 
 	return {
@@ -172,6 +174,7 @@ export function useDeposits(
 	const query = useQuery({
 		...depositsQueryOptions(organizationId || "", params),
 		enabled: !!organizationId,
+		placeholderData: keepPreviousData,
 	});
 
 	return {

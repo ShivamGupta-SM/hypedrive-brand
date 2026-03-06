@@ -4,10 +4,10 @@ import { walletHoldsQueryOptions } from "@/features/wallet/queries";
 import { WalletHolds } from "@/pages/wallet";
 
 export const Route = createFileRoute("/_app/$orgSlug/wallet/holds")({
-	loader: async ({ context }) => {
+	loader: ({ context }) => {
 		const orgId = context.organization?.id;
 		if (!orgId) return;
-		await context.queryClient.ensureQueryData(walletHoldsQueryOptions(orgId));
+		context.queryClient.prefetchQuery(walletHoldsQueryOptions(orgId));
 	},
 	head: () => ({
 		meta: [{ title: "Holds | Wallet | Hypedrive" }],

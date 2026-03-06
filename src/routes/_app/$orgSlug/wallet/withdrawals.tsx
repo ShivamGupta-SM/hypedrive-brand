@@ -4,13 +4,11 @@ import { withdrawalStatsQueryOptions, withdrawalsQueryOptions } from "@/features
 import { WalletWithdrawals } from "@/pages/wallet";
 
 export const Route = createFileRoute("/_app/$orgSlug/wallet/withdrawals")({
-	loader: async ({ context }) => {
+	loader: ({ context }) => {
 		const orgId = context.organization?.id;
 		if (!orgId) return;
-		await Promise.all([
-			context.queryClient.ensureQueryData(withdrawalsQueryOptions(orgId)),
-			context.queryClient.ensureQueryData(withdrawalStatsQueryOptions(orgId)),
-		]);
+		context.queryClient.prefetchQuery(withdrawalsQueryOptions(orgId));
+		context.queryClient.prefetchQuery(withdrawalStatsQueryOptions(orgId));
 	},
 	head: () => ({
 		meta: [{ title: "Withdrawals | Wallet | Hypedrive" }],

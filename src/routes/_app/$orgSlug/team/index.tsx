@@ -4,10 +4,10 @@ import { membersQueryOptions } from "@/features/team/queries";
 import { TeamMembers } from "@/pages/team";
 
 export const Route = createFileRoute("/_app/$orgSlug/team/")({
-	loader: async ({ context }) => {
+	loader: ({ context }) => {
 		const orgId = context.organization?.id;
 		if (!orgId) return;
-		await context.queryClient.ensureQueryData(membersQueryOptions(orgId));
+		context.queryClient.prefetchQuery(membersQueryOptions(orgId));
 	},
 	component: TeamMembers,
 	errorComponent: RouteErrorComponent,

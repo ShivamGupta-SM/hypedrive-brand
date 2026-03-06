@@ -2,7 +2,6 @@ import {
 	ArrowPathIcon,
 	ArrowsUpDownIcon,
 	CalendarIcon,
-	CheckCircleIcon,
 	CubeIcon,
 	EllipsisVerticalIcon,
 	EyeIcon,
@@ -22,6 +21,7 @@ import { Input, InputGroup } from "@/components/input";
 import { Link } from "@/components/link";
 import { PageHeader } from "@/components/page-header";
 import { BulkActionsBar } from "@/components/shared/bulk-actions-bar";
+import { SelectionCheckbox } from "@/components/shared/selection-checkbox";
 import { useCan } from "@/components/shared/can";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
@@ -42,8 +42,8 @@ type Listing = brand.ListingWithStats;
 // SHIMMER COMPONENT
 // =============================================================================
 
-function Shimmer({ className }: { className?: string }) {
-	return <div className={clsx("animate-pulse rounded-md bg-zinc-200 dark:bg-zinc-700", className)} />;
+function Shimmer({ className, style }: { className?: string; style?: React.CSSProperties }) {
+	return <div className={clsx("animate-pulse rounded-md bg-zinc-200 dark:bg-zinc-700", className)} style={style} />;
 }
 
 // =============================================================================
@@ -297,7 +297,7 @@ export function ListingsList() {
 		setLocalSearch(value);
 		clearTimeout(searchTimerRef.current);
 		searchTimerRef.current = setTimeout(() => {
-			navigate({ search: (prev: Record<string, unknown>) => ({ ...prev, q: value || undefined }) });
+			navigate({ search: ((prev: Record<string, unknown>) => ({ ...prev, q: value || undefined })) as never });
 		}, 300);
 	};
 
@@ -343,7 +343,7 @@ export function ListingsList() {
 			filters.push({
 				key: "search",
 				label: `"${searchQuery}"`,
-				onRemove: () => { setLocalSearch(""); navigate({ search: (prev: Record<string, unknown>) => ({ ...prev, q: undefined }) }); },
+				onRemove: () => { setLocalSearch(""); navigate({ search: ((prev: Record<string, unknown>) => ({ ...prev, q: undefined })) as never }); },
 			});
 		}
 		return filters;
@@ -351,7 +351,7 @@ export function ListingsList() {
 
 	const clearAllFilters = () => {
 		setLocalSearch("");
-		navigate({ search: { } });
+		navigate({ search: {} as never });
 	};
 
 	const handleBatchAction = useCallback(async (action: "delete") => {
@@ -443,7 +443,7 @@ export function ListingsList() {
 								<button
 									type="button"
 									key={opt.value}
-									onClick={() => navigate({ search: (prev: Record<string, unknown>) => ({ ...prev, sort: opt.value === "date" ? undefined : opt.value }) })}
+									onClick={() => navigate({ search: ((prev: Record<string, unknown>) => ({ ...prev, sort: opt.value === "date" ? undefined : opt.value })) as never })}
 									className={clsx(
 										"inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium shadow-sm ring-1 transition-all duration-200 active:scale-95",
 										isActive
@@ -483,22 +483,11 @@ export function ListingsList() {
 				<>
 					<div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
 						{filteredListings.map((listing) => (
-							<div key={listing.id} className="group relative">
-								{/* Selection checkbox */}
-								<button
-									type="button"
-									onClick={(e) => { e.preventDefault(); toggleSelect(listing.id); }}
-									className={clsx(
-										"absolute left-2 top-2 z-10 flex size-5 items-center justify-center rounded border transition-all",
-										selectedIds.has(listing.id)
-											? "border-zinc-900 bg-zinc-900 dark:border-white dark:bg-white"
-											: "border-zinc-300 bg-white opacity-0 group-hover:opacity-100 dark:border-zinc-600 dark:bg-zinc-800"
-									)}
-								>
-									{selectedIds.has(listing.id) && (
-										<CheckCircleIcon className="size-3.5 text-white dark:text-zinc-900" />
-									)}
-								</button>
+							<div key={listing.id} className={clsx("group relative rounded-xl transition-shadow", selectedIds.has(listing.id) && "outline-2 outline-zinc-900 dark:outline-white")}>
+								<SelectionCheckbox
+									selected={selectedIds.has(listing.id)}
+									onToggle={(e) => { e.preventDefault(); toggleSelect(listing.id); }}
+								/>
 								<ListingCard listing={listing} orgSlug={orgSlug} canEdit={canUpdateListing} />
 							</div>
 						))}
@@ -543,7 +532,7 @@ export function ListingsList() {
 			<BulkActionsBar selectedCount={selectedIds.size} onClear={clearSelection}>
 				{canDeleteListing && (
 					<Button color="red" onClick={() => handleBatchAction("delete")} disabled={isBatchLoading}>
-						<TrashIcon className="size-4" /> Delete
+						<TrashIcon data-slot="icon" className="size-4" /> Delete
 					</Button>
 				)}
 			</BulkActionsBar>

@@ -4,10 +4,10 @@ import { infiniteWalletTransactionsQueryOptions } from "@/features/wallet/querie
 import { WalletTransactions } from "@/pages/wallet";
 
 export const Route = createFileRoute("/_app/$orgSlug/wallet/")({
-	loader: async ({ context }) => {
+	loader: ({ context }) => {
 		const orgId = context.organization?.id;
 		if (!orgId) return;
-		await context.queryClient.prefetchInfiniteQuery(infiniteWalletTransactionsQueryOptions(orgId));
+		context.queryClient.prefetchInfiniteQuery(infiniteWalletTransactionsQueryOptions(orgId));
 	},
 	head: () => ({
 		meta: [{ title: "Transactions | Wallet | Hypedrive" }],

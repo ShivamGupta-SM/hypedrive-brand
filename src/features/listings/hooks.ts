@@ -2,7 +2,7 @@
  * Listing Query Hooks.
  */
 
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { infiniteListingsQueryOptions, listingQueryOptions, listingsQueryOptions } from "./queries";
 
 export function useListings(
@@ -45,6 +45,7 @@ export function useInfiniteListings(
 	const query = useInfiniteQuery({
 		...infiniteListingsQueryOptions(organizationId || "", params),
 		enabled: !!organizationId,
+		placeholderData: keepPreviousData,
 	});
 
 	const data = query.data?.pages.flatMap((page) => page.data ?? []) ?? [];

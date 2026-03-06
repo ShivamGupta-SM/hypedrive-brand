@@ -12,6 +12,7 @@ import { getPlatformColor, getPlatformIcon } from "@/components/icons/platform-i
 import { Link } from "@/components/link";
 import type { brand, db } from "@/lib/brand-client";
 import { formatCurrency, formatDateCompact } from "@/lib/design-tokens";
+import { SelectionCheckbox } from "@/components/shared/selection-checkbox";
 
 // =============================================================================
 // TYPES
@@ -115,7 +116,7 @@ function EnrollmentCardFull({
 			className={clsx(
 				"group relative flex flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 transition-all duration-200 dark:bg-zinc-900",
 				isSelected
-					? "ring-2 ring-zinc-900 dark:ring-white"
+					? "outline-2 outline-zinc-900 ring-zinc-200 dark:outline-white dark:ring-zinc-800"
 					: "ring-zinc-200 hover:ring-zinc-300 hover:shadow-md dark:ring-zinc-800 dark:hover:ring-zinc-700"
 			)}
 		>
@@ -204,18 +205,10 @@ function EnrollmentCardFull({
 
 			{/* Selection checkbox — overlaid top-left, outside the Link */}
 			{onSelect && (
-				<button
-					type="button"
-					onClick={handleCheckboxClick}
-					className={clsx(
-						"absolute left-2.5 top-2.5 z-10 flex size-5 items-center justify-center rounded-md transition-all",
-						isSelected
-							? "border-0 bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
-							: "border border-zinc-300 bg-white/90 backdrop-blur-sm hover:border-zinc-400 sm:opacity-0 sm:group-hover:opacity-100 dark:border-zinc-600 dark:bg-zinc-800/90"
-					)}
-				>
-					{isSelected && <CheckCircleIcon className="size-3.5" />}
-				</button>
+				<SelectionCheckbox
+					selected={isSelected}
+					onToggle={handleCheckboxClick}
+				/>
 			)}
 		</div>
 	);
