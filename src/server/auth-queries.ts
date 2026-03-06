@@ -43,7 +43,7 @@ export const getServerAuthWithOrgs = createServerFn({ method: "GET" }).handler(a
 			slug: org.slug,
 			logo: org.logo,
 			createdAt: org.createdAt,
-			approvalStatus: org.status,
+			status: org.status,
 		}));
 
 		return {

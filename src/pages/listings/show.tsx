@@ -348,9 +348,9 @@ function EditListingModal({
 									onChange={(e) => updateField("name", e.target.value)}
 									placeholder="e.g., Premium Wireless Headphones"
 									className={clsx(
-										"w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none dark:bg-zinc-800 dark:text-white",
+										"w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none dark:bg-zinc-800 dark:text-white dark:placeholder:text-zinc-500",
 										errors.name
-											? "border-red-300 focus:border-red-500"
+											? "border-red-300 focus:border-red-500 dark:border-red-500/60 dark:focus:border-red-400"
 											: "border-zinc-200 focus:border-zinc-400 dark:border-zinc-700"
 									)}
 								/>
@@ -374,9 +374,9 @@ function EditListingModal({
 										onChange={(e) => updateField("identifier", e.target.value.toUpperCase())}
 										placeholder="e.g., WH-001"
 										className={clsx(
-											"w-full rounded-xl border bg-white py-2.5 pl-9 pr-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none dark:bg-zinc-800 dark:text-white",
+											"w-full rounded-xl border bg-white py-2.5 pl-9 pr-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none dark:bg-zinc-800 dark:text-white dark:placeholder:text-zinc-500",
 											errors.identifier
-												? "border-red-300 focus:border-red-500"
+												? "border-red-300 focus:border-red-500 dark:border-red-500/60 dark:focus:border-red-400"
 												: "border-zinc-200 focus:border-zinc-400 dark:border-zinc-700"
 										)}
 									/>
@@ -403,9 +403,9 @@ function EditListingModal({
 										onChange={(e) => updateField("price", e.target.value)}
 										placeholder="0.00"
 										className={clsx(
-											"w-full rounded-xl border bg-white py-2.5 pl-9 pr-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none dark:bg-zinc-800 dark:text-white",
+											"w-full rounded-xl border bg-white py-2.5 pl-9 pr-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none dark:bg-zinc-800 dark:text-white dark:placeholder:text-zinc-500",
 											errors.price
-												? "border-red-300 focus:border-red-500"
+												? "border-red-300 focus:border-red-500 dark:border-red-500/60 dark:focus:border-red-400"
 												: "border-zinc-200 focus:border-zinc-400 dark:border-zinc-700"
 										)}
 									/>
@@ -427,7 +427,7 @@ function EditListingModal({
 									onChange={(e) => updateField("description", e.target.value)}
 									rows={3}
 									placeholder="Brief listing description..."
-									className="w-full resize-none rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
+									className="w-full resize-none rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:placeholder:text-zinc-500"
 								/>
 							</div>
 						</div>
@@ -453,9 +453,9 @@ function EditListingModal({
 										onChange={(e) => updateField("link", e.target.value)}
 										placeholder="https://example.com/listing"
 										className={clsx(
-											"w-full rounded-xl border bg-white py-2.5 pl-9 pr-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none dark:bg-zinc-800 dark:text-white",
+											"w-full rounded-xl border bg-white py-2.5 pl-9 pr-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none dark:bg-zinc-800 dark:text-white dark:placeholder:text-zinc-500",
 											errors.link
-												? "border-red-300 focus:border-red-500"
+												? "border-red-300 focus:border-red-500 dark:border-red-500/60 dark:focus:border-red-400"
 												: "border-zinc-200 focus:border-zinc-400 dark:border-zinc-700"
 										)}
 									/>
@@ -466,7 +466,7 @@ function EditListingModal({
 							{/* Image URLs */}
 							<div>
 								<span className="mb-1.5 block text-sm font-medium text-zinc-900 dark:text-white">Listing Images</span>
-								<p className="mb-3 text-xs text-zinc-500">
+								<p className="mb-3 text-xs text-zinc-500 dark:text-zinc-400">
 									Add image URLs for your listing. The first image will be the primary image.
 								</p>
 
@@ -485,7 +485,7 @@ function EditListingModal({
 												}
 											}}
 											placeholder="https://example.com/image.jpg"
-											className="w-full rounded-xl border border-zinc-200 bg-white py-2.5 pl-9 pr-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
+											className="w-full rounded-xl border border-zinc-200 bg-white py-2.5 pl-9 pr-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:placeholder:text-zinc-500"
 										/>
 									</div>
 									<Button type="button" onClick={addImage} outline>
@@ -539,9 +539,9 @@ function EditListingModal({
 
 								{formData.listingImages.length === 0 && (
 									<div className="mt-3 rounded-xl border-2 border-dashed border-zinc-200 p-6 text-center dark:border-zinc-700">
-										<PhotoIcon className="mx-auto size-8 text-zinc-400" />
-										<p className="mt-2 text-sm text-zinc-500">No images added yet</p>
-										<p className="text-xs text-zinc-400">Add image URLs above to showcase your listing</p>
+										<PhotoIcon className="mx-auto size-8 text-zinc-400 dark:text-zinc-500" />
+										<p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">No images added yet</p>
+										<p className="text-xs text-zinc-400 dark:text-zinc-500">Add image URLs above to showcase your listing</p>
 									</div>
 								)}
 							</div>
@@ -595,9 +595,9 @@ export function ListingShow() {
 	const { id: listingId } = routeApi.useParams();
 	const { organizationId, orgSlug } = useOrgContext();
 
-	// Permission checks
-	const canUpdateListing = useCan("listing", "update");
-	const canDeleteListing = useCan("listing", "delete");
+	// Permission checks — prefer server-driven allowedActions, fallback to useCan
+	const canUpdateGlobal = useCan("listing", "update");
+	const canDeleteGlobal = useCan("listing", "delete");
 
 	// Modal state
 	const [showEditModal, setShowEditModal] = useState(false);
@@ -688,23 +688,32 @@ export function ListingShow() {
 					</div>
 				</div>
 
-				{/* Actions */}
-				{(canUpdateListing || canDeleteListing) && (
-					<div className="flex gap-2">
-						{canUpdateListing && (
-							<Button onClick={() => setShowEditModal(true)} outline>
-								<PencilIcon className="size-4" />
-								Edit
-							</Button>
-						)}
-						{canDeleteListing && (
-							<Button onClick={() => setShowDeleteConfirm(true)} outline>
-								<TrashIcon className="size-4 text-red-500" />
-								<span className="text-red-600 dark:text-red-400">Delete</span>
-							</Button>
-						)}
-					</div>
-				)}
+				{/* Actions — prefer server-driven allowedActions */}
+				{(() => {
+					const canUpdate = listing?.allowedActions
+						? (listing.allowedActions as string[]).includes("update")
+						: canUpdateGlobal;
+					const canDelete = listing?.allowedActions
+						? (listing.allowedActions as string[]).includes("delete")
+						: canDeleteGlobal;
+					if (!canUpdate && !canDelete) return null;
+					return (
+						<div className="flex gap-2">
+							{canUpdate && (
+								<Button onClick={() => setShowEditModal(true)} outline>
+									<PencilIcon className="size-4" />
+									Edit
+								</Button>
+							)}
+							{canDelete && (
+								<Button onClick={() => setShowDeleteConfirm(true)} outline>
+									<TrashIcon className="size-4 text-red-500" />
+									<span className="text-red-600 dark:text-red-400">Delete</span>
+								</Button>
+							)}
+						</div>
+					);
+				})()}
 			</div>
 
 			{/* Stats Row */}
@@ -736,7 +745,7 @@ export function ListingShow() {
 							<div className="flex items-center justify-between border-b border-zinc-200 pb-4 dark:border-zinc-700">
 								<div className="flex items-center gap-3">
 									<div className="flex size-10 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
-										<TagIcon className="size-5 text-zinc-500" />
+										<TagIcon className="size-5 text-zinc-500 dark:text-zinc-400" />
 									</div>
 									<div>
 										<p className="text-sm font-medium text-zinc-900 dark:text-white">SKU</p>

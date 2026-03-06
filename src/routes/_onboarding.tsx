@@ -2,31 +2,31 @@
  * Onboarding Routes Layout
  * For authenticated users without an organization.
  * Uses router context + server-side org fetch — no Zustand access.
+ *
+ * Backend org status model (3-state): onboarding | active | suspended
  */
 
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_onboarding")({
 	beforeLoad: ({ context }) => {
-		// Not authenticated — redirect to login
 		if (!context.auth.isAuthenticated) {
 			throw redirect({ to: "/login" });
 		}
 
-		// Organizations already in context from root beforeLoad
 		const organizations = context.organizations ?? [];
 
 		if (organizations.length > 0) {
 			const org = organizations[0];
-			const status = org.approvalStatus;
+			const status = org.status;
 
-			if (status === "approved") {
+			if (status === "active") {
 				throw redirect({ to: "/$orgSlug", params: { orgSlug: org.slug } });
 			}
-			if (status === "pending" || status === "draft") {
+			if (status === "onboarding") {
 				throw redirect({ to: "/pending-approval" });
 			}
-			if (status === "rejected" || status === "banned") {
+			if (status === "suspended") {
 				throw redirect({ to: "/rejected" });
 			}
 		}

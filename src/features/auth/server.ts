@@ -6,6 +6,8 @@
  */
 
 import { createServerFn } from "@tanstack/react-start";
+import Client from "@/lib/brand-client";
+import { API_URL } from "@/lib/config";
 import { authMiddleware } from "@/server/middleware";
 
 // =============================================================================
@@ -247,16 +249,16 @@ export const passkeyReauthOptionsServer = createServerFn({ method: "POST" })
 	});
 
 export const passkeyAuthenticateOptionsServer = createServerFn({ method: "POST" })
-	.middleware([authMiddleware])
-	.handler(async ({ context }) => {
-		return context.client.auth.passkeyAuthenticateOptions();
+	.handler(async () => {
+		const client = new Client(API_URL);
+		return client.auth.passkeyAuthenticateOptions();
 	});
 
 export const passkeyAuthenticateServer = createServerFn({ method: "POST" })
-	.middleware([authMiddleware])
 	.inputValidator((input: { response: unknown; challengeCookie: string }) => input)
-	.handler(async ({ context, data }) => {
-		return context.client.auth.passkeyAuthenticate(data);
+	.handler(async ({ data }) => {
+		const client = new Client(API_URL);
+		return client.auth.passkeyAuthenticate(data);
 	});
 
 // =============================================================================

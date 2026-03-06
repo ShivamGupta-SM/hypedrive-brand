@@ -203,13 +203,13 @@ function WalletHero({
 
 			<div className="mt-4 grid grid-cols-3 gap-3 border-t border-white/10 pt-4">
 				<div className="min-w-0">
-					<p className="text-[11px] text-zinc-500">Wallet Balance</p>
+					<p className="text-[11px] text-zinc-500 dark:text-zinc-400">Wallet Balance</p>
 					<p className="mt-0.5 truncate text-sm font-medium tabular-nums text-zinc-300">
 						{formatCurrency(stats.walletBalanceDecimal)}
 					</p>
 				</div>
 				<div className="min-w-0">
-					<p className="text-[11px] text-zinc-500">
+					<p className="text-[11px] text-zinc-500 dark:text-zinc-400">
 						{stats.paymentMode === "post_submission" ? "Commitments" : "On Hold"}
 					</p>
 					<p className="mt-0.5 truncate text-sm font-medium tabular-nums text-zinc-300">
@@ -219,7 +219,7 @@ function WalletHero({
 					</p>
 				</div>
 				<div className="min-w-0">
-					<p className="text-[11px] text-zinc-500">Runway</p>
+					<p className="text-[11px] text-zinc-500 dark:text-zinc-400">Runway</p>
 					<p className="mt-0.5 text-sm font-medium tabular-nums text-zinc-300">
 						{runwayDays !== null ? `${runwayDays}d` : "—"}
 					</p>
@@ -248,7 +248,7 @@ function CampaignPulse({
 }) {
 	const items = [
 		{ label: "Active", value: stats.activeCampaigns, dotClass: "bg-emerald-500" },
-		{ label: "Draft", value: stats.draftCampaigns, dotClass: "bg-zinc-400" },
+		{ label: "Draft", value: stats.draftCampaigns, dotClass: "bg-zinc-400 dark:bg-zinc-500" },
 		{ label: "Paused", value: stats.pausedCampaigns, dotClass: "bg-amber-400" },
 	];
 
@@ -366,7 +366,7 @@ function EnrollmentStats({
 					{stats.approvalRateTrend !== 0 && (
 						<span
 							className={`text-[10px] font-medium ${
-								stats.approvalRateTrend > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-500"
+								stats.approvalRateTrend > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-500 dark:text-red-400"
 							}`}
 						>
 							{stats.approvalRateTrend > 0 ? "+" : ""}
@@ -468,7 +468,7 @@ function TopCampaignsSection({
 								</div>
 							) : (
 								<div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
-									<MegaphoneIcon className="size-4 text-zinc-400" />
+									<MegaphoneIcon className="size-4 text-zinc-400 dark:text-zinc-500" />
 								</div>
 							)}
 							<div className="min-w-0 flex-1">
@@ -547,7 +547,7 @@ function PendingReviewsSection({
 						<CheckCircleIcon className="size-5 text-emerald-500" />
 					</div>
 					<p className="mt-2 text-sm font-medium text-zinc-500 dark:text-zinc-400">All caught up</p>
-					<p className="text-xs text-zinc-400 dark:text-zinc-500">No enrollments need review</p>
+					<p className="text-xs text-zinc-500 dark:text-zinc-400">No enrollments need review</p>
 				</div>
 			)}
 		</ContentCard>
@@ -652,7 +652,7 @@ function ActivityFeed({ organizationId }: { organizationId: string }) {
 					<ClockIcon className="size-5 text-zinc-300 dark:text-zinc-600" />
 				</div>
 				<p className="mt-2 text-sm font-medium text-zinc-500 dark:text-zinc-400">No recent activity</p>
-				<p className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500">Actions will appear here as they happen</p>
+				<p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">Actions will appear here as they happen</p>
 			</div>
 		);
 	}
@@ -677,7 +677,7 @@ function ActivityFeed({ organizationId }: { organizationId: string }) {
 									<span className="text-zinc-500 dark:text-zinc-400"> · {entry.details.campaignTitle}</span>
 								)}
 							</p>
-							<p className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500">
+							<p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
 								{formatRelativeTime(entry.createdAt)}
 								{entry.adminName && (
 									<>
@@ -755,7 +755,7 @@ function NewUserWelcome({ brandName, orgSlug }: { brandName: string; orgSlug: st
 
 			{/* How it works */}
 			<ContentCard padding="md">
-				<p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+				<p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
 					How it works
 				</p>
 				<div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">

@@ -10,7 +10,7 @@ export function useListings(
 	params?: {
 		categoryId?: string;
 		platformId?: string;
-		search?: string;
+		q?: string;
 		skip?: number;
 		take?: number;
 		sortBy?: "createdAt" | "name" | "price";
@@ -34,7 +34,13 @@ export function useListings(
 
 export function useInfiniteListings(
 	organizationId: string | undefined,
-	params?: { categoryId?: string; platformId?: string; search?: string }
+	params?: {
+		categoryId?: string;
+		platformId?: string;
+		q?: string;
+		sortBy?: "createdAt" | "name" | "price";
+		sortOrder?: "asc" | "desc";
+	}
 ) {
 	const query = useInfiniteQuery({
 		...infiniteListingsQueryOptions(organizationId || "", params),

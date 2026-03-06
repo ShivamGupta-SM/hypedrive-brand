@@ -65,7 +65,7 @@ export interface MenuSectionHeaderProps {
 export function MenuSectionHeader({ children, className }: MenuSectionHeaderProps) {
 	return (
 		<h3
-			className={`mb-1.5 px-1 text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 ${className ?? ""}`}
+			className={`mb-1.5 px-1 text-[10px] font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400 ${className ?? ""}`}
 		>
 			{children}
 		</h3>
@@ -82,7 +82,7 @@ export interface MenuSectionFooterProps {
 }
 
 export function MenuSectionFooter({ children, className }: MenuSectionFooterProps) {
-	return <p className={`mt-1.5 px-1 text-xs text-zinc-400 dark:text-zinc-500 ${className ?? ""}`}>{children}</p>;
+	return <p className={`mt-1.5 px-1 text-xs text-zinc-500 dark:text-zinc-400 ${className ?? ""}`}>{children}</p>;
 }
 
 // =============================================================================
@@ -158,7 +158,7 @@ export function MenuRow({
 			</span>
 			{children && <div className="min-w-0 flex-1">{children}</div>}
 			{value && !children && (
-				<span className="min-w-0 flex-1 truncate text-right text-[15px] text-zinc-400 dark:text-zinc-500">{value}</span>
+				<span className="min-w-0 flex-1 truncate text-right text-[15px] text-zinc-500 dark:text-zinc-400">{value}</span>
 			)}
 			{badge && (
 				<Badge color={badgeColor || "zinc"} className="shrink-0 text-[11px]">
@@ -333,7 +333,7 @@ export function ProfileCard({
 							{avatarUrl ? (
 								<img src={avatarUrl} alt={name} className="size-full object-cover" />
 							) : (
-								<div className="flex size-full items-center justify-center text-xl font-semibold text-zinc-500">
+								<div className="flex size-full items-center justify-center text-xl font-semibold text-zinc-500 dark:text-zinc-400">
 									{initials}
 								</div>
 							)}

@@ -29,7 +29,20 @@ export const walletHoldsQueryOptions = (orgId: string) =>
 		staleTime: CACHE.list,
 	});
 
-export const withdrawalsQueryOptions = (orgId: string, params?: Record<string, unknown>) =>
+export const withdrawalsQueryOptions = (
+	orgId: string,
+	params?: {
+		status?: string;
+		requestedFrom?: string;
+		requestedTo?: string;
+		amountMin?: number;
+		amountMax?: number;
+		sortBy?: "requestedAt" | "amount" | "status";
+		sortOrder?: "asc" | "desc";
+		skip?: number;
+		take?: number;
+	}
+) =>
 	queryOptions({
 		queryKey: queryKeys.withdrawals(orgId, params),
 		queryFn: () => listWithdrawalsServer({ data: { orgId, params: params || {} } }),
@@ -43,14 +56,37 @@ export const withdrawalStatsQueryOptions = (orgId: string) =>
 		staleTime: CACHE.list,
 	});
 
-export const depositsQueryOptions = (orgId: string, params?: Record<string, unknown>) =>
+export const depositsQueryOptions = (
+	orgId: string,
+	params?: {
+		dateFrom?: string;
+		dateTo?: string;
+		amountMin?: number;
+		amountMax?: number;
+		sortBy?: "createdAt" | "amount";
+		sortOrder?: "asc" | "desc";
+		skip?: number;
+		take?: number;
+	}
+) =>
 	queryOptions({
 		queryKey: queryKeys.deposits(orgId, params),
 		queryFn: () => listDepositsServer({ data: { orgId, params: params || {} } }),
 		staleTime: CACHE.list,
 	});
 
-export const walletTransactionsQueryOptions = (orgId: string, params?: Record<string, unknown>) =>
+export const walletTransactionsQueryOptions = (
+	orgId: string,
+	params?: {
+		type?: "credit" | "debit";
+		status?: "pending" | "completed" | "voided";
+		category?: "enrollment_hold" | "deposit" | "payout" | "refund" | "admin_credit";
+		skip?: number;
+		take?: number;
+		sortBy?: "createdAt" | "amount";
+		sortOrder?: "asc" | "desc";
+	}
+) =>
 	queryOptions({
 		queryKey: queryKeys.walletTransactions(orgId, params),
 		queryFn: () => getWalletTransactionsServer({ data: { orgId, params: params || {} } }),
@@ -80,14 +116,11 @@ export const infiniteWalletTransactionsQueryOptions = (
 ) =>
 	infiniteQueryOptions({
 		queryKey: queryKeys.infiniteWalletTransactions(orgId, params),
-		queryFn: ({ pageParam = 0 }) =>
+		queryFn: ({ pageParam }) =>
 			getWalletTransactionsServer({
-				data: { orgId, params: { ...params, skip: pageParam, take: DEFAULT_PAGE_SIZE } },
+				data: { orgId, params: { ...params, cursor: pageParam, limit: DEFAULT_PAGE_SIZE } },
 			}),
-		initialPageParam: 0,
-		getNextPageParam: (lastPage, allPages) => {
-			if (!lastPage.hasMore) return undefined;
-			return allPages.reduce((acc, page) => acc + (page.data?.length ?? 0), 0);
-		},
+		initialPageParam: undefined as string | undefined,
+		getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
 		staleTime: CACHE.list,
 	});

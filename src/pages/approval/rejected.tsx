@@ -53,15 +53,15 @@ export function Rejected({ organization }: { organization: { name: string } | nu
 						<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">What you can do</h3>
 						<ul className="mt-3 space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
 							<li className="flex items-start gap-2">
-								<span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-zinc-400" />
+								<span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-zinc-400 dark:bg-zinc-500" />
 								Review the rejection reason above
 							</li>
 							<li className="flex items-start gap-2">
-								<span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-zinc-400" />
+								<span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-zinc-400 dark:bg-zinc-500" />
 								Contact support if you have questions
 							</li>
 							<li className="flex items-start gap-2">
-								<span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-zinc-400" />
+								<span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-zinc-400 dark:bg-zinc-500" />
 								Submit a new application with updated information
 							</li>
 						</ul>

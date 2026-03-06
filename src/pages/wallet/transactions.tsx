@@ -1,13 +1,29 @@
-import { ArrowPathIcon } from "@heroicons/react/16/solid";
+import {
+	ArrowDownLeftIcon,
+	ArrowPathIcon,
+	ArrowUpRightIcon,
+	Squares2X2Icon,
+} from "@heroicons/react/16/solid";
+import { useState } from "react";
 import { Button } from "@/components/button";
 import { EmptyState } from "@/components/shared/empty-state";
+import { FilterPills, type FilterPillOption } from "@/components/shared/filter-pills";
 import { Skeleton } from "@/components/skeleton";
 import { useInfiniteWalletTransactions } from "@/features/wallet/hooks";
 import { useOrgContext } from "@/hooks/use-org-context";
 import { TransactionRow } from "./components";
 
+const typeFilterOptions: FilterPillOption[] = [
+	{ value: "all", label: "All", icon: Squares2X2Icon, iconColor: "text-sky-500" },
+	{ value: "credit", label: "Credits", icon: ArrowDownLeftIcon, iconColor: "text-emerald-500" },
+	{ value: "debit", label: "Debits", icon: ArrowUpRightIcon, iconColor: "text-red-500" },
+];
+
+type TypeFilter = "all" | "credit" | "debit";
+
 export function WalletTransactions() {
 	const { organizationId } = useOrgContext();
+	const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
 
 	const {
 		data: transactions,
@@ -15,55 +31,66 @@ export function WalletTransactions() {
 		hasMore,
 		isFetchingNextPage,
 		fetchNextPage,
-	} = useInfiniteWalletTransactions(organizationId);
+	} = useInfiniteWalletTransactions(organizationId, {
+		type: typeFilter === "all" ? undefined : typeFilter,
+	});
 
 	return (
-		<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-			<div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3 dark:border-zinc-800">
-				<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">
-					All Transactions
-					{transactions.length > 0 && (
-						<span className="ml-2 text-xs font-normal text-zinc-500">{transactions.length}</span>
-					)}
-				</h3>
-			</div>
-			{loading ? (
-				<div className="space-y-2 p-4">
-					{[1, 2, 3, 4, 5].map((i) => (
-						<Skeleton key={i} width="100%" height={56} borderRadius={8} />
-					))}
+		<div className="space-y-4">
+			{/* Type filter pills */}
+			<FilterPills options={typeFilterOptions} value={typeFilter} onChange={(v) => setTypeFilter(v as TypeFilter)} />
+
+			<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
+				<div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3 dark:border-zinc-800">
+					<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">
+						{typeFilter === "all" ? "All Transactions" : typeFilter === "credit" ? "Credits" : "Debits"}
+						{transactions.length > 0 && (
+							<span className="ml-2 text-xs font-normal text-zinc-500 dark:text-zinc-400">{transactions.length}</span>
+						)}
+					</h3>
 				</div>
-			) : transactions.length === 0 ? (
-				<div className="p-4">
-					<EmptyState
-						preset="generic"
-						title="No transactions yet"
-						description="Your transaction history will appear here once you add funds or make payments."
-					/>
-				</div>
-			) : (
-				<>
-					<div className="divide-y divide-zinc-100 dark:divide-zinc-800">
-						{transactions.map((transaction) => (
-							<TransactionRow key={transaction.id} transaction={transaction} />
+				{loading ? (
+					<div className="space-y-2 p-4">
+						{[1, 2, 3, 4, 5].map((i) => (
+							<Skeleton key={i} width="100%" height={56} borderRadius={8} />
 						))}
 					</div>
-					{hasMore && (
-						<div className="flex justify-center border-t border-zinc-100 px-4 py-3 dark:border-zinc-800">
-							<Button outline onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
-								{isFetchingNextPage ? (
-									<>
-										<ArrowPathIcon className="size-4 animate-spin" />
-										Loading...
-									</>
-								) : (
-									"Load More"
-								)}
-							</Button>
+				) : transactions.length === 0 ? (
+					<div className="p-4">
+						<EmptyState
+							preset="generic"
+							title="No transactions yet"
+							description={
+								typeFilter !== "all"
+									? `No ${typeFilter} transactions found.`
+									: "Your transaction history will appear here once you add funds or make payments."
+							}
+						/>
+					</div>
+				) : (
+					<>
+						<div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+							{transactions.map((transaction) => (
+								<TransactionRow key={transaction.id} transaction={transaction} />
+							))}
 						</div>
-					)}
-				</>
-			)}
+						{hasMore && (
+							<div className="flex justify-center border-t border-zinc-100 px-4 py-3 dark:border-zinc-800">
+								<Button outline onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
+									{isFetchingNextPage ? (
+										<>
+											<ArrowPathIcon className="size-4 animate-spin" />
+											Loading...
+										</>
+									) : (
+										"Load More"
+									)}
+								</Button>
+							</div>
+						)}
+					</>
+				)}
+			</div>
 		</div>
 	);
 }

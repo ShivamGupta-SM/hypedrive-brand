@@ -3,6 +3,7 @@
  * Wrapper around react-loading-skeleton with Catalyst theme integration
  */
 
+import { useIsDark } from "@/hooks/use-theme";
 import ReactSkeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import clsx from "clsx";
@@ -203,7 +204,8 @@ interface SkeletonProviderProps {
  * Colors are auto-detected based on dark class on html element
  */
 export function SkeletonProvider({ children, darkMode }: SkeletonProviderProps) {
-	const isDark = darkMode ?? (typeof document !== "undefined" && document.documentElement.classList.contains("dark"));
+	const themeDark = useIsDark();
+	const isDark = darkMode ?? themeDark;
 
 	return (
 		<SkeletonTheme

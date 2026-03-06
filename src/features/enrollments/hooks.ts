@@ -39,7 +39,13 @@ export function useEnrollments(
 
 export function useInfiniteEnrollments(
 	organizationId: string | undefined,
-	params?: { status?: db.EnrollmentStatus; campaignId?: string }
+	params?: {
+		status?: db.EnrollmentStatus;
+		campaignId?: string;
+		q?: string;
+		sortBy?: "createdAt" | "orderValue" | "status" | "submittedAt" | "expiresAt";
+		sortOrder?: "asc" | "desc";
+	}
 ) {
 	const query = useInfiniteQuery({
 		...infiniteEnrollmentsQueryOptions(organizationId || "", params),

@@ -14,7 +14,7 @@
  */
 
 import { toast } from "sonner";
-import { getAPIErrorMessage } from "@/hooks/api-client";
+import { getFriendlyErrorMessage } from "@/hooks/api-client";
 
 // =============================================================================
 // CORE HELPERS
@@ -25,7 +25,7 @@ function success(message: string, description?: string) {
 }
 
 function error(err: unknown, fallback = "Something went wrong") {
-	toast.error(getAPIErrorMessage(err, fallback));
+	toast.error(getFriendlyErrorMessage(err, fallback));
 }
 
 function info(message: string, description?: string) {
@@ -84,7 +84,7 @@ function promise<T>(
 	return toast.promise(p, {
 		loading: messages.loading,
 		success: messages.success,
-		error: messages.error ?? ((err) => getAPIErrorMessage(err, "Something went wrong")),
+		error: messages.error ?? ((err) => getFriendlyErrorMessage(err, "Something went wrong")),
 	});
 }
 

@@ -33,12 +33,16 @@ function getOrgColor(id: string) {
 	return ORG_COLORS[index % ORG_COLORS.length];
 }
 
-/** Small colored dot for approval status — only renders for known non-approved states */
+/** Small colored dot for org status — only renders for non-active states */
 const STATUS_COLORS: Record<string, string> = {
-	pending: "bg-amber-400",
-	draft: "bg-zinc-400",
-	rejected: "bg-red-400",
-	banned: "bg-red-400",
+	onboarding: "bg-sky-400",
+	suspended: "bg-red-400",
+};
+
+/** Text colors for org status shown in org list — only whitelisted statuses render */
+const STATUS_TEXT_COLORS: Record<string, string> = {
+	onboarding: "text-sky-600 dark:text-sky-400",
+	suspended: "text-red-600 dark:text-red-400",
 };
 
 function StatusDot({ status }: { status?: string }) {
@@ -85,7 +89,7 @@ function OrgAvatar({
 					)}
 				/>
 			)}
-			<StatusDot status={org.approvalStatus} />
+			<StatusDot status={org.status} />
 		</span>
 	);
 }
@@ -146,20 +150,18 @@ function OrgListContent({
 									>
 										{org.name}
 									</span>
-									{org.approvalStatus && org.approvalStatus !== "approved" && (
-										<span
-											className={clsx(
-												"mt-1 block font-medium capitalize",
-												isMobile ? "text-xs" : "text-[11px]",
-												org.approvalStatus === "pending" && "text-amber-600 dark:text-amber-400",
-												org.approvalStatus === "draft" && "text-zinc-500 dark:text-zinc-500",
-												(org.approvalStatus === "rejected" || org.approvalStatus === "banned") &&
-													"text-red-600 dark:text-red-400"
-											)}
-										>
-											{org.approvalStatus}
-										</span>
-									)}
+									{org.status &&
+										STATUS_TEXT_COLORS[org.status] && (
+											<span
+												className={clsx(
+													"mt-1 block font-medium capitalize",
+													isMobile ? "text-xs" : "text-[11px]",
+													STATUS_TEXT_COLORS[org.status]
+												)}
+											>
+												{org.status}
+											</span>
+										)}
 								</div>
 								{isCurrent && (
 									<span
@@ -493,7 +495,7 @@ export function MobileOrgSwitcher({
 				<span className="truncate text-sm/5 font-semibold text-zinc-900 dark:text-white">
 					{displayOrg.name || "Select"}
 				</span>
-				<ChevronDownIcon className="-ml-0.5 size-3.5 shrink-0 text-zinc-400 dark:text-zinc-500" />
+				<ChevronDownIcon className="-ml-0.5 size-3.5 shrink-0 text-zinc-500 dark:text-zinc-400" />
 			</button>
 
 			<MobileOrgSheet

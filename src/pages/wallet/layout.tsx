@@ -19,6 +19,7 @@ import {
 	useInfiniteWalletTransactions,
 	useVirtualAccount,
 	useWallet,
+	useWalletBalanceStream,
 	useWalletHolds,
 	useWithdrawals,
 } from "@/features/wallet/hooks";
@@ -38,6 +39,7 @@ export function WalletLayout() {
 		refetch: refetchWallet,
 	} = useWallet(organizationId);
 	const { data: holds, loading: holdsLoading, refetch: refetchHolds } = useWalletHolds(organizationId);
+	const balanceStream = useWalletBalanceStream(organizationId);
 
 	// For tab badge counts — TanStack Query deduplicates these with sub-page calls
 	const { data: transactions } = useInfiniteWalletTransactions(organizationId);
@@ -53,14 +55,15 @@ export function WalletLayout() {
 	const [showDeposit, setShowDeposit] = useState(false);
 
 	const stats = useMemo(() => {
-		const balance = wallet?.balanceDecimal || "0";
-		const holdAmount = wallet?.pendingBalanceDecimal || "0";
-		const available = wallet?.availableBalanceDecimal || "0";
+		// Prefer real-time stream data when connected, fall back to polled wallet data
+		const balance = balanceStream.connected ? balanceStream.balanceDecimal : (wallet?.balanceDecimal || "0");
+		const holdAmount = balanceStream.connected ? balanceStream.pendingDebitDecimal : (wallet?.pendingBalanceDecimal || "0");
+		const available = balanceStream.connected ? balanceStream.availableBalanceDecimal : (wallet?.availableBalanceDecimal || "0");
 		const creditLimit = wallet?.creditLimitDecimal || "0";
 		const creditUtilized = wallet?.creditUtilizedDecimal || "0";
 		const creditAvailable = Math.max(0, parseFloat(creditLimit) - parseFloat(creditUtilized));
 		return { balance, holdAmount, available, creditLimit, creditUtilized, creditAvailable };
-	}, [wallet]);
+	}, [wallet, balanceStream]);
 
 	const isLowBalance = parseFloat(stats.available) < 500; // < ₹500
 

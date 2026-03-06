@@ -34,17 +34,22 @@ export const campaignStatsQueryOptions = (orgId: string, campaignId: string) =>
 
 export const infiniteCampaignsQueryOptions = (
 	orgId: string,
-	params?: { status?: string; listingId?: string; search?: string }
+	params?: {
+		status?: string;
+		listingId?: string;
+		q?: string;
+		sortBy?: "createdAt" | "startDate" | "endDate" | "title";
+		sortOrder?: "asc" | "desc";
+	}
 ) =>
 	infiniteQueryOptions({
 		queryKey: queryKeys.infiniteCampaigns(orgId, params),
-		queryFn: ({ pageParam = 0 }) =>
-			listCampaignsServer({ data: { orgId, params: { ...params, skip: pageParam, take: DEFAULT_PAGE_SIZE } } }),
-		initialPageParam: 0,
-		getNextPageParam: (lastPage, allPages) => {
-			if (!lastPage.hasMore) return undefined;
-			return allPages.reduce((acc, page) => acc + (page.data?.length ?? 0), 0);
-		},
+		queryFn: ({ pageParam }) =>
+			listCampaignsServer({
+				data: { orgId, params: { ...params, cursor: pageParam, limit: DEFAULT_PAGE_SIZE } },
+			}),
+		initialPageParam: undefined as string | undefined,
+		getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
 		staleTime: CACHE.list,
 	});
 
@@ -55,7 +60,7 @@ export const campaignsQueryOptions = (
 	params?: {
 		status?: string;
 		listingId?: string;
-		search?: string;
+		q?: string;
 		skip?: number;
 		take?: number;
 		sortBy?: "createdAt" | "startDate" | "endDate" | "title";

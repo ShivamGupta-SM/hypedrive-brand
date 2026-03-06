@@ -259,14 +259,14 @@ function SearchResultRow({
 					</p>
 				)}
 				{result.displayId && (
-					<p className="mt-0.5 text-[10px] text-zinc-400 dark:text-zinc-500">
+					<p className="mt-0.5 text-[10px] text-zinc-500 dark:text-zinc-400">
 						<HighlightText text={result.displayId} query={query} />
 					</p>
 				)}
 			</div>
 
 			<div className="flex shrink-0 flex-col items-end gap-1">
-				<p className="text-[11px] text-zinc-400 dark:text-zinc-500">{formatRelativeTime(result.createdAt)}</p>
+				<p className="text-[11px] text-zinc-500 dark:text-zinc-400">{formatRelativeTime(result.createdAt)}</p>
 				<ArrowRightIcon className="size-3 text-zinc-300 opacity-0 transition-opacity group-hover:opacity-100 dark:text-zinc-600" />
 			</div>
 		</button>
@@ -497,7 +497,7 @@ export function SearchDialog({
 								setFocusedIndex(-1);
 							}}
 							placeholder="Search campaigns, enrollments, listings..."
-							className="h-13 w-full bg-transparent text-base text-zinc-900 placeholder:text-zinc-400 focus:outline-none dark:text-white sm:text-sm"
+							className="h-13 w-full bg-transparent text-base text-zinc-900 placeholder:text-zinc-400 focus:outline-none dark:text-white dark:placeholder:text-zinc-500 sm:text-sm"
 						/>
 						{query && (
 							<button
@@ -540,7 +540,7 @@ export function SearchDialog({
 								>
 									{tab.label}
 									{tab.count > 0 && (
-										<span className={`ml-1 ${filter === tab.key ? "opacity-60" : "text-zinc-400 dark:text-zinc-500"}`}>
+										<span className={`ml-1 ${filter === tab.key ? "opacity-60" : "text-zinc-500 dark:text-zinc-400"}`}>
 											{tab.count}
 										</span>
 									)}
@@ -557,7 +557,7 @@ export function SearchDialog({
 								{recentSearches.length > 0 && (
 									<>
 										<div className="flex items-center justify-between px-2.5 py-1.5">
-											<span className="text-[11px] font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+											<span className="text-[11px] font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
 												Recent
 											</span>
 											<button
@@ -598,7 +598,7 @@ export function SearchDialog({
 									</>
 								)}
 								<div className="px-2.5 py-1.5">
-									<span className="text-[11px] font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+									<span className="text-[11px] font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
 										Quick Actions
 									</span>
 								</div>
@@ -651,10 +651,11 @@ export function SearchDialog({
 						{hasQuery && !loading && !searchError && filteredResults.length === 0 && (
 							<div className="py-8 text-center">
 								<MagnifyingGlassIcon className="mx-auto size-6 text-zinc-300 dark:text-zinc-600" />
-								<p className="mt-2 text-sm text-zinc-500">
+								<p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
 									No results for &ldquo;{debouncedQuery}&rdquo;
 									{filter !== "all" && ` in ${filter}`}
 								</p>
+
 							</div>
 						)}
 
@@ -664,7 +665,7 @@ export function SearchDialog({
 								{(filter === "all" || filter === "campaigns") && grouped.campaigns.length > 0 && (
 									<>
 										<div className="px-2.5 py-1.5">
-											<span className="text-[11px] font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+											<span className="text-[11px] font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
 												Campaigns
 											</span>
 										</div>
@@ -682,7 +683,7 @@ export function SearchDialog({
 								{(filter === "all" || filter === "enrollments") && grouped.enrollments.length > 0 && (
 									<>
 										<div className="px-2.5 py-1.5">
-											<span className="text-[11px] font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+											<span className="text-[11px] font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
 												Enrollments
 											</span>
 										</div>
@@ -700,7 +701,7 @@ export function SearchDialog({
 								{(filter === "all" || filter === "listings") && grouped.listings.length > 0 && (
 									<>
 										<div className="px-2.5 py-1.5">
-											<span className="text-[11px] font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+											<span className="text-[11px] font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
 												Listings
 											</span>
 										</div>
@@ -718,7 +719,7 @@ export function SearchDialog({
 								{(filter === "all" || filter === "invoices") && grouped.invoices.length > 0 && (
 									<>
 										<div className="px-2.5 py-1.5">
-											<span className="text-[11px] font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+											<span className="text-[11px] font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
 												Invoices
 											</span>
 										</div>

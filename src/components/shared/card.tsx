@@ -203,7 +203,7 @@ export function StatCard({
 			<div className="mt-1 flex items-center gap-2">
 				<span className={clsx(sizes.label, styles.label)}>{label}</span>
 				{sublabel && (
-					<span className={clsx("text-xs", styles.isPrimary ? "text-white/60" : "text-zinc-400 dark:text-zinc-500")}>
+					<span className={clsx("text-xs", styles.isPrimary ? "text-white/60" : "text-zinc-500 dark:text-zinc-400")}>
 						{sublabel}
 					</span>
 				)}

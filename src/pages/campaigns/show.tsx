@@ -426,9 +426,9 @@ function EditCampaignModal({
 									onChange={(e) => updateField("title", e.target.value)}
 									placeholder="e.g., Summer Sale Campaign"
 									className={clsx(
-										"w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none dark:bg-zinc-800 dark:text-white",
+										"w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none dark:bg-zinc-800 dark:text-white dark:placeholder:text-zinc-500",
 										errors.title
-											? "border-red-300 focus:border-red-500"
+											? "border-red-300 focus:border-red-500 dark:border-red-500/60 dark:focus:border-red-400"
 											: "border-zinc-200 focus:border-zinc-400 dark:border-zinc-700"
 									)}
 								/>
@@ -448,7 +448,7 @@ function EditCampaignModal({
 									onChange={(e) => updateField("description", e.target.value)}
 									placeholder="Describe your campaign..."
 									rows={3}
-									className="w-full resize-none rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
+									className="w-full resize-none rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:placeholder:text-zinc-500"
 								/>
 							</div>
 
@@ -468,7 +468,7 @@ function EditCampaignModal({
 										className={clsx(
 											"w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-zinc-900 focus:outline-none dark:bg-zinc-800 dark:text-white",
 											errors.startDate
-												? "border-red-300 focus:border-red-500"
+												? "border-red-300 focus:border-red-500 dark:border-red-500/60 dark:focus:border-red-400"
 												: "border-zinc-200 focus:border-zinc-400 dark:border-zinc-700"
 										)}
 									/>
@@ -490,7 +490,7 @@ function EditCampaignModal({
 										className={clsx(
 											"w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-zinc-900 focus:outline-none dark:bg-zinc-800 dark:text-white",
 											errors.endDate
-												? "border-red-300 focus:border-red-500"
+												? "border-red-300 focus:border-red-500 dark:border-red-500/60 dark:focus:border-red-400"
 												: "border-zinc-200 focus:border-zinc-400 dark:border-zinc-700"
 										)}
 									/>
@@ -545,7 +545,7 @@ function EditCampaignModal({
 									className={clsx(
 										"w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-zinc-900 focus:outline-none dark:bg-zinc-800 dark:text-white",
 										errors.maxEnrollments
-											? "border-red-300 focus:border-red-500"
+											? "border-red-300 focus:border-red-500 dark:border-red-500/60 dark:focus:border-red-400"
 											: "border-zinc-200 focus:border-zinc-400 dark:border-zinc-700"
 									)}
 								/>
@@ -572,7 +572,7 @@ function EditCampaignModal({
 											<p
 												className={clsx(
 													"text-xs",
-													formData.isPublic ? "text-zinc-400 dark:text-zinc-600" : "text-zinc-500"
+													formData.isPublic ? "text-zinc-400 dark:text-zinc-500" : "text-zinc-500 dark:text-zinc-400"
 												)}
 											>
 												Anyone can join
@@ -595,7 +595,7 @@ function EditCampaignModal({
 											<p
 												className={clsx(
 													"text-xs",
-													!formData.isPublic ? "text-zinc-400 dark:text-zinc-600" : "text-zinc-500"
+													!formData.isPublic ? "text-zinc-400 dark:text-zinc-500" : "text-zinc-500 dark:text-zinc-400"
 												)}
 											>
 												Invite only
@@ -727,19 +727,19 @@ function EnrollmentReviewDialog({
 					<div className="overflow-hidden rounded-xl shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800">
 						<div className="grid grid-cols-2">
 							<div className="px-4 py-3">
-								<p className="text-[11px] font-medium text-zinc-400 dark:text-zinc-500">Order Value</p>
+								<p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">Order Value</p>
 								<p className="mt-0.5 text-sm font-semibold text-zinc-900 dark:text-white">
 									{formatCurrency(enrollment.orderValueDecimal)}
 								</p>
 							</div>
 							<div className="border-l border-zinc-100 px-4 py-3 dark:border-zinc-800">
-								<p className="text-[11px] font-medium text-zinc-400 dark:text-zinc-500">Bill Rate</p>
+								<p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">Bill Rate</p>
 								<p className="mt-0.5 text-sm font-semibold text-emerald-600 dark:text-emerald-400">
 									{enrollment.lockedBillRate}%
 								</p>
 							</div>
 							<div className="border-t border-zinc-100 px-4 py-3 dark:border-zinc-800">
-								<p className="text-[11px] font-medium text-zinc-400 dark:text-zinc-500">Created</p>
+								<p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">Created</p>
 								<p className="mt-0.5 text-sm font-medium text-zinc-900 dark:text-white">
 									{enrollment.createdAt
 										? new Date(enrollment.createdAt).toLocaleDateString("en-IN", {
@@ -751,7 +751,7 @@ function EnrollmentReviewDialog({
 								</p>
 							</div>
 							<div className="border-t border-l border-zinc-100 px-4 py-3 dark:border-zinc-800">
-								<p className="text-[11px] font-medium text-zinc-400 dark:text-zinc-500">Status</p>
+								<p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">Status</p>
 								<Badge color="amber" className="mt-0.5">
 									{enrollment.status}
 								</Badge>
@@ -1079,7 +1079,7 @@ export function CampaignShow() {
 								{campaign.listing?.name && (
 									<span className="hidden items-center gap-1 text-xs text-zinc-500 sm:inline-flex dark:text-zinc-400">
 										<CubeIcon className="size-3.5 shrink-0" />
-										<span className="truncate">{campaign.listing.name}</span>
+										<span className="max-w-40 truncate">{campaign.listing.name}</span>
 									</span>
 								)}
 							</div>
@@ -1095,7 +1095,7 @@ export function CampaignShow() {
 						)}
 						<div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
 							<span className="inline-flex items-center gap-1.5">
-								<CalendarIcon className="size-3.5 shrink-0 text-zinc-400 dark:text-zinc-500" />
+								<CalendarIcon className="size-3.5 shrink-0 text-zinc-500 dark:text-zinc-400" />
 								{formatDate(campaign.startDate)} – {formatDate(campaign.endDate)}
 							</span>
 							{daysRemaining !== null && daysRemaining > 0 && (
@@ -1123,8 +1123,8 @@ export function CampaignShow() {
 				{/* Actions bar */}
 				{canUpdateCampaign && (
 					<div className="flex items-center gap-2 border-t border-zinc-100 px-4 py-2.5 sm:px-5 dark:border-zinc-800">
-						{/* Primary actions — solid colored */}
-						{campaign.status === "draft" && (
+						{/* Primary actions — driven by allowedActions from API */}
+						{campaign.allowedActions?.includes("submit") && (
 							<button
 								type="button"
 								onClick={handleSubmit}
@@ -1135,7 +1135,7 @@ export function CampaignShow() {
 								{submitCampaign.isPending ? "Submitting..." : "Submit for Review"}
 							</button>
 						)}
-						{campaign.status === "active" && (
+						{campaign.allowedActions?.includes("pause") && (
 							<button
 								type="button"
 								onClick={handlePause}
@@ -1146,7 +1146,7 @@ export function CampaignShow() {
 								{pauseCampaign.isPending ? "Pausing..." : "Pause"}
 							</button>
 						)}
-						{campaign.status === "paused" && (
+						{campaign.allowedActions?.includes("resume") && (
 							<button
 								type="button"
 								onClick={handleResume}
@@ -1157,7 +1157,7 @@ export function CampaignShow() {
 								{resumeCampaign.isPending ? "Resuming..." : "Resume"}
 							</button>
 						)}
-						{(campaign.status === "ended" || campaign.status === "cancelled") && (
+						{campaign.allowedActions?.includes("archive") && (
 							<button
 								type="button"
 								onClick={handleArchive}
@@ -1170,7 +1170,7 @@ export function CampaignShow() {
 						)}
 
 						<div className="ml-auto flex items-center gap-1.5">
-							{campaign.status === "active" && (
+							{campaign.allowedActions?.includes("end") && (
 								<button
 									type="button"
 									onClick={() => setShowEndConfirm(true)}
@@ -1388,8 +1388,8 @@ export function CampaignShow() {
 									/>
 								</div>
 								<div className="mt-2 flex items-center justify-between">
-									<span className="text-[10px] text-zinc-400 dark:text-zinc-500">{formatDate(campaign.startDate)}</span>
-									<span className="text-[10px] text-zinc-400 dark:text-zinc-500">{formatDate(campaign.endDate)}</span>
+									<span className="text-[10px] text-zinc-500 dark:text-zinc-400">{formatDate(campaign.startDate)}</span>
+									<span className="text-[10px] text-zinc-500 dark:text-zinc-400">{formatDate(campaign.endDate)}</span>
 								</div>
 							</div>
 						</div>
@@ -1946,7 +1946,7 @@ export function CampaignShow() {
 						{/* Social Media */}
 						{(!editingTaskCategory || editingTaskCategory === "social" || editingTaskCategory === "video") && (
 							<div className="space-y-2">
-								<p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+								<p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
 									Social Media
 								</p>
 								<Field>
@@ -2067,7 +2067,7 @@ export function CampaignShow() {
 						{/* Content Requirements */}
 						{(!editingTaskCategory || editingTaskCategory === "review" || editingTaskCategory === "feedback") && (
 							<div className="space-y-2">
-								<p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+								<p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
 									Content
 								</p>
 								<div className="grid grid-cols-2 gap-3">
@@ -2112,7 +2112,7 @@ export function CampaignShow() {
 							editingTaskCategory === "feedback" ||
 							editingTaskCategory === "photo") && (
 							<div className="space-y-3">
-								<p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+								<p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
 									Media
 								</p>
 								<div className="flex items-center justify-between">
@@ -2171,7 +2171,7 @@ export function CampaignShow() {
 						{/* Duration */}
 						{(!editingTaskCategory || editingTaskCategory === "social" || editingTaskCategory === "video") && (
 							<div className="space-y-2">
-								<p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+								<p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
 									Duration (seconds)
 								</p>
 								<div className="grid grid-cols-2 gap-3">
@@ -2450,7 +2450,7 @@ function CampaignTimeline({ campaign }: { campaign: brand.CampaignWithStats }) {
 		label: "Created",
 		date: campaign.createdAt,
 		icon: ClipboardDocumentListIcon,
-		iconBg: "bg-zinc-400",
+		iconBg: "bg-zinc-400 dark:bg-zinc-500",
 	});
 
 	if (
@@ -2530,8 +2530,8 @@ function CampaignTimeline({ campaign }: { campaign: brand.CampaignWithStats }) {
 						</div>
 						<div className="min-w-0 flex-1 pt-0.5">
 							<p className="text-sm font-medium text-zinc-900 dark:text-white">{event.label}</p>
-							{event.description && <p className="mt-0.5 line-clamp-2 text-xs text-zinc-500">{event.description}</p>}
-							<p className="mt-1 text-[10px] text-zinc-400">{formatDateTime(event.date)}</p>
+							{event.description && <p className="mt-0.5 line-clamp-2 text-xs text-zinc-500 dark:text-zinc-400">{event.description}</p>}
+							<p className="mt-1 text-[10px] text-zinc-400 dark:text-zinc-500">{formatDateTime(event.date)}</p>
 						</div>
 					</div>
 				);

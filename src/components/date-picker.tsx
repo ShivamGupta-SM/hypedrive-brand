@@ -54,7 +54,7 @@ function TriggerButton({
 				)}
 			>
 				<span className="truncate">{displayValue || placeholder}</span>
-				<CalendarIcon className="size-4 shrink-0 text-zinc-400 dark:text-zinc-500" />
+				<CalendarIcon className="size-4 shrink-0 text-zinc-500 dark:text-zinc-400" />
 			</span>
 		</Headless.PopoverButton>
 	);

@@ -47,14 +47,15 @@ function EnrollmentsLayoutSkeleton() {
 				columns={4}
 			/>
 
-			{/* Search + Filters skeleton */}
+			{/* Search + Tabs skeleton */}
 			<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-				<div className="h-9 w-full animate-pulse rounded-lg bg-zinc-200 skeleton-shimmer sm:w-52 dark:bg-zinc-800" />
-				<div className="flex gap-2 overflow-x-auto">
-					{[1, 2, 3, 4].map((i) => (
+				<div className="h-10 w-full animate-pulse rounded-lg bg-zinc-200 skeleton-shimmer sm:w-64 dark:bg-zinc-800" />
+				<div className="flex gap-1.5 overflow-x-auto">
+					{[80, 110, 80, 75].map((w, i) => (
 						<div
 							key={i}
-							className="h-9 w-24 shrink-0 animate-pulse rounded-full bg-zinc-200 skeleton-shimmer dark:bg-zinc-800"
+							style={{ width: w }}
+							className="h-9 shrink-0 animate-pulse rounded-full bg-zinc-200 skeleton-shimmer dark:bg-zinc-800"
 						/>
 					))}
 				</div>
@@ -191,9 +192,9 @@ export function EnrollmentsLayout() {
 				columns={4}
 			/>
 
-			{/* Search */}
-			<div className="flex items-center gap-2">
-				<div className="w-full sm:w-52 sm:shrink-0">
+			{/* Search + Tabs */}
+			<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+				<div className="w-full sm:w-64 sm:shrink-0">
 					<InputGroup>
 						<MagnifyingGlassIcon data-slot="icon" />
 						<Input
@@ -214,27 +215,8 @@ export function EnrollmentsLayout() {
 						)}
 					</InputGroup>
 				</div>
+				<TabNav tabs={tabs} />
 			</div>
-
-			{/* Active search indicator */}
-			{q && (
-				<div className="flex flex-wrap items-center gap-2">
-					<span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700 dark:bg-amber-950/30 dark:text-amber-300">
-						"{q}"
-						<button
-							type="button"
-							onClick={() => setSearchQuery("")}
-							className="ml-0.5 rounded-full hover:bg-amber-100 dark:hover:bg-amber-900/50"
-							aria-label="Remove search filter"
-						>
-							<XMarkIcon className="size-3.5" />
-						</button>
-					</span>
-				</div>
-			)}
-
-			{/* URL-based tab navigation */}
-			<TabNav tabs={tabs} />
 
 			{/* Child route renders here */}
 			<Outlet />

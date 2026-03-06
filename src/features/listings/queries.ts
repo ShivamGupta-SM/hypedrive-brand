@@ -22,7 +22,7 @@ export const listingsQueryOptions = (
 	params?: {
 		categoryId?: string;
 		platformId?: string;
-		search?: string;
+		q?: string;
 		skip?: number;
 		take?: number;
 		sortBy?: "createdAt" | "name" | "price";
@@ -39,18 +39,21 @@ export const listingsQueryOptions = (
 
 export const infiniteListingsQueryOptions = (
 	orgId: string,
-	params?: { categoryId?: string; platformId?: string; search?: string }
+	params?: {
+		categoryId?: string;
+		platformId?: string;
+		q?: string;
+		sortBy?: "createdAt" | "name" | "price";
+		sortOrder?: "asc" | "desc";
+	}
 ) =>
 	infiniteQueryOptions({
 		queryKey: queryKeys.infiniteListings(orgId, params),
-		queryFn: ({ pageParam = 0 }) =>
+		queryFn: ({ pageParam }) =>
 			listListingsServer({
-				data: { orgId, params: { ...params, skip: pageParam, take: DEFAULT_PAGE_SIZE } },
+				data: { orgId, params: { ...params, cursor: pageParam, limit: DEFAULT_PAGE_SIZE } },
 			}),
-		initialPageParam: 0,
-		getNextPageParam: (lastPage, allPages) => {
-			if (!lastPage.hasMore) return undefined;
-			return allPages.reduce((acc, page) => acc + (page.data?.length ?? 0), 0);
-		},
+		initialPageParam: undefined as string | undefined,
+		getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
 		staleTime: CACHE.list,
 	});

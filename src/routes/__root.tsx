@@ -1,6 +1,6 @@
 import { isCancelledError, type QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRootRouteWithContext, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useTheme } from "@/hooks/use-theme";
 import { SkeletonTheme } from "react-loading-skeleton";
 import { Toaster } from "sonner";
 import type { Organization } from "@/components/app-layout";
@@ -102,25 +102,6 @@ function RootErrorComponent({ error }: { error: unknown }) {
 			</div>
 		</div>
 	);
-}
-
-/** Reactively reads data-theme from <html> via MutationObserver. */
-function useTheme() {
-	const [theme, setTheme] = useState<"light" | "dark">(() => {
-		if (typeof document === "undefined") return "light";
-		return document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
-	});
-
-	useEffect(() => {
-		const observer = new MutationObserver(() => {
-			const t = document.documentElement.getAttribute("data-theme");
-			setTheme(t === "dark" ? "dark" : "light");
-		});
-		observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-		return () => observer.disconnect();
-	}, []);
-
-	return theme;
 }
 
 function AppToaster() {

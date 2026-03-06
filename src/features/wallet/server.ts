@@ -24,7 +24,24 @@ export const getWalletHoldsServer = createServerFn({ method: "GET" })
 
 export const listWithdrawalsServer = createServerFn({ method: "GET" })
 	.middleware([authMiddleware])
-	.inputValidator((input: { orgId: string; params: Record<string, unknown> }) => input)
+	.inputValidator(
+		(input: {
+			orgId: string;
+			params: {
+				status?: string;
+				requestedFrom?: string;
+				requestedTo?: string;
+				amountMin?: number;
+				amountMax?: number;
+				sortBy?: "requestedAt" | "amount" | "status";
+				sortOrder?: "asc" | "desc";
+				skip?: number;
+				take?: number;
+				cursor?: string;
+				limit?: number;
+			};
+		}) => input
+	)
 	.handler(async ({ context, data }) => {
 		return context.client.brand.listWithdrawalRequests(data.orgId, data.params);
 	});
@@ -38,14 +55,44 @@ export const getWithdrawalStatsServer = createServerFn({ method: "GET" })
 
 export const listDepositsServer = createServerFn({ method: "GET" })
 	.middleware([authMiddleware])
-	.inputValidator((input: { orgId: string; params: Record<string, unknown> }) => input)
+	.inputValidator(
+		(input: {
+			orgId: string;
+			params: {
+				dateFrom?: string;
+				dateTo?: string;
+				amountMin?: number;
+				amountMax?: number;
+				sortBy?: "createdAt" | "amount";
+				sortOrder?: "asc" | "desc";
+				skip?: number;
+				take?: number;
+				page?: number;
+			};
+		}) => input
+	)
 	.handler(async ({ context, data }) => {
 		return context.client.brand.listDeposits(data.orgId, data.params);
 	});
 
 export const getWalletTransactionsServer = createServerFn({ method: "GET" })
 	.middleware([authMiddleware])
-	.inputValidator((input: { orgId: string; params: Record<string, unknown> }) => input)
+	.inputValidator(
+		(input: {
+			orgId: string;
+			params: {
+				type?: "credit" | "debit";
+				status?: "pending" | "completed" | "voided";
+				category?: "enrollment_hold" | "deposit" | "payout" | "refund" | "admin_credit";
+				skip?: number;
+				take?: number;
+				cursor?: string;
+				limit?: number;
+				sortBy?: "createdAt" | "amount";
+				sortOrder?: "asc" | "desc";
+			};
+		}) => input
+	)
 	.handler(async ({ context, data }) => {
 		return context.client.brand.getOrganizationWalletTransactions(data.orgId, data.params);
 	});

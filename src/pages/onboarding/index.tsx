@@ -665,7 +665,7 @@ function SuccessStep({ orgName, organizationId }: { orgName: string; organizatio
 													? "text-red-700 dark:text-red-400"
 													: status === "active"
 														? "text-zinc-900 dark:text-white"
-														: "text-zinc-400 dark:text-zinc-600"
+														: "text-zinc-400 dark:text-zinc-500"
 										}`}
 									>
 										{meta.label}

@@ -8,7 +8,13 @@ export function TeamRoles() {
 	const canManageMembers = useCan("member", "update");
 
 	if (!canManageMembers) {
-		return <EmptyState preset="generic" title="No access" description="You don't have permission to manage roles." />;
+		return (
+			<div className="overflow-hidden rounded-xl bg-white ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
+				<div className="p-6">
+					<EmptyState preset="generic" title="No access" description="You don't have permission to manage roles." />
+				</div>
+			</div>
+		);
 	}
 
 	return <RolesSection organizationId={organizationId} />;

@@ -12,7 +12,9 @@ export const getEnrollmentServer = createServerFn({ method: "GET" })
 	.middleware([authMiddleware])
 	.inputValidator((input: { orgId: string; enrollmentId: string }) => input)
 	.handler(async ({ context, data }) => {
-		return context.client.brand.getEnrollment(data.orgId, data.enrollmentId);
+		return context.client.brand.getEnrollment(data.orgId, data.enrollmentId, {
+			expand: "campaign,tasks",
+		});
 	});
 
 export const listEnrollmentsServer = createServerFn({ method: "GET" })
@@ -23,8 +25,15 @@ export const listEnrollmentsServer = createServerFn({ method: "GET" })
 			params: {
 				status?: db.EnrollmentStatus;
 				campaignId?: string;
+				q?: string;
 				skip?: number;
 				take?: number;
+				cursor?: string;
+				limit?: number;
+				createdFrom?: string;
+				createdTo?: string;
+				orderValueMin?: number;
+				orderValueMax?: number;
 				sortBy?: "createdAt" | "status" | "expiresAt" | "orderValue" | "submittedAt";
 				sortOrder?: "asc" | "desc";
 			};

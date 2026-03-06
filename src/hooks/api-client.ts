@@ -37,7 +37,23 @@ export function getAPIErrorMessage(error: unknown, fallback = "Something went wr
 }
 
 export function getAPIErrorCode(error: unknown): string | null {
-	if (isAPIError(error) && error.code) return error.code;
+	if (isAPIError(error)) {
+		// Check for structured error code in details (new pattern)
+		const details = (error as any).details;
+		if (details?.code) return details.code;
+		// Fallback to top-level code
+		if (error.code) return error.code;
+	}
+	return null;
+}
+
+/**
+ * Get structured error details from APIError (for financial errors etc.)
+ */
+export function getAPIErrorDetails(error: unknown): Record<string, unknown> | null {
+	if (isAPIError(error)) {
+		return (error as any).details ?? null;
+	}
 	return null;
 }
 
@@ -101,6 +117,36 @@ export const queryKeys = {
 };
 
 export const DEFAULT_PAGE_SIZE = 20;
+
+// =============================================================================
+// ERROR CODE → USER-FRIENDLY MESSAGES
+// =============================================================================
+
+const ERROR_CODE_MESSAGES: Record<string, string> = {
+	INSUFFICIENT_BALANCE: "Insufficient wallet balance for this operation.",
+	WALLET_FROZEN: "Your wallet is currently frozen. Contact support for assistance.",
+	WALLET_NOT_FOUND: "Wallet not found. Please complete your organization setup.",
+	BANK_ACCOUNT_NOT_FOUND: "No bank account linked. Please add a bank account first.",
+	BANK_ACCOUNT_NOT_VERIFIED: "Your bank account is not yet verified.",
+	ORG_NOT_FOUND: "Organization not found.",
+	SETUP_INCOMPLETE: "Please complete your organization setup first.",
+	INVALID_STATUS_TRANSITION: "This action is not available for the current status.",
+	DUPLICATE_WITHDRAWAL: "A similar withdrawal was already submitted. Please wait before trying again.",
+	RATE_LIMITED: "Too many requests. Please wait a moment and try again.",
+	ENROLLMENT_EXPIRED: "This enrollment has expired and can no longer be processed.",
+	CAMPAIGN_FULL: "This campaign has reached its maximum enrollment limit.",
+};
+
+/**
+ * Get a user-friendly message from an API error, checking structured error codes first.
+ */
+export function getFriendlyErrorMessage(error: unknown, fallback: string): string {
+	const code = getAPIErrorCode(error);
+	if (code && ERROR_CODE_MESSAGES[code]) {
+		return ERROR_CODE_MESSAGES[code];
+	}
+	return getAPIErrorMessage(error, fallback);
+}
 
 // =============================================================================
 // CACHE TIME CONSTANTS (centralized — single source of truth)

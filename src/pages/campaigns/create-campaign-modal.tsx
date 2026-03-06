@@ -216,7 +216,7 @@ function TaskRequirementsDialog({
 							<span
 								className={clsx(
 									"text-xs tabular-nums",
-									instructions.length > 900 ? "text-amber-500" : "text-zinc-400 dark:text-zinc-500"
+									instructions.length > 900 ? "text-amber-500" : "text-zinc-500 dark:text-zinc-400"
 								)}
 							>
 								{instructions.length}/1000
@@ -256,7 +256,7 @@ function TaskRequirementsDialog({
 								{/* Social Media */}
 								{showSocial && (
 									<div className="space-y-2">
-										<p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+										<p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
 											Social Media
 										</p>
 										<Field>
@@ -359,7 +359,7 @@ function TaskRequirementsDialog({
 								{/* Content */}
 								{showContent && (
 									<div className="space-y-2">
-										<p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+										<p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
 											Content
 										</p>
 										<div className="grid grid-cols-2 gap-3">
@@ -396,7 +396,7 @@ function TaskRequirementsDialog({
 								{/* Media */}
 								{showMedia && (
 									<div className="space-y-2">
-										<p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+										<p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
 											Media
 										</p>
 										<div className="space-y-3">
@@ -453,7 +453,7 @@ function TaskRequirementsDialog({
 								{/* Duration */}
 								{showDuration && (
 									<div className="space-y-2">
-										<p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+										<p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
 											Duration (seconds)
 										</p>
 										<div className="grid grid-cols-2 gap-3">
@@ -539,7 +539,7 @@ export function CreateCampaignModal({
 	const nextTaskId = () => `local-task-${++taskIdCounter.current}`;
 
 	const { data: listings, loading: listingsLoading } = useListings(organizationId, {
-		search: listingSearch || undefined,
+		q: listingSearch || undefined,
 		take: 20,
 	});
 	const { data: platforms, loading: platformsLoading } = usePlatforms();
@@ -829,10 +829,10 @@ export function CreateCampaignModal({
 								) : listings.length === 0 ? (
 									<div className="rounded-xl border-2 border-dashed border-zinc-200 py-10 text-center dark:border-zinc-700">
 										<div className="mx-auto flex size-12 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800">
-											<CubeIcon className="size-6 text-zinc-400 dark:text-zinc-500" />
+											<CubeIcon className="size-6 text-zinc-500 dark:text-zinc-400" />
 										</div>
-										<p className="mt-3 text-sm font-medium text-zinc-500">No listings found</p>
-										<p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
+										<p className="mt-3 text-sm font-medium text-zinc-500 dark:text-zinc-400">No listings found</p>
+										<p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
 											Create a product listing first, then come back to create a campaign.
 										</p>
 									</div>
@@ -865,7 +865,7 @@ export function CreateCampaignModal({
 													)}
 													<div className="min-w-0 flex-1">
 														<p className="truncate text-sm font-medium text-zinc-900 dark:text-white">{listing.name}</p>
-														<p className="text-xs text-zinc-500">{formatCurrency(listing.priceDecimal)}</p>
+														<p className="text-xs text-zinc-500 dark:text-zinc-400">{formatCurrency(listing.priceDecimal)}</p>
 													</div>
 													{selected && <CheckCircleIcon className="size-5 shrink-0 text-emerald-500" />}
 												</button>
@@ -901,7 +901,7 @@ export function CreateCampaignModal({
 										<span
 											className={clsx(
 												"text-xs tabular-nums",
-												description.length > 900 ? "text-amber-500" : "text-zinc-400 dark:text-zinc-500"
+												description.length > 900 ? "text-amber-500" : "text-zinc-500 dark:text-zinc-400"
 											)}
 										>
 											{description.length}/1000
@@ -975,7 +975,7 @@ export function CreateCampaignModal({
 														<p
 															className={clsx(
 																"hidden text-xs sm:block",
-																active ? "opacity-60" : "text-zinc-400 dark:text-zinc-500"
+																active ? "opacity-60" : "text-zinc-500 dark:text-zinc-400"
 															)}
 														>
 															{opt.desc}
@@ -1089,7 +1089,7 @@ export function CreateCampaignModal({
 											<span
 												className={clsx(
 													"text-xs tabular-nums",
-													termsAndConditions.length > 4500 ? "text-amber-500" : "text-zinc-400 dark:text-zinc-500"
+													termsAndConditions.length > 4500 ? "text-amber-500" : "text-zinc-500 dark:text-zinc-400"
 												)}
 											>
 												{termsAndConditions.length}/5000
@@ -1155,7 +1155,7 @@ export function CreateCampaignModal({
 															{task.taskTemplateName}
 														</p>
 														{task.instructions ? (
-															<p className="truncate text-[11px] text-zinc-400 dark:text-zinc-500">
+															<p className="truncate text-[11px] text-zinc-500 dark:text-zinc-400">
 																{task.instructions}
 															</p>
 														) : hasCustomizations ? (
@@ -1308,7 +1308,7 @@ export function CreateCampaignModal({
 										<p className="text-sm font-medium text-zinc-900 dark:text-white">
 											{selectedListing?.name || "Unknown listing"}
 										</p>
-										<p className="text-xs text-zinc-500">
+										<p className="text-xs text-zinc-500 dark:text-zinc-400">
 											{selectedListing ? formatCurrency(selectedListing.priceDecimal) : ""}
 										</p>
 									</div>
@@ -1409,7 +1409,7 @@ export function CreateCampaignModal({
 								Back
 							</Button>
 						)}
-						<span className="hidden text-xs tabular-nums text-zinc-400 dark:text-zinc-500 sm:block">
+						<span className="hidden text-xs tabular-nums text-zinc-500 dark:text-zinc-400 sm:block">
 							Step {step + 1} of {STEPS.length}
 						</span>
 					</div>

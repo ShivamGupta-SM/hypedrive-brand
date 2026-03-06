@@ -17,9 +17,9 @@ export const Route = createFileRoute("/_app/")({
 			throw redirect({ to: "/onboarding" });
 		}
 
-		// Prefer first approved org, fall back to first org
-		const approvedOrg = organizations.find((o) => o.approvalStatus === "approved");
-		const targetOrg = approvedOrg ?? organizations[0];
+		// Prefer first active org, fall back to first org
+		const activeOrg = organizations.find((o) => o.status === "active");
+		const targetOrg = activeOrg ?? organizations[0];
 
 		// Redirect to org-specific dashboard
 		throw redirect({

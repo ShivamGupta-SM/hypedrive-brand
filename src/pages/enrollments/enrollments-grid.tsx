@@ -1,15 +1,24 @@
 import {
 	ArrowPathIcon,
+	ArrowsUpDownIcon,
+	CalendarIcon,
 	CheckCircleIcon,
+	CurrencyRupeeIcon,
+	ExclamationTriangleIcon,
 	TableCellsIcon,
 	XMarkIcon,
 } from "@heroicons/react/16/solid";
 import { getRouteApi } from "@tanstack/react-router";
 import { useCallback, useMemo, useState } from "react";
 import { Button } from "@/components/button";
+import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/dialog";
+import { Field, Label } from "@/components/fieldset";
+import { Textarea } from "@/components/textarea";
 import { EnrollmentCardFull, getEnrollmentStatusConfig, isEnrollmentOverdue } from "@/components/enrollment-card";
+import { BulkActionsBar } from "@/components/shared/bulk-actions-bar";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
+import { FilterPills, type FilterPillOption } from "@/components/shared/filter-pills";
 import { useCampaigns } from "@/features/campaigns/hooks";
 import { useInfiniteEnrollments } from "@/features/enrollments/hooks";
 import {
@@ -59,58 +68,6 @@ function exportEnrollmentsToCSV(enrollments: Enrollment[], filename = "enrollmen
 }
 
 // =============================================================================
-// BULK ACTIONS BAR
-// =============================================================================
-
-function BulkActionsBar({
-	selectedCount,
-	onApprove,
-	onReject,
-	onClear,
-	isLoading,
-}: {
-	selectedCount: number;
-	onApprove: () => void;
-	onReject: () => void;
-	onClear: () => void;
-	isLoading: boolean;
-}) {
-	if (selectedCount === 0) return null;
-
-	return (
-		<div className="fixed inset-x-0 bottom-6 z-30 mx-auto flex w-max items-center gap-3 rounded-xl bg-zinc-900 px-4 py-2.5 text-white shadow-2xl ring-1 ring-white/10 dark:bg-white dark:text-zinc-900 dark:ring-zinc-900/10">
-			<span className="flex size-6 items-center justify-center rounded-full bg-white/20 text-xs font-bold tabular-nums dark:bg-zinc-900/20">
-				{selectedCount}
-			</span>
-			<span className="text-sm font-medium">{selectedCount} selected</span>
-			<div className="mx-1 h-5 w-px bg-white/20 dark:bg-zinc-900/10" />
-			<div className="flex items-center gap-1.5">
-				<Button color="emerald" onClick={onApprove} disabled={isLoading}>
-					{isLoading ? (
-						<ArrowPathIcon data-slot="icon" className="size-4 animate-spin" />
-					) : (
-						<CheckCircleIcon data-slot="icon" className="size-4" />
-					)}
-					Approve
-				</Button>
-				<Button color="red" onClick={onReject} disabled={isLoading}>
-					<XMarkIcon data-slot="icon" className="size-4" />
-					Reject
-				</Button>
-			</div>
-			<button
-				type="button"
-				onClick={onClear}
-				className="rounded-full p-1 hover:bg-white/10 dark:hover:bg-zinc-900/10"
-				aria-label="Clear selection"
-			>
-				<XMarkIcon className="size-4" />
-			</button>
-		</div>
-	);
-}
-
-// =============================================================================
 // GRID SKELETON
 // =============================================================================
 
@@ -152,6 +109,20 @@ export function EnrollmentsGridSkeleton() {
 // ENROLLMENTS GRID
 // =============================================================================
 
+const sortPillOptions: FilterPillOption[] = [
+	{ value: "newest", label: "Newest", icon: CalendarIcon, iconColor: "text-sky-500" },
+	{ value: "oldest", label: "Oldest", icon: CalendarIcon, iconColor: "text-zinc-400" },
+	{ value: "orderValue", label: "Order Value", icon: CurrencyRupeeIcon, iconColor: "text-emerald-500" },
+	{ value: "status", label: "Status", icon: ArrowsUpDownIcon, iconColor: "text-violet-500" },
+];
+
+const sortMap = {
+	newest: { sortBy: "createdAt" as const, sortOrder: "desc" as const },
+	oldest: { sortBy: "createdAt" as const, sortOrder: "asc" as const },
+	orderValue: { sortBy: "orderValue" as const, sortOrder: "desc" as const },
+	status: { sortBy: "status" as const, sortOrder: "asc" as const },
+};
+
 interface EnrollmentsGridProps {
 	status?: db.EnrollmentStatus;
 }
@@ -160,6 +131,7 @@ export function EnrollmentsGrid({ status }: EnrollmentsGridProps) {
 	const { organizationId, orgSlug } = useOrgContext();
 	const { q } = enrollmentsRouteApi.useSearch();
 
+	const [sortBy, setSortBy] = useState("newest");
 	const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 	const [isBulkLoading, setIsBulkLoading] = useState(false);
 
@@ -178,6 +150,8 @@ export function EnrollmentsGrid({ status }: EnrollmentsGridProps) {
 	const bulkReject = useBulkRejectEnrollments(organizationId);
 	const exportEnrollments = useExportOrganizationEnrollments(organizationId);
 
+	const activeSort = sortMap[sortBy as keyof typeof sortMap] || sortMap.newest;
+
 	const {
 		data: enrollments,
 		loading,
@@ -188,24 +162,10 @@ export function EnrollmentsGrid({ status }: EnrollmentsGridProps) {
 		fetchNextPage,
 	} = useInfiniteEnrollments(organizationId, {
 		status,
+		q: q || undefined,
+		sortBy: activeSort.sortBy,
+		sortOrder: activeSort.sortOrder,
 	});
-
-	// Client-side search
-	const filteredEnrollments = useMemo(() => {
-		let result = [...enrollments];
-
-		if (q) {
-			const query = q.toLowerCase();
-			result = result.filter(
-				(enrollment) =>
-					enrollment.displayId.toLowerCase().includes(query) ||
-					enrollment.orderId.toLowerCase().includes(query) ||
-					campaignNameMap.get(enrollment.campaignId)?.toLowerCase().includes(query),
-			);
-		}
-
-		return result;
-	}, [enrollments, q, campaignNameMap]);
 
 	// Reference time for overdue calculation (stable during render)
 	const referenceTime = useMemo(() => new Date(), []);
@@ -224,17 +184,21 @@ export function EnrollmentsGrid({ status }: EnrollmentsGridProps) {
 	}, []);
 
 	const handleSelectAll = useCallback(() => {
-		const actionableIds = filteredEnrollments.filter((e) => e.status === "awaiting_review").map((e) => e.id);
+		const actionableIds = enrollments.filter((e) => e.status === "awaiting_review").map((e) => e.id);
 		if (selectedIds.size === actionableIds.length && actionableIds.length > 0) {
 			setSelectedIds(new Set());
 		} else {
 			setSelectedIds(new Set(actionableIds));
 		}
-	}, [filteredEnrollments, selectedIds.size]);
+	}, [enrollments, selectedIds.size]);
 
 	const clearSelection = useCallback(() => {
 		setSelectedIds(new Set());
 	}, []);
+
+	// Bulk reject dialog state
+	const [showBulkRejectDialog, setShowBulkRejectDialog] = useState(false);
+	const [bulkRejectReason, setBulkRejectReason] = useState("");
 
 	// Bulk action handlers
 	const handleBulkApprove = useCallback(async () => {
@@ -242,31 +206,40 @@ export function EnrollmentsGrid({ status }: EnrollmentsGridProps) {
 		setIsBulkLoading(true);
 		try {
 			await bulkApprove.mutateAsync({ enrollmentIds: Array.from(selectedIds) });
+			showToast.success(`${selectedIds.size} enrollment${selectedIds.size > 1 ? "s" : ""} approved`);
 			setSelectedIds(new Set());
 			refetch();
-		} catch (error) {
-			console.error("Failed to approve enrollments:", error);
+		} catch (err) {
+			showToast.error(err, "Failed to approve enrollments");
 		} finally {
 			setIsBulkLoading(false);
 		}
 	}, [selectedIds, bulkApprove, refetch]);
 
-	const handleBulkReject = useCallback(async () => {
+	const handleBulkRejectRequest = useCallback(() => {
+		if (selectedIds.size === 0) return;
+		setBulkRejectReason("");
+		setShowBulkRejectDialog(true);
+	}, [selectedIds.size]);
+
+	const handleBulkRejectConfirm = useCallback(async () => {
 		if (selectedIds.size === 0) return;
 		setIsBulkLoading(true);
 		try {
 			await bulkReject.mutateAsync({
 				enrollmentIds: Array.from(selectedIds),
-				reason: "Bulk rejected",
+				reason: bulkRejectReason.trim() || "Rejected by brand",
 			});
+			showToast.success(`${selectedIds.size} enrollment${selectedIds.size > 1 ? "s" : ""} rejected`);
 			setSelectedIds(new Set());
+			setShowBulkRejectDialog(false);
 			refetch();
-		} catch (error) {
-			console.error("Failed to reject enrollments:", error);
+		} catch (err) {
+			showToast.error(err, "Failed to reject enrollments");
 		} finally {
 			setIsBulkLoading(false);
 		}
-	}, [selectedIds, bulkReject, refetch]);
+	}, [selectedIds, bulkReject, bulkRejectReason, refetch]);
 
 	// Export handler
 	const handleExport = useCallback(async () => {
@@ -279,16 +252,16 @@ export function EnrollmentsGrid({ status }: EnrollmentsGridProps) {
 				window.open(url, "_blank");
 				showToast.exported();
 			} else {
-				exportEnrollmentsToCSV(filteredEnrollments, "enrollments");
+				exportEnrollmentsToCSV(enrollments, "enrollments");
 				showToast.exportedLocally();
 			}
 		} catch {
-			exportEnrollmentsToCSV(filteredEnrollments, "enrollments");
+			exportEnrollmentsToCSV(enrollments, "enrollments");
 			showToast.exportedLocally();
 		}
-	}, [exportEnrollments, status, filteredEnrollments]);
+	}, [exportEnrollments, status, enrollments]);
 
-	const actionableCount = filteredEnrollments.filter((e) => e.status === "awaiting_review").length;
+	const actionableCount = enrollments.filter((e) => e.status === "awaiting_review").length;
 
 	if (loading) {
 		return <EnrollmentsGridSkeleton />;
@@ -301,7 +274,7 @@ export function EnrollmentsGrid({ status }: EnrollmentsGridProps) {
 	return (
 		<>
 			{/* Enrollments List */}
-			{filteredEnrollments.length === 0 ? (
+			{enrollments.length === 0 ? (
 				<EmptyState
 					preset="enrollments"
 					title={q ? "No enrollments found" : "No enrollments yet"}
@@ -313,7 +286,10 @@ export function EnrollmentsGrid({ status }: EnrollmentsGridProps) {
 				/>
 			) : (
 				<div className="space-y-4">
-					{/* Results header with Select All + Export */}
+					{/* Sort pills */}
+					<FilterPills options={sortPillOptions} value={sortBy} onChange={setSortBy} />
+
+					{/* Results header: Select All + count + Export */}
 					<div className="flex items-center justify-between">
 						<div className="flex items-center gap-3">
 							{actionableCount > 0 && (
@@ -336,8 +312,8 @@ export function EnrollmentsGrid({ status }: EnrollmentsGridProps) {
 									Select all ({actionableCount})
 								</button>
 							)}
-							<span className="text-xs text-zinc-400 dark:text-zinc-500">
-								{filteredEnrollments.length} enrollment{filteredEnrollments.length !== 1 ? "s" : ""}
+							<span className="text-xs text-zinc-500 dark:text-zinc-400">
+								{enrollments.length} enrollment{enrollments.length !== 1 ? "s" : ""}
 								{q && ` matching "${q}"`}
 							</span>
 						</div>
@@ -358,7 +334,7 @@ export function EnrollmentsGrid({ status }: EnrollmentsGridProps) {
 
 					{/* Cards Grid */}
 					<div className="grid grid-cols-1 gap-2.5 sm:gap-3 md:grid-cols-2 lg:gap-4">
-						{filteredEnrollments.map((enrollment) => (
+						{enrollments.map((enrollment) => (
 							<EnrollmentCardFull
 								key={enrollment.id}
 								enrollment={enrollment}
@@ -392,13 +368,66 @@ export function EnrollmentsGrid({ status }: EnrollmentsGridProps) {
 			)}
 
 			{/* Floating Bulk Actions Bar */}
-			<BulkActionsBar
-				selectedCount={selectedIds.size}
-				onApprove={handleBulkApprove}
-				onReject={handleBulkReject}
-				onClear={clearSelection}
-				isLoading={isBulkLoading}
-			/>
+			<BulkActionsBar selectedCount={selectedIds.size} onClear={clearSelection}>
+				<Button color="emerald" onClick={handleBulkApprove} disabled={isBulkLoading}>
+					{isBulkLoading ? (
+						<ArrowPathIcon data-slot="icon" className="size-4 animate-spin" />
+					) : (
+						<CheckCircleIcon data-slot="icon" className="size-4" />
+					)}
+					Approve
+				</Button>
+				<Button color="red" onClick={handleBulkRejectRequest} disabled={isBulkLoading}>
+					<XMarkIcon data-slot="icon" className="size-4" />
+					Reject
+				</Button>
+			</BulkActionsBar>
+
+			{/* Bulk Reject Reason Dialog */}
+			<Dialog open={showBulkRejectDialog} onClose={() => setShowBulkRejectDialog(false)} size="sm">
+				<DialogHeader
+					icon={ExclamationTriangleIcon}
+					iconColor="red"
+					title="Reject Enrollments"
+					description={`Reject ${selectedIds.size} selected enrollment${selectedIds.size > 1 ? "s" : ""}?`}
+					onClose={() => setShowBulkRejectDialog(false)}
+				/>
+				<DialogBody>
+					<div className="mb-4 flex items-start gap-2.5 rounded-xl bg-red-50 p-3 dark:bg-red-950/20">
+						<ExclamationTriangleIcon className="mt-0.5 size-4 shrink-0 text-red-500" />
+						<p className="text-sm text-red-700 dark:text-red-300">
+							This action is permanent. The creators will be notified immediately.
+						</p>
+					</div>
+					<Field>
+						<Label>Rejection reason</Label>
+						<Textarea
+							value={bulkRejectReason}
+							onChange={(e) => setBulkRejectReason(e.target.value)}
+							placeholder="e.g., Content does not meet campaign requirements..."
+							rows={3}
+						/>
+					</Field>
+				</DialogBody>
+				<DialogActions>
+					<Button plain onClick={() => setShowBulkRejectDialog(false)} disabled={isBulkLoading}>
+						Cancel
+					</Button>
+					<Button color="red" onClick={handleBulkRejectConfirm} disabled={isBulkLoading}>
+						{isBulkLoading ? (
+							<>
+								<ArrowPathIcon className="size-4 animate-spin" />
+								Rejecting...
+							</>
+						) : (
+							<>
+								<XMarkIcon className="size-4" />
+								Reject {selectedIds.size} enrollment{selectedIds.size > 1 ? "s" : ""}
+							</>
+						)}
+					</Button>
+				</DialogActions>
+			</Dialog>
 		</>
 	);
 }

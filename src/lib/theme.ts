@@ -102,9 +102,9 @@ export const statusColors: Record<EnrollmentStatus, StatusColorConfig> = {
 		border: "border-zinc-200 dark:border-zinc-700",
 	},
 	expired: {
-		text: "text-zinc-400 dark:text-zinc-500",
+		text: "text-zinc-500 dark:text-zinc-400",
 		bg: "bg-zinc-100 dark:bg-zinc-800/50",
-		icon: "text-zinc-400 dark:text-zinc-500",
+		icon: "text-zinc-500 dark:text-zinc-400",
 		border: "border-zinc-200 dark:border-zinc-700",
 	},
 };
@@ -267,7 +267,7 @@ export const textColors = {
 	secondary: "text-zinc-500 dark:text-zinc-400",
 
 	/** Tertiary text (timestamps, metadata) */
-	tertiary: "text-zinc-400 dark:text-zinc-500",
+	tertiary: "text-zinc-500 dark:text-zinc-400",
 
 	/** Disabled text */
 	disabled: "text-zinc-300 dark:text-zinc-600",

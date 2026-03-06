@@ -101,10 +101,9 @@ function DeadlineGauge({ daysRemaining, maxDays = 30 }: { daysRemaining: number;
 					<path
 						d={`M ${strokeWidth / 2} ${size / 2} A ${radius} ${radius} 0 0 1 ${size - strokeWidth / 2} ${size / 2}`}
 						fill="none"
-						stroke="#e4e4e7"
 						strokeWidth={strokeWidth}
 						strokeLinecap="round"
-						className="dark:stroke-zinc-700"
+						className="stroke-zinc-200 dark:stroke-zinc-700"
 					/>
 					<path
 						d={`M ${strokeWidth / 2} ${size / 2} A ${radius} ${radius} 0 0 1 ${size - strokeWidth / 2} ${size / 2}`}
@@ -207,7 +206,7 @@ export function CampaignCard({
 	return (
 		<Link
 			href={`/${orgSlug}/campaigns/${campaign.id}`}
-			className="group flex flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 transition-shadow duration-200 hover:shadow-md dark:bg-zinc-900 dark:ring-zinc-800"
+			className="group flex h-full flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 transition-shadow duration-200 hover:shadow-md dark:bg-zinc-900 dark:ring-zinc-800"
 		>
 			{/* == Desktop == */}
 			<div className="hidden flex-1 sm:flex sm:flex-col">
@@ -278,7 +277,7 @@ export function CampaignCard({
 				{isLive && hasCap && (
 					<div className="px-4 pb-3">
 						<div className="flex items-center justify-between pb-1">
-							<span className="text-[10px] font-medium text-zinc-400 dark:text-zinc-500">Enrollment Progress</span>
+							<span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">Enrollment Progress</span>
 							<span className="text-[10px] font-semibold tabular-nums text-zinc-500 dark:text-zinc-400">
 								{campaign.currentEnrollments}/{campaign.maxEnrollments}
 							</span>
@@ -302,21 +301,21 @@ export function CampaignCard({
 				<div className="grid grid-cols-3 divide-x divide-zinc-200 bg-zinc-50/50 dark:divide-zinc-700 dark:bg-zinc-800/30">
 					{/* Enrolled */}
 					<div className="flex flex-col items-center justify-center py-3">
-						<span className="flex items-center gap-1 text-[10px] font-medium text-zinc-400 dark:text-zinc-500">
+						<span className="flex items-center gap-1 text-[10px] font-medium text-zinc-500 dark:text-zinc-400">
 							<UsersIcon className="size-3 shrink-0" />
 							Enrolled
 						</span>
 						<span className="mt-0.5 text-sm font-semibold tabular-nums text-zinc-900 dark:text-white">
 							{campaign.currentEnrollments}
 							{hasCap && (
-								<span className="text-xs font-normal text-zinc-400 dark:text-zinc-500">/{campaign.maxEnrollments}</span>
+								<span className="text-xs font-normal text-zinc-500 dark:text-zinc-400">/{campaign.maxEnrollments}</span>
 							)}
 						</span>
 					</div>
 
 					{/* Pending */}
 					<div className="flex flex-col items-center justify-center py-3">
-						<span className="flex items-center gap-1 text-[10px] font-medium text-zinc-400 dark:text-zinc-500">
+						<span className="flex items-center gap-1 text-[10px] font-medium text-zinc-500 dark:text-zinc-400">
 							<ClockIcon className="size-3 shrink-0" />
 							Pending
 						</span>
@@ -331,7 +330,7 @@ export function CampaignCard({
 							<DeadlineGauge daysRemaining={daysLeft} />
 						) : (
 							<>
-								<span className="flex items-center gap-1 text-[10px] font-medium text-zinc-400 dark:text-zinc-500">
+								<span className="flex items-center gap-1 text-[10px] font-medium text-zinc-500 dark:text-zinc-400">
 									<CheckCircleIcon className="size-3 shrink-0" />
 									Approved
 								</span>
@@ -409,7 +408,7 @@ export function CampaignCard({
 				{isLive && hasCap && (
 					<div className="px-3 pb-2.5">
 						<div className="flex items-center justify-between pb-1">
-							<span className="text-[10px] font-medium text-zinc-400 dark:text-zinc-500">Enrollment Progress</span>
+							<span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">Enrollment Progress</span>
 							<span className="text-[10px] font-semibold tabular-nums text-zinc-500 dark:text-zinc-400">
 								{campaign.currentEnrollments}/{campaign.maxEnrollments}
 							</span>
@@ -432,21 +431,21 @@ export function CampaignCard({
 				{/* -- Footer stats: 3-col with vertical dividers -- */}
 				<div className="grid grid-cols-3 divide-x divide-zinc-200 bg-zinc-50/50 dark:divide-zinc-700 dark:bg-zinc-800/30">
 					<div className="flex flex-col items-center justify-center py-2.5">
-						<span className="flex items-center gap-1 text-[10px] font-medium text-zinc-400 dark:text-zinc-500">
+						<span className="flex items-center gap-1 text-[10px] font-medium text-zinc-500 dark:text-zinc-400">
 							<UsersIcon className="size-2.5 shrink-0" />
 							Enrolled
 						</span>
 						<span className="mt-0.5 text-xs font-semibold tabular-nums text-zinc-900 dark:text-white">
 							{campaign.currentEnrollments}
 							{hasCap && (
-								<span className="text-[10px] font-normal text-zinc-400 dark:text-zinc-500">
+								<span className="text-[10px] font-normal text-zinc-500 dark:text-zinc-400">
 									/{campaign.maxEnrollments}
 								</span>
 							)}
 						</span>
 					</div>
 					<div className="flex flex-col items-center justify-center py-2.5">
-						<span className="flex items-center gap-1 text-[10px] font-medium text-zinc-400 dark:text-zinc-500">
+						<span className="flex items-center gap-1 text-[10px] font-medium text-zinc-500 dark:text-zinc-400">
 							<ClockIcon className="size-2.5 shrink-0" />
 							Pending
 						</span>
@@ -459,7 +458,7 @@ export function CampaignCard({
 							<DeadlineGauge daysRemaining={daysLeft} />
 						) : (
 							<>
-								<span className="flex items-center gap-1 text-[10px] font-medium text-zinc-400 dark:text-zinc-500">
+								<span className="flex items-center gap-1 text-[10px] font-medium text-zinc-500 dark:text-zinc-400">
 									<CheckCircleIcon className="size-2.5 shrink-0" />
 									Approved
 								</span>

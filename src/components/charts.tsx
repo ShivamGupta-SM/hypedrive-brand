@@ -3,6 +3,7 @@
  * Provides chart components with Catalyst theme integration
  */
 
+import { useIsDark } from "@/hooks/use-theme";
 import clsx from "clsx";
 import {
 	Area,
@@ -119,7 +120,7 @@ export function LineChart({
 	showTooltip = true,
 	curved = true,
 }: LineChartProps) {
-	const isDark = typeof document !== "undefined" && document.documentElement.classList.contains("dark");
+	const isDark = useIsDark();
 
 	return (
 		<div className={clsx("w-full min-w-0", className)} style={{ height, minHeight: height }}>
@@ -195,7 +196,7 @@ export function AreaChart({
 	stacked = false,
 	gradient = true,
 }: AreaChartProps) {
-	const isDark = typeof document !== "undefined" && document.documentElement.classList.contains("dark");
+	const isDark = useIsDark();
 
 	return (
 		<div className={clsx("w-full min-w-0", className)} style={{ height, minHeight: height }}>
@@ -288,7 +289,7 @@ export function BarChart({
 	horizontal = false,
 	barSize = 20,
 }: BarChartProps) {
-	const isDark = typeof document !== "undefined" && document.documentElement.classList.contains("dark");
+	const isDark = useIsDark();
 
 	return (
 		<div className={clsx("w-full min-w-0", className)} style={{ height, minHeight: height }}>
@@ -393,7 +394,7 @@ export function PieChart({
 	outerRadius = 80,
 	label = false,
 }: PieChartProps) {
-	const isDark = typeof document !== "undefined" && document.documentElement.classList.contains("dark");
+	const isDark = useIsDark();
 
 	return (
 		<div className={clsx("w-full min-w-0", className)} style={{ height, minHeight: height }}>

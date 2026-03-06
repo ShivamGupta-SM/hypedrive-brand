@@ -1,19 +1,28 @@
 import {
+	ArchiveBoxIcon,
 	ArrowPathIcon,
+	ArrowsUpDownIcon,
+	CalendarIcon,
+	CheckCircleIcon,
 	ExclamationTriangleIcon,
+	PauseIcon,
+	PlayIcon,
 	TableCellsIcon,
 	XMarkIcon,
 } from "@heroicons/react/16/solid";
 import { getRouteApi } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { Button } from "@/components/button";
 import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/dialog";
+import { BulkActionsBar } from "@/components/shared/bulk-actions-bar";
 import { useCan } from "@/components/shared/can";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
+import { FilterPills, type FilterPillOption } from "@/components/shared/filter-pills";
 import { Skeleton } from "@/components/skeleton";
 import { useInfiniteCampaigns } from "@/features/campaigns/hooks";
 import {
+	useBatchCampaigns,
 	useCancelCampaign,
 	useDuplicateCampaign,
 	usePauseCampaign,
@@ -77,6 +86,20 @@ interface CampaignsGridProps {
 	status?: db.CampaignStatus;
 }
 
+const sortPillOptions: FilterPillOption[] = [
+	{ value: "newest", label: "Newest", icon: CalendarIcon, iconColor: "text-sky-500" },
+	{ value: "oldest", label: "Oldest", icon: CalendarIcon, iconColor: "text-zinc-400" },
+	{ value: "title", label: "Title A-Z", icon: ArrowsUpDownIcon, iconColor: "text-violet-500" },
+	{ value: "startDate", label: "Start Date", icon: CalendarIcon, iconColor: "text-emerald-500" },
+];
+
+const sortMap = {
+	newest: { sortBy: "createdAt" as const, sortOrder: "desc" as const },
+	oldest: { sortBy: "createdAt" as const, sortOrder: "asc" as const },
+	title: { sortBy: "title" as const, sortOrder: "asc" as const },
+	startDate: { sortBy: "startDate" as const, sortOrder: "desc" as const },
+};
+
 export function CampaignsGrid({ status }: CampaignsGridProps) {
 	const { organizationId, orgSlug } = useOrgContext();
 	const { q } = campaignsRouteApi.useSearch();
@@ -86,6 +109,7 @@ export function CampaignsGrid({ status }: CampaignsGridProps) {
 	const canPause = useCan("campaign", "pause");
 	const canResume = useCan("campaign", "resume");
 
+	const [sortBy, setSortBy] = useState("newest");
 	const [actionPendingId, setActionPendingId] = useState<string | null>(null);
 	const [cancelConfirm, setCancelConfirm] = useState<{ id: string; title: string } | null>(null);
 
@@ -94,6 +118,23 @@ export function CampaignsGrid({ status }: CampaignsGridProps) {
 	const resumeCampaign = useResumeCampaign();
 	const cancelCampaign = useCancelCampaign();
 	const duplicateCampaign = useDuplicateCampaign();
+	const batchCampaigns = useBatchCampaigns();
+
+	// Batch selection state
+	const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+	const [isBatchLoading, setIsBatchLoading] = useState(false);
+
+	const toggleSelect = useCallback((id: string) => {
+		setSelectedIds((prev) => {
+			const next = new Set(prev);
+			if (next.has(id)) next.delete(id); else next.add(id);
+			return next;
+		});
+	}, []);
+
+	const clearSelection = useCallback(() => setSelectedIds(new Set()), []);
+
+	const activeSort = sortMap[sortBy as keyof typeof sortMap] || sortMap.newest;
 
 	const {
 		data: campaigns,
@@ -105,24 +146,29 @@ export function CampaignsGrid({ status }: CampaignsGridProps) {
 		fetchNextPage,
 	} = useInfiniteCampaigns(organizationId, {
 		status,
+		q: q || undefined,
+		sortBy: activeSort.sortBy,
+		sortOrder: activeSort.sortOrder,
 	});
 
-	// Client-side search + sort
-	const filteredCampaigns = useMemo(() => {
-		let result = [...campaigns];
-
-		if (q) {
-			const query = q.toLowerCase();
-			result = result.filter(
-				(campaign) =>
-					campaign.title.toLowerCase().includes(query) || campaign.campaignType.toLowerCase().includes(query),
-			);
+	const handleBatchAction = useCallback(async (action: "pause" | "resume" | "end" | "archive") => {
+		if (!organizationId || selectedIds.size === 0) return;
+		setIsBatchLoading(true);
+		try {
+			await batchCampaigns.mutateAsync({
+				organizationId,
+				action,
+				campaignIds: Array.from(selectedIds),
+			});
+			showToast.success(`${selectedIds.size} campaign${selectedIds.size > 1 ? "s" : ""} ${action === "end" ? "ended" : action + "d"}`);
+			setSelectedIds(new Set());
+			refetch();
+		} catch (err) {
+			showToast.error(err, `Failed to ${action} campaigns`);
+		} finally {
+			setIsBatchLoading(false);
 		}
-
-		result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-		return result;
-	}, [campaigns, q]);
+	}, [organizationId, selectedIds, batchCampaigns, refetch]);
 
 	// Campaign action handlers
 	const handlePauseCampaign = async (campaignId: string) => {
@@ -187,7 +233,7 @@ export function CampaignsGrid({ status }: CampaignsGridProps) {
 		}
 	};
 
-	const campaignCount = filteredCampaigns.length;
+	const campaignCount = campaigns.length;
 
 	if (loading) {
 		return <CampaignsGridSkeleton />;
@@ -195,45 +241,63 @@ export function CampaignsGrid({ status }: CampaignsGridProps) {
 
 	return (
 		<>
-			{/* Results count + Export */}
-			<div className="flex items-center justify-between">
-				<p className="text-xs text-zinc-400 dark:text-zinc-500">
-					{campaignCount} campaign{campaignCount !== 1 ? "s" : ""}
-					{q && ` matching "${q}"`}
-				</p>
-				{campaigns.length > 0 && (
-					<Button
-						color="emerald"
-						onClick={() => exportCampaignsToCSV(filteredCampaigns)}
-						className="hidden sm:inline-flex"
-					>
-						<TableCellsIcon data-slot="icon" className="size-4" />
-						Export
-					</Button>
-				)}
+			{/* Sort + Results count + Export */}
+			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+				<FilterPills options={sortPillOptions} value={sortBy} onChange={setSortBy} />
+				<div className="flex items-center justify-between gap-3 sm:justify-end">
+					<span className="text-xs text-zinc-500 dark:text-zinc-400">
+						{campaignCount} campaign{campaignCount !== 1 ? "s" : ""}
+						{q && ` matching "${q}"`}
+					</span>
+					{campaigns.length > 0 && (
+						<Button
+							color="emerald"
+							onClick={() => exportCampaignsToCSV(campaigns)}
+							className="hidden shrink-0 sm:inline-flex"
+						>
+							<TableCellsIcon data-slot="icon" className="size-4" />
+							Export
+						</Button>
+					)}
+				</div>
 			</div>
 
 			{/* Results grid */}
 			{error ? (
 				<ErrorState message="Unable to load campaigns." onRetry={refetch} />
-			) : filteredCampaigns.length > 0 ? (
+			) : campaigns.length > 0 ? (
 				<>
 					<div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3.5 lg:grid-cols-3">
-						{filteredCampaigns.map((campaign) => (
-							<CampaignCard
-								key={campaign.id}
-								campaign={campaign}
-								orgSlug={orgSlug}
-								onPause={handlePauseCampaign}
-								onResume={handleResumeCampaign}
-								onDelete={handleRequestCancel}
-								onDuplicate={handleDuplicateCampaign}
-								isActionPending={actionPendingId === campaign.id}
-								canPause={canPause}
-								canResume={canResume}
-								canDelete={canDelete}
-								canCreate={canCreate}
-							/>
+						{campaigns.map((campaign) => (
+							<div key={campaign.id} className="group relative">
+								{/* Selection checkbox (desktop hover) */}
+								<button
+									type="button"
+									onClick={(e) => { e.preventDefault(); toggleSelect(campaign.id); }}
+									className={`absolute left-2 top-2 z-10 flex size-5 items-center justify-center rounded border transition-all ${
+										selectedIds.has(campaign.id)
+											? "border-zinc-900 bg-zinc-900 dark:border-white dark:bg-white"
+											: "border-zinc-300 bg-white opacity-0 group-hover:opacity-100 dark:border-zinc-600 dark:bg-zinc-800"
+									}`}
+								>
+									{selectedIds.has(campaign.id) && (
+										<CheckCircleIcon className="size-3.5 text-white dark:text-zinc-900" />
+									)}
+								</button>
+								<CampaignCard
+									campaign={campaign}
+									orgSlug={orgSlug}
+									onPause={handlePauseCampaign}
+									onResume={handleResumeCampaign}
+									onDelete={handleRequestCancel}
+									onDuplicate={handleDuplicateCampaign}
+									isActionPending={actionPendingId === campaign.id}
+									canPause={canPause}
+									canResume={canResume}
+									canDelete={canDelete}
+									canCreate={canCreate}
+								/>
+							</div>
 						))}
 					</div>
 
@@ -266,6 +330,23 @@ export function CampaignsGrid({ status }: CampaignsGridProps) {
 					}
 				/>
 			)}
+
+			{/* Floating Batch Actions Bar */}
+			<BulkActionsBar selectedCount={selectedIds.size} onClear={clearSelection}>
+				{canPause && status === "active" && (
+					<Button color="amber" onClick={() => handleBatchAction("pause")} disabled={isBatchLoading}>
+						<PauseIcon className="size-4" /> Pause
+					</Button>
+				)}
+				{canResume && status === "paused" && (
+					<Button color="emerald" onClick={() => handleBatchAction("resume")} disabled={isBatchLoading}>
+						<PlayIcon className="size-4" /> Resume
+					</Button>
+				)}
+				<Button outline onClick={() => handleBatchAction("archive")} disabled={isBatchLoading}>
+					<ArchiveBoxIcon className="size-4" /> Archive
+				</Button>
+			</BulkActionsBar>
 
 			{/* Cancel Confirmation Dialog */}
 			<Dialog open={!!cancelConfirm} onClose={() => setCancelConfirm(null)} size="sm">

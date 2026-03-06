@@ -2,31 +2,36 @@ import {
 	ArrowPathIcon,
 	ArrowsUpDownIcon,
 	CalendarIcon,
+	CheckCircleIcon,
 	CubeIcon,
 	EllipsisVerticalIcon,
 	EyeIcon,
 	LinkIcon,
 	MagnifyingGlassIcon,
 	PlusIcon,
+	TrashIcon,
 	XMarkIcon,
 } from "@heroicons/react/16/solid";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/button";
 import { Dropdown, DropdownButton, DropdownItem, DropdownMenu } from "@/components/dropdown";
 import { Input, InputGroup } from "@/components/input";
 import { Link } from "@/components/link";
 import { PageHeader } from "@/components/page-header";
+import { BulkActionsBar } from "@/components/shared/bulk-actions-bar";
 import { useCan } from "@/components/shared/can";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
 import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
 import { IconButton } from "@/components/shared/icon-button";
 import { useInfiniteListings } from "@/features/listings/hooks";
+import { useBatchListings } from "@/features/listings/mutations";
 import { getAssetUrl } from "@/hooks/api-client";
 import { useOrgContext } from "@/hooks/use-org-context";
 import type { brand } from "@/lib/brand-client";
 import { formatCurrency } from "@/lib/design-tokens";
+import { showToast } from "@/lib/toast";
 import { CreateListingModal } from "./create-listing-modal";
 
 type Listing = brand.ListingWithStats;
@@ -110,7 +115,7 @@ function ListingCard({ listing, orgSlug, canEdit }: ListingCardProps) {
 			<div className="grid grid-cols-2 divide-x divide-zinc-200 dark:divide-zinc-700">
 				{/* Views */}
 				<div className="flex flex-col items-center justify-center py-2">
-					<span className="text-[10px] text-zinc-400 dark:text-zinc-500">Views</span>
+					<span className="text-[10px] text-zinc-500 dark:text-zinc-400">Views</span>
 					<span className="text-xs font-semibold text-zinc-900 sm:text-sm dark:text-white">
 						{listing.views.toLocaleString("en-IN")}
 					</span>
@@ -118,7 +123,7 @@ function ListingCard({ listing, orgSlug, canEdit }: ListingCardProps) {
 
 				{/* Listing Link */}
 				<div className="flex flex-col items-center justify-center py-2">
-					<span className="text-[10px] text-zinc-400 dark:text-zinc-500">Link</span>
+					<span className="text-[10px] text-zinc-500 dark:text-zinc-400">Link</span>
 					{listing.link ? (
 						<a
 							href={listing.link}
@@ -143,8 +148,8 @@ function ListingCard({ listing, orgSlug, canEdit }: ListingCardProps) {
 					View details
 				</Link>
 				<Dropdown>
-					<DropdownButton plain aria-label="More options" className="-m-1 p-1">
-						<EllipsisVerticalIcon className="size-5 text-zinc-400 dark:text-zinc-500" />
+					<DropdownButton plain aria-label="More options" className="-m-2.5 p-2.5">
+						<EllipsisVerticalIcon className="size-5 text-zinc-500 dark:text-zinc-400" />
 					</DropdownButton>
 					<DropdownMenu anchor="bottom end">
 						<DropdownItem href={`/${orgSlug}/listings/${listing.id}`}>View details</DropdownItem>
@@ -214,7 +219,7 @@ function ListingsListSkeleton() {
 					<Shimmer className="h-8 w-32" />
 					<Shimmer className="mt-2 h-4 w-48 sm:w-64" />
 				</div>
-				<Shimmer className="h-10 w-10 shrink-0 rounded-lg sm:w-32" />
+				<Shimmer className="size-10 shrink-0 rounded-lg" />
 			</div>
 
 			{/* Stats */}
@@ -227,12 +232,12 @@ function ListingsListSkeleton() {
 				columns={2}
 			/>
 
-			{/* Search + Filter Row */}
+			{/* Search + Sort pills */}
 			<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-				<Shimmer className="h-9 w-full rounded-lg sm:w-52" />
-				<div className="flex items-center gap-1.5">
-					{[1, 2, 3].map((i) => (
-						<Shimmer key={i} className="h-8 w-20 rounded-full" />
+				<Shimmer className="h-10 w-full rounded-lg sm:w-64" />
+				<div className="flex gap-1.5 overflow-x-auto">
+					{[75, 80, 65, 95].map((w, i) => (
+						<Shimmer key={i} className="h-9 shrink-0 rounded-full" style={{ width: w }} />
 					))}
 				</div>
 			</div>
@@ -258,9 +263,43 @@ export function ListingsList() {
 	const canCreateListing = useCan("listing", "create");
 	const canUpdateListing = useCan("listing", "update");
 
+	const canDeleteListing = useCan("listing", "delete");
+
 	const [searchQuery, setSearchQuery] = useState("");
 	const [sortBy, setSortBy] = useState("date");
 	const [showCreateModal, setShowCreateModal] = useState(false);
+
+	// Batch selection state
+	const batchListings = useBatchListings();
+	const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+	const [isBatchLoading, setIsBatchLoading] = useState(false);
+
+	const toggleSelect = useCallback((id: string) => {
+		setSelectedIds((prev) => {
+			const next = new Set(prev);
+			if (next.has(id)) next.delete(id); else next.add(id);
+			return next;
+		});
+	}, []);
+
+	const clearSelection = useCallback(() => setSelectedIds(new Set()), []);
+
+	// Debounced search for API
+	const [debouncedSearch, setDebouncedSearch] = useState("");
+	const searchTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+	const handleSearchChange = (value: string) => {
+		setSearchQuery(value);
+		clearTimeout(searchTimerRef.current);
+		searchTimerRef.current = setTimeout(() => setDebouncedSearch(value), 300);
+	};
+
+	// Map sort pill to API sort params
+	const sortMapping: Record<string, { sortBy?: "createdAt" | "name" | "price"; sortOrder?: "asc" | "desc" }> = {
+		date: { sortBy: "createdAt", sortOrder: "desc" },
+		name: { sortBy: "name", sortOrder: "asc" },
+		price: { sortBy: "price", sortOrder: "desc" },
+		views: { sortBy: "createdAt", sortOrder: "desc" }, // views not sortable server-side, fallback
+	};
 
 	const {
 		data: listings,
@@ -270,33 +309,18 @@ export function ListingsList() {
 		hasMore,
 		isFetchingNextPage,
 		fetchNextPage,
-	} = useInfiniteListings(organizationId);
+	} = useInfiniteListings(organizationId, {
+		q: debouncedSearch || undefined,
+		...sortMapping[sortBy],
+	});
 
-	// Filter and sort listings locally
+	// Only client-side sort for views (not available server-side)
 	const filteredListings = useMemo(() => {
-		let result = [...listings];
-
-		// Search filter
-		if (searchQuery) {
-			const query = searchQuery.toLowerCase();
-			result = result.filter(
-				(listing) =>
-					listing.name.toLowerCase().includes(query) ||
-					listing.identifier?.toLowerCase().includes(query) ||
-					listing.description?.toLowerCase().includes(query)
-			);
+		if (sortBy === "views") {
+			return [...listings].sort((a, b) => b.views - a.views);
 		}
-
-		// Sort
-		result.sort((a, b) => {
-			if (sortBy === "name") return a.name.localeCompare(b.name);
-			if (sortBy === "price") return b.price - a.price;
-			if (sortBy === "views") return b.views - a.views;
-			return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-		});
-
-		return result;
-	}, [listings, searchQuery, sortBy]);
+		return listings;
+	}, [listings, sortBy]);
 
 	// Stats
 	const stats = useMemo(() => {
@@ -311,7 +335,7 @@ export function ListingsList() {
 			filters.push({
 				key: "search",
 				label: `"${searchQuery}"`,
-				onRemove: () => setSearchQuery(""),
+				onRemove: () => { setSearchQuery(""); setDebouncedSearch(""); },
 			});
 		}
 		return filters;
@@ -319,8 +343,28 @@ export function ListingsList() {
 
 	const clearAllFilters = () => {
 		setSearchQuery("");
+		setDebouncedSearch("");
 		setSortBy("date");
 	};
+
+	const handleBatchAction = useCallback(async (action: "delete") => {
+		if (!organizationId || selectedIds.size === 0) return;
+		setIsBatchLoading(true);
+		try {
+			await batchListings.mutateAsync({
+				organizationId,
+				action,
+				listingIds: Array.from(selectedIds),
+			});
+			showToast.success(`${selectedIds.size} listing${selectedIds.size > 1 ? "s" : ""} deleted`);
+			setSelectedIds(new Set());
+			refetch();
+		} catch (err) {
+			showToast.error(err, `Failed to ${action} listings`);
+		} finally {
+			setIsBatchLoading(false);
+		}
+	}, [organizationId, selectedIds, batchListings, refetch]);
 
 	const hasActiveFilters = !!searchQuery;
 
@@ -354,13 +398,13 @@ export function ListingsList() {
 
 			{/* Search + Filter Row */}
 			<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-				<div className="w-full sm:w-52 sm:shrink-0">
+				<div className="w-full sm:w-64 sm:shrink-0">
 					<InputGroup>
 						<MagnifyingGlassIcon data-slot="icon" />
 						<Input
 							type="text"
 							value={searchQuery}
-							onChange={(e) => setSearchQuery(e.target.value)}
+							onChange={(e) => handleSearchChange(e.target.value)}
 							placeholder="Search listings..."
 							aria-label="Search listings"
 						/>
@@ -427,7 +471,23 @@ export function ListingsList() {
 				<>
 					<div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
 						{filteredListings.map((listing) => (
-							<ListingCard key={listing.id} listing={listing} orgSlug={orgSlug} canEdit={canUpdateListing} />
+							<div key={listing.id} className="group relative">
+								{/* Selection checkbox */}
+								<button
+									type="button"
+									onClick={(e) => { e.preventDefault(); toggleSelect(listing.id); }}
+									className={`absolute left-2 top-2 z-10 flex size-5 items-center justify-center rounded border transition-all ${
+										selectedIds.has(listing.id)
+											? "border-zinc-900 bg-zinc-900 dark:border-white dark:bg-white"
+											: "border-zinc-300 bg-white opacity-0 group-hover:opacity-100 dark:border-zinc-600 dark:bg-zinc-800"
+									}`}
+								>
+									{selectedIds.has(listing.id) && (
+										<CheckCircleIcon className="size-3.5 text-white dark:text-zinc-900" />
+									)}
+								</button>
+								<ListingCard listing={listing} orgSlug={orgSlug} canEdit={canUpdateListing} />
+							</div>
 						))}
 					</div>
 
@@ -465,6 +525,15 @@ export function ListingsList() {
 					}
 				/>
 			)}
+
+			{/* Floating Batch Actions Bar */}
+			<BulkActionsBar selectedCount={selectedIds.size} onClear={clearSelection}>
+				{canDeleteListing && (
+					<Button color="red" onClick={() => handleBatchAction("delete")} disabled={isBatchLoading}>
+						<TrashIcon className="size-4" /> Delete
+					</Button>
+				)}
+			</BulkActionsBar>
 
 			{/* Create Listing Modal */}
 			<CreateListingModal

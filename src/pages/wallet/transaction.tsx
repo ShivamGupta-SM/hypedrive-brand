@@ -149,7 +149,7 @@ export function TransactionShow() {
 										? "text-amber-500"
 										: typeConfig.color === "sky"
 											? "text-sky-500"
-											: "text-zinc-500"
+											: "text-zinc-500 dark:text-zinc-400"
 						}`}
 					/>
 				}
@@ -200,7 +200,7 @@ export function TransactionShow() {
 						<div className="flex items-center justify-between border-b border-zinc-200 pb-4 dark:border-zinc-700">
 							<div className="flex items-center gap-3">
 								<div className="flex size-10 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
-									<HashtagIcon className="size-5 text-zinc-500" />
+									<HashtagIcon className="size-5 text-zinc-500 dark:text-zinc-400" />
 								</div>
 								<div>
 									<p className="text-sm font-medium text-zinc-900 dark:text-white">Transaction ID</p>
@@ -219,7 +219,7 @@ export function TransactionShow() {
 						<div className="flex items-center justify-between border-b border-zinc-200 pb-4 dark:border-zinc-700">
 							<div className="flex items-center gap-3">
 								<div className="flex size-10 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
-									<BanknotesIcon className="size-5 text-zinc-500" />
+									<BanknotesIcon className="size-5 text-zinc-500 dark:text-zinc-400" />
 								</div>
 								<div>
 									<p className="text-sm font-medium text-zinc-900 dark:text-white">Wallet ID</p>
@@ -308,7 +308,7 @@ export function TransactionShow() {
 						<div className="flex items-center justify-between pt-2">
 							<div className="flex items-center gap-3">
 								<div className="flex size-10 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
-									<CalendarIcon className="size-5 text-zinc-500" />
+									<CalendarIcon className="size-5 text-zinc-500 dark:text-zinc-400" />
 								</div>
 								<div>
 									<p className="text-sm font-medium text-zinc-900 dark:text-white">Created</p>

@@ -139,7 +139,7 @@ export function FilterBar({
 
 				{/* Clear filters */}
 				{hasActiveFilters && onClearFilters && (
-					<Button plain onClick={onClearFilters} className="text-zinc-500 hover:text-zinc-700">
+					<Button plain onClick={onClearFilters} className="text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200">
 						<XMarkIcon data-slot="icon" />
 						Clear
 					</Button>

@@ -17,7 +17,9 @@ export const getCampaignServer = createServerFn({ method: "GET" })
 	.middleware([authMiddleware])
 	.inputValidator((input: { orgId: string; campaignId: string }) => input)
 	.handler(async ({ context, data }) => {
-		return context.client.brand.getCampaign(data.orgId, data.campaignId);
+		return context.client.brand.getCampaign(data.orgId, data.campaignId, {
+			expand: "tasks,enrollmentStats,listing",
+		});
 	});
 
 export const getCampaignStatsServer = createServerFn({ method: "GET" })
@@ -37,9 +39,11 @@ export const listCampaignsServer = createServerFn({ method: "GET" })
 			params?: {
 				status?: string;
 				listingId?: string;
-				search?: string;
+				q?: string;
 				skip?: number;
 				take?: number;
+				cursor?: string;
+				limit?: number;
 				sortBy?: "createdAt" | "startDate" | "endDate" | "title";
 				sortOrder?: "asc" | "desc";
 			};
@@ -135,10 +139,11 @@ export const updateCampaignStateServer = createServerFn({ method: "POST" })
 
 export const duplicateCampaignServer = createServerFn({ method: "POST" })
 	.middleware([authMiddleware])
-	.inputValidator((input: { organizationId: string; campaignId: string; newTitle?: string }) => input)
+	.inputValidator((input: { organizationId: string; campaignId: string; newTitle?: string; idempotencyKey?: string }) => input)
 	.handler(async ({ context, data }) => {
 		return context.client.brand.duplicateCampaign(data.organizationId, data.campaignId, {
 			newTitle: data.newTitle,
+			idempotencyKey: data.idempotencyKey,
 		});
 	});
 
@@ -194,4 +199,24 @@ export const removeCampaignTaskServer = createServerFn({ method: "POST" })
 	.inputValidator((input: { orgId: string; campaignId: string; taskId: string }) => input)
 	.handler(async ({ context, data }) => {
 		return context.client.brand.removeCampaignTask(data.orgId, data.campaignId, data.taskId);
+	});
+
+// -- Batch Campaign Operations ------------------------------------------------
+
+export const batchCampaignsServer = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
+	.inputValidator(
+		(input: {
+			orgId: string;
+			action: "pause" | "resume" | "end" | "archive";
+			campaignIds: string[];
+			reason?: string;
+		}) => input
+	)
+	.handler(async ({ context, data }) => {
+		return context.client.brand.batchCampaigns(data.orgId, {
+			action: data.action,
+			campaignIds: data.campaignIds,
+			reason: data.reason,
+		});
 	});

@@ -57,7 +57,7 @@ export function PageHeader({
 			)}
 
 			{/* Main Header */}
-			<div className="flex items-start justify-between gap-4">
+			<div className="flex items-start justify-between gap-2 sm:gap-4">
 				<div className="min-w-0 flex-1">
 					<div className="flex flex-wrap items-center gap-x-3 gap-y-2">
 						<Heading>{title}</Heading>
@@ -209,7 +209,7 @@ export function PageSection({
 								) : (
 									<TitleComponent>{title}</TitleComponent>
 								))}
-							{description && <Text className="mt-0.5 text-sm text-zinc-500">{description}</Text>}
+							{description && <Text className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">{description}</Text>}
 						</div>
 					</div>
 					{actions && <div className="shrink-0">{actions}</div>}
@@ -284,7 +284,7 @@ export function FormSection({ children, className, icon, title, description }: F
 				)}
 				<div>
 					<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">{title}</h3>
-					{description && <Text className="mt-0.5 text-sm text-zinc-500">{description}</Text>}
+					{description && <Text className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">{description}</Text>}
 				</div>
 			</div>
 			<div className="mt-6 space-y-6">{children}</div>
@@ -491,7 +491,7 @@ export function ContentCard({
 						)}
 						<div className="min-w-0">
 							{title && <h3 className="text-sm font-semibold text-zinc-900 dark:text-white">{title}</h3>}
-							{description && <Text className="mt-0.5 text-sm text-zinc-500">{description}</Text>}
+							{description && <Text className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">{description}</Text>}
 						</div>
 					</div>
 					{actions && <div className="shrink-0">{actions}</div>}
@@ -1114,7 +1114,7 @@ const actionLinkStyles = {
 		icon: "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400",
 		title: "text-zinc-900 dark:text-white",
 		description: "text-zinc-500 dark:text-zinc-400",
-		chevron: "text-zinc-400 dark:text-zinc-500",
+		chevron: "text-zinc-500 dark:text-zinc-400",
 	},
 	warning: {
 		container:

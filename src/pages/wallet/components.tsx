@@ -30,7 +30,7 @@ import { Skeleton } from "@/components/skeleton";
 import { Textarea } from "@/components/textarea";
 import { usePasskeyReauthOptions } from "@/features/auth/hooks-passkeys";
 import { useCancelWithdrawal, useCreateWithdrawal } from "@/features/wallet/mutations";
-import { getAPIErrorMessage } from "@/hooks/api-client";
+import { getFriendlyErrorMessage } from "@/hooks/api-client";
 import type { brand } from "@/lib/brand-client";
 import { formatCurrency, formatDateTime } from "@/lib/design-tokens";
 import { showToast } from "@/lib/toast";
@@ -135,7 +135,7 @@ export function DepositAccountDialog({
 				) : !accountDetails ? (
 					<div className="flex flex-col items-center py-8 text-center">
 						<div className="flex size-14 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800">
-							<BuildingOffice2Icon className="size-7 text-zinc-400" />
+							<BuildingOffice2Icon className="size-7 text-zinc-500 dark:text-zinc-400" />
 						</div>
 						<p className="mt-3 text-sm font-semibold text-zinc-900 dark:text-white">Deposit Account Not Set Up</p>
 						<p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
@@ -158,7 +158,7 @@ export function DepositAccountDialog({
 										<Icon className="size-4 text-zinc-500 dark:text-zinc-400" />
 									</div>
 									<div className="min-w-0 flex-1">
-										<p className="text-[11px] font-medium text-zinc-400 dark:text-zinc-500">{detail.label}</p>
+										<p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">{detail.label}</p>
 										<p
 											className={clsx(
 												"mt-0.5 truncate text-sm font-medium text-zinc-900 dark:text-white",
@@ -226,7 +226,7 @@ export function TransactionRow({ transaction }: { transaction: WalletTransaction
 				<div className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
 					<span className="shrink-0">{formatDateTime(transaction.createdAt)}</span>
 					{transaction.reference && (
-						<span className="truncate font-mono text-[10px] text-zinc-400 dark:text-zinc-500">
+						<span className="truncate font-mono text-[10px] text-zinc-500 dark:text-zinc-400">
 							{transaction.reference.slice(-12)}
 						</span>
 					)}
@@ -255,7 +255,11 @@ export function HoldRow({ hold }: { hold: ActiveHold }) {
 				<ShieldExclamationIcon className="size-4 text-amber-600 dark:text-amber-400" />
 			</div>
 			<div className="min-w-0 flex-1">
-				<p className="truncate text-sm font-medium text-zinc-900 dark:text-white">{hold.campaignTitle || "Hold"}</p>
+				<p className="truncate text-sm font-medium text-zinc-900 dark:text-white">
+					{hold.holdType === "withdrawal"
+						? `Withdrawal ${hold.withdrawalDisplayId ?? ""} — pending`
+						: hold.campaignTitle || "Hold"}
+				</p>
 				<p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
 					{formatDateTime(hold.createdAt)}
 					{hold.expiresAt && ` · Expires ${formatDateTime(hold.expiresAt)}`}
@@ -297,11 +301,22 @@ export function WithdrawDialog({
 
 	const isPending = createWithdrawal.isPending || passkeyReauth.isPending;
 
+	const MIN_WITHDRAWAL = 500; // ₹500 minimum for organizations
+	const MAX_WITHDRAWAL = 50000; // ₹50,000 maximum
+
 	const handleSubmit = async () => {
 		setError(null);
 		const amountNum = parseFloat(amount);
 		if (Number.isNaN(amountNum) || amountNum <= 0) {
 			setError("Please enter a valid amount");
+			return;
+		}
+		if (amountNum < MIN_WITHDRAWAL) {
+			setError(`Minimum withdrawal amount is ₹${MIN_WITHDRAWAL.toLocaleString("en-IN")}`);
+			return;
+		}
+		if (amountNum > MAX_WITHDRAWAL) {
+			setError(`Maximum withdrawal amount is ₹${MAX_WITHDRAWAL.toLocaleString("en-IN")}`);
 			return;
 		}
 		if (amountNum > availableBalance) {
@@ -331,7 +346,7 @@ export function WithdrawDialog({
 			if (err instanceof Error && err.message === "Passkey verification cancelled") {
 				setError("Passkey verification was cancelled.");
 			} else {
-				setError(getAPIErrorMessage(err, "Failed to request withdrawal"));
+				setError(getFriendlyErrorMessage(err, "Failed to request withdrawal"));
 			}
 		}
 	};
@@ -423,54 +438,100 @@ export function WithdrawalRow({
 	};
 
 	const cancelWithdrawal = useCancelWithdrawal(organizationId);
+	// Use server-driven allowedActions if available, fallback to permission + status check
 	const canCancelWithdrawal = useCan("withdrawal", "cancel");
-	const canCancel = withdrawal.status === "pending" && canCancelWithdrawal;
+	const canCancel = withdrawal.allowedActions
+		? withdrawal.allowedActions.includes("cancel")
+		: withdrawal.status === "pending" && canCancelWithdrawal;
 
-	const handleCancel = async (e: React.MouseEvent) => {
+	const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+
+	const handleCancelClick = (e: React.MouseEvent) => {
 		e.stopPropagation();
+		setShowCancelConfirm(true);
+	};
+
+	const handleConfirmCancel = async () => {
 		try {
 			await cancelWithdrawal.mutateAsync({ withdrawalId: withdrawal.id });
 			showToast.success("Withdrawal request cancelled");
+			setShowCancelConfirm(false);
 		} catch (err) {
 			showToast.error(err, "Failed to cancel withdrawal");
 		}
 	};
 
 	return (
-		<button
-			type="button"
-			className={`flex w-full items-center gap-3 px-4 py-3 text-left ${onClick ? "transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50" : ""}`}
-			onClick={onClick}
-		>
-			<div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
-				<ArrowUpRightIcon className="size-4 text-zinc-500 dark:text-zinc-400" />
-			</div>
-			<div className="min-w-0 flex-1">
-				<div className="flex items-center gap-2">
-					<p className="truncate text-sm font-medium text-zinc-900 dark:text-white">Withdrawal</p>
-					<Badge color={statusColors[withdrawal.status] || "zinc"}>{withdrawal.status}</Badge>
+		<>
+			<button
+				type="button"
+				className={`flex w-full items-center gap-3 px-4 py-3 text-left ${onClick ? "transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50" : ""}`}
+				onClick={onClick}
+			>
+				<div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
+					<ArrowUpRightIcon className="size-4 text-zinc-500 dark:text-zinc-400" />
 				</div>
-				<p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
-					{formatDateTime(withdrawal.requestedAt)}
-					<span className="ml-1.5 font-mono text-zinc-400 dark:text-zinc-500">#{withdrawal.id.slice(-8)}</span>
-				</p>
-			</div>
-			<div className="flex shrink-0 items-center gap-2">
-				<p className="text-sm font-semibold tabular-nums text-zinc-900 dark:text-white">
-					{formatCurrency(withdrawal.amountDecimal)}
-				</p>
-				{canCancel && (
-					<Button
-						plain
-						onClick={handleCancel}
-						disabled={cancelWithdrawal.isPending}
-						className="text-xs text-red-500 hover:text-red-700"
-					>
-						{cancelWithdrawal.isPending ? "..." : "Cancel"}
+				<div className="min-w-0 flex-1">
+					<div className="flex items-center gap-2">
+						<p className="truncate text-sm font-medium text-zinc-900 dark:text-white">Withdrawal</p>
+						<Badge color={statusColors[withdrawal.status] || "zinc"}>{withdrawal.status}</Badge>
+					</div>
+					<p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
+						{formatDateTime(withdrawal.requestedAt)}
+						<span className="ml-1.5 font-mono text-zinc-500 dark:text-zinc-400">#{withdrawal.id.slice(-8)}</span>
+					</p>
+				</div>
+				<div className="flex shrink-0 items-center gap-2">
+					<p className="text-sm font-semibold tabular-nums text-zinc-900 dark:text-white">
+						{formatCurrency(withdrawal.amountDecimal)}
+					</p>
+					{canCancel && (
+						<Button
+							plain
+							onClick={handleCancelClick}
+							disabled={cancelWithdrawal.isPending}
+							className="text-xs text-red-500 hover:text-red-700"
+						>
+							{cancelWithdrawal.isPending ? "..." : "Cancel"}
+						</Button>
+					)}
+				</div>
+			</button>
+
+			{/* Cancel Confirmation Dialog */}
+			<Dialog open={showCancelConfirm} onClose={() => setShowCancelConfirm(false)} size="sm">
+				<DialogHeader
+					icon={ExclamationTriangleIcon}
+					iconColor="red"
+					title="Cancel Withdrawal"
+					description={`Cancel withdrawal of ${formatCurrency(withdrawal.amountDecimal)}?`}
+					onClose={() => setShowCancelConfirm(false)}
+				/>
+				<DialogBody>
+					<div className="flex items-start gap-2.5 rounded-xl bg-red-50 p-3 dark:bg-red-950/20">
+						<ExclamationTriangleIcon className="mt-0.5 size-4 shrink-0 text-red-500" />
+						<p className="text-sm text-red-700 dark:text-red-300">
+							The funds will be returned to your available balance. This cannot be undone.
+						</p>
+					</div>
+				</DialogBody>
+				<DialogActions>
+					<Button plain onClick={() => setShowCancelConfirm(false)} disabled={cancelWithdrawal.isPending}>
+						Go Back
 					</Button>
-				)}
-			</div>
-		</button>
+					<Button color="red" onClick={handleConfirmCancel} disabled={cancelWithdrawal.isPending}>
+						{cancelWithdrawal.isPending ? (
+							<>
+								<ArrowPathIcon className="size-4 animate-spin" />
+								Cancelling...
+							</>
+						) : (
+							"Cancel Withdrawal"
+						)}
+					</Button>
+				</DialogActions>
+			</Dialog>
+		</>
 	);
 }
 
@@ -491,7 +552,7 @@ export function DepositRow({ deposit }: { deposit: brand.DepositTransaction }) {
 				</div>
 				<p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
 					{formatDateTime(deposit.createdAt)}
-					<span className="ml-1.5 font-mono text-zinc-400 dark:text-zinc-500">#{deposit.id.slice(-8)}</span>
+					<span className="ml-1.5 font-mono text-zinc-500 dark:text-zinc-400">#{deposit.id.slice(-8)}</span>
 				</p>
 			</div>
 			<p className="shrink-0 text-sm font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">

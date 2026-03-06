@@ -14,7 +14,7 @@ export function WalletHolds() {
 			<div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3 dark:border-zinc-800">
 				<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">
 					Active Holds
-					{holds.length > 0 && <span className="ml-2 text-xs font-normal text-zinc-500">{holds.length}</span>}
+					{holds.length > 0 && <span className="ml-2 text-xs font-normal text-zinc-500 dark:text-zinc-400">{holds.length}</span>}
 				</h3>
 			</div>
 			{loading ? (

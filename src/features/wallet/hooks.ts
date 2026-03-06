@@ -2,8 +2,13 @@
  * Wallet Query Hooks — read-only data access for wallet, transactions, withdrawals, deposits.
  */
 
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import type { db } from "@/lib/brand-client";
+import { useEffect, useRef, useState } from "react";
+import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
+import Client from "@/lib/brand-client";
+
+import { API_URL } from "@/lib/config";
+import { queryKeys } from "@/hooks/api-client";
+import { getStreamTokenServer } from "@/server/auth-queries";
 import {
 	depositsQueryOptions,
 	infiniteWalletTransactionsQueryOptions,
@@ -100,7 +105,13 @@ export function useWalletHolds(organizationId: string | undefined) {
 
 export function useWithdrawals(
 	organizationId: string | undefined,
-	params?: { status?: db.WithdrawalStatus; skip?: number; take?: number }
+	params?: {
+		status?: string;
+		sortBy?: "requestedAt" | "amount" | "status";
+		sortOrder?: "asc" | "desc";
+		skip?: number;
+		take?: number;
+	}
 ) {
 	const query = useQuery({
 		...withdrawalsQueryOptions(organizationId || "", params),
@@ -147,7 +158,16 @@ export function useVirtualAccount(organizationId: string | undefined) {
 
 export function useDeposits(
 	organizationId: string | undefined,
-	params?: { skip?: number; take?: number; sortOrder?: "asc" | "desc" }
+	params?: {
+		dateFrom?: string;
+		dateTo?: string;
+		amountMin?: number;
+		amountMax?: number;
+		sortBy?: "createdAt" | "amount";
+		sortOrder?: "asc" | "desc";
+		skip?: number;
+		take?: number;
+	}
 ) {
 	const query = useQuery({
 		...depositsQueryOptions(organizationId || "", params),
@@ -176,4 +196,112 @@ export function useWithdrawalDetail(organizationId: string | undefined, withdraw
 		error: query.error,
 		refetch: query.refetch,
 	};
+}
+
+// =============================================================================
+// WALLET BALANCE STREAM
+// =============================================================================
+
+export interface WalletBalanceStreamState {
+	balance: number;
+	balanceDecimal: string;
+	pendingDebit: number;
+	pendingDebitDecimal: string;
+	availableBalance: number;
+	availableBalanceDecimal: string;
+	updatedAt: string | null;
+	balanceStale: boolean;
+	connected: boolean;
+}
+
+const INITIAL_BALANCE_STATE: WalletBalanceStreamState = {
+	balance: 0,
+	balanceDecimal: "0.00",
+	pendingDebit: 0,
+	pendingDebitDecimal: "0.00",
+	availableBalance: 0,
+	availableBalanceDecimal: "0.00",
+	updatedAt: null,
+	balanceStale: false,
+	connected: false,
+};
+
+export function useWalletBalanceStream(organizationId: string | undefined) {
+	const [state, setState] = useState<WalletBalanceStreamState>(INITIAL_BALANCE_STATE);
+	const streamRef = useRef<{ close: () => void } | null>(null);
+	const queryClient = useQueryClient();
+
+	useEffect(() => {
+		if (!organizationId) return;
+
+		let cancelled = false;
+		let retryAttempt = 0;
+		let retryTimer: ReturnType<typeof setTimeout>;
+
+		async function connect() {
+			try {
+				const { token } = await getStreamTokenServer();
+				if (cancelled) return;
+
+				const client = new Client(API_URL, { auth: { authorization: `Bearer ${token}` } });
+				const stream = await client.brand.streamWalletBalance(organizationId!);
+				if (cancelled) {
+					stream.close();
+					return;
+				}
+				streamRef.current = stream;
+				setState((prev) => ({ ...prev, connected: true }));
+				retryAttempt = 0;
+
+				for await (const update of stream) {
+					if (cancelled) break;
+
+					setState({
+						balance: update.balance,
+						balanceDecimal: update.balanceDecimal,
+						pendingDebit: update.pendingDebit,
+						pendingDebitDecimal: update.pendingDebitDecimal,
+						availableBalance: update.availableBalance,
+						availableBalanceDecimal: update.availableBalanceDecimal,
+						updatedAt: update.updatedAt,
+						balanceStale: update.balanceStale ?? false,
+						connected: true,
+					});
+
+					// Invalidate the wallet query so other components stay in sync
+					queryClient.invalidateQueries({ queryKey: queryKeys.wallet(organizationId!) });
+				}
+
+				// Stream ended cleanly — reconnect
+				if (!cancelled) {
+					scheduleReconnect();
+				}
+			} catch {
+				if (!cancelled) {
+					scheduleReconnect();
+				}
+			}
+		}
+
+		function scheduleReconnect() {
+			setState((prev) => ({ ...prev, connected: false }));
+			streamRef.current = null;
+			// Exponential backoff: 1s, 2s, 4s, 8s, 16s, max 30s
+			const delay = Math.min(1000 * 2 ** retryAttempt, 30_000);
+			retryAttempt++;
+			retryTimer = setTimeout(connect, delay);
+		}
+
+		connect();
+
+		return () => {
+			cancelled = true;
+			clearTimeout(retryTimer);
+			streamRef.current?.close();
+			streamRef.current = null;
+			setState(INITIAL_BALANCE_STATE);
+		};
+	}, [organizationId, queryClient]);
+
+	return state;
 }

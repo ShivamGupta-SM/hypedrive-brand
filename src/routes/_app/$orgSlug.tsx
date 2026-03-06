@@ -39,14 +39,14 @@ export const Route = createFileRoute("/_app/$orgSlug")({
 			throw redirect({ to: "/onboarding" });
 		}
 
-		// Check approval status
-		const status = org.approvalStatus;
+		// Check org status (3-state: onboarding | active | suspended)
+		const status = org.status;
 
-		if (status === "pending" || status === "draft") {
+		if (status === "onboarding") {
 			throw redirect({ to: "/pending-approval" });
 		}
 
-		if (status === "rejected" || status === "banned") {
+		if (status === "suspended") {
 			throw redirect({ to: "/rejected" });
 		}
 

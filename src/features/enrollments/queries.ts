@@ -52,18 +52,25 @@ export const campaignEnrollmentsQueryOptions = (
 
 export const infiniteEnrollmentsQueryOptions = (
 	orgId: string,
-	params?: { status?: db.EnrollmentStatus; campaignId?: string }
+	params?: {
+		status?: db.EnrollmentStatus;
+		campaignId?: string;
+		q?: string;
+		createdFrom?: string;
+		createdTo?: string;
+		orderValueMin?: number;
+		orderValueMax?: number;
+		sortBy?: "createdAt" | "orderValue" | "status" | "submittedAt" | "expiresAt";
+		sortOrder?: "asc" | "desc";
+	}
 ) =>
 	infiniteQueryOptions({
 		queryKey: queryKeys.infiniteEnrollments(orgId, params),
-		queryFn: ({ pageParam = 0 }) =>
+		queryFn: ({ pageParam }) =>
 			listEnrollmentsServer({
-				data: { orgId, params: { ...params, skip: pageParam, take: DEFAULT_PAGE_SIZE } },
+				data: { orgId, params: { ...params, cursor: pageParam, limit: DEFAULT_PAGE_SIZE } },
 			}),
-		initialPageParam: 0,
-		getNextPageParam: (lastPage, allPages) => {
-			if (!lastPage.hasMore) return undefined;
-			return allPages.reduce((acc, page) => acc + (page.data?.length ?? 0), 0);
-		},
+		initialPageParam: undefined as string | undefined,
+		getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
 		staleTime: CACHE.list,
 	});

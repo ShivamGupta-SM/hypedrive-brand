@@ -366,7 +366,7 @@ export function CreateListingModal({
 									<span
 										className={clsx(
 											"text-xs tabular-nums",
-											description.length > 450 ? "text-amber-500" : "text-zinc-400 dark:text-zinc-500"
+											description.length > 450 ? "text-amber-500" : "text-zinc-500 dark:text-zinc-400"
 										)}
 									>
 										{description.length}/500

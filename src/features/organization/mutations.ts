@@ -29,7 +29,7 @@ export function useCreateOrganization() {
 			country?: string;
 			postalCode?: string;
 		}) => {
-			return createOrganizationServer({ data: params });
+			return createOrganizationServer({ data: { ...params, idempotencyKey: crypto.randomUUID() } });
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.organizationProfile() });

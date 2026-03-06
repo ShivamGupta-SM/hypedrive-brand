@@ -32,9 +32,9 @@ export const listOrgRolesServer = createServerFn({ method: "GET" })
 
 export const inviteMemberServer = createServerFn({ method: "POST" })
 	.middleware([authMiddleware])
-	.inputValidator((input: { orgId: string; email: string; role: "owner" | "admin" | "member" }) => input)
+	.inputValidator((input: { orgId: string; email: string; role: "owner" | "admin" | "member"; idempotencyKey?: string }) => input)
 	.handler(async ({ context, data }) => {
-		return context.client.auth.inviteMemberAuth(data.orgId, { email: data.email, role: data.role });
+		return context.client.auth.inviteMemberAuth(data.orgId, { email: data.email, role: data.role, idempotencyKey: data.idempotencyKey });
 	});
 
 export const cancelInvitationServer = createServerFn({ method: "POST" })
@@ -60,7 +60,25 @@ export const removeMemberServer = createServerFn({ method: "POST" })
 
 export const addMemberServer = createServerFn({ method: "POST" })
 	.middleware([authMiddleware])
-	.inputValidator((input: { orgId: string; userId: string; role: "owner" | "admin" | "member" }) => input)
+	.inputValidator((input: { orgId: string; userId: string; role: "owner" | "admin" | "member"; idempotencyKey?: string }) => input)
 	.handler(async ({ context, data }) => {
-		return context.client.auth.addMember(data.orgId, { userId: data.userId, role: data.role });
+		return context.client.auth.addMember(data.orgId, { userId: data.userId, role: data.role, idempotencyKey: data.idempotencyKey });
+	});
+
+// -- Batch Member Operations --------------------------------------------------
+
+export const batchMembersServer = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
+	.inputValidator(
+		(input: {
+			orgId: string;
+			action: "remove";
+			memberIds: string[];
+		}) => input
+	)
+	.handler(async ({ context, data }) => {
+		return context.client.auth.batchMembers(data.orgId, {
+			action: data.action,
+			memberIds: data.memberIds,
+		});
 	});

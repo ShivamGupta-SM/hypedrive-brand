@@ -10,9 +10,11 @@ import { authMiddleware } from "@/server/middleware";
 
 export const getInvoiceServer = createServerFn({ method: "GET" })
 	.middleware([authMiddleware])
-	.inputValidator((input: { orgId: string; invoiceId: string }) => input)
+	.inputValidator((input: { orgId: string; invoiceId: string; expand?: string }) => input)
 	.handler(async ({ context, data }) => {
-		return context.client.brand.getInvoice(data.orgId, data.invoiceId);
+		return context.client.brand.getInvoice(data.orgId, data.invoiceId, {
+			expand: data.expand,
+		});
 	});
 
 export const listInvoicesServer = createServerFn({ method: "GET" })
@@ -24,7 +26,16 @@ export const listInvoicesServer = createServerFn({ method: "GET" })
 				status?: db.InvoiceStatus;
 				skip?: number;
 				take?: number;
+				cursor?: string;
+				limit?: number;
 				q?: string;
+				campaignId?: string;
+				issuedDateFrom?: string;
+				issuedDateTo?: string;
+				dueDateFrom?: string;
+				dueDateTo?: string;
+				amountMin?: number;
+				amountMax?: number;
 				sortBy?: "createdAt" | "issuedAt" | "dueDate" | "totalAmount";
 				sortOrder?: "asc" | "desc";
 			};
@@ -41,4 +52,22 @@ export const generateInvoicePDFServer = createServerFn({ method: "POST" })
 	.inputValidator((input: { orgId: string; invoiceId: string }) => input)
 	.handler(async ({ context, data }) => {
 		return context.client.brand.generateInvoicePDF(data.orgId, data.invoiceId);
+	});
+
+// -- Batch Invoice Operations -------------------------------------------------
+
+export const batchInvoicesServer = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
+	.inputValidator(
+		(input: {
+			orgId: string;
+			action: "mark_paid";
+			invoiceIds: string[];
+		}) => input
+	)
+	.handler(async ({ context, data }) => {
+		return context.client.brand.batchInvoices(data.orgId, {
+			action: data.action,
+			invoiceIds: data.invoiceIds,
+		});
 	});

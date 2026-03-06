@@ -1,7 +1,9 @@
 /**
  * Approval Status Routes Layout
- * For pending/rejected organizations.
+ * For onboarding/suspended organizations.
  * Uses router context + server-side org fetch — no Zustand access.
+ *
+ * Backend org status model (3-state): onboarding | active | suspended
  */
 
 import { createFileRoute, isRedirect, Outlet, redirect } from "@tanstack/react-router";
@@ -26,7 +28,7 @@ export const Route = createFileRoute("/_approval")({
 			slug: string;
 			logo?: string | null;
 			createdAt: string;
-			approvalStatus?: string;
+			status?: string;
 		} | null = null;
 		try {
 			await context.queryClient.invalidateQueries({ queryKey: [...AUTH_QUERY_KEY] });
@@ -44,7 +46,7 @@ export const Route = createFileRoute("/_approval")({
 
 			// Active org — redirect to dashboard
 			const org = organizations[0];
-			if (org.approvalStatus === "active") {
+			if (org.status === "active") {
 				throw redirect({ to: "/$orgSlug", params: { orgSlug: org.slug } });
 			}
 

@@ -2,24 +2,40 @@ import {
 	ArrowUpRightIcon,
 	CalendarIcon,
 	CheckCircleIcon,
+	ClockIcon,
 	ExclamationTriangleIcon,
 	HashtagIcon,
+	Squares2X2Icon,
+	XCircleIcon,
 } from "@heroicons/react/16/solid";
 import { useState } from "react";
 import { Badge } from "@/components/badge";
 import { Button } from "@/components/button";
 import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/dialog";
 import { EmptyState } from "@/components/shared/empty-state";
+import { FilterPills, type FilterPillOption } from "@/components/shared/filter-pills";
 import { Skeleton } from "@/components/skeleton";
 import { useWithdrawalDetail, useWithdrawalStats, useWithdrawals } from "@/features/wallet/hooks";
 import { useOrgContext } from "@/hooks/use-org-context";
 import { formatCurrency, formatDateTime } from "@/lib/design-tokens";
 import { WithdrawalRow } from "./components";
 
+const statusFilterOptions: FilterPillOption[] = [
+	{ value: "all", label: "All", icon: Squares2X2Icon, iconColor: "text-sky-500" },
+	{ value: "pending", label: "Pending", icon: ClockIcon, iconColor: "text-amber-500" },
+	{ value: "completed", label: "Completed", icon: CheckCircleIcon, iconColor: "text-emerald-500" },
+	{ value: "rejected", label: "Rejected", icon: XCircleIcon, iconColor: "text-red-500" },
+];
+
+type StatusFilter = "all" | "pending" | "completed" | "rejected";
+
 export function WalletWithdrawals() {
 	const { organizationId } = useOrgContext();
+	const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 
-	const { data: withdrawals, loading: withdrawalsLoading } = useWithdrawals(organizationId);
+	const { data: withdrawals, loading: withdrawalsLoading } = useWithdrawals(organizationId, {
+		status: statusFilter === "all" ? undefined : statusFilter,
+	});
 	const { data: withdrawalStats } = useWithdrawalStats(organizationId);
 
 	const [selectedWithdrawalId, setSelectedWithdrawalId] = useState<string | null>(null);
@@ -30,6 +46,9 @@ export function WalletWithdrawals() {
 
 	return (
 		<div className="space-y-4">
+			{/* Status filter pills */}
+			<FilterPills options={statusFilterOptions} value={statusFilter} onChange={(v) => setStatusFilter(v as StatusFilter)} />
+
 			{/* Withdrawal Stats */}
 			{withdrawalStats && (
 				<div className="grid grid-cols-2 gap-3 sm:gap-4">
@@ -57,7 +76,7 @@ export function WalletWithdrawals() {
 					<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">
 						Withdrawal Requests
 						{withdrawals.length > 0 && (
-							<span className="ml-2 text-xs font-normal text-zinc-500">{withdrawals.length}</span>
+							<span className="ml-2 text-xs font-normal text-zinc-500 dark:text-zinc-400">{withdrawals.length}</span>
 						)}
 					</h3>
 				</div>
@@ -108,7 +127,7 @@ export function WalletWithdrawals() {
 						<div className="space-y-5">
 							{/* Amount highlight */}
 							<div className="rounded-xl bg-zinc-50 p-4 text-center dark:bg-zinc-800/50">
-								<p className="text-[11px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+								<p className="text-[11px] font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
 									Amount
 								</p>
 								<p className="mt-1 text-2xl font-bold tabular-nums text-zinc-900 dark:text-white">
@@ -171,7 +190,7 @@ export function WalletWithdrawals() {
 							)}
 						</div>
 					) : (
-						<p className="text-sm text-zinc-500">Withdrawal not found.</p>
+						<p className="text-sm text-zinc-500 dark:text-zinc-400">Withdrawal not found.</p>
 					)}
 				</DialogBody>
 				<DialogActions>

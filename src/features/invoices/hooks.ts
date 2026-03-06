@@ -2,10 +2,9 @@
  * Invoice Hooks — queries + mutations.
  */
 
-import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import type { db } from "@/lib/brand-client";
 import { infiniteInvoicesQueryOptions, invoiceQueryOptions, invoicesQueryOptions } from "./queries";
-import { generateInvoicePDFServer } from "./server";
 
 export function useInvoices(
 	organizationId: string | undefined,
@@ -33,7 +32,20 @@ export function useInvoices(
 	};
 }
 
-export function useInfiniteInvoices(organizationId: string | undefined, params?: { status?: db.InvoiceStatus }) {
+export function useInfiniteInvoices(
+	organizationId: string | undefined,
+	params?: {
+		status?: db.InvoiceStatus;
+		q?: string;
+		campaignId?: string;
+		issuedDateFrom?: string;
+		issuedDateTo?: string;
+		amountMin?: number;
+		amountMax?: number;
+		sortBy?: "createdAt" | "issuedAt" | "dueDate" | "totalAmount";
+		sortOrder?: "asc" | "desc";
+	}
+) {
 	const query = useInfiniteQuery({
 		...infiniteInvoicesQueryOptions(organizationId || "", params),
 		enabled: !!organizationId,
@@ -56,7 +68,7 @@ export function useInfiniteInvoices(organizationId: string | undefined, params?:
 
 export function useInvoice(organizationId: string | undefined, invoiceId: string | undefined) {
 	const query = useQuery({
-		...invoiceQueryOptions(organizationId || "", invoiceId || ""),
+		...invoiceQueryOptions(organizationId || "", invoiceId || "", "lineItems"),
 		enabled: !!organizationId && !!invoiceId,
 	});
 
@@ -66,12 +78,4 @@ export function useInvoice(organizationId: string | undefined, invoiceId: string
 		error: query.error,
 		refetch: query.refetch,
 	};
-}
-
-export function useGenerateInvoicePDF(organizationId: string | undefined) {
-	return useMutation({
-		mutationFn: async (invoiceId: string) => {
-			return generateInvoicePDFServer({ data: { orgId: organizationId as string, invoiceId } });
-		},
-	});
 }

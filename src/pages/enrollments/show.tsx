@@ -73,7 +73,7 @@ function getStatusConfig(status: EnrollmentStatus): {
 			icon: ClockIcon,
 			color: "zinc",
 			bgClass: "bg-zinc-100 dark:bg-zinc-800",
-			iconColor: "text-zinc-500",
+			iconColor: "text-zinc-500 dark:text-zinc-400",
 		},
 		awaiting_review: {
 			label: "Awaiting Review",
@@ -324,11 +324,11 @@ function TimelineItem({ item, isLast }: { item: brand.EnrollmentDetail["history"
 						<p className="text-sm font-medium text-zinc-900 dark:text-white">{getStatusLabel(item.toStatus)}</p>
 						{item.reason && <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">{item.reason}</p>}
 					</div>
-					<span className="whitespace-nowrap text-xs text-zinc-400 dark:text-zinc-500">
+					<span className="whitespace-nowrap text-xs text-zinc-500 dark:text-zinc-400">
 						{formatRelativeTime(item.changedAt)}
 					</span>
 				</div>
-				<p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">{item.changedByName || "System"}</p>
+				<p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">{item.changedByName || "System"}</p>
 			</div>
 		</div>
 	);
@@ -616,9 +616,9 @@ export function EnrollmentShow() {
 	const { id: enrollmentId } = useParams({ strict: false }) as { id: string };
 	const { organizationId, orgSlug } = useOrgContext();
 
-	const canApproveEnrollment = useCan("enrollment", "approve");
-	const canRejectEnrollment = useCan("enrollment", "reject");
-	const canRequestChanges = useCan("enrollment", "request_changes");
+	const canApproveGlobal = useCan("enrollment", "approve");
+	const canRejectGlobal = useCan("enrollment", "reject");
+	const canRequestChangesGlobal = useCan("enrollment", "request_changes");
 
 	const { data: enrollment, loading, error, refetch } = useEnrollment(organizationId, undefined, enrollmentId);
 	usePageTitle(enrollment?.displayId ?? null);
@@ -641,6 +641,18 @@ export function EnrollmentShow() {
 	const statusConfig = getStatusConfig(enrollment.status);
 	const StatusIcon = statusConfig.icon;
 	const isAwaitingReview = enrollment.status === "awaiting_review";
+
+	// Prefer server-driven allowedActions, fall back to RBAC
+	const canApproveEnrollment = enrollment.allowedActions
+		? enrollment.allowedActions.includes("approve")
+		: canApproveGlobal;
+	const canRejectEnrollment = enrollment.allowedActions
+		? enrollment.allowedActions.includes("reject")
+		: canRejectGlobal;
+	const canRequestChanges = enrollment.allowedActions
+		? enrollment.allowedActions.includes("request_changes")
+		: canRequestChangesGlobal;
+
 	const canReview = isAwaitingReview && (canApproveEnrollment || canRejectEnrollment || canRequestChanges);
 
 	const creatorName = enrollment.creator?.profileName || "Creator";
@@ -1086,7 +1098,7 @@ export function EnrollmentShow() {
 																					</p>
 																				)}
 																				{task.instructions && (
-																					<p className="mt-1 flex items-start gap-1 text-xs text-zinc-400 dark:text-zinc-500">
+																					<p className="mt-1 flex items-start gap-1 text-xs text-zinc-500 dark:text-zinc-400">
 																						<ExclamationTriangleIcon className="mt-0.5 size-3 shrink-0" />
 																						{task.instructions}
 																					</p>
@@ -1121,7 +1133,7 @@ export function EnrollmentShow() {
 																							</a>
 																						)}
 																						{task.submittedAt && (
-																							<span className="inline-flex items-center text-xs text-zinc-400 dark:text-zinc-500">
+																							<span className="inline-flex items-center text-xs text-zinc-500 dark:text-zinc-400">
 																								{formatDateTime(task.submittedAt)}
 																							</span>
 																						)}
@@ -1171,7 +1183,7 @@ export function EnrollmentShow() {
 									/>
 								) : (
 									<div className="flex size-11 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800">
-										<MegaphoneIcon className="size-5 text-zinc-500" />
+										<MegaphoneIcon className="size-5 text-zinc-500 dark:text-zinc-400" />
 									</div>
 								)}
 								<div className="min-w-0 flex-1">

@@ -119,6 +119,7 @@ export const createOrganizationServer = createServerFn({ method: "POST" })
 			state?: string;
 			country?: string;
 			postalCode?: string;
+			idempotencyKey?: string;
 		}) => input
 	)
 	.handler(async ({ context, data }) => {

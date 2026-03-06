@@ -12,7 +12,12 @@ export function useCreateWithdrawal(organizationId: string | undefined) {
 
 	return useMutation({
 		mutationFn: async (params: brand.CreateOrgWithdrawalRequest) => {
-			return createWithdrawalServer({ data: { orgId: organizationId as string, params } });
+			return createWithdrawalServer({
+				data: {
+					orgId: organizationId as string,
+					params: { ...params, idempotencyKey: params.idempotencyKey ?? crypto.randomUUID() },
+				},
+			});
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.wallet(organizationId || "") });

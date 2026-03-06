@@ -132,7 +132,7 @@ export function FileDropzone({
 							<ArrowUpTrayIcon className={clsx("text-blue-500", variant === "minimal" ? "size-5" : "size-8")} />
 						) : (
 							<ArrowUpTrayIcon
-								className={clsx("text-zinc-400 dark:text-zinc-500", variant === "minimal" ? "size-5" : "size-8")}
+								className={clsx("text-zinc-500 dark:text-zinc-400", variant === "minimal" ? "size-5" : "size-8")}
 							/>
 						)}
 					</div>
@@ -168,9 +168,9 @@ export function FileDropzone({
 							) : (
 								<div className="flex size-10 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
 									{file.type.startsWith("image/") ? (
-										<PhotoIcon className="size-5 text-zinc-400" />
+										<PhotoIcon className="size-5 text-zinc-400 dark:text-zinc-500" />
 									) : (
-										<DocumentIcon className="size-5 text-zinc-400" />
+										<DocumentIcon className="size-5 text-zinc-400 dark:text-zinc-500" />
 									)}
 								</div>
 							)}
@@ -283,7 +283,7 @@ export function AvatarUpload({ src, onFileChange, size = 96, error, disabled, cl
 			) : (
 				<div className="flex size-full items-center justify-center bg-zinc-100 dark:bg-zinc-800">
 					<ArrowUpTrayIcon
-						className={clsx("transition-colors", isDragActive ? "text-blue-500" : "text-zinc-400")}
+						className={clsx("transition-colors", isDragActive ? "text-blue-500" : "text-zinc-400 dark:text-zinc-500")}
 						style={{ width: size * 0.3, height: size * 0.3 }}
 					/>
 				</div>

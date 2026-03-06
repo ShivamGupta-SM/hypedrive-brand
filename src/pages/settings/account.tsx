@@ -168,7 +168,7 @@ function ChangePasswordPanel() {
 				</div>
 				<div className="min-w-0 flex-1">
 					<p className="font-semibold text-zinc-900 dark:text-white">Change Password</p>
-					<p className="mt-0.5 text-sm text-zinc-500">Enter your current password and choose a new one.</p>
+					<p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">Enter your current password and choose a new one.</p>
 				</div>
 			</div>
 
@@ -290,7 +290,7 @@ function ChangeEmailPanel({ currentEmail }: { currentEmail: string }) {
 				</div>
 				<div className="min-w-0 flex-1">
 					<p className="font-semibold text-zinc-900 dark:text-white">Change Email</p>
-					<p className="mt-0.5 text-sm text-zinc-500">A verification email will be sent to your new address.</p>
+					<p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">A verification email will be sent to your new address.</p>
 				</div>
 			</div>
 
@@ -313,7 +313,7 @@ function ChangeEmailPanel({ currentEmail }: { currentEmail: string }) {
 					)}
 					<div>
 						<span className="text-sm font-medium text-zinc-900 dark:text-white">Current Email</span>
-						<p className="mt-1 text-sm text-zinc-500">{currentEmail}</p>
+						<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{currentEmail}</p>
 					</div>
 					<div>
 						<label htmlFor="new-email" className="text-sm font-medium text-zinc-900 dark:text-white">
@@ -433,7 +433,7 @@ function ActiveSessionsPanel() {
 				</div>
 				<div className="min-w-0 flex-1">
 					<p className="font-semibold text-zinc-900 dark:text-white">Active Sessions</p>
-					<p className="mt-0.5 text-sm text-zinc-500">Manage your active sessions across devices.</p>
+					<p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">Manage your active sessions across devices.</p>
 				</div>
 			</div>
 
@@ -463,7 +463,7 @@ function ActiveSessionsPanel() {
 									}`}
 								>
 									<DeviceIcon
-										className={`size-5 ${isCurrent ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-500"}`}
+										className={`size-5 ${isCurrent ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-500 dark:text-zinc-400"}`}
 									/>
 								</div>
 								<div className="min-w-0 flex-1">
@@ -475,7 +475,7 @@ function ActiveSessionsPanel() {
 											</span>
 										)}
 									</div>
-									<div className="flex items-center gap-2 text-xs text-zinc-500">
+									<div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
 										{session.location && <span>{session.location}</span>}
 										{session.location && <span>·</span>}
 										<span>{formatDate(session.lastActive || session.createdAt)}</span>
@@ -507,7 +507,7 @@ function ActiveSessionsPanel() {
 				</div>
 			) : sessions.length === 0 ? (
 				<div className="rounded-xl bg-zinc-50 p-6 text-center dark:bg-zinc-800/50">
-					<p className="text-sm text-zinc-500">No active sessions found</p>
+					<p className="text-sm text-zinc-500 dark:text-zinc-400">No active sessions found</p>
 				</div>
 			) : (
 				<div className="space-y-3">
@@ -529,7 +529,7 @@ function ActiveSessionsPanel() {
 									}`}
 								>
 									<DeviceIcon
-										className={`size-5 ${isCurrent ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-500"}`}
+										className={`size-5 ${isCurrent ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-500 dark:text-zinc-400"}`}
 									/>
 								</div>
 								<div className="min-w-0 flex-1">
@@ -541,7 +541,7 @@ function ActiveSessionsPanel() {
 											</span>
 										)}
 									</div>
-									<p className="text-xs text-zinc-500">Last active: {formatDate(session.createdAt)}</p>
+									<p className="text-xs text-zinc-500 dark:text-zinc-400">Last active: {formatDate(session.createdAt)}</p>
 								</div>
 								{!isCurrent && (
 									<button
@@ -691,7 +691,7 @@ function EditUserProfilePanel({ initialName, initialImage }: { initialName: stri
 				</div>
 				<div className="min-w-0 flex-1">
 					<p className="font-semibold text-zinc-900 dark:text-white">Edit Profile</p>
-					<p className="mt-0.5 text-sm text-zinc-500">Update your name and profile picture.</p>
+					<p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">Update your name and profile picture.</p>
 				</div>
 			</div>
 
@@ -846,7 +846,7 @@ function TwoFactorPanel({ isEnabled }: { isEnabled: boolean }) {
 					<p className="font-semibold text-zinc-900 dark:text-white">
 						{isEnabled ? "Manage Two-Factor Authentication" : "Enable Two-Factor Authentication"}
 					</p>
-					<p className="mt-0.5 text-sm text-zinc-500">{stepDescription[step]}</p>
+					<p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">{stepDescription[step]}</p>
 				</div>
 			</div>
 
@@ -894,7 +894,7 @@ function TwoFactorPanel({ isEnabled }: { isEnabled: boolean }) {
 							</button>
 						</div>
 					</div>
-					<p className="text-center text-xs text-zinc-500">
+					<p className="text-center text-xs text-zinc-500 dark:text-zinc-400">
 						Use Google Authenticator, Authy, or any TOTP-compatible app.
 					</p>
 				</div>
@@ -1080,7 +1080,7 @@ function PasskeysPanel() {
 				</div>
 				<div className="min-w-0 flex-1">
 					<p className="font-semibold text-zinc-900 dark:text-white">Passkeys</p>
-					<p className="mt-0.5 text-sm text-zinc-500">
+					<p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
 						Sign in securely without a password using biometrics or a security key.
 					</p>
 				</div>
@@ -1102,7 +1102,7 @@ function PasskeysPanel() {
 				<div className="rounded-xl bg-zinc-50 p-6 text-center dark:bg-zinc-800/50">
 					<FingerPrintIcon className="mx-auto size-8 text-zinc-300 dark:text-zinc-600" />
 					<p className="mt-2 text-sm font-medium text-zinc-600 dark:text-zinc-400">No passkeys registered</p>
-					<p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
+					<p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
 						Add a passkey to sign in faster and more securely.
 					</p>
 				</div>
@@ -1111,7 +1111,7 @@ function PasskeysPanel() {
 					{passkeys.map((pk) => (
 						<div key={pk.id} className="flex items-center gap-3 rounded-xl bg-zinc-50 p-3 dark:bg-zinc-800/50">
 							<div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-zinc-200 dark:bg-zinc-700">
-								<FingerPrintIcon className="size-4 text-zinc-500" />
+								<FingerPrintIcon className="size-4 text-zinc-500 dark:text-zinc-400" />
 							</div>
 							<div className="min-w-0 flex-1">
 								{editingId === pk.id ? (
@@ -1227,7 +1227,7 @@ function ViewBackupCodesPanel() {
 				</div>
 				<div className="min-w-0 flex-1">
 					<p className="font-semibold text-zinc-900 dark:text-white">Backup Codes</p>
-					<p className="mt-0.5 text-sm text-zinc-500">
+					<p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
 						{codes.length > 0
 							? isRegenerated
 								? "New backup codes generated. Save them now — old codes are invalidated."
@@ -1342,7 +1342,7 @@ function SetPasswordPanel() {
 				</div>
 				<div className="min-w-0 flex-1">
 					<p className="font-semibold text-zinc-900 dark:text-white">Set Password</p>
-					<p className="mt-0.5 text-sm text-zinc-500">
+					<p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
 						{success
 							? "Password has been set successfully."
 							: "Create a password to enable email sign-in alongside your social accounts."}
@@ -1451,7 +1451,7 @@ function DeleteAccountPanel() {
 				</div>
 				<div className="min-w-0 flex-1">
 					<p className="font-semibold text-zinc-900 dark:text-white">Delete Account</p>
-					<p className="mt-0.5 text-sm text-zinc-500">This action is permanent and cannot be undone.</p>
+					<p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">This action is permanent and cannot be undone.</p>
 				</div>
 			</div>
 
@@ -1561,7 +1561,7 @@ function LinkedAccountsPanel() {
 				</div>
 				<div className="min-w-0 flex-1">
 					<p className="font-semibold text-zinc-900 dark:text-white">Linked Accounts</p>
-					<p className="mt-0.5 text-sm text-zinc-500">Connect social accounts for easier sign-in.</p>
+					<p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">Connect social accounts for easier sign-in.</p>
 				</div>
 			</div>
 
@@ -1591,12 +1591,12 @@ function LinkedAccountsPanel() {
 									}`}
 								>
 									<ProviderIcon
-										className={`size-5 ${linked ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-500"}`}
+										className={`size-5 ${linked ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-500 dark:text-zinc-400"}`}
 									/>
 								</div>
 								<div className="min-w-0 flex-1">
 									<p className="text-sm font-medium text-zinc-900 dark:text-white">{provider.label}</p>
-									<p className="text-xs text-zinc-500">{linked ? "Connected" : "Not connected"}</p>
+									<p className="text-xs text-zinc-500 dark:text-zinc-400">{linked ? "Connected" : "Not connected"}</p>
 								</div>
 								{linked ? (
 									<Button
@@ -1628,7 +1628,7 @@ function LinkedAccountsPanel() {
 								</div>
 								<div className="min-w-0 flex-1">
 									<p className="text-sm font-medium capitalize text-zinc-900 dark:text-white">{account.providerId}</p>
-									<p className="text-xs text-zinc-500">Connected</p>
+									<p className="text-xs text-zinc-500 dark:text-zinc-400">Connected</p>
 								</div>
 								<Button
 									plain
@@ -2030,7 +2030,7 @@ export function AccountSettings({ section = "all" }: { section?: AccountSettings
 										<p className="text-sm font-medium capitalize text-zinc-900 dark:text-white">
 											{token.platform} Device
 										</p>
-										<p className="truncate text-xs text-zinc-500">Token: {token.token.slice(0, 16)}...</p>
+										<p className="truncate text-xs text-zinc-500 dark:text-zinc-400">Token: {token.token.slice(0, 16)}...</p>
 									</div>
 									<button
 										type="button"
@@ -2110,7 +2110,7 @@ export function AccountSettings({ section = "all" }: { section?: AccountSettings
 			{/* App version — only in full-page mode */}
 			{section === "all" && (
 				<div className="pt-4 text-center">
-					<p className="text-xs text-zinc-400 dark:text-zinc-600">Hypedrive Brand v1.0.0</p>
+					<p className="text-xs text-zinc-400 dark:text-zinc-500">Hypedrive Brand v1.0.0</p>
 				</div>
 			)}
 		</div>

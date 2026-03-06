@@ -31,14 +31,14 @@ import { Route } from "@/routes/_app/$orgSlug/campaigns";
 
 function CampaignsLayoutSkeleton() {
 	return (
-		<div className="space-y-6">
+		<div className="space-y-5">
 			{/* Header */}
 			<div className="flex items-start justify-between gap-4">
 				<div>
 					<Skeleton width={130} height={32} borderRadius={8} />
 					<Skeleton width={280} height={16} borderRadius={6} className="mt-2" />
 				</div>
-				<Skeleton width={150} height={40} borderRadius={8} />
+				<Skeleton width={40} height={40} borderRadius={8} />
 			</div>
 
 			{/* Stats */}
@@ -53,18 +53,14 @@ function CampaignsLayoutSkeleton() {
 				columns={4}
 			/>
 
-			{/* Search */}
-			<div className="flex items-center gap-2">
-				<Skeleton height={40} borderRadius={8} containerClassName="flex-1" />
-			</div>
-
-			{/* Tabs */}
-			<div className="flex gap-1.5">
-				<Skeleton width={80} height={36} borderRadius={999} />
-				<Skeleton width={70} height={36} borderRadius={999} />
-				<Skeleton width={75} height={36} borderRadius={999} />
-				<Skeleton width={65} height={36} borderRadius={999} />
-				<Skeleton width={60} height={36} borderRadius={999} />
+			{/* Search + Tabs */}
+			<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+				<Skeleton height={40} width={256} borderRadius={8} containerClassName="w-full sm:w-64 shrink-0" />
+				<div className="flex gap-1.5 overflow-x-auto">
+					{[80, 70, 75, 65, 60].map((w, i) => (
+						<Skeleton key={i} width={w} height={36} borderRadius={999} />
+					))}
+				</div>
 			</div>
 
 			{/* Grid skeleton */}
@@ -157,7 +153,7 @@ export function CampaignsLayout() {
 	};
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-5">
 			{/* Header */}
 			<PageHeader
 				title="Campaigns"
@@ -187,9 +183,9 @@ export function CampaignsLayout() {
 				columns={4}
 			/>
 
-			{/* Search */}
-			<div className="flex items-center gap-2">
-				<div className="w-full sm:max-w-xs">
+			{/* Search + Tabs */}
+			<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+				<div className="w-full sm:w-64 sm:shrink-0">
 					<InputGroup>
 						<MagnifyingGlassIcon data-slot="icon" />
 						<Input
@@ -210,27 +206,8 @@ export function CampaignsLayout() {
 						)}
 					</InputGroup>
 				</div>
+				<TabNav tabs={tabs} />
 			</div>
-
-			{/* Active search indicator */}
-			{q && (
-				<div className="flex flex-wrap items-center gap-2">
-					<span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700 dark:bg-amber-950/30 dark:text-amber-300">
-						"{q}"
-						<button
-							type="button"
-							onClick={() => setSearchQuery("")}
-							className="ml-0.5 rounded-full hover:bg-amber-100 dark:hover:bg-amber-900/50"
-							aria-label="Remove search filter"
-						>
-							<XMarkIcon className="size-3.5" />
-						</button>
-					</span>
-				</div>
-			)}
-
-			{/* URL-based tab navigation */}
-			<TabNav tabs={tabs} />
 
 			{/* Child route renders here */}
 			<Outlet />

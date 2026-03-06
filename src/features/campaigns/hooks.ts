@@ -18,7 +18,7 @@ export function useCampaigns(
 	params?: {
 		status?: string;
 		listingId?: string;
-		search?: string;
+		q?: string;
 		skip?: number;
 		take?: number;
 		sortBy?: "createdAt" | "startDate" | "endDate" | "title";
@@ -42,7 +42,13 @@ export function useCampaigns(
 
 export function useInfiniteCampaigns(
 	organizationId: string | undefined,
-	params?: { status?: string; listingId?: string; search?: string }
+	params?: {
+		status?: string;
+		listingId?: string;
+		q?: string;
+		sortBy?: "createdAt" | "startDate" | "endDate" | "title";
+		sortOrder?: "asc" | "desc";
+	}
 ) {
 	const query = useInfiniteQuery({
 		...infiniteCampaignsQueryOptions(organizationId || "", params),

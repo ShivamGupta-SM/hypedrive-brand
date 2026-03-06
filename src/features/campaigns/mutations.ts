@@ -7,6 +7,7 @@ import { queryKeys } from "@/hooks/api-client";
 import type { brand, db } from "@/lib/brand-client";
 import {
 	addCampaignTaskServer,
+	batchCampaignsServer,
 	createAndSubmitCampaignServer,
 	createCampaignServer,
 	duplicateCampaignServer,
@@ -21,7 +22,12 @@ export function useCreateCampaign(organizationId: string | undefined) {
 
 	return useMutation({
 		mutationFn: async (params: brand.CreateCampaignRequest) => {
-			return createCampaignServer({ data: { orgId: organizationId as string, params } });
+			return createCampaignServer({
+				data: {
+					orgId: organizationId as string,
+					params: { ...params, idempotencyKey: params.idempotencyKey ?? crypto.randomUUID() },
+				},
+			});
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.campaigns(organizationId || "") });
@@ -125,7 +131,9 @@ export function useDuplicateCampaign() {
 			campaignId: string;
 			newTitle?: string;
 		}) => {
-			return duplicateCampaignServer({ data: { organizationId, campaignId, newTitle } });
+			return duplicateCampaignServer({
+				data: { organizationId, campaignId, newTitle, idempotencyKey: crypto.randomUUID() },
+			});
 		},
 		onSuccess: (_, v) => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.campaigns(v.organizationId) });
@@ -143,7 +151,12 @@ export function useCreateAndSubmitCampaign(organizationId: string | undefined) {
 
 	return useMutation({
 		mutationFn: async (params: brand.CreateAndSubmitRequest) => {
-			return createAndSubmitCampaignServer({ data: { orgId: organizationId as string, params } });
+			return createAndSubmitCampaignServer({
+				data: {
+					orgId: organizationId as string,
+					params: { ...params, idempotencyKey: params.idempotencyKey ?? crypto.randomUUID() },
+				},
+			});
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.campaigns(organizationId || "") });
@@ -227,6 +240,36 @@ export function useRemoveCampaignTask(organizationId: string | undefined, campai
 			queryClient.invalidateQueries({
 				queryKey: queryKeys.campaign(organizationId || "", campaignId || ""),
 			});
+		},
+	});
+}
+
+// =============================================================================
+// BATCH OPERATIONS
+// =============================================================================
+
+export function useBatchCampaigns() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: async ({
+			organizationId,
+			action,
+			campaignIds,
+			reason,
+		}: {
+			organizationId: string;
+			action: "pause" | "resume" | "end" | "archive";
+			campaignIds: string[];
+			reason?: string;
+		}) => {
+			return batchCampaignsServer({
+				data: { orgId: organizationId, action, campaignIds, reason },
+			});
+		},
+		onSuccess: (_, v) => {
+			queryClient.invalidateQueries({ queryKey: queryKeys.campaigns(v.organizationId) });
+			queryClient.invalidateQueries({ queryKey: queryKeys.infiniteCampaigns(v.organizationId) });
 		},
 	});
 }

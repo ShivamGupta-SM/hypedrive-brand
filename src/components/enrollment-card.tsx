@@ -111,7 +111,7 @@ function EnrollmentCardFull({
 
 	return (
 		<div
-			className={`group relative flex flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 transition-all duration-200 ${isSelected ? "ring-2 ring-zinc-900 dark:ring-white" : "ring-zinc-200 hover:ring-zinc-300 hover:shadow-md dark:ring-zinc-800 dark:hover:ring-zinc-700"}`}
+			className={`group relative flex flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 transition-all duration-200 dark:bg-zinc-900 ${isSelected ? "ring-2 ring-zinc-900 dark:ring-white" : "ring-zinc-200 hover:ring-zinc-300 hover:shadow-md dark:ring-zinc-800 dark:hover:ring-zinc-700"}`}
 		>
 			<Link
 				href={`/${orgSlug}/campaigns/${enrollment.campaignId}/enrollments/${enrollment.id}`}
@@ -146,12 +146,12 @@ function EnrollmentCardFull({
 
 						{/* Row 2: Campaign + meta */}
 						<div className="mt-1 flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
-							<MegaphoneIcon className="size-3 shrink-0 text-zinc-400 dark:text-zinc-500" />
+							<MegaphoneIcon className="size-3 shrink-0 text-zinc-500 dark:text-zinc-400" />
 							<span className="truncate">{campaignName || enrollment.campaignId.slice(-8)}</span>
 						</div>
 
 						{/* Row 3: ID + date + city + overdue */}
-						<div className="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] text-zinc-400 dark:text-zinc-500">
+						<div className="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] text-zinc-500 dark:text-zinc-400">
 							<span className="font-mono">{enrollment.displayId}</span>
 							<span>·</span>
 							<span>{formatDateCompact(enrollment.createdAt)}</span>
@@ -174,13 +174,13 @@ function EnrollmentCardFull({
 				{/* Footer stats */}
 				<div className="grid grid-cols-3 divide-x divide-zinc-100 border-t border-zinc-100 bg-zinc-50/60 dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-800/30">
 					<div className="flex flex-col items-center justify-center py-2.5">
-						<span className="text-[10px] font-medium text-zinc-400 dark:text-zinc-500">Order Value</span>
+						<span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">Order Value</span>
 						<span className="mt-0.5 text-xs font-semibold tabular-nums text-zinc-900 sm:text-sm dark:text-white">
 							{formatCurrency(enrollment.orderValueDecimal)}
 						</span>
 					</div>
 					<div className="flex flex-col items-center justify-center py-2.5">
-						<span className="text-[10px] font-medium text-zinc-400 dark:text-zinc-500">
+						<span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">
 							Fee ({enrollment.lockedBillRate}%)
 						</span>
 						<span className="mt-0.5 text-xs font-semibold tabular-nums text-emerald-600 sm:text-sm dark:text-emerald-400">
@@ -188,7 +188,7 @@ function EnrollmentCardFull({
 						</span>
 					</div>
 					<div className="flex flex-col items-center justify-center py-2.5">
-						<span className="text-[10px] font-medium text-zinc-400 dark:text-zinc-500">Submitted</span>
+						<span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">Submitted</span>
 						<span className="mt-0.5 text-xs font-semibold tabular-nums text-zinc-700 sm:text-sm dark:text-zinc-300">
 							{formatDateCompact(enrollment.createdAt)}
 						</span>

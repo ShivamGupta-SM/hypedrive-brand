@@ -57,7 +57,7 @@ export function WizardStepper({
 										"text-center text-xs font-medium transition-colors duration-200",
 										isCurrent && "text-zinc-900 dark:text-white",
 										isCompleted && "text-emerald-600 dark:text-emerald-400",
-										!isCurrent && !isCompleted && "text-zinc-400 dark:text-zinc-500"
+										!isCurrent && !isCompleted && "text-zinc-500 dark:text-zinc-400"
 									)}
 								>
 									{label}

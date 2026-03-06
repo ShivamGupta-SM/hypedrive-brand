@@ -1,7 +1,9 @@
 /**
  * Public Authentication Routes Layout
- * Redirects to dashboard if already authenticated with approved org.
+ * Redirects to dashboard if already authenticated with active org.
  * Uses router context for auth — no Zustand access.
+ *
+ * Backend org status model (3-state): onboarding | active | suspended
  */
 
 import { createFileRoute, redirect } from "@tanstack/react-router";
@@ -10,28 +12,26 @@ import { AuthLayout } from "@/pages/auth/layout";
 export const Route = createFileRoute("/_auth")({
 	beforeLoad: ({ context }) => {
 		if (context.auth.isAuthenticated) {
-			// Organizations already in context from root beforeLoad
 			const organizations = context.organizations ?? [];
-			const approvedOrg = organizations.find((o) => o.approvalStatus === "approved");
+			const activeOrg = organizations.find((o) => o.status === "active");
 
-			if (approvedOrg) {
-				throw redirect({ to: "/$orgSlug", params: { orgSlug: approvedOrg.slug } });
+			if (activeOrg) {
+				throw redirect({ to: "/$orgSlug", params: { orgSlug: activeOrg.slug } });
 			}
 
-			// Authenticated but no approved org — check if they have any org
+			// Has org but not active — route based on status
 			if (organizations.length > 0) {
-				const org = organizations[0];
-				const status = org.approvalStatus;
+				const status = organizations[0].status;
 
-				if (status === "pending" || status === "draft") {
+				if (status === "onboarding") {
 					throw redirect({ to: "/pending-approval" });
 				}
-				if (status === "rejected" || status === "banned") {
+				if (status === "suspended") {
 					throw redirect({ to: "/rejected" });
 				}
 			}
 
-			// Authenticated with no orgs — send to onboarding to create first org
+			// No orgs — send to onboarding to create first org
 			throw redirect({ to: "/onboarding" });
 		}
 	},

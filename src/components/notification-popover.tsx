@@ -44,7 +44,7 @@ function NotificationIcon({ type }: { type?: string }) {
 		case "campaign_rejected":
 			return <ExclamationTriangleIcon className={`${iconClass} text-amber-500`} />;
 		default:
-			return <BellIcon className={`${iconClass} text-zinc-400 dark:text-zinc-500`} />;
+			return <BellIcon className={`${iconClass} text-zinc-500 dark:text-zinc-400`} />;
 	}
 }
 
@@ -118,9 +118,9 @@ function NotificationItem({
 					{notification.title || "Notification"}
 				</p>
 				{notification.body && (
-					<p className="mt-0.5 line-clamp-2 text-xs text-zinc-500 dark:text-zinc-500">{notification.body}</p>
+					<p className="mt-0.5 line-clamp-2 text-xs text-zinc-500 dark:text-zinc-400">{notification.body}</p>
 				)}
-				<p className="mt-1 text-[11px] text-zinc-400 dark:text-zinc-600">{timeAgo(notification.createdAt)}</p>
+				<p className="mt-1 text-[11px] text-zinc-400 dark:text-zinc-500">{timeAgo(notification.createdAt)}</p>
 			</div>
 
 			{/* Unread dot */}
@@ -327,10 +327,10 @@ function NotificationPanelContent({
 				/* Empty state */
 				<div className="flex flex-col items-center px-4 py-10 text-center">
 					<div className="flex size-10 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-700/50">
-						<InboxIcon className="size-5 text-zinc-400 dark:text-zinc-500" />
+						<InboxIcon className="size-5 text-zinc-500 dark:text-zinc-400" />
 					</div>
 					<p className="mt-3 text-sm font-medium text-zinc-500 dark:text-zinc-400">All caught up</p>
-					<p className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500">No new notifications right now</p>
+					<p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">No new notifications right now</p>
 				</div>
 			) : (
 				/* Notification list */

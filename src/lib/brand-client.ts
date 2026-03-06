@@ -716,11 +716,9 @@ export namespace admin {
         creatorName: string
         accountType: "bank_account" | "upi"
         accountHolderName?: string
-        accountNumber?: string
         accountNumberMasked?: string
         bankName?: string
         ifscCode?: string
-        upiId?: string
         upiIdMasked?: string
         isVerified: boolean
         isDefault: boolean
@@ -1704,7 +1702,7 @@ export namespace admin {
         platformId?: string
         sortBy?: string
         sortOrder?: "asc" | "desc"
-        search?: string
+        q?: string
         skip?: number
         take?: number
     }
@@ -1713,7 +1711,7 @@ export namespace admin {
         status?: string
         type?: string
         organizationId?: string
-        search?: string
+        q?: string
         startDateFrom?: string
         startDateTo?: string
         skip?: number
@@ -1724,7 +1722,7 @@ export namespace admin {
         kycVerified?: boolean
         payoutReady?: boolean
         isBanned?: boolean
-        search?: string
+        q?: string
         createdFrom?: string
         createdTo?: string
         sortBy?: "createdAt" | "firstName" | "lastName" | "enrollmentCount"
@@ -1740,7 +1738,7 @@ export namespace admin {
         status?: string
         sortBy?: string
         sortOrder?: "asc" | "desc"
-        search?: string
+        q?: string
         skip?: number
         take?: number
     }
@@ -1752,7 +1750,7 @@ export namespace admin {
         expiringSoon?: boolean
         sortBy?: string
         sortOrder?: "asc" | "desc"
-        search?: string
+        q?: string
         skip?: number
         take?: number
     }
@@ -1769,7 +1767,7 @@ export namespace admin {
         status?: string
         campaignId?: string
         creatorId?: string
-        search?: string
+        q?: string
         fromDate?: string
         toDate?: string
         skip?: number
@@ -1780,7 +1778,7 @@ export namespace admin {
         status?: string
         campaignId?: string
         creatorId?: string
-        search?: string
+        q?: string
         fromDate?: string
         toDate?: string
         skip?: number
@@ -1820,13 +1818,13 @@ export namespace admin {
          */
         flaggedOnly?: boolean
 
-        search?: string
+        q?: string
         skip?: number
         take?: number
     }
 
     export interface ListPlatformsQuery {
-        search?: string
+        q?: string
         type?: string
         status?: string
         sortBy?: "createdAt" | "name" | "listingCount"
@@ -1842,7 +1840,7 @@ export namespace admin {
         taskTemplateId?: string
         sortBy?: string
         sortOrder?: "asc" | "desc"
-        search?: string
+        q?: string
         skip?: number
         take?: number
     }
@@ -1852,7 +1850,7 @@ export namespace admin {
         isEditable?: boolean
         sortBy?: string
         sortOrder?: "asc" | "desc"
-        search?: string
+        q?: string
         skip?: number
         take?: number
     }
@@ -3588,7 +3586,7 @@ export namespace admin {
                 campaignId: params.campaignId,
                 creatorId:  params.creatorId,
                 fromDate:   params.fromDate,
-                search:     params.search,
+                q:          params.q,
                 skip:       params.skip === undefined ? undefined : String(params.skip),
                 status:     params.status,
                 take:       params.take === undefined ? undefined : String(params.take),
@@ -4219,6 +4217,10 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
@@ -4234,6 +4236,10 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
 
@@ -4485,6 +4491,10 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
@@ -4507,6 +4517,10 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
 
@@ -4625,6 +4639,10 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
@@ -4640,6 +4658,10 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
 
@@ -4904,6 +4926,10 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
@@ -4926,6 +4952,10 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
 
@@ -5093,12 +5123,16 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
                 category:   params.category === undefined ? undefined : String(params.category),
                 platformId: params.platformId,
-                search:     params.search,
+                q:          params.q,
                 skip:       params.skip === undefined ? undefined : String(params.skip),
                 sortBy:     params.sortBy,
                 sortOrder:  params.sortOrder === undefined ? undefined : String(params.sortOrder),
@@ -5114,6 +5148,10 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
 
@@ -5126,13 +5164,17 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
                 campaignId:     params.campaignId,
                 creatorId:      params.creatorId,
                 hasProof:       params.hasProof === undefined ? undefined : String(params.hasProof),
-                search:         params.search,
+                q:              params.q,
                 skip:           params.skip === undefined ? undefined : String(params.skip),
                 sortBy:         params.sortBy,
                 sortOrder:      params.sortOrder === undefined ? undefined : String(params.sortOrder),
@@ -5148,6 +5190,10 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
 
@@ -5157,11 +5203,15 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
                 organizationId: params.organizationId,
-                search:         params.search,
+                q:              params.q,
                 skip:           params.skip === undefined ? undefined : String(params.skip),
                 startDateFrom:  params.startDateFrom,
                 startDateTo:    params.startDateTo,
@@ -5178,6 +5228,10 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
 
@@ -5206,7 +5260,7 @@ export namespace admin {
         public async listCoupons(params: {
     sortBy?: string
     sortOrder?: "asc" | "desc"
-    search?: string
+    q?: string
     skip?: number
     take?: number
     status?: "active" | "inactive" | "expired"
@@ -5217,11 +5271,15 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
                 campaignId: params.campaignId,
-                search:     params.search,
+                q:          params.q,
                 skip:       params.skip === undefined ? undefined : String(params.skip),
                 sortBy:     params.sortBy,
                 sortOrder:  params.sortOrder === undefined ? undefined : String(params.sortOrder),
@@ -5237,6 +5295,10 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
 
@@ -5246,6 +5308,10 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
@@ -5254,7 +5320,7 @@ export namespace admin {
                 isBanned:    params.isBanned === undefined ? undefined : String(params.isBanned),
                 kycVerified: params.kycVerified === undefined ? undefined : String(params.kycVerified),
                 payoutReady: params.payoutReady === undefined ? undefined : String(params.payoutReady),
-                search:      params.search,
+                q:           params.q,
                 skip:        params.skip === undefined ? undefined : String(params.skip),
                 sortBy:      params.sortBy === undefined ? undefined : String(params.sortBy),
                 sortOrder:   params.sortOrder === undefined ? undefined : String(params.sortOrder),
@@ -5269,6 +5335,10 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
 
@@ -5281,13 +5351,17 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
                 organizationId: params.organizationId,
                 provider:       params.provider,
+                q:              params.q,
                 receiverType:   params.receiverType,
-                search:         params.search,
                 skip:           params.skip === undefined ? undefined : String(params.skip),
                 sortBy:         params.sortBy,
                 sortOrder:      params.sortOrder === undefined ? undefined : String(params.sortOrder),
@@ -5303,6 +5377,10 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
 
@@ -5315,11 +5393,15 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
                 expiringSoon:     params.expiringSoon === undefined ? undefined : String(params.expiringSoon),
-                search:           params.search,
+                q:                params.q,
                 skip:             params.skip === undefined ? undefined : String(params.skip),
                 sortBy:           params.sortBy,
                 sortOrder:        params.sortOrder === undefined ? undefined : String(params.sortOrder),
@@ -5337,6 +5419,10 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
 
@@ -5346,13 +5432,17 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
                 campaignId: params.campaignId,
                 creatorId:  params.creatorId,
                 fromDate:   params.fromDate,
-                search:     params.search,
+                q:          params.q,
                 skip:       params.skip === undefined ? undefined : String(params.skip),
                 status:     params.status,
                 take:       params.take === undefined ? undefined : String(params.take),
@@ -5367,6 +5457,10 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
 
@@ -5379,6 +5473,10 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
@@ -5397,6 +5495,10 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
 
@@ -5406,7 +5508,7 @@ export namespace admin {
         public async listInvoices(params: {
     sortBy?: string
     sortOrder?: "asc" | "desc"
-    search?: string
+    q?: string
     skip?: number
     take?: number
     organizationId?: string
@@ -5424,13 +5526,17 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
                 organizationId: params.organizationId,
                 periodEnd:      params.periodEnd,
                 periodStart:    params.periodStart,
-                search:         params.search,
+                q:              params.q,
                 skip:           params.skip === undefined ? undefined : String(params.skip),
                 sortBy:         params.sortBy,
                 sortOrder:      params.sortOrder === undefined ? undefined : String(params.sortOrder),
@@ -5446,6 +5552,10 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
 
@@ -5480,7 +5590,7 @@ export namespace admin {
         public async listListings(params: {
     sortBy?: string
     sortOrder?: "asc" | "desc"
-    search?: string
+    q?: string
     skip?: number
     take?: number
     organizationId?: string
@@ -5492,13 +5602,17 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
                 categoryId:     params.categoryId,
                 organizationId: params.organizationId,
                 platformId:     params.platformId,
-                search:         params.search,
+                q:              params.q,
                 skip:           params.skip === undefined ? undefined : String(params.skip),
                 sortBy:         params.sortBy,
                 sortOrder:      params.sortOrder === undefined ? undefined : String(params.sortOrder),
@@ -5513,6 +5627,10 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
 
@@ -5522,12 +5640,16 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
                 accountTier: params.accountTier,
                 flaggedOnly: params.flaggedOnly === undefined ? undefined : String(params.flaggedOnly),
-                search:      params.search,
+                q:           params.q,
                 skip:        params.skip === undefined ? undefined : String(params.skip),
                 status:      params.status,
                 take:        params.take === undefined ? undefined : String(params.take),
@@ -5541,6 +5663,10 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
 
@@ -5550,7 +5676,7 @@ export namespace admin {
         public async listPayouts(params: {
     sortBy?: string
     sortOrder?: "asc" | "desc"
-    search?: string
+    q?: string
     skip?: number
     take?: number
     status?: string
@@ -5561,11 +5687,15 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
                 holderType: params.holderType === undefined ? undefined : String(params.holderType),
-                search:     params.search,
+                q:          params.q,
                 skip:       params.skip === undefined ? undefined : String(params.skip),
                 sortBy:     params.sortBy,
                 sortOrder:  params.sortOrder === undefined ? undefined : String(params.sortOrder),
@@ -5581,6 +5711,10 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
 
@@ -5593,10 +5727,14 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
-                search:    params.search,
+                q:         params.q,
                 skip:      params.skip === undefined ? undefined : String(params.skip),
                 sortBy:    params.sortBy === undefined ? undefined : String(params.sortBy),
                 sortOrder: params.sortOrder === undefined ? undefined : String(params.sortOrder),
@@ -5613,6 +5751,10 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
 
@@ -5650,12 +5792,16 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
                 category:   params.category,
                 isEditable: params.isEditable === undefined ? undefined : String(params.isEditable),
-                search:     params.search,
+                q:          params.q,
                 skip:       params.skip === undefined ? undefined : String(params.skip),
                 sortBy:     params.sortBy,
                 sortOrder:  params.sortOrder === undefined ? undefined : String(params.sortOrder),
@@ -5670,6 +5816,10 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
 
@@ -5735,7 +5885,7 @@ export namespace admin {
         public async listWallets(params: {
     sortBy?: string
     sortOrder?: "asc" | "desc"
-    search?: string
+    q?: string
     skip?: number
     take?: number
     holderType?: "organization" | "creator"
@@ -5746,12 +5896,16 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
                 holderType: params.holderType === undefined ? undefined : String(params.holderType),
                 isFrozen:   params.isFrozen === undefined ? undefined : String(params.isFrozen),
-                search:     params.search,
+                q:          params.q,
                 skip:       params.skip === undefined ? undefined : String(params.skip),
                 sortBy:     params.sortBy,
                 sortOrder:  params.sortOrder === undefined ? undefined : String(params.sortOrder),
@@ -5766,6 +5920,10 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
 
@@ -5775,7 +5933,7 @@ export namespace admin {
         public async listWithdrawalMethodVerifications(params: {
     sortBy?: string
     sortOrder?: "asc" | "desc"
-    search?: string
+    q?: string
     skip?: number
     take?: number
     status?: string
@@ -5793,10 +5951,14 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
-                search:    params.search,
+                q:         params.q,
                 skip:      params.skip === undefined ? undefined : String(params.skip),
                 sortBy:    params.sortBy,
                 sortOrder: params.sortOrder === undefined ? undefined : String(params.sortOrder),
@@ -5820,6 +5982,10 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
 
@@ -5829,7 +5995,7 @@ export namespace admin {
         public async listWithdrawalMethods(params: {
     sortBy?: string
     sortOrder?: "asc" | "desc"
-    search?: string
+    q?: string
     skip?: number
     take?: number
     creatorId?: string
@@ -5841,13 +6007,17 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
                 accountType: params.accountType === undefined ? undefined : String(params.accountType),
                 creatorId:   params.creatorId,
                 isVerified:  params.isVerified === undefined ? undefined : String(params.isVerified),
-                search:      params.search,
+                q:           params.q,
                 skip:        params.skip === undefined ? undefined : String(params.skip),
                 sortBy:      params.sortBy,
                 sortOrder:   params.sortOrder === undefined ? undefined : String(params.sortOrder),
@@ -5862,6 +6032,10 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
 
@@ -5871,13 +6045,12 @@ export namespace admin {
         public async listWithdrawals(params: {
     sortBy?: string
     sortOrder?: "asc" | "desc"
-    search?: string
+    q?: string
     skip?: number
     take?: number
     status?: db.WithdrawalStatus
     holderType?: "organization" | "creator"
     requiresApproval?: boolean
-    q?: string
     amountMin?: number
     amountMax?: number
     requestedFrom?: string
@@ -5888,6 +6061,10 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
@@ -5898,7 +6075,6 @@ export namespace admin {
                 requestedFrom:    params.requestedFrom,
                 requestedTo:      params.requestedTo,
                 requiresApproval: params.requiresApproval === undefined ? undefined : String(params.requiresApproval),
-                search:           params.search,
                 skip:             params.skip === undefined ? undefined : String(params.skip),
                 sortBy:           params.sortBy,
                 sortOrder:        params.sortOrder === undefined ? undefined : String(params.sortOrder),
@@ -5914,6 +6090,10 @@ export namespace admin {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
 
@@ -7027,6 +7207,7 @@ export namespace auth {
             this.adminStopImpersonating = this.adminStopImpersonating.bind(this)
             this.adminUnbanUser = this.adminUnbanUser.bind(this)
             this.adminUpdateUser = this.adminUpdateUser.bind(this)
+            this.batchMembers = this.batchMembers.bind(this)
             this.cancelInvitation = this.cancelInvitation.bind(this)
             this.changeEmail = this.changeEmail.bind(this)
             this.changePassword = this.changePassword.bind(this)
@@ -7124,6 +7305,7 @@ export namespace auth {
         public async addMember(organizationId: string, params: {
     userId: string
     role: "owner" | "admin" | "member"
+    idempotencyKey?: string
 }): Promise<types.MemberResponse> {
             // Now make the actual call to the API
             const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/members`, JSON.stringify(params))
@@ -7451,6 +7633,33 @@ export namespace auth {
             const resp = await this.baseClient.callTypedAPI("POST", `/auth/admin/update-user`, JSON.stringify(params))
             return await resp.json() as {
     user: types.UserResponse
+}
+        }
+
+        /**
+         * POST /organizations/:organizationId/members/batch
+         * Batch member operations (remove)
+         */
+        public async batchMembers(organizationId: string, params: {
+    action: "remove"
+    memberIds: string[]
+}): Promise<{
+    success: number
+    failed: number
+    errors: {
+        memberId: string
+        error: string
+    }[]
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/members/batch`, JSON.stringify(params))
+            return await resp.json() as {
+    success: number
+    failed: number
+    errors: {
+        memberId: string
+        error: string
+    }[]
 }
         }
 
@@ -7963,6 +8172,7 @@ export namespace auth {
         public async inviteMemberAuth(organizationId: string, params: {
     email: string
     role: "owner" | "admin" | "member"
+    idempotencyKey?: string
 }): Promise<{
     invitation: types.InvitationResponse
 }> {
@@ -8987,9 +9197,16 @@ export namespace auth {
 export namespace brand {
     export interface ActiveHold {
         id: string
-        enrollmentId: string
-        campaignId: string
-        campaignTitle: string
+        /**
+         * Hold type: "enrollment" or "withdrawal"
+         */
+        holdType: "enrollment" | "withdrawal"
+
+        enrollmentId?: string
+        campaignId?: string
+        campaignTitle?: string
+        withdrawalId?: string
+        withdrawalDisplayId?: string
         /**
          * Hold amount in smallest units
          */
@@ -9383,6 +9600,11 @@ export namespace brand {
          * Tasks required for immediate submission — at least one
          */
         tasks: CreateCampaignTask[]
+
+        /**
+         * Optional idempotency key to prevent duplicate creation from retries
+         */
+        idempotencyKey?: string
     }
 
     export interface CreateCampaignRequest {
@@ -9399,6 +9621,11 @@ export namespace brand {
          * Tasks to add during creation (optional — at least one required before submission)
          */
         tasks?: CreateCampaignTask[]
+
+        /**
+         * Optional idempotency key to prevent duplicate creation from retries
+         */
+        idempotencyKey?: string
     }
 
     export interface CreateCampaignTask {
@@ -9420,6 +9647,10 @@ export namespace brand {
         link: string
         listingImages?: ListingImageInput[]
         listingType?: db.ListingType
+        /**
+         * Optional idempotency key to prevent duplicate creation from retries
+         */
+        idempotencyKey?: string
     }
 
     export interface CreateOrgWithdrawalRequest {
@@ -9434,6 +9665,11 @@ export namespace brand {
          * Challenge ID from GET /auth/passkey/reauth-options
          */
         challengeId: string
+
+        /**
+         * Client-generated idempotency key to prevent duplicate withdrawals on retry
+         */
+        idempotencyKey?: string
     }
 
     export interface DailyPerformance {
@@ -9594,6 +9830,7 @@ export namespace brand {
         reference?: string
         description: string
         createdAt: string
+        allowedActions: string[]
     }
 
     export interface EnrollmentChartDataPoint {
@@ -10001,6 +10238,8 @@ export namespace brand {
          * Line items included in getInvoice response
          */
         lineItems?: InvoiceLineItem[]
+
+        allowedActions?: ("download" | "cancel")[]
     }
 
     export interface InvoiceLineItem {
@@ -10034,6 +10273,16 @@ export namespace brand {
         skip?: number
         take?: number
         /**
+         * Opaque cursor for cursor-based pagination (takes precedence over skip/take)
+         */
+        cursor?: string
+
+        /**
+         * Items per page for cursor-based pagination (default: 20, max: 100)
+         */
+        limit?: number
+
+        /**
          * Single status or comma-separated statuses (e.g., "active,paused")
          */
         status?: string
@@ -10041,9 +10290,11 @@ export namespace brand {
         listingId?: string
         platformId?: string
         categoryId?: string
-        search?: string
+        q?: string
         startDateFrom?: string
         startDateTo?: string
+        createdFrom?: string
+        createdTo?: string
         sortBy?: "createdAt" | "startDate" | "endDate" | "title"
         sortOrder?: "asc" | "desc"
     }
@@ -10051,12 +10302,23 @@ export namespace brand {
     export interface ListInvoicesParams {
         skip?: number
         take?: number
+        /**
+         * Opaque cursor for cursor-based pagination (takes precedence over skip/take)
+         */
+        cursor?: string
+
+        /**
+         * Items per page for cursor-based pagination (default: 20, max: 100)
+         */
+        limit?: number
+
         status?: db.InvoiceStatus
         /**
          * Search by invoice number or notes
          */
         q?: string
 
+        campaignId?: string
         issuedDateFrom?: string
         issuedDateTo?: string
         dueDateFrom?: string
@@ -10070,9 +10332,19 @@ export namespace brand {
     export interface ListOrganizationListingsParams {
         skip?: number
         take?: number
+        /**
+         * Opaque cursor for cursor-based pagination (takes precedence over skip/take)
+         */
+        cursor?: string
+
+        /**
+         * Items per page for cursor-based pagination (default: 20, max: 100)
+         */
+        limit?: number
+
         categoryId?: string
         platformId?: string
-        search?: string
+        q?: string
         priceMin?: number
         priceMax?: number
         sortBy?: "createdAt" | "name" | "price"
@@ -10110,6 +10382,7 @@ export namespace brand {
     export interface ListingWithStats {
         isActive: boolean
         campaignCount: number
+        allowedActions?: ("update" | "delete")[]
         id: string
         organizationId: string
         categoryId?: string
@@ -10239,6 +10512,7 @@ export namespace brand {
         createdAt: string
 
         updatedAt: string
+        allowedActions: ("update" | "delete")[]
     }
 
     export interface OrganizationBankAccount {
@@ -10479,6 +10753,48 @@ export namespace brand {
         status: "not_provisioned" | "pending" | "active"
     }
 
+    export interface WalletBalanceUpdate {
+        /**
+         * Balance in smallest units (paise)
+         */
+        balance: number
+
+        /**
+         * Decimal balance for display (e.g., "1234.56")
+         */
+        balanceDecimal: string
+
+        /**
+         * Pending debit (holds) in smallest units
+         */
+        pendingDebit: number
+
+        /**
+         * Decimal pending debit for display
+         */
+        pendingDebitDecimal: string
+
+        /**
+         * Available balance in smallest units (balance - holds)
+         */
+        availableBalance: number
+
+        /**
+         * Decimal available balance for display
+         */
+        availableBalanceDecimal: string
+
+        /**
+         * ISO 8601 timestamp of this update
+         */
+        updatedAt: string
+
+        /**
+         * True when ledger service was unavailable — values may be stale
+         */
+        balanceStale?: boolean
+    }
+
     export interface WalletTransaction {
         id: string
         walletId: string
@@ -10520,6 +10836,7 @@ export namespace brand {
         category?: "enrollment_hold" | "deposit" | "payout" | "refund" | "admin_credit" | "other"
 
         createdAt: string
+        allowedActions: string[]
     }
 
     export interface Withdrawal {
@@ -10560,6 +10877,7 @@ export namespace brand {
 
         requestedAt: string
         processedAt?: string
+        allowedActions?: "cancel"[]
     }
 
     export class ServiceClient {
@@ -10570,7 +10888,10 @@ export namespace brand {
             this.addBankAccount = this.addBankAccount.bind(this)
             this.addCampaignTask = this.addCampaignTask.bind(this)
             this.archiveNotifications = this.archiveNotifications.bind(this)
+            this.batchCampaigns = this.batchCampaigns.bind(this)
             this.batchEnrollments = this.batchEnrollments.bind(this)
+            this.batchInvoices = this.batchInvoices.bind(this)
+            this.batchListings = this.batchListings.bind(this)
             this.cancelWithdrawalRequest = this.cancelWithdrawalRequest.bind(this)
             this.changeOrgPhone = this.changeOrgPhone.bind(this)
             this.createAndSubmitCampaign = this.createAndSubmitCampaign.bind(this)
@@ -10620,6 +10941,7 @@ export namespace brand {
             this.removeCampaignTask = this.removeCampaignTask.bind(this)
             this.removeToken = this.removeToken.bind(this)
             this.streamSetupProgress = this.streamSetupProgress.bind(this)
+            this.streamWalletBalance = this.streamWalletBalance.bind(this)
             this.unifiedSearch = this.unifiedSearch.bind(this)
             this.updateCampaign = this.updateCampaign.bind(this)
             this.updateCampaignState = this.updateCampaignState.bind(this)
@@ -10666,6 +10988,34 @@ export namespace brand {
         }
 
         /**
+         * POST /organizations/:organizationId/campaigns/batch
+         * Batch campaign state changes (pause, resume, end, archive)
+         */
+        public async batchCampaigns(organizationId: string, params: {
+    action: "pause" | "resume" | "end" | "archive"
+    campaignIds: string[]
+    reason?: string
+}): Promise<{
+    success: number
+    failed: number
+    errors: {
+        campaignId: string
+        error: string
+    }[]
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/campaigns/batch`, JSON.stringify(params))
+            return await resp.json() as {
+    success: number
+    failed: number
+    errors: {
+        campaignId: string
+        error: string
+    }[]
+}
+        }
+
+        /**
          * POST /organizations/:organizationId/enrollments/batch
          * Unified batch operations for enrollments
          * Replaces: bulkApproveEnrollments, bulkRejectEnrollments
@@ -10686,6 +11036,60 @@ export namespace brand {
     processed: number
     failed: number
     errors: { [key: string]: string }
+}
+        }
+
+        /**
+         * POST /organizations/:organizationId/invoices/batch
+         * Batch invoice operations (mark_paid)
+         */
+        public async batchInvoices(organizationId: string, params: {
+    action: "mark_paid"
+    invoiceIds: string[]
+}): Promise<{
+    success: number
+    failed: number
+    errors: {
+        invoiceId: string
+        error: string
+    }[]
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/invoices/batch`, JSON.stringify(params))
+            return await resp.json() as {
+    success: number
+    failed: number
+    errors: {
+        invoiceId: string
+        error: string
+    }[]
+}
+        }
+
+        /**
+         * POST /organizations/:organizationId/listings/batch
+         * Batch listing operations (delete)
+         */
+        public async batchListings(organizationId: string, params: {
+    action: "delete"
+    listingIds: string[]
+}): Promise<{
+    success: number
+    failed: number
+    errors: {
+        listingId: string
+        error: string
+    }[]
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/listings/batch`, JSON.stringify(params))
+            return await resp.json() as {
+    success: number
+    failed: number
+    errors: {
+        listingId: string
+        error: string
+    }[]
 }
         }
 
@@ -10812,6 +11216,10 @@ export namespace brand {
          */
         public async duplicateCampaign(organizationId: string, id: string, params: {
     newTitle?: string
+    /**
+     * Optional idempotency key to prevent duplicate creation from retries
+     */
+    idempotencyKey?: string
 }): Promise<Campaign> {
             // Now make the actual call to the API
             const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/campaigns/${encodeURIComponent(id)}/duplicate`, JSON.stringify(params))
@@ -10842,8 +11250,12 @@ export namespace brand {
         public async exportOrganizationEnrollments(organizationId: string, params: {
     status?: db.EnrollmentStatus
     campaignId?: string
+    creatorId?: string
+    q?: string
     createdFrom?: string
     createdTo?: string
+    orderValueMin?: number
+    orderValueMax?: number
 }): Promise<{
     csv: string
     totalCount: number
@@ -10852,10 +11264,14 @@ export namespace brand {
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
-                campaignId:  params.campaignId,
-                createdFrom: params.createdFrom,
-                createdTo:   params.createdTo,
-                status:      params.status === undefined ? undefined : String(params.status),
+                campaignId:    params.campaignId,
+                createdFrom:   params.createdFrom,
+                createdTo:     params.createdTo,
+                creatorId:     params.creatorId,
+                orderValueMax: params.orderValueMax === undefined ? undefined : String(params.orderValueMax),
+                orderValueMin: params.orderValueMin === undefined ? undefined : String(params.orderValueMin),
+                q:             params.q,
+                status:        params.status === undefined ? undefined : String(params.status),
             })
 
             // Now make the actual call to the API
@@ -10901,10 +11317,23 @@ export namespace brand {
 
         /**
          * Get campaign by ID - secured endpoint for campaign owners/org members (brand-only, creators use getPublicCampaign)
+         * Supports optional `expand` query param to selectively load relations (N+1 fix).
+         * When expand is omitted, ALL relations are loaded for backward compatibility.
+         * Example: ?expand=tasks,enrollmentStats,listing
          */
-        public async getCampaign(organizationId: string, id: string): Promise<CampaignWithStats> {
+        public async getCampaign(organizationId: string, id: string, params: {
+    /**
+     * Comma-separated list of relations to include: tasks, enrollmentStats, listing. Omit to include all.
+     */
+    expand?: string
+}): Promise<CampaignWithStats> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                expand: params.expand,
+            })
+
             // Now make the actual call to the API
-            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/campaigns/${encodeURIComponent(id)}`)
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/campaigns/${encodeURIComponent(id)}`, undefined, {query})
             return await resp.json() as CampaignWithStats
         }
 
@@ -10954,11 +11383,24 @@ export namespace brand {
          * GET /organizations/:organizationId/enrollments/:id
          * Get enrollment with full details - SINGLE endpoint for all brand enrollment fetches
          * No campaignId required - validates via campaign relationship
-         * Always returns full detail (creator, campaign, platform, OCR, tasks, history, pricing)
+         * Returns full detail by default. Use `expand` query param to selectively include
+         * heavy relations (N+1 fix): campaign, tasks.
+         * When expand is omitted, all relations are included for backward compatibility.
+         * Example: ?expand=campaign,tasks
          */
-        public async getEnrollment(organizationId: string, id: string): Promise<EnrollmentDetail> {
+        public async getEnrollment(organizationId: string, id: string, params: {
+    /**
+     * Comma-separated list of relations to include: campaign, tasks. Omit to include all.
+     */
+    expand?: string
+}): Promise<EnrollmentDetail> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                expand: params.expand,
+            })
+
             // Now make the actual call to the API
-            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/enrollments/${encodeURIComponent(id)}`)
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/enrollments/${encodeURIComponent(id)}`, undefined, {query})
             return await resp.json() as EnrollmentDetail
         }
 
@@ -10975,9 +11417,19 @@ export namespace brand {
         /**
          * Get invoice by ID (with enrollment count)
          */
-        public async getInvoice(organizationId: string, id: string): Promise<Invoice> {
+        public async getInvoice(organizationId: string, id: string, params: {
+    /**
+     * Comma-separated list of relations to include: lineItems. Omit to include all.
+     */
+    expand?: string
+}): Promise<Invoice> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                expand: params.expand,
+            })
+
             // Now make the actual call to the API
-            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/invoices/${encodeURIComponent(id)}`)
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/invoices/${encodeURIComponent(id)}`, undefined, {query})
             return await resp.json() as Invoice
         }
 
@@ -11069,6 +11521,16 @@ export namespace brand {
     skip?: number
     take?: number
     /**
+     * Opaque cursor for cursor-based pagination (takes precedence over skip/take)
+     */
+    cursor?: string
+
+    /**
+     * Items per page for cursor-based pagination (default: 20, max: 100)
+     */
+    limit?: number
+
+    /**
      * Filter by transaction status: pending (inflight hold), completed (posted), voided
      */
     status?: "pending" | "completed" | "voided"
@@ -11111,14 +11573,20 @@ export namespace brand {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
                 amountMax: params.amountMax === undefined ? undefined : String(params.amountMax),
                 amountMin: params.amountMin === undefined ? undefined : String(params.amountMin),
                 category:  params.category === undefined ? undefined : String(params.category),
+                cursor:    params.cursor,
                 dateFrom:  params.dateFrom,
                 dateTo:    params.dateTo,
+                limit:     params.limit === undefined ? undefined : String(params.limit),
                 skip:      params.skip === undefined ? undefined : String(params.skip),
                 sortBy:    params.sortBy === undefined ? undefined : String(params.sortBy),
                 sortOrder: params.sortOrder === undefined ? undefined : String(params.sortOrder),
@@ -11135,6 +11603,10 @@ export namespace brand {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
 
@@ -11179,11 +11651,21 @@ export namespace brand {
         }
 
         /**
-         * Get organization wallet active holds (enrollment holds)
+         * Get organization wallet active holds (enrollment + withdrawal)
          */
         public async getWalletHolds(organizationId: string, params: {
     skip?: number
     take?: number
+    /**
+     * Opaque cursor for cursor-based pagination (takes precedence over skip/take)
+     */
+    cursor?: string
+
+    /**
+     * Items per page for cursor-based pagination (default: 20, max: 100)
+     */
+    limit?: number
+
     /**
      * Filter by campaign
      */
@@ -11217,14 +11699,20 @@ export namespace brand {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
                 campaignId:  params.campaignId,
                 createdFrom: params.createdFrom,
                 createdTo:   params.createdTo,
+                cursor:      params.cursor,
                 expiresFrom: params.expiresFrom,
                 expiresTo:   params.expiresTo,
+                limit:       params.limit === undefined ? undefined : String(params.limit),
                 skip:        params.skip === undefined ? undefined : String(params.skip),
                 sortBy:      params.sortBy === undefined ? undefined : String(params.sortBy),
                 sortOrder:   params.sortOrder === undefined ? undefined : String(params.sortOrder),
@@ -11239,6 +11727,10 @@ export namespace brand {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
 
@@ -11285,13 +11777,21 @@ export namespace brand {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
                 categoryId:    params.categoryId,
+                createdFrom:   params.createdFrom,
+                createdTo:     params.createdTo,
+                cursor:        params.cursor,
+                limit:         params.limit === undefined ? undefined : String(params.limit),
                 listingId:     params.listingId,
                 platformId:    params.platformId,
-                search:        params.search,
+                q:             params.q,
                 skip:          params.skip === undefined ? undefined : String(params.skip),
                 sortBy:        params.sortBy === undefined ? undefined : String(params.sortBy),
                 sortOrder:     params.sortOrder === undefined ? undefined : String(params.sortOrder),
@@ -11309,6 +11809,10 @@ export namespace brand {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
 
@@ -11319,6 +11823,16 @@ export namespace brand {
         public async listDeposits(organizationId: string, params: {
     skip?: number
     take?: number
+    /**
+     * Page number for pagination (1-based, alternative to skip/take)
+     */
+    page?: number
+
+    dateFrom?: string
+    dateTo?: string
+    amountMin?: number
+    amountMax?: number
+    sortBy?: "createdAt" | "amount"
     sortOrder?: "asc" | "desc"
 }): Promise<{
     data: DepositTransaction[]
@@ -11326,10 +11840,20 @@ export namespace brand {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
+                amountMax: params.amountMax === undefined ? undefined : String(params.amountMax),
+                amountMin: params.amountMin === undefined ? undefined : String(params.amountMin),
+                dateFrom:  params.dateFrom,
+                dateTo:    params.dateTo,
+                page:      params.page === undefined ? undefined : String(params.page),
                 skip:      params.skip === undefined ? undefined : String(params.skip),
+                sortBy:    params.sortBy === undefined ? undefined : String(params.sortBy),
                 sortOrder: params.sortOrder === undefined ? undefined : String(params.sortOrder),
                 take:      params.take === undefined ? undefined : String(params.take),
             })
@@ -11342,6 +11866,10 @@ export namespace brand {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
 
@@ -11355,15 +11883,22 @@ export namespace brand {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
                 amountMax:      params.amountMax === undefined ? undefined : String(params.amountMax),
                 amountMin:      params.amountMin === undefined ? undefined : String(params.amountMin),
+                campaignId:     params.campaignId,
+                cursor:         params.cursor,
                 dueDateFrom:    params.dueDateFrom,
                 dueDateTo:      params.dueDateTo,
                 issuedDateFrom: params.issuedDateFrom,
                 issuedDateTo:   params.issuedDateTo,
+                limit:          params.limit === undefined ? undefined : String(params.limit),
                 q:              params.q,
                 skip:           params.skip === undefined ? undefined : String(params.skip),
                 sortBy:         params.sortBy === undefined ? undefined : String(params.sortBy),
@@ -11380,6 +11915,10 @@ export namespace brand {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
 
@@ -11406,15 +11945,27 @@ export namespace brand {
     skip?: number
     take?: number
     /**
+     * Opaque cursor for cursor-based pagination (takes precedence over skip/take)
+     */
+    cursor?: string
+
+    /**
+     * Items per page for cursor-based pagination (default: 20, max: 100)
+     */
+    limit?: number
+
+    /**
      * Single status or comma-separated statuses (e.g., "awaiting_review,awaiting_submission")
      */
     status?: string
 
     campaignId?: string
     creatorId?: string
-    search?: string
+    q?: string
     createdFrom?: string
     createdTo?: string
+    orderValueMin?: number
+    orderValueMax?: number
     sortBy?: "createdAt" | "orderValue" | "status" | "submittedAt" | "expiresAt"
     sortOrder?: "asc" | "desc"
 }): Promise<{
@@ -11423,19 +11974,27 @@ export namespace brand {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
-                campaignId:  params.campaignId,
-                createdFrom: params.createdFrom,
-                createdTo:   params.createdTo,
-                creatorId:   params.creatorId,
-                search:      params.search,
-                skip:        params.skip === undefined ? undefined : String(params.skip),
-                sortBy:      params.sortBy === undefined ? undefined : String(params.sortBy),
-                sortOrder:   params.sortOrder === undefined ? undefined : String(params.sortOrder),
-                status:      params.status,
-                take:        params.take === undefined ? undefined : String(params.take),
+                campaignId:    params.campaignId,
+                createdFrom:   params.createdFrom,
+                createdTo:     params.createdTo,
+                creatorId:     params.creatorId,
+                cursor:        params.cursor,
+                limit:         params.limit === undefined ? undefined : String(params.limit),
+                orderValueMax: params.orderValueMax === undefined ? undefined : String(params.orderValueMax),
+                orderValueMin: params.orderValueMin === undefined ? undefined : String(params.orderValueMin),
+                q:             params.q,
+                skip:          params.skip === undefined ? undefined : String(params.skip),
+                sortBy:        params.sortBy === undefined ? undefined : String(params.sortBy),
+                sortOrder:     params.sortOrder === undefined ? undefined : String(params.sortOrder),
+                status:        params.status,
+                take:          params.take === undefined ? undefined : String(params.take),
             })
 
             // Now make the actual call to the API
@@ -11446,6 +12005,10 @@ export namespace brand {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
 
@@ -11458,14 +12021,20 @@ export namespace brand {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
                 categoryId: params.categoryId,
+                cursor:     params.cursor,
+                limit:      params.limit === undefined ? undefined : String(params.limit),
                 platformId: params.platformId,
                 priceMax:   params.priceMax === undefined ? undefined : String(params.priceMax),
                 priceMin:   params.priceMin === undefined ? undefined : String(params.priceMin),
-                search:     params.search,
+                q:          params.q,
                 skip:       params.skip === undefined ? undefined : String(params.skip),
                 sortBy:     params.sortBy === undefined ? undefined : String(params.sortBy),
                 sortOrder:  params.sortOrder === undefined ? undefined : String(params.sortOrder),
@@ -11480,6 +12049,10 @@ export namespace brand {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
 
@@ -11494,6 +12067,16 @@ export namespace brand {
         public async listWithdrawalRequests(organizationId: string, params: {
     skip?: number
     take?: number
+    /**
+     * Opaque cursor for cursor-based pagination (takes precedence over skip/take)
+     */
+    cursor?: string
+
+    /**
+     * Items per page for cursor-based pagination (default: 20, max: 100)
+     */
+    limit?: number
+
     status?: db.WithdrawalStatus
     requestedFrom?: string
     requestedTo?: string
@@ -11507,11 +12090,17 @@ export namespace brand {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
                 amountMax:     params.amountMax === undefined ? undefined : String(params.amountMax),
                 amountMin:     params.amountMin === undefined ? undefined : String(params.amountMin),
+                cursor:        params.cursor,
+                limit:         params.limit === undefined ? undefined : String(params.limit),
                 requestedFrom: params.requestedFrom,
                 requestedTo:   params.requestedTo,
                 skip:          params.skip === undefined ? undefined : String(params.skip),
@@ -11529,6 +12118,10 @@ export namespace brand {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
 
@@ -11587,6 +12180,27 @@ export namespace brand {
          */
         public async streamSetupProgress(organizationId: string): Promise<StreamIn<internal.SetupProgressUpdate>> {
             return await this.baseClient.createStreamIn(`/organizations/${encodeURIComponent(organizationId)}/setup-progress/stream`)
+        }
+
+        /**
+         * Stream wallet balance updates via Server-Sent Events (WebSocket transport).
+         * Client connects and receives real-time balance updates as transactions occur.
+         * 
+         * Flow:
+         * 1. Client connects with organizationId
+         * 2. Server sends initial balance state immediately
+         * 3. Server polls ledger every 5 seconds for changes
+         * 4. Only sends updates when balance or pending amounts change
+         * 5. Stream stays open until client disconnects or 10 min timeout
+         * 
+         * @example
+         * const stream = await wallet.streamWalletBalance({ organizationId: "..." });
+         * for await (const update of stream) {
+         * console.log(`Balance: ${update.balanceDecimal}, Available: ${update.availableBalanceDecimal}`);
+         * }
+         */
+        public async streamWalletBalance(organizationId: string): Promise<StreamIn<WalletBalanceUpdate>> {
+            return await this.baseClient.createStreamIn(`/organizations/${encodeURIComponent(organizationId)}/wallet/stream`)
         }
 
         /**
@@ -11808,7 +12422,7 @@ export namespace catalog {
     export interface ListCategoriesParams {
         skip?: number
         take?: number
-        search?: string
+        q?: string
         sortBy?: "name" | "createdAt"
         sortOrder?: "asc" | "desc"
     }
@@ -11895,10 +12509,14 @@ export namespace catalog {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
-                search:    params.search,
+                q:         params.q,
                 skip:      params.skip === undefined ? undefined : String(params.skip),
                 sortBy:    params.sortBy === undefined ? undefined : String(params.sortBy),
                 sortOrder: params.sortOrder === undefined ? undefined : String(params.sortOrder),
@@ -11913,6 +12531,10 @@ export namespace catalog {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
 
@@ -11925,6 +12547,10 @@ export namespace catalog {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
@@ -11942,6 +12568,10 @@ export namespace catalog {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
 
@@ -11960,6 +12590,10 @@ export namespace catalog {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
@@ -11978,6 +12612,10 @@ export namespace catalog {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
     }
@@ -13229,6 +13867,7 @@ export namespace creator {
         enrollmentId?: string
         category?: "enrollment_hold" | "deposit" | "payout" | "refund" | "admin_credit" | "other"
         createdAt: string
+        allowedActions: string[]
     }
 
     export interface Withdrawal {
@@ -13765,6 +14404,10 @@ export namespace creator {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
@@ -13787,6 +14430,10 @@ export namespace creator {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
 
@@ -13945,7 +14592,7 @@ export namespace creator {
     take?: number
     categoryId?: string
     platformId?: string
-    search?: string
+    q?: string
     priceMin?: number
     priceMax?: number
     sortBy?: "createdAt" | "name" | "price"
@@ -13956,6 +14603,10 @@ export namespace creator {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
@@ -13963,7 +14614,7 @@ export namespace creator {
                 platformId: params.platformId,
                 priceMax:   params.priceMax === undefined ? undefined : String(params.priceMax),
                 priceMin:   params.priceMin === undefined ? undefined : String(params.priceMin),
-                search:     params.search,
+                q:          params.q,
                 skip:       params.skip === undefined ? undefined : String(params.skip),
                 sortBy:     params.sortBy === undefined ? undefined : String(params.sortBy),
                 sortOrder:  params.sortOrder === undefined ? undefined : String(params.sortOrder),
@@ -13978,6 +14629,10 @@ export namespace creator {
     skip: number
     take: number
     hasMore: boolean
+    /**
+     * Opaque cursor for next page (null when no more data). Present when cursor pagination is supported.
+     */
+    nextCursor?: string | null
 }
         }
 
@@ -15433,6 +16088,11 @@ export namespace endpoints {
          * Challenge ID from GET /auth/passkey/reauth-options — required when passkeyResponse is provided
          */
         challengeId?: string
+
+        /**
+         * Optional idempotency key to prevent duplicate creation from retries
+         */
+        idempotencyKey?: string
     }
 
     export interface CreateOrganizationResponse {

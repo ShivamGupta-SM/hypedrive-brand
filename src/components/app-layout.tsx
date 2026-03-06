@@ -44,7 +44,7 @@ export interface Organization {
 	slug: string;
 	logo?: string | null;
 	createdAt: string;
-	approvalStatus?: string;
+	status?: "onboarding" | "active" | "suspended";
 }
 
 export function AppLayout({

@@ -56,6 +56,16 @@ export function usePanelNav(): PanelNavValue | null {
 
 type ThemeOption = "light" | "dark" | "system";
 
+function applyTheme(theme: ThemeOption) {
+	const root = document.documentElement;
+	if (theme === "system") {
+		const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+		root.setAttribute("data-theme", prefersDark ? "dark" : "light");
+	} else {
+		root.setAttribute("data-theme", theme);
+	}
+}
+
 function SidebarThemeToggle() {
 	const [theme, setTheme] = useState<ThemeOption>("system");
 
@@ -65,13 +75,15 @@ function SidebarThemeToggle() {
 	}, []);
 
 	useEffect(() => {
-		const root = document.documentElement;
 		localStorage.setItem("theme", theme);
+		applyTheme(theme);
+
+		// Listen for OS theme changes when set to "system"
 		if (theme === "system") {
-			const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-			root.setAttribute("data-theme", prefersDark ? "dark" : "light");
-		} else {
-			root.setAttribute("data-theme", theme);
+			const mql = window.matchMedia("(prefers-color-scheme: dark)");
+			const handler = () => applyTheme("system");
+			mql.addEventListener("change", handler);
+			return () => mql.removeEventListener("change", handler);
 		}
 	}, [theme]);
 
@@ -83,7 +95,7 @@ function SidebarThemeToggle() {
 
 	return (
 		<div className="shrink-0 border-t border-zinc-200/80 px-2 py-3 dark:border-zinc-800">
-			<p className="mb-1.5 px-2.5 text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-600">
+			<p className="mb-1.5 px-2.5 text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
 				Appearance
 			</p>
 			<div className="flex gap-0.5 rounded-xl bg-zinc-200/60 p-1 dark:bg-zinc-800/80">
@@ -240,7 +252,7 @@ function NavButton({ item, active, onClick }: { item: NavItem; active: boolean; 
 			</div>
 			<div className="min-w-0 flex-1">
 				<p className="truncate text-sm font-medium leading-tight">{item.label}</p>
-				<p className="mt-0.5 truncate text-xs leading-tight text-zinc-400 dark:text-zinc-500">{item.description}</p>
+				<p className="mt-0.5 truncate text-xs leading-tight text-zinc-500 dark:text-zinc-400">{item.description}</p>
 			</div>
 		</button>
 	);
@@ -326,7 +338,7 @@ export function SettingsDialog({ open, onClose, initialTab = "org" }: SettingsDi
 						<nav className="flex-1 overflow-y-auto px-2 py-3">
 							{/* Workspace group */}
 							<div className="mb-1">
-								<p className="mb-1 px-2.5 text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-600">
+								<p className="mb-1 px-2.5 text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
 									Workspace
 								</p>
 								<div className="space-y-0.5">
@@ -345,7 +357,7 @@ export function SettingsDialog({ open, onClose, initialTab = "org" }: SettingsDi
 
 							{/* Account group */}
 							<div>
-								<p className="mb-1 px-2.5 text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-600">
+								<p className="mb-1 px-2.5 text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
 									Account
 								</p>
 								<div className="space-y-0.5">
@@ -399,7 +411,7 @@ export function SettingsDialog({ open, onClose, initialTab = "org" }: SettingsDi
 											</div>
 											<div className="flex items-baseline gap-2">
 												<span className="text-sm font-semibold text-zinc-900 dark:text-white">{activeItem.label}</span>
-												<span className="hidden text-xs text-zinc-400 dark:text-zinc-500 sm:inline">
+												<span className="hidden text-xs text-zinc-500 dark:text-zinc-400 sm:inline">
 													{activeItem.description}
 												</span>
 											</div>

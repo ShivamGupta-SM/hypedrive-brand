@@ -290,7 +290,7 @@ function EditOrganizationPanel({
 								{formData.logo || logoPreview ? "Change Logo" : "Upload Logo"}
 							</label>
 							<input id="logo-upload" type="file" accept="image/*" onChange={handleLogoChange} className="hidden" />
-							<p className="mt-1 text-xs text-zinc-500">PNG, JPG up to 5MB</p>
+							<p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">PNG, JPG up to 5MB</p>
 						</div>
 					</div>
 				</Field>
@@ -734,7 +734,7 @@ function GSTPreviewDetail({
 				<Icon className="size-3.5 text-emerald-600 dark:text-emerald-400" />
 			</div>
 			<div className="min-w-0">
-				<p className="text-[11px] font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-500">{label}</p>
+				<p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{label}</p>
 				<p className="text-sm text-zinc-800 dark:text-zinc-200">{value}</p>
 			</div>
 		</div>
@@ -832,7 +832,7 @@ function VerifyGSTPanel({ organizationId, currentGST }: { organizationId: string
 					</div>
 				</Field>
 				{!previewData && !error && (
-					<p className="mt-1.5 text-xs text-zinc-400 dark:text-zinc-500">
+					<p className="mt-1.5 text-xs text-zinc-500 dark:text-zinc-400">
 						We'll verify this with the GST portal. Required for campaigns & invoicing.
 					</p>
 				)}
@@ -1060,7 +1060,7 @@ export function Settings({ section = "all" }: { section?: OrgSettingsSection } =
 						</div>
 						<div>
 							<p className="text-sm font-medium text-zinc-800 dark:text-zinc-200">No GST number added</p>
-							<p className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500">
+							<p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
 								Add your GSTIN to create campaigns, listings, and generate invoices
 							</p>
 						</div>
@@ -1094,7 +1094,7 @@ export function Settings({ section = "all" }: { section?: OrgSettingsSection } =
 								{gstIsVerified ? "Verified" : "Pending Verification"}
 							</span>
 							{gst.verifiedAt && (
-								<span className="text-[10px] text-zinc-400 dark:text-zinc-500">
+								<span className="text-[10px] text-zinc-500 dark:text-zinc-400">
 									·{" "}
 									{new Date(gst.verifiedAt).toLocaleDateString("en-IN", {
 										day: "numeric",
@@ -1130,15 +1130,15 @@ export function Settings({ section = "all" }: { section?: OrgSettingsSection } =
 					{/* Billing Address */}
 					<div className="border-t border-zinc-100 px-4 py-3 dark:border-zinc-800">
 						<div className="flex items-start gap-2.5">
-							<MapPinIcon className="mt-0.5 size-3.5 shrink-0 text-zinc-400 dark:text-zinc-500" />
+							<MapPinIcon className="mt-0.5 size-3.5 shrink-0 text-zinc-500 dark:text-zinc-400" />
 							<div className="min-w-0 flex-1">
-								<p className="text-[11px] font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+								<p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
 									Billing Address
 								</p>
 								{billingAddress ? (
 									<p className="mt-0.5 text-sm text-zinc-700 dark:text-zinc-300">{billingAddress}</p>
 								) : (
-									<p className="mt-0.5 text-sm italic text-zinc-400 dark:text-zinc-500">
+									<p className="mt-0.5 text-sm italic text-zinc-500 dark:text-zinc-400">
 										Not set — update in{" "}
 										<button
 											type="button"
@@ -1214,11 +1214,11 @@ export function Settings({ section = "all" }: { section?: OrgSettingsSection } =
 			) : (
 				<div className="flex flex-col items-center gap-3 rounded-xl bg-zinc-50 py-8 ring-1 ring-zinc-200/80 dark:bg-zinc-800/60 dark:ring-zinc-700/60">
 					<div className="flex size-12 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-700/60">
-						<BanknotesIcon className="size-6 text-zinc-400 dark:text-zinc-500" />
+						<BanknotesIcon className="size-6 text-zinc-500 dark:text-zinc-400" />
 					</div>
 					<div className="text-center">
 						<p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">No bank account added</p>
-						<p className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500">Add a bank account to enable withdrawals</p>
+						<p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">Add a bank account to enable withdrawals</p>
 					</div>
 					{canCreateBankAccount && (
 						<Button color="dark/zinc" onClick={openAddBank}>
@@ -1264,8 +1264,8 @@ export function Settings({ section = "all" }: { section?: OrgSettingsSection } =
 
 			{section === "all" && (
 				<div className="flex flex-col items-center gap-2 pt-8">
-					<Logo className="h-5 w-auto text-zinc-400 dark:text-zinc-600" />
-					<p className="text-xs text-zinc-400 dark:text-zinc-600">v1.0.0</p>
+					<Logo className="h-5 w-auto text-zinc-400 dark:text-zinc-500" />
+					<p className="text-xs text-zinc-400 dark:text-zinc-500">v1.0.0</p>
 				</div>
 			)}
 		</div>

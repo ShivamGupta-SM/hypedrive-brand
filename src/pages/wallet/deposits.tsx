@@ -1,21 +1,51 @@
+import {
+	BanknotesIcon,
+	CalendarIcon,
+} from "@heroicons/react/16/solid";
+import { useState } from "react";
 import { EmptyState } from "@/components/shared/empty-state";
+import { FilterPills, type FilterPillOption } from "@/components/shared/filter-pills";
 import { Skeleton } from "@/components/skeleton";
 import { useDeposits } from "@/features/wallet/hooks";
 import { useOrgContext } from "@/hooks/use-org-context";
 import { DepositRow } from "./components";
 
+const sortMap = {
+	newest: { sortBy: "createdAt" as const, sortOrder: "desc" as const },
+	oldest: { sortBy: "createdAt" as const, sortOrder: "asc" as const },
+	"amount-high": { sortBy: "amount" as const, sortOrder: "desc" as const },
+	"amount-low": { sortBy: "amount" as const, sortOrder: "asc" as const },
+};
+
+type SortValue = keyof typeof sortMap;
+
+const sortPillOptions: FilterPillOption<SortValue>[] = [
+	{ value: "newest", label: "Newest", icon: CalendarIcon, iconColor: "text-sky-500" },
+	{ value: "oldest", label: "Oldest", icon: CalendarIcon, iconColor: "text-zinc-400" },
+	{ value: "amount-high", label: "Highest", icon: BanknotesIcon, iconColor: "text-emerald-500" },
+	{ value: "amount-low", label: "Lowest", icon: BanknotesIcon, iconColor: "text-amber-500" },
+];
+
 export function WalletDeposits() {
 	const { organizationId } = useOrgContext();
+	const [sortBy, setSortBy] = useState<SortValue>("newest");
+	const activeSort = sortMap[sortBy] || sortMap.newest;
 
-	const { data: deposits, loading: depositsLoading } = useDeposits(organizationId);
+	const { data: deposits, loading: depositsLoading } = useDeposits(organizationId, {
+		sortBy: activeSort.sortBy,
+		sortOrder: activeSort.sortOrder,
+	});
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-4">
+			{/* Sort pills */}
+			<FilterPills options={sortPillOptions} value={sortBy} onChange={setSortBy} />
+
 			<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
 				<div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3 dark:border-zinc-800">
 					<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">
 						Deposit History
-						{deposits.length > 0 && <span className="ml-2 text-xs font-normal text-zinc-500">{deposits.length}</span>}
+						{deposits.length > 0 && <span className="ml-2 text-xs font-normal text-zinc-500 dark:text-zinc-400">{deposits.length}</span>}
 					</h3>
 				</div>
 				{depositsLoading ? (
