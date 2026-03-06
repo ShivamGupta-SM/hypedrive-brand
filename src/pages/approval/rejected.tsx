@@ -28,7 +28,7 @@ export function Rejected({ organization }: { organization: { name: string } | nu
 					</div>
 
 					{/* Title */}
-					<h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Application Not Approved</h1>
+					<h1 className="text-xl font-semibold text-zinc-900 dark:text-white">Application Not Approved</h1>
 
 					{/* Organization name */}
 					{organization && (
@@ -36,7 +36,7 @@ export function Rejected({ organization }: { organization: { name: string } | nu
 					)}
 
 					{/* Description */}
-					<p className="mt-4 text-[15px] leading-relaxed text-zinc-500 dark:text-zinc-400">
+					<p className="mt-4 text-sm text-zinc-500 dark:text-zinc-400">
 						Unfortunately, your organization application was not approved at this time. Please review the details below.
 					</p>
 

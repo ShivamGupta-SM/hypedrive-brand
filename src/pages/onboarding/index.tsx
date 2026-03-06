@@ -10,6 +10,7 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/button";
+import { Field, Label } from "@/components/fieldset";
 import { Input } from "@/components/input";
 import { Logo } from "@/components/logo";
 import { Textarea } from "@/components/textarea";
@@ -20,6 +21,7 @@ import { useCheckSlug, useCreateOrganization } from "@/features/organization/mut
 import { usePreviewLogoByDomain } from "@/features/storage/hooks";
 import { getAPIErrorMessage } from "@/hooks/api-client";
 import { useConfetti } from "@/hooks/use-confetti";
+import { FormError } from "@/pages/auth/components";
 
 // =============================================================================
 // STEP INDICATOR
@@ -192,40 +194,29 @@ function OrganizationStep({
 				<div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800">
 					<BuildingStorefrontIcon className="size-7 text-zinc-500 dark:text-zinc-400" />
 				</div>
-				<h2 className="text-xl font-bold text-zinc-900 dark:text-white">Create Your Organization</h2>
-				<p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+				<h2 className="text-xl font-semibold text-zinc-900 dark:text-white">Create Your Organization</h2>
+				<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
 					Tell us about your brand to get started with campaigns.
 				</p>
 			</div>
 
-			{error && (
-				<div className="rounded-lg bg-red-50 p-3 dark:bg-red-950/30">
-					<p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-				</div>
-			)}
+			<FormError message={error} />
 
 			<div className="space-y-4">
-				<div>
-					<label htmlFor="org-name" className="text-sm font-medium text-zinc-900 dark:text-white">
-						Organization Name *
-					</label>
+				<Field>
+					<Label>Organization Name *</Label>
 					<Input
-						id="org-name"
 						value={data.name}
 						onChange={(e) => handleNameChange(e.target.value)}
 						placeholder="Enter your organization name"
-						className="mt-1.5"
 						required
 					/>
-				</div>
+				</Field>
 
-				<div>
-					<label htmlFor="org-slug" className="text-sm font-medium text-zinc-900 dark:text-white">
-						URL Slug *
-					</label>
-					<div className="relative mt-1.5">
+				<Field>
+					<Label>URL Slug *</Label>
+					<div className="relative">
 						<Input
-							id="org-slug"
 							value={data.slug}
 							onChange={(e) => handleSlugChange(e.target.value)}
 							placeholder="your-brand-name"
@@ -255,27 +246,21 @@ function OrganizationStep({
 						)}
 						{slugStatus === "taken" && <span className="ml-2 text-red-600 dark:text-red-400">Already taken</span>}
 					</p>
-				</div>
+				</Field>
 
-				<div>
-					<label htmlFor="org-description" className="text-sm font-medium text-zinc-900 dark:text-white">
-						Description
-					</label>
+				<Field>
+					<Label>Description</Label>
 					<Textarea
-						id="org-description"
 						value={data.description}
 						onChange={(e) => onChange({ ...data, description: e.target.value })}
 						placeholder="Tell us about your organization..."
-						className="mt-1.5"
 						rows={3}
 					/>
-				</div>
+				</Field>
 
-				<div>
-					<label htmlFor="org-website" className="text-sm font-medium text-zinc-900 dark:text-white">
-						Website
-					</label>
-					<div className="mt-1.5 flex items-center gap-3">
+				<Field>
+					<Label>Website</Label>
+					<div className="flex items-center gap-3">
 						{logoPreview?.logoUrl && (
 							<img
 								src={logoPreview.logoUrl}
@@ -284,7 +269,6 @@ function OrganizationStep({
 							/>
 						)}
 						<Input
-							id="org-website"
 							type="url"
 							value={data.website}
 							onChange={(e) => onChange({ ...data, website: e.target.value })}
@@ -296,7 +280,7 @@ function OrganizationStep({
 					{logoPreview?.logoUrl && (
 						<p className="mt-1 text-xs text-emerald-600 dark:text-emerald-400">Logo detected from website</p>
 					)}
-				</div>
+				</Field>
 			</div>
 
 			<Button type="submit" color="dark/zinc" className="w-full">
@@ -373,26 +357,19 @@ function GSTStep({
 				<div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
 					<IdentificationIcon className="size-7 text-amber-600 dark:text-amber-400" />
 				</div>
-				<h2 className="text-xl font-bold text-zinc-900 dark:text-white">GST Verification</h2>
-				<p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+				<h2 className="text-xl font-semibold text-zinc-900 dark:text-white">GST Verification</h2>
+				<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
 					We need your GST details for compliance and invoicing.
 				</p>
 			</div>
 
-			{error && (
-				<div className="rounded-lg bg-red-50 p-3 dark:bg-red-950/30">
-					<p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-				</div>
-			)}
+			<FormError message={error} />
 
 			<div className="space-y-4">
-				<div>
-					<label htmlFor="gst-number" className="text-sm font-medium text-zinc-900 dark:text-white">
-						GST Number (GSTIN) *
-					</label>
-					<div className="mt-1.5 flex gap-2">
+				<Field>
+					<Label>GST Number (GSTIN) *</Label>
+					<div className="flex gap-2">
 						<Input
-							id="gst-number"
 							value={data.gstNumber}
 							onChange={(e) => {
 								onChange({ ...data, gstNumber: e.target.value.toUpperCase() });
@@ -409,10 +386,10 @@ function GSTStep({
 							onClick={handleVerify}
 							disabled={verifyGST.isPending || verified}
 						>
-							{verifyGST.isPending ? "Verifying..." : verified ? "Verified" : "Verify"}
+							{verifyGST.isPending ? "Verifying…" : verified ? "Verified" : "Verify"}
 						</Button>
 					</div>
-				</div>
+				</Field>
 
 				{verified && data.gstLegalName && (
 					<div className="rounded-lg bg-emerald-50 p-4 dark:bg-emerald-950/20">
@@ -475,17 +452,13 @@ function ReviewStep({
 				<div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-sky-100 dark:bg-sky-900/30">
 					<DocumentTextIcon className="size-7 text-sky-600 dark:text-sky-400" />
 				</div>
-				<h2 className="text-xl font-bold text-zinc-900 dark:text-white">Review Your Details</h2>
-				<p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+				<h2 className="text-xl font-semibold text-zinc-900 dark:text-white">Review Your Details</h2>
+				<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
 					Make sure everything looks correct before submitting.
 				</p>
 			</div>
 
-			{error && (
-				<div className="rounded-lg bg-red-50 p-3 dark:bg-red-950/30">
-					<p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-				</div>
-			)}
+			<FormError message={error} />
 
 			<div className="rounded-lg bg-zinc-50 p-4 dark:bg-zinc-900">
 				<dl className="space-y-3">
@@ -540,7 +513,7 @@ function ReviewStep({
 					Back
 				</Button>
 				<Button color="dark/zinc" onClick={onSubmit} disabled={isSubmitting} className="flex-1">
-					{isSubmitting ? "Submitting..." : "Submit Application"}
+					{isSubmitting ? "Submitting…" : "Submit Application"}
 				</Button>
 			</div>
 		</div>
@@ -593,10 +566,10 @@ function SuccessStep({ orgName, organizationId }: { orgName: string; organizatio
 				<div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
 					<RocketLaunchIcon className="size-7 text-emerald-600 dark:text-emerald-400" />
 				</div>
-				<h2 className="text-xl font-bold text-zinc-900 dark:text-white">
+				<h2 className="text-xl font-semibold text-zinc-900 dark:text-white">
 					{stream.isComplete ? "You're All Set!" : "Setting Up Your Organization"}
 				</h2>
-				<p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+				<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
 					{stream.isComplete ? (
 						<>
 							<strong className="text-zinc-700 dark:text-zinc-300">{orgName}</strong> is ready for review.

@@ -49,7 +49,7 @@ export function PendingApproval({ organization }: { organization: { name: string
 					</div>
 
 					{/* Title */}
-					<h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Awaiting Approval</h1>
+					<h1 className="text-xl font-semibold text-zinc-900 dark:text-white">Awaiting Approval</h1>
 
 					{/* Organization name */}
 					{organization && (
@@ -57,7 +57,7 @@ export function PendingApproval({ organization }: { organization: { name: string
 					)}
 
 					{/* Description */}
-					<p className="mt-4 text-[15px] leading-relaxed text-zinc-500 dark:text-zinc-400">
+					<p className="mt-4 text-sm text-zinc-500 dark:text-zinc-400">
 						Your organization is currently being reviewed by our team. This usually takes 1-2 business days. We'll
 						notify you by email once your account has been approved.
 					</p>
@@ -86,7 +86,7 @@ export function PendingApproval({ organization }: { organization: { name: string
 						<Button onClick={handleCheckStatus} disabled={loading} aria-busy={loading} color="dark/zinc" className="w-full">
 							<ArrowPathIcon className={`size-4 ${loading ? "animate-spin" : ""}`} />
 						<output aria-live="polite">
-							{loading ? "Checking..." : "Check Status"}
+							{loading ? "Checking…" : "Check Status"}
 						</output>
 						</Button>
 

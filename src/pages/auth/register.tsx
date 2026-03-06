@@ -190,7 +190,7 @@ export function Register() {
 		>
 			{/* Header */}
 			<div>
-				<Logo className="mb-4 h-7" />
+				<Logo className="mb-4 h-7 w-auto text-zinc-950 dark:text-white" />
 				<h1 className="text-xl font-semibold text-zinc-900 dark:text-white">Create an account</h1>
 				<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
 					Launch campaigns, manage enrollments, and grow your brand

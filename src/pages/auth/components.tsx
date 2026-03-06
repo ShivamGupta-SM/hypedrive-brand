@@ -64,14 +64,16 @@ export function OAuthButton({
 	onClick?: () => void;
 }) {
 	return (
-		<button
-			type="button"
-			disabled={disabled}
-			onClick={onClick}
-			className="flex h-10 w-full items-center justify-center gap-2.5 rounded-lg border border-zinc-200 bg-white text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 active:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
-		>
-			{icon}
-			{label}
-		</button>
+		<span className="relative block w-full before:absolute before:inset-px before:rounded-[calc(var(--radius-lg)-1px)] before:bg-white before:shadow-sm dark:before:hidden">
+			<button
+				type="button"
+				disabled={disabled}
+				onClick={onClick}
+				className="relative inline-flex w-full items-center justify-center gap-x-2 rounded-lg border border-zinc-950/10 bg-transparent px-[calc(--spacing(3.5)-1px)] py-[calc(--spacing(2.5)-1px)] text-base/6 font-semibold text-zinc-950 hover:bg-zinc-950/2.5 active:bg-zinc-950/5 focus:outline-hidden disabled:opacity-50 sm:px-[calc(--spacing(3)-1px)] sm:py-[calc(--spacing(1.5)-1px)] sm:text-sm/6 dark:border-white/15 dark:bg-white/5 dark:text-white dark:hover:bg-white/10 dark:active:bg-white/15"
+			>
+				{icon}
+				{label}
+			</button>
+		</span>
 	);
 }
