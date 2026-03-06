@@ -75,6 +75,7 @@ import { usePageTitle } from "@/hooks/use-breadcrumb";
 import { useConfetti } from "@/hooks/use-confetti";
 import { useOrgContext } from "@/hooks/use-org-context";
 import type { brand, db } from "@/lib/brand-client";
+import { downloadExcel } from "@/lib/download";
 import { formatCurrency } from "@/lib/design-tokens";
 import { showToast } from "@/lib/toast";
 import { getStatusConfig } from "./utils";
@@ -1382,13 +1383,7 @@ export function CampaignShow() {
 								onClick={async () => {
 									try {
 										const result = await exportEnrollments.mutateAsync({ campaignId });
-										const blob = new Blob([result.csv], { type: "text/csv" });
-										const url = URL.createObjectURL(blob);
-										const a = document.createElement("a");
-										a.href = url;
-										a.download = result.filename || "enrollments.csv";
-										a.click();
-										URL.revokeObjectURL(url);
+										downloadExcel(result.data, result.filename || "enrollments.xlsx");
 										showToast.success("Export downloaded");
 									} catch (err) {
 										showToast.error(err, "Failed to export enrollments");
@@ -1398,7 +1393,7 @@ export function CampaignShow() {
 							>
 								<TableCellsIcon data-slot="icon" className="size-4" />
 								<span className="hidden sm:inline">
-									{exportEnrollments.isPending ? "Exporting..." : "Export CSV"}
+									{exportEnrollments.isPending ? "Exporting..." : "Export Excel"}
 								</span>
 							</Button>
 							<Link

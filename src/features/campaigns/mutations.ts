@@ -11,6 +11,7 @@ import {
 	createAndSubmitCampaignServer,
 	createCampaignServer,
 	duplicateCampaignServer,
+	exportCampaignsServer,
 	removeCampaignTaskServer,
 	updateCampaignServer,
 	updateCampaignStateServer,
@@ -270,6 +271,16 @@ export function useBatchCampaigns() {
 		onSuccess: (_, v) => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.campaigns(v.organizationId) });
 			queryClient.invalidateQueries({ queryKey: queryKeys.infiniteCampaigns(v.organizationId) });
+		},
+	});
+}
+
+export function useExportCampaigns(organizationId: string | undefined) {
+	return useMutation({
+		mutationFn: async (params: { status?: string; q?: string }) => {
+			return exportCampaignsServer({
+				data: { orgId: organizationId as string, ...params },
+			});
 		},
 	});
 }

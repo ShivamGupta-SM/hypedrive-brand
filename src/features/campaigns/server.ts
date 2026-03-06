@@ -220,3 +220,21 @@ export const batchCampaignsServer = createServerFn({ method: "POST" })
 			reason: data.reason,
 		});
 	});
+
+// -- Export Campaigns ---------------------------------------------------------
+
+export const exportCampaignsServer = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
+	.inputValidator(
+		(input: {
+			orgId: string;
+			status?: string;
+			q?: string;
+		}) => input
+	)
+	.handler(async ({ context, data }) => {
+		return context.client.brand.exportCampaigns(data.orgId, {
+			status: data.status,
+			q: data.q,
+		});
+	});

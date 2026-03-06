@@ -26,12 +26,13 @@ import {
 	useBatchCampaigns,
 	useCancelCampaign,
 	useDuplicateCampaign,
+	useExportCampaigns,
 	usePauseCampaign,
 	useResumeCampaign,
 } from "@/features/campaigns/mutations";
 import { useOrgContext } from "@/hooks/use-org-context";
 import type { brand, db } from "@/lib/brand-client";
-import { downloadCSV } from "@/lib/download";
+import { downloadCSV, downloadExcel } from "@/lib/download";
 import { showToast } from "@/lib/toast";
 import { CampaignCard, CampaignCardSkeleton } from "./campaign-card";
 
@@ -120,6 +121,7 @@ export function CampaignsGrid({ status }: CampaignsGridProps) {
 	const cancelCampaign = useCancelCampaign();
 	const duplicateCampaign = useDuplicateCampaign();
 	const batchCampaigns = useBatchCampaigns();
+	const exportCampaigns = useExportCampaigns(organizationId);
 
 	// Batch selection state
 	const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -250,10 +252,19 @@ export function CampaignsGrid({ status }: CampaignsGridProps) {
 					<Button
 						size="sm"
 						color="emerald"
-						onClick={() => exportCampaignsToCSV(campaigns)}
+						disabled={exportCampaigns.isPending}
+						onClick={async () => {
+							try {
+								const result = await exportCampaigns.mutateAsync({ status, q: q || undefined });
+								downloadExcel(result.data, result.filename);
+								showToast.success("Export downloaded");
+							} catch {
+								exportCampaignsToCSV(campaigns);
+							}
+						}}
 					>
 						<TableCellsIcon data-slot="icon" className="size-4" />
-						Export
+						{exportCampaigns.isPending ? "Exporting..." : "Export"}
 					</Button>
 				)}
 			</div>

@@ -362,7 +362,7 @@ html:has([data-theme="dark"]) {
 [data-sonner-toaster] [data-sonner-toast] {
 	font-family: var(--font-sans);
 	border-radius: 14px;
-	padding: 13px 15px;
+	padding: 13px 32px 13px 15px;
 	gap: 11px;
 
 	/* Glassmorphic */
@@ -416,10 +416,10 @@ html:has([data-theme="dark"]) {
 /* ── Close button ── */
 [data-sonner-toaster] [data-sonner-toast] [data-close-button] {
 	position: absolute;
-	top: 6px;
+	top: 50%;
 	right: 6px;
 	left: auto;
-	transform: none;
+	transform: translateY(-50%);
 	border-radius: 6px;
 	width: 24px;
 	height: 24px;

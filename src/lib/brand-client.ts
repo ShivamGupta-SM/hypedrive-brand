@@ -3541,11 +3541,12 @@ export namespace admin {
     reportType: "overview" | "campaigns" | "organizations" | "revenue" | "withdrawals"
     startDate: string
     endDate: string
-    format?: "json" | "csv"
+    format?: "json" | "xlsx"
 }): Promise<{
     data: string
     filename: string
     contentType: string
+    recordCount?: number
 }> {
             // Now make the actual call to the API
             const resp = await this.baseClient.callTypedAPI("POST", `/admin/analytics/export`, JSON.stringify(params))
@@ -3553,6 +3554,7 @@ export namespace admin {
     data: string
     filename: string
     contentType: string
+    recordCount?: number
 }
         }
 
@@ -3560,12 +3562,13 @@ export namespace admin {
          * Export all coupons (admin)
          */
         public async exportCoupons(params: {
-    format?: "json" | "csv"
+    format?: "json" | "xlsx"
     status?: "active" | "inactive" | "expired"
 }): Promise<{
     data: string
     filename: string
     contentType: string
+    recordCount?: number
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
@@ -3579,14 +3582,11 @@ export namespace admin {
     data: string
     filename: string
     contentType: string
+    recordCount?: number
 }
         }
 
-        public async exportEnrollments(params: ListEnrollmentsQuery): Promise<{
-    csv: string
-    filename: string
-    count: number
-}> {
+        public async exportEnrollments(params: ListEnrollmentsQuery): Promise<utils.ExcelExportResponse> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
                 campaignId: params.campaignId,
@@ -3603,11 +3603,7 @@ export namespace admin {
 
             // Now make the actual call to the API
             const resp = await this.baseClient.callTypedAPI("GET", `/admin/enrollments/export`, undefined, {query})
-            return await resp.json() as {
-    csv: string
-    filename: string
-    count: number
-}
+            return await resp.json() as utils.ExcelExportResponse
         }
 
         /**
@@ -3618,11 +3614,7 @@ export namespace admin {
     status?: db.InvoiceStatus
     periodStart?: string
     periodEnd?: string
-}): Promise<{
-    csv: string
-    filename: string
-    recordCount: number
-}> {
+}): Promise<utils.ExcelExportResponse> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
                 organizationId: params.organizationId,
@@ -3633,25 +3625,17 @@ export namespace admin {
 
             // Now make the actual call to the API
             const resp = await this.baseClient.callTypedAPI("GET", `/admin/invoices/export`, undefined, {query})
-            return await resp.json() as {
-    csv: string
-    filename: string
-    recordCount: number
-}
+            return await resp.json() as utils.ExcelExportResponse
         }
 
         /**
-         * GET /admin/listings/export - Export listings to CSV
+         * GET /admin/listings/export - Export listings to XLSX
          */
         public async exportListings(params: {
     organizationId?: string
     categoryId?: string
     platformId?: string
-}): Promise<{
-    csv: string
-    filename: string
-    recordCount: number
-}> {
+}): Promise<utils.ExcelExportResponse> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
                 categoryId:     params.categoryId,
@@ -3661,11 +3645,7 @@ export namespace admin {
 
             // Now make the actual call to the API
             const resp = await this.baseClient.callTypedAPI("GET", `/admin/listings/export`, undefined, {query})
-            return await resp.json() as {
-    csv: string
-    filename: string
-    recordCount: number
-}
+            return await resp.json() as utils.ExcelExportResponse
         }
 
         /**
@@ -3698,11 +3678,12 @@ export namespace admin {
          * Export task templates data (admin)
          */
         public async exportTaskTemplates(params: {
-    format?: "csv" | "json"
+    format?: "xlsx" | "json"
 }): Promise<{
     data: string
     filename: string
     contentType: string
+    recordCount?: number
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
@@ -3715,6 +3696,7 @@ export namespace admin {
     data: string
     filename: string
     contentType: string
+    recordCount?: number
 }
         }
 
@@ -3724,11 +3706,12 @@ export namespace admin {
         public async exportVerifications(params: {
     status?: string
     subjectType?: string
-    format?: "json" | "csv"
+    format?: "json" | "xlsx"
 }): Promise<{
     data: string
     filename: string
     contentType: string
+    recordCount?: number
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
@@ -3743,6 +3726,7 @@ export namespace admin {
     data: string
     filename: string
     contentType: string
+    recordCount?: number
 }
         }
 
@@ -9426,14 +9410,6 @@ export namespace brand {
         query: string
     }
 
-    export interface CSVExportResponse {
-        csv: string
-        totalCount: number
-        campaignTitle: string
-        exportedAt: string
-        filename: string
-    }
-
     export interface Campaign {
         id: string
         /**
@@ -10066,6 +10042,20 @@ export namespace brand {
         approved: number
         rejected: number
         pending: number
+    }
+
+    export interface EnrollmentExportResponse {
+        totalCount: number
+        campaignTitle: string
+        exportedAt: string
+        /**
+         * Base64-encoded XLSX data
+         */
+        data: string
+
+        filename: string
+        contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        recordCount: number
     }
 
     export type EnrollmentReviewAction = "approve" | "reject" | "request_changes"
@@ -10944,6 +10934,7 @@ export namespace brand {
             this.deleteListing = this.deleteListing.bind(this)
             this.deleteNotifications = this.deleteNotifications.bind(this)
             this.duplicateCampaign = this.duplicateCampaign.bind(this)
+            this.exportCampaigns = this.exportCampaigns.bind(this)
             this.exportEnrollments = this.exportEnrollments.bind(this)
             this.exportInvoiceEnrollments = this.exportInvoiceEnrollments.bind(this)
             this.exportOrganizationEnrollments = this.exportOrganizationEnrollments.bind(this)
@@ -11269,6 +11260,21 @@ export namespace brand {
             return await resp.json() as Campaign
         }
 
+        public async exportCampaigns(organizationId: string, params: {
+    status?: string
+    q?: string
+}): Promise<utils.ExcelExportResponse> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                q:      params.q,
+                status: params.status,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/campaigns/export`, undefined, {query})
+            return await resp.json() as utils.ExcelExportResponse
+        }
+
         /**
          * Export enrollments data as CSV
          * SECURITY: Creator payout data and PII NOT included in brand exports
@@ -11276,7 +11282,7 @@ export namespace brand {
          */
         public async exportEnrollments(organizationId: string, campaignId: string, params: {
     status?: db.EnrollmentStatus
-}): Promise<CSVExportResponse> {
+}): Promise<EnrollmentExportResponse> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
                 status: params.status === undefined ? undefined : String(params.status),
@@ -11284,7 +11290,7 @@ export namespace brand {
 
             // Now make the actual call to the API
             const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/campaigns/${encodeURIComponent(campaignId)}/enrollments/export`, undefined, {query})
-            return await resp.json() as CSVExportResponse
+            return await resp.json() as EnrollmentExportResponse
         }
 
         /**
@@ -11292,20 +11298,32 @@ export namespace brand {
          * Export enrollments linked to an invoice as CSV
          */
         public async exportInvoiceEnrollments(organizationId: string, invoiceId: string): Promise<{
-    csv: string
+    /**
+     * Base64-encoded XLSX data
+     */
+    data: string
+
+    filename: string
+    contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    recordCount: number
     totalCount: number
     invoiceNumber: string
     exportedAt: string
-    filename: string
 }> {
             // Now make the actual call to the API
             const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/invoices/${encodeURIComponent(invoiceId)}/enrollments/export`)
             return await resp.json() as {
-    csv: string
+    /**
+     * Base64-encoded XLSX data
+     */
+    data: string
+
+    filename: string
+    contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    recordCount: number
     totalCount: number
     invoiceNumber: string
     exportedAt: string
-    filename: string
 }
         }
 
@@ -11322,10 +11340,16 @@ export namespace brand {
     orderValueMin?: number
     orderValueMax?: number
 }): Promise<{
-    csv: string
+    /**
+     * Base64-encoded XLSX data
+     */
+    data: string
+
+    filename: string
+    contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    recordCount: number
     totalCount: number
     exportedAt: string
-    filename: string
 }> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
@@ -11342,10 +11366,16 @@ export namespace brand {
             // Now make the actual call to the API
             const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/enrollments/export`, undefined, {query})
             return await resp.json() as {
-    csv: string
+    /**
+     * Base64-encoded XLSX data
+     */
+    data: string
+
+    filename: string
+    contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    recordCount: number
     totalCount: number
     exportedAt: string
-    filename: string
 }
         }
 
@@ -16542,6 +16572,17 @@ export namespace types {
 
 export namespace utils {
     export type CurrencyCode = "INR" | "USD" | "EUR" | "GBP"
+
+    export interface ExcelExportResponse {
+        /**
+         * Base64-encoded XLSX data
+         */
+        data: string
+
+        filename: string
+        contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        recordCount: number
+    }
 
     export interface ListingImageItem {
         id: string

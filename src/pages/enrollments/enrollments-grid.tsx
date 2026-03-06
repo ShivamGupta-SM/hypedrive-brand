@@ -29,7 +29,7 @@ import {
 } from "@/features/enrollments/mutations";
 import { useOrgContext } from "@/hooks/use-org-context";
 import type { brand, db } from "@/lib/brand-client";
-import { downloadCSV } from "@/lib/download";
+import { downloadCSV, downloadExcel } from "@/lib/download";
 import { showToast } from "@/lib/toast";
 
 type Enrollment = brand.EnrollmentWithRelations;
@@ -248,9 +248,8 @@ export function EnrollmentsGrid({ status }: EnrollmentsGridProps) {
 			const result = await exportEnrollments.mutateAsync({
 				status,
 			});
-			const url = (result as { url?: string })?.url;
-			if (url) {
-				window.open(url, "_blank");
+			if (result.data && result.filename) {
+				downloadExcel(result.data, result.filename);
 				showToast.exported();
 			} else {
 				exportEnrollmentsToCSV(enrollments, "enrollments");

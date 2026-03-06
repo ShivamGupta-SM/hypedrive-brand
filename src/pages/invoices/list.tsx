@@ -33,6 +33,7 @@ import { useInfiniteInvoices, useInvoice } from "@/features/invoices/hooks";
 import { useBatchInvoices, useExportInvoiceEnrollments, useGenerateInvoicePDF } from "@/features/invoices/mutations";
 import { useOrgContext } from "@/hooks/use-org-context";
 import type { brand, db } from "@/lib/brand-client";
+import { downloadExcel } from "@/lib/download";
 import { formatCurrency, formatDate, formatDateCompact } from "@/lib/design-tokens";
 import { showToast } from "@/lib/toast";
 
@@ -226,15 +227,7 @@ function InvoiceDetailDialog({ invoice, onClose }: { invoice: Invoice | null; on
 		if (!inv) return;
 		try {
 			const result = await exportEnrollments.mutateAsync(inv.id);
-			const blob = new Blob([result.csv], { type: "text/csv;charset=utf-8;" });
-			const url = URL.createObjectURL(blob);
-			const a = document.createElement("a");
-			a.href = url;
-			a.download = result.filename;
-			document.body.appendChild(a);
-			a.click();
-			document.body.removeChild(a);
-			URL.revokeObjectURL(url);
+			downloadExcel(result.data, result.filename);
 			showToast.success(`Exported ${result.totalCount} enrollment${result.totalCount !== 1 ? "s" : ""}`);
 		} catch (err) {
 			showToast.error(err, "Failed to export enrollments");

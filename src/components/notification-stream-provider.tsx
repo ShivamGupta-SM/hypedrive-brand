@@ -128,7 +128,7 @@ export function NotificationStreamProvider({
 						) {
 							new Notification(notification.title || "Hypedrive", {
 								body: notification.body || undefined,
-								icon: "/favicon.ico",
+								icon: "/favicon.svg",
 								tag: notification.id,
 							});
 						}
