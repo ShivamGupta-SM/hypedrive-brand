@@ -166,6 +166,7 @@ export function EnrollmentsLayout() {
 			{overdueCount > 0 && (
 				<AlertBanner
 					variant="warning"
+					size="sm"
 					title={`${overdueCount} enrollment${overdueCount !== 1 ? "s" : ""} overdue`}
 					description="Pending review for more than 48 hours"
 					action={{ label: "View", href: orgPath("/enrollments/awaiting-review") }}

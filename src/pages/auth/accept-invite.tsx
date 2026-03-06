@@ -1,7 +1,7 @@
 import {
-	BuildingStorefrontIcon,
 	CheckCircleIcon,
 	ExclamationTriangleIcon,
+	HomeModernIcon,
 	XCircleIcon,
 } from "@heroicons/react/16/solid";
 import { useNavigate, useSearch } from "@tanstack/react-router";
@@ -173,7 +173,7 @@ export function AcceptInvite() {
 
 			<div className="text-center">
 				<div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800">
-					<BuildingStorefrontIcon className="size-7 text-zinc-500 dark:text-zinc-400" />
+					<HomeModernIcon className="size-7 text-zinc-500 dark:text-zinc-400" />
 				</div>
 				<h1 className="text-xl font-semibold text-zinc-900 dark:text-white">You're invited!</h1>
 				<p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">

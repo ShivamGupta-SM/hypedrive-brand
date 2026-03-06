@@ -54,6 +54,15 @@ export const generateInvoicePDFServer = createServerFn({ method: "POST" })
 		return context.client.brand.generateInvoicePDF(data.orgId, data.invoiceId);
 	});
 
+// -- Export Invoice Enrollments ------------------------------------------------
+
+export const exportInvoiceEnrollmentsServer = createServerFn({ method: "GET" })
+	.middleware([authMiddleware])
+	.inputValidator((input: { orgId: string; invoiceId: string }) => input)
+	.handler(async ({ context, data }) => {
+		return context.client.brand.exportInvoiceEnrollments(data.orgId, data.invoiceId);
+	});
+
 // -- Batch Invoice Operations -------------------------------------------------
 
 export const batchInvoicesServer = createServerFn({ method: "POST" })

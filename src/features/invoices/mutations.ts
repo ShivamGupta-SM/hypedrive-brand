@@ -4,7 +4,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/hooks/api-client";
-import { batchInvoicesServer, generateInvoicePDFServer } from "./server";
+import { batchInvoicesServer, exportInvoiceEnrollmentsServer, generateInvoicePDFServer } from "./server";
 
 export function useGenerateInvoicePDF(organizationId: string | undefined) {
 	const queryClient = useQueryClient();
@@ -24,6 +24,14 @@ export function useGenerateInvoicePDF(organizationId: string | undefined) {
 // =============================================================================
 // BATCH OPERATIONS
 // =============================================================================
+
+export function useExportInvoiceEnrollments(organizationId: string | undefined) {
+	return useMutation({
+		mutationFn: async (invoiceId: string) => {
+			return exportInvoiceEnrollmentsServer({ data: { orgId: organizationId as string, invoiceId } });
+		},
+	});
+}
 
 export function useBatchInvoices() {
 	const queryClient = useQueryClient();
