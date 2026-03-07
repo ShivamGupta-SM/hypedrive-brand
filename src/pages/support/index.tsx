@@ -251,7 +251,7 @@ export function Support() {
 				<MenuSection>
 					<MenuRow
 						icon={DocumentTextIcon}
-						iconColor="sky"
+						iconColor="amber"
 						label="Documentation"
 						suffix={<ArrowTopRightOnSquareIcon className="size-4 text-zinc-400" />}
 						onClick={() => window.open("https://docs.hypedrive.com", "_blank")}

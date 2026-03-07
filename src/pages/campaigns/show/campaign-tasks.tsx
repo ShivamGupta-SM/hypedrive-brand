@@ -99,9 +99,7 @@ export function CampaignTasks({
 				{/* Header + Actions */}
 				<div className="flex items-start justify-between gap-4">
 					<div className="flex items-center gap-2.5">
-						<div className="flex size-6 items-center justify-center rounded-md bg-amber-100 dark:bg-amber-900/30">
-							<ClipboardDocumentListIcon className="size-3.5 text-amber-500" />
-						</div>
+						<ClipboardDocumentListIcon className="size-4 text-amber-500" />
 						<div>
 							<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">Campaign Tasks</h3>
 							<p className="text-xs text-zinc-500 dark:text-zinc-400">

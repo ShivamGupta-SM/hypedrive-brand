@@ -930,9 +930,7 @@ export function ListingShow() {
 			<div>
 				<div className="flex items-center justify-between px-0.5 pb-2.5">
 					<div className="flex items-center gap-2.5">
-						<div className="flex size-6 items-center justify-center rounded-md bg-violet-100 dark:bg-violet-900/30">
-							<MegaphoneIcon className="size-3.5 text-violet-500" />
-						</div>
+						<MegaphoneIcon className="size-4 text-violet-500" />
 						<h3 className="text-xs font-semibold text-zinc-900 sm:text-sm dark:text-white">
 							Campaigns
 							{listing.campaignCount > 0 && (

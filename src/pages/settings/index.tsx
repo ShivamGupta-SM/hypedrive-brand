@@ -1034,7 +1034,7 @@ export function Settings({ section = "all" }: { section?: OrgSettingsSection } =
 					<MenuSeparator />
 					<MenuRow
 						icon={GlobeAltIcon}
-						iconColor="sky"
+						iconColor="violet"
 						label="Website"
 						value={orgData?.website || "Not set"}
 						onClick={canUpdateOrganization ? openEditOrg : undefined}

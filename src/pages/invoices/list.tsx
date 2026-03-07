@@ -71,10 +71,10 @@ const statusConfig: Record<
 	},
 	viewed: {
 		label: "Viewed",
-		color: "sky",
-		dotClass: "bg-sky-500",
-		bgClass: "bg-sky-50 dark:bg-sky-900/20",
-		iconText: "text-sky-500 dark:text-sky-400",
+		color: "violet",
+		dotClass: "bg-violet-500",
+		bgClass: "bg-violet-50 dark:bg-violet-900/20",
+		iconText: "text-violet-500 dark:text-violet-400",
 	},
 	draft: {
 		label: "Draft",
@@ -92,10 +92,10 @@ const statusConfig: Record<
 	},
 	partially_paid: {
 		label: "Partial",
-		color: "amber",
-		dotClass: "bg-amber-500",
-		bgClass: "bg-amber-50 dark:bg-amber-900/20",
-		iconText: "text-amber-500 dark:text-amber-400",
+		color: "sky",
+		dotClass: "bg-sky-500",
+		bgClass: "bg-sky-50 dark:bg-sky-900/20",
+		iconText: "text-sky-500 dark:text-sky-400",
 	},
 	overdue: {
 		label: "Overdue",

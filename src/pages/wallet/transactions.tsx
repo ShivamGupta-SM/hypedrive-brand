@@ -50,9 +50,7 @@ export function WalletTransactions() {
 			<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
 				<div className="flex items-center justify-between border-b border-zinc-200 px-3.5 py-2.5 sm:px-4 sm:py-3 dark:border-zinc-700">
 					<div className="flex items-center gap-2.5">
-						<div className="flex size-6 items-center justify-center rounded-md bg-sky-100 dark:bg-sky-900/30">
-							<ArrowsRightLeftIcon className="size-3.5 text-sky-500" />
-						</div>
+						<ArrowsRightLeftIcon className="size-4 text-sky-500" />
 						<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">Transactions</h3>
 					</div>
 					<FilterDropdown label="Type" options={typeFilterOptions} value={typeFilter} onChange={(v) => setTypeFilter(v as TypeFilter)} />

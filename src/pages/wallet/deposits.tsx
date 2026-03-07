@@ -46,9 +46,7 @@ export function WalletDeposits() {
 		<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
 			<div className="flex items-center justify-between border-b border-zinc-200 px-3.5 py-2.5 sm:px-4 sm:py-3 dark:border-zinc-700">
 				<div className="flex items-center gap-2.5">
-					<div className="flex size-6 items-center justify-center rounded-md bg-emerald-100 dark:bg-emerald-900/30">
-						<ArrowDownLeftIcon className="size-3.5 text-emerald-500" />
-					</div>
+					<ArrowDownLeftIcon className="size-4 text-emerald-500" />
 					<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">Deposits</h3>
 				</div>
 				<FilterDropdown label="Sort" options={sortOptions} value={sortBy} onChange={setSortBy} />

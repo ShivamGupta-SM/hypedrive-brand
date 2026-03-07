@@ -15,7 +15,7 @@ import { Button } from "@/components/button";
 import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/dialog";
 import { Field, Label } from "@/components/fieldset";
 import { Textarea } from "@/components/textarea";
-import { EnrollmentCardFull, getEnrollmentStatusConfig, isEnrollmentOverdue } from "@/components/enrollment-card";
+import { EnrollmentCardFull, isEnrollmentOverdue } from "@/components/enrollment-card";
 import { BulkActionsBar } from "@/components/shared/bulk-actions-bar";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
@@ -28,45 +28,11 @@ import {
 	useExportOrganizationEnrollments,
 } from "@/features/enrollments/mutations";
 import { useOrgContext } from "@/hooks/use-org-context";
-import type { brand, db } from "@/lib/brand-client";
-import { downloadCSV, downloadExcel } from "@/lib/download";
+import type { db } from "@/lib/brand-client";
+import { downloadExcel } from "@/lib/download";
 import { showToast } from "@/lib/toast";
 
-type Enrollment = brand.EnrollmentWithRelations;
-
 const enrollmentsRouteApi = getRouteApi("/_app/$orgSlug/enrollments");
-
-// =============================================================================
-// EXPORT FUNCTIONALITY
-// =============================================================================
-
-function exportEnrollmentsToCSV(enrollments: Enrollment[], filename = "enrollments") {
-	const headers = [
-		"Order ID",
-		"Status",
-		"Campaign",
-		"Shopper",
-		"Platform",
-		"Order Value",
-		"Rebate %",
-		"Rebate Amount",
-		"Created At",
-	];
-
-	const rows = enrollments.map((e) => [
-		e.orderId,
-		getEnrollmentStatusConfig(e.status).label,
-		e.campaignId,
-		e.creatorId,
-		e.platform?.name || "",
-		String(e.orderValueDecimal),
-		`${e.lockedBillRate}%`,
-		String(e.lockedPlatformFeeDecimal),
-		new Date(e.createdAt).toISOString(),
-	]);
-
-	downloadCSV(headers, rows, filename);
-}
 
 // =============================================================================
 // GRID SKELETON
@@ -248,18 +214,12 @@ export function EnrollmentsGrid({ status }: EnrollmentsGridProps) {
 			const result = await exportEnrollments.mutateAsync({
 				status,
 			});
-			if (result.data && result.filename) {
-				downloadExcel(result.data, result.filename);
-				showToast.exported();
-			} else {
-				exportEnrollmentsToCSV(enrollments, "enrollments");
-				showToast.exportedLocally();
-			}
-		} catch {
-			exportEnrollmentsToCSV(enrollments, "enrollments");
-			showToast.exportedLocally();
+			downloadExcel(result.data, result.filename);
+			showToast.exported();
+		} catch (err) {
+			showToast.error(err, "Failed to export enrollments");
 		}
-	}, [exportEnrollments, status, enrollments]);
+	}, [exportEnrollments, status]);
 
 	if (loading) {
 		return <EnrollmentsGridSkeleton />;

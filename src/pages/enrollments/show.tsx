@@ -409,22 +409,18 @@ function TimelineItem({ item, isLast }: { item: brand.EnrollmentDetail["history"
 function SectionHeader({
 	title,
 	icon: Icon,
-	iconBg,
 	iconColor,
 	actions,
 }: {
 	title: string;
 	icon: React.ElementType;
-	iconBg: string;
 	iconColor: string;
 	actions?: React.ReactNode;
 }) {
 	return (
 		<div className="flex items-center justify-between gap-2.5 border-b border-zinc-200/80 px-4 py-3 sm:px-5 dark:border-zinc-800">
 			<div className="flex items-center gap-2.5">
-				<div className={clsx("flex size-7 items-center justify-center rounded-lg", iconBg)}>
-					<Icon className={clsx("size-3.5", iconColor)} />
-				</div>
+				<Icon className={clsx("size-4", iconColor)} />
 				<h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{title}</h3>
 			</div>
 			{actions}
@@ -898,7 +894,6 @@ export function EnrollmentShow() {
 						<SectionHeader
 							title="Order Details"
 							icon={HashtagIcon}
-							iconBg="bg-sky-50 dark:bg-sky-950/30"
 							iconColor="text-sky-600 dark:text-sky-400"
 						/>
 						<dl className="divide-y divide-zinc-100 px-4 sm:px-5 dark:divide-zinc-800/60">
@@ -930,7 +925,6 @@ export function EnrollmentShow() {
 							<SectionHeader
 								title="Deliverables"
 								icon={ShoppingBagIcon}
-								iconBg="bg-zinc-100 dark:bg-zinc-800"
 								iconColor="text-zinc-600 dark:text-zinc-400"
 								actions={
 									<div className="flex items-center gap-2">
@@ -1069,7 +1063,6 @@ export function EnrollmentShow() {
 							<SectionHeader
 								title="Order Verification"
 								icon={PhotoIcon}
-								iconBg="bg-violet-50 dark:bg-violet-950/30"
 								iconColor="text-violet-600 dark:text-violet-400"
 							/>
 							<div className="p-4 sm:p-5">
@@ -1152,7 +1145,6 @@ export function EnrollmentShow() {
 						<SectionHeader
 							title="Campaign"
 							icon={MegaphoneIcon}
-							iconBg="bg-indigo-50 dark:bg-indigo-950/30"
 							iconColor="text-indigo-600 dark:text-indigo-400"
 						/>
 						<div className="p-4 sm:p-5">
@@ -1189,7 +1181,6 @@ export function EnrollmentShow() {
 							<SectionHeader
 								title="Creator"
 								icon={UserIcon}
-								iconBg="bg-rose-50 dark:bg-rose-950/30"
 								iconColor="text-rose-600 dark:text-rose-400"
 							/>
 							<div className="p-4 sm:p-5">
@@ -1247,7 +1238,6 @@ export function EnrollmentShow() {
 							<SectionHeader
 								title="Billing Breakdown"
 								icon={CurrencyRupeeIcon}
-								iconBg="bg-emerald-50 dark:bg-emerald-950/30"
 								iconColor="text-emerald-600 dark:text-emerald-400"
 							/>
 							<dl className="divide-y divide-zinc-100 px-4 sm:px-5 dark:divide-zinc-800/60">
@@ -1280,7 +1270,6 @@ export function EnrollmentShow() {
 							<SectionHeader
 								title="Activity Timeline"
 								icon={ClockIcon}
-								iconBg="bg-zinc-100 dark:bg-zinc-800"
 								iconColor="text-zinc-500 dark:text-zinc-400"
 							/>
 							<div className="p-4 sm:p-5">

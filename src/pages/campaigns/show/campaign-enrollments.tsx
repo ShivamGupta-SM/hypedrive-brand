@@ -50,9 +50,7 @@ export function CampaignEnrollments({
 			{/* Header + Actions */}
 			<div className="flex items-start justify-between gap-4">
 				<div className="flex items-center gap-2.5">
-					<div className="flex size-6 items-center justify-center rounded-md bg-sky-100 dark:bg-sky-900/30">
-						<UserGroupIcon className="size-3.5 text-sky-500" />
-					</div>
+					<UserGroupIcon className="size-4 text-sky-500" />
 					<div>
 						<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">Enrollments</h3>
 						<p className="text-xs text-zinc-500 dark:text-zinc-400">

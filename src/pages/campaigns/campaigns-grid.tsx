@@ -31,35 +31,12 @@ import {
 	useResumeCampaign,
 } from "@/features/campaigns/mutations";
 import { useOrgContext } from "@/hooks/use-org-context";
-import type { brand, db } from "@/lib/brand-client";
-import { downloadCSV, downloadExcel } from "@/lib/download";
+import type { db } from "@/lib/brand-client";
+import { downloadExcel } from "@/lib/download";
 import { showToast } from "@/lib/toast";
 import { CampaignCard, CampaignCardSkeleton } from "./campaign-card";
 
-type Campaign = brand.CampaignWithStats;
-
 const campaignsRouteApi = getRouteApi("/_app/$orgSlug/campaigns");
-
-// =============================================================================
-// CSV EXPORT UTILITY
-// =============================================================================
-
-function exportCampaignsToCSV(campaigns: Campaign[]) {
-	const headers = ["ID", "Title", "Status", "Type", "Start Date", "End Date", "Max Enrollments", "Created At"];
-
-	const rows = campaigns.map((c) => [
-		c.id,
-		c.title,
-		c.status,
-		c.campaignType,
-		c.startDate || "",
-		c.endDate || "",
-		String(c.maxEnrollments || ""),
-		c.createdAt,
-	]);
-
-	downloadCSV(headers, rows, "campaigns");
-}
 
 // =============================================================================
 // GRID SKELETON
@@ -236,8 +213,6 @@ export function CampaignsGrid({ status }: CampaignsGridProps) {
 		}
 	};
 
-	const campaignCount = campaigns.length;
-
 	if (loading) {
 		return <CampaignsGridSkeleton />;
 	}
@@ -258,8 +233,8 @@ export function CampaignsGrid({ status }: CampaignsGridProps) {
 								const result = await exportCampaigns.mutateAsync({ status, q: q || undefined });
 								downloadExcel(result.data, result.filename);
 								showToast.success("Export downloaded");
-							} catch {
-								exportCampaignsToCSV(campaigns);
+							} catch (err) {
+								showToast.error(err, "Failed to export campaigns");
 							}
 						}}
 					>

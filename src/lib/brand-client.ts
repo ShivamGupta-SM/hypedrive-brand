@@ -10754,6 +10754,33 @@ export namespace brand {
         daysLeft: number
     }
 
+    export interface TransactionBreakdown {
+        /**
+         * Total amount charged to brand (smallest units)
+         */
+        totalHold: number
+
+        totalHoldDecimal: string
+        /**
+         * Platform service fee (smallest units)
+         */
+        platformFee: number
+
+        platformFeeDecimal: string
+        /**
+         * GST amount (smallest units)
+         */
+        gstAmount: number
+
+        gstAmountDecimal: string
+        /**
+         * Brand commission / bill amount (smallest units)
+         */
+        billAmount?: number
+
+        billAmountDecimal?: string
+    }
+
     export interface UpdateListingRequest {
         name?: string
         description?: string
@@ -10865,6 +10892,11 @@ export namespace brand {
          * Transaction category for better UX
          */
         category?: "enrollment_hold" | "deposit" | "payout" | "refund" | "admin_credit" | "other"
+
+        /**
+         * Financial breakdown for enrollment transactions (brand-facing only, no creator details)
+         */
+        breakdown?: TransactionBreakdown
 
         createdAt: string
         allowedActions: string[]

@@ -738,6 +738,33 @@ export function TransactionDetailDialog({
 							)}
 						</div>
 
+						{/* Financial breakdown for enrollment transactions */}
+						{tx.breakdown && (
+							<div className="mt-3 rounded-xl bg-zinc-50 p-3 dark:bg-zinc-800/50">
+								<p className="mb-2 text-xs font-semibold text-zinc-500 dark:text-zinc-400">Charge Breakdown</p>
+								<div className="space-y-1.5">
+									{tx.breakdown.billAmount != null && (
+										<div className="flex items-center justify-between text-sm">
+											<span className="text-zinc-600 dark:text-zinc-400">Brand Commission</span>
+											<span className="font-medium tabular-nums text-zinc-900 dark:text-white">{formatCurrency(tx.breakdown.billAmountDecimal!)}</span>
+										</div>
+									)}
+									<div className="flex items-center justify-between text-sm">
+										<span className="text-zinc-600 dark:text-zinc-400">Platform Fee</span>
+										<span className="font-medium tabular-nums text-zinc-900 dark:text-white">{formatCurrency(tx.breakdown.platformFeeDecimal)}</span>
+									</div>
+									<div className="flex items-center justify-between text-sm">
+										<span className="text-zinc-600 dark:text-zinc-400">GST</span>
+										<span className="font-medium tabular-nums text-zinc-900 dark:text-white">{formatCurrency(tx.breakdown.gstAmountDecimal)}</span>
+									</div>
+									<div className="mt-1 flex items-center justify-between border-t border-zinc-200 pt-1.5 text-sm dark:border-zinc-700">
+										<span className="font-medium text-zinc-700 dark:text-zinc-300">Total Charged</span>
+										<span className="font-semibold tabular-nums text-zinc-900 dark:text-white">{formatCurrency(tx.breakdown.totalHoldDecimal)}</span>
+									</div>
+								</div>
+							</div>
+						)}
+
 						{/* Technical IDs — collapsible */}
 						<button
 							type="button"

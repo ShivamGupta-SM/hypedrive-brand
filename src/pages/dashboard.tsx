@@ -48,12 +48,12 @@ function getGreeting(): string {
 // =============================================================================
 
 const sectionIconColors = {
-	emerald: { bg: "bg-emerald-100 dark:bg-emerald-900/30", icon: "text-emerald-500" },
-	sky: { bg: "bg-sky-100 dark:bg-sky-900/30", icon: "text-sky-500" },
-	amber: { bg: "bg-amber-100 dark:bg-amber-900/30", icon: "text-amber-500" },
-	violet: { bg: "bg-violet-100 dark:bg-violet-900/30", icon: "text-violet-500" },
-	rose: { bg: "bg-rose-100 dark:bg-rose-900/30", icon: "text-rose-500" },
-	zinc: { bg: "bg-zinc-100 dark:bg-zinc-800", icon: "text-zinc-500 dark:text-zinc-400" },
+	emerald: "text-emerald-500",
+	sky: "text-sky-500",
+	amber: "text-amber-500",
+	violet: "text-violet-500",
+	rose: "text-rose-500",
+	zinc: "text-zinc-500 dark:text-zinc-400",
 };
 
 type SectionIconColor = keyof typeof sectionIconColors;
@@ -71,15 +71,12 @@ function SectionHeader({
 	iconColor?: SectionIconColor;
 	children?: React.ReactNode;
 }) {
-	const colors = sectionIconColors[iconColor];
 	return (
 		<div className="flex items-center gap-2.5">
 			{img ? (
 				<img src={img} alt="" className="size-6 object-contain drop-shadow-sm" />
 			) : Icon ? (
-				<div className={`flex size-6 items-center justify-center rounded-md ${colors.bg}`}>
-					<Icon className={`size-3.5 ${colors.icon}`} />
-				</div>
+				<Icon className={`size-4 ${sectionIconColors[iconColor]}`} />
 			) : null}
 			<h2 className="text-sm font-semibold text-zinc-900 dark:text-white">{title}</h2>
 			{children}

@@ -795,9 +795,7 @@ export function CreateCampaignModal({
 						<div className="space-y-4">
 							{/* Section header */}
 							<div className="flex items-center gap-2">
-								<div className="flex size-7 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
-									<CubeIcon className="size-3.5 text-zinc-500 dark:text-zinc-400" />
-								</div>
+								<CubeIcon className="size-4 text-zinc-500 dark:text-zinc-400" />
 								<p className="text-sm font-medium text-zinc-900 dark:text-white">Select a Listing</p>
 							</div>
 
@@ -881,9 +879,7 @@ export function CreateCampaignModal({
 					{step === 1 && (
 						<div className="rounded-xl p-3 shadow-sm ring-1 ring-zinc-200 sm:p-4 dark:ring-zinc-800">
 							<div className="mb-3 flex items-center gap-2 sm:mb-4">
-								<div className="flex size-7 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-950/30">
-									<MegaphoneIcon className="size-3.5 text-emerald-600 dark:text-emerald-400" />
-								</div>
+								<MegaphoneIcon className="size-4 text-emerald-600 dark:text-emerald-400" />
 								<p className="text-sm font-medium text-zinc-900 dark:text-white">Campaign Details</p>
 							</div>
 							<FieldGroup>
@@ -996,9 +992,7 @@ export function CreateCampaignModal({
 							{/* Schedule Section */}
 							<div className="rounded-xl p-3 shadow-sm ring-1 ring-zinc-200 sm:p-4 dark:ring-zinc-800">
 								<div className="mb-3 flex items-center gap-2 sm:mb-4">
-									<div className="flex size-7 items-center justify-center rounded-lg bg-sky-50 dark:bg-sky-950/30">
-										<CalendarIcon className="size-3.5 text-sky-600 dark:text-sky-400" />
-									</div>
+									<CalendarIcon className="size-4 text-sky-600 dark:text-sky-400" />
 									<p className="text-sm font-medium text-zinc-900 dark:text-white">Campaign Schedule</p>
 								</div>
 								<div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -1056,9 +1050,7 @@ export function CreateCampaignModal({
 							{/* Capacity & Terms Section */}
 							<div className="rounded-xl p-3 shadow-sm ring-1 ring-zinc-200 sm:p-4 dark:ring-zinc-800">
 								<div className="mb-3 flex items-center gap-2 sm:mb-4">
-									<div className="flex size-7 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-950/30">
-										<CubeIcon className="size-3.5 text-amber-600 dark:text-amber-400" />
-									</div>
+									<CubeIcon className="size-4 text-amber-600 dark:text-amber-400" />
 									<p className="text-sm font-medium text-zinc-900 dark:text-white">Capacity & Terms</p>
 								</div>
 								<FieldGroup className="space-y-4!">
@@ -1108,9 +1100,7 @@ export function CreateCampaignModal({
 							{/* Task Selection Section */}
 							<div className="rounded-xl p-3 shadow-sm ring-1 ring-zinc-200 sm:p-4 dark:ring-zinc-800">
 								<div className="flex items-center gap-2">
-									<div className="flex size-7 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-950/30">
-										<RocketLaunchIcon className="size-3.5 text-emerald-600 dark:text-emerald-400" />
-									</div>
+									<RocketLaunchIcon className="size-4 text-emerald-600 dark:text-emerald-400" />
 									<div className="min-w-0 flex-1">
 										<p className="text-sm font-medium text-zinc-900 dark:text-white">Creator Tasks</p>
 									</div>
