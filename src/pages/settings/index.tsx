@@ -48,7 +48,7 @@ import {
 	useVerifyGSTPreview,
 } from "@/features/organization/hooks-settings";
 import { useFileUpload } from "@/features/storage/hooks";
-import { getAPIErrorMessage, getAssetUrl } from "@/hooks/api-client";
+import { getFriendlyErrorMessage, getAssetUrl } from "@/hooks/api-client";
 import { useOrgContext } from "@/hooks/use-org-context";
 import {
 	getAllCountries,
@@ -278,7 +278,7 @@ function EditOrganizationPanel({
 			showToast.success("Organization updated");
 			pop();
 		} catch (err) {
-			setError(getAPIErrorMessage(err, "Failed to update organization"));
+			setError(getFriendlyErrorMessage(err, "Failed to update organization"));
 		}
 	};
 
@@ -515,7 +515,7 @@ function AddBankAccountPanel({ organizationId }: { organizationId: string | unde
 				setError(result.message || "Bank account verification failed. Please check details.");
 			}
 		} catch (err) {
-			setError(getAPIErrorMessage(err, "Failed to verify bank account"));
+			setError(getFriendlyErrorMessage(err, "Failed to verify bank account"));
 		}
 	};
 
@@ -533,7 +533,7 @@ function AddBankAccountPanel({ organizationId }: { organizationId: string | unde
 			showToast.success("Bank account added");
 			pop();
 		} catch (err) {
-			setError(getAPIErrorMessage(err, "Failed to add bank account"));
+			setError(getFriendlyErrorMessage(err, "Failed to add bank account"));
 		}
 	};
 
@@ -686,7 +686,7 @@ function ChangePhonePanel({
 			if (err instanceof Error && err.message === "Passkey verification cancelled") {
 				setError("Passkey verification was cancelled.");
 			} else {
-				setError(getAPIErrorMessage(err, "Failed to update phone number"));
+				setError(getFriendlyErrorMessage(err, "Failed to update phone number"));
 			}
 		}
 	};
@@ -806,7 +806,7 @@ function VerifyGSTPanel({ organizationId, currentGST }: { organizationId: string
 				stateCode: result.stateCode,
 			});
 		} catch (err) {
-			setError(getAPIErrorMessage(err, "GST verification failed"));
+			setError(getFriendlyErrorMessage(err, "GST verification failed"));
 		}
 	};
 
@@ -819,7 +819,7 @@ function VerifyGSTPanel({ organizationId, currentGST }: { organizationId: string
 			showToast.success("GST verified and saved");
 			pop();
 		} catch (err) {
-			setError(getAPIErrorMessage(err, "Failed to save GST"));
+			setError(getFriendlyErrorMessage(err, "Failed to save GST"));
 		}
 	};
 

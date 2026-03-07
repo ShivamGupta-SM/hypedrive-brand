@@ -70,7 +70,7 @@ import {
 } from "@/features/campaigns/mutations";
 import { useCampaignEnrollments } from "@/features/enrollments/hooks";
 import { useExportEnrollments } from "@/features/enrollments/mutations";
-import { getAPIErrorMessage } from "@/hooks/api-client";
+import { getFriendlyErrorMessage } from "@/hooks/api-client";
 import { usePageTitle } from "@/hooks/use-breadcrumb";
 import { useConfetti } from "@/hooks/use-confetti";
 import { useOrgContext } from "@/hooks/use-org-context";
@@ -328,7 +328,7 @@ function EditCampaignModal({
 			onSuccess();
 			onClose();
 		} catch (err) {
-			console.error("Failed to update campaign:", getAPIErrorMessage(err));
+			console.error("Failed to update campaign:", getFriendlyErrorMessage(err));
 		}
 	}, [formData, organizationId, campaign, updateCampaign, onSuccess, onClose, validateStep]);
 

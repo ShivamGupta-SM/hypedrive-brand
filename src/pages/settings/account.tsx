@@ -69,7 +69,7 @@ import {
 import { useLinkedAccounts, useLinkSocial, useUnlinkAccount } from "@/features/auth/hooks-social";
 import { useRemovePushToken, useUpdateNotificationPreferences } from "@/features/notifications/hooks";
 import { useLeaveOrganization } from "@/features/organization/mutations";
-import { getAPIErrorMessage } from "@/hooks/api-client";
+import { getFriendlyErrorMessage } from "@/hooks/api-client";
 import { useOrgContext } from "@/hooks/use-org-context";
 
 // =============================================================================
@@ -156,7 +156,7 @@ function ChangePasswordPanel() {
 			setSuccess(true);
 			setTimeout(() => handleClose(), 1500);
 		} catch (err) {
-			setError(getAPIErrorMessage(err, "Failed to change password"));
+			setError(getFriendlyErrorMessage(err, "Failed to change password"));
 		}
 	};
 
@@ -278,7 +278,7 @@ function ChangeEmailPanel({ currentEmail }: { currentEmail: string }) {
 			await changeEmail.mutateAsync({ newEmail: newEmail.trim() });
 			setSuccess(true);
 		} catch (err) {
-			setError(getAPIErrorMessage(err, "Failed to change email"));
+			setError(getFriendlyErrorMessage(err, "Failed to change email"));
 		}
 	};
 
@@ -624,7 +624,7 @@ function EditUserProfilePanel({ initialName, initialImage }: { initialName: stri
 			setSuccess(true);
 			setTimeout(() => handleClose(), 1500);
 		} catch (err) {
-			setError(getAPIErrorMessage(err, "Failed to update profile"));
+			setError(getFriendlyErrorMessage(err, "Failed to update profile"));
 		} finally {
 			setIsPending(false);
 		}
@@ -754,7 +754,7 @@ function TwoFactorPanel({ isEnabled }: { isEnabled: boolean }) {
 				setStep("qr");
 			}
 		} catch (err) {
-			setError(getAPIErrorMessage(err, "Invalid password"));
+			setError(getFriendlyErrorMessage(err, "Invalid password"));
 		}
 	};
 
@@ -773,7 +773,7 @@ function TwoFactorPanel({ isEnabled }: { isEnabled: boolean }) {
 			await verifyTotp.mutateAsync({ twoFactorToken: password, code, trustDevice: true });
 			setStep("backup");
 		} catch (err) {
-			setError(getAPIErrorMessage(err, "Invalid code. Please try again."));
+			setError(getFriendlyErrorMessage(err, "Invalid code. Please try again."));
 		}
 	};
 
@@ -783,7 +783,7 @@ function TwoFactorPanel({ isEnabled }: { isEnabled: boolean }) {
 			await disable2FA.mutateAsync({ password });
 			setStep("done");
 		} catch (err) {
-			setError(getAPIErrorMessage(err, "Failed to disable 2FA"));
+			setError(getFriendlyErrorMessage(err, "Failed to disable 2FA"));
 		}
 	};
 
@@ -1003,7 +1003,7 @@ function PasskeysPanel() {
 			if (err instanceof DOMException && err.name === "NotAllowedError") {
 				setError("Passkey registration was cancelled.");
 			} else {
-				setError(getAPIErrorMessage(err, "Failed to register passkey"));
+				setError(getFriendlyErrorMessage(err, "Failed to register passkey"));
 			}
 		} finally {
 			setRegistering(false);
@@ -1015,7 +1015,7 @@ function PasskeysPanel() {
 		try {
 			await deletePasskey.mutateAsync(id);
 		} catch (err) {
-			setError(getAPIErrorMessage(err, "Failed to delete passkey"));
+			setError(getFriendlyErrorMessage(err, "Failed to delete passkey"));
 		}
 	};
 
@@ -1027,7 +1027,7 @@ function PasskeysPanel() {
 			setEditingId(null);
 			setEditName("");
 		} catch (err) {
-			setError(getAPIErrorMessage(err, "Failed to rename passkey"));
+			setError(getFriendlyErrorMessage(err, "Failed to rename passkey"));
 		}
 	};
 
@@ -1165,7 +1165,7 @@ function ViewBackupCodesPanel() {
 			const result = await viewCodes.mutateAsync({ password });
 			setCodes(result.backupCodes);
 		} catch (err) {
-			setError(getAPIErrorMessage(err, "Failed to view backup codes"));
+			setError(getFriendlyErrorMessage(err, "Failed to view backup codes"));
 		}
 	};
 
@@ -1177,7 +1177,7 @@ function ViewBackupCodesPanel() {
 			setCodes(result.backupCodes);
 			setIsRegenerated(true);
 		} catch (err) {
-			setError(getAPIErrorMessage(err, "Failed to regenerate backup codes"));
+			setError(getFriendlyErrorMessage(err, "Failed to regenerate backup codes"));
 		}
 	};
 
@@ -1292,7 +1292,7 @@ function SetPasswordPanel() {
 			await setPasswordMutation.mutateAsync({ newPassword });
 			setSuccess(true);
 		} catch (err) {
-			setError(getAPIErrorMessage(err, "Failed to set password"));
+			setError(getFriendlyErrorMessage(err, "Failed to set password"));
 		}
 	};
 
@@ -1401,7 +1401,7 @@ function DeleteAccountPanel() {
 				navigate({ to: result.redirectTo as "/" | "/login" });
 			}
 		} catch (err) {
-			setError(getAPIErrorMessage(err, "Failed to delete account"));
+			setError(getFriendlyErrorMessage(err, "Failed to delete account"));
 		}
 	};
 
@@ -1499,7 +1499,7 @@ function LinkedAccountsPanel() {
 				refetch();
 			}
 		} catch (err) {
-			console.error("Failed to link account:", getAPIErrorMessage(err));
+			console.error("Failed to link account:", getFriendlyErrorMessage(err));
 		}
 	};
 
@@ -1509,7 +1509,7 @@ function LinkedAccountsPanel() {
 			await unlinkAccount.mutateAsync({ providerId, accountId });
 			refetch();
 		} catch (err) {
-			console.error("Failed to unlink account:", getAPIErrorMessage(err));
+			console.error("Failed to unlink account:", getFriendlyErrorMessage(err));
 		} finally {
 			setUnlinkingId(null);
 		}
@@ -1629,7 +1629,7 @@ function PendingInvitationsSection() {
 		try {
 			await acceptInvitation.mutateAsync({ organizationId, invitationId });
 		} catch (err) {
-			console.error("Failed to accept invitation:", getAPIErrorMessage(err));
+			console.error("Failed to accept invitation:", getFriendlyErrorMessage(err));
 		} finally {
 			setProcessingId(null);
 		}
@@ -1640,7 +1640,7 @@ function PendingInvitationsSection() {
 		try {
 			await rejectInvitation.mutateAsync({ organizationId, invitationId });
 		} catch (err) {
-			console.error("Failed to reject invitation:", getAPIErrorMessage(err));
+			console.error("Failed to reject invitation:", getFriendlyErrorMessage(err));
 		} finally {
 			setProcessingId(null);
 		}
@@ -1785,7 +1785,7 @@ export function AccountSettings({ section = "all" }: { section?: AccountSettings
 			await leaveOrganization.mutateAsync(organization.id);
 			navigate({ to: "/login" as "/" });
 		} catch (err) {
-			console.error("Failed to leave organization:", getAPIErrorMessage(err));
+			console.error("Failed to leave organization:", getFriendlyErrorMessage(err));
 		}
 	};
 
@@ -1995,7 +1995,7 @@ export function AccountSettings({ section = "all" }: { section?: AccountSettings
 											try {
 												await removePushToken.mutateAsync(token.token);
 											} catch (err) {
-												console.error("Failed to remove push token:", getAPIErrorMessage(err));
+												console.error("Failed to remove push token:", getFriendlyErrorMessage(err));
 											}
 										}}
 										disabled={removePushToken.isPending}

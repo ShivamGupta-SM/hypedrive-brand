@@ -19,7 +19,7 @@ import { useSetupProgressStream } from "@/features/organization/hooks";
 import { useEnrichPreview, useVerifyGSTPreview } from "@/features/organization/hooks-settings";
 import { useCheckSlug, useCreateOrganization } from "@/features/organization/mutations";
 import { usePreviewLogoByDomain } from "@/features/storage/hooks";
-import { getAPIErrorMessage } from "@/hooks/api-client";
+import { getFriendlyErrorMessage } from "@/hooks/api-client";
 import { useConfetti } from "@/hooks/use-confetti";
 import { FormError } from "@/pages/auth/components";
 
@@ -338,7 +338,7 @@ function GSTStep({
 			});
 			setVerified(true);
 		} catch (err) {
-			setError(getAPIErrorMessage(err, "Could not verify GST number"));
+			setError(getFriendlyErrorMessage(err, "Could not verify GST number"));
 		}
 	};
 
@@ -748,7 +748,7 @@ export function Onboarding() {
 			setSubmittedOrgId(result.id);
 			setStep(3);
 		} catch (err) {
-			setError(getAPIErrorMessage(err, "Failed to create organization"));
+			setError(getFriendlyErrorMessage(err, "Failed to create organization"));
 		}
 	};
 

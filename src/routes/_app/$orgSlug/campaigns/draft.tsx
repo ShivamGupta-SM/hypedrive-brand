@@ -1,18 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { RouteErrorComponent, RoutePendingComponent } from "@/components/shared/route-error";
-import { infiniteCampaignsQueryOptions } from "@/features/campaigns/queries";
 import { CampaignsGrid } from "@/pages/campaigns/campaigns-grid";
+import { campaignStatusRouteConfig } from "./-route-config";
 
 export const Route = createFileRoute("/_app/$orgSlug/campaigns/draft")({
-	head: () => ({
-		meta: [{ title: "Draft Campaigns | Hypedrive" }],
-	}),
-	loader: ({ context }) => {
-		const orgId = context.organization?.id;
-		if (!orgId) return;
-		context.queryClient.prefetchInfiniteQuery(infiniteCampaignsQueryOptions(orgId, { status: "draft" }));
-	},
+	...campaignStatusRouteConfig("draft"),
 	component: () => <CampaignsGrid status="draft" />,
-	errorComponent: RouteErrorComponent,
-	pendingComponent: RoutePendingComponent,
 });

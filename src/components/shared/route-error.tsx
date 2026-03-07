@@ -4,7 +4,7 @@
  */
 
 import { isCancelledError } from "@tanstack/react-query";
-import { getAPIErrorMessage, isAPIError } from "@/hooks/api-client";
+import { getFriendlyErrorMessage, isAPIError } from "@/hooks/api-client";
 import { ErrorState } from "./error-state";
 
 export function RouteErrorComponent({ error, reset }: { error: unknown; reset?: () => void }) {
@@ -16,7 +16,7 @@ export function RouteErrorComponent({ error, reset }: { error: unknown; reset?: 
 		throw error;
 	}
 
-	return <ErrorState title="Failed to load" message={getAPIErrorMessage(error)} onRetry={reset} />;
+	return <ErrorState title="Failed to load" message={getFriendlyErrorMessage(error)} onRetry={reset} />;
 }
 
 export function RoutePendingComponent() {

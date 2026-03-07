@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/button";
 import { Logo } from "@/components/logo";
 import { useAcceptInvitation, useGetInvitation, useRejectInvitation } from "@/features/auth/hooks-invitations";
-import { getAPIErrorMessage } from "@/hooks/api-client";
+import { getFriendlyErrorMessage } from "@/hooks/api-client";
 import { AuthShell } from "./login";
 
 type InviteState = "loading" | "preview" | "accepted" | "rejected" | "error";
@@ -56,7 +56,7 @@ export function AcceptInvite() {
 				setState("preview");
 			},
 			(err) => {
-				setError(getAPIErrorMessage(err, "This invitation is invalid or has expired."));
+				setError(getFriendlyErrorMessage(err, "This invitation is invalid or has expired."));
 				setState("error");
 			}
 		);
@@ -72,7 +72,7 @@ export function AcceptInvite() {
 			setState("accepted");
 			setTimeout(() => navigate({ to: "/" }), 2000);
 		} catch (err) {
-			setError(getAPIErrorMessage(err, "Failed to accept invitation."));
+			setError(getFriendlyErrorMessage(err, "Failed to accept invitation."));
 		}
 	};
 
@@ -85,7 +85,7 @@ export function AcceptInvite() {
 			});
 			setState("rejected");
 		} catch (err) {
-			setError(getAPIErrorMessage(err, "Failed to decline invitation."));
+			setError(getFriendlyErrorMessage(err, "Failed to decline invitation."));
 		}
 	};
 

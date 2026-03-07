@@ -35,7 +35,7 @@ import { useCampaigns } from "@/features/campaigns/hooks";
 import { useCancelCampaign, useDuplicateCampaign, usePauseCampaign, useResumeCampaign } from "@/features/campaigns/mutations";
 import { useListing } from "@/features/listings/hooks";
 import { useDeleteListing, useUpdateListing } from "@/features/listings/mutations";
-import { getAPIErrorMessage, getAssetUrl } from "@/hooks/api-client";
+import { getFriendlyErrorMessage, getAssetUrl } from "@/hooks/api-client";
 import { usePageTitle } from "@/hooks/use-breadcrumb";
 import { useOrgContext } from "@/hooks/use-org-context";
 import type { brand } from "@/lib/brand-client";
@@ -355,7 +355,7 @@ function EditListingModal({
 			onSuccess();
 			onClose();
 		} catch (err) {
-			console.error("Failed to update listing:", getAPIErrorMessage(err));
+			console.error("Failed to update listing:", getFriendlyErrorMessage(err));
 		}
 	}, [formData, organizationId, listing, updateListing, onSuccess, onClose, validateStep]);
 

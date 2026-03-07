@@ -23,7 +23,7 @@ import {
 	useOrganizationRoles,
 	useUpdateOrganizationRole,
 } from "@/features/organization/hooks-roles";
-import { getAPIErrorMessage } from "@/hooks/api-client";
+import { getFriendlyErrorMessage } from "@/hooks/api-client";
 import { useOrgContext } from "@/hooks/use-org-context";
 import type { OrgResource } from "@/lib/permissions/definitions";
 import { ACTION_LABELS, ORG_RESOURCE_LABELS, ORG_STATEMENT } from "@/lib/permissions/definitions";
@@ -101,7 +101,7 @@ function RolesContent({ organizationId }: { organizationId: string | undefined }
 			setCreateError(null);
 			showToast.success("Role created");
 		} catch (err) {
-			setCreateError(getAPIErrorMessage(err, "Failed to create role"));
+			setCreateError(getFriendlyErrorMessage(err, "Failed to create role"));
 		}
 	}, [newRoleName, createRole]);
 

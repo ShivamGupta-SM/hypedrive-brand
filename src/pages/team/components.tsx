@@ -33,7 +33,7 @@ import {
 } from "@/features/organization/hooks-roles";
 import { useUserSearch } from "@/features/team/hooks";
 import { useInviteMember, useRemoveMember, useUpdateMemberRole } from "@/features/team/mutations";
-import { getAPIErrorMessage } from "@/hooks/api-client";
+import { getFriendlyErrorMessage } from "@/hooks/api-client";
 import type { types } from "@/lib/brand-client";
 import type { OrgResource } from "@/lib/permissions/definitions";
 import {
@@ -677,7 +677,7 @@ export function InviteMemberModal({
 			setRole("member");
 			setError(null);
 		} catch (err) {
-			setError(getAPIErrorMessage(err, "Failed to send invitation"));
+			setError(getFriendlyErrorMessage(err, "Failed to send invitation"));
 		}
 	}, [email, role, inviteMember, onSuccess, onClose]);
 
@@ -901,7 +901,7 @@ export function ChangeRoleDialog({
 			onSuccess();
 			onClose();
 		} catch (err) {
-			console.error("Failed to update role:", getAPIErrorMessage(err));
+			console.error("Failed to update role:", getFriendlyErrorMessage(err));
 		}
 	}, [member, selectedRole, updateRole, onSuccess, onClose]);
 
@@ -1019,7 +1019,7 @@ export function RemoveMemberDialog({
 			onSuccess();
 			onClose();
 		} catch (err) {
-			console.error("Failed to remove member:", getAPIErrorMessage(err));
+			console.error("Failed to remove member:", getFriendlyErrorMessage(err));
 		}
 	}, [member, removeMember, onSuccess, onClose]);
 
@@ -1111,7 +1111,7 @@ export function RolesSection({ organizationId }: { organizationId: string | unde
 			setCreateError(null);
 			showToast.success("Role created");
 		} catch (err) {
-			setCreateError(getAPIErrorMessage(err, "Failed to create role"));
+			setCreateError(getFriendlyErrorMessage(err, "Failed to create role"));
 		}
 	}, [newRoleName, createRole]);
 

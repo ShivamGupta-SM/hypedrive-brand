@@ -30,29 +30,17 @@ export function isAPIError(error: unknown): error is APIError {
 	return typeof error === "object" && error !== null && ("code" in error || "message" in error || "status" in error);
 }
 
-export function getAPIErrorMessage(error: unknown, fallback = "Something went wrong"): string {
+function getAPIErrorMessage(error: unknown, fallback = "Something went wrong"): string {
 	if (isAPIError(error)) return error.message || fallback;
 	if (error instanceof Error) return error.message;
 	return fallback;
 }
 
-export function getAPIErrorCode(error: unknown): string | null {
+function getAPIErrorCode(error: unknown): string | null {
 	if (isAPIError(error)) {
-		// Check for structured error code in details (new pattern)
 		const details = (error as any).details;
 		if (details?.code) return details.code;
-		// Fallback to top-level code
 		if (error.code) return error.code;
-	}
-	return null;
-}
-
-/**
- * Get structured error details from APIError (for financial errors etc.)
- */
-export function getAPIErrorDetails(error: unknown): Record<string, unknown> | null {
-	if (isAPIError(error)) {
-		return (error as any).details ?? null;
 	}
 	return null;
 }
@@ -142,7 +130,7 @@ const ERROR_CODE_MESSAGES: Record<string, string> = {
 /**
  * Get a user-friendly message from an API error, checking structured error codes first.
  */
-export function getFriendlyErrorMessage(error: unknown, fallback: string): string {
+export function getFriendlyErrorMessage(error: unknown, fallback = "Something went wrong"): string {
 	const code = getAPIErrorCode(error);
 	if (code && ERROR_CODE_MESSAGES[code]) {
 		return ERROR_CODE_MESSAGES[code];
