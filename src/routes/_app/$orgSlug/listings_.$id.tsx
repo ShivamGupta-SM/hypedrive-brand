@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { RouteErrorComponent, RoutePendingComponent } from "@/components/shared/route-error";
 import { listingQueryOptions } from "@/features/listings/queries";
-import { ListingShow } from "@/pages/listings";
 
 export const Route = createFileRoute("/_app/$orgSlug/listings_/$id")({
 	head: () => ({
@@ -13,7 +12,6 @@ export const Route = createFileRoute("/_app/$orgSlug/listings_/$id")({
 		if (!orgId) return;
 		await context.queryClient.ensureQueryData(listingQueryOptions(orgId, params.id));
 	},
-	component: ListingShow,
 	errorComponent: RouteErrorComponent,
 	pendingComponent: RoutePendingComponent,
 });

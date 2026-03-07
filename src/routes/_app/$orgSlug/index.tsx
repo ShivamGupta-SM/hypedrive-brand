@@ -6,7 +6,6 @@ import {
 	organizationActivityQueryOptions,
 	setupProgressQueryOptions,
 } from "@/features/organization/queries";
-import { Dashboard } from "@/pages/dashboard";
 
 export const Route = createFileRoute("/_app/$orgSlug/")({
 	head: () => ({
@@ -21,7 +20,6 @@ export const Route = createFileRoute("/_app/$orgSlug/")({
 			context.queryClient.ensureQueryData(setupProgressQueryOptions(orgId)),
 		]);
 	},
-	component: Dashboard,
 	errorComponent: RouteErrorComponent,
 	pendingComponent: RoutePendingComponent,
 });
