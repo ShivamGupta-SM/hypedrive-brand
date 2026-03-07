@@ -18,6 +18,7 @@ import { AreaChart } from "@/components/charts";
 import { EnrollmentCardInline } from "@/components/enrollment-card";
 import { Link } from "@/components/link";
 import { AlertBanner, ContentCard, PageHeader } from "@/components/page-header";
+import { ErrorBoundary } from "@/components/shared/error-boundary";
 import { ErrorState } from "@/components/shared/error-state";
 import { IconButton } from "@/components/shared/icon-button";
 import { Skeleton } from "@/components/skeleton";
@@ -671,20 +672,63 @@ function QuickActions({ orgSlug }: { orgSlug: string }) {
 // ACTIVITY FEED
 // =============================================================================
 
-const activityIcons: Record<string, { icon: React.ElementType; color: string }> = {
-	campaign: { icon: MegaphoneIcon, color: "text-zinc-500 dark:text-zinc-400" },
-	enrollment: { icon: UserGroupIcon, color: "text-zinc-500 dark:text-zinc-400" },
-	invoice: { icon: BanknotesIcon, color: "text-zinc-500 dark:text-zinc-400" },
-	listing: { icon: ShoppingBagIcon, color: "text-zinc-500 dark:text-zinc-400" },
-	withdrawal: { icon: BanknotesIcon, color: "text-zinc-500 dark:text-zinc-400" },
-	organization: { icon: SparklesIcon, color: "text-zinc-500 dark:text-zinc-400" },
+const activityIcons: Record<string, { icon: React.ElementType; iconColor: string; bgColor: string }> = {
+	campaign: { icon: MegaphoneIcon, iconColor: "text-violet-600 dark:text-violet-400", bgColor: "bg-violet-100 dark:bg-violet-900/30" },
+	enrollment: { icon: UserGroupIcon, iconColor: "text-sky-600 dark:text-sky-400", bgColor: "bg-sky-100 dark:bg-sky-900/30" },
+	invoice: { icon: BanknotesIcon, iconColor: "text-amber-600 dark:text-amber-400", bgColor: "bg-amber-100 dark:bg-amber-900/30" },
+	listing: { icon: ShoppingBagIcon, iconColor: "text-pink-600 dark:text-pink-400", bgColor: "bg-pink-100 dark:bg-pink-900/30" },
+	withdrawal: { icon: WalletIcon, iconColor: "text-emerald-600 dark:text-emerald-400", bgColor: "bg-emerald-100 dark:bg-emerald-900/30" },
+	organization: { icon: SparklesIcon, iconColor: "text-zinc-600 dark:text-zinc-400", bgColor: "bg-zinc-100 dark:bg-zinc-800" },
+};
+
+const ACTION_LABELS: Record<string, string> = {
+	campaign_created: "Campaign Created",
+	campaign_approved: "Campaign Approved",
+	campaign_rejected: "Campaign Rejected",
+	campaign_paused: "Campaign Paused",
+	campaign_ended: "Campaign Ended",
+	campaign_cancelled: "Campaign Cancelled",
+	enrollment_created: "New Enrollment",
+	enrollment_submitted: "Enrollment Submitted",
+	enrollment_approved: "Enrollment Approved",
+	enrollment_rejected: "Enrollment Rejected",
+	enrollment_expired: "Enrollment Expired",
+	enrollment_resubmitted: "Enrollment Resubmitted",
+	withdrawal_requested: "Withdrawal Requested",
+	withdrawal_completed: "Withdrawal Completed",
+	withdrawal_failed: "Withdrawal Failed",
+	withdrawal_approved: "Withdrawal Approved",
+	invoice_generated: "Invoice Generated",
+	organization_created: "Organization Created",
+	organization_reinstated: "Organization Reinstated",
+	deposit_received: "Deposit Received",
+	credit: "Wallet Credited",
 };
 
 function formatAction(action: string): string {
-	return action.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+	return ACTION_LABELS[action] ?? action.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-function ActivityFeed({ organizationId }: { organizationId: string }) {
+function getActivityLink(orgSlug: string, entityType: string, entityId: string, action: string): string | null {
+	switch (entityType) {
+		case "campaign":
+			return `/${orgSlug}/campaigns/${entityId}`;
+		case "enrollment":
+			return `/${orgSlug}/enrollments/${entityId}`;
+		case "withdrawal":
+			return `/${orgSlug}/wallet/withdrawals`;
+		case "invoice":
+			return `/${orgSlug}/invoices/${entityId}`;
+		case "listing":
+			return `/${orgSlug}/listings/${entityId}`;
+		case "organization":
+			return null;
+		default:
+			return null;
+	}
+}
+
+function ActivityFeed({ organizationId, orgSlug }: { organizationId: string; orgSlug: string }) {
 	const { data, loading } = useOrganizationActivity(organizationId, { limit: 6 });
 
 	if (loading) {
@@ -719,22 +763,20 @@ function ActivityFeed({ organizationId }: { organizationId: string }) {
 
 	return (
 		<div className="relative space-y-0.5">
-			<div className="pointer-events-none absolute bottom-3 left-[0.85rem] top-3 w-px bg-zinc-200 dark:bg-zinc-800" />
+			<div className="pointer-events-none absolute bottom-3 left-[1.375rem] top-3 w-px bg-zinc-200 dark:bg-zinc-800" />
 			{activities.map((entry) => {
 				const meta = activityIcons[entry.entityType] ?? activityIcons.organization;
-				return (
-					<div
-						key={entry.id}
-						className="group relative flex items-start gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/40"
-					>
-						<div className="relative z-10 mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg bg-zinc-100 ring-2 ring-white dark:bg-zinc-800 dark:ring-zinc-900">
-							<meta.icon className={`size-3.5 ${meta.color}`} />
+				const href = getActivityLink(orgSlug, entry.entityType, entry.entityId, entry.action);
+				const inner = (
+					<>
+						<div className={`relative z-10 mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg ring-2 ring-white dark:ring-zinc-900 ${meta.bgColor}`}>
+							<meta.icon className={`size-3.5 ${meta.iconColor}`} />
 						</div>
 						<div className="min-w-0 flex-1">
 							<p className="text-sm text-zinc-700 dark:text-zinc-300">
 								<span className="font-medium text-zinc-900 dark:text-white">{formatAction(entry.action)}</span>
 								{entry.details?.campaignTitle && (
-									<span className="text-zinc-500 dark:text-zinc-400"> · {entry.details.campaignTitle}</span>
+									<span className="text-zinc-600 dark:text-zinc-400"> · {entry.details.campaignTitle}</span>
 								)}
 							</p>
 							<p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
@@ -742,11 +784,28 @@ function ActivityFeed({ organizationId }: { organizationId: string }) {
 								{entry.adminName && (
 									<>
 										{" "}
-										· <span className="text-zinc-500 dark:text-zinc-400">{entry.adminName}</span>
+										· <span className="text-zinc-600 dark:text-zinc-400">{entry.adminName}</span>
 									</>
 								)}
 							</p>
 						</div>
+						{href && (
+							<ChevronRightIcon className="mt-1 size-4 shrink-0 text-zinc-300 transition-colors group-hover:text-zinc-500 dark:text-zinc-600 dark:group-hover:text-zinc-400" />
+						)}
+					</>
+				);
+
+				return href ? (
+					<Link
+						key={entry.id}
+						to={href}
+						className="group relative flex items-start gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/40"
+					>
+						{inner}
+					</Link>
+				) : (
+					<div key={entry.id} className="group relative flex items-start gap-3 rounded-lg px-2 py-2">
+						{inner}
 					</div>
 				);
 			})}
@@ -1068,40 +1127,54 @@ export function Dashboard() {
 					/>
 
 					{/* Wallet + Quick Actions */}
-					<WalletHero stats={stats} orgSlug={orgSlug} />
+					<ErrorBoundary title="Failed to load wallet" compact>
+						<WalletHero stats={stats} orgSlug={orgSlug} />
+					</ErrorBoundary>
 					<QuickActions orgSlug={orgSlug} />
 
 					{/* Stats — Campaigns + Enrollments */}
 					<div className="grid min-w-0 gap-3 sm:gap-4 lg:grid-cols-2">
-						<CampaignPulse stats={stats} orgSlug={orgSlug} />
-						<EnrollmentStats stats={stats} orgSlug={orgSlug} />
+						<ErrorBoundary title="Failed to load campaign stats" compact>
+							<CampaignPulse stats={stats} orgSlug={orgSlug} />
+						</ErrorBoundary>
+						<ErrorBoundary title="Failed to load enrollment stats" compact>
+							<EnrollmentStats stats={stats} orgSlug={orgSlug} />
+						</ErrorBoundary>
 					</div>
 
 					{/* Pending Reviews + Top Campaigns */}
 					<div className="grid min-w-0 gap-3 sm:gap-4 lg:grid-cols-2">
-						<PendingReviewsSection
-							items={dashboardData.pendingEnrollments}
-							totalPending={stats.pendingEnrollments}
-							orgSlug={orgSlug}
-						/>
-						<TopCampaignsSection campaigns={dashboardData.topCampaigns} orgSlug={orgSlug} />
+						<ErrorBoundary title="Failed to load pending reviews" compact>
+							<PendingReviewsSection
+								items={dashboardData.pendingEnrollments}
+								totalPending={stats.pendingEnrollments}
+								orgSlug={orgSlug}
+							/>
+						</ErrorBoundary>
+						<ErrorBoundary title="Failed to load top campaigns" compact>
+							<TopCampaignsSection campaigns={dashboardData.topCampaigns} orgSlug={orgSlug} />
+						</ErrorBoundary>
 					</div>
 
 					{/* Enrollment Trend Chart */}
 					{dashboardData.enrollmentChart && dashboardData.enrollmentChart.length > 1 && (
-						<EnrollmentTrendChart chartData={dashboardData.enrollmentChart} orgSlug={orgSlug} />
+						<ErrorBoundary title="Failed to load chart" compact>
+							<EnrollmentTrendChart chartData={dashboardData.enrollmentChart} orgSlug={orgSlug} />
+						</ErrorBoundary>
 					)}
 
 					{/* Activity Feed */}
 					{organizationId && (
-						<ContentCard padding="none" className="overflow-hidden">
-							<div className="flex items-center justify-between border-b border-zinc-200 px-3.5 py-2.5 sm:px-4 sm:py-3 dark:border-zinc-700">
-								<SectionHeader title="Recent Activity" icon={ClockIcon} iconColor="sky" />
-							</div>
-							<div className="px-3.5 py-3 sm:px-4">
-								<ActivityFeed organizationId={organizationId} />
-							</div>
-						</ContentCard>
+						<ErrorBoundary title="Failed to load activity" compact>
+							<ContentCard padding="none" className="overflow-hidden">
+								<div className="flex items-center justify-between border-b border-zinc-200 px-3.5 py-2.5 sm:px-4 sm:py-3 dark:border-zinc-700">
+									<SectionHeader title="Recent Activity" icon={ClockIcon} iconColor="sky" />
+								</div>
+								<div className="px-3.5 py-3 sm:px-4">
+									<ActivityFeed organizationId={organizationId} orgSlug={orgSlug} />
+								</div>
+							</ContentCard>
+						</ErrorBoundary>
 					)}
 				</>
 			)}

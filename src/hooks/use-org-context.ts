@@ -19,24 +19,20 @@ import { ORG_ROLE_PERMISSIONS, type OrgAction, type OrgResource, type OrgRole } 
 
 const orgSlugRoute = getRouteApi("/_app/$orgSlug");
 
-function buildCan(role: string | undefined, customPermissions: Record<string, string[]> | null) {
+function resolvePermissions(
+	role: string | undefined,
+	customPermissions: Record<string, string[]> | null,
+): Record<string, readonly string[]> | null {
+	if (!role) return null;
+	const staticPerms = ORG_ROLE_PERMISSIONS[role as OrgRole];
+	if (staticPerms) return staticPerms;
+	return customPermissions;
+}
+
+function buildCan(permissions: Record<string, readonly string[]> | null) {
 	return <R extends OrgResource>(resource: R, action: OrgAction<R>): boolean => {
-		if (!role) return false;
-
-		// Static roles (owner, admin, etc.) — use hardcoded matrix
-		const staticPerms = ORG_ROLE_PERMISSIONS[role as OrgRole];
-		if (staticPerms) {
-			const resourcePerms = staticPerms[resource] as readonly string[] | undefined;
-			return resourcePerms?.includes(action as string) ?? false;
-		}
-
-		// Custom role — use fetched permissions
-		if (customPermissions) {
-			const resourcePerms = customPermissions[resource];
-			return resourcePerms?.includes(action as string) ?? false;
-		}
-
-		return false;
+		if (!permissions) return false;
+		return permissions[resource]?.includes(action as string) ?? false;
 	};
 }
 
@@ -44,7 +40,8 @@ export function useOrgContext() {
 	const { auth, organization, orgSlug, activeMember, customPermissions } = orgSlugRoute.useRouteContext();
 
 	const role = activeMember?.role;
-	const can = useMemo(() => buildCan(role, customPermissions ?? null), [role, customPermissions]);
+	const permissions = useMemo(() => resolvePermissions(role, customPermissions ?? null), [role, customPermissions]);
+	const can = useMemo(() => buildCan(permissions), [permissions]);
 
 	return {
 		organization,

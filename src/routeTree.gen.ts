@@ -137,7 +137,9 @@ const AppOrgSlugIndexRoute = AppOrgSlugIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppOrgSlugRoute,
-} as any)
+} as any).lazy(() =>
+  import('./routes/_app/$orgSlug/index.lazy').then((d) => d.Route),
+)
 const AppOrgSlugWalletRoute = AppOrgSlugWalletRouteImport.update({
   id: '/wallet',
   path: '/wallet',
@@ -238,12 +240,16 @@ const AppOrgSlugListingsIdRoute = AppOrgSlugListingsIdRouteImport.update({
   id: '/listings_/$id',
   path: '/listings/$id',
   getParentRoute: () => AppOrgSlugRoute,
-} as any)
+} as any).lazy(() =>
+  import('./routes/_app/$orgSlug/listings_.$id.lazy').then((d) => d.Route),
+)
 const AppOrgSlugEnrollmentsIdRoute = AppOrgSlugEnrollmentsIdRouteImport.update({
   id: '/enrollments_/$id',
   path: '/enrollments/$id',
   getParentRoute: () => AppOrgSlugRoute,
-} as any)
+} as any).lazy(() =>
+  import('./routes/_app/$orgSlug/enrollments_.$id.lazy').then((d) => d.Route),
+)
 const AppOrgSlugEnrollmentsRejectedRoute =
   AppOrgSlugEnrollmentsRejectedRouteImport.update({
     id: '/rejected',
@@ -266,7 +272,9 @@ const AppOrgSlugCampaignsIdRoute = AppOrgSlugCampaignsIdRouteImport.update({
   id: '/campaigns_/$id',
   path: '/campaigns/$id',
   getParentRoute: () => AppOrgSlugRoute,
-} as any)
+} as any).lazy(() =>
+  import('./routes/_app/$orgSlug/campaigns_.$id.lazy').then((d) => d.Route),
+)
 const AppOrgSlugCampaignsPausedRoute =
   AppOrgSlugCampaignsPausedRouteImport.update({
     id: '/paused',

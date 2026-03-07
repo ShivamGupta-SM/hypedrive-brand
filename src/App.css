@@ -272,7 +272,9 @@ html:has([data-theme="dark"]) {
 	gap: 0.25rem;
 	align-items: center;
 	line-height: 1;
-	transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.15s ease;
+	transition:
+		transform 0.15s cubic-bezier(0.16, 1, 0.3, 1),
+		opacity 0.15s ease;
 }
 
 [data-bulk-bar] [data-bulk-actions] button:active {
@@ -532,14 +534,170 @@ html:has([data-theme="dark"]) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   react-medium-image-zoom overrides
+   lightgallery overrides — match app zinc/dark theme
    ═══════════════════════════════════════════════════════════════════════════ */
 
-[data-rmiz-modal-overlay="visible"] {
-	background-color: rgba(0, 0, 0, 0.85);
-	backdrop-filter: blur(8px);
+/* ── Backdrop ── */
+.lg-backdrop {
+	background-color: rgba(9, 9, 11, 0.92);
+	backdrop-filter: blur(12px);
 }
 
-[data-rmiz-modal-img] {
-	border-radius: 8px;
+/* ── Container font ── */
+.lg-container {
+	font-family: inherit;
+}
+
+/* ── Image area ── */
+.lg-outer .lg-img-wrap {
+	padding: 56px 24px 24px;
+}
+
+.lg-outer .lg-object {
+	border-radius: 10px;
+	box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Toolbar ── */
+.lg-toolbar {
+	padding: 10px 10px 0;
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+}
+
+.lg-media-overlap .lg-toolbar {
+	background-image: none;
+}
+
+/* ── All icon buttons — Samsung squircle ── */
+.lg-toolbar .lg-icon,
+.lg-icon.lg-zoom-in,
+.lg-icon.lg-zoom-out,
+.lg-icon.lg-actual-size {
+	color: rgba(255, 255, 255, 0.85) !important;
+	font-size: 18px !important;
+	width: 40px !important;
+	height: 40px !important;
+	line-height: 18px !important;
+	padding: 11px 0 !important;
+	border-radius: 13px !important;
+	background-color: rgba(255, 255, 255, 0.1) !important;
+	border: none !important;
+	box-shadow: none !important;
+	transition: all 0.2s ease !important;
+	margin: 0 3px !important;
+	float: none !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+}
+
+.lg-toolbar .lg-icon:hover,
+.lg-icon.lg-zoom-in:hover,
+.lg-icon.lg-zoom-out:hover,
+.lg-icon.lg-actual-size:hover {
+	color: #fff !important;
+	background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.lg-toolbar .lg-icon:active,
+.lg-icon.lg-zoom-in:active,
+.lg-icon.lg-zoom-out:active,
+.lg-icon.lg-actual-size:active {
+	transform: scale(0.92) !important;
+	background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* ── Zoom out disabled state ── */
+.lg-icon.lg-zoom-out {
+	opacity: 0.3 !important;
+	pointer-events: none !important;
+}
+
+.lg-zoomed .lg-icon.lg-zoom-out {
+	opacity: 1 !important;
+	pointer-events: auto !important;
+}
+
+/* ── Navigation arrows — Samsung squircle ── */
+.lg-next,
+.lg-prev {
+	background-color: rgba(255, 255, 255, 0.1) !important;
+	border: none !important;
+	border-radius: 14px !important;
+	color: rgba(255, 255, 255, 0.85) !important;
+	font-size: 18px !important;
+	width: 44px !important;
+	height: 44px !important;
+	padding: 0 !important;
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	transition: all 0.2s ease !important;
+}
+
+.lg-next:hover:not(.disabled),
+.lg-prev:hover:not(.disabled) {
+	color: #fff !important;
+	background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.lg-next:active:not(.disabled),
+.lg-prev:active:not(.disabled) {
+	transform: scale(0.92) !important;
+	background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.lg-next {
+	right: 20px !important;
+}
+
+.lg-prev {
+	left: 20px !important;
+}
+
+/* ── Hide counter for single image ── */
+.lg-single-item .lg-counter {
+	display: none;
+}
+
+/* ── Counter ── */
+.lg-counter {
+	color: rgba(161, 161, 170, 0.5);
+	font-size: 12px;
+	font-weight: 500;
+	padding-left: 16px;
+}
+
+/* ── Captions ── */
+.lg-sub-html {
+	color: rgba(228, 228, 231, 0.8);
+	font-size: 13px;
+	padding: 12px 40px;
+}
+
+.lg-media-overlap .lg-sub-html {
+	background-image: none;
+}
+
+/* ── Hide loading spinner bg ── */
+.lg-outer .lg-item:not(.lg-start-end-progress) {
+	background: none;
+}
+
+/* ── Smoother slide transitions ── */
+.lg-css3.lg-slide.lg-use-css3 .lg-item.lg-prev-slide,
+.lg-css3.lg-slide.lg-use-css3 .lg-item.lg-next-slide,
+.lg-css3.lg-slide.lg-use-css3 .lg-item.lg-current {
+	transition:
+		transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0s,
+		opacity 0.15s ease 0s;
+}
+
+/* ── Focus ring ── */
+.lg-icon:focus-visible {
+	outline: 2px solid rgba(255, 255, 255, 0.3) !important;
+	outline-offset: 2px !important;
+	border-radius: 10px !important;
 }

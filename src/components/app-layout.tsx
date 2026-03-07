@@ -13,8 +13,8 @@ import {
 } from "@heroicons/react/16/solid";
 import { Link, Outlet, useLocation } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { AccountDropdownMenu } from "@/components/account-dropdown-menu";
 import { Avatar } from "@/components/avatar";
+import { ProfileMenu } from "@/components/profile-menu";
 import { ContentHeader } from "@/components/content-header";
 import { Dropdown, DropdownButton } from "@/components/dropdown";
 import { Logo } from "@/components/logo";
@@ -118,7 +118,7 @@ export function AppLayout({
 										/>
 									)}
 								</DropdownButton>
-								<AccountDropdownMenu anchor="bottom end" onOpenAccountSettings={openAccountSettings} />
+								<ProfileMenu user={user} anchor="bottom end" onOpenAccountSettings={openAccountSettings} onOpenOrgSettings={openOrgSettings} onOpenSearch={() => setShowSearch(true)} />
 							</Dropdown>
 						</NavbarSection>
 					</Navbar>
@@ -149,7 +149,7 @@ export function AppLayout({
 									/>
 								)}
 							</DropdownButton>
-							<AccountDropdownMenu anchor="bottom end" onOpenAccountSettings={openAccountSettings} />
+							<ProfileMenu user={user} anchor="bottom end" onOpenAccountSettings={openAccountSettings} onOpenOrgSettings={openOrgSettings} onOpenSearch={() => setShowSearch(true)} />
 						</Dropdown>
 					</>
 				}
@@ -269,7 +269,7 @@ export function AppLayout({
 									</span>
 									<ChevronUpIcon />
 								</DropdownButton>
-								<AccountDropdownMenu anchor="top start" onOpenAccountSettings={openAccountSettings} />
+								<ProfileMenu user={user} anchor="top start" onOpenAccountSettings={openAccountSettings} onOpenOrgSettings={openOrgSettings} onOpenSearch={() => setShowSearch(true)} />
 							</Dropdown>
 						</SidebarFooter>
 					</Sidebar>

@@ -22,7 +22,9 @@
       "Bash(npx biome check src/components/search-dialog.tsx --write)",
       "WebFetch(domain:3dicons.com)",
       "Bash(pnpm build)",
-      "Bash(ls -la /c/Projects/hypedrive-brand/src/lib/server-auth*)"
+      "Bash(ls -la /c/Projects/hypedrive-brand/src/lib/server-auth*)",
+      "Bash(npx vitest run)",
+      "Bash(git status -u)"
     ]
   }
 }

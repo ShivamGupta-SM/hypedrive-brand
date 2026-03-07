@@ -23,7 +23,8 @@ function triggerDownload(blob: Blob, filename: string): void {
 	document.body.appendChild(link);
 	link.click();
 	document.body.removeChild(link);
-	URL.revokeObjectURL(url);
+	// Revoke after a delay — the browser needs time to start the download
+	setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 /**
