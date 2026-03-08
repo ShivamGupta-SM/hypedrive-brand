@@ -17,14 +17,14 @@ import { Local } from "@/lib/brand-client";
  * Falls back to Encore's Local sentinel which resolves to http://localhost:4000.
  */
 export const API_URL: string =
-	(typeof import.meta !== "undefined" && (import.meta.env as Record<string, string>)?.VITE_API_URL) ||
-	process.env.VITE_API_URL ||
-	Local;
+  (typeof import.meta !== "undefined" && (import.meta.env as Record<string, string>)?.VITE_API_URL) ||
+  process.env.VITE_API_URL ||
+  Local;
 
 // ─── ENVIRONMENT ──────────────────────────────────────────────────────────────
 
 export const IS_PRODUCTION: boolean =
-	(typeof import.meta !== "undefined" && import.meta.env?.PROD) || process.env.NODE_ENV === "production";
+  (typeof import.meta !== "undefined" && import.meta.env?.PROD) || process.env.NODE_ENV === "production";
 
 export const IS_DEV: boolean = !IS_PRODUCTION;
 

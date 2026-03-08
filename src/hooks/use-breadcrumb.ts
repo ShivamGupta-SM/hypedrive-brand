@@ -5,23 +5,23 @@ let pageTitle: string | null = null;
 const listeners = new Set<() => void>();
 
 function subscribe(cb: () => void) {
-	listeners.add(cb);
-	return () => listeners.delete(cb);
+  listeners.add(cb);
+  return () => listeners.delete(cb);
 }
 
 function getSnapshot() {
-	return pageTitle;
+  return pageTitle;
 }
 
 function setPageTitle(title: string | null) {
-	pageTitle = title;
-	for (const cb of listeners) cb();
+  pageTitle = title;
+  for (const cb of listeners) cb();
 }
 
 /** Read the current page title (for breadcrumbs). */
 export function useBreadcrumbStore() {
-	const title = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
-	return { pageTitle: title };
+  const title = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+  return { pageTitle: title };
 }
 
 /**
@@ -32,8 +32,8 @@ export function useBreadcrumbStore() {
  * usePageTitle(campaign?.title ?? null);
  */
 export function usePageTitle(title: string | null | undefined) {
-	useEffect(() => {
-		setPageTitle(title ?? null);
-		return () => setPageTitle(null);
-	}, [title]);
+  useEffect(() => {
+    setPageTitle(title ?? null);
+    return () => setPageTitle(null);
+  }, [title]);
 }

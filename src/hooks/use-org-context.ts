@@ -20,43 +20,43 @@ import { ORG_ROLE_PERMISSIONS, type OrgAction, type OrgResource, type OrgRole } 
 const orgSlugRoute = getRouteApi("/_app/$orgSlug");
 
 function resolvePermissions(
-	role: string | undefined,
-	customPermissions: Record<string, string[]> | null
+  role: string | undefined,
+  customPermissions: Record<string, string[]> | null
 ): Record<string, readonly string[]> | null {
-	if (!role) return null;
-	const staticPerms = ORG_ROLE_PERMISSIONS[role as OrgRole];
-	if (staticPerms) return staticPerms;
-	return customPermissions;
+  if (!role) return null;
+  const staticPerms = ORG_ROLE_PERMISSIONS[role as OrgRole];
+  if (staticPerms) return staticPerms;
+  return customPermissions;
 }
 
 function buildCan(permissions: Record<string, readonly string[]> | null) {
-	return <R extends OrgResource>(resource: R, action: OrgAction<R>): boolean => {
-		if (!permissions) return false;
-		return permissions[resource]?.includes(action as string) ?? false;
-	};
+  return <R extends OrgResource>(resource: R, action: OrgAction<R>): boolean => {
+    if (!permissions) return false;
+    return permissions[resource]?.includes(action as string) ?? false;
+  };
 }
 
 export function useOrgContext() {
-	const { auth, organization, orgSlug, activeMember, customPermissions } = orgSlugRoute.useRouteContext();
+  const { auth, organization, orgSlug, activeMember, customPermissions } = orgSlugRoute.useRouteContext();
 
-	const role = activeMember?.role;
-	const permissions = useMemo(() => resolvePermissions(role, customPermissions ?? null), [role, customPermissions]);
-	const can = useMemo(() => buildCan(permissions), [permissions]);
+  const role = activeMember?.role;
+  const permissions = useMemo(() => resolvePermissions(role, customPermissions ?? null), [role, customPermissions]);
+  const can = useMemo(() => buildCan(permissions), [permissions]);
 
-	const member = activeMember ?? null;
-	const user = auth.user;
-	const userId = user?.id ?? null;
+  const member = activeMember ?? null;
+  const user = auth.user;
+  const userId = user?.id ?? null;
 
-	return useMemo(
-		() => ({
-			organization,
-			organizationId: organization.id,
-			orgSlug,
-			activeMember: member,
-			user,
-			userId,
-			can,
-		}),
-		[organization, orgSlug, member, user, userId, can]
-	);
+  return useMemo(
+    () => ({
+      organization,
+      organizationId: organization.id,
+      orgSlug,
+      activeMember: member,
+      user,
+      userId,
+      can,
+    }),
+    [organization, orgSlug, member, user, userId, can]
+  );
 }

@@ -9,83 +9,83 @@ import { listFilesQueryOptions, logoPreviewQueryOptions } from "./queries";
 import { deleteFileServer, requestDownloadUrlServer, requestUploadUrlServer } from "./server";
 
 export function useRequestUploadUrl() {
-	return useMutation({
-		mutationFn: async (params: storage.UploadUrlRequest) => {
-			return requestUploadUrlServer({ data: params });
-		},
-	});
+  return useMutation({
+    mutationFn: async (params: storage.UploadUrlRequest) => {
+      return requestUploadUrlServer({ data: params });
+    },
+  });
 }
 
 export function useRequestDownloadUrl() {
-	return useMutation({
-		mutationFn: async (params: storage.DownloadUrlRequest) => {
-			return requestDownloadUrlServer({ data: params });
-		},
-	});
+  return useMutation({
+    mutationFn: async (params: storage.DownloadUrlRequest) => {
+      return requestDownloadUrlServer({ data: params });
+    },
+  });
 }
 
 export function useListFiles() {
-	const query = useQuery({
-		...listFilesQueryOptions(),
-	});
+  const query = useQuery({
+    ...listFilesQueryOptions(),
+  });
 
-	return {
-		data: query.data?.files ?? [],
-		loading: query.isPending && !query.data,
-		error: query.error,
-		refetch: query.refetch,
-	};
+  return {
+    data: query.data?.files ?? [],
+    loading: query.isPending && !query.data,
+    error: query.error,
+    refetch: query.refetch,
+  };
 }
 
 export function useDeleteFile() {
-	const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-	return useMutation({
-		mutationFn: async (key: string) => {
-			return deleteFileServer({ data: { key } });
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.files() });
-		},
-	});
+  return useMutation({
+    mutationFn: async (key: string) => {
+      return deleteFileServer({ data: { key } });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.files() });
+    },
+  });
 }
 
 export function usePreviewLogoByDomain(domain: string | undefined) {
-	const query = useQuery({
-		...logoPreviewQueryOptions(domain || ""),
-		enabled: !!domain && domain.length >= 3,
-	});
+  const query = useQuery({
+    ...logoPreviewQueryOptions(domain || ""),
+    enabled: !!domain && domain.length >= 3,
+  });
 
-	return {
-		data: query.data ?? null,
-		loading: query.isPending && !query.data,
-		error: query.error,
-		refetch: query.refetch,
-	};
+  return {
+    data: query.data ?? null,
+    loading: query.isPending && !query.data,
+    error: query.error,
+    refetch: query.refetch,
+  };
 }
 
 /**
  * Full upload flow: request signed URL → upload file to S3 → return file URL
  */
 export function useFileUpload() {
-	const requestUploadUrl = useRequestUploadUrl();
+  const requestUploadUrl = useRequestUploadUrl();
 
-	return useMutation({
-		mutationFn: async (params: { file: File; folder: storage.StorageFolder; resourceId?: string }) => {
-			const { uploadUrl, fileUrl, key } = await requestUploadUrl.mutateAsync({
-				filename: params.file.name,
-				contentType: params.file.type,
-				folder: params.folder,
-				resourceId: params.resourceId,
-			});
+  return useMutation({
+    mutationFn: async (params: { file: File; folder: storage.StorageFolder; resourceId?: string }) => {
+      const { uploadUrl, fileUrl, key } = await requestUploadUrl.mutateAsync({
+        filename: params.file.name,
+        contentType: params.file.type,
+        folder: params.folder,
+        resourceId: params.resourceId,
+      });
 
-			await fetch(uploadUrl, {
-				method: "PUT",
-				body: params.file,
-				headers: { "Content-Type": params.file.type },
-			});
+      await fetch(uploadUrl, {
+        method: "PUT",
+        body: params.file,
+        headers: { "Content-Type": params.file.type },
+      });
 
-			return { fileUrl, key };
-		},
-	});
+      return { fileUrl, key };
+    },
+  });
 }

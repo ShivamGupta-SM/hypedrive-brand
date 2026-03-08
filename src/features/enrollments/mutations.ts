@@ -6,143 +6,143 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/hooks/api-client";
 import type { db } from "@/lib/brand-client";
 import {
-	batchEnrollmentsServer,
-	exportEnrollmentsServer,
-	exportOrgEnrollmentsServer,
-	reviewEnrollmentServer,
+  batchEnrollmentsServer,
+  exportEnrollmentsServer,
+  exportOrgEnrollmentsServer,
+  reviewEnrollmentServer,
 } from "./server";
 
 export function useApproveEnrollment(organizationId: string | undefined) {
-	const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-	return useMutation({
-		mutationFn: async ({ enrollmentId, remarks }: { enrollmentId: string; remarks?: string }) => {
-			return reviewEnrollmentServer({
-				data: { orgId: organizationId as string, enrollmentId, action: "approve", remarks },
-			});
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.enrollments(organizationId || "") });
-			queryClient.invalidateQueries({ queryKey: queryKeys.infiniteEnrollments(organizationId || "") });
-			queryClient.invalidateQueries({ queryKey: queryKeys.dashboard(organizationId || "") });
-		},
-	});
+  return useMutation({
+    mutationFn: async ({ enrollmentId, remarks }: { enrollmentId: string; remarks?: string }) => {
+      return reviewEnrollmentServer({
+        data: { orgId: organizationId as string, enrollmentId, action: "approve", remarks },
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.enrollments(organizationId || "") });
+      queryClient.invalidateQueries({ queryKey: queryKeys.infiniteEnrollments(organizationId || "") });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard(organizationId || "") });
+    },
+  });
 }
 
 export function useRejectEnrollment(organizationId: string | undefined) {
-	const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-	return useMutation({
-		mutationFn: async ({ enrollmentId, reason }: { enrollmentId: string; reason: string }) => {
-			return reviewEnrollmentServer({
-				data: { orgId: organizationId as string, enrollmentId, action: "reject", reason },
-			});
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.enrollments(organizationId || "") });
-			queryClient.invalidateQueries({ queryKey: queryKeys.infiniteEnrollments(organizationId || "") });
-			queryClient.invalidateQueries({ queryKey: queryKeys.dashboard(organizationId || "") });
-		},
-	});
+  return useMutation({
+    mutationFn: async ({ enrollmentId, reason }: { enrollmentId: string; reason: string }) => {
+      return reviewEnrollmentServer({
+        data: { orgId: organizationId as string, enrollmentId, action: "reject", reason },
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.enrollments(organizationId || "") });
+      queryClient.invalidateQueries({ queryKey: queryKeys.infiniteEnrollments(organizationId || "") });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard(organizationId || "") });
+    },
+  });
 }
 
 export function useRequestChangesEnrollment(organizationId: string | undefined) {
-	const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-	return useMutation({
-		mutationFn: async ({
-			enrollmentId,
-			reason,
-			taskFeedback,
-		}: {
-			enrollmentId: string;
-			reason: string;
-			taskFeedback?: { submissionId: string; feedback: string }[];
-		}) => {
-			return reviewEnrollmentServer({
-				data: {
-					orgId: organizationId as string,
-					enrollmentId,
-					action: "request_changes",
-					reason,
-					taskFeedback,
-				},
-			});
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.enrollments(organizationId || "") });
-			queryClient.invalidateQueries({ queryKey: queryKeys.infiniteEnrollments(organizationId || "") });
-			queryClient.invalidateQueries({ queryKey: queryKeys.dashboard(organizationId || "") });
-		},
-	});
+  return useMutation({
+    mutationFn: async ({
+      enrollmentId,
+      reason,
+      taskFeedback,
+    }: {
+      enrollmentId: string;
+      reason: string;
+      taskFeedback?: { submissionId: string; feedback: string }[];
+    }) => {
+      return reviewEnrollmentServer({
+        data: {
+          orgId: organizationId as string,
+          enrollmentId,
+          action: "request_changes",
+          reason,
+          taskFeedback,
+        },
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.enrollments(organizationId || "") });
+      queryClient.invalidateQueries({ queryKey: queryKeys.infiniteEnrollments(organizationId || "") });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard(organizationId || "") });
+    },
+  });
 }
 
 export function useBatchEnrollments(organizationId: string | undefined) {
-	const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-	return useMutation({
-		mutationFn: async ({
-			action,
-			ids,
-			reason,
-			remarks,
-		}: {
-			action: "approve" | "reject" | "request_changes";
-			ids: string[];
-			reason?: string;
-			remarks?: string;
-		}) => {
-			return batchEnrollmentsServer({
-				data: { orgId: organizationId as string, action, ids, reason, remarks },
-			});
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.enrollments(organizationId || "") });
-			queryClient.invalidateQueries({ queryKey: queryKeys.infiniteEnrollments(organizationId || "") });
-			queryClient.invalidateQueries({ queryKey: queryKeys.dashboard(organizationId || "") });
-		},
-	});
+  return useMutation({
+    mutationFn: async ({
+      action,
+      ids,
+      reason,
+      remarks,
+    }: {
+      action: "approve" | "reject" | "request_changes";
+      ids: string[];
+      reason?: string;
+      remarks?: string;
+    }) => {
+      return batchEnrollmentsServer({
+        data: { orgId: organizationId as string, action, ids, reason, remarks },
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.enrollments(organizationId || "") });
+      queryClient.invalidateQueries({ queryKey: queryKeys.infiniteEnrollments(organizationId || "") });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard(organizationId || "") });
+    },
+  });
 }
 
 export function useBulkApproveEnrollments(organizationId: string | undefined) {
-	const batch = useBatchEnrollments(organizationId);
-	return {
-		...batch,
-		mutate: ({ enrollmentIds, remarks }: { enrollmentIds: string[]; remarks?: string }) =>
-			batch.mutate({ action: "approve", ids: enrollmentIds, remarks }),
-		mutateAsync: ({ enrollmentIds, remarks }: { enrollmentIds: string[]; remarks?: string }) =>
-			batch.mutateAsync({ action: "approve", ids: enrollmentIds, remarks }),
-	};
+  const batch = useBatchEnrollments(organizationId);
+  return {
+    ...batch,
+    mutate: ({ enrollmentIds, remarks }: { enrollmentIds: string[]; remarks?: string }) =>
+      batch.mutate({ action: "approve", ids: enrollmentIds, remarks }),
+    mutateAsync: ({ enrollmentIds, remarks }: { enrollmentIds: string[]; remarks?: string }) =>
+      batch.mutateAsync({ action: "approve", ids: enrollmentIds, remarks }),
+  };
 }
 
 export function useBulkRejectEnrollments(organizationId: string | undefined) {
-	const batch = useBatchEnrollments(organizationId);
-	return {
-		...batch,
-		mutate: ({ enrollmentIds, reason }: { enrollmentIds: string[]; reason: string }) =>
-			batch.mutate({ action: "reject", ids: enrollmentIds, reason }),
-		mutateAsync: ({ enrollmentIds, reason }: { enrollmentIds: string[]; reason: string }) =>
-			batch.mutateAsync({ action: "reject", ids: enrollmentIds, reason }),
-	};
+  const batch = useBatchEnrollments(organizationId);
+  return {
+    ...batch,
+    mutate: ({ enrollmentIds, reason }: { enrollmentIds: string[]; reason: string }) =>
+      batch.mutate({ action: "reject", ids: enrollmentIds, reason }),
+    mutateAsync: ({ enrollmentIds, reason }: { enrollmentIds: string[]; reason: string }) =>
+      batch.mutateAsync({ action: "reject", ids: enrollmentIds, reason }),
+  };
 }
 
 export function useExportEnrollments(organizationId: string | undefined) {
-	return useMutation({
-		mutationFn: async ({ campaignId, status }: { campaignId: string; status?: db.EnrollmentStatus }) => {
-			return exportEnrollmentsServer({ data: { orgId: organizationId as string, campaignId, status } });
-		},
-	});
+  return useMutation({
+    mutationFn: async ({ campaignId, status }: { campaignId: string; status?: db.EnrollmentStatus }) => {
+      return exportEnrollmentsServer({ data: { orgId: organizationId as string, campaignId, status } });
+    },
+  });
 }
 
 export function useExportOrganizationEnrollments(organizationId: string | undefined) {
-	return useMutation({
-		mutationFn: async (params: {
-			status?: db.EnrollmentStatus;
-			campaignId?: string;
-			createdFrom?: string;
-			createdTo?: string;
-		}) => {
-			return exportOrgEnrollmentsServer({ data: { orgId: organizationId as string, ...params } });
-		},
-	});
+  return useMutation({
+    mutationFn: async (params: {
+      status?: db.EnrollmentStatus;
+      campaignId?: string;
+      createdFrom?: string;
+      createdTo?: string;
+    }) => {
+      return exportOrgEnrollmentsServer({ data: { orgId: organizationId as string, ...params } });
+    },
+  });
 }

@@ -18,16 +18,16 @@ const IS_PROD = process.env.NODE_ENV === "production";
 // =============================================================================
 
 export function setAuthCookies(token: string, rememberMe = false) {
-	const maxAge = rememberMe ? AUTH_COOKIE_MAX_AGE : AUTH_COOKIE_SESSION_MAX_AGE;
-	setCookie(AUTH_COOKIE, token, { path: "/", sameSite: "lax", secure: IS_PROD, maxAge, httpOnly: true });
+  const maxAge = rememberMe ? AUTH_COOKIE_MAX_AGE : AUTH_COOKIE_SESSION_MAX_AGE;
+  setCookie(AUTH_COOKIE, token, { path: "/", sameSite: "lax", secure: IS_PROD, maxAge, httpOnly: true });
 }
 
 export function clearAuthCookies() {
-	deleteCookie(AUTH_COOKIE, { path: "/" });
+  deleteCookie(AUTH_COOKIE, { path: "/" });
 }
 
 export function readAuthCookie(): string | null {
-	return getCookie(AUTH_COOKIE) ?? null;
+  return getCookie(AUTH_COOKIE) ?? null;
 }
 
 // =============================================================================
@@ -35,9 +35,9 @@ export function readAuthCookie(): string | null {
 // =============================================================================
 
 export function getServerClient(token: string): Client {
-	return new Client(API_URL, {
-		requestInit: {
-			headers: { Authorization: `Bearer ${token}` },
-		},
-	});
+  return new Client(API_URL, {
+    requestInit: {
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  });
 }

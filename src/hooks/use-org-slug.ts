@@ -13,8 +13,8 @@ import { useParams } from "@tanstack/react-router";
  * All org-scoped routes live under /$orgSlug, so params always has the slug.
  */
 export function useOrgSlug(): string {
-	const params = useParams({ strict: false }) as { orgSlug?: string };
-	return params.orgSlug || "";
+  const params = useParams({ strict: false }) as { orgSlug?: string };
+  return params.orgSlug || "";
 }
 
 /**
@@ -23,14 +23,14 @@ export function useOrgSlug(): string {
  * @returns Full path with orgSlug (e.g., "/acme-corp/campaigns")
  */
 export function useOrgPath() {
-	const orgSlug = useOrgSlug();
+  const orgSlug = useOrgSlug();
 
-	return (path: string) => {
-		// Remove leading slash if present
-		const cleanPath = path.startsWith("/") ? path.slice(1) : path;
+  return (path: string) => {
+    // Remove leading slash if present
+    const cleanPath = path.startsWith("/") ? path.slice(1) : path;
 
-		// Guard against empty orgSlug producing //path
-		if (!orgSlug) return `/${cleanPath}`;
-		return `/${orgSlug}/${cleanPath}`;
-	};
+    // Guard against empty orgSlug producing //path
+    if (!orgSlug) return `/${cleanPath}`;
+    return `/${orgSlug}/${cleanPath}`;
+  };
 }

@@ -4,16 +4,16 @@ import { withdrawalStatsQueryOptions, withdrawalsQueryOptions } from "@/features
 import { WalletWithdrawals } from "@/pages/wallet";
 
 export const Route = createFileRoute("/_app/$orgSlug/wallet/withdrawals")({
-	loader: ({ context }) => {
-		const orgId = context.organization?.id;
-		if (!orgId) return;
-		context.queryClient.prefetchQuery(withdrawalsQueryOptions(orgId));
-		context.queryClient.prefetchQuery(withdrawalStatsQueryOptions(orgId));
-	},
-	head: () => ({
-		meta: [{ title: "Withdrawals | Wallet | Hypedrive" }],
-	}),
-	component: WalletWithdrawals,
-	errorComponent: RouteErrorComponent,
-	pendingComponent: RoutePendingComponent,
+  loader: ({ context }) => {
+    const orgId = context.organization?.id;
+    if (!orgId) return;
+    context.queryClient.prefetchQuery(withdrawalsQueryOptions(orgId));
+    context.queryClient.prefetchQuery(withdrawalStatsQueryOptions(orgId));
+  },
+  head: () => ({
+    meta: [{ title: "Withdrawals | Wallet | Hypedrive" }],
+  }),
+  component: WalletWithdrawals,
+  errorComponent: RouteErrorComponent,
+  pendingComponent: RoutePendingComponent,
 });

@@ -11002,6 +11002,7 @@ export namespace brand {
             this.getPreferences = this.getPreferences.bind(this)
             this.getSetupProgress = this.getSetupProgress.bind(this)
             this.getUnreadCount = this.getUnreadCount.bind(this)
+            this.getVapidPublicKey = this.getVapidPublicKey.bind(this)
             this.getVirtualAccount = this.getVirtualAccount.bind(this)
             this.getWalletHolds = this.getWalletHolds.bind(this)
             this.getWithdrawalRequest = this.getWithdrawalRequest.bind(this)
@@ -11063,8 +11064,14 @@ export namespace brand {
 
         public async archiveNotifications(organizationId: string, params: {
     ids: string[]
-}): Promise<void> {
-            await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/notifications/archive`, JSON.stringify(params))
+}): Promise<{
+    archived: number
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/notifications/archive`, JSON.stringify(params))
+            return await resp.json() as {
+    archived: number
+}
         }
 
         /**
@@ -11254,8 +11261,14 @@ export namespace brand {
             return await resp.json() as Withdrawal
         }
 
-        public async deleteAllNotifications(organizationId: string): Promise<void> {
-            await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/notifications/delete-all`)
+        public async deleteAllNotifications(organizationId: string): Promise<{
+    deleted: number
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/notifications/delete-all`)
+            return await resp.json() as {
+    deleted: number
+}
         }
 
         /**
@@ -11287,8 +11300,14 @@ export namespace brand {
 
         public async deleteNotifications(organizationId: string, params: {
     ids: string[]
-}): Promise<void> {
-            await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/notifications/delete`, JSON.stringify(params))
+}): Promise<{
+    deleted: number
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/notifications/delete`, JSON.stringify(params))
+            return await resp.json() as {
+    deleted: number
+}
         }
 
         /**
@@ -11772,8 +11791,10 @@ export namespace brand {
             return await resp.json() as OrganizationWithdrawalStats
         }
 
-        public async getPreferences(organizationId: string): Promise<void> {
-            await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/notifications/preferences`)
+        public async getPreferences(organizationId: string): Promise<notifications.PreferencesResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/notifications/preferences`)
+            return await resp.json() as notifications.PreferencesResponse
         }
 
         /**
@@ -11795,6 +11816,16 @@ export namespace brand {
             const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/notifications/unread-count`)
             return await resp.json() as {
     count: number
+}
+        }
+
+        public async getVapidPublicKey(): Promise<{
+    publicKey: string
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/notifications/vapid-key`)
+            return await resp.json() as {
+    publicKey: string
 }
         }
 
@@ -12084,7 +12115,7 @@ export namespace brand {
     limit?: number
     offset?: number
     unreadOnly?: boolean
-}): Promise<void> {
+}): Promise<notifications.ListResponse> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
                 limit:      params.limit === undefined ? undefined : String(params.limit),
@@ -12092,7 +12123,9 @@ export namespace brand {
                 unreadOnly: params.unreadOnly === undefined ? undefined : String(params.unreadOnly),
             })
 
-            await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/notifications`, undefined, {query})
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/notifications`, undefined, {query})
+            return await resp.json() as notifications.ListResponse
         }
 
         /**
@@ -12214,8 +12247,22 @@ export namespace brand {
 }
         }
 
-        public async listTokens(organizationId: string): Promise<void> {
-            await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/notifications/tokens`)
+        public async listTokens(organizationId: string): Promise<{
+    tokens: {
+        id: string
+        platform: notifications.PushPlatform
+        createdAt: string
+    }[]
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/notifications/tokens`)
+            return await resp.json() as {
+    tokens: {
+        id: string
+        platform: notifications.PushPlatform
+        createdAt: string
+    }[]
+}
         }
 
         /**
@@ -12283,21 +12330,39 @@ export namespace brand {
 }
         }
 
-        public async markAllRead(organizationId: string): Promise<void> {
-            await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/notifications/read-all`)
+        public async markAllRead(organizationId: string): Promise<{
+    updated: number
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/notifications/read-all`)
+            return await resp.json() as {
+    updated: number
+}
         }
 
         public async markRead(organizationId: string, params: {
     ids: string[]
-}): Promise<void> {
-            await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/notifications/read`, JSON.stringify(params))
+}): Promise<{
+    updated: number
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/notifications/read`, JSON.stringify(params))
+            return await resp.json() as {
+    updated: number
+}
         }
 
         public async registerToken(organizationId: string, params: {
     token: string
     platform: notifications.PushPlatform
-}): Promise<void> {
-            await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/notifications/tokens`, JSON.stringify(params))
+}): Promise<{
+    success: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/notifications/tokens`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+}
         }
 
         /**
@@ -12315,8 +12380,14 @@ export namespace brand {
 
         public async removeToken(organizationId: string, params: {
     token: string
-}): Promise<void> {
-            await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/notifications/tokens/remove`, JSON.stringify(params))
+}): Promise<{
+    success: boolean
+}> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/notifications/tokens/remove`, JSON.stringify(params))
+            return await resp.json() as {
+    success: boolean
+}
         }
 
         /**
@@ -12542,8 +12613,10 @@ export namespace brand {
     email?: string
     phone?: string
     whatsappPhone?: string
-}): Promise<void> {
-            await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/notifications/preferences`, JSON.stringify(params))
+}): Promise<notifications.PreferencesResponse> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("POST", `/organizations/${encodeURIComponent(organizationId)}/notifications/preferences`, JSON.stringify(params))
+            return await resp.json() as notifications.PreferencesResponse
         }
 
         /**
@@ -15610,6 +15683,28 @@ export namespace notifications {
         body?: string
     }
 
+    export interface ListResponse {
+        notifications: Notification[]
+        unreadCount: number
+    }
+
+    export interface Notification {
+        id: string
+        userId: string
+        type: string
+        title: string
+        body: string | null
+        data: { [key: string]: any } | null
+        channels: Channel[]
+        isRead: boolean
+        readAt: string | null
+        isArchived: boolean
+        archivedAt: string | null
+        actionUrl: string | null
+        imageUrl: string | null
+        createdAt: string
+    }
+
     export interface NotificationTemplate {
         /**
          * Unique notification type identifier
@@ -15701,6 +15796,17 @@ export namespace notifications {
          * For unread_count type
          */
         unreadCount?: number
+    }
+
+    export interface PreferencesResponse {
+        emailEnabled: boolean
+        smsEnabled: boolean
+        pushEnabled: boolean
+        inAppEnabled: boolean
+        whatsappEnabled: boolean
+        email: string | null
+        phone: string | null
+        whatsappPhone: string | null
     }
 
     export type PushPlatform = "ios" | "android" | "web"

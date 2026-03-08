@@ -5,20 +5,20 @@ import { RouteErrorComponent, RoutePendingComponent } from "@/components/shared/
 import { infiniteCampaignsQueryOptions } from "@/features/campaigns/queries";
 
 const searchSchema = z.object({
-	q: z.string().optional().catch(undefined),
-	sort: z.enum(["newest", "oldest", "title", "startDate"]).optional().catch(undefined),
+  q: z.string().optional().catch(undefined),
+  sort: z.enum(["newest", "oldest", "title", "startDate"]).optional().catch(undefined),
 });
 
 export const Route = createFileRoute("/_app/$orgSlug/campaigns")({
-	head: () => ({
-		meta: [{ title: "Campaigns | Hypedrive" }],
-	}),
-	validateSearch: searchSchema,
-	loader: async ({ context }) => {
-		const orgId = context.organization?.id;
-		if (!orgId) return;
-		await context.queryClient.prefetchInfiniteQuery(infiniteCampaignsQueryOptions(orgId, {}));
-	},
-	errorComponent: RouteErrorComponent,
-	pendingComponent: RoutePendingComponent,
+  head: () => ({
+    meta: [{ title: "Campaigns | Hypedrive" }],
+  }),
+  validateSearch: searchSchema,
+  loader: async ({ context }) => {
+    const orgId = context.organization?.id;
+    if (!orgId) return;
+    await context.queryClient.prefetchInfiniteQuery(infiniteCampaignsQueryOptions(orgId, {}));
+  },
+  errorComponent: RouteErrorComponent,
+  pendingComponent: RoutePendingComponent,
 });

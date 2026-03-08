@@ -10,17 +10,17 @@ import { listFilesServer, logoPreviewServer } from "./server";
 // -- File List ----------------------------------------------------------------
 
 export const listFilesQueryOptions = () =>
-	queryOptions({
-		queryKey: queryKeys.files(),
-		queryFn: () => listFilesServer(),
-		staleTime: CACHE.list,
-	});
+  queryOptions({
+    queryKey: queryKeys.files(),
+    queryFn: () => listFilesServer(),
+    staleTime: CACHE.list,
+  });
 
 // -- Logo Preview -------------------------------------------------------------
 
 export const logoPreviewQueryOptions = (domain: string) =>
-	queryOptions({
-		queryKey: queryKeys.logoPreview(domain),
-		queryFn: () => logoPreviewServer({ data: { domain } }),
-		staleTime: CACHE.static,
-	});
+  queryOptions({
+    queryKey: queryKeys.logoPreview(domain),
+    queryFn: () => logoPreviewServer({ data: { domain } }),
+    staleTime: CACHE.static,
+  });

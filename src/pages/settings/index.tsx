@@ -1,20 +1,20 @@
 import {
-	ArrowPathIcon,
-	BanknotesIcon,
-	BuildingOfficeIcon,
-	CalendarDaysIcon,
-	CameraIcon,
-	CheckCircleIcon,
-	CreditCardIcon,
-	ExclamationTriangleIcon,
-	GlobeAltIcon,
-	HomeModernIcon,
-	IdentificationIcon,
-	MapPinIcon,
-	PhoneIcon,
-	ShieldCheckIcon,
-	TrashIcon,
-	UserCircleIcon,
+  ArrowPathIcon,
+  BanknotesIcon,
+  BuildingOfficeIcon,
+  CalendarDaysIcon,
+  CameraIcon,
+  CheckCircleIcon,
+  CreditCardIcon,
+  ExclamationTriangleIcon,
+  GlobeAltIcon,
+  HomeModernIcon,
+  IdentificationIcon,
+  MapPinIcon,
+  PhoneIcon,
+  ShieldCheckIcon,
+  TrashIcon,
+  UserCircleIcon,
 } from "@heroicons/react/16/solid";
 import { startAuthentication } from "@simplewebauthn/browser";
 import type React from "react";
@@ -37,27 +37,27 @@ import { Textarea } from "@/components/textarea";
 import { usePasskeyReauthOptions } from "@/features/auth/hooks-passkeys";
 import { useDashboard } from "@/features/organization/hooks";
 import {
-	useAddBankAccount,
-	useBankAccount,
-	useChangeOrgPhone,
-	useDeleteBankAccount,
-	useGSTDetails,
-	useOrganizationSettings,
-	useUpdateBankAccount,
-	useUpdateOrganizationSettings,
-	useVerifyBankAccount,
-	useVerifyGST,
-	useVerifyGSTPreview,
+  useAddBankAccount,
+  useBankAccount,
+  useChangeOrgPhone,
+  useDeleteBankAccount,
+  useGSTDetails,
+  useOrganizationSettings,
+  useUpdateBankAccount,
+  useUpdateOrganizationSettings,
+  useVerifyBankAccount,
+  useVerifyGST,
+  useVerifyGSTPreview,
 } from "@/features/organization/hooks-settings";
 import { useFileUpload } from "@/features/storage/hooks";
 import { getAssetUrl, getFriendlyErrorMessage } from "@/hooks/api-client";
 import { useOrgContext } from "@/hooks/use-org-context";
 import {
-	getAllCountries,
-	getCitiesForState,
-	getStatesForCountry,
-	resolveCountryIsoCode,
-	resolveStateIsoCode,
+  getAllCountries,
+  getCitiesForState,
+  getStatesForCountry,
+  resolveCountryIsoCode,
+  resolveStateIsoCode,
 } from "@/lib/location-data";
 import { showToast } from "@/lib/toast";
 
@@ -66,119 +66,119 @@ import { showToast } from "@/lib/toast";
 // =============================================================================
 
 function BankAccountSkeleton() {
-	return (
-		<div className="space-y-4">
-			{/* Card skeleton */}
-			<div className="overflow-hidden rounded-2xl ring-1 ring-zinc-200/80 dark:ring-zinc-700/60">
-				{/* Header */}
-				<div className="flex items-center gap-3 bg-zinc-50 px-5 py-4 dark:bg-zinc-800/80">
-					<div className="size-10 rounded-xl bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
-					<div className="flex-1">
-						<div className="h-4 w-32 rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
-						<div className="mt-1.5 h-3 w-48 rounded bg-zinc-200/70 skeleton-shimmer dark:bg-zinc-700/60" />
-					</div>
-					<div className="h-5 w-16 rounded-full bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
-				</div>
-				{/* Details grid */}
-				<div className="grid grid-cols-2 gap-px bg-zinc-200/60 dark:bg-zinc-700/40">
-					{[1, 2, 3, 4].map((i) => (
-						<div key={i} className="bg-white px-4 py-3.5 dark:bg-zinc-900">
-							<div className="h-2.5 w-16 rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
-							<div className="mt-2 h-4 w-28 rounded bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
-						</div>
-					))}
-				</div>
-				{/* Footer */}
-				<div className="flex items-center justify-end gap-2 bg-white px-4 py-3 dark:bg-zinc-900">
-					<div className="h-8 w-20 rounded-lg bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
-					<div className="h-8 w-20 rounded-lg bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
-				</div>
-			</div>
-		</div>
-	);
+  return (
+    <div className="space-y-4">
+      {/* Card skeleton */}
+      <div className="overflow-hidden rounded-2xl ring-1 ring-zinc-200/80 dark:ring-zinc-700/60">
+        {/* Header */}
+        <div className="flex items-center gap-3 bg-zinc-50 px-5 py-4 dark:bg-zinc-800/80">
+          <div className="size-10 rounded-xl bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+          <div className="flex-1">
+            <div className="h-4 w-32 rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+            <div className="mt-1.5 h-3 w-48 rounded bg-zinc-200/70 skeleton-shimmer dark:bg-zinc-700/60" />
+          </div>
+          <div className="h-5 w-16 rounded-full bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+        </div>
+        {/* Details grid */}
+        <div className="grid grid-cols-2 gap-px bg-zinc-200/60 dark:bg-zinc-700/40">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="bg-white px-4 py-3.5 dark:bg-zinc-900">
+              <div className="h-2.5 w-16 rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+              <div className="mt-2 h-4 w-28 rounded bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
+            </div>
+          ))}
+        </div>
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-2 bg-white px-4 py-3 dark:bg-zinc-900">
+          <div className="h-8 w-20 rounded-lg bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
+          <div className="h-8 w-20 rounded-lg bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function SettingsSkeleton({ isDialog = false, section }: { isDialog?: boolean; section?: string }) {
-	// Section-specific skeletons for dialog mode
-	if (isDialog && section === "bank") {
-		return (
-			<div className="space-y-5 px-4 py-5 pb-10 sm:px-5">
-				<BankAccountSkeleton />
-			</div>
-		);
-	}
-	if (isDialog && section === "gst") {
-		return (
-			<div className="space-y-5 px-4 py-5 pb-10 sm:px-5">
-				<div className="overflow-hidden rounded-xl ring-1 ring-zinc-200/80 dark:ring-zinc-700/60">
-					{Array.from({ length: 3 }).map((_, i) => (
-						<div
-							key={i}
-							className="flex items-center gap-3 border-b border-zinc-200 px-4 py-3 last:border-b-0 dark:border-zinc-800"
-						>
-							<div className="size-8 shrink-0 rounded-lg bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
-							<div className="flex-1">
-								<div className="h-3 w-20 rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
-								<div className="mt-1.5 h-3.5 w-36 rounded bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
-							</div>
-						</div>
-					))}
-				</div>
-			</div>
-		);
-	}
+  // Section-specific skeletons for dialog mode
+  if (isDialog && section === "bank") {
+    return (
+      <div className="space-y-5 px-4 py-5 pb-10 sm:px-5">
+        <BankAccountSkeleton />
+      </div>
+    );
+  }
+  if (isDialog && section === "gst") {
+    return (
+      <div className="space-y-5 px-4 py-5 pb-10 sm:px-5">
+        <div className="overflow-hidden rounded-xl ring-1 ring-zinc-200/80 dark:ring-zinc-700/60">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className="flex items-center gap-3 border-b border-zinc-200 px-4 py-3 last:border-b-0 dark:border-zinc-800"
+            >
+              <div className="size-8 shrink-0 rounded-lg bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
+              <div className="flex-1">
+                <div className="h-3 w-20 rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+                <div className="mt-1.5 h-3.5 w-36 rounded bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
-	return (
-		<div className={isDialog ? "space-y-5 px-4 py-5 pb-10 sm:px-5" : "space-y-6 pb-20"}>
-			{!isDialog && (
-				<div className="animate-fade-in">
-					<div className="h-8 w-48 rounded-lg bg-zinc-200 skeleton-shimmer dark:bg-zinc-800" />
-					<div className="mt-2 h-4 w-64 rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-800" />
-				</div>
-			)}
-			{/* Profile card */}
-			<div
-				className="overflow-hidden rounded-2xl bg-zinc-900 animate-fade-in dark:bg-zinc-800"
-				style={{ animationDelay: "60ms" }}
-			>
-				<div className="flex items-center gap-3 px-5 py-4">
-					<div className="size-12 shrink-0 rounded-xl bg-zinc-700 skeleton-shimmer" />
-					<div className="min-w-0 flex-1">
-						<div className="h-4 w-36 rounded bg-zinc-700 skeleton-shimmer" />
-						<div className="mt-2 h-3 w-20 rounded bg-zinc-700 skeleton-shimmer" />
-					</div>
-				</div>
-				<div className="grid grid-cols-3 divide-x divide-white/8 border-t border-white/8">
-					{[1, 2, 3].map((i) => (
-						<div key={i} className="px-3 py-2.5 text-center">
-							<div className="mx-auto h-4 w-10 rounded bg-zinc-700 skeleton-shimmer" />
-							<div className="mx-auto mt-1.5 h-2.5 w-14 rounded bg-zinc-700/60 skeleton-shimmer" />
-						</div>
-					))}
-				</div>
-			</div>
-			{/* Details rows */}
-			{[4, 3, 2].map((rows, idx) => (
-				<div key={rows} className="space-y-1.5 animate-fade-in" style={{ animationDelay: `${120 + idx * 80}ms` }}>
-					<div className="h-3 w-28 rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
-					<div className="overflow-hidden rounded-xl ring-1 ring-zinc-200/80 dark:ring-zinc-700/60">
-						{Array.from({ length: rows }).map((_, i) => (
-							<div
-								key={i}
-								className="flex items-center gap-3 border-b border-zinc-200 px-4 py-3 last:border-b-0 dark:border-zinc-800"
-							>
-								<div className="size-8 shrink-0 rounded-lg bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
-								<div className="flex-1">
-									<div className="h-3 w-20 rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
-									<div className="mt-1.5 h-3.5 w-36 rounded bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
-								</div>
-							</div>
-						))}
-					</div>
-				</div>
-			))}
-		</div>
-	);
+  return (
+    <div className={isDialog ? "space-y-5 px-4 py-5 pb-10 sm:px-5" : "space-y-6 pb-20"}>
+      {!isDialog && (
+        <div className="animate-fade-in">
+          <div className="h-8 w-48 rounded-lg bg-zinc-200 skeleton-shimmer dark:bg-zinc-800" />
+          <div className="mt-2 h-4 w-64 rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-800" />
+        </div>
+      )}
+      {/* Profile card */}
+      <div
+        className="overflow-hidden rounded-2xl bg-zinc-900 animate-fade-in dark:bg-zinc-800"
+        style={{ animationDelay: "60ms" }}
+      >
+        <div className="flex items-center gap-3 px-5 py-4">
+          <div className="size-12 shrink-0 rounded-xl bg-zinc-700 skeleton-shimmer" />
+          <div className="min-w-0 flex-1">
+            <div className="h-4 w-36 rounded bg-zinc-700 skeleton-shimmer" />
+            <div className="mt-2 h-3 w-20 rounded bg-zinc-700 skeleton-shimmer" />
+          </div>
+        </div>
+        <div className="grid grid-cols-3 divide-x divide-white/8 border-t border-white/8">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="px-3 py-2.5 text-center">
+              <div className="mx-auto h-4 w-10 rounded bg-zinc-700 skeleton-shimmer" />
+              <div className="mx-auto mt-1.5 h-2.5 w-14 rounded bg-zinc-700/60 skeleton-shimmer" />
+            </div>
+          ))}
+        </div>
+      </div>
+      {/* Details rows */}
+      {[4, 3, 2].map((rows, idx) => (
+        <div key={rows} className="space-y-1.5 animate-fade-in" style={{ animationDelay: `${120 + idx * 80}ms` }}>
+          <div className="h-3 w-28 rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+          <div className="overflow-hidden rounded-xl ring-1 ring-zinc-200/80 dark:ring-zinc-700/60">
+            {Array.from({ length: rows }).map((_, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-3 border-b border-zinc-200 px-4 py-3 last:border-b-0 dark:border-zinc-800"
+              >
+                <div className="size-8 shrink-0 rounded-lg bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
+                <div className="flex-1">
+                  <div className="h-3 w-20 rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+                  <div className="mt-1.5 h-3.5 w-36 rounded bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 // =============================================================================
@@ -186,61 +186,61 @@ function SettingsSkeleton({ isDialog = false, section }: { isDialog?: boolean; s
 // =============================================================================
 
 function OrganizationProfileCard({
-	name,
-	logo,
-	stats,
-	onEditProfile,
-	canEdit,
+  name,
+  logo,
+  stats,
+  onEditProfile,
+  canEdit,
 }: {
-	name: string;
-	logo?: string | null;
-	stats: Array<{ label: string; value: string | number }>;
-	onEditProfile: () => void;
-	canEdit?: boolean;
+  name: string;
+  logo?: string | null;
+  stats: Array<{ label: string; value: string | number }>;
+  onEditProfile: () => void;
+  canEdit?: boolean;
 }) {
-	const initials =
-		name
-			.split(" ")
-			.map((n) => n[0])
-			.slice(0, 2)
-			.join("")
-			.toUpperCase() || "O";
+  const initials =
+    name
+      .split(" ")
+      .map((n) => n[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase() || "O";
 
-	const logoUrl = logo ? getAssetUrl(logo) : null;
+  const logoUrl = logo ? getAssetUrl(logo) : null;
 
-	return (
-		<div className="overflow-hidden rounded-2xl bg-zinc-900 ring-1 ring-white/5 dark:bg-zinc-800/80">
-			<div className="flex items-center justify-between px-5 py-4">
-				<div className="flex items-center gap-3.5">
-					<div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-zinc-700 text-base font-bold text-white ring-1 ring-white/10 dark:bg-zinc-600">
-						{logoUrl ? <FadeImage src={logoUrl} alt={name} className="size-full object-cover" /> : initials}
-					</div>
-					<div className="min-w-0">
-						<h2 className="truncate text-[15px] font-semibold text-white">{name}</h2>
-						<p className="mt-0.5 truncate text-xs text-zinc-400">Organization</p>
-					</div>
-				</div>
-				{canEdit && (
-					<button
-						type="button"
-						onClick={onEditProfile}
-						className="shrink-0 rounded-lg bg-white/10 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-white/15 hover:text-white"
-						aria-label="Edit organization"
-					>
-						Edit
-					</button>
-				)}
-			</div>
-			<div className="grid grid-cols-3 divide-x divide-white/8 border-t border-white/8">
-				{stats.map((stat) => (
-					<div key={stat.label} className="px-3 py-2.5 text-center">
-						<p className="text-sm font-semibold text-white">{stat.value}</p>
-						<p className="mt-0.5 text-[10px] font-medium uppercase tracking-wider text-zinc-500">{stat.label}</p>
-					</div>
-				))}
-			</div>
-		</div>
-	);
+  return (
+    <div className="overflow-hidden rounded-2xl bg-zinc-900 ring-1 ring-white/5 dark:bg-zinc-800/80">
+      <div className="flex items-center justify-between px-5 py-4">
+        <div className="flex items-center gap-3.5">
+          <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-zinc-700 text-base font-bold text-white ring-1 ring-white/10 dark:bg-zinc-600">
+            {logoUrl ? <FadeImage src={logoUrl} alt={name} className="size-full object-cover" /> : initials}
+          </div>
+          <div className="min-w-0">
+            <h2 className="truncate text-[15px] font-semibold text-white">{name}</h2>
+            <p className="mt-0.5 truncate text-xs text-zinc-400">Organization</p>
+          </div>
+        </div>
+        {canEdit && (
+          <button
+            type="button"
+            onClick={onEditProfile}
+            className="shrink-0 rounded-lg bg-white/10 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-white/15 hover:text-white"
+            aria-label="Edit organization"
+          >
+            Edit
+          </button>
+        )}
+      </div>
+      <div className="grid grid-cols-3 divide-x divide-white/8 border-t border-white/8">
+        {stats.map((stat) => (
+          <div key={stat.label} className="px-3 py-2.5 text-center">
+            <p className="text-sm font-semibold text-white">{stat.value}</p>
+            <p className="mt-0.5 text-[10px] font-medium uppercase tracking-wider text-zinc-500">{stat.label}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 // =============================================================================
@@ -248,307 +248,307 @@ function OrganizationProfileCard({
 // =============================================================================
 
 function EditOrganizationPanel({
-	organizationId,
-	initialData,
+  organizationId,
+  initialData,
 }: {
-	organizationId: string | undefined;
-	initialData: {
-		name: string;
-		description?: string;
-		website?: string;
-		logo?: string;
-		contactPerson?: string;
-		address?: string;
-		city?: string;
-		state?: string;
-		country?: string;
-		postalCode?: string;
-	};
+  organizationId: string | undefined;
+  initialData: {
+    name: string;
+    description?: string;
+    website?: string;
+    logo?: string;
+    contactPerson?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    postalCode?: string;
+  };
 }) {
-	const panelNav = usePanelNav();
-	const pop = () => panelNav?.popPanel();
+  const panelNav = usePanelNav();
+  const pop = () => panelNav?.popPanel();
 
-	const [formData, setFormData] = useState(initialData);
-	const [error, setError] = useState<string | null>(null);
-	const [logoPreview, setLogoPreview] = useState<string | null>(null);
-	const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [formData, setFormData] = useState(initialData);
+  const [error, setError] = useState<string | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
 
-	const countries = useMemo(() => getAllCountries(), []);
-	const selectedCountry = useMemo(() => {
-		if (!formData.country) return null;
-		const val = formData.country.trim().toLowerCase();
-		return countries.find((c) => c.name.toLowerCase() === val || c.isoCode.toLowerCase() === val) ?? null;
-	}, [countries, formData.country]);
-	const countryCode = selectedCountry?.isoCode ?? resolveCountryIsoCode(formData.country || "");
-	const stateOptions = useMemo(() => (countryCode ? getStatesForCountry(countryCode) : []), [countryCode]);
-	const selectedState = useMemo(() => {
-		if (!formData.state) return null;
-		const val = formData.state.trim().toLowerCase();
-		return stateOptions.find((s) => s.name.toLowerCase() === val || s.isoCode.toLowerCase() === val) ?? null;
-	}, [stateOptions, formData.state]);
-	const stateCode =
-		selectedState?.isoCode ?? (countryCode ? resolveStateIsoCode(countryCode, formData.state || "") : null);
-	const cityOptions = useMemo(
-		() => (countryCode && stateCode ? getCitiesForState(countryCode, stateCode) : []),
-		[countryCode, stateCode]
-	);
+  const countries = useMemo(() => getAllCountries(), []);
+  const selectedCountry = useMemo(() => {
+    if (!formData.country) return null;
+    const val = formData.country.trim().toLowerCase();
+    return countries.find((c) => c.name.toLowerCase() === val || c.isoCode.toLowerCase() === val) ?? null;
+  }, [countries, formData.country]);
+  const countryCode = selectedCountry?.isoCode ?? resolveCountryIsoCode(formData.country || "");
+  const stateOptions = useMemo(() => (countryCode ? getStatesForCountry(countryCode) : []), [countryCode]);
+  const selectedState = useMemo(() => {
+    if (!formData.state) return null;
+    const val = formData.state.trim().toLowerCase();
+    return stateOptions.find((s) => s.name.toLowerCase() === val || s.isoCode.toLowerCase() === val) ?? null;
+  }, [stateOptions, formData.state]);
+  const stateCode =
+    selectedState?.isoCode ?? (countryCode ? resolveStateIsoCode(countryCode, formData.state || "") : null);
+  const cityOptions = useMemo(
+    () => (countryCode && stateCode ? getCitiesForState(countryCode, stateCode) : []),
+    [countryCode, stateCode]
+  );
 
-	const updateOrg = useUpdateOrganizationSettings(organizationId);
-	const fileUpload = useFileUpload();
+  const updateOrg = useUpdateOrganizationSettings(organizationId);
+  const fileUpload = useFileUpload();
 
-	const isPending = updateOrg.isPending || fileUpload.isPending;
+  const isPending = updateOrg.isPending || fileUpload.isPending;
 
-	const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files?.[0];
-		if (!file) return;
-		if (!file.type.startsWith("image/")) {
-			setError("Please select an image file");
-			return;
-		}
-		if (file.size > 5 * 1024 * 1024) {
-			setError("Image must be under 5MB");
-			return;
-		}
-		setLogoFile(file);
-		setLogoPreview(URL.createObjectURL(file));
-	};
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setError("Please select an image file");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Image must be under 5MB");
+      return;
+    }
+    setLogoFile(file);
+    setLogoPreview(URL.createObjectURL(file));
+  };
 
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-		setError(null);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
 
-		if (!organizationId || !formData.name.trim()) {
-			setError("Organization name is required");
-			return;
-		}
+    if (!organizationId || !formData.name.trim()) {
+      setError("Organization name is required");
+      return;
+    }
 
-		try {
-			let logoUrl = formData.logo;
-			if (logoFile) {
-				const result = await fileUpload.mutateAsync({
-					file: logoFile,
-					folder: "org-logos",
-					resourceId: organizationId,
-				});
-				logoUrl = result.fileUrl;
-			}
+    try {
+      let logoUrl = formData.logo;
+      if (logoFile) {
+        const result = await fileUpload.mutateAsync({
+          file: logoFile,
+          folder: "org-logos",
+          resourceId: organizationId,
+        });
+        logoUrl = result.fileUrl;
+      }
 
-			await updateOrg.mutateAsync({
-				name: formData.name.trim(),
-				description: formData.description?.trim() || undefined,
-				website: formData.website?.trim() || undefined,
-				logo: logoUrl || undefined,
-				contactPerson: formData.contactPerson?.trim() || undefined,
-				address: formData.address?.trim() || undefined,
-				city: formData.city?.trim() || undefined,
-				state: formData.state?.trim() || undefined,
-				country: countryCode || undefined,
-				postalCode: formData.postalCode?.trim() || undefined,
-			});
-			showToast.success("Organization updated");
-			pop();
-		} catch (err) {
-			setError(getFriendlyErrorMessage(err, "Failed to update organization"));
-		}
-	};
+      await updateOrg.mutateAsync({
+        name: formData.name.trim(),
+        description: formData.description?.trim() || undefined,
+        website: formData.website?.trim() || undefined,
+        logo: logoUrl || undefined,
+        contactPerson: formData.contactPerson?.trim() || undefined,
+        address: formData.address?.trim() || undefined,
+        city: formData.city?.trim() || undefined,
+        state: formData.state?.trim() || undefined,
+        country: countryCode || undefined,
+        postalCode: formData.postalCode?.trim() || undefined,
+      });
+      showToast.success("Organization updated");
+      pop();
+    } catch (err) {
+      setError(getFriendlyErrorMessage(err, "Failed to update organization"));
+    }
+  };
 
-	useEffect(() => {
-		setFormData(initialData);
-	}, [initialData]);
+  useEffect(() => {
+    setFormData(initialData);
+  }, [initialData]);
 
-	return (
-		<div className="space-y-4">
-			<p className="text-sm text-zinc-500 dark:text-zinc-400">
-				Update your organization profile and contact information.
-			</p>
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400">
+        Update your organization profile and contact information.
+      </p>
 
-			{error && (
-				<div className="rounded-xl bg-red-50 p-3 dark:bg-red-950/30">
-					<p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-				</div>
-			)}
+      {error && (
+        <div className="rounded-xl bg-red-50 p-3 dark:bg-red-950/30">
+          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        </div>
+      )}
 
-			<form onSubmit={handleSubmit} className="space-y-4">
-				{/* Logo Upload */}
-				<Field>
-					<Label>Organization Logo</Label>
-					<div className="mt-1.5 flex items-center gap-4">
-						<div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-zinc-100 dark:bg-zinc-800">
-							{logoPreview || formData.logo ? (
-								<FadeImage
-									src={logoPreview || getAssetUrl(formData.logo)}
-									alt="Logo"
-									className="size-full object-cover"
-								/>
-							) : (
-								<CameraIcon className="size-6 text-zinc-400" />
-							)}
-						</div>
-						<div>
-							<label
-								htmlFor="logo-upload"
-								className="cursor-pointer rounded-lg bg-zinc-100 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
-							>
-								{formData.logo || logoPreview ? "Change Logo" : "Upload Logo"}
-							</label>
-							<input id="logo-upload" type="file" accept="image/*" onChange={handleLogoChange} className="hidden" />
-							<p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">PNG, JPG up to 5MB</p>
-						</div>
-					</div>
-				</Field>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Logo Upload */}
+        <Field>
+          <Label>Organization Logo</Label>
+          <div className="mt-1.5 flex items-center gap-4">
+            <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-zinc-100 dark:bg-zinc-800">
+              {logoPreview || formData.logo ? (
+                <FadeImage
+                  src={logoPreview || getAssetUrl(formData.logo)}
+                  alt="Logo"
+                  className="size-full object-cover"
+                />
+              ) : (
+                <CameraIcon className="size-6 text-zinc-400" />
+              )}
+            </div>
+            <div>
+              <label
+                htmlFor="logo-upload"
+                className="cursor-pointer rounded-lg bg-zinc-100 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+              >
+                {formData.logo || logoPreview ? "Change Logo" : "Upload Logo"}
+              </label>
+              <input id="logo-upload" type="file" accept="image/*" onChange={handleLogoChange} className="hidden" />
+              <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">PNG, JPG up to 5MB</p>
+            </div>
+          </div>
+        </Field>
 
-				<Field>
-					<Label>
-						Organization Name <span className="text-red-500">*</span>
-					</Label>
-					<Input
-						value={formData.name}
-						onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
-						placeholder="Organization name"
-						required
-					/>
-				</Field>
+        <Field>
+          <Label>
+            Organization Name <span className="text-red-500">*</span>
+          </Label>
+          <Input
+            value={formData.name}
+            onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
+            placeholder="Organization name"
+            required
+          />
+        </Field>
 
-				<Field>
-					<Label>Description</Label>
-					<Textarea
-						value={formData.description || ""}
-						onChange={(e) => setFormData((p) => ({ ...p, description: e.target.value }))}
-						placeholder="Brief description of your organization..."
-						rows={2}
-					/>
-				</Field>
+        <Field>
+          <Label>Description</Label>
+          <Textarea
+            value={formData.description || ""}
+            onChange={(e) => setFormData((p) => ({ ...p, description: e.target.value }))}
+            placeholder="Brief description of your organization..."
+            rows={2}
+          />
+        </Field>
 
-				<div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-					<Field>
-						<Label>Website</Label>
-						<Input
-							value={formData.website || ""}
-							onChange={(e) => setFormData((p) => ({ ...p, website: e.target.value }))}
-							placeholder="https://example.com"
-						/>
-					</Field>
-					<Field>
-						<Label>Contact Person</Label>
-						<Input
-							value={formData.contactPerson || ""}
-							onChange={(e) => setFormData((p) => ({ ...p, contactPerson: e.target.value }))}
-							placeholder="Contact person name"
-						/>
-					</Field>
-				</div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <Field>
+            <Label>Website</Label>
+            <Input
+              value={formData.website || ""}
+              onChange={(e) => setFormData((p) => ({ ...p, website: e.target.value }))}
+              placeholder="https://example.com"
+            />
+          </Field>
+          <Field>
+            <Label>Contact Person</Label>
+            <Input
+              value={formData.contactPerson || ""}
+              onChange={(e) => setFormData((p) => ({ ...p, contactPerson: e.target.value }))}
+              placeholder="Contact person name"
+            />
+          </Field>
+        </div>
 
-				<Field>
-					<Label>Address</Label>
-					<Input
-						value={formData.address || ""}
-						onChange={(e) => setFormData((p) => ({ ...p, address: e.target.value }))}
-						placeholder="Street address"
-					/>
-				</Field>
+        <Field>
+          <Label>Address</Label>
+          <Input
+            value={formData.address || ""}
+            onChange={(e) => setFormData((p) => ({ ...p, address: e.target.value }))}
+            placeholder="Street address"
+          />
+        </Field>
 
-				<Field>
-					<Label>Country</Label>
-					<Combobox
-						options={countries}
-						value={selectedCountry}
-						onChange={(c) => {
-							setFormData((p) => ({
-								...p,
-								country: c?.name || "",
-								state: "",
-								city: "",
-							}));
-						}}
-						displayValue={(c) => c?.name ?? ""}
-						placeholder="Search country..."
-					>
-						{(option) => (
-							<ComboboxOption key={option.isoCode} value={option}>
-								<CountryFlag country={option.isoCode} size="s" />
-								<ComboboxLabel>{option.name}</ComboboxLabel>
-							</ComboboxOption>
-						)}
-					</Combobox>
-				</Field>
+        <Field>
+          <Label>Country</Label>
+          <Combobox
+            options={countries}
+            value={selectedCountry}
+            onChange={(c) => {
+              setFormData((p) => ({
+                ...p,
+                country: c?.name || "",
+                state: "",
+                city: "",
+              }));
+            }}
+            displayValue={(c) => c?.name ?? ""}
+            placeholder="Search country..."
+          >
+            {(option) => (
+              <ComboboxOption key={option.isoCode} value={option}>
+                <CountryFlag country={option.isoCode} size="s" />
+                <ComboboxLabel>{option.name}</ComboboxLabel>
+              </ComboboxOption>
+            )}
+          </Combobox>
+        </Field>
 
-				<div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-					<Field>
-						<Label>State</Label>
-						{stateOptions.length > 0 ? (
-							<Combobox
-								options={stateOptions}
-								value={selectedState}
-								onChange={(s) => {
-									setFormData((p) => ({
-										...p,
-										state: s?.name || "",
-										city: "",
-									}));
-								}}
-								displayValue={(s) => s?.name ?? ""}
-								placeholder="Search state..."
-							>
-								{(option) => (
-									<ComboboxOption key={option.isoCode} value={option}>
-										<ComboboxLabel>{option.name}</ComboboxLabel>
-									</ComboboxOption>
-								)}
-							</Combobox>
-						) : (
-							<Input
-								value={formData.state || ""}
-								onChange={(e) => setFormData((p) => ({ ...p, state: e.target.value }))}
-								placeholder="State / Province"
-							/>
-						)}
-					</Field>
-					<Field>
-						<Label>City</Label>
-						{cityOptions.length > 0 ? (
-							<Combobox
-								options={cityOptions}
-								value={formData.city || null}
-								onChange={(c) => setFormData((p) => ({ ...p, city: c || "" }))}
-								displayValue={(c) => c ?? ""}
-								placeholder="Search city..."
-							>
-								{(option) => (
-									<ComboboxOption key={option} value={option}>
-										<ComboboxLabel>{option}</ComboboxLabel>
-									</ComboboxOption>
-								)}
-							</Combobox>
-						) : (
-							<Input
-								value={formData.city || ""}
-								onChange={(e) => setFormData((p) => ({ ...p, city: e.target.value }))}
-								placeholder="City"
-							/>
-						)}
-					</Field>
-				</div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <Field>
+            <Label>State</Label>
+            {stateOptions.length > 0 ? (
+              <Combobox
+                options={stateOptions}
+                value={selectedState}
+                onChange={(s) => {
+                  setFormData((p) => ({
+                    ...p,
+                    state: s?.name || "",
+                    city: "",
+                  }));
+                }}
+                displayValue={(s) => s?.name ?? ""}
+                placeholder="Search state..."
+              >
+                {(option) => (
+                  <ComboboxOption key={option.isoCode} value={option}>
+                    <ComboboxLabel>{option.name}</ComboboxLabel>
+                  </ComboboxOption>
+                )}
+              </Combobox>
+            ) : (
+              <Input
+                value={formData.state || ""}
+                onChange={(e) => setFormData((p) => ({ ...p, state: e.target.value }))}
+                placeholder="State / Province"
+              />
+            )}
+          </Field>
+          <Field>
+            <Label>City</Label>
+            {cityOptions.length > 0 ? (
+              <Combobox
+                options={cityOptions}
+                value={formData.city || null}
+                onChange={(c) => setFormData((p) => ({ ...p, city: c || "" }))}
+                displayValue={(c) => c ?? ""}
+                placeholder="Search city..."
+              >
+                {(option) => (
+                  <ComboboxOption key={option} value={option}>
+                    <ComboboxLabel>{option}</ComboboxLabel>
+                  </ComboboxOption>
+                )}
+              </Combobox>
+            ) : (
+              <Input
+                value={formData.city || ""}
+                onChange={(e) => setFormData((p) => ({ ...p, city: e.target.value }))}
+                placeholder="City"
+              />
+            )}
+          </Field>
+        </div>
 
-				<Field>
-					<Label>Postal Code</Label>
-					<Input
-						value={formData.postalCode || ""}
-						onChange={(e) => setFormData((p) => ({ ...p, postalCode: e.target.value }))}
-						placeholder="400001"
-					/>
-				</Field>
-			</form>
+        <Field>
+          <Label>Postal Code</Label>
+          <Input
+            value={formData.postalCode || ""}
+            onChange={(e) => setFormData((p) => ({ ...p, postalCode: e.target.value }))}
+            placeholder="400001"
+          />
+        </Field>
+      </form>
 
-			<div className="flex justify-end gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-800">
-				<Button plain onClick={pop} disabled={isPending}>
-					Cancel
-				</Button>
-				<Button color="dark/zinc" onClick={handleSubmit} disabled={isPending || !formData.name.trim()}>
-					{fileUpload.isPending ? "Uploading..." : updateOrg.isPending ? "Saving..." : "Save Changes"}
-				</Button>
-			</div>
-		</div>
-	);
+      <div className="flex justify-end gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-800">
+        <Button plain onClick={pop} disabled={isPending}>
+          Cancel
+        </Button>
+        <Button color="dark/zinc" onClick={handleSubmit} disabled={isPending || !formData.name.trim()}>
+          {fileUpload.isPending ? "Uploading..." : updateOrg.isPending ? "Saving..." : "Save Changes"}
+        </Button>
+      </div>
+    </div>
+  );
 }
 
 // =============================================================================
@@ -556,189 +556,189 @@ function EditOrganizationPanel({
 // =============================================================================
 
 function AddBankAccountPanel({
-	organizationId,
-	mode = "add",
+  organizationId,
+  mode = "add",
 }: {
-	organizationId: string | undefined;
-	mode?: "add" | "update";
+  organizationId: string | undefined;
+  mode?: "add" | "update";
 }) {
-	const panelNav = usePanelNav();
-	const pop = () => panelNav?.popPanel();
+  const panelNav = usePanelNav();
+  const pop = () => panelNav?.popPanel();
 
-	const [accountNumber, setAccountNumber] = useState("");
-	const [ifscCode, setIfscCode] = useState("");
-	const [accountHolderName, setAccountHolderName] = useState("");
-	const [bankName, setBankName] = useState("");
-	const [accountType, setAccountType] = useState<"current" | "savings">("current");
-	const [validationId, setValidationId] = useState("");
-	const [verified, setVerified] = useState(false);
-	const [error, setError] = useState<string | null>(null);
+  const [accountNumber, setAccountNumber] = useState("");
+  const [ifscCode, setIfscCode] = useState("");
+  const [accountHolderName, setAccountHolderName] = useState("");
+  const [bankName, setBankName] = useState("");
+  const [accountType, setAccountType] = useState<"current" | "savings">("current");
+  const [validationId, setValidationId] = useState("");
+  const [verified, setVerified] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-	const verifyBank = useVerifyBankAccount(organizationId);
-	const addBank = useAddBankAccount(organizationId);
-	const updateBank = useUpdateBankAccount(organizationId);
+  const verifyBank = useVerifyBankAccount(organizationId);
+  const addBank = useAddBankAccount(organizationId);
+  const updateBank = useUpdateBankAccount(organizationId);
 
-	const isUpdate = mode === "update";
+  const isUpdate = mode === "update";
 
-	const handleVerify = async () => {
-		setError(null);
-		if (!accountNumber.trim() || !ifscCode.trim()) {
-			setError("Account number and IFSC are required");
-			return;
-		}
-		try {
-			const result = await verifyBank.mutateAsync({
-				accountNumber: accountNumber.trim(),
-				ifscCode: ifscCode.trim().toUpperCase(),
-			});
-			if (result.isVerified) {
-				setAccountHolderName(result.registeredName || accountHolderName);
-				setValidationId(result.validationId);
-				setVerified(true);
-				showToast.success("Bank account verified");
-			} else {
-				setError(result.message || "Bank account verification failed. Please check details.");
-			}
-		} catch (err) {
-			setError(getFriendlyErrorMessage(err, "Failed to verify bank account"));
-		}
-	};
+  const handleVerify = async () => {
+    setError(null);
+    if (!accountNumber.trim() || !ifscCode.trim()) {
+      setError("Account number and IFSC are required");
+      return;
+    }
+    try {
+      const result = await verifyBank.mutateAsync({
+        accountNumber: accountNumber.trim(),
+        ifscCode: ifscCode.trim().toUpperCase(),
+      });
+      if (result.isVerified) {
+        setAccountHolderName(result.registeredName || accountHolderName);
+        setValidationId(result.validationId);
+        setVerified(true);
+        showToast.success("Bank account verified");
+      } else {
+        setError(result.message || "Bank account verification failed. Please check details.");
+      }
+    } catch (err) {
+      setError(getFriendlyErrorMessage(err, "Failed to verify bank account"));
+    }
+  };
 
-	const handleSave = async () => {
-		setError(null);
-		const payload = {
-			accountNumber: accountNumber.trim(),
-			ifscCode: ifscCode.trim().toUpperCase(),
-			accountHolderName: accountHolderName.trim(),
-			bankName: bankName.trim() || "Unknown",
-			accountType,
-			validationId,
-		};
-		try {
-			if (isUpdate) {
-				await updateBank.mutateAsync(payload);
-				showToast.success("Bank account updated");
-			} else {
-				await addBank.mutateAsync(payload);
-				showToast.success("Bank account added");
-			}
-			pop();
-		} catch (err) {
-			setError(getFriendlyErrorMessage(err, isUpdate ? "Failed to update bank account" : "Failed to add bank account"));
-		}
-	};
+  const handleSave = async () => {
+    setError(null);
+    const payload = {
+      accountNumber: accountNumber.trim(),
+      ifscCode: ifscCode.trim().toUpperCase(),
+      accountHolderName: accountHolderName.trim(),
+      bankName: bankName.trim() || "Unknown",
+      accountType,
+      validationId,
+    };
+    try {
+      if (isUpdate) {
+        await updateBank.mutateAsync(payload);
+        showToast.success("Bank account updated");
+      } else {
+        await addBank.mutateAsync(payload);
+        showToast.success("Bank account added");
+      }
+      pop();
+    } catch (err) {
+      setError(getFriendlyErrorMessage(err, isUpdate ? "Failed to update bank account" : "Failed to add bank account"));
+    }
+  };
 
-	const isSaving = isUpdate ? updateBank.isPending : addBank.isPending;
+  const isSaving = isUpdate ? updateBank.isPending : addBank.isPending;
 
-	return (
-		<div className="space-y-4">
-			<p className="text-sm text-zinc-500 dark:text-zinc-400">
-				{isUpdate
-					? "Verify your new bank account details. The existing account will be replaced."
-					: "Add your bank account for withdrawals. We'll verify your account first."}
-			</p>
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400">
+        {isUpdate
+          ? "Verify your new bank account details. The existing account will be replaced."
+          : "Add your bank account for withdrawals. We'll verify your account first."}
+      </p>
 
-			{error && (
-				<div className="rounded-xl bg-red-50 p-3 dark:bg-red-950/30">
-					<p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-				</div>
-			)}
+      {error && (
+        <div className="rounded-xl bg-red-50 p-3 dark:bg-red-950/30">
+          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        </div>
+      )}
 
-			<Field>
-				<Label>
-					Account Number <span className="text-red-500">*</span>
-				</Label>
-				<Input
-					value={accountNumber}
-					onChange={(e) => {
-						setAccountNumber(e.target.value);
-						setVerified(false);
-					}}
-					placeholder="Enter account number"
-					disabled={verified}
-				/>
-			</Field>
-			<Field>
-				<Label>
-					IFSC Code <span className="text-red-500">*</span>
-				</Label>
-				<Input
-					value={ifscCode}
-					onChange={(e) => {
-						setIfscCode(e.target.value.toUpperCase());
-						setVerified(false);
-					}}
-					placeholder="e.g., SBIN0001234"
-					maxLength={11}
-					disabled={verified}
-				/>
-			</Field>
-			<Field>
-				<Label>Account Holder Name</Label>
-				<Input
-					value={accountHolderName}
-					onChange={(e) => setAccountHolderName(e.target.value)}
-					placeholder="As per bank records"
-					disabled={verified}
-				/>
-			</Field>
-			<Field>
-				<Label>Bank Name</Label>
-				<Input value={bankName} onChange={(e) => setBankName(e.target.value)} placeholder="e.g., State Bank of India" />
-			</Field>
+      <Field>
+        <Label>
+          Account Number <span className="text-red-500">*</span>
+        </Label>
+        <Input
+          value={accountNumber}
+          onChange={(e) => {
+            setAccountNumber(e.target.value);
+            setVerified(false);
+          }}
+          placeholder="Enter account number"
+          disabled={verified}
+        />
+      </Field>
+      <Field>
+        <Label>
+          IFSC Code <span className="text-red-500">*</span>
+        </Label>
+        <Input
+          value={ifscCode}
+          onChange={(e) => {
+            setIfscCode(e.target.value.toUpperCase());
+            setVerified(false);
+          }}
+          placeholder="e.g., SBIN0001234"
+          maxLength={11}
+          disabled={verified}
+        />
+      </Field>
+      <Field>
+        <Label>Account Holder Name</Label>
+        <Input
+          value={accountHolderName}
+          onChange={(e) => setAccountHolderName(e.target.value)}
+          placeholder="As per bank records"
+          disabled={verified}
+        />
+      </Field>
+      <Field>
+        <Label>Bank Name</Label>
+        <Input value={bankName} onChange={(e) => setBankName(e.target.value)} placeholder="e.g., State Bank of India" />
+      </Field>
 
-			<div className="flex gap-4">
-				<label className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
-					<input
-						type="radio"
-						name="accountType"
-						value="current"
-						checked={accountType === "current"}
-						onChange={() => setAccountType("current")}
-						className="size-4 accent-zinc-900 dark:accent-white"
-					/>
-					Current
-				</label>
-				<label className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
-					<input
-						type="radio"
-						name="accountType"
-						value="savings"
-						checked={accountType === "savings"}
-						onChange={() => setAccountType("savings")}
-						className="size-4 accent-zinc-900 dark:accent-white"
-					/>
-					Savings
-				</label>
-			</div>
+      <div className="flex gap-4">
+        <label className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
+          <input
+            type="radio"
+            name="accountType"
+            value="current"
+            checked={accountType === "current"}
+            onChange={() => setAccountType("current")}
+            className="size-4 accent-zinc-900 dark:accent-white"
+          />
+          Current
+        </label>
+        <label className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
+          <input
+            type="radio"
+            name="accountType"
+            value="savings"
+            checked={accountType === "savings"}
+            onChange={() => setAccountType("savings")}
+            className="size-4 accent-zinc-900 dark:accent-white"
+          />
+          Savings
+        </label>
+      </div>
 
-			{verified && (
-				<div className="flex items-center gap-2 rounded-xl bg-emerald-50 p-3 dark:bg-emerald-950/30">
-					<CheckCircleIcon className="size-5 text-emerald-500" />
-					<span className="text-sm font-medium text-emerald-700 dark:text-emerald-300">Bank account verified</span>
-				</div>
-			)}
+      {verified && (
+        <div className="flex items-center gap-2 rounded-xl bg-emerald-50 p-3 dark:bg-emerald-950/30">
+          <CheckCircleIcon className="size-5 text-emerald-500" />
+          <span className="text-sm font-medium text-emerald-700 dark:text-emerald-300">Bank account verified</span>
+        </div>
+      )}
 
-			<div className="flex justify-end gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-800">
-				<Button plain onClick={pop}>
-					Cancel
-				</Button>
-				{!verified ? (
-					<Button
-						color="dark/zinc"
-						onClick={handleVerify}
-						disabled={verifyBank.isPending || !accountNumber || !ifscCode}
-					>
-						{verifyBank.isPending ? "Verifying..." : "Verify Account"}
-					</Button>
-				) : (
-					<Button color="emerald" onClick={handleSave} disabled={isSaving}>
-						{isSaving ? (isUpdate ? "Updating..." : "Adding...") : isUpdate ? "Update Account" : "Add Account"}
-					</Button>
-				)}
-			</div>
-		</div>
-	);
+      <div className="flex justify-end gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-800">
+        <Button plain onClick={pop}>
+          Cancel
+        </Button>
+        {!verified ? (
+          <Button
+            color="dark/zinc"
+            onClick={handleVerify}
+            disabled={verifyBank.isPending || !accountNumber || !ifscCode}
+          >
+            {verifyBank.isPending ? "Verifying..." : "Verify Account"}
+          </Button>
+        ) : (
+          <Button color="emerald" onClick={handleSave} disabled={isSaving}>
+            {isSaving ? (isUpdate ? "Updating..." : "Adding...") : isUpdate ? "Update Account" : "Add Account"}
+          </Button>
+        )}
+      </div>
+    </div>
+  );
 }
 
 // =============================================================================
@@ -746,84 +746,84 @@ function AddBankAccountPanel({
 // =============================================================================
 
 function ChangePhonePanel({
-	organizationId,
-	currentPhone,
+  organizationId,
+  currentPhone,
 }: {
-	organizationId: string | undefined;
-	currentPhone?: string;
+  organizationId: string | undefined;
+  currentPhone?: string;
 }) {
-	const panelNav = usePanelNav();
-	const pop = () => panelNav?.popPanel();
+  const panelNav = usePanelNav();
+  const pop = () => panelNav?.popPanel();
 
-	const [phoneNumber, setPhoneNumber] = useState(currentPhone || "");
-	const [error, setError] = useState<string | null>(null);
+  const [phoneNumber, setPhoneNumber] = useState(currentPhone || "");
+  const [error, setError] = useState<string | null>(null);
 
-	const changeOrgPhone = useChangeOrgPhone(organizationId);
-	const passkeyReauth = usePasskeyReauthOptions();
+  const changeOrgPhone = useChangeOrgPhone(organizationId);
+  const passkeyReauth = usePasskeyReauthOptions();
 
-	const handleSubmit = async () => {
-		if (!organizationId) return;
-		const phone = phoneNumber.trim();
-		if (!phone || phone.length < 10) {
-			setError("Please enter a valid phone number");
-			return;
-		}
-		setError(null);
-		try {
-			const { options, challengeId } = await passkeyReauth.mutateAsync();
-			const assertion = await startAuthentication({
-				optionsJSON: options as Parameters<typeof startAuthentication>[0]["optionsJSON"],
-			});
-			await changeOrgPhone.mutateAsync({
-				phoneNumber: phone,
-				passkeyResponse: assertion,
-				challengeId,
-			});
-			showToast.success("Phone number updated");
-			pop();
-		} catch (err) {
-			if (err instanceof Error && err.message === "Passkey verification cancelled") {
-				setError("Passkey verification was cancelled.");
-			} else {
-				setError(getFriendlyErrorMessage(err, "Failed to update phone number"));
-			}
-		}
-	};
+  const handleSubmit = async () => {
+    if (!organizationId) return;
+    const phone = phoneNumber.trim();
+    if (!phone || phone.length < 10) {
+      setError("Please enter a valid phone number");
+      return;
+    }
+    setError(null);
+    try {
+      const { options, challengeId } = await passkeyReauth.mutateAsync();
+      const assertion = await startAuthentication({
+        optionsJSON: options as Parameters<typeof startAuthentication>[0]["optionsJSON"],
+      });
+      await changeOrgPhone.mutateAsync({
+        phoneNumber: phone,
+        passkeyResponse: assertion,
+        challengeId,
+      });
+      showToast.success("Phone number updated");
+      pop();
+    } catch (err) {
+      if (err instanceof Error && err.message === "Passkey verification cancelled") {
+        setError("Passkey verification was cancelled.");
+      } else {
+        setError(getFriendlyErrorMessage(err, "Failed to update phone number"));
+      }
+    }
+  };
 
-	const isPending = changeOrgPhone.isPending || passkeyReauth.isPending;
+  const isPending = changeOrgPhone.isPending || passkeyReauth.isPending;
 
-	return (
-		<div className="space-y-4">
-			<p className="text-sm text-zinc-500 dark:text-zinc-400">
-				Update your organization's contact phone number. Passkey verification required.
-			</p>
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400">
+        Update your organization's contact phone number. Passkey verification required.
+      </p>
 
-			{error && (
-				<div className="rounded-xl bg-red-50 p-3 dark:bg-red-950/30">
-					<p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-				</div>
-			)}
+      {error && (
+        <div className="rounded-xl bg-red-50 p-3 dark:bg-red-950/30">
+          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        </div>
+      )}
 
-			<Field>
-				<Label>Phone Number</Label>
-				<Input
-					value={phoneNumber}
-					onChange={(e) => setPhoneNumber(e.target.value)}
-					placeholder="+91 98765 43210"
-					type="tel"
-				/>
-			</Field>
+      <Field>
+        <Label>Phone Number</Label>
+        <Input
+          value={phoneNumber}
+          onChange={(e) => setPhoneNumber(e.target.value)}
+          placeholder="+91 98765 43210"
+          type="tel"
+        />
+      </Field>
 
-			<div className="flex justify-end gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-800">
-				<Button plain onClick={pop} disabled={isPending}>
-					Cancel
-				</Button>
-				<Button color="dark/zinc" onClick={handleSubmit} disabled={isPending || !phoneNumber.trim()}>
-					{isPending ? "Updating..." : "Update Phone"}
-				</Button>
-			</div>
-		</div>
-	);
+      <div className="flex justify-end gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-800">
+        <Button plain onClick={pop} disabled={isPending}>
+          Cancel
+        </Button>
+        <Button color="dark/zinc" onClick={handleSubmit} disabled={isPending || !phoneNumber.trim()}>
+          {isPending ? "Updating..." : "Update Phone"}
+        </Button>
+      </div>
+    </div>
+  );
 }
 
 // =============================================================================
@@ -833,177 +833,177 @@ function ChangePhonePanel({
 const GST_REGEX = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/;
 
 interface GSTPreview {
-	legalName: string;
-	tradeName?: string;
-	gstStatus: string;
-	address?: string;
-	city?: string;
-	state?: string;
-	pinCode?: string;
-	businessType?: string;
-	registrationDate?: string;
-	stateCode: string;
+  legalName: string;
+  tradeName?: string;
+  gstStatus: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  pinCode?: string;
+  businessType?: string;
+  registrationDate?: string;
+  stateCode: string;
 }
 
 function GSTPreviewDetail({
-	label,
-	value,
-	icon: Icon,
+  label,
+  value,
+  icon: Icon,
 }: {
-	label: string;
-	value?: string;
-	icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value?: string;
+  icon: React.ComponentType<{ className?: string }>;
 }) {
-	if (!value) return null;
-	return (
-		<div className="flex items-start gap-2.5 py-1.5">
-			<div className="flex size-6 shrink-0 items-center justify-center rounded-md bg-emerald-100 dark:bg-emerald-900/40">
-				<Icon className="size-3.5 text-emerald-600 dark:text-emerald-400" />
-			</div>
-			<div className="min-w-0">
-				<p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{label}</p>
-				<p className="text-sm text-zinc-800 dark:text-zinc-200">{value}</p>
-			</div>
-		</div>
-	);
+  if (!value) return null;
+  return (
+    <div className="flex items-start gap-2.5 py-1.5">
+      <div className="flex size-6 shrink-0 items-center justify-center rounded-md bg-emerald-100 dark:bg-emerald-900/40">
+        <Icon className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+      </div>
+      <div className="min-w-0">
+        <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{label}</p>
+        <p className="text-sm text-zinc-800 dark:text-zinc-200">{value}</p>
+      </div>
+    </div>
+  );
 }
 
 function VerifyGSTPanel({ organizationId, currentGST }: { organizationId: string | undefined; currentGST?: string }) {
-	const panelNav = usePanelNav();
-	const pop = () => panelNav?.popPanel();
+  const panelNav = usePanelNav();
+  const pop = () => panelNav?.popPanel();
 
-	const [gstNumber, setGstNumber] = useState(currentGST || "");
-	const [error, setError] = useState<string | null>(null);
-	const [previewData, setPreviewData] = useState<GSTPreview | null>(null);
+  const [gstNumber, setGstNumber] = useState(currentGST || "");
+  const [error, setError] = useState<string | null>(null);
+  const [previewData, setPreviewData] = useState<GSTPreview | null>(null);
 
-	const verifyPreview = useVerifyGSTPreview();
-	const verifyGST = useVerifyGST();
+  const verifyPreview = useVerifyGSTPreview();
+  const verifyGST = useVerifyGST();
 
-	const isValidGST = GST_REGEX.test(gstNumber.trim().toUpperCase());
-	const isChanged = gstNumber.trim().toUpperCase() !== (currentGST || "").toUpperCase();
+  const isValidGST = GST_REGEX.test(gstNumber.trim().toUpperCase());
+  const isChanged = gstNumber.trim().toUpperCase() !== (currentGST || "").toUpperCase();
 
-	const handlePreview = async () => {
-		setError(null);
-		setPreviewData(null);
-		const formatted = gstNumber.trim().toUpperCase();
-		if (!isValidGST) {
-			setError("Enter a valid 15-character GSTIN (e.g. 29AABCI5013R1ZB)");
-			return;
-		}
-		try {
-			const result = await verifyPreview.mutateAsync({ gstNumber: formatted });
-			setPreviewData({
-				legalName: result.legalName,
-				tradeName: result.tradeName,
-				gstStatus: result.gstStatus,
-				address: result.address,
-				city: result.city,
-				state: result.state,
-				pinCode: result.pinCode,
-				businessType: result.businessType,
-				registrationDate: result.registrationDate,
-				stateCode: result.stateCode,
-			});
-		} catch (err) {
-			setError(getFriendlyErrorMessage(err, "GST verification failed"));
-		}
-	};
+  const handlePreview = async () => {
+    setError(null);
+    setPreviewData(null);
+    const formatted = gstNumber.trim().toUpperCase();
+    if (!isValidGST) {
+      setError("Enter a valid 15-character GSTIN (e.g. 29AABCI5013R1ZB)");
+      return;
+    }
+    try {
+      const result = await verifyPreview.mutateAsync({ gstNumber: formatted });
+      setPreviewData({
+        legalName: result.legalName,
+        tradeName: result.tradeName,
+        gstStatus: result.gstStatus,
+        address: result.address,
+        city: result.city,
+        state: result.state,
+        pinCode: result.pinCode,
+        businessType: result.businessType,
+        registrationDate: result.registrationDate,
+        stateCode: result.stateCode,
+      });
+    } catch (err) {
+      setError(getFriendlyErrorMessage(err, "GST verification failed"));
+    }
+  };
 
-	const handleSave = async () => {
-		if (!organizationId) return;
-		setError(null);
-		const formatted = gstNumber.trim().toUpperCase();
-		try {
-			await verifyGST.mutateAsync({ organizationId, gstNumber: formatted });
-			showToast.success("GST verified and saved");
-			pop();
-		} catch (err) {
-			setError(getFriendlyErrorMessage(err, "Failed to save GST"));
-		}
-	};
+  const handleSave = async () => {
+    if (!organizationId) return;
+    setError(null);
+    const formatted = gstNumber.trim().toUpperCase();
+    try {
+      await verifyGST.mutateAsync({ organizationId, gstNumber: formatted });
+      showToast.success("GST verified and saved");
+      pop();
+    } catch (err) {
+      setError(getFriendlyErrorMessage(err, "Failed to save GST"));
+    }
+  };
 
-	const isPending = verifyPreview.isPending || verifyGST.isPending;
+  const isPending = verifyPreview.isPending || verifyGST.isPending;
 
-	const fullAddress = previewData
-		? [previewData.address, previewData.city, previewData.state, previewData.pinCode].filter(Boolean).join(", ")
-		: undefined;
+  const fullAddress = previewData
+    ? [previewData.address, previewData.city, previewData.state, previewData.pinCode].filter(Boolean).join(", ")
+    : undefined;
 
-	return (
-		<div className="space-y-4">
-			{/* Input */}
-			<div>
-				<Field>
-					<Label>GSTIN</Label>
-					<div className="flex gap-2">
-						<Input
-							value={gstNumber}
-							onChange={(e) => {
-								setGstNumber(e.target.value.toUpperCase());
-								setPreviewData(null);
-							}}
-							placeholder="29AABCI5013R1ZB"
-							maxLength={15}
-							className="flex-1 font-mono text-base tracking-widest"
-							disabled={!!previewData}
-						/>
-						{!previewData ? (
-							<Button color="dark/zinc" onClick={handlePreview} disabled={isPending || !isValidGST}>
-								{verifyPreview.isPending ? "Checking..." : "Verify"}
-							</Button>
-						) : (
-							<Button plain onClick={() => setPreviewData(null)}>
-								Edit
-							</Button>
-						)}
-					</div>
-				</Field>
-				{!previewData && !error && (
-					<p className="mt-1.5 text-xs text-zinc-500 dark:text-zinc-400">
-						We'll verify this with the GST portal. Required for campaigns & invoicing.
-					</p>
-				)}
-			</div>
+  return (
+    <div className="space-y-4">
+      {/* Input */}
+      <div>
+        <Field>
+          <Label>GSTIN</Label>
+          <div className="flex gap-2">
+            <Input
+              value={gstNumber}
+              onChange={(e) => {
+                setGstNumber(e.target.value.toUpperCase());
+                setPreviewData(null);
+              }}
+              placeholder="29AABCI5013R1ZB"
+              maxLength={15}
+              className="flex-1 font-mono text-base tracking-widest"
+              disabled={!!previewData}
+            />
+            {!previewData ? (
+              <Button color="dark/zinc" onClick={handlePreview} disabled={isPending || !isValidGST}>
+                {verifyPreview.isPending ? "Checking..." : "Verify"}
+              </Button>
+            ) : (
+              <Button plain onClick={() => setPreviewData(null)}>
+                Edit
+              </Button>
+            )}
+          </div>
+        </Field>
+        {!previewData && !error && (
+          <p className="mt-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+            We'll verify this with the GST portal. Required for campaigns & invoicing.
+          </p>
+        )}
+      </div>
 
-			{/* Error */}
-			{error && (
-				<div className="flex items-start gap-2.5 rounded-xl bg-red-50 px-3.5 py-3 ring-1 ring-red-200/60 dark:bg-red-950/20 dark:ring-red-900/40">
-					<ExclamationTriangleIcon className="mt-0.5 size-4 shrink-0 text-red-500 dark:text-red-400" />
-					<p className="text-sm text-red-700 dark:text-red-300">{error}</p>
-				</div>
-			)}
+      {/* Error */}
+      {error && (
+        <div className="flex items-start gap-2.5 rounded-xl bg-red-50 px-3.5 py-3 ring-1 ring-red-200/60 dark:bg-red-950/20 dark:ring-red-900/40">
+          <ExclamationTriangleIcon className="mt-0.5 size-4 shrink-0 text-red-500 dark:text-red-400" />
+          <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
+        </div>
+      )}
 
-			{/* Preview Card */}
-			{previewData && (
-				<div className="overflow-hidden rounded-xl ring-1 ring-zinc-200 dark:ring-zinc-700">
-					<div className="flex items-center gap-2.5 bg-emerald-50 px-4 py-2.5 dark:bg-emerald-950/30">
-						<ShieldCheckIcon className="size-4 text-emerald-600 dark:text-emerald-400" />
-						<span className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
-							Verified — {previewData.gstStatus}
-						</span>
-					</div>
-					<div className="grid grid-cols-1 gap-x-4 px-4 py-3 sm:grid-cols-2">
-						<GSTPreviewDetail icon={UserCircleIcon} label="Legal Name" value={previewData.legalName} />
-						<GSTPreviewDetail icon={BuildingOfficeIcon} label="Trade Name" value={previewData.tradeName} />
-						<GSTPreviewDetail icon={HomeModernIcon} label="Business Type" value={previewData.businessType} />
-						<GSTPreviewDetail icon={CalendarDaysIcon} label="Registered" value={previewData.registrationDate} />
-						<div className="sm:col-span-2">
-							<GSTPreviewDetail icon={MapPinIcon} label="Registered Address" value={fullAddress} />
-						</div>
-					</div>
-				</div>
-			)}
+      {/* Preview Card */}
+      {previewData && (
+        <div className="overflow-hidden rounded-xl ring-1 ring-zinc-200 dark:ring-zinc-700">
+          <div className="flex items-center gap-2.5 bg-emerald-50 px-4 py-2.5 dark:bg-emerald-950/30">
+            <ShieldCheckIcon className="size-4 text-emerald-600 dark:text-emerald-400" />
+            <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+              Verified — {previewData.gstStatus}
+            </span>
+          </div>
+          <div className="grid grid-cols-1 gap-x-4 px-4 py-3 sm:grid-cols-2">
+            <GSTPreviewDetail icon={UserCircleIcon} label="Legal Name" value={previewData.legalName} />
+            <GSTPreviewDetail icon={BuildingOfficeIcon} label="Trade Name" value={previewData.tradeName} />
+            <GSTPreviewDetail icon={HomeModernIcon} label="Business Type" value={previewData.businessType} />
+            <GSTPreviewDetail icon={CalendarDaysIcon} label="Registered" value={previewData.registrationDate} />
+            <div className="sm:col-span-2">
+              <GSTPreviewDetail icon={MapPinIcon} label="Registered Address" value={fullAddress} />
+            </div>
+          </div>
+        </div>
+      )}
 
-			{/* Actions */}
-			<div className="flex items-center justify-between border-t border-zinc-200 pt-4 dark:border-zinc-800">
-				<Button plain onClick={pop} disabled={isPending}>
-					Cancel
-				</Button>
-				<Button color="emerald" onClick={handleSave} disabled={isPending || !previewData}>
-					{verifyGST.isPending ? "Saving..." : isChanged ? "Save New GST" : "Confirm & Save"}
-				</Button>
-			</div>
-		</div>
-	);
+      {/* Actions */}
+      <div className="flex items-center justify-between border-t border-zinc-200 pt-4 dark:border-zinc-800">
+        <Button plain onClick={pop} disabled={isPending}>
+          Cancel
+        </Button>
+        <Button color="emerald" onClick={handleSave} disabled={isPending || !previewData}>
+          {verifyGST.isPending ? "Saving..." : isChanged ? "Save New GST" : "Confirm & Save"}
+        </Button>
+      </div>
+    </div>
+  );
 }
 
 // =============================================================================
@@ -1011,26 +1011,26 @@ function VerifyGSTPanel({ organizationId, currentGST }: { organizationId: string
 // =============================================================================
 
 function BankIcon({ iconUrl, bankName }: { iconUrl?: string | null; bankName?: string | null }) {
-	const [imgError, setImgError] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
-	if (imgError || !iconUrl) {
-		return (
-			<div className="flex size-11 items-center justify-center rounded-xl bg-emerald-100 ring-1 ring-emerald-200/60 dark:bg-emerald-900/50 dark:ring-emerald-800/40">
-				<CreditCardIcon className="size-5 text-emerald-600 dark:text-emerald-400" />
-			</div>
-		);
-	}
+  if (imgError || !iconUrl) {
+    return (
+      <div className="flex size-11 items-center justify-center rounded-xl bg-emerald-100 ring-1 ring-emerald-200/60 dark:bg-emerald-900/50 dark:ring-emerald-800/40">
+        <CreditCardIcon className="size-5 text-emerald-600 dark:text-emerald-400" />
+      </div>
+    );
+  }
 
-	return (
-		<div className="flex size-11 items-center justify-center overflow-hidden rounded-xl bg-white p-1.5 ring-1 ring-zinc-200/60 dark:bg-zinc-800 dark:ring-zinc-700/40">
-			<FadeImage
-				src={iconUrl}
-				alt={bankName || "Bank"}
-				className="size-full object-contain"
-				onError={() => setImgError(true)}
-			/>
-		</div>
-	);
+  return (
+    <div className="flex size-11 items-center justify-center overflow-hidden rounded-xl bg-white p-1.5 ring-1 ring-zinc-200/60 dark:bg-zinc-800 dark:ring-zinc-700/40">
+      <FadeImage
+        src={iconUrl}
+        alt={bankName || "Bank"}
+        className="size-full object-contain"
+        onError={() => setImgError(true)}
+      />
+    </div>
+  );
 }
 
 // =============================================================================
@@ -1040,396 +1040,396 @@ function BankIcon({ iconUrl, bankName }: { iconUrl?: string | null; bankName?: s
 export type OrgSettingsSection = "profile" | "gst" | "bank" | "all";
 
 export function Settings({ section = "all" }: { section?: OrgSettingsSection } = {}) {
-	const { organization, organizationId } = useOrgContext();
-	const { data: orgDetails } = useOrganizationSettings(organizationId);
-	const { data: dashboardData, loading: isLoadingStats } = useDashboard(organizationId);
-	const { data: bankAccount, loading: isBankLoading, refetch: refetchBank } = useBankAccount(organizationId);
-	const { data: gstDetails, loading: isGSTLoading } = useGSTDetails(organizationId);
-	const deleteBankAccount = useDeleteBankAccount();
-	const stats = dashboardData?.stats;
+  const { organization, organizationId } = useOrgContext();
+  const { data: orgDetails } = useOrganizationSettings(organizationId);
+  const { data: dashboardData, loading: isLoadingStats } = useDashboard(organizationId);
+  const { data: bankAccount, loading: isBankLoading, refetch: refetchBank } = useBankAccount(organizationId);
+  const { data: gstDetails, loading: isGSTLoading } = useGSTDetails(organizationId);
+  const deleteBankAccount = useDeleteBankAccount();
+  const stats = dashboardData?.stats;
 
-	const canUpdateOrganization = useCan("organization", "update");
-	const canCreateBankAccount = useCan("bankAccount", "create");
-	const canDeleteBankAccount = useCan("bankAccount", "delete");
-	const panelNav = usePanelNav();
+  const canUpdateOrganization = useCan("organization", "update");
+  const canCreateBankAccount = useCan("bankAccount", "create");
+  const canDeleteBankAccount = useCan("bankAccount", "delete");
+  const panelNav = usePanelNav();
 
-	const formatSpent = (decimal: string | undefined) => {
-		if (!decimal) return "₹0";
-		const amount = parseFloat(decimal);
-		if (Number.isNaN(amount) || amount === 0) return "₹0";
-		if (amount >= 100000) return `₹${(amount / 100000).toFixed(1)}L`;
-		if (amount >= 1000) return `₹${(amount / 1000).toFixed(1)}K`;
-		return `₹${amount.toFixed(0)}`;
-	};
+  const formatSpent = (decimal: string | undefined) => {
+    if (!decimal) return "₹0";
+    const amount = parseFloat(decimal);
+    if (Number.isNaN(amount) || amount === 0) return "₹0";
+    if (amount >= 100000) return `₹${(amount / 100000).toFixed(1)}L`;
+    if (amount >= 1000) return `₹${(amount / 1000).toFixed(1)}K`;
+    return `₹${amount.toFixed(0)}`;
+  };
 
-	const openEditOrg = () => {
-		const initialData = {
-			name: organization?.name || "",
-			description: orgDetails?.description ?? undefined,
-			website: orgDetails?.website ?? undefined,
-			logo: orgDetails?.logo ?? undefined,
-			contactPerson: orgDetails?.contactPerson ?? undefined,
-			address: orgDetails?.address ?? undefined,
-			city: orgDetails?.city ?? undefined,
-			state: orgDetails?.state ?? undefined,
-			country: orgDetails?.country ?? undefined,
-			postalCode: orgDetails?.postalCode ?? undefined,
-		};
-		if (panelNav) {
-			panelNav.pushPanel(
-				"edit-org",
-				"Edit Organization",
-				<EditOrganizationPanel organizationId={organizationId} initialData={initialData} />
-			);
-		}
-	};
+  const openEditOrg = () => {
+    const initialData = {
+      name: organization?.name || "",
+      description: orgDetails?.description ?? undefined,
+      website: orgDetails?.website ?? undefined,
+      logo: orgDetails?.logo ?? undefined,
+      contactPerson: orgDetails?.contactPerson ?? undefined,
+      address: orgDetails?.address ?? undefined,
+      city: orgDetails?.city ?? undefined,
+      state: orgDetails?.state ?? undefined,
+      country: orgDetails?.country ?? undefined,
+      postalCode: orgDetails?.postalCode ?? undefined,
+    };
+    if (panelNav) {
+      panelNav.pushPanel(
+        "edit-org",
+        "Edit Organization",
+        <EditOrganizationPanel organizationId={organizationId} initialData={initialData} />
+      );
+    }
+  };
 
-	const openAddBank = () => {
-		if (panelNav) {
-			panelNav.pushPanel("add-bank", "Add Bank Account", <AddBankAccountPanel organizationId={organizationId} />);
-		}
-	};
+  const openAddBank = () => {
+    if (panelNav) {
+      panelNav.pushPanel("add-bank", "Add Bank Account", <AddBankAccountPanel organizationId={organizationId} />);
+    }
+  };
 
-	const openChangeBank = () => {
-		if (panelNav) {
-			panelNav.pushPanel(
-				"change-bank",
-				"Change Bank Account",
-				<AddBankAccountPanel organizationId={organizationId} mode="update" />
-			);
-		}
-	};
+  const openChangeBank = () => {
+    if (panelNav) {
+      panelNav.pushPanel(
+        "change-bank",
+        "Change Bank Account",
+        <AddBankAccountPanel organizationId={organizationId} mode="update" />
+      );
+    }
+  };
 
-	const openChangePhone = () => {
-		if (panelNav) {
-			panelNav.pushPanel(
-				"change-phone",
-				"Change Phone Number",
-				<ChangePhonePanel organizationId={organizationId} currentPhone={orgDetails?.phoneNumber || ""} />
-			);
-		}
-	};
+  const openChangePhone = () => {
+    if (panelNav) {
+      panelNav.pushPanel(
+        "change-phone",
+        "Change Phone Number",
+        <ChangePhonePanel organizationId={organizationId} currentPhone={orgDetails?.phoneNumber || ""} />
+      );
+    }
+  };
 
-	const openVerifyGST = () => {
-		if (panelNav) {
-			panelNav.pushPanel(
-				"verify-gst",
-				"Verify GST",
-				<VerifyGSTPanel organizationId={organizationId} currentGST={gstDetails?.gstDetails?.gstNumber} />
-			);
-		}
-	};
+  const openVerifyGST = () => {
+    if (panelNav) {
+      panelNav.pushPanel(
+        "verify-gst",
+        "Verify GST",
+        <VerifyGSTPanel organizationId={organizationId} currentGST={gstDetails?.gstDetails?.gstNumber} />
+      );
+    }
+  };
 
-	const handleDeleteBank = async () => {
-		if (!organizationId) return;
-		if (!window.confirm("Are you sure you want to remove this bank account?")) return;
-		try {
-			await deleteBankAccount.mutateAsync({ organizationId });
-			showToast.success("Bank account removed");
-			refetchBank();
-		} catch (err) {
-			showToast.error(err, "Failed to remove bank account");
-		}
-	};
+  const handleDeleteBank = async () => {
+    if (!organizationId) return;
+    if (!window.confirm("Are you sure you want to remove this bank account?")) return;
+    try {
+      await deleteBankAccount.mutateAsync({ organizationId });
+      showToast.success("Bank account removed");
+      refetchBank();
+    } catch (err) {
+      showToast.error(err, "Failed to remove bank account");
+    }
+  };
 
-	const loading = isLoadingStats;
+  const loading = isLoadingStats;
 
-	if (loading) {
-		return <SettingsSkeleton isDialog={section !== "all"} section={section} />;
-	}
+  if (loading) {
+    return <SettingsSkeleton isDialog={section !== "all"} section={section} />;
+  }
 
-	const orgData = orgDetails;
-	const show = (s: OrgSettingsSection) => section === "all" || section === s;
-	const isDialog = section !== "all";
+  const orgData = orgDetails;
+  const show = (s: OrgSettingsSection) => section === "all" || section === s;
+  const isDialog = section !== "all";
 
-	// --- Section: Profile ---
-	const profileSection = (
-		<>
-			<OrganizationProfileCard
-				name={organization?.name || "Organization"}
-				logo={orgData?.logo}
-				stats={[
-					{ label: "Campaigns", value: stats?.activeCampaigns ?? 0 },
-					{ label: "Enrollments", value: stats?.totalEnrollments ?? 0 },
-					{ label: "Balance", value: formatSpent(stats?.walletBalanceDecimal) },
-				]}
-				onEditProfile={openEditOrg}
-				canEdit={canUpdateOrganization}
-			/>
-			<div>
-				{!isDialog && <MenuSectionHeader>Organization Details</MenuSectionHeader>}
-				<MenuSection>
-					<MenuRow
-						icon={HomeModernIcon}
-						iconColor="sky"
-						label="Organization Name"
-						value={organization?.name || "—"}
-						onClick={canUpdateOrganization ? openEditOrg : undefined}
-						isFirst
-					/>
-					<MenuSeparator />
-					<MenuRow
-						icon={GlobeAltIcon}
-						iconColor="violet"
-						label="Website"
-						value={orgData?.website || "Not set"}
-						onClick={canUpdateOrganization ? openEditOrg : undefined}
-					/>
-					<MenuSeparator />
-					<MenuRow
-						icon={MapPinIcon}
-						iconColor="red"
-						label="Address"
-						value={[orgData?.address, orgData?.city, orgData?.state].filter(Boolean).join(", ") || "Not set"}
-						onClick={canUpdateOrganization ? openEditOrg : undefined}
-					/>
-					<MenuSeparator />
-					<MenuRow
-						icon={PhoneIcon}
-						iconColor="emerald"
-						label="Phone"
-						value={orgData?.phoneNumber || "Not set"}
-						onClick={canUpdateOrganization ? openChangePhone : undefined}
-						isLast
-					/>
-				</MenuSection>
-			</div>
-		</>
-	);
+  // --- Section: Profile ---
+  const profileSection = (
+    <>
+      <OrganizationProfileCard
+        name={organization?.name || "Organization"}
+        logo={orgData?.logo}
+        stats={[
+          { label: "Campaigns", value: stats?.activeCampaigns ?? 0 },
+          { label: "Enrollments", value: stats?.totalEnrollments ?? 0 },
+          { label: "Balance", value: formatSpent(stats?.walletBalanceDecimal) },
+        ]}
+        onEditProfile={openEditOrg}
+        canEdit={canUpdateOrganization}
+      />
+      <div>
+        {!isDialog && <MenuSectionHeader>Organization Details</MenuSectionHeader>}
+        <MenuSection>
+          <MenuRow
+            icon={HomeModernIcon}
+            iconColor="sky"
+            label="Organization Name"
+            value={organization?.name || "—"}
+            onClick={canUpdateOrganization ? openEditOrg : undefined}
+            isFirst
+          />
+          <MenuSeparator />
+          <MenuRow
+            icon={GlobeAltIcon}
+            iconColor="violet"
+            label="Website"
+            value={orgData?.website || "Not set"}
+            onClick={canUpdateOrganization ? openEditOrg : undefined}
+          />
+          <MenuSeparator />
+          <MenuRow
+            icon={MapPinIcon}
+            iconColor="red"
+            label="Address"
+            value={[orgData?.address, orgData?.city, orgData?.state].filter(Boolean).join(", ") || "Not set"}
+            onClick={canUpdateOrganization ? openEditOrg : undefined}
+          />
+          <MenuSeparator />
+          <MenuRow
+            icon={PhoneIcon}
+            iconColor="emerald"
+            label="Phone"
+            value={orgData?.phoneNumber || "Not set"}
+            onClick={canUpdateOrganization ? openChangePhone : undefined}
+            isLast
+          />
+        </MenuSection>
+      </div>
+    </>
+  );
 
-	// --- Section: GST ---
-	const gst = gstDetails?.gstDetails;
-	const gstIsVerified = gst?.isVerified === true;
-	const hasGST = !!gst?.gstNumber;
-	const billingAddress = [orgData?.address, orgData?.city, orgData?.state, orgData?.postalCode]
-		.filter(Boolean)
-		.join(", ");
+  // --- Section: GST ---
+  const gst = gstDetails?.gstDetails;
+  const gstIsVerified = gst?.isVerified === true;
+  const hasGST = !!gst?.gstNumber;
+  const billingAddress = [orgData?.address, orgData?.city, orgData?.state, orgData?.postalCode]
+    .filter(Boolean)
+    .join(", ");
 
-	const gstSection = (
-		<div>
-			{!isDialog && <MenuSectionHeader>GST & Compliance</MenuSectionHeader>}
+  const gstSection = (
+    <div>
+      {!isDialog && <MenuSectionHeader>GST & Compliance</MenuSectionHeader>}
 
-			{isGSTLoading ? (
-				<div className="h-44 skeleton-shimmer rounded-xl bg-zinc-100 dark:bg-zinc-800" />
-			) : !hasGST ? (
-				<div className="overflow-hidden rounded-xl ring-1 ring-zinc-200/80 dark:ring-zinc-700/60">
-					<div className="flex flex-col items-center gap-3 px-6 py-8 text-center">
-						<div className="flex size-11 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/40">
-							<IdentificationIcon className="size-5 text-amber-600 dark:text-amber-400" />
-						</div>
-						<div>
-							<p className="text-sm font-medium text-zinc-800 dark:text-zinc-200">No GST number added</p>
-							<p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
-								Required for campaigns, listings, and invoicing
-							</p>
-						</div>
-						{canUpdateOrganization && (
-							<Button color="amber" className="mt-1" onClick={openVerifyGST}>
-								Add & Verify GST
-							</Button>
-						)}
-					</div>
-				</div>
-			) : (
-				<div className="overflow-hidden rounded-xl ring-1 ring-zinc-200/80 dark:ring-zinc-700/60">
-					{/* Status Banner */}
-					<div
-						className={`flex items-center justify-between px-4 py-2 ${
-							gstIsVerified ? "bg-emerald-50 dark:bg-emerald-950/20" : "bg-amber-50 dark:bg-amber-950/20"
-						}`}
-					>
-						<div className="flex items-center gap-2">
-							{gstIsVerified ? (
-								<ShieldCheckIcon className="size-4 text-emerald-600 dark:text-emerald-400" />
-							) : (
-								<ExclamationTriangleIcon className="size-4 text-amber-600 dark:text-amber-400" />
-							)}
-							<span
-								className={`text-xs font-semibold uppercase tracking-wide ${
-									gstIsVerified ? "text-emerald-700 dark:text-emerald-300" : "text-amber-700 dark:text-amber-300"
-								}`}
-							>
-								{gstIsVerified ? "Verified" : "Pending Verification"}
-							</span>
-							{gst.verifiedAt && (
-								<span className="text-[10px] text-zinc-500 dark:text-zinc-400">
-									·{" "}
-									{new Date(gst.verifiedAt).toLocaleDateString("en-IN", {
-										day: "numeric",
-										month: "short",
-										year: "numeric",
-									})}
-								</span>
-							)}
-						</div>
-						{canUpdateOrganization && (
-							<BadgeButton color={gstIsVerified ? "zinc" : "amber"} onClick={openVerifyGST}>
-								{gstIsVerified ? "Change" : "Verify Now"}
-							</BadgeButton>
-						)}
-					</div>
+      {isGSTLoading ? (
+        <div className="h-44 skeleton-shimmer rounded-xl bg-zinc-100 dark:bg-zinc-800" />
+      ) : !hasGST ? (
+        <div className="overflow-hidden rounded-xl ring-1 ring-zinc-200/80 dark:ring-zinc-700/60">
+          <div className="flex flex-col items-center gap-3 px-6 py-8 text-center">
+            <div className="flex size-11 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/40">
+              <IdentificationIcon className="size-5 text-amber-600 dark:text-amber-400" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200">No GST number added</p>
+              <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+                Required for campaigns, listings, and invoicing
+              </p>
+            </div>
+            {canUpdateOrganization && (
+              <Button color="amber" className="mt-1" onClick={openVerifyGST}>
+                Add & Verify GST
+              </Button>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="overflow-hidden rounded-xl ring-1 ring-zinc-200/80 dark:ring-zinc-700/60">
+          {/* Status Banner */}
+          <div
+            className={`flex items-center justify-between px-4 py-2 ${
+              gstIsVerified ? "bg-emerald-50 dark:bg-emerald-950/20" : "bg-amber-50 dark:bg-amber-950/20"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              {gstIsVerified ? (
+                <ShieldCheckIcon className="size-4 text-emerald-600 dark:text-emerald-400" />
+              ) : (
+                <ExclamationTriangleIcon className="size-4 text-amber-600 dark:text-amber-400" />
+              )}
+              <span
+                className={`text-xs font-semibold uppercase tracking-wide ${
+                  gstIsVerified ? "text-emerald-700 dark:text-emerald-300" : "text-amber-700 dark:text-amber-300"
+                }`}
+              >
+                {gstIsVerified ? "Verified" : "Pending Verification"}
+              </span>
+              {gst.verifiedAt && (
+                <span className="text-[10px] text-zinc-500 dark:text-zinc-400">
+                  ·{" "}
+                  {new Date(gst.verifiedAt).toLocaleDateString("en-IN", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                </span>
+              )}
+            </div>
+            {canUpdateOrganization && (
+              <BadgeButton color={gstIsVerified ? "zinc" : "amber"} onClick={openVerifyGST}>
+                {gstIsVerified ? "Change" : "Verify Now"}
+              </BadgeButton>
+            )}
+          </div>
 
-					{/* GSTIN + Legal Name */}
-					<div className="px-4 py-3">
-						<div className="flex items-baseline justify-between gap-3">
-							<p className="font-mono text-lg font-semibold tracking-widest text-zinc-900 dark:text-white">
-								{gst.gstNumber}
-							</p>
-							<CopyButton value={gst.gstNumber} label="GST Number" />
-						</div>
-						<p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
-							{gst.legalName}
-							{gst.tradeName && gst.tradeName !== gst.legalName && (
-								<span className="text-zinc-400 dark:text-zinc-500"> · {gst.tradeName}</span>
-							)}
-						</p>
-					</div>
+          {/* GSTIN + Legal Name */}
+          <div className="px-4 py-3">
+            <div className="flex items-baseline justify-between gap-3">
+              <p className="font-mono text-lg font-semibold tracking-widest text-zinc-900 dark:text-white">
+                {gst.gstNumber}
+              </p>
+              <CopyButton value={gst.gstNumber} label="GST Number" />
+            </div>
+            <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
+              {gst.legalName}
+              {gst.tradeName && gst.tradeName !== gst.legalName && (
+                <span className="text-zinc-400 dark:text-zinc-500"> · {gst.tradeName}</span>
+              )}
+            </p>
+          </div>
 
-					{/* Billing Address */}
-					<div className="border-t border-zinc-200 px-4 py-3 dark:border-zinc-800">
-						<div className="flex items-start gap-2.5">
-							<MapPinIcon className="mt-0.5 size-3.5 shrink-0 text-zinc-500 dark:text-zinc-400" />
-							<div className="min-w-0 flex-1">
-								<p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-									Billing Address
-								</p>
-								{billingAddress ? (
-									<p className="mt-0.5 text-sm text-zinc-700 dark:text-zinc-300">{billingAddress}</p>
-								) : (
-									<p className="mt-0.5 text-sm italic text-zinc-500 dark:text-zinc-400">
-										Not set — update in{" "}
-										<button
-											type="button"
-											className="underline"
-											onClick={canUpdateOrganization ? openEditOrg : undefined}
-										>
-											Organization Details
-										</button>
-									</p>
-								)}
-							</div>
-						</div>
-					</div>
-				</div>
-			)}
-		</div>
-	);
+          {/* Billing Address */}
+          <div className="border-t border-zinc-200 px-4 py-3 dark:border-zinc-800">
+            <div className="flex items-start gap-2.5">
+              <MapPinIcon className="mt-0.5 size-3.5 shrink-0 text-zinc-500 dark:text-zinc-400" />
+              <div className="min-w-0 flex-1">
+                <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                  Billing Address
+                </p>
+                {billingAddress ? (
+                  <p className="mt-0.5 text-sm text-zinc-700 dark:text-zinc-300">{billingAddress}</p>
+                ) : (
+                  <p className="mt-0.5 text-sm italic text-zinc-500 dark:text-zinc-400">
+                    Not set — update in{" "}
+                    <button
+                      type="button"
+                      className="underline"
+                      onClick={canUpdateOrganization ? openEditOrg : undefined}
+                    >
+                      Organization Details
+                    </button>
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 
-	// --- Section: Bank ---
-	const bankSection = (
-		<div>
-			{!isDialog && <MenuSectionHeader>Bank Account</MenuSectionHeader>}
-			{isBankLoading ? (
-				<BankAccountSkeleton />
-			) : bankAccount ? (
-				<div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-zinc-200/80 dark:bg-zinc-900 dark:ring-zinc-700/60">
-					{/* Header */}
-					<div className="flex items-center gap-3.5 px-5 py-4">
-						<BankIcon iconUrl={bankAccount.iconUrl} bankName={bankAccount.bankName} />
-						<div className="min-w-0 flex-1">
-							<div className="flex items-center gap-2">
-								<p className="truncate text-[15px] font-semibold text-zinc-900 dark:text-white">
-									{bankAccount.bankName || "Bank Account"}
-								</p>
-								<Badge color="emerald" className="shrink-0">
-									<CheckCircleIcon className="size-3" />
-									Verified
-								</Badge>
-							</div>
-							<p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
-								{bankAccount.accountType === "savings" ? "Savings" : "Current"} Account
-							</p>
-						</div>
-					</div>
+  // --- Section: Bank ---
+  const bankSection = (
+    <div>
+      {!isDialog && <MenuSectionHeader>Bank Account</MenuSectionHeader>}
+      {isBankLoading ? (
+        <BankAccountSkeleton />
+      ) : bankAccount ? (
+        <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-zinc-200/80 dark:bg-zinc-900 dark:ring-zinc-700/60">
+          {/* Header */}
+          <div className="flex items-center gap-3.5 px-5 py-4">
+            <BankIcon iconUrl={bankAccount.iconUrl} bankName={bankAccount.bankName} />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <p className="truncate text-[15px] font-semibold text-zinc-900 dark:text-white">
+                  {bankAccount.bankName || "Bank Account"}
+                </p>
+                <Badge color="emerald" className="shrink-0">
+                  <CheckCircleIcon className="size-3" />
+                  Verified
+                </Badge>
+              </div>
+              <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+                {bankAccount.accountType === "savings" ? "Savings" : "Current"} Account
+              </p>
+            </div>
+          </div>
 
-					{/* Account details — list style */}
-					<div className="border-t border-zinc-100 dark:border-zinc-800">
-						<div className="flex items-center justify-between px-5 py-3">
-							<span className="text-[13px] text-zinc-500 dark:text-zinc-400">Account Number</span>
-							<span className="font-mono text-[13px] font-medium tracking-wide text-zinc-900 dark:text-white">
-								****{bankAccount.accountNumber?.slice(-4) || "****"}
-							</span>
-						</div>
-						<div className="mx-5 h-px bg-zinc-100 dark:bg-zinc-800" />
-						<div className="flex items-center justify-between px-5 py-3">
-							<span className="text-[13px] text-zinc-500 dark:text-zinc-400">IFSC Code</span>
-							<span className="font-mono text-[13px] font-medium tracking-wide text-zinc-900 dark:text-white">
-								{bankAccount.ifscCode || "—"}
-							</span>
-						</div>
-						<div className="mx-5 h-px bg-zinc-100 dark:bg-zinc-800" />
-						<div className="flex items-center justify-between px-5 py-3">
-							<span className="text-[13px] text-zinc-500 dark:text-zinc-400">Account Holder</span>
-							<span className="truncate pl-4 text-[13px] font-medium text-zinc-900 dark:text-white">
-								{bankAccount.accountHolderName || "—"}
-							</span>
-						</div>
-					</div>
+          {/* Account details — list style */}
+          <div className="border-t border-zinc-100 dark:border-zinc-800">
+            <div className="flex items-center justify-between px-5 py-3">
+              <span className="text-[13px] text-zinc-500 dark:text-zinc-400">Account Number</span>
+              <span className="font-mono text-[13px] font-medium tracking-wide text-zinc-900 dark:text-white">
+                ****{bankAccount.accountNumber?.slice(-4) || "****"}
+              </span>
+            </div>
+            <div className="mx-5 h-px bg-zinc-100 dark:bg-zinc-800" />
+            <div className="flex items-center justify-between px-5 py-3">
+              <span className="text-[13px] text-zinc-500 dark:text-zinc-400">IFSC Code</span>
+              <span className="font-mono text-[13px] font-medium tracking-wide text-zinc-900 dark:text-white">
+                {bankAccount.ifscCode || "—"}
+              </span>
+            </div>
+            <div className="mx-5 h-px bg-zinc-100 dark:bg-zinc-800" />
+            <div className="flex items-center justify-between px-5 py-3">
+              <span className="text-[13px] text-zinc-500 dark:text-zinc-400">Account Holder</span>
+              <span className="truncate pl-4 text-[13px] font-medium text-zinc-900 dark:text-white">
+                {bankAccount.accountHolderName || "—"}
+              </span>
+            </div>
+          </div>
 
-					{/* Actions footer */}
-					<div className="flex items-center justify-end gap-2 border-t border-zinc-100 bg-zinc-50/60 px-4 py-2.5 dark:border-zinc-800 dark:bg-zinc-800/40">
-						{canCreateBankAccount && (
-							<Button plain onClick={openChangeBank} className="text-xs">
-								<ArrowPathIcon className="size-3.5" />
-								Change Account
-							</Button>
-						)}
-						{canDeleteBankAccount && (
-							<Button
-								plain
-								onClick={handleDeleteBank}
-								disabled={deleteBankAccount.isPending}
-								className="text-xs text-red-500 hover:text-red-700"
-							>
-								<TrashIcon className="size-3.5" />
-								{deleteBankAccount.isPending ? "Removing..." : "Remove"}
-							</Button>
-						)}
-					</div>
-				</div>
-			) : (
-				<div className="overflow-hidden rounded-2xl ring-1 ring-zinc-200/80 dark:ring-zinc-700/60">
-					<div className="flex flex-col items-center gap-4 bg-gradient-to-b from-zinc-50 to-white px-6 py-12 dark:from-zinc-800/60 dark:to-zinc-900">
-						<div className="flex size-14 items-center justify-center rounded-2xl bg-zinc-100 ring-1 ring-zinc-200/60 dark:bg-zinc-800 dark:ring-zinc-700/60">
-							<BanknotesIcon className="size-7 text-zinc-400 dark:text-zinc-500" />
-						</div>
-						<div className="text-center">
-							<p className="text-[15px] font-semibold text-zinc-800 dark:text-zinc-200">No bank account linked</p>
-							<p className="mx-auto mt-1.5 max-w-[260px] text-[13px] leading-relaxed text-zinc-500 dark:text-zinc-400">
-								Add and verify a bank account to enable withdrawals from your wallet
-							</p>
-						</div>
-						{canCreateBankAccount && (
-							<Button color="dark/zinc" onClick={openAddBank} className="mt-1">
-								<CreditCardIcon className="size-4" />
-								Link Bank Account
-							</Button>
-						)}
-					</div>
-				</div>
-			)}
-		</div>
-	);
+          {/* Actions footer */}
+          <div className="flex items-center justify-end gap-2 border-t border-zinc-100 bg-zinc-50/60 px-4 py-2.5 dark:border-zinc-800 dark:bg-zinc-800/40">
+            {canCreateBankAccount && (
+              <Button plain onClick={openChangeBank} className="text-xs">
+                <ArrowPathIcon className="size-3.5" />
+                Change Account
+              </Button>
+            )}
+            {canDeleteBankAccount && (
+              <Button
+                plain
+                onClick={handleDeleteBank}
+                disabled={deleteBankAccount.isPending}
+                className="text-xs text-red-500 hover:text-red-700"
+              >
+                <TrashIcon className="size-3.5" />
+                {deleteBankAccount.isPending ? "Removing..." : "Remove"}
+              </Button>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="overflow-hidden rounded-2xl ring-1 ring-zinc-200/80 dark:ring-zinc-700/60">
+          <div className="flex flex-col items-center gap-4 bg-gradient-to-b from-zinc-50 to-white px-6 py-12 dark:from-zinc-800/60 dark:to-zinc-900">
+            <div className="flex size-14 items-center justify-center rounded-2xl bg-zinc-100 ring-1 ring-zinc-200/60 dark:bg-zinc-800 dark:ring-zinc-700/60">
+              <BanknotesIcon className="size-7 text-zinc-400 dark:text-zinc-500" />
+            </div>
+            <div className="text-center">
+              <p className="text-[15px] font-semibold text-zinc-800 dark:text-zinc-200">No bank account linked</p>
+              <p className="mx-auto mt-1.5 max-w-[260px] text-[13px] leading-relaxed text-zinc-500 dark:text-zinc-400">
+                Add and verify a bank account to enable withdrawals from your wallet
+              </p>
+            </div>
+            {canCreateBankAccount && (
+              <Button color="dark/zinc" onClick={openAddBank} className="mt-1">
+                <CreditCardIcon className="size-4" />
+                Link Bank Account
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 
-	return (
-		<div className={isDialog ? "space-y-5 px-5 py-5 pb-10 sm:px-6" : "animate-page-enter space-y-6 pb-20"}>
-			{section === "all" && (
-				<div>
-					<Heading>Organization Settings</Heading>
-					<Text className="mt-1">Manage your organization profile and compliance</Text>
-				</div>
-			)}
+  return (
+    <div className={isDialog ? "space-y-5 px-5 py-5 pb-10 sm:px-6" : "animate-page-enter space-y-6 pb-20"}>
+      {section === "all" && (
+        <div>
+          <Heading>Organization Settings</Heading>
+          <Text className="mt-1">Manage your organization profile and compliance</Text>
+        </div>
+      )}
 
-			{show("profile") && profileSection}
-			{show("gst") && gstSection}
-			{show("bank") && bankSection}
+      {show("profile") && profileSection}
+      {show("gst") && gstSection}
+      {show("bank") && bankSection}
 
-			{section === "all" && (
-				<div className="flex flex-col items-center gap-2 pt-8">
-					<Logo className="h-5 w-auto text-zinc-500 dark:text-zinc-400" />
-					<p className="text-xs text-zinc-500 dark:text-zinc-400">v1.0.0</p>
-				</div>
-			)}
-		</div>
-	);
+      {section === "all" && (
+        <div className="flex flex-col items-center gap-2 pt-8">
+          <Logo className="h-5 w-auto text-zinc-500 dark:text-zinc-400" />
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">v1.0.0</p>
+        </div>
+      )}
+    </div>
+  );
 }

@@ -7,18 +7,18 @@ import { queryKeys } from "@/hooks/api-client";
 import { batchInvoicesServer, exportInvoiceEnrollmentsServer, generateInvoicePDFServer } from "./server";
 
 export function useGenerateInvoicePDF(organizationId: string | undefined) {
-	const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-	return useMutation({
-		mutationFn: async (invoiceId: string) => {
-			return generateInvoicePDFServer({ data: { orgId: organizationId as string, invoiceId } });
-		},
-		onSuccess: (_, invoiceId) => {
-			queryClient.invalidateQueries({
-				queryKey: queryKeys.invoice(organizationId || "", invoiceId),
-			});
-		},
-	});
+  return useMutation({
+    mutationFn: async (invoiceId: string) => {
+      return generateInvoicePDFServer({ data: { orgId: organizationId as string, invoiceId } });
+    },
+    onSuccess: (_, invoiceId) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.invoice(organizationId || "", invoiceId),
+      });
+    },
+  });
 }
 
 // =============================================================================
@@ -26,33 +26,33 @@ export function useGenerateInvoicePDF(organizationId: string | undefined) {
 // =============================================================================
 
 export function useExportInvoiceEnrollments(organizationId: string | undefined) {
-	return useMutation({
-		mutationFn: async (invoiceId: string) => {
-			return exportInvoiceEnrollmentsServer({ data: { orgId: organizationId as string, invoiceId } });
-		},
-	});
+  return useMutation({
+    mutationFn: async (invoiceId: string) => {
+      return exportInvoiceEnrollmentsServer({ data: { orgId: organizationId as string, invoiceId } });
+    },
+  });
 }
 
 export function useBatchInvoices() {
-	const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-	return useMutation({
-		mutationFn: async ({
-			organizationId,
-			action,
-			invoiceIds,
-		}: {
-			organizationId: string;
-			action: "mark_paid";
-			invoiceIds: string[];
-		}) => {
-			return batchInvoicesServer({
-				data: { orgId: organizationId, action, invoiceIds },
-			});
-		},
-		onSuccess: (_, v) => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.invoices(v.organizationId) });
-			queryClient.invalidateQueries({ queryKey: queryKeys.infiniteInvoices(v.organizationId) });
-		},
-	});
+  return useMutation({
+    mutationFn: async ({
+      organizationId,
+      action,
+      invoiceIds,
+    }: {
+      organizationId: string;
+      action: "mark_paid";
+      invoiceIds: string[];
+    }) => {
+      return batchInvoicesServer({
+        data: { orgId: organizationId, action, invoiceIds },
+      });
+    },
+    onSuccess: (_, v) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.invoices(v.organizationId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.infiniteInvoices(v.organizationId) });
+    },
+  });
 }

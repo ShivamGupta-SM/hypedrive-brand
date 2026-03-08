@@ -24,7 +24,8 @@
       "Bash(pnpm build)",
       "Bash(ls -la /c/Projects/hypedrive-brand/src/lib/server-auth*)",
       "Bash(npx vitest run)",
-      "Bash(git status -u)"
+      "Bash(git status -u)",
+      "Bash(pnpm add -D @tanstack/react-query-devtools @tanstack/router-devtools)"
     ]
   }
 }

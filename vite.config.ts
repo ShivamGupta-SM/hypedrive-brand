@@ -48,6 +48,12 @@ export default defineConfig({
 			"react-loading-skeleton",
 		],
 	},
+	server: {
+		watch: {
+			usePolling: false,
+			ignored: ["**/node_modules/**", "**/.git/**"],
+		},
+	},
 	build: {
 		// Split large vendor libraries into separate chunks for better caching
 		rollupOptions: {

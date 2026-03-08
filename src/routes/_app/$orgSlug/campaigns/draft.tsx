@@ -3,6 +3,6 @@ import { CampaignsGrid } from "@/pages/campaigns/campaigns-grid";
 import { campaignStatusRouteConfig } from "./-route-config";
 
 export const Route = createFileRoute("/_app/$orgSlug/campaigns/draft")({
-	...campaignStatusRouteConfig("draft"),
-	component: () => <CampaignsGrid status="draft" />,
+  ...campaignStatusRouteConfig("draft"),
+  component: () => <CampaignsGrid status="draft" />,
 });

@@ -34,41 +34,41 @@ import type { UseFormSetValue } from "react-hook-form";
  * ```
  */
 export function useAutofillSync<T extends Record<string, unknown>>(
-	setValue: UseFormSetValue<T>,
-	fields: Partial<Record<keyof T & string, string>>
+  setValue: UseFormSetValue<T>,
+  fields: Partial<Record<keyof T & string, string>>
 ) {
-	const formRef = useRef<HTMLFormElement>(null);
-	const setValueRef = useRef(setValue);
-	const fieldsRef = useRef(fields);
-	setValueRef.current = setValue;
-	fieldsRef.current = fields;
+  const formRef = useRef<HTMLFormElement>(null);
+  const setValueRef = useRef(setValue);
+  const fieldsRef = useRef(fields);
+  setValueRef.current = setValue;
+  fieldsRef.current = fields;
 
-	const syncAllFields = useCallback(() => {
-		const form = formRef.current;
-		if (!form) return;
-		for (const [field, selector] of Object.entries(fieldsRef.current)) {
-			const el = form.querySelector<HTMLInputElement>(selector as string);
-			if (el?.value) {
-				// biome-ignore lint: dynamic field name from caller
-				setValueRef.current(field as any, el.value as any, { shouldValidate: true });
-			}
-		}
-	}, []);
+  const syncAllFields = useCallback(() => {
+    const form = formRef.current;
+    if (!form) return;
+    for (const [field, selector] of Object.entries(fieldsRef.current)) {
+      const el = form.querySelector<HTMLInputElement>(selector as string);
+      if (el?.value) {
+        // biome-ignore lint: dynamic field name from caller
+        setValueRef.current(field as any, el.value as any, { shouldValidate: true });
+      }
+    }
+  }, []);
 
-	// CSS animation detection — attaches once, never re-attaches
-	useEffect(() => {
-		const form = formRef.current;
-		if (!form) return;
+  // CSS animation detection — attaches once, never re-attaches
+  useEffect(() => {
+    const form = formRef.current;
+    if (!form) return;
 
-		const onAnimationStart = (e: AnimationEvent) => {
-			if (e.animationName === "onAutoFillStart") {
-				requestAnimationFrame(syncAllFields);
-			}
-		};
+    const onAnimationStart = (e: AnimationEvent) => {
+      if (e.animationName === "onAutoFillStart") {
+        requestAnimationFrame(syncAllFields);
+      }
+    };
 
-		form.addEventListener("animationstart", onAnimationStart);
-		return () => form.removeEventListener("animationstart", onAnimationStart);
-	}, [syncAllFields]);
+    form.addEventListener("animationstart", onAnimationStart);
+    return () => form.removeEventListener("animationstart", onAnimationStart);
+  }, [syncAllFields]);
 
-	return { formRef, syncAutofill: syncAllFields };
+  return { formRef, syncAutofill: syncAllFields };
 }

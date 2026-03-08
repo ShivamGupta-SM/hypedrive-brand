@@ -1,10 +1,10 @@
 import {
-	CheckCircleIcon,
-	ClockIcon,
-	MagnifyingGlassIcon,
-	Squares2X2Icon,
-	XCircleIcon,
-	XMarkIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  MagnifyingGlassIcon,
+  Squares2X2Icon,
+  XCircleIcon,
+  XMarkIcon,
 } from "@heroicons/react/16/solid";
 import { Outlet } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
@@ -25,75 +25,75 @@ import { Route } from "@/routes/_app/$orgSlug/enrollments";
 // =============================================================================
 
 function EnrollmentsLayoutSkeleton() {
-	return (
-		<div className="space-y-5">
-			{/* Header skeleton */}
-			<div className="flex items-start justify-between gap-4 animate-fade-in">
-				<div>
-					<div className="h-8 w-36 rounded-lg bg-zinc-200 skeleton-shimmer dark:bg-zinc-800" />
-					<div className="mt-2 h-4 w-48 rounded bg-zinc-200 skeleton-shimmer sm:w-56 dark:bg-zinc-800" />
-				</div>
-			</div>
+  return (
+    <div className="space-y-5">
+      {/* Header skeleton */}
+      <div className="flex items-start justify-between gap-4 animate-fade-in">
+        <div>
+          <div className="h-8 w-36 rounded-lg bg-zinc-200 skeleton-shimmer dark:bg-zinc-800" />
+          <div className="mt-2 h-4 w-48 rounded bg-zinc-200 skeleton-shimmer sm:w-56 dark:bg-zinc-800" />
+        </div>
+      </div>
 
-			{/* Stats skeleton */}
-			<FinancialStatsGridBordered
-				stats={[
-					{ name: "Total", value: "" },
-					{ name: "In Review", value: "" },
-					{ name: "Approved", value: "" },
-					{ name: "Rejected", value: "" },
-				]}
-				loading
-				columns={4}
-			/>
+      {/* Stats skeleton */}
+      <FinancialStatsGridBordered
+        stats={[
+          { name: "Total", value: "" },
+          { name: "In Review", value: "" },
+          { name: "Approved", value: "" },
+          { name: "Rejected", value: "" },
+        ]}
+        loading
+        columns={4}
+      />
 
-			{/* Search + Tabs skeleton */}
-			<div
-				className="flex flex-col gap-3 sm:flex-row sm:items-center animate-fade-in"
-				style={{ animationDelay: "120ms" }}
-			>
-				<div className="h-10 w-full rounded-lg bg-zinc-200 skeleton-shimmer sm:w-64 dark:bg-zinc-800" />
-				<div className="flex gap-1.5 overflow-x-auto scrollbar-hide">
-					{[80, 110, 80, 75].map((w, i) => (
-						<div
-							key={i}
-							style={{ width: w }}
-							className="h-9 shrink-0 rounded-full bg-zinc-200 skeleton-shimmer dark:bg-zinc-800"
-						/>
-					))}
-				</div>
-			</div>
+      {/* Search + Tabs skeleton */}
+      <div
+        className="flex flex-col gap-3 sm:flex-row sm:items-center animate-fade-in"
+        style={{ animationDelay: "120ms" }}
+      >
+        <div className="h-10 w-full rounded-lg bg-zinc-200 skeleton-shimmer sm:w-64 dark:bg-zinc-800" />
+        <div className="flex gap-1.5 overflow-x-auto scrollbar-hide">
+          {[80, 110, 80, 75].map((w, i) => (
+            <div
+              key={i}
+              style={{ width: w }}
+              className="h-9 shrink-0 rounded-full bg-zinc-200 skeleton-shimmer dark:bg-zinc-800"
+            />
+          ))}
+        </div>
+      </div>
 
-			{/* Cards skeleton */}
-			<div className="grid grid-cols-1 gap-2.5 sm:gap-3 md:grid-cols-2 lg:gap-4">
-				{[1, 2, 3, 4].map((i) => (
-					<div
-						key={i}
-						className="overflow-hidden rounded-xl bg-white shadow-xs ring-1 ring-zinc-200 animate-fade-in dark:bg-zinc-900 dark:ring-zinc-800"
-						style={{ animationDelay: `${180 + i * 60}ms` }}
-					>
-						<div className="flex items-start gap-3.5 p-3.5 sm:gap-4 sm:p-4">
-							<div className="size-12 shrink-0 rounded-full bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
-							<div className="min-w-0 flex-1 space-y-2">
-								<div className="h-4 w-2/3 skeleton-shimmer rounded bg-zinc-200 dark:bg-zinc-700" />
-								<div className="h-3 w-1/2 skeleton-shimmer rounded bg-zinc-200 dark:bg-zinc-700" />
-								<div className="h-3 w-3/4 skeleton-shimmer rounded bg-zinc-200 dark:bg-zinc-700" />
-							</div>
-						</div>
-						<div className="h-px bg-zinc-200 dark:bg-zinc-700" />
-						<div className="grid grid-cols-3 divide-x divide-zinc-200 bg-zinc-50/50 dark:divide-zinc-700 dark:bg-zinc-800/30">
-							{[1, 2, 3].map((j) => (
-								<div key={j} className="flex flex-col items-center gap-1 py-2.5 sm:py-3">
-									<div className="h-2.5 w-10 skeleton-shimmer rounded bg-zinc-200 dark:bg-zinc-700" />
-									<div className="h-3.5 w-14 skeleton-shimmer rounded bg-zinc-200 dark:bg-zinc-700" />
-								</div>
-							))}
-						</div>
-					</div>
-				))}
-			</div>
-		</div>
-	);
+      {/* Cards skeleton */}
+      <div className="grid grid-cols-1 gap-2.5 sm:gap-3 md:grid-cols-2 lg:gap-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div
+            key={i}
+            className="overflow-hidden rounded-xl bg-white shadow-xs ring-1 ring-zinc-200 animate-fade-in dark:bg-zinc-900 dark:ring-zinc-800"
+            style={{ animationDelay: `${180 + i * 60}ms` }}
+          >
+            <div className="flex items-start gap-3.5 p-3.5 sm:gap-4 sm:p-4">
+              <div className="size-12 shrink-0 rounded-full bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+              <div className="min-w-0 flex-1 space-y-2">
+                <div className="h-4 w-2/3 skeleton-shimmer rounded bg-zinc-200 dark:bg-zinc-700" />
+                <div className="h-3 w-1/2 skeleton-shimmer rounded bg-zinc-200 dark:bg-zinc-700" />
+                <div className="h-3 w-3/4 skeleton-shimmer rounded bg-zinc-200 dark:bg-zinc-700" />
+              </div>
+            </div>
+            <div className="h-px bg-zinc-200 dark:bg-zinc-700" />
+            <div className="grid grid-cols-3 divide-x divide-zinc-200 bg-zinc-50/50 dark:divide-zinc-700 dark:bg-zinc-800/30">
+              {[1, 2, 3].map((j) => (
+                <div key={j} className="flex flex-col items-center gap-1 py-2.5 sm:py-3">
+                  <div className="h-2.5 w-10 skeleton-shimmer rounded bg-zinc-200 dark:bg-zinc-700" />
+                  <div className="h-3.5 w-14 skeleton-shimmer rounded bg-zinc-200 dark:bg-zinc-700" />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 // =============================================================================
@@ -101,131 +101,131 @@ function EnrollmentsLayoutSkeleton() {
 // =============================================================================
 
 export function EnrollmentsLayout() {
-	const { organizationId } = useOrgContext();
-	const orgPath = useOrgPath();
-	const navigate = Route.useNavigate();
-	const { q } = Route.useSearch();
+  const { organizationId } = useOrgContext();
+  const orgPath = useOrgPath();
+  const navigate = Route.useNavigate();
+  const { q } = Route.useSearch();
 
-	// Debounced search — local state for responsive input, URL updates after 300ms
-	const [searchInput, setSearchInput] = useState(q ?? "");
-	const debouncedSearch = useDebounce(searchInput, 300);
-	useEffect(() => {
-		navigate({ search: (prev) => ({ ...prev, q: debouncedSearch || undefined }) });
-	}, [debouncedSearch, navigate]);
-	useEffect(() => {
-		setSearchInput(q ?? "");
-	}, [q]);
+  // Debounced search — local state for responsive input, URL updates after 300ms
+  const [searchInput, setSearchInput] = useState(q ?? "");
+  const debouncedSearch = useDebounce(searchInput, 300);
+  useEffect(() => {
+    navigate({ search: (prev) => ({ ...prev, q: debouncedSearch || undefined }) });
+  }, [debouncedSearch, navigate]);
+  useEffect(() => {
+    setSearchInput(q ?? "");
+  }, [q]);
 
-	// All enrollments for stats + tab counts
-	const { data: enrollments, loading, total } = useInfiniteEnrollments(organizationId, {});
+  // All enrollments for stats + tab counts
+  const { data: enrollments, loading, total } = useInfiniteEnrollments(organizationId, {});
 
-	// Count overdue enrollments
-	const overdueCount = useMemo(() => {
-		const referenceTime = new Date();
-		return enrollments.filter((e) => e.status === "awaiting_review" && isEnrollmentOverdue(e.createdAt, referenceTime))
-			.length;
-	}, [enrollments]);
+  // Count overdue enrollments
+  const overdueCount = useMemo(() => {
+    const referenceTime = new Date();
+    return enrollments.filter((e) => e.status === "awaiting_review" && isEnrollmentOverdue(e.createdAt, referenceTime))
+      .length;
+  }, [enrollments]);
 
-	if (loading) return <EnrollmentsLayoutSkeleton />;
+  if (loading) return <EnrollmentsLayoutSkeleton />;
 
-	const stats = {
-		total: total || enrollments.length,
-		awaitingReview: enrollments.filter((e) => e.status === "awaiting_review").length,
-		approved: enrollments.filter((e) => e.status === "approved").length,
-		rejected: enrollments.filter((e) => e.status === "permanently_rejected").length,
-	};
+  const stats = {
+    total: total || enrollments.length,
+    awaitingReview: enrollments.filter((e) => e.status === "awaiting_review").length,
+    approved: enrollments.filter((e) => e.status === "approved").length,
+    rejected: enrollments.filter((e) => e.status === "permanently_rejected").length,
+  };
 
-	const tabs: TabNavItem[] = [
-		{
-			label: "All",
-			to: orgPath("/enrollments"),
-			exact: true,
-			count: stats.total,
-			icon: Squares2X2Icon,
-			iconColor: "text-sky-500",
-		},
-		{
-			label: "Awaiting Review",
-			to: orgPath("/enrollments/awaiting-review"),
-			count: stats.awaitingReview,
-			icon: ClockIcon,
-			iconColor: "text-amber-500",
-		},
-		{
-			label: "Approved",
-			to: orgPath("/enrollments/approved"),
-			count: stats.approved,
-			icon: CheckCircleIcon,
-			iconColor: "text-emerald-500",
-		},
-		{
-			label: "Rejected",
-			to: orgPath("/enrollments/rejected"),
-			count: stats.rejected,
-			icon: XCircleIcon,
-			iconColor: "text-red-500",
-		},
-	];
+  const tabs: TabNavItem[] = [
+    {
+      label: "All",
+      to: orgPath("/enrollments"),
+      exact: true,
+      count: stats.total,
+      icon: Squares2X2Icon,
+      iconColor: "text-sky-500",
+    },
+    {
+      label: "Awaiting Review",
+      to: orgPath("/enrollments/awaiting-review"),
+      count: stats.awaitingReview,
+      icon: ClockIcon,
+      iconColor: "text-amber-500",
+    },
+    {
+      label: "Approved",
+      to: orgPath("/enrollments/approved"),
+      count: stats.approved,
+      icon: CheckCircleIcon,
+      iconColor: "text-emerald-500",
+    },
+    {
+      label: "Rejected",
+      to: orgPath("/enrollments/rejected"),
+      count: stats.rejected,
+      icon: XCircleIcon,
+      iconColor: "text-red-500",
+    },
+  ];
 
-	const setSearchQuery = (value: string) => setSearchInput(value);
+  const setSearchQuery = (value: string) => setSearchInput(value);
 
-	return (
-		<div className="space-y-5">
-			{/* Header */}
-			<PageHeader title="Enrollments" description="Review and manage campaign enrollments" />
+  return (
+    <div className="space-y-5">
+      {/* Header */}
+      <PageHeader title="Enrollments" description="Review and manage campaign enrollments" />
 
-			{/* Overdue Alert */}
-			{overdueCount > 0 && (
-				<AlertBanner
-					variant="warning"
-					size="sm"
-					title={`${overdueCount} enrollment${overdueCount !== 1 ? "s" : ""} overdue`}
-					description="Pending review for more than 48 hours"
-					action={{ label: "View", href: orgPath("/enrollments/awaiting-review") }}
-				/>
-			)}
+      {/* Overdue Alert */}
+      {overdueCount > 0 && (
+        <AlertBanner
+          variant="warning"
+          size="sm"
+          title={`${overdueCount} enrollment${overdueCount !== 1 ? "s" : ""} overdue`}
+          description="Pending review for more than 48 hours"
+          action={{ label: "View", href: orgPath("/enrollments/awaiting-review") }}
+        />
+      )}
 
-			{/* Stats */}
-			<FinancialStatsGridBordered
-				stats={[
-					{ name: "Total", value: stats.total },
-					{ name: "In Review", value: stats.awaitingReview },
-					{ name: "Approved", value: stats.approved, changeType: "positive" },
-					{ name: "Rejected", value: stats.rejected, changeType: "negative" },
-				]}
-				columns={4}
-			/>
+      {/* Stats */}
+      <FinancialStatsGridBordered
+        stats={[
+          { name: "Total", value: stats.total },
+          { name: "In Review", value: stats.awaitingReview },
+          { name: "Approved", value: stats.approved, changeType: "positive" },
+          { name: "Rejected", value: stats.rejected, changeType: "negative" },
+        ]}
+        columns={4}
+      />
 
-			{/* Search + Tabs */}
-			<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-				<div className="w-full sm:w-64 sm:shrink-0">
-					<InputGroup>
-						<MagnifyingGlassIcon data-slot="icon" />
-						<Input
-							type="text"
-							value={searchInput}
-							onChange={(e) => setSearchQuery(e.target.value)}
-							placeholder="Search by shopper, campaign..."
-							aria-label="Search enrollments"
-						/>
-						{searchInput && (
-							<button
-								type="button"
-								onClick={() => setSearchQuery("")}
-								className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
-							>
-								<XMarkIcon className="size-4" />
-							</button>
-						)}
-					</InputGroup>
-				</div>
-				<TabNav tabs={tabs} />
-			</div>
+      {/* Search + Tabs */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="w-full sm:w-64 sm:shrink-0">
+          <InputGroup>
+            <MagnifyingGlassIcon data-slot="icon" />
+            <Input
+              type="text"
+              value={searchInput}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by shopper, campaign..."
+              aria-label="Search enrollments"
+            />
+            {searchInput && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+              >
+                <XMarkIcon className="size-4" />
+              </button>
+            )}
+          </InputGroup>
+        </div>
+        <TabNav tabs={tabs} />
+      </div>
 
-			{/* Child route renders here — tighter gap from tabs */}
-			<div className="-mt-2">
-				<Outlet />
-			</div>
-		</div>
-	);
+      {/* Child route renders here — tighter gap from tabs */}
+      <div className="-mt-2">
+        <Outlet />
+      </div>
+    </div>
+  );
 }

@@ -1,0 +1,15 @@
+{
+	"files.watcherExclude": {
+		"**/node_modules/**": true,
+		"**/.git/objects/**": true,
+		"**/.git/subtree-cache/**": true,
+		"**/dist/**": true,
+		"**/.output/**": true
+	},
+	"search.exclude": {
+		"**/node_modules": true,
+		"**/.output": true,
+		"**/dist": true
+	},
+	"typescript.tsdk": "node_modules/typescript/lib"
+}

@@ -5,20 +5,20 @@ import { RouteErrorComponent, RoutePendingComponent } from "@/components/shared/
 import { infiniteListingsQueryOptions } from "@/features/listings/queries";
 
 const searchSchema = z.object({
-	q: z.string().optional().catch(undefined),
-	sort: z.enum(["date", "name", "price", "views"]).optional().catch(undefined),
+  q: z.string().optional().catch(undefined),
+  sort: z.enum(["date", "name", "price", "views"]).optional().catch(undefined),
 });
 
 export const Route = createFileRoute("/_app/$orgSlug/listings")({
-	head: () => ({
-		meta: [{ title: "Listings | Hypedrive" }],
-	}),
-	validateSearch: searchSchema,
-	loader: async ({ context }) => {
-		const orgId = context.organization?.id;
-		if (!orgId) return;
-		await context.queryClient.prefetchInfiniteQuery(infiniteListingsQueryOptions(orgId, {}));
-	},
-	errorComponent: RouteErrorComponent,
-	pendingComponent: RoutePendingComponent,
+  head: () => ({
+    meta: [{ title: "Listings | Hypedrive" }],
+  }),
+  validateSearch: searchSchema,
+  loader: async ({ context }) => {
+    const orgId = context.organization?.id;
+    if (!orgId) return;
+    await context.queryClient.prefetchInfiniteQuery(infiniteListingsQueryOptions(orgId, {}));
+  },
+  errorComponent: RouteErrorComponent,
+  pendingComponent: RoutePendingComponent,
 });

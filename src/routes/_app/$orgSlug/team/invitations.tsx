@@ -4,15 +4,15 @@ import { invitationsQueryOptions } from "@/features/team/queries";
 import { TeamInvitations } from "@/pages/team";
 
 export const Route = createFileRoute("/_app/$orgSlug/team/invitations")({
-	loader: ({ context }) => {
-		const orgId = context.organization?.id;
-		if (!orgId) return;
-		context.queryClient.prefetchQuery(invitationsQueryOptions(orgId));
-	},
-	head: () => ({
-		meta: [{ title: "Invitations | Team | Hypedrive" }],
-	}),
-	component: TeamInvitations,
-	errorComponent: RouteErrorComponent,
-	pendingComponent: RoutePendingComponent,
+  loader: ({ context }) => {
+    const orgId = context.organization?.id;
+    if (!orgId) return;
+    context.queryClient.prefetchQuery(invitationsQueryOptions(orgId));
+  },
+  head: () => ({
+    meta: [{ title: "Invitations | Team | Hypedrive" }],
+  }),
+  component: TeamInvitations,
+  errorComponent: RouteErrorComponent,
+  pendingComponent: RoutePendingComponent,
 });

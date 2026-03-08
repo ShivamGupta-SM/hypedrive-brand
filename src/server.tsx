@@ -9,15 +9,15 @@ import { createStartHandler, defaultStreamHandler } from "@tanstack/react-start/
 const GUARD = Symbol.for("__hdCancelledErrorHandler");
 const g = globalThis as Record<symbol, boolean>;
 if (!g[GUARD]) {
-	g[GUARD] = true;
-	process.on("unhandledRejection", (reason) => {
-		if (isCancelledError(reason)) return;
-		console.error("Unhandled rejection:", reason);
-	});
+  g[GUARD] = true;
+  process.on("unhandledRejection", (reason) => {
+    if (isCancelledError(reason)) return;
+    console.error("Unhandled rejection:", reason);
+  });
 }
 
 const handler = createStartHandler(defaultStreamHandler);
 
 export default {
-	fetch: handler,
+  fetch: handler,
 };

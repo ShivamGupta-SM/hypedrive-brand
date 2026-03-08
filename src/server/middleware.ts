@@ -25,14 +25,14 @@ import { readAuthCookie } from "@/server/auth-helpers.server";
  * ```
  */
 export const authMiddleware = createMiddleware({ type: "function" }).server(async ({ next }) => {
-	const token = readAuthCookie();
-	if (!token) {
-		throw Object.assign(new Error("UNAUTHORIZED"), { status: 401 });
-	}
-	const client = new Client(API_URL, {
-		requestInit: {
-			headers: { Authorization: `Bearer ${token}` },
-		},
-	});
-	return next({ context: { token, client } });
+  const token = readAuthCookie();
+  if (!token) {
+    throw Object.assign(new Error("UNAUTHORIZED"), { status: 401 });
+  }
+  const client = new Client(API_URL, {
+    requestInit: {
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  });
+  return next({ context: { token, client } });
 });

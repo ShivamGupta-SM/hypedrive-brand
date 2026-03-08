@@ -9,50 +9,50 @@ import { userInvitationsQueryOptions } from "./queries";
 import { acceptInvitationServer, getInvitationServer, rejectInvitationServer } from "./server";
 
 export function useUserInvitations() {
-	const query = useQuery({
-		...userInvitationsQueryOptions(),
-	});
+  const query = useQuery({
+    ...userInvitationsQueryOptions(),
+  });
 
-	return {
-		data: query.data?.invitations ?? [],
-		loading: query.isPending && !query.data,
-		error: query.error,
-		refetch: query.refetch,
-	};
+  return {
+    data: query.data?.invitations ?? [],
+    loading: query.isPending && !query.data,
+    error: query.error,
+    refetch: query.refetch,
+  };
 }
 
 export function useGetInvitation() {
-	return useMutation({
-		mutationFn: async (invitationId: string) => {
-			return getInvitationServer({ data: { invitationId } });
-		},
-	});
+  return useMutation({
+    mutationFn: async (invitationId: string) => {
+      return getInvitationServer({ data: { invitationId } });
+    },
+  });
 }
 
 export function useAcceptInvitation() {
-	const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-	return useMutation({
-		mutationFn: async (params: { organizationId: string; invitationId: string }) => {
-			return acceptInvitationServer({ data: { ...params } });
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.userInvitations() });
-			queryClient.invalidateQueries({ queryKey: queryKeys.organizationProfile() });
-			queryClient.invalidateQueries({ queryKey: ["auth", "session-with-orgs"] });
-		},
-	});
+  return useMutation({
+    mutationFn: async (params: { organizationId: string; invitationId: string }) => {
+      return acceptInvitationServer({ data: { ...params } });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.userInvitations() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.organizationProfile() });
+      queryClient.invalidateQueries({ queryKey: ["auth", "session-with-orgs"] });
+    },
+  });
 }
 
 export function useRejectInvitation() {
-	const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-	return useMutation({
-		mutationFn: async (params: { organizationId: string; invitationId: string }) => {
-			return rejectInvitationServer({ data: { ...params } });
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.userInvitations() });
-		},
-	});
+  return useMutation({
+    mutationFn: async (params: { organizationId: string; invitationId: string }) => {
+      return rejectInvitationServer({ data: { ...params } });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.userInvitations() });
+    },
+  });
 }

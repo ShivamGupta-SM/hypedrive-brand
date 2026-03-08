@@ -10,23 +10,23 @@ import { infiniteEnrollmentsQueryOptions } from "@/features/enrollments/queries"
 type EnrollmentStatus = "awaiting_review" | "approved" | "permanently_rejected";
 
 const TITLES: Record<EnrollmentStatus, string> = {
-	awaiting_review: "Awaiting Review | Enrollments",
-	approved: "Approved | Enrollments",
-	permanently_rejected: "Rejected | Enrollments",
+  awaiting_review: "Awaiting Review | Enrollments",
+  approved: "Approved | Enrollments",
+  permanently_rejected: "Rejected | Enrollments",
 };
 
 export function enrollmentStatusRouteConfig(status: EnrollmentStatus) {
-	return {
-		head: () => ({
-			meta: [{ title: `${TITLES[status]} | Hypedrive` }],
-		}),
-		loader: ({ context }: { context: { organization?: { id: string } | null; queryClient: any } }) => {
-			const orgId = context.organization?.id;
-			if (!orgId) return;
-			context.queryClient.prefetchInfiniteQuery(infiniteEnrollmentsQueryOptions(orgId, { status }));
-			context.queryClient.prefetchQuery(campaignsLookupQueryOptions(orgId));
-		},
-		errorComponent: RouteErrorComponent,
-		pendingComponent: RoutePendingComponent,
-	} as const;
+  return {
+    head: () => ({
+      meta: [{ title: `${TITLES[status]} | Hypedrive` }],
+    }),
+    loader: ({ context }: { context: { organization?: { id: string } | null; queryClient: any } }) => {
+      const orgId = context.organization?.id;
+      if (!orgId) return;
+      context.queryClient.prefetchInfiniteQuery(infiniteEnrollmentsQueryOptions(orgId, { status }));
+      context.queryClient.prefetchQuery(campaignsLookupQueryOptions(orgId));
+    },
+    errorComponent: RouteErrorComponent,
+    pendingComponent: RoutePendingComponent,
+  } as const;
 }

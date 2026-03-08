@@ -6,105 +6,105 @@
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import { CACHE, DEFAULT_PAGE_SIZE, queryKeys } from "@/hooks/api-client";
 import {
-	getCampaignServer,
-	getCampaignStatsServer,
-	listCampaignsServer,
-	listCampaignTasksServer,
-	listPlatformsServer,
-	listTaskTemplatesServer,
+  getCampaignServer,
+  getCampaignStatsServer,
+  listCampaignsServer,
+  listCampaignTasksServer,
+  listPlatformsServer,
+  listTaskTemplatesServer,
 } from "./server";
 
 // -- Campaign Detail ----------------------------------------------------------
 
 export const campaignQueryOptions = (orgId: string, campaignId: string) =>
-	queryOptions({
-		queryKey: queryKeys.campaign(orgId, campaignId),
-		queryFn: () => getCampaignServer({ data: { orgId, campaignId } }),
-		staleTime: CACHE.detail,
-	});
+  queryOptions({
+    queryKey: queryKeys.campaign(orgId, campaignId),
+    queryFn: () => getCampaignServer({ data: { orgId, campaignId } }),
+    staleTime: CACHE.detail,
+  });
 
 export const campaignStatsQueryOptions = (orgId: string, campaignId: string) =>
-	queryOptions({
-		queryKey: queryKeys.campaignStats(orgId, campaignId),
-		queryFn: () => getCampaignStatsServer({ data: { orgId, campaignId } }),
-		staleTime: CACHE.detail,
-	});
+  queryOptions({
+    queryKey: queryKeys.campaignStats(orgId, campaignId),
+    queryFn: () => getCampaignStatsServer({ data: { orgId, campaignId } }),
+    staleTime: CACHE.detail,
+  });
 
 // -- Campaign Lists -----------------------------------------------------------
 
 export const infiniteCampaignsQueryOptions = (
-	orgId: string,
-	params?: {
-		status?: string;
-		listingId?: string;
-		q?: string;
-		sortBy?: "createdAt" | "startDate" | "endDate" | "title";
-		sortOrder?: "asc" | "desc";
-	}
+  orgId: string,
+  params?: {
+    status?: string;
+    listingId?: string;
+    q?: string;
+    sortBy?: "createdAt" | "startDate" | "endDate" | "title";
+    sortOrder?: "asc" | "desc";
+  }
 ) =>
-	infiniteQueryOptions({
-		queryKey: queryKeys.infiniteCampaigns(orgId, params),
-		queryFn: ({ pageParam }) =>
-			listCampaignsServer({
-				data: { orgId, params: { ...params, cursor: pageParam, limit: DEFAULT_PAGE_SIZE } },
-			}),
-		initialPageParam: undefined as string | undefined,
-		getNextPageParam: (lastPage) => lastPage?.nextCursor ?? undefined,
-		staleTime: CACHE.list,
-	});
+  infiniteQueryOptions({
+    queryKey: queryKeys.infiniteCampaigns(orgId, params),
+    queryFn: ({ pageParam }) =>
+      listCampaignsServer({
+        data: { orgId, params: { ...params, cursor: pageParam, limit: DEFAULT_PAGE_SIZE } },
+      }),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => lastPage?.nextCursor ?? undefined,
+    staleTime: CACHE.list,
+  });
 
 // -- Campaign Lists (paginated) -----------------------------------------------
 
 export const campaignsQueryOptions = (
-	orgId: string,
-	params?: {
-		status?: string;
-		listingId?: string;
-		q?: string;
-		skip?: number;
-		take?: number;
-		sortBy?: "createdAt" | "startDate" | "endDate" | "title";
-		sortOrder?: "asc" | "desc";
-	}
+  orgId: string,
+  params?: {
+    status?: string;
+    listingId?: string;
+    q?: string;
+    skip?: number;
+    take?: number;
+    sortBy?: "createdAt" | "startDate" | "endDate" | "title";
+    sortOrder?: "asc" | "desc";
+  }
 ) =>
-	queryOptions({
-		queryKey: queryKeys.campaigns(orgId, params),
-		queryFn: () => listCampaignsServer({ data: { orgId, params: params || {} } }),
-		staleTime: CACHE.list,
-	});
+  queryOptions({
+    queryKey: queryKeys.campaigns(orgId, params),
+    queryFn: () => listCampaignsServer({ data: { orgId, params: params || {} } }),
+    staleTime: CACHE.list,
+  });
 
 // -- Campaign Tasks -----------------------------------------------------------
 
 export const campaignTasksQueryOptions = (orgId: string, campaignId: string) =>
-	queryOptions({
-		queryKey: queryKeys.campaignTasks(orgId, campaignId),
-		queryFn: () => listCampaignTasksServer({ data: { orgId, campaignId } }),
-		staleTime: CACHE.list,
-	});
+  queryOptions({
+    queryKey: queryKeys.campaignTasks(orgId, campaignId),
+    queryFn: () => listCampaignTasksServer({ data: { orgId, campaignId } }),
+    staleTime: CACHE.list,
+  });
 
 // -- Platforms ----------------------------------------------------------------
 
 export const platformsQueryOptions = () =>
-	queryOptions({
-		queryKey: queryKeys.platforms(),
-		queryFn: () => listPlatformsServer(),
-		staleTime: CACHE.lookup,
-	});
+  queryOptions({
+    queryKey: queryKeys.platforms(),
+    queryFn: () => listPlatformsServer(),
+    staleTime: CACHE.lookup,
+  });
 
 // -- Task Templates -----------------------------------------------------------
 
 export const taskTemplatesQueryOptions = (params?: { category?: string; platformId?: string }) =>
-	queryOptions({
-		queryKey: queryKeys.taskTemplates(params),
-		queryFn: () => listTaskTemplatesServer({ data: params || {} }),
-		staleTime: CACHE.lookup,
-	});
+  queryOptions({
+    queryKey: queryKeys.taskTemplates(params),
+    queryFn: () => listTaskTemplatesServer({ data: params || {} }),
+    staleTime: CACHE.lookup,
+  });
 
 // -- Campaign Lookup (dropdowns) ----------------------------------------------
 
 export const campaignsLookupQueryOptions = (orgId: string) =>
-	queryOptions({
-		queryKey: queryKeys.campaigns(orgId, { take: 100 }),
-		queryFn: () => listCampaignsServer({ data: { orgId, params: { take: 100 } } }),
-		staleTime: CACHE.lookup,
-	});
+  queryOptions({
+    queryKey: queryKeys.campaigns(orgId, { take: 100 }),
+    queryFn: () => listCampaignsServer({ data: { orgId, params: { take: 100 } } }),
+    staleTime: CACHE.lookup,
+  });

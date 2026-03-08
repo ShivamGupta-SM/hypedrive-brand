@@ -23,8 +23,8 @@ import type { OrgAction, OrgResource } from "@/lib/permissions/definitions";
  * const canCreate = useCan("listing", "create");
  */
 export function useCan<R extends OrgResource>(resource: R, action: OrgAction<R>): boolean {
-	const { can } = useOrgContext();
-	return can(resource, action);
+  const { can } = useOrgContext();
+  return can(resource, action);
 }
 
 // =============================================================================
@@ -32,11 +32,11 @@ export function useCan<R extends OrgResource>(resource: R, action: OrgAction<R>)
 // =============================================================================
 
 interface CanProps<R extends OrgResource> {
-	resource: R;
-	action: OrgAction<R>;
-	children: ReactNode | ((allowed: boolean) => ReactNode);
-	passThrough?: boolean;
-	not?: boolean;
+  resource: R;
+  action: OrgAction<R>;
+  children: ReactNode | ((allowed: boolean) => ReactNode);
+  passThrough?: boolean;
+  not?: boolean;
 }
 
 /**
@@ -52,13 +52,13 @@ interface CanProps<R extends OrgResource> {
  * </Can>
  */
 export function Can<R extends OrgResource>({ resource, action, children, passThrough, not }: CanProps<R>) {
-	const { can } = useOrgContext();
-	const canDo = can(resource, action);
-	const allowed = not ? !canDo : canDo;
+  const { can } = useOrgContext();
+  const canDo = can(resource, action);
+  const allowed = not ? !canDo : canDo;
 
-	if (passThrough || typeof children === "function") {
-		return typeof children === "function" ? children(allowed) : children;
-	}
+  if (passThrough || typeof children === "function") {
+    return typeof children === "function" ? children(allowed) : children;
+  }
 
-	return allowed ? children : null;
+  return allowed ? children : null;
 }

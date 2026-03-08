@@ -6,14 +6,14 @@
 import { queryOptions } from "@tanstack/react-query";
 import { CACHE, queryKeys } from "@/hooks/api-client";
 import {
-	getAccountInfoServer,
-	getSessionServer,
-	listAccountsServer,
-	listDeviceSessionsServer,
-	listSessionsServer,
-	listUserInvitationsServer,
-	meServer,
-	passkeyListServer,
+  getAccountInfoServer,
+  getSessionServer,
+  listAccountsServer,
+  listDeviceSessionsServer,
+  listSessionsServer,
+  listUserInvitationsServer,
+  meServer,
+  passkeyListServer,
 } from "./server";
 
 // =============================================================================
@@ -21,33 +21,33 @@ import {
 // =============================================================================
 
 export function userInfoQueryOptions() {
-	return queryOptions({
-		queryKey: queryKeys.userInfo(),
-		queryFn: async () => {
-			return getSessionServer();
-		},
-		staleTime: CACHE.auth,
-	});
+  return queryOptions({
+    queryKey: queryKeys.userInfo(),
+    queryFn: async () => {
+      return getSessionServer();
+    },
+    staleTime: CACHE.auth,
+  });
 }
 
 export function meQueryOptions() {
-	return queryOptions({
-		queryKey: [...queryKeys.userInfo(), "me"] as const,
-		queryFn: async () => {
-			return meServer();
-		},
-		staleTime: CACHE.auth,
-	});
+  return queryOptions({
+    queryKey: [...queryKeys.userInfo(), "me"] as const,
+    queryFn: async () => {
+      return meServer();
+    },
+    staleTime: CACHE.auth,
+  });
 }
 
 export function accountInfoQueryOptions() {
-	return queryOptions({
-		queryKey: [...queryKeys.userInfo(), "accountInfo"] as const,
-		queryFn: async () => {
-			return getAccountInfoServer();
-		},
-		staleTime: CACHE.auth,
-	});
+  return queryOptions({
+    queryKey: [...queryKeys.userInfo(), "accountInfo"] as const,
+    queryFn: async () => {
+      return getAccountInfoServer();
+    },
+    staleTime: CACHE.auth,
+  });
 }
 
 // =============================================================================
@@ -55,13 +55,13 @@ export function accountInfoQueryOptions() {
 // =============================================================================
 
 export function passkeyListQueryOptions() {
-	return queryOptions({
-		queryKey: queryKeys.passkeys(),
-		queryFn: async () => {
-			return passkeyListServer();
-		},
-		staleTime: CACHE.auth,
-	});
+  return queryOptions({
+    queryKey: queryKeys.passkeys(),
+    queryFn: async () => {
+      return passkeyListServer();
+    },
+    staleTime: CACHE.auth,
+  });
 }
 
 // =============================================================================
@@ -69,23 +69,23 @@ export function passkeyListQueryOptions() {
 // =============================================================================
 
 export function deviceSessionsQueryOptions() {
-	return queryOptions({
-		queryKey: queryKeys.deviceSessions(),
-		queryFn: async () => {
-			return listSessionsServer();
-		},
-		staleTime: CACHE.auth,
-	});
+  return queryOptions({
+    queryKey: queryKeys.deviceSessions(),
+    queryFn: async () => {
+      return listSessionsServer();
+    },
+    staleTime: CACHE.auth,
+  });
 }
 
 export function deviceSessionsListQueryOptions() {
-	return queryOptions({
-		queryKey: [...queryKeys.deviceSessions(), "device"] as const,
-		queryFn: async () => {
-			return listDeviceSessionsServer();
-		},
-		staleTime: CACHE.auth,
-	});
+  return queryOptions({
+    queryKey: [...queryKeys.deviceSessions(), "device"] as const,
+    queryFn: async () => {
+      return listDeviceSessionsServer();
+    },
+    staleTime: CACHE.auth,
+  });
 }
 
 // =============================================================================
@@ -93,13 +93,13 @@ export function deviceSessionsListQueryOptions() {
 // =============================================================================
 
 export function linkedAccountsQueryOptions() {
-	return queryOptions({
-		queryKey: queryKeys.linkedAccounts(),
-		queryFn: async () => {
-			return listAccountsServer();
-		},
-		staleTime: CACHE.auth,
-	});
+  return queryOptions({
+    queryKey: queryKeys.linkedAccounts(),
+    queryFn: async () => {
+      return listAccountsServer();
+    },
+    staleTime: CACHE.auth,
+  });
 }
 
 // =============================================================================
@@ -107,11 +107,11 @@ export function linkedAccountsQueryOptions() {
 // =============================================================================
 
 export function userInvitationsQueryOptions() {
-	return queryOptions({
-		queryKey: queryKeys.userInvitations(),
-		queryFn: async () => {
-			return listUserInvitationsServer();
-		},
-		staleTime: CACHE.invitations,
-	});
+  return queryOptions({
+    queryKey: queryKeys.userInvitations(),
+    queryFn: async () => {
+      return listUserInvitationsServer();
+    },
+    staleTime: CACHE.invitations,
+  });
 }
