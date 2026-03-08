@@ -20,7 +20,9 @@ import { Link } from "@/components/link";
 import { AlertBanner, ContentCard, PageHeader } from "@/components/page-header";
 import { ErrorBoundary } from "@/components/shared/error-boundary";
 import { ErrorState } from "@/components/shared/error-state";
+import { FadeImage } from "@/components/shared/fade-image";
 import { IconButton } from "@/components/shared/icon-button";
+import { RelativeTime } from "@/components/shared/relative-time";
 import { Skeleton } from "@/components/skeleton";
 import {
 	useDashboard,
@@ -30,7 +32,7 @@ import {
 } from "@/features/organization/hooks";
 import { getAssetUrl } from "@/hooks/api-client";
 import { useOrgContext } from "@/hooks/use-org-context";
-import { formatCurrency, formatRelativeTime } from "@/lib/design-tokens";
+import { formatCurrency } from "@/lib/design-tokens";
 
 // =============================================================================
 // GREETING
@@ -74,7 +76,7 @@ function SectionHeader({
 	return (
 		<div className="flex items-center gap-2.5">
 			{img ? (
-				<img src={img} alt="" className="size-6 object-contain drop-shadow-sm" />
+				<FadeImage src={img} alt="" className="size-6 object-contain drop-shadow-sm" />
 			) : Icon ? (
 				<Icon className={`size-4 ${sectionIconColors[iconColor]}`} />
 			) : null}
@@ -264,7 +266,9 @@ function CampaignPulse({
 				{stats.endingSoon > 0 && (
 					<div className="mt-3 flex items-center gap-2 rounded-lg bg-amber-50/60 px-3 py-2 shadow-sm ring-1 ring-amber-200 dark:bg-amber-950/10 dark:ring-amber-800">
 						<ClockIcon className="size-3.5 text-amber-500" />
-						<span className="text-xs font-medium text-amber-700 dark:text-amber-400">{stats.endingSoon} ending soon</span>
+						<span className="text-xs font-medium text-amber-700 dark:text-amber-400">
+							{stats.endingSoon} ending soon
+						</span>
 					</div>
 				)}
 			</div>
@@ -362,7 +366,9 @@ function EnrollmentStats({
 						{stats.approvalRateTrend !== 0 && (
 							<span
 								className={`text-[10px] font-medium ${
-									stats.approvalRateTrend > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-500 dark:text-red-400"
+									stats.approvalRateTrend > 0
+										? "text-emerald-600 dark:text-emerald-400"
+										: "text-red-500 dark:text-red-400"
 								}`}
 							>
 								{stats.approvalRateTrend > 0 ? "+" : ""}
@@ -472,62 +478,64 @@ function TopCampaignsSection({
 			</div>
 			<div className="px-3.5 py-3 sm:px-4">
 				<div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
-				{campaigns.slice(0, 4).map((campaign) => {
-					const sc = statusConfig[campaign.status] || statusConfig.active;
-					return (
-						<Link
-							key={campaign.id}
-							href={`/${orgSlug}/campaigns/${campaign.id}`}
-							className="group relative flex flex-col overflow-hidden rounded-xl bg-white shadow-xs ring-1 ring-zinc-200 transition-all hover:ring-zinc-300 hover:shadow-md dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:ring-zinc-700"
-						>
-							{/* Top section: image + info */}
-							<div className="flex items-start gap-3 p-3">
-								{campaign.listingImage ? (
-									<div className="size-10 shrink-0 overflow-hidden rounded-lg bg-zinc-100 ring-1 ring-zinc-200/80 p-1 dark:bg-zinc-800 dark:ring-zinc-700">
-										<img src={getAssetUrl(campaign.listingImage)} alt="" className="size-full object-contain" />
+					{campaigns.slice(0, 4).map((campaign) => {
+						const sc = statusConfig[campaign.status] || statusConfig.active;
+						return (
+							<Link
+								key={campaign.id}
+								href={`/${orgSlug}/campaigns/${campaign.id}`}
+								className="group relative flex flex-col overflow-hidden rounded-xl bg-white shadow-xs ring-1 ring-zinc-200 transition-all hover:ring-zinc-300 hover:shadow-md dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:ring-zinc-700"
+							>
+								{/* Top section: image + info */}
+								<div className="flex items-start gap-3 p-3">
+									{campaign.listingImage ? (
+										<div className="size-10 shrink-0 overflow-hidden rounded-lg bg-zinc-100 ring-1 ring-zinc-200/80 p-1 dark:bg-zinc-800 dark:ring-zinc-700">
+											<FadeImage src={getAssetUrl(campaign.listingImage)} alt="" className="size-full object-contain" />
+										</div>
+									) : (
+										<div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-zinc-100 ring-1 ring-zinc-200/80 dark:bg-zinc-800 dark:ring-zinc-700">
+											<MegaphoneIcon className="size-4 text-zinc-500 dark:text-zinc-400" />
+										</div>
+									)}
+									<div className="min-w-0 flex-1">
+										<div className="flex items-center justify-between gap-2">
+											<h3 className="truncate text-sm font-semibold text-zinc-900 dark:text-white">{campaign.name}</h3>
+											<Badge color={sc.color} className="inline-flex shrink-0 items-center gap-0.5 text-[10px]!">
+												{sc.label}
+											</Badge>
+										</div>
+										<p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+											{campaign.enrollments} enrolled · {campaign.approvalRate}% approved
+										</p>
 									</div>
-								) : (
-									<div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-zinc-100 ring-1 ring-zinc-200/80 dark:bg-zinc-800 dark:ring-zinc-700">
-										<MegaphoneIcon className="size-4 text-zinc-500 dark:text-zinc-400" />
-									</div>
-								)}
-								<div className="min-w-0 flex-1">
-									<div className="flex items-center justify-between gap-2">
-										<h3 className="truncate text-sm font-semibold text-zinc-900 dark:text-white">{campaign.name}</h3>
-										<Badge color={sc.color} className="inline-flex shrink-0 items-center gap-0.5 text-[10px]!">
-											{sc.label}
-										</Badge>
-									</div>
-									<p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
-										{campaign.enrollments} enrolled · {campaign.approvalRate}% approved
-									</p>
 								</div>
-							</div>
 
-							{/* Footer stats */}
-							<div className="mt-auto grid grid-cols-3 divide-x divide-zinc-200 border-t border-zinc-200 bg-zinc-50/50 dark:divide-zinc-700 dark:border-zinc-800 dark:bg-zinc-800/30">
-								<div className="flex flex-col items-center justify-center py-2">
-									<span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">Enrolled</span>
-									<span className="mt-0.5 text-xs font-semibold tabular-nums text-zinc-900 dark:text-white">
-										{campaign.enrollments}
-									</span>
+								{/* Footer stats */}
+								<div className="mt-auto grid grid-cols-3 divide-x divide-zinc-200 border-t border-zinc-200 bg-zinc-50/50 dark:divide-zinc-700 dark:border-zinc-800 dark:bg-zinc-800/30">
+									<div className="flex flex-col items-center justify-center py-2">
+										<span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">Enrolled</span>
+										<span className="mt-0.5 text-xs font-semibold tabular-nums text-zinc-900 dark:text-white">
+											{campaign.enrollments}
+										</span>
+									</div>
+									<div className="flex flex-col items-center justify-center py-2">
+										<span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">Approval</span>
+										<span className="mt-0.5 text-xs font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">
+											{campaign.approvalRate}%
+										</span>
+									</div>
+									<div className="flex flex-col items-center justify-center py-2">
+										<span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">Days Left</span>
+										<span
+											className={`mt-0.5 text-xs font-semibold tabular-nums ${campaign.daysLeft <= 3 ? "text-red-600 dark:text-red-400" : campaign.daysLeft <= 7 ? "text-amber-600 dark:text-amber-400" : "text-zinc-700 dark:text-zinc-300"}`}
+										>
+											{campaign.daysLeft > 0 ? campaign.daysLeft : "—"}
+										</span>
+									</div>
 								</div>
-								<div className="flex flex-col items-center justify-center py-2">
-									<span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">Approval</span>
-									<span className="mt-0.5 text-xs font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">
-										{campaign.approvalRate}%
-									</span>
-								</div>
-								<div className="flex flex-col items-center justify-center py-2">
-									<span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">Days Left</span>
-									<span className={`mt-0.5 text-xs font-semibold tabular-nums ${campaign.daysLeft <= 3 ? "text-red-600 dark:text-red-400" : campaign.daysLeft <= 7 ? "text-amber-600 dark:text-amber-400" : "text-zinc-700 dark:text-zinc-300"}`}>
-										{campaign.daysLeft > 0 ? campaign.daysLeft : "—"}
-									</span>
-								</div>
-							</div>
-						</Link>
-					);
-				})}
+							</Link>
+						);
+					})}
 				</div>
 			</div>
 		</ContentCard>
@@ -579,12 +587,7 @@ function PendingReviewsSection({
 					<div className="space-y-3">
 						<div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
 							{items.slice(0, 4).map((item) => (
-								<EnrollmentCardInline
-									key={item.id}
-									enrollment={item}
-									orgSlug={orgSlug}
-									formatRelativeTime={formatRelativeTime}
-								/>
+								<EnrollmentCardInline key={item.id} enrollment={item} orgSlug={orgSlug} />
 							))}
 						</div>
 
@@ -653,7 +656,7 @@ function QuickActions({ orgSlug }: { orgSlug: string }) {
 						href={link.href}
 						className="group flex flex-col items-center gap-2 rounded-xl px-1 py-3 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
 					>
-						<img src={link.img} alt="" className="size-11 object-contain sm:size-12" />
+						<FadeImage src={link.img} alt="" className="size-11 object-contain sm:size-12" />
 						<div className="text-center">
 							<p className="text-label-sm font-semibold text-zinc-900 dark:text-white">{link.label}</p>
 							<p className="text-[11px] text-zinc-500 dark:text-zinc-400">{link.desc}</p>
@@ -670,12 +673,36 @@ function QuickActions({ orgSlug }: { orgSlug: string }) {
 // =============================================================================
 
 const activityIcons: Record<string, { icon: React.ElementType; iconColor: string; bgColor: string }> = {
-	campaign: { icon: MegaphoneIcon, iconColor: "text-violet-600 dark:text-violet-400", bgColor: "bg-violet-100 dark:bg-violet-900/30" },
-	enrollment: { icon: UserGroupIcon, iconColor: "text-sky-600 dark:text-sky-400", bgColor: "bg-sky-100 dark:bg-sky-900/30" },
-	invoice: { icon: BanknotesIcon, iconColor: "text-amber-600 dark:text-amber-400", bgColor: "bg-amber-100 dark:bg-amber-900/30" },
-	listing: { icon: ShoppingBagIcon, iconColor: "text-pink-600 dark:text-pink-400", bgColor: "bg-pink-100 dark:bg-pink-900/30" },
-	withdrawal: { icon: WalletIcon, iconColor: "text-emerald-600 dark:text-emerald-400", bgColor: "bg-emerald-100 dark:bg-emerald-900/30" },
-	organization: { icon: SparklesIcon, iconColor: "text-zinc-600 dark:text-zinc-400", bgColor: "bg-zinc-100 dark:bg-zinc-800" },
+	campaign: {
+		icon: MegaphoneIcon,
+		iconColor: "text-violet-600 dark:text-violet-400",
+		bgColor: "bg-violet-100 dark:bg-violet-900/30",
+	},
+	enrollment: {
+		icon: UserGroupIcon,
+		iconColor: "text-sky-600 dark:text-sky-400",
+		bgColor: "bg-sky-100 dark:bg-sky-900/30",
+	},
+	invoice: {
+		icon: BanknotesIcon,
+		iconColor: "text-amber-600 dark:text-amber-400",
+		bgColor: "bg-amber-100 dark:bg-amber-900/30",
+	},
+	listing: {
+		icon: ShoppingBagIcon,
+		iconColor: "text-pink-600 dark:text-pink-400",
+		bgColor: "bg-pink-100 dark:bg-pink-900/30",
+	},
+	withdrawal: {
+		icon: WalletIcon,
+		iconColor: "text-emerald-600 dark:text-emerald-400",
+		bgColor: "bg-emerald-100 dark:bg-emerald-900/30",
+	},
+	organization: {
+		icon: SparklesIcon,
+		iconColor: "text-zinc-600 dark:text-zinc-400",
+		bgColor: "bg-zinc-100 dark:bg-zinc-800",
+	},
 };
 
 const ACTION_LABELS: Record<string, string> = {
@@ -706,7 +733,7 @@ function formatAction(action: string): string {
 	return ACTION_LABELS[action] ?? action.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-function getActivityLink(orgSlug: string, entityType: string, entityId: string, action: string): string | null {
+function getActivityLink(orgSlug: string, entityType: string, entityId: string, _action: string): string | null {
 	switch (entityType) {
 		case "campaign":
 			return `/${orgSlug}/campaigns/${entityId}`;
@@ -732,11 +759,15 @@ function ActivityFeed({ organizationId, orgSlug }: { organizationId: string; org
 		return (
 			<div className="space-y-1">
 				{[1, 2, 3, 4].map((i) => (
-					<div key={i} className="flex items-center gap-3 rounded-lg px-2 py-2.5">
-						<div className="size-7 shrink-0 animate-pulse rounded-lg bg-zinc-100 dark:bg-zinc-800" />
+					<div
+						key={i}
+						className="flex items-center gap-3 rounded-lg px-2 py-2.5 animate-fade-in"
+						style={{ animationDelay: `${i * 50}ms` }}
+					>
+						<div className="size-7 shrink-0 skeleton-shimmer rounded-lg bg-zinc-100 dark:bg-zinc-800" />
 						<div className="flex-1 space-y-1.5">
-							<div className="h-3.5 w-3/5 animate-pulse rounded bg-zinc-100 dark:bg-zinc-800" />
-							<div className="h-3 w-2/5 animate-pulse rounded bg-zinc-100 dark:bg-zinc-800" />
+							<div className="h-3.5 w-3/5 skeleton-shimmer rounded bg-zinc-100 dark:bg-zinc-800" />
+							<div className="h-3 w-2/5 skeleton-shimmer rounded bg-zinc-100 dark:bg-zinc-800" />
 						</div>
 					</div>
 				))}
@@ -766,7 +797,9 @@ function ActivityFeed({ organizationId, orgSlug }: { organizationId: string; org
 				const href = getActivityLink(orgSlug, entry.entityType, entry.entityId, entry.action);
 				const inner = (
 					<>
-						<div className={`relative z-10 mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg ring-2 ring-white dark:ring-zinc-900 ${meta.bgColor}`}>
+						<div
+							className={`relative z-10 mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg ring-2 ring-white dark:ring-zinc-900 ${meta.bgColor}`}
+						>
 							<meta.icon className={`size-3.5 ${meta.iconColor}`} />
 						</div>
 						<div className="min-w-0 flex-1">
@@ -777,7 +810,7 @@ function ActivityFeed({ organizationId, orgSlug }: { organizationId: string; org
 								)}
 							</p>
 							<p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
-								{formatRelativeTime(entry.createdAt)}
+								<RelativeTime date={entry.createdAt} />
 								{entry.adminName && (
 									<>
 										{" "}
@@ -877,7 +910,7 @@ function NewUserWelcome({ brandName, orgSlug }: { brandName: string; orgSlug: st
 				<div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
 					{STEPS.map((step) => (
 						<div key={step.n} className="flex items-start gap-3">
-							<img src={step.img} alt="" className="mt-0.5 size-10 shrink-0 object-contain drop-shadow-sm" />
+							<FadeImage src={step.img} alt="" className="mt-0.5 size-10 shrink-0 object-contain drop-shadow-sm" />
 							<div className="min-w-0">
 								<div className="flex items-center gap-2">
 									<span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-zinc-900 text-[10px] font-bold tabular-nums text-white dark:bg-zinc-700">
@@ -1093,7 +1126,7 @@ export function Dashboard() {
 		);
 
 	return (
-		<div className="min-w-0 space-y-4 sm:space-y-5">
+		<div className="animate-page-enter min-w-0 space-y-4 sm:space-y-5">
 			{/* Header */}
 			<PageHeader
 				title={`${getGreeting()}, ${brandName}`}

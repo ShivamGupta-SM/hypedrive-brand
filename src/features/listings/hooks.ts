@@ -49,7 +49,7 @@ export function useInfiniteListings(
 	});
 
 	const data = query.data?.pages.flatMap((page) => page.data ?? []) ?? [];
-	const total = query.data?.pages[0]?.total ?? data.length;
+	const total = query.data?.pages[0]?.total ?? 0;
 
 	return {
 		data,

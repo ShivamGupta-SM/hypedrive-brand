@@ -69,13 +69,7 @@ export function AlertDescription({
 	className,
 	...props
 }: { className?: string } & Omit<Headless.DescriptionProps<typeof Text>, "as" | "className">) {
-	return (
-		<Headless.Description
-			as={Text}
-			{...props}
-			className={clsx(className, "mt-2 text-pretty")}
-		/>
-	);
+	return <Headless.Description as={Text} {...props} className={clsx(className, "mt-2 text-pretty")} />;
 }
 
 export function AlertBody({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {

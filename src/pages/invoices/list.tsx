@@ -1,20 +1,18 @@
 import {
-	ArrowPathIcon,
 	CalendarDaysIcon,
 	CalendarIcon,
 	CheckCircleIcon,
 	ClockIcon,
 	CurrencyRupeeIcon,
-	DocumentArrowDownIcon,
 	DocumentTextIcon,
 	ExclamationTriangleIcon,
 	MagnifyingGlassIcon,
-	TableCellsIcon,
 	XMarkIcon,
 } from "@heroicons/react/16/solid";
 import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import clsx from "clsx";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { BsFileEarmarkPdfFill as PdfIcon, BsTable as TableIcon } from "react-icons/bs";
 import { Badge } from "@/components/badge";
 import { Button } from "@/components/button";
 import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/dialog";
@@ -32,12 +30,10 @@ import { Skeleton } from "@/components/skeleton";
 import { useInfiniteInvoices, useInvoice } from "@/features/invoices/hooks";
 import { useBatchInvoices, useExportInvoiceEnrollments, useGenerateInvoicePDF } from "@/features/invoices/mutations";
 import { useOrgContext } from "@/hooks/use-org-context";
-import type { brand, db } from "@/lib/brand-client";
-import { downloadExcel } from "@/lib/download";
+import type { db } from "@/lib/brand-client";
 import { formatCurrency, formatDate, formatDateCompact } from "@/lib/design-tokens";
+import { downloadBase64, downloadExcel } from "@/lib/download";
 import { showToast } from "@/lib/toast";
-
-type Invoice = brand.Invoice;
 
 const invoicesRouteApi = getRouteApi("/_app/$orgSlug/invoices");
 
@@ -49,7 +45,7 @@ const statusConfig: Record<
 	string,
 	{
 		label: string;
-		color: "emerald" | "amber" | "red" | "sky" | "zinc";
+		color: "emerald" | "amber" | "red" | "sky" | "zinc" | "violet";
 		dotClass: string;
 		bgClass: string;
 		iconText: string;
@@ -215,13 +211,12 @@ function InvoicesSkeleton() {
 // INVOICE DETAIL DIALOG
 // =============================================================================
 
-function InvoiceDetailDialog({ invoice, onClose }: { invoice: Invoice | null; onClose: () => void }) {
+function InvoiceDetailDialog({ invoiceId, onClose }: { invoiceId: string | null; onClose: () => void }) {
 	const { organization } = useOrgContext();
 	const canDownload = useCan("invoice", "download");
 	const generatePDF = useGenerateInvoicePDF(organization?.id);
 	const exportEnrollments = useExportInvoiceEnrollments(organization?.id);
-	const { data: freshInvoice } = useInvoice(organization?.id, invoice?.id);
-	const inv = freshInvoice ?? invoice;
+	const { data: inv, loading } = useInvoice(organization?.id, invoiceId ?? undefined);
 
 	const handleExportEnrollments = async () => {
 		if (!inv) return;
@@ -237,311 +232,332 @@ function InvoiceDetailDialog({ invoice, onClose }: { invoice: Invoice | null; on
 	const handleDownloadPDF = async () => {
 		if (!inv) return;
 		try {
-			if (inv.pdfUrl) {
-				window.open(inv.pdfUrl, "_blank");
-			} else {
-				const result = await generatePDF.mutateAsync(inv.id);
-				if (result.pdfUrl) {
-					window.open(result.pdfUrl, "_blank");
-					showToast.fileGenerated("Invoice PDF");
-				}
-			}
+			const result = await generatePDF.mutateAsync(inv.id);
+			downloadBase64(result.data, result.filename, result.contentType);
+			showToast.fileGenerated("Invoice PDF");
 		} catch (err) {
 			showToast.error(err, "Failed to download PDF");
 		}
 	};
 
-	if (!inv) return null;
-
 	const orgName = organization?.name || "Organization";
-	const subtotal = parseFloat(inv.subtotalDecimal || "0");
-	const gst = parseFloat(inv.gstAmountDecimal || "0");
-	const tds = parseFloat(inv.tdsAmountDecimal || "0");
-	const halfGst = gst / 2;
-	const isPaid = inv.status === "paid";
-	const isOverdue = inv.status === "overdue";
+	const subtotal = inv ? parseFloat(inv.subtotalDecimal || "0") : 0;
+	const tds = inv ? parseFloat(inv.tdsAmountDecimal || "0") : 0;
+	const isPaid = inv?.status === "paid";
+	const isOverdue = inv?.status === "overdue";
 
 	return (
-		<Dialog open={!!inv} onClose={onClose} size="2xl">
-			<DialogHeader
-				icon={DocumentTextIcon}
-				iconColor={isPaid ? "emerald" : isOverdue ? "red" : "zinc"}
-				title={`Invoice ${inv.invoiceNumber}`}
-				description={`Issued ${formatDate(inv.issuedAt || inv.createdAt)}${inv.dueDate ? ` · Due ${formatDate(inv.dueDate)}` : ""}`}
-				onClose={onClose}
-			/>
-
-			<div className="mt-3 flex items-center gap-2">
-				<InvoiceStatusBadge status={inv.status} />
-				{inv.enrollmentCount > 0 && (
-					<span className="text-xs text-zinc-500 dark:text-zinc-400">
-						{inv.enrollmentCount} enrollment{inv.enrollmentCount !== 1 ? "s" : ""}
-					</span>
-				)}
-			</div>
-
-			<DialogBody className="space-y-5 sm:space-y-6">
-				{/* FROM / TO */}
-				<div className="grid grid-cols-2 gap-4 sm:gap-6">
-					<div>
-						<p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">From</p>
-						<Logo className="mt-1.5 h-5 w-auto text-zinc-900 dark:text-white" />
-						<p className="mt-1 text-[11px] leading-relaxed text-zinc-500 sm:text-xs dark:text-zinc-400">
-							Hypedrive Technologies Pvt. Ltd.
-							<br />
-							support@hypedrive.in
-						</p>
-					</div>
-					<div>
-						<p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
-							Bill To
-						</p>
-						<p className="mt-1.5 text-sm font-semibold text-zinc-900 dark:text-white">{orgName}</p>
-						<p className="mt-0.5 text-[11px] text-zinc-500 sm:text-xs dark:text-zinc-400">Organization</p>
-					</div>
-				</div>
-
-				{/* METADATA GRID */}
-				<div className="grid grid-cols-2 gap-px overflow-hidden rounded-lg bg-zinc-200 ring-1 ring-zinc-200 sm:grid-cols-4 dark:bg-zinc-700 dark:ring-zinc-700">
-					{[
-						{ label: "Issue Date", value: formatDate(inv.issuedAt || inv.createdAt) },
-						{ label: "Due Date", value: formatDate(inv.dueDate), danger: isOverdue },
-						{
-							label: "Period",
-							value: `${formatDateCompact(inv.periodStart ?? "")} – ${formatDateCompact(inv.periodEnd ?? "")}`,
-							nowrap: true,
-						},
-						{ label: "Enrollments", value: String(inv.enrollmentCount) },
-					].map((item) => (
-						<div key={item.label} className="bg-white px-3 py-2.5 sm:px-4 sm:py-3 dark:bg-zinc-900">
-							<p className="text-[9px] font-medium uppercase tracking-wider text-zinc-500 sm:text-[10px] dark:text-zinc-400">
-								{item.label}
-							</p>
-							<p
-								className={clsx(
-									"mt-0.5 text-xs font-medium sm:text-sm",
-									item.nowrap && "whitespace-nowrap",
-									item.danger ? "text-red-600 dark:text-red-400" : "text-zinc-900 dark:text-white"
-								)}
-							>
-								{item.value}
-							</p>
+		<Dialog open={!!invoiceId} onClose={onClose} size="2xl">
+			{loading || !inv ? (
+				<>
+					<DialogHeader icon={DocumentTextIcon} iconColor="zinc" title="Loading..." onClose={onClose} />
+					<DialogBody className="space-y-5 sm:space-y-6">
+						<div className="grid grid-cols-2 gap-4 sm:gap-6">
+							<div className="space-y-2">
+								<Skeleton width={40} height={10} borderRadius={4} />
+								<Skeleton width={120} height={16} borderRadius={4} />
+								<Skeleton width={180} height={12} borderRadius={4} />
+							</div>
+							<div className="space-y-2">
+								<Skeleton width={40} height={10} borderRadius={4} />
+								<Skeleton width={140} height={16} borderRadius={4} />
+								<Skeleton width={80} height={12} borderRadius={4} />
+							</div>
 						</div>
-					))}
-				</div>
+						<div className="grid grid-cols-2 gap-px overflow-hidden rounded-lg bg-zinc-200 ring-1 ring-zinc-200 sm:grid-cols-4 dark:bg-zinc-700 dark:ring-zinc-700">
+							{[1, 2, 3, 4].map((i) => (
+								<div key={i} className="space-y-1.5 bg-white px-3 py-2.5 sm:px-4 sm:py-3 dark:bg-zinc-900">
+									<Skeleton width={60} height={10} borderRadius={4} />
+									<Skeleton width={80} height={16} borderRadius={4} />
+								</div>
+							))}
+						</div>
+						<div className="space-y-2">
+							{[1, 2, 3].map((i) => (
+								<Skeleton key={i} height={44} borderRadius={8} />
+							))}
+						</div>
+						<div className="flex justify-end">
+							<div className="w-full space-y-2 sm:max-w-xs">
+								<Skeleton height={16} borderRadius={4} />
+								<Skeleton height={16} borderRadius={4} />
+								<Skeleton height={20} borderRadius={4} />
+							</div>
+						</div>
+					</DialogBody>
+					<DialogActions>
+						<Button plain onClick={onClose}>
+							Close
+						</Button>
+					</DialogActions>
+				</>
+			) : (
+				<>
+					<DialogHeader
+						icon={DocumentTextIcon}
+						iconColor={isPaid ? "emerald" : isOverdue ? "red" : "zinc"}
+						title={`Invoice ${inv.invoiceNumber}`}
+						description={`Issued ${formatDate(inv.issuedAt || inv.createdAt)}${inv.dueDate ? ` · Due ${formatDate(inv.dueDate)}` : ""}`}
+						onClose={onClose}
+					/>
 
-				{/* LINE ITEMS — mobile stacked */}
-				<div className="space-y-2 sm:hidden">
-					<p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
-						Line Items
-					</p>
-					{inv.lineItems && inv.lineItems.length > 0 ? (
-						inv.lineItems.map((item) => (
-							<div
-								key={item.id}
-								className="flex items-center justify-between gap-3 rounded-lg border border-zinc-200 px-3 py-2.5 dark:border-zinc-800"
-							>
-								<div className="min-w-0 flex-1">
-									<p className="truncate text-sm text-zinc-900 dark:text-white">{item.description}</p>
-									<p className="text-[11px] tabular-nums text-zinc-500 dark:text-zinc-400">
-										{item.quantity} &times; {formatCurrency(item.rateDecimal)}
+					<div className="mt-3 flex items-center gap-2">
+						<InvoiceStatusBadge status={inv.status} />
+						{inv.enrollmentCount > 0 && (
+							<span className="text-xs text-zinc-500 dark:text-zinc-400">
+								{inv.enrollmentCount} enrollment{inv.enrollmentCount !== 1 ? "s" : ""}
+							</span>
+						)}
+					</div>
+
+					<DialogBody className="space-y-5 sm:space-y-6">
+						{/* FROM / TO */}
+						<div className="grid grid-cols-2 gap-4 sm:gap-6">
+							<div>
+								<p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
+									From
+								</p>
+								<Logo className="mt-1.5 h-5 w-auto text-zinc-900 dark:text-white" />
+								<p className="mt-1 text-[11px] leading-relaxed text-zinc-500 sm:text-xs dark:text-zinc-400">
+									Hypedrive Technologies Pvt. Ltd.
+									<br />
+									support@hypedrive.in
+								</p>
+							</div>
+							<div>
+								<p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
+									Bill To
+								</p>
+								<p className="mt-1.5 text-sm font-semibold text-zinc-900 dark:text-white">{orgName}</p>
+								<p className="mt-0.5 text-[11px] text-zinc-500 sm:text-xs dark:text-zinc-400">Organization</p>
+							</div>
+						</div>
+
+						{/* METADATA GRID */}
+						<div className="grid grid-cols-2 gap-px overflow-hidden rounded-lg bg-zinc-200 ring-1 ring-zinc-200 sm:grid-cols-4 dark:bg-zinc-700 dark:ring-zinc-700">
+							{[
+								{ label: "Issue Date", value: formatDate(inv.issuedAt || inv.createdAt) },
+								{ label: "Due Date", value: formatDate(inv.dueDate), danger: isOverdue },
+								{
+									label: "Period",
+									value: `${formatDateCompact(inv.periodStart ?? "")} – ${formatDateCompact(inv.periodEnd ?? "")}`,
+									nowrap: true,
+								},
+								{ label: "Enrollments", value: String(inv.enrollmentCount) },
+							].map((item) => (
+								<div key={item.label} className="bg-white px-3 py-2.5 sm:px-4 sm:py-3 dark:bg-zinc-900">
+									<p className="text-[9px] font-medium uppercase tracking-wider text-zinc-500 sm:text-[10px] dark:text-zinc-400">
+										{item.label}
+									</p>
+									<p
+										className={clsx(
+											"mt-0.5 text-xs font-medium sm:text-sm",
+											item.nowrap && "whitespace-nowrap",
+											item.danger ? "text-red-600 dark:text-red-400" : "text-zinc-900 dark:text-white"
+										)}
+									>
+										{item.value}
 									</p>
 								</div>
-								<p className="shrink-0 text-sm font-semibold tabular-nums text-zinc-900 dark:text-white">
-									{formatCurrency(item.amountDecimal)}
-								</p>
-							</div>
-						))
-					) : (
-						<div className="flex items-center justify-between gap-3 rounded-lg border border-zinc-200 px-3 py-2.5 dark:border-zinc-800">
-							<div>
-								<p className="text-sm text-zinc-900 dark:text-white">Campaign Enrollments</p>
-								<p className="text-[11px] text-zinc-500 dark:text-zinc-400">
-									{inv.enrollmentCount} enrollment{inv.enrollmentCount !== 1 ? "s" : ""}
-								</p>
-							</div>
-							<p className="shrink-0 text-sm font-semibold tabular-nums text-zinc-900 dark:text-white">
-								{formatCurrency(inv.subtotalDecimal)}
-							</p>
+							))}
 						</div>
-					)}
-				</div>
 
-				{/* LINE ITEMS — desktop table */}
-				<div className="hidden sm:block">
-					<table className="w-full">
-						<thead>
-							<tr className="border-b-2 border-zinc-200 dark:border-zinc-700">
-								<th className="pb-2 text-left text-[10px] font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
-									Description
-								</th>
-								<th className="whitespace-nowrap pb-2 text-center text-[10px] font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
-									Qty
-								</th>
-								<th className="whitespace-nowrap pb-2 pl-4 text-right text-[10px] font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
-									Rate
-								</th>
-								<th className="whitespace-nowrap pb-2 pl-4 text-right text-[10px] font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
-									Amount
-								</th>
-							</tr>
-						</thead>
-						<tbody>
+						{/* LINE ITEMS — mobile stacked */}
+						<div className="space-y-2 sm:hidden">
+							<p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
+								Line Items
+							</p>
 							{inv.lineItems && inv.lineItems.length > 0 ? (
-								inv.lineItems.map((item, idx) => (
-									<tr key={item.id} className={clsx(idx > 0 && "border-t border-zinc-200 dark:border-zinc-800")}>
-										<td className="py-2.5 pr-4 text-sm text-zinc-900 dark:text-white">{item.description}</td>
-										<td className="whitespace-nowrap py-2.5 text-center text-sm tabular-nums text-zinc-600 dark:text-zinc-400">
-											{item.quantity}
-										</td>
-										<td className="whitespace-nowrap py-2.5 pl-4 text-right text-sm tabular-nums text-zinc-600 dark:text-zinc-400">
-											{formatCurrency(item.rateDecimal)}
-										</td>
-										<td className="whitespace-nowrap py-2.5 pl-4 text-right text-sm font-medium tabular-nums text-zinc-900 dark:text-white">
+								inv.lineItems.map((item) => (
+									<div
+										key={item.id}
+										className="flex items-center justify-between gap-3 rounded-lg border border-zinc-200 px-3 py-2.5 dark:border-zinc-800"
+									>
+										<div className="min-w-0 flex-1">
+											<p className="truncate text-sm text-zinc-900 dark:text-white">{item.description}</p>
+											<p className="text-[11px] tabular-nums text-zinc-500 dark:text-zinc-400">
+												{item.quantity} &times; {formatCurrency(item.rateDecimal)}
+											</p>
+										</div>
+										<p className="shrink-0 text-sm font-semibold tabular-nums text-zinc-900 dark:text-white">
 											{formatCurrency(item.amountDecimal)}
-										</td>
-									</tr>
+										</p>
+									</div>
 								))
 							) : (
-								<tr>
-									<td className="py-2.5 pr-4">
+								<div className="flex items-center justify-between gap-3 rounded-lg border border-zinc-200 px-3 py-2.5 dark:border-zinc-800">
+									<div>
 										<p className="text-sm text-zinc-900 dark:text-white">Campaign Enrollments</p>
-										<p className="text-xs text-zinc-500 dark:text-zinc-400">
+										<p className="text-[11px] text-zinc-500 dark:text-zinc-400">
 											{inv.enrollmentCount} enrollment{inv.enrollmentCount !== 1 ? "s" : ""}
 										</p>
-									</td>
-									<td className="whitespace-nowrap py-2.5 text-center text-sm tabular-nums text-zinc-600 dark:text-zinc-400">
-										{inv.enrollmentCount}
-									</td>
-									<td className="whitespace-nowrap py-2.5 pl-4 text-right text-sm tabular-nums text-zinc-600 dark:text-zinc-400">
-										—
-									</td>
-									<td className="whitespace-nowrap py-2.5 pl-4 text-right text-sm font-medium tabular-nums text-zinc-900 dark:text-white">
+									</div>
+									<p className="shrink-0 text-sm font-semibold tabular-nums text-zinc-900 dark:text-white">
 										{formatCurrency(inv.subtotalDecimal)}
-									</td>
-								</tr>
+									</p>
+								</div>
 							)}
-						</tbody>
-					</table>
-				</div>
+						</div>
 
-				{/* TOTALS */}
-				<div className="flex justify-end">
-					<div className="w-full sm:max-w-xs">
-						<div className="space-y-1.5 border-t border-zinc-200 pt-3 dark:border-zinc-700">
-							<TotalRow label="Subtotal" value={formatCurrency(subtotal)} />
-							{halfGst > 0 && (
-								<>
-									<TotalRow label={`CGST @ ${inv.gstRate / 2}%`} value={formatCurrency(halfGst)} />
-									<TotalRow label={`SGST @ ${inv.gstRate / 2}%`} value={formatCurrency(halfGst)} />
-								</>
-							)}
-							{tds > 0 && (
-								<TotalRow
-									label={`TDS @ ${inv.tdsRate}%`}
-									value={`-${formatCurrency(tds)}`}
-									className="text-red-600 dark:text-red-400"
-								/>
-							)}
+						{/* LINE ITEMS — desktop table */}
+						<div className="hidden sm:block">
+							<table className="w-full">
+								<thead>
+									<tr className="border-b-2 border-zinc-200 dark:border-zinc-700">
+										<th className="pb-2 text-left text-[10px] font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
+											Description
+										</th>
+										<th className="whitespace-nowrap pb-2 text-center text-[10px] font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
+											Qty
+										</th>
+										<th className="whitespace-nowrap pb-2 pl-4 text-right text-[10px] font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
+											Rate
+										</th>
+										<th className="whitespace-nowrap pb-2 pl-4 text-right text-[10px] font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
+											Amount
+										</th>
+									</tr>
+								</thead>
+								<tbody>
+									{inv.lineItems && inv.lineItems.length > 0 ? (
+										inv.lineItems.map((item, idx) => (
+											<tr key={item.id} className={clsx(idx > 0 && "border-t border-zinc-200 dark:border-zinc-800")}>
+												<td className="py-2.5 pr-4 text-sm text-zinc-900 dark:text-white">{item.description}</td>
+												<td className="whitespace-nowrap py-2.5 text-center text-sm tabular-nums text-zinc-600 dark:text-zinc-400">
+													{item.quantity}
+												</td>
+												<td className="whitespace-nowrap py-2.5 pl-4 text-right text-sm tabular-nums text-zinc-600 dark:text-zinc-400">
+													{formatCurrency(item.rateDecimal)}
+												</td>
+												<td className="whitespace-nowrap py-2.5 pl-4 text-right text-sm font-medium tabular-nums text-zinc-900 dark:text-white">
+													{formatCurrency(item.amountDecimal)}
+												</td>
+											</tr>
+										))
+									) : (
+										<tr>
+											<td className="py-2.5 pr-4">
+												<p className="text-sm text-zinc-900 dark:text-white">Campaign Enrollments</p>
+												<p className="text-xs text-zinc-500 dark:text-zinc-400">
+													{inv.enrollmentCount} enrollment{inv.enrollmentCount !== 1 ? "s" : ""}
+												</p>
+											</td>
+											<td className="whitespace-nowrap py-2.5 text-center text-sm tabular-nums text-zinc-600 dark:text-zinc-400">
+												{inv.enrollmentCount}
+											</td>
+											<td className="whitespace-nowrap py-2.5 pl-4 text-right text-sm tabular-nums text-zinc-600 dark:text-zinc-400">
+												—
+											</td>
+											<td className="whitespace-nowrap py-2.5 pl-4 text-right text-sm font-medium tabular-nums text-zinc-900 dark:text-white">
+												{formatCurrency(inv.subtotalDecimal)}
+											</td>
+										</tr>
+									)}
+								</tbody>
+							</table>
 						</div>
-						<div className="mt-2 flex items-baseline justify-between border-t-2 border-zinc-900 pt-2 dark:border-white">
-							<span className="text-sm font-bold text-zinc-900 dark:text-white">Total Due</span>
-							<span className="text-base font-bold tabular-nums text-zinc-900 sm:text-lg dark:text-white">
-								{formatCurrency(inv.totalAmountDecimal)}
-							</span>
-						</div>
-						{inv.amountPaid > 0 && !isPaid && (
-							<div className="mt-2 space-y-1">
-								<TotalRow
-									label="Amount Paid"
-									value={`-${formatCurrency(inv.amountPaidDecimal)}`}
-									className="text-emerald-600 dark:text-emerald-400"
-								/>
-								<div className="flex justify-between rounded-md bg-amber-50 px-2 py-1 dark:bg-amber-950/20">
-									<span className="text-xs font-semibold text-amber-700 dark:text-amber-400">Balance Due</span>
-									<span className="text-sm font-bold tabular-nums text-amber-700 dark:text-amber-400">
-										{formatCurrency(parseFloat(inv.totalAmountDecimal) - parseFloat(inv.amountPaidDecimal))}
+
+						{/* TOTALS */}
+						<div className="flex justify-end">
+							<div className="w-full sm:max-w-xs">
+								<div className="space-y-1.5 border-t border-zinc-200 pt-3 dark:border-zinc-700">
+									<TotalRow label="Subtotal" value={formatCurrency(subtotal)} />
+									{parseFloat(inv.gstAmountDecimal || "0") > 0 && (
+										<TotalRow
+											label={inv.gstRate ? `GST @ ${inv.gstRate}%` : "GST"}
+											value={formatCurrency(inv.gstAmountDecimal)}
+										/>
+									)}
+									{tds > 0 && (
+										<TotalRow
+											label={`TDS @ ${inv.tdsRate}%`}
+											value={`-${formatCurrency(tds)}`}
+											className="text-red-600 dark:text-red-400"
+										/>
+									)}
+								</div>
+								<div className="mt-2 flex items-baseline justify-between border-t-2 border-zinc-900 pt-2 dark:border-white">
+									<span className="text-sm font-bold text-zinc-900 dark:text-white">Total Due</span>
+									<span className="text-base font-bold tabular-nums text-zinc-900 sm:text-lg dark:text-white">
+										{formatCurrency(inv.totalAmountDecimal)}
 									</span>
+								</div>
+								{inv.amountPaid > 0 && !isPaid && (
+									<div className="mt-2 space-y-1">
+										<TotalRow
+											label="Amount Paid"
+											value={`-${formatCurrency(inv.amountPaidDecimal)}`}
+											className="text-emerald-600 dark:text-emerald-400"
+										/>
+										<div className="flex justify-between rounded-md bg-amber-50 px-2 py-1 dark:bg-amber-950/20">
+											<span className="text-xs font-semibold text-amber-700 dark:text-amber-400">Balance Due</span>
+											<span className="text-sm font-bold tabular-nums text-amber-700 dark:text-amber-400">
+												{formatCurrency(parseFloat(inv.totalAmountDecimal) - parseFloat(inv.amountPaidDecimal))}
+											</span>
+										</div>
+									</div>
+								)}
+							</div>
+						</div>
+
+						{/* STATUS BANNERS */}
+						{isPaid && (
+							<div className="flex items-center gap-2.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5 sm:gap-3 sm:px-4 sm:py-3 dark:border-emerald-800/40 dark:bg-emerald-950/20">
+								<CheckCircleIcon className="size-4 text-emerald-600 sm:size-5 dark:text-emerald-400" />
+								<div>
+									<p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">Payment Received</p>
+									{inv.paidAt && (
+										<p className="text-[11px] text-emerald-600/80 sm:text-xs dark:text-emerald-400/70">
+											Paid on {formatDate(inv.paidAt)}
+										</p>
+									)}
 								</div>
 							</div>
 						)}
-					</div>
-				</div>
-
-				{/* STATUS BANNERS */}
-				{isPaid && (
-					<div className="flex items-center gap-2.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5 sm:gap-3 sm:px-4 sm:py-3 dark:border-emerald-800/40 dark:bg-emerald-950/20">
-						<CheckCircleIcon className="size-4 text-emerald-600 sm:size-5 dark:text-emerald-400" />
-						<div>
-							<p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">Payment Received</p>
-							{inv.paidAt && (
-								<p className="text-[11px] text-emerald-600/80 sm:text-xs dark:text-emerald-400/70">
-									Paid on {formatDate(inv.paidAt)}
-								</p>
-							)}
-						</div>
-					</div>
-				)}
-				{isOverdue && (
-					<div className="flex items-center gap-2.5 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 sm:gap-3 sm:px-4 sm:py-3 dark:border-red-800/40 dark:bg-red-950/20">
-						<ExclamationTriangleIcon className="size-4 text-red-500 sm:size-5 dark:text-red-400" />
-						<div>
-							<p className="text-sm font-medium text-red-700 dark:text-red-300">Payment Overdue</p>
-							<p className="text-[11px] text-red-600/80 sm:text-xs dark:text-red-400/70">
-								Was due on {formatDate(inv.dueDate)}
-							</p>
-						</div>
-					</div>
-				)}
-
-				{inv.notes && (
-					<div className="rounded-lg border border-zinc-200 bg-zinc-50/50 p-3 dark:border-zinc-700 dark:bg-zinc-800/30">
-						<p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
-							Notes
-						</p>
-						<p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{inv.notes}</p>
-					</div>
-				)}
-			</DialogBody>
-
-			<DialogActions>
-				<p className="mr-auto hidden text-xs text-zinc-500 sm:block dark:text-zinc-400">support@hypedrive.in</p>
-				<Button plain onClick={onClose}>
-					Close
-				</Button>
-				{canDownload && inv.enrollmentCount > 0 && (
-					<Button outline onClick={handleExportEnrollments} disabled={exportEnrollments.isPending}>
-						{exportEnrollments.isPending ? (
-							<>
-								<ArrowPathIcon className="size-4 animate-spin" />
-								<span className="hidden sm:inline">Exporting...</span>
-							</>
-						) : (
-							<>
-								<TableCellsIcon data-slot="icon" className="size-4" />
-								<span className="hidden sm:inline">Export Enrollments</span>
-								<span className="sm:hidden">CSV</span>
-							</>
+						{isOverdue && (
+							<div className="flex items-center gap-2.5 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 sm:gap-3 sm:px-4 sm:py-3 dark:border-red-800/40 dark:bg-red-950/20">
+								<ExclamationTriangleIcon className="size-4 text-red-500 sm:size-5 dark:text-red-400" />
+								<div>
+									<p className="text-sm font-medium text-red-700 dark:text-red-300">Payment Overdue</p>
+									<p className="text-[11px] text-red-600/80 sm:text-xs dark:text-red-400/70">
+										Was due on {formatDate(inv.dueDate)}
+									</p>
+								</div>
+							</div>
 						)}
-					</Button>
-				)}
-				{canDownload && (
-					<Button color="dark/zinc" onClick={handleDownloadPDF} disabled={generatePDF.isPending}>
-						{generatePDF.isPending ? (
-							<>
-								<ArrowPathIcon className="size-4 animate-spin" />
-								<span className="hidden sm:inline">Generating...</span>
-							</>
-						) : (
-							<>
-								<DocumentArrowDownIcon data-slot="icon" className="size-4" />
+
+						{inv.notes && (
+							<div className="rounded-lg border border-zinc-200 bg-zinc-50/50 p-3 dark:border-zinc-700 dark:bg-zinc-800/30">
+								<p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
+									Notes
+								</p>
+								<p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{inv.notes}</p>
+							</div>
+						)}
+					</DialogBody>
+
+					<DialogActions>
+						<p className="mr-auto hidden text-xs text-zinc-500 sm:block dark:text-zinc-400">support@hypedrive.in</p>
+						<Button plain onClick={onClose}>
+							Close
+						</Button>
+						{canDownload && inv.enrollmentCount > 0 && (
+							<Button color="emerald" onClick={handleExportEnrollments} loading={exportEnrollments.isPending}>
+								<TableIcon data-slot="icon" className="size-4" />
+								<span className="hidden sm:inline">Export Enrollments</span>
+								<span className="sm:hidden">Excel</span>
+							</Button>
+						)}
+						{canDownload && (
+							<Button color="red" onClick={handleDownloadPDF} loading={generatePDF.isPending}>
+								<PdfIcon data-slot="icon" className="size-4" />
 								<span className="hidden sm:inline">Download PDF</span>
 								<span className="sm:hidden">PDF</span>
-							</>
+							</Button>
 						)}
-					</Button>
-				)}
-			</DialogActions>
+					</DialogActions>
+				</>
+			)}
 		</Dialog>
 	);
 }
@@ -583,7 +599,7 @@ export function InvoicesList() {
 		[navigate]
 	);
 
-	const [viewingInvoice, setViewingInvoice] = useState<Invoice | null>(null);
+	const [viewingInvoiceId, setViewingInvoiceId] = useState<string | null>(null);
 
 	// Selection
 	const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -709,6 +725,23 @@ export function InvoicesList() {
 		[navigate]
 	);
 
+	const loadMoreRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		const el = loadMoreRef.current;
+		if (!el || !hasMore) return;
+		const observer = new IntersectionObserver(
+			(entries) => {
+				if (entries[0].isIntersecting && !isFetchingNextPage) {
+					fetchNextPage();
+				}
+			},
+			{ threshold: 0, rootMargin: "200px" }
+		);
+		observer.observe(el);
+		return () => observer.disconnect();
+	}, [hasMore, isFetchingNextPage, fetchNextPage]);
+
 	if (loading) return <InvoicesSkeleton />;
 	if (error) return <ErrorState message="Failed to load invoices. Please try again." onRetry={refetch} />;
 
@@ -738,7 +771,7 @@ export function InvoicesList() {
 	];
 
 	return (
-		<div className="space-y-5">
+		<div className="animate-page-enter space-y-5">
 			<PageHeader title="Invoices" description="Billing records and payment history" />
 
 			<FinancialStatsGridBordered stats={statsItems} columns={4} />
@@ -853,7 +886,7 @@ export function InvoicesList() {
 									</div>
 									<button
 										type="button"
-										onClick={() => setViewingInvoice(inv)}
+										onClick={() => setViewingInvoiceId(inv.id)}
 										className="flex min-w-0 flex-1 items-center gap-3 px-3 py-3 text-left"
 									>
 										<div className={clsx("flex size-8 shrink-0 items-center justify-center rounded-lg", cfg.bgClass)}>
@@ -861,7 +894,7 @@ export function InvoicesList() {
 										</div>
 										<div className="min-w-0 flex-1">
 											<div className="flex items-center gap-2">
-												<p className="truncate font-mono text-sm font-medium text-zinc-900 dark:text-white">
+												<p className="truncate text-sm font-medium tabular-nums tracking-wide text-zinc-900 dark:text-white">
 													{inv.invoiceNumber}
 												</p>
 												<InvoiceStatusBadge status={inv.status} />
@@ -888,20 +921,11 @@ export function InvoicesList() {
 							);
 						})}
 					</div>
-
-					{/* Load more */}
 					{hasMore && (
-						<div className="flex justify-center border-t border-zinc-200 px-4 py-3 dark:border-zinc-800">
-							<Button outline onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
-								{isFetchingNextPage ? (
-									<>
-										<ArrowPathIcon className="size-4 animate-spin" />
-										Loading...
-									</>
-								) : (
-									"Load More"
-								)}
-							</Button>
+						<div ref={loadMoreRef} className="flex justify-center py-6">
+							{isFetchingNextPage && (
+								<div className="size-5 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900 dark:border-zinc-600 dark:border-t-white" />
+							)}
 						</div>
 					)}
 				</div>
@@ -909,13 +933,13 @@ export function InvoicesList() {
 
 			{/* Bulk actions */}
 			<BulkActionsBar selectedCount={selectedIds.size} onClear={clearSelection}>
-				<Button color="emerald" onClick={() => handleBatchAction("mark_paid")} disabled={isBatchLoading}>
+				<Button color="emerald" onClick={() => handleBatchAction("mark_paid")} loading={isBatchLoading}>
 					<CheckCircleIcon data-slot="icon" className="size-4" />
 					<span className="hidden sm:inline">Mark Paid</span>
 					<span className="sm:hidden">Paid</span>
 				</Button>
 				<Button
-					color="dark/zinc"
+					color="red"
 					onClick={async () => {
 						const selected = invoices.filter((inv) => selectedIds.has(inv.id));
 						if (selected.length === 0) return;
@@ -923,19 +947,12 @@ export function InvoicesList() {
 						let downloaded = 0;
 						try {
 							for (const inv of selected) {
-								if (inv.pdfUrl) {
-									window.open(inv.pdfUrl, "_blank");
+								try {
+									const result = await generatePDF.mutateAsync(inv.id);
+									downloadBase64(result.data, result.filename, result.contentType);
 									downloaded++;
-								} else {
-									try {
-										const result = await generatePDF.mutateAsync(inv.id);
-										if (result.pdfUrl) {
-											window.open(result.pdfUrl, "_blank");
-											downloaded++;
-										}
-									} catch {
-										/* skip */
-									}
+								} catch {
+									/* skip individual failures */
 								}
 							}
 							if (downloaded > 0) showToast.success(`Downloaded ${downloaded} PDF${downloaded !== 1 ? "s" : ""}`);
@@ -943,16 +960,16 @@ export function InvoicesList() {
 							setIsBatchLoading(false);
 						}
 					}}
-					disabled={isBatchLoading || generatePDF.isPending}
+					loading={isBatchLoading}
 				>
-					<DocumentArrowDownIcon data-slot="icon" className="size-4" />
-					<span className="hidden sm:inline">{isBatchLoading ? "Downloading..." : "Download PDFs"}</span>
+					<PdfIcon data-slot="icon" className="size-4" />
+					<span className="hidden sm:inline">Download PDFs</span>
 					<span className="sm:hidden">PDFs</span>
 				</Button>
 			</BulkActionsBar>
 
 			{/* Detail dialog */}
-			<InvoiceDetailDialog invoice={viewingInvoice} onClose={() => setViewingInvoice(null)} />
+			<InvoiceDetailDialog invoiceId={viewingInvoiceId} onClose={() => setViewingInvoiceId(null)} />
 		</div>
 	);
 }

@@ -52,12 +52,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 		}
 
 		return (
-			<ErrorState
-				title={title}
-				message={error.message}
-				onRetry={this.reset}
-				className={compact ? "py-8" : undefined}
-			/>
+			<ErrorState title={title} message={error.message} onRetry={this.reset} className={compact ? "py-8" : undefined} />
 		);
 	}
 }

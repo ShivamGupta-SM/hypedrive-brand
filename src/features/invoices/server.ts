@@ -67,13 +67,7 @@ export const exportInvoiceEnrollmentsServer = createServerFn({ method: "GET" })
 
 export const batchInvoicesServer = createServerFn({ method: "POST" })
 	.middleware([authMiddleware])
-	.inputValidator(
-		(input: {
-			orgId: string;
-			action: "mark_paid";
-			invoiceIds: string[];
-		}) => input
-	)
+	.inputValidator((input: { orgId: string; action: "mark_paid"; invoiceIds: string[] }) => input)
 	.handler(async ({ context, data }) => {
 		return context.client.brand.batchInvoices(data.orgId, {
 			action: data.action,

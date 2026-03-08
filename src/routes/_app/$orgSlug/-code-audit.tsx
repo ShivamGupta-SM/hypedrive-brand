@@ -55,9 +55,39 @@ import {
 } from "@/components/pagination";
 import { Radio, RadioField, RadioGroup } from "@/components/radio";
 import { Select } from "@/components/select";
+
 // ═══════════════════════════════════════════════════════════════
 // CURRENT COMPONENTS (actively used)
 // ═══════════════════════════════════════════════════════════════
+
+// StatCard was deleted from shared/card.tsx — inline stub for this audit page
+function StatCard({
+	icon,
+	label,
+	value,
+	sublabel,
+}: {
+	icon: ReactNode;
+	label: string;
+	value: string | number;
+	sublabel?: string;
+	variant?: string;
+	size?: string;
+	trend?: { value: number; direction: string };
+	badge?: { text: string; variant: string };
+}) {
+	return (
+		<div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+			<div className="flex items-center gap-2 text-zinc-500">
+				{icon}
+				<span className="text-xs">{label}</span>
+			</div>
+			<p className="mt-1 text-lg font-semibold text-zinc-900 dark:text-white">{value}</p>
+			{sublabel && <p className="text-xs text-zinc-500">{sublabel}</p>}
+		</div>
+	);
+}
+
 // ═══════════════════════════════════════════════════════════════
 // DEAD COMPONENTS (currently unused in production)
 // ═══════════════════════════════════════════════════════════════

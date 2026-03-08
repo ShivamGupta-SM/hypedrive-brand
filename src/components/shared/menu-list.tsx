@@ -146,7 +146,7 @@ export function MenuRow({
 			href={href}
 			className={`flex w-full items-center gap-3 bg-transparent px-4 py-2.5 text-left ${
 				isInteractive
-					? "transition-colors hover:bg-black/3 active:bg-black/5 dark:hover:bg-white/4 dark:active:bg-white/6"
+					? "transition-colors duration-150 hover:bg-black/3 active:bg-black/5 dark:hover:bg-white/4 dark:active:bg-white/6"
 					: ""
 			} ${isFirst ? "rounded-t-xl" : ""} ${isLast ? "rounded-b-xl" : ""}`}
 		>
@@ -322,7 +322,7 @@ export function ProfileCard({
 		<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
 			{/* Cover */}
 			<div className="relative h-24 bg-zinc-800 dark:bg-zinc-700">
-				{coverUrl && <img src={coverUrl} alt="" className="size-full object-cover" />}
+				{coverUrl && <img src={coverUrl} alt="" loading="lazy" className="size-full object-cover" />}
 			</div>
 
 			{/* Avatar */}
@@ -331,7 +331,7 @@ export function ProfileCard({
 					<div className="relative">
 						<div className="size-20 overflow-hidden rounded-2xl border-4 border-white bg-zinc-200 dark:border-zinc-900 dark:bg-zinc-800">
 							{avatarUrl ? (
-								<img src={avatarUrl} alt={name} className="size-full object-cover" />
+								<img src={avatarUrl} alt={name} loading="lazy" className="size-full object-cover" />
 							) : (
 								<div className="flex size-full items-center justify-center text-xl font-semibold text-zinc-500 dark:text-zinc-400">
 									{initials}
@@ -374,7 +374,7 @@ export function ProfileCard({
 						<button
 							type="button"
 							onClick={onEditProfile}
-							className="mb-1 rounded-lg px-3 py-1.5 text-sm font-medium text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/30"
+							className="mb-1 rounded-lg px-3 py-1.5 text-sm font-medium text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/30 transition-colors duration-150"
 						>
 							Edit
 						</button>

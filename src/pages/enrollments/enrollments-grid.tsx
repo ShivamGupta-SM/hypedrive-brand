@@ -1,25 +1,24 @@
 import {
-	ArrowPathIcon,
 	ArrowsUpDownIcon,
 	CalendarIcon,
 	CheckCircleIcon,
 	CurrencyRupeeIcon,
 	ExclamationTriangleIcon,
-	TableCellsIcon,
 	XCircleIcon,
 	XMarkIcon,
 } from "@heroicons/react/16/solid";
 import { getRouteApi } from "@tanstack/react-router";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { BsTable as TableIcon } from "react-icons/bs";
 import { Button } from "@/components/button";
 import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/dialog";
-import { Field, Label } from "@/components/fieldset";
-import { Textarea } from "@/components/textarea";
 import { EnrollmentCardFull, isEnrollmentOverdue } from "@/components/enrollment-card";
+import { Field, Label } from "@/components/fieldset";
 import { BulkActionsBar } from "@/components/shared/bulk-actions-bar";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
 import { FilterDropdown, type FilterOption } from "@/components/shared/filter-dropdown";
+import { Textarea } from "@/components/textarea";
 import { useCampaigns } from "@/features/campaigns/hooks";
 import { useInfiniteEnrollments } from "@/features/enrollments/hooks";
 import {
@@ -41,27 +40,28 @@ const enrollmentsRouteApi = getRouteApi("/_app/$orgSlug/enrollments");
 export function EnrollmentsGridSkeleton() {
 	return (
 		<div className="space-y-4">
-			<div className="h-3 w-28 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800" />
-			<div className="grid grid-cols-1 gap-2.5 sm:gap-3 md:grid-cols-2 lg:gap-4">
-				{[1, 2, 3, 4].map((i) => (
+			<div className="h-3 w-28 skeleton-shimmer rounded bg-zinc-200 animate-fade-in dark:bg-zinc-800" />
+			<div className="grid grid-cols-1 gap-2.5 min-[480px]:grid-cols-2 sm:gap-3 lg:grid-cols-3 lg:gap-4 2xl:grid-cols-4">
+				{[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
 					<div
 						key={i}
-						className="overflow-hidden rounded-xl bg-white shadow-xs ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800"
+						className="overflow-hidden rounded-xl bg-white shadow-xs ring-1 ring-zinc-200 animate-fade-in dark:bg-zinc-900 dark:ring-zinc-800"
+						style={{ animationDelay: `${i * 60}ms` }}
 					>
 						<div className="flex items-start gap-3.5 p-3.5 sm:gap-4 sm:p-4">
-							<div className="size-12 shrink-0 animate-pulse rounded-full bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+							<div className="size-12 shrink-0 rounded-full bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
 							<div className="min-w-0 flex-1 space-y-2">
-								<div className="h-4 w-2/3 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
-								<div className="h-3 w-1/2 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
-								<div className="h-3 w-3/4 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
+								<div className="h-4 w-2/3 skeleton-shimmer rounded bg-zinc-200 dark:bg-zinc-700" />
+								<div className="h-3 w-1/2 skeleton-shimmer rounded bg-zinc-200 dark:bg-zinc-700" />
+								<div className="h-3 w-3/4 skeleton-shimmer rounded bg-zinc-200 dark:bg-zinc-700" />
 							</div>
 						</div>
 						<div className="h-px bg-zinc-200 dark:bg-zinc-700" />
 						<div className="grid grid-cols-3 divide-x divide-zinc-200 bg-zinc-50/50 dark:divide-zinc-700 dark:bg-zinc-800/30">
 							{[1, 2, 3].map((j) => (
 								<div key={j} className="flex flex-col items-center gap-1 py-2.5 sm:py-3">
-									<div className="h-2.5 w-10 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
-									<div className="h-3.5 w-14 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
+									<div className="h-2.5 w-10 skeleton-shimmer rounded bg-zinc-200 dark:bg-zinc-700" />
+									<div className="h-3.5 w-14 skeleton-shimmer rounded bg-zinc-200 dark:bg-zinc-700" />
 								</div>
 							))}
 						</div>
@@ -221,6 +221,23 @@ export function EnrollmentsGrid({ status }: EnrollmentsGridProps) {
 		}
 	}, [exportEnrollments, status]);
 
+	const loadMoreRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		const el = loadMoreRef.current;
+		if (!el || !hasMore) return;
+		const observer = new IntersectionObserver(
+			(entries) => {
+				if (entries[0].isIntersecting && !isFetchingNextPage) {
+					fetchNextPage();
+				}
+			},
+			{ threshold: 0, rootMargin: "200px" }
+		);
+		observer.observe(el);
+		return () => observer.disconnect();
+	}, [hasMore, isFetchingNextPage, fetchNextPage]);
+
 	if (loading) {
 		return <EnrollmentsGridSkeleton />;
 	}
@@ -230,16 +247,14 @@ export function EnrollmentsGrid({ status }: EnrollmentsGridProps) {
 	}
 
 	return (
-		<div className="space-y-4">
+		<div className="animate-page-enter space-y-4">
 			{/* Enrollments List */}
 			{enrollments.length === 0 ? (
 				<EmptyState
 					preset="enrollments"
 					title={q ? "No enrollments found" : "No enrollments yet"}
 					description={
-						q
-							? "Try adjusting your search query"
-							: "Enrollments will appear here when shoppers join your campaigns"
+						q ? "Try adjusting your search query" : "Enrollments will appear here when shoppers join your campaigns"
 					}
 				/>
 			) : (
@@ -248,51 +263,34 @@ export function EnrollmentsGrid({ status }: EnrollmentsGridProps) {
 					<div className="flex items-center gap-2">
 						<FilterDropdown label="Sort" options={sortOptions} value={sortBy} onChange={setSortBy} />
 						<div className="flex-1" />
-						<Button
-							size="sm"
-							color="emerald"
-							onClick={handleExport}
-							disabled={exportEnrollments.isPending}
-						>
-							{exportEnrollments.isPending ? (
-								<ArrowPathIcon data-slot="icon" className="size-4 animate-spin" />
-							) : (
-								<TableCellsIcon data-slot="icon" className="size-4" />
-							)}
+						<Button color="emerald" onClick={handleExport} loading={exportEnrollments.isPending}>
+							<TableIcon data-slot="icon" className="size-4" />
 							Export
 						</Button>
 					</div>
 
 					{/* Cards Grid */}
-					<div className="grid grid-cols-1 gap-2.5 sm:gap-3 md:grid-cols-2 lg:gap-4">
-						{enrollments.map((enrollment) => (
-							<EnrollmentCardFull
-								key={enrollment.id}
-								enrollment={enrollment}
-								orgSlug={orgSlug}
-								isSelected={selectedIds.has(enrollment.id)}
-								onSelect={enrollment.status === "awaiting_review" ? handleSelect : undefined}
-								showOverdueAlert={
-									enrollment.status === "awaiting_review" && isEnrollmentOverdue(enrollment.createdAt, referenceTime)
-								}
-								campaignName={campaignNameMap.get(enrollment.campaignId)}
-							/>
+					<div className="grid grid-cols-1 gap-2.5 min-[480px]:grid-cols-2 sm:gap-3 lg:grid-cols-3 lg:gap-4 2xl:grid-cols-4">
+						{enrollments.map((enrollment, i) => (
+							<div key={enrollment.id} className="animate-scale-in" style={{ animationDelay: `${i * 50}ms` }}>
+								<EnrollmentCardFull
+									enrollment={enrollment}
+									orgSlug={orgSlug}
+									isSelected={selectedIds.has(enrollment.id)}
+									onSelect={enrollment.status === "awaiting_review" ? handleSelect : undefined}
+									showOverdueAlert={
+										enrollment.status === "awaiting_review" && isEnrollmentOverdue(enrollment.createdAt, referenceTime)
+									}
+									campaignName={campaignNameMap.get(enrollment.campaignId)}
+								/>
+							</div>
 						))}
 					</div>
-
-					{/* Load More */}
 					{hasMore && (
-						<div className="flex justify-center pt-2">
-							<Button outline onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
-								{isFetchingNextPage ? (
-									<>
-										<ArrowPathIcon className="size-4 animate-spin" />
-										Loading...
-									</>
-								) : (
-									"Load More"
-								)}
-							</Button>
+						<div ref={loadMoreRef} className="flex justify-center py-6">
+							{isFetchingNextPage && (
+								<div className="size-5 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900 dark:border-zinc-600 dark:border-t-white" />
+							)}
 						</div>
 					)}
 				</div>
@@ -300,12 +298,8 @@ export function EnrollmentsGrid({ status }: EnrollmentsGridProps) {
 
 			{/* Floating Bulk Actions Bar */}
 			<BulkActionsBar selectedCount={selectedIds.size} onClear={clearSelection}>
-				<Button color="emerald" onClick={handleBulkApproveRequest} disabled={isBulkLoading}>
-					{isBulkLoading ? (
-						<ArrowPathIcon data-slot="icon" className="size-4 animate-spin" />
-					) : (
-						<CheckCircleIcon data-slot="icon" className="size-4" />
-					)}
+				<Button color="emerald" onClick={handleBulkApproveRequest} loading={isBulkLoading}>
+					<CheckCircleIcon data-slot="icon" className="size-4" />
 					Approve
 				</Button>
 				<Button color="red" onClick={handleBulkRejectRequest} disabled={isBulkLoading}>
@@ -327,18 +321,9 @@ export function EnrollmentsGrid({ status }: EnrollmentsGridProps) {
 					<Button plain onClick={() => setShowBulkApproveDialog(false)} disabled={isBulkLoading}>
 						Cancel
 					</Button>
-					<Button color="emerald" onClick={handleBulkApproveConfirm} disabled={isBulkLoading}>
-						{isBulkLoading ? (
-							<>
-								<ArrowPathIcon className="size-4 animate-spin" />
-								Approving...
-							</>
-						) : (
-							<>
-								<CheckCircleIcon className="size-4" />
-								Approve
-							</>
-						)}
+					<Button color="emerald" onClick={handleBulkApproveConfirm} loading={isBulkLoading}>
+						<CheckCircleIcon className="size-4" />
+						Approve
 					</Button>
 				</DialogActions>
 			</Dialog>
@@ -373,18 +358,9 @@ export function EnrollmentsGrid({ status }: EnrollmentsGridProps) {
 					<Button plain onClick={() => setShowBulkRejectDialog(false)} disabled={isBulkLoading}>
 						Cancel
 					</Button>
-					<Button color="red" onClick={handleBulkRejectConfirm} disabled={isBulkLoading}>
-						{isBulkLoading ? (
-							<>
-								<ArrowPathIcon className="size-4 animate-spin" />
-								Rejecting...
-							</>
-						) : (
-							<>
-								<XMarkIcon className="size-4" />
-								Reject {selectedIds.size} enrollment{selectedIds.size > 1 ? "s" : ""}
-							</>
-						)}
+					<Button color="red" onClick={handleBulkRejectConfirm} loading={isBulkLoading}>
+						<XMarkIcon className="size-4" />
+						Reject {selectedIds.size} enrollment{selectedIds.size > 1 ? "s" : ""}
 					</Button>
 				</DialogActions>
 			</Dialog>

@@ -45,3 +45,6 @@ pnpm-lock.yaml
 # Nitro build artifacts
 .nitro/
 .output/
+
+# Bundle analysis
+stats.html

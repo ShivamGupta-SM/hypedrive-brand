@@ -193,13 +193,7 @@ const DEFAULT_ITEM: Record<SettingsTab, string> = {
 // TAB SWITCHER — top of sidebar
 // =============================================================================
 
-function TabSwitcher({
-	activeTab,
-	onChange,
-}: {
-	activeTab: SettingsTab;
-	onChange: (tab: SettingsTab) => void;
-}) {
+function TabSwitcher({ activeTab, onChange }: { activeTab: SettingsTab; onChange: (tab: SettingsTab) => void }) {
 	return (
 		<div className="flex rounded-lg bg-zinc-950/5 p-0.5 dark:bg-white/5">
 			<button

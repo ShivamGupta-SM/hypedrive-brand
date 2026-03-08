@@ -1,25 +1,24 @@
 import {
 	ArchiveBoxIcon,
-	ArrowPathIcon,
 	ArrowsUpDownIcon,
 	CalendarIcon,
 	ExclamationTriangleIcon,
 	PauseIcon,
 	PlayIcon,
-	TableCellsIcon,
 	XMarkIcon,
 } from "@heroicons/react/16/solid";
-import clsx from "clsx";
 import { getRouteApi, useNavigate } from "@tanstack/react-router";
-import { useCallback, useState } from "react";
+import clsx from "clsx";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { BsTable as TableIcon } from "react-icons/bs";
 import { Button } from "@/components/button";
 import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/dialog";
 import { BulkActionsBar } from "@/components/shared/bulk-actions-bar";
 import { useCan } from "@/components/shared/can";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
-import { SelectionCheckbox } from "@/components/shared/selection-checkbox";
 import { FilterDropdown, type FilterOption } from "@/components/shared/filter-dropdown";
+import { SelectionCheckbox } from "@/components/shared/selection-checkbox";
 import { Skeleton } from "@/components/skeleton";
 import { useInfiniteCampaigns } from "@/features/campaigns/hooks";
 import {
@@ -48,8 +47,8 @@ export function CampaignsGridSkeleton() {
 			<div>
 				<Skeleton width={110} height={14} />
 			</div>
-			<div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3.5 lg:grid-cols-3">
-				{[1, 2, 3, 4, 5, 6].map((i) => (
+			<div className="grid grid-cols-1 gap-2 min-[480px]:grid-cols-2 sm:gap-3.5 lg:grid-cols-3 2xl:grid-cols-4">
+				{[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
 					<CampaignCardSkeleton key={i} />
 				))}
 			</div>
@@ -107,7 +106,8 @@ export function CampaignsGrid({ status }: CampaignsGridProps) {
 	const toggleSelect = useCallback((id: string) => {
 		setSelectedIds((prev) => {
 			const next = new Set(prev);
-			if (next.has(id)) next.delete(id); else next.add(id);
+			if (next.has(id)) next.delete(id);
+			else next.add(id);
 			return next;
 		});
 	}, []);
@@ -131,62 +131,76 @@ export function CampaignsGrid({ status }: CampaignsGridProps) {
 		sortOrder: activeSort.sortOrder,
 	});
 
-	const handleBatchAction = useCallback(async (action: "pause" | "resume" | "end" | "archive") => {
-		if (!organizationId || selectedIds.size === 0) return;
-		setIsBatchLoading(true);
-		try {
-			await batchCampaigns.mutateAsync({
-				organizationId,
-				action,
-				campaignIds: Array.from(selectedIds),
-			});
-			showToast.success(`${selectedIds.size} campaign${selectedIds.size > 1 ? "s" : ""} ${action === "end" ? "ended" : action + "d"}`);
-			setSelectedIds(new Set());
-			refetch();
-		} catch (err) {
-			showToast.error(err, `Failed to ${action} campaigns`);
-		} finally {
-			setIsBatchLoading(false);
-		}
-	}, [organizationId, selectedIds, batchCampaigns, refetch]);
+	const handleBatchAction = useCallback(
+		async (action: "pause" | "resume" | "end" | "archive") => {
+			if (!organizationId || selectedIds.size === 0) return;
+			setIsBatchLoading(true);
+			try {
+				await batchCampaigns.mutateAsync({
+					organizationId,
+					action,
+					campaignIds: Array.from(selectedIds),
+				});
+				showToast.success(
+					`${selectedIds.size} campaign${selectedIds.size > 1 ? "s" : ""} ${action === "end" ? "ended" : action + "d"}`
+				);
+				setSelectedIds(new Set());
+				refetch();
+			} catch (err) {
+				showToast.error(err, `Failed to ${action} campaigns`);
+			} finally {
+				setIsBatchLoading(false);
+			}
+		},
+		[organizationId, selectedIds, batchCampaigns, refetch]
+	);
 
 	// Campaign action handlers
-	const handlePauseCampaign = async (campaignId: string) => {
-		if (!organizationId) return;
-		setActionPendingId(campaignId);
-		try {
-			await pauseCampaign.mutateAsync({
-				organizationId,
-				campaignId,
-				reason: "Paused by user",
-			});
-			showToast.success("Campaign paused");
-		} catch (err) {
-			showToast.error(err, "Failed to pause campaign");
-		} finally {
-			setActionPendingId(null);
-		}
-	};
+	const handlePauseCampaign = useCallback(
+		async (campaignId: string) => {
+			if (!organizationId || actionPendingId) return;
+			setActionPendingId(campaignId);
+			try {
+				await pauseCampaign.mutateAsync({
+					organizationId,
+					campaignId,
+					reason: "Paused by user",
+				});
+				showToast.success("Campaign paused");
+			} catch (err) {
+				showToast.error(err, "Failed to pause campaign");
+			} finally {
+				setActionPendingId(null);
+			}
+		},
+		[organizationId, pauseCampaign, actionPendingId]
+	);
 
-	const handleResumeCampaign = async (campaignId: string) => {
-		if (!organizationId) return;
-		setActionPendingId(campaignId);
-		try {
-			await resumeCampaign.mutateAsync({ organizationId, campaignId });
-			showToast.success("Campaign resumed");
-		} catch (err) {
-			showToast.error(err, "Failed to resume campaign");
-		} finally {
-			setActionPendingId(null);
-		}
-	};
+	const handleResumeCampaign = useCallback(
+		async (campaignId: string) => {
+			if (!organizationId || actionPendingId) return;
+			setActionPendingId(campaignId);
+			try {
+				await resumeCampaign.mutateAsync({ organizationId, campaignId });
+				showToast.success("Campaign resumed");
+			} catch (err) {
+				showToast.error(err, "Failed to resume campaign");
+			} finally {
+				setActionPendingId(null);
+			}
+		},
+		[organizationId, resumeCampaign, actionPendingId]
+	);
 
-	const handleRequestCancel = (campaignId: string) => {
-		const campaign = campaigns.find((c) => c.id === campaignId);
-		setCancelConfirm({ id: campaignId, title: campaign?.title || "this campaign" });
-	};
+	const handleRequestCancel = useCallback(
+		(campaignId: string) => {
+			const campaign = campaigns.find((c) => c.id === campaignId);
+			setCancelConfirm({ id: campaignId, title: campaign?.title || "this campaign" });
+		},
+		[campaigns]
+	);
 
-	const handleConfirmCancel = async () => {
+	const handleConfirmCancel = useCallback(async () => {
 		if (!organizationId || !cancelConfirm) return;
 		setActionPendingId(cancelConfirm.id);
 		try {
@@ -198,36 +212,67 @@ export function CampaignsGrid({ status }: CampaignsGridProps) {
 			setActionPendingId(null);
 			setCancelConfirm(null);
 		}
-	};
+	}, [organizationId, cancelConfirm, cancelCampaign]);
 
-	const handleDuplicateCampaign = async (campaignId: string) => {
-		if (!organizationId) return;
-		setActionPendingId(campaignId);
-		try {
-			await duplicateCampaign.mutateAsync({ organizationId, campaignId });
-			showToast.success("Campaign duplicated");
-		} catch (err) {
-			showToast.error(err, "Failed to duplicate campaign");
-		} finally {
-			setActionPendingId(null);
-		}
-	};
+	const handleDuplicateCampaign = useCallback(
+		async (campaignId: string) => {
+			if (!organizationId) return;
+			setActionPendingId(campaignId);
+			try {
+				await duplicateCampaign.mutateAsync({ organizationId, campaignId });
+				showToast.success("Campaign duplicated");
+			} catch (err) {
+				showToast.error(err, "Failed to duplicate campaign");
+			} finally {
+				setActionPendingId(null);
+			}
+		},
+		[organizationId, duplicateCampaign]
+	);
+
+	const loadMoreRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		const el = loadMoreRef.current;
+		if (!el || !hasMore) return;
+		const observer = new IntersectionObserver(
+			(entries) => {
+				if (entries[0].isIntersecting && !isFetchingNextPage) {
+					fetchNextPage();
+				}
+			},
+			{ threshold: 0, rootMargin: "200px" }
+		);
+		observer.observe(el);
+		return () => observer.disconnect();
+	}, [hasMore, isFetchingNextPage, fetchNextPage]);
 
 	if (loading) {
 		return <CampaignsGridSkeleton />;
 	}
 
 	return (
-		<div className="space-y-4">
+		<div className="animate-page-enter space-y-4">
 			{/* Toolbar */}
 			<div className="flex items-center gap-2">
-				<FilterDropdown label="Sort" options={sortOptions} value={sortBy} onChange={(value) => navigate({ search: ((prev: Record<string, unknown>) => ({ ...prev, sort: value === "newest" ? undefined : value })) as never })} />
+				<FilterDropdown
+					label="Sort"
+					options={sortOptions}
+					value={sortBy}
+					onChange={(value) =>
+						navigate({
+							search: ((prev: Record<string, unknown>) => ({
+								...prev,
+								sort: value === "newest" ? undefined : value,
+							})) as never,
+						})
+					}
+				/>
 				<div className="flex-1" />
 				{campaigns.length > 0 && (
 					<Button
-						size="sm"
 						color="emerald"
-						disabled={exportCampaigns.isPending}
+						loading={exportCampaigns.isPending}
 						onClick={async () => {
 							try {
 								const result = await exportCampaigns.mutateAsync({ status, q: q || undefined });
@@ -238,8 +283,8 @@ export function CampaignsGrid({ status }: CampaignsGridProps) {
 							}
 						}}
 					>
-						<TableCellsIcon data-slot="icon" className="size-4" />
-						{exportCampaigns.isPending ? "Exporting..." : "Export"}
+						<TableIcon data-slot="icon" className="size-4" />
+						Export
 					</Button>
 				)}
 			</div>
@@ -249,12 +294,22 @@ export function CampaignsGrid({ status }: CampaignsGridProps) {
 				<ErrorState message="Unable to load campaigns." onRetry={refetch} />
 			) : campaigns.length > 0 ? (
 				<>
-					<div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3.5 lg:grid-cols-3">
-						{campaigns.map((campaign) => (
-							<div key={campaign.id} className={clsx("group relative rounded-xl transition-shadow", selectedIds.has(campaign.id) && "outline-2 outline-zinc-900 dark:outline-white")}>
+					<div className="grid grid-cols-1 gap-2 min-[480px]:grid-cols-2 sm:gap-3.5 lg:grid-cols-3 2xl:grid-cols-4">
+						{campaigns.map((campaign, i) => (
+							<div
+								key={campaign.id}
+								className={clsx(
+									"group relative rounded-xl transition-shadow animate-scale-in",
+									selectedIds.has(campaign.id) && "outline-2 outline-zinc-900 dark:outline-white"
+								)}
+								style={{ animationDelay: `${i * 50}ms` }}
+							>
 								<SelectionCheckbox
 									selected={selectedIds.has(campaign.id)}
-									onToggle={(e) => { e.preventDefault(); toggleSelect(campaign.id); }}
+									onToggle={(e) => {
+										e.preventDefault();
+										toggleSelect(campaign.id);
+									}}
 								/>
 								<CampaignCard
 									campaign={campaign}
@@ -272,20 +327,11 @@ export function CampaignsGrid({ status }: CampaignsGridProps) {
 							</div>
 						))}
 					</div>
-
-					{/* Load More */}
 					{hasMore && (
-						<div className="flex justify-center py-6">
-							<Button outline onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
-								{isFetchingNextPage ? (
-									<>
-										<ArrowPathIcon className="size-4 animate-spin" />
-										Loading...
-									</>
-								) : (
-									"Load More"
-								)}
-							</Button>
+						<div ref={loadMoreRef} className="flex justify-center py-6">
+							{isFetchingNextPage && (
+								<div className="size-5 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900 dark:border-zinc-600 dark:border-t-white" />
+							)}
 						</div>
 					)}
 				</>
@@ -341,18 +387,9 @@ export function CampaignsGrid({ status }: CampaignsGridProps) {
 					<Button plain onClick={() => setCancelConfirm(null)} disabled={!!actionPendingId}>
 						Go Back
 					</Button>
-					<Button color="red" onClick={handleConfirmCancel} disabled={!!actionPendingId}>
-						{actionPendingId === cancelConfirm?.id ? (
-							<>
-								<ArrowPathIcon className="size-4 animate-spin" />
-								Cancelling...
-							</>
-						) : (
-							<>
-								<XMarkIcon className="size-4" />
-								Cancel Campaign
-							</>
-						)}
+					<Button color="red" onClick={handleConfirmCancel} loading={actionPendingId === cancelConfirm?.id}>
+						<XMarkIcon className="size-4" />
+						Cancel Campaign
 					</Button>
 				</DialogActions>
 			</Dialog>

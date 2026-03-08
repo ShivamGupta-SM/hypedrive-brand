@@ -5,7 +5,12 @@
 
 import { queryOptions } from "@tanstack/react-query";
 import { CACHE, queryKeys } from "@/hooks/api-client";
-import { getNotificationPreferencesServer, getUnreadCountServer, listNotificationsServer, listPushTokensServer } from "./server";
+import {
+	getNotificationPreferencesServer,
+	getUnreadCountServer,
+	listNotificationsServer,
+	listPushTokensServer,
+} from "./server";
 
 // -- Notifications (In-App) ---------------------------------------------------
 

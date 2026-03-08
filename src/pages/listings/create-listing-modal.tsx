@@ -22,6 +22,7 @@ import { FileDropzone } from "@/components/file-dropzone";
 import { Input, InputGroup } from "@/components/input";
 import { CurrencyInput } from "@/components/number-input";
 import { Select } from "@/components/select";
+import { FadeImage } from "@/components/shared/fade-image";
 import { WizardStepper } from "@/components/shared/wizard-stepper";
 import { Textarea } from "@/components/textarea";
 import { usePlatforms } from "@/features/campaigns/hooks";
@@ -435,7 +436,7 @@ export function CreateListingModal({
 													)}
 													title={idx === 0 ? "Primary image" : "Click to set as primary"}
 												>
-													<img src={url} alt={`Upload ${idx + 1}`} className="size-full object-contain" />
+													<FadeImage src={url} alt={`Upload ${idx + 1}`} className="size-full object-contain" />
 												</button>
 												{idx === 0 && (
 													<span className="absolute -top-1.5 left-1/2 -translate-x-1/2 rounded-full bg-emerald-500 px-1.5 py-px text-[10px] font-semibold text-white">
@@ -512,7 +513,7 @@ export function CreateListingModal({
 								{images.length > 0 && (
 									<div className="mt-3 flex flex-wrap gap-2">
 										{images.map((url, idx) => (
-											<img
+											<FadeImage
 												key={url}
 												src={url}
 												alt={`Upload ${idx + 1}`}
@@ -546,18 +547,9 @@ export function CreateListingModal({
 							<ChevronRightIcon />
 						</Button>
 					) : (
-						<Button type="submit" color="emerald" disabled={createListing.isPending || uploadingCount > 0}>
-							{createListing.isPending ? (
-								<>
-									<ArrowPathIcon className="size-4 animate-spin" />
-									Creating…
-								</>
-							) : (
-								<>
-									<PlusIcon />
-									Create Listing
-								</>
-							)}
+						<Button type="submit" color="emerald" loading={createListing.isPending} disabled={uploadingCount > 0}>
+							<PlusIcon />
+							Create Listing
 						</Button>
 					)}
 				</DialogActions>

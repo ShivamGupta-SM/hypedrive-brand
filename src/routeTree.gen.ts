@@ -55,7 +55,6 @@ import { Route as AppOrgSlugCampaignsEndedRouteImport } from './routes/_app/$org
 import { Route as AppOrgSlugCampaignsDraftRouteImport } from './routes/_app/$orgSlug/campaigns/draft'
 import { Route as AppOrgSlugCampaignsActiveRouteImport } from './routes/_app/$orgSlug/campaigns/active'
 import { Route as AppOrgSlugWalletTransactionsIdRouteImport } from './routes/_app/$orgSlug/wallet_.transactions_.$id'
-import { Route as AppOrgSlugCampaignsCampaignIdEnrollmentsIdRouteImport } from './routes/_app/$orgSlug/campaigns_.$campaignId.enrollments_.$id'
 
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/_onboarding',
@@ -144,17 +143,23 @@ const AppOrgSlugWalletRoute = AppOrgSlugWalletRouteImport.update({
   id: '/wallet',
   path: '/wallet',
   getParentRoute: () => AppOrgSlugRoute,
-} as any)
+} as any).lazy(() =>
+  import('./routes/_app/$orgSlug/wallet.lazy').then((d) => d.Route),
+)
 const AppOrgSlugTeamRoute = AppOrgSlugTeamRouteImport.update({
   id: '/team',
   path: '/team',
   getParentRoute: () => AppOrgSlugRoute,
-} as any)
+} as any).lazy(() =>
+  import('./routes/_app/$orgSlug/team.lazy').then((d) => d.Route),
+)
 const AppOrgSlugSupportRoute = AppOrgSlugSupportRouteImport.update({
   id: '/support',
   path: '/support',
   getParentRoute: () => AppOrgSlugRoute,
-} as any)
+} as any).lazy(() =>
+  import('./routes/_app/$orgSlug/support.lazy').then((d) => d.Route),
+)
 const AppOrgSlugSettingsRoute = AppOrgSlugSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -164,22 +169,30 @@ const AppOrgSlugListingsRoute = AppOrgSlugListingsRouteImport.update({
   id: '/listings',
   path: '/listings',
   getParentRoute: () => AppOrgSlugRoute,
-} as any)
+} as any).lazy(() =>
+  import('./routes/_app/$orgSlug/listings.lazy').then((d) => d.Route),
+)
 const AppOrgSlugInvoicesRoute = AppOrgSlugInvoicesRouteImport.update({
   id: '/invoices',
   path: '/invoices',
   getParentRoute: () => AppOrgSlugRoute,
-} as any)
+} as any).lazy(() =>
+  import('./routes/_app/$orgSlug/invoices.lazy').then((d) => d.Route),
+)
 const AppOrgSlugEnrollmentsRoute = AppOrgSlugEnrollmentsRouteImport.update({
   id: '/enrollments',
   path: '/enrollments',
   getParentRoute: () => AppOrgSlugRoute,
-} as any)
+} as any).lazy(() =>
+  import('./routes/_app/$orgSlug/enrollments.lazy').then((d) => d.Route),
+)
 const AppOrgSlugCampaignsRoute = AppOrgSlugCampaignsRouteImport.update({
   id: '/campaigns',
   path: '/campaigns',
   getParentRoute: () => AppOrgSlugRoute,
-} as any)
+} as any).lazy(() =>
+  import('./routes/_app/$orgSlug/campaigns.lazy').then((d) => d.Route),
+)
 const AppOrgSlugWalletIndexRoute = AppOrgSlugWalletIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -304,13 +317,11 @@ const AppOrgSlugWalletTransactionsIdRoute =
     id: '/wallet_/transactions_/$id',
     path: '/wallet/transactions/$id',
     getParentRoute: () => AppOrgSlugRoute,
-  } as any)
-const AppOrgSlugCampaignsCampaignIdEnrollmentsIdRoute =
-  AppOrgSlugCampaignsCampaignIdEnrollmentsIdRouteImport.update({
-    id: '/campaigns_/$campaignId/enrollments_/$id',
-    path: '/campaigns/$campaignId/enrollments/$id',
-    getParentRoute: () => AppOrgSlugRoute,
-  } as any)
+  } as any).lazy(() =>
+    import('./routes/_app/$orgSlug/wallet_.transactions_.$id.lazy').then(
+      (d) => d.Route,
+    ),
+  )
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
@@ -355,7 +366,6 @@ export interface FileRoutesByFullPath {
   '/$orgSlug/team/': typeof AppOrgSlugTeamIndexRoute
   '/$orgSlug/wallet/': typeof AppOrgSlugWalletIndexRoute
   '/$orgSlug/wallet/transactions/$id': typeof AppOrgSlugWalletTransactionsIdRoute
-  '/$orgSlug/campaigns/$campaignId/enrollments/$id': typeof AppOrgSlugCampaignsCampaignIdEnrollmentsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof AppIndexRoute
@@ -395,7 +405,6 @@ export interface FileRoutesByTo {
   '/$orgSlug/team': typeof AppOrgSlugTeamIndexRoute
   '/$orgSlug/wallet': typeof AppOrgSlugWalletIndexRoute
   '/$orgSlug/wallet/transactions/$id': typeof AppOrgSlugWalletTransactionsIdRoute
-  '/$orgSlug/campaigns/$campaignId/enrollments/$id': typeof AppOrgSlugCampaignsCampaignIdEnrollmentsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -445,7 +454,6 @@ export interface FileRoutesById {
   '/_app/$orgSlug/team/': typeof AppOrgSlugTeamIndexRoute
   '/_app/$orgSlug/wallet/': typeof AppOrgSlugWalletIndexRoute
   '/_app/$orgSlug/wallet_/transactions_/$id': typeof AppOrgSlugWalletTransactionsIdRoute
-  '/_app/$orgSlug/campaigns_/$campaignId/enrollments_/$id': typeof AppOrgSlugCampaignsCampaignIdEnrollmentsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -492,7 +500,6 @@ export interface FileRouteTypes {
     | '/$orgSlug/team/'
     | '/$orgSlug/wallet/'
     | '/$orgSlug/wallet/transactions/$id'
-    | '/$orgSlug/campaigns/$campaignId/enrollments/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -532,7 +539,6 @@ export interface FileRouteTypes {
     | '/$orgSlug/team'
     | '/$orgSlug/wallet'
     | '/$orgSlug/wallet/transactions/$id'
-    | '/$orgSlug/campaigns/$campaignId/enrollments/$id'
   id:
     | '__root__'
     | '/_app'
@@ -581,7 +587,6 @@ export interface FileRouteTypes {
     | '/_app/$orgSlug/team/'
     | '/_app/$orgSlug/wallet/'
     | '/_app/$orgSlug/wallet_/transactions_/$id'
-    | '/_app/$orgSlug/campaigns_/$campaignId/enrollments_/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -916,13 +921,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppOrgSlugWalletTransactionsIdRouteImport
       parentRoute: typeof AppOrgSlugRoute
     }
-    '/_app/$orgSlug/campaigns_/$campaignId/enrollments_/$id': {
-      id: '/_app/$orgSlug/campaigns_/$campaignId/enrollments_/$id'
-      path: '/campaigns/$campaignId/enrollments/$id'
-      fullPath: '/$orgSlug/campaigns/$campaignId/enrollments/$id'
-      preLoaderRoute: typeof AppOrgSlugCampaignsCampaignIdEnrollmentsIdRouteImport
-      parentRoute: typeof AppOrgSlugRoute
-    }
   }
 }
 
@@ -1013,7 +1011,6 @@ interface AppOrgSlugRouteChildren {
   AppOrgSlugListingsIdRoute: typeof AppOrgSlugListingsIdRoute
   AppOrgSlugSettingsAccountRoute: typeof AppOrgSlugSettingsAccountRoute
   AppOrgSlugWalletTransactionsIdRoute: typeof AppOrgSlugWalletTransactionsIdRoute
-  AppOrgSlugCampaignsCampaignIdEnrollmentsIdRoute: typeof AppOrgSlugCampaignsCampaignIdEnrollmentsIdRoute
 }
 
 const AppOrgSlugRouteChildren: AppOrgSlugRouteChildren = {
@@ -1031,8 +1028,6 @@ const AppOrgSlugRouteChildren: AppOrgSlugRouteChildren = {
   AppOrgSlugListingsIdRoute: AppOrgSlugListingsIdRoute,
   AppOrgSlugSettingsAccountRoute: AppOrgSlugSettingsAccountRoute,
   AppOrgSlugWalletTransactionsIdRoute: AppOrgSlugWalletTransactionsIdRoute,
-  AppOrgSlugCampaignsCampaignIdEnrollmentsIdRoute:
-    AppOrgSlugCampaignsCampaignIdEnrollmentsIdRoute,
 }
 
 const AppOrgSlugRouteWithChildren = AppOrgSlugRoute._addFileChildren(

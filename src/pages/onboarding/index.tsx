@@ -1,9 +1,9 @@
 import { CheckCircleIcon as CheckCircleSolidIcon, XCircleIcon } from "@heroicons/react/16/solid";
 import {
 	ArrowRightStartOnRectangleIcon,
-	HomeModernIcon,
 	DocumentTextIcon,
 	ExclamationTriangleIcon,
+	HomeModernIcon,
 	IdentificationIcon,
 	RocketLaunchIcon,
 } from "@heroicons/react/24/outline";
@@ -13,6 +13,7 @@ import { Button } from "@/components/button";
 import { Field, Label } from "@/components/fieldset";
 import { Input } from "@/components/input";
 import { Logo } from "@/components/logo";
+import { FadeImage } from "@/components/shared/fade-image";
 import { Textarea } from "@/components/textarea";
 import { useLogout } from "@/features/auth/hooks";
 import { useSetupProgressStream } from "@/features/organization/hooks";
@@ -262,7 +263,7 @@ function OrganizationStep({
 					<Label>Website</Label>
 					<div className="flex items-center gap-3">
 						{logoPreview?.logoUrl && (
-							<img
+							<FadeImage
 								src={logoPreview.logoUrl}
 								alt="Logo preview"
 								className="size-10 shrink-0 rounded-lg border border-zinc-200 object-contain dark:border-zinc-700"

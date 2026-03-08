@@ -9,7 +9,7 @@ import {
 	XMarkIcon,
 } from "@heroicons/react/16/solid";
 import { Outlet } from "@tanstack/react-router";
-import { useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Input, InputGroup } from "@/components/input";
 import { PageHeader } from "@/components/page-header";
 import { useCan } from "@/components/shared/can";
@@ -18,12 +18,15 @@ import { IconButton } from "@/components/shared/icon-button";
 import { TabNav, type TabNavItem } from "@/components/shared/tab-nav";
 import { Skeleton } from "@/components/skeleton";
 import { useInfiniteCampaigns } from "@/features/campaigns/hooks";
+import { useDebounce } from "@/hooks/use-debounce";
 import { useOrgContext } from "@/hooks/use-org-context";
 import { useOrgPath } from "@/hooks/use-org-slug";
-import { CampaignCardSkeleton } from "./campaign-card";
-import { CreateCampaignModal } from "./create-campaign-modal";
-
 import { Route } from "@/routes/_app/$orgSlug/campaigns";
+import { CampaignCardSkeleton } from "./campaign-card";
+
+const CreateCampaignModal = lazy(() =>
+	import("./create-campaign-modal").then((m) => ({ default: m.CreateCampaignModal }))
+);
 
 // =============================================================================
 // LOADING SKELETON
@@ -85,6 +88,17 @@ export function CampaignsLayout() {
 	const orgPath = useOrgPath();
 	const navigate = Route.useNavigate();
 	const { q } = Route.useSearch();
+
+	// Debounced search — local state for responsive input, URL updates after 300ms
+	const [searchInput, setSearchInput] = useState(q ?? "");
+	const debouncedSearch = useDebounce(searchInput, 300);
+	useEffect(() => {
+		navigate({ search: (prev) => ({ ...prev, q: debouncedSearch || undefined }) });
+	}, [debouncedSearch, navigate]);
+	// Sync external URL changes (e.g. back button) to local input
+	useEffect(() => {
+		setSearchInput(q ?? "");
+	}, [q]);
 
 	const canCreate = useCan("campaign", "create");
 	const [showCreateModal, setShowCreateModal] = useState(false);
@@ -148,9 +162,7 @@ export function CampaignsLayout() {
 		},
 	];
 
-	const setSearchQuery = (value: string) => {
-		navigate({ search: (prev) => ({ ...prev, q: value || undefined }) });
-	};
+	const setSearchQuery = (value: string) => setSearchInput(value);
 
 	return (
 		<div className="space-y-5">
@@ -190,12 +202,12 @@ export function CampaignsLayout() {
 						<MagnifyingGlassIcon data-slot="icon" />
 						<Input
 							type="search"
-							value={q ?? ""}
+							value={searchInput}
 							onChange={(e) => setSearchQuery(e.target.value)}
 							placeholder="Search campaigns..."
 							aria-label="Search campaigns"
 						/>
-						{q && (
+						{searchInput && (
 							<button
 								type="button"
 								onClick={() => setSearchQuery("")}
@@ -215,12 +227,16 @@ export function CampaignsLayout() {
 			</div>
 
 			{/* Create Campaign Modal */}
-			<CreateCampaignModal
-				isOpen={showCreateModal}
-				onClose={() => setShowCreateModal(false)}
-				organizationId={organizationId}
-				onSuccess={refetch}
-			/>
+			{showCreateModal && (
+				<Suspense>
+					<CreateCampaignModal
+						isOpen={showCreateModal}
+						onClose={() => setShowCreateModal(false)}
+						organizationId={organizationId}
+						onSuccess={refetch}
+					/>
+				</Suspense>
+			)}
 		</div>
 	);
 }

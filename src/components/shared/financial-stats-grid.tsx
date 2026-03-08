@@ -31,11 +31,12 @@ export function FinancialStatsGrid({ stats, loading = false, columns = 4 }: Fina
 				{Array.from({ length: stats.length || columns }).map((_, i) => (
 					<div
 						key={`skeleton-${i}`}
-						className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 bg-white px-3 py-4 sm:px-5 dark:bg-zinc-900"
+						className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 bg-white px-3 py-4 sm:px-5 animate-fade-in dark:bg-zinc-900"
+						style={{ animationDelay: `${i * 50}ms` }}
 					>
-						<div className="h-3 w-16 sm:h-4 sm:w-24 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
-						<div className="h-3 w-10 sm:h-4 sm:w-12 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
-						<div className="mt-1 h-5 w-16 sm:h-7 sm:w-24 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
+						<div className="h-3 w-16 sm:h-4 sm:w-24 skeleton-shimmer rounded bg-zinc-200 dark:bg-zinc-700" />
+						<div className="h-3 w-10 sm:h-4 sm:w-12 skeleton-shimmer rounded bg-zinc-200 dark:bg-zinc-700" />
+						<div className="mt-1 h-5 w-16 sm:h-7 sm:w-24 skeleton-shimmer rounded bg-zinc-200 dark:bg-zinc-700" />
 					</div>
 				))}
 			</dl>
@@ -44,10 +45,10 @@ export function FinancialStatsGrid({ stats, loading = false, columns = 4 }: Fina
 
 	return (
 		<dl className={`grid ${gridColsClass} gap-px bg-zinc-200 dark:bg-zinc-700`}>
-			{stats.map((stat) => (
+			{stats.map((stat, i) => (
 				<div
 					key={stat.name}
-					className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 bg-white px-3 py-3.5 sm:px-5 sm:py-5 dark:bg-zinc-900"
+					className={`flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 bg-white px-3 py-3.5 sm:px-5 sm:py-5 dark:bg-zinc-900 animate-stagger-item stagger-${i + 1}`}
 				>
 					<dt className="text-xs sm:text-sm/6 font-medium text-zinc-500 dark:text-zinc-400">{stat.name}</dt>
 					{stat.change && (
@@ -92,11 +93,12 @@ export function FinancialStatsGridBordered({ stats, loading = false, columns = 4
 				{Array.from({ length: stats.length || columns }).map((_, i) => (
 					<div
 						key={`skeleton-${i}`}
-						className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 bg-white px-2.5 py-2 sm:px-5 sm:py-4 dark:bg-zinc-900"
+						className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 bg-white px-2.5 py-2 sm:px-5 sm:py-4 animate-fade-in dark:bg-zinc-900"
+						style={{ animationDelay: `${i * 50}ms` }}
 					>
-						<div className="h-2.5 w-12 sm:h-4 sm:w-24 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
-						<div className="h-2.5 w-8 sm:h-4 sm:w-12 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
-						<div className="mt-1 h-4 w-14 sm:h-7 sm:w-28 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
+						<div className="h-2.5 w-12 sm:h-4 sm:w-24 skeleton-shimmer rounded bg-zinc-200 dark:bg-zinc-700" />
+						<div className="h-2.5 w-8 sm:h-4 sm:w-12 skeleton-shimmer rounded bg-zinc-200 dark:bg-zinc-700" />
+						<div className="mt-1 h-4 w-14 sm:h-7 sm:w-28 skeleton-shimmer rounded bg-zinc-200 dark:bg-zinc-700" />
 					</div>
 				))}
 			</dl>
@@ -107,10 +109,10 @@ export function FinancialStatsGridBordered({ stats, loading = false, columns = 4
 		<dl
 			className={`grid ${gridColsClass} gap-px overflow-hidden rounded-xl bg-zinc-200 shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-700 dark:ring-zinc-800`}
 		>
-			{stats.map((stat) => (
+			{stats.map((stat, i) => (
 				<div
 					key={stat.name}
-					className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 bg-white px-2.5 py-2 sm:px-5 sm:py-4 dark:bg-zinc-900"
+					className={`flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 bg-white px-2.5 py-2 sm:px-5 sm:py-4 dark:bg-zinc-900 animate-stagger-item stagger-${i + 1}`}
 				>
 					<dt className="text-[11px] sm:text-sm/6 font-medium text-zinc-500 dark:text-zinc-400">{stat.name}</dt>
 					{stat.change && (

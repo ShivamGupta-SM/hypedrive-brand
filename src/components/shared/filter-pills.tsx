@@ -26,19 +26,9 @@ interface FilterPillsProps<T extends string = string> {
 	className?: string;
 }
 
-export function FilterPills<T extends string = string>({
-	options,
-	value,
-	onChange,
-	className,
-}: FilterPillsProps<T>) {
+export function FilterPills<T extends string = string>({ options, value, onChange, className }: FilterPillsProps<T>) {
 	return (
-		<div
-			className={clsx(
-				"inline-flex items-center gap-0.5 rounded-lg bg-zinc-950/6 p-1 dark:bg-white/6",
-				className,
-			)}
-		>
+		<div className={clsx("inline-flex items-center gap-0.5 rounded-lg bg-zinc-950/6 p-1 dark:bg-white/6", className)}>
 			{options.map((opt) => {
 				const isActive = value === opt.value;
 				return (
@@ -47,17 +37,17 @@ export function FilterPills<T extends string = string>({
 						key={opt.value}
 						onClick={() => onChange(opt.value)}
 						className={clsx(
-							"inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-all sm:px-2.5 sm:py-1",
+							"inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-all duration-150 active:scale-[0.97] sm:px-2.5 sm:py-1",
 							isActive
 								? "bg-white text-zinc-900 shadow-sm ring-1 ring-zinc-950/5 dark:bg-zinc-700 dark:text-white dark:ring-white/10"
-								: "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200",
+								: "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
 						)}
 					>
 						{opt.icon && (
 							<opt.icon
 								className={clsx(
 									"size-3.5",
-									isActive ? opt.iconColor || "text-zinc-600 dark:text-zinc-300" : opt.iconColor || "text-zinc-400",
+									isActive ? opt.iconColor || "text-zinc-600 dark:text-zinc-300" : opt.iconColor || "text-zinc-400"
 								)}
 							/>
 						)}

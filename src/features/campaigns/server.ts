@@ -139,7 +139,9 @@ export const updateCampaignStateServer = createServerFn({ method: "POST" })
 
 export const duplicateCampaignServer = createServerFn({ method: "POST" })
 	.middleware([authMiddleware])
-	.inputValidator((input: { organizationId: string; campaignId: string; newTitle?: string; idempotencyKey?: string }) => input)
+	.inputValidator(
+		(input: { organizationId: string; campaignId: string; newTitle?: string; idempotencyKey?: string }) => input
+	)
 	.handler(async ({ context, data }) => {
 		return context.client.brand.duplicateCampaign(data.organizationId, data.campaignId, {
 			newTitle: data.newTitle,
@@ -225,13 +227,7 @@ export const batchCampaignsServer = createServerFn({ method: "POST" })
 
 export const exportCampaignsServer = createServerFn({ method: "POST" })
 	.middleware([authMiddleware])
-	.inputValidator(
-		(input: {
-			orgId: string;
-			status?: string;
-			q?: string;
-		}) => input
-	)
+	.inputValidator((input: { orgId: string; status?: string; q?: string }) => input)
 	.handler(async ({ context, data }) => {
 		return context.client.brand.exportCampaigns(data.orgId, {
 			status: data.status,

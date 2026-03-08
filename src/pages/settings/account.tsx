@@ -23,12 +23,14 @@ import { startRegistration } from "@simplewebauthn/browser";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/button";
 import { AvatarUpload } from "@/components/file-dropzone";
 import { Heading } from "@/components/heading";
 import { GoogleIcon } from "@/components/icons/platform-icons";
 import { Input } from "@/components/input";
 import { usePanelNav } from "@/components/settings-dialog";
+import { FadeImage } from "@/components/shared/fade-image";
 import {
 	duotoneColors,
 	MenuRow,
@@ -67,10 +69,16 @@ import {
 	useSetActiveSession,
 } from "@/features/auth/hooks-sessions";
 import { useLinkedAccounts, useLinkSocial, useUnlinkAccount } from "@/features/auth/hooks-social";
-import { useRemovePushToken, useUpdateNotificationPreferences } from "@/features/notifications/hooks";
+import {
+	useNotificationPreferences,
+	useRemovePushToken,
+	useUpdateNotificationPreferences,
+} from "@/features/notifications/hooks";
 import { useLeaveOrganization } from "@/features/organization/mutations";
 import { getFriendlyErrorMessage } from "@/hooks/api-client";
 import { useOrgContext } from "@/hooks/use-org-context";
+import { subscribeToPush, unsubscribeFromPush } from "@/lib/push-notifications";
+import { getStreamTokenServer } from "@/server/auth-queries";
 
 // =============================================================================
 // USER PROFILE HEADER CARD
@@ -100,7 +108,11 @@ function UserProfileCard({
 			<div className="flex items-center justify-between px-5 py-4">
 				<div className="flex items-center gap-3.5">
 					{image ? (
-						<img src={image} alt={name} className="size-12 shrink-0 rounded-xl object-cover ring-1 ring-white/10" />
+						<FadeImage
+							src={image}
+							alt={name}
+							className="size-12 shrink-0 rounded-xl object-cover ring-1 ring-white/10"
+						/>
 					) : (
 						<div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-zinc-700 text-base font-bold text-white ring-1 ring-white/10 dark:bg-zinc-600">
 							{initials}
@@ -168,7 +180,9 @@ function ChangePasswordPanel() {
 				</div>
 				<div className="min-w-0 flex-1">
 					<p className="font-semibold text-zinc-900 dark:text-white">Change Password</p>
-					<p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">Enter your current password and choose a new one.</p>
+					<p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
+						Enter your current password and choose a new one.
+					</p>
 				</div>
 			</div>
 
@@ -290,7 +304,9 @@ function ChangeEmailPanel({ currentEmail }: { currentEmail: string }) {
 				</div>
 				<div className="min-w-0 flex-1">
 					<p className="font-semibold text-zinc-900 dark:text-white">Change Email</p>
-					<p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">A verification email will be sent to your new address.</p>
+					<p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
+						A verification email will be sent to your new address.
+					</p>
 				</div>
 			</div>
 
@@ -426,11 +442,22 @@ function ActiveSessionsPanel() {
 	const hasMultiple = sessionList.length > 1;
 
 	const renderSessionCard = (
-		session: { id: string; token: string; current?: boolean; lastActive?: string; createdAt?: string; location?: string } & Record<string, unknown>,
+		session: {
+			id: string;
+			token: string;
+			current?: boolean;
+			lastActive?: string;
+			createdAt?: string;
+			location?: string;
+			iconType?: string;
+			device?: string;
+			browser?: string;
+			userAgent?: string | null;
+		},
 		isCurrent: boolean,
 		onRevoke: (token: string) => void,
 		revoking: boolean,
-		showSwitch?: boolean,
+		showSwitch?: boolean
 	) => {
 		const DeviceIcon = getDeviceIcon(session);
 		return (
@@ -507,13 +534,19 @@ function ActiveSessionsPanel() {
 			{loading ? (
 				<div className="space-y-2.5">
 					{[1, 2].map((i) => (
-						<div key={i} className="h-18 animate-pulse rounded-xl bg-zinc-100 dark:bg-zinc-800" />
+						<div key={i} className="h-18 skeleton-shimmer rounded-xl bg-zinc-100 dark:bg-zinc-800" />
 					))}
 				</div>
 			) : hasDeviceSessions ? (
 				<div className="space-y-2.5">
 					{deviceSessions.map((session) =>
-						renderSessionCard(session, !!session.current, (t) => revokeDeviceSession.mutate(t), revokeDeviceSession.isPending, true)
+						renderSessionCard(
+							session,
+							!!session.current,
+							(t) => revokeDeviceSession.mutate(t),
+							revokeDeviceSession.isPending,
+							true
+						)
 					)}
 				</div>
 			) : sessions.length === 0 ? (
@@ -523,7 +556,12 @@ function ActiveSessionsPanel() {
 			) : (
 				<div className="space-y-2.5">
 					{sessions.map((session) =>
-						renderSessionCard(session, session.token === currentToken, (t) => revokeSession.mutate(t), revokeSession.isPending)
+						renderSessionCard(
+							session,
+							session.token === currentToken,
+							(t) => revokeSession.mutate(t),
+							revokeSession.isPending
+						)
 					)}
 				</div>
 			)}
@@ -1057,7 +1095,7 @@ function PasskeysPanel() {
 			{loading ? (
 				<div className="space-y-2.5">
 					{[1, 2].map((i) => (
-						<div key={i} className="h-16 animate-pulse rounded-xl bg-zinc-100 dark:bg-zinc-800" />
+						<div key={i} className="h-16 skeleton-shimmer rounded-xl bg-zinc-100 dark:bg-zinc-800" />
 					))}
 				</div>
 			) : passkeys.length === 0 ? (
@@ -1413,7 +1451,9 @@ function DeleteAccountPanel() {
 				</div>
 				<div className="min-w-0 flex-1">
 					<p className="font-semibold text-zinc-900 dark:text-white">Delete Account</p>
-					<p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">This action is permanent and cannot be undone.</p>
+					<p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
+						This action is permanent and cannot be undone.
+					</p>
 				</div>
 			</div>
 
@@ -1530,7 +1570,7 @@ function LinkedAccountsPanel() {
 			{loading ? (
 				<div className="space-y-2.5">
 					{[1, 2].map((i) => (
-						<div key={i} className="h-16 animate-pulse rounded-xl bg-zinc-100 dark:bg-zinc-800" />
+						<div key={i} className="h-16 skeleton-shimmer rounded-xl bg-zinc-100 dark:bg-zinc-800" />
 					))}
 				</div>
 			) : (
@@ -1652,7 +1692,7 @@ function PendingInvitationsSection() {
 				<MenuSectionHeader>Pending Invitations</MenuSectionHeader>
 				<MenuSection>
 					<div className="px-4 py-6">
-						<div className="h-16 animate-pulse rounded-xl bg-zinc-100 dark:bg-zinc-800" />
+						<div className="h-16 skeleton-shimmer rounded-xl bg-zinc-100 dark:bg-zinc-800" />
 					</div>
 				</MenuSection>
 			</div>
@@ -1673,9 +1713,7 @@ function PendingInvitationsSection() {
 								index === 0 ? "rounded-t-xl" : ""
 							} ${index === invitations.length - 1 ? "rounded-b-xl" : ""}`}
 						>
-							<div
-								className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${duotoneColors.violet.bg}`}
-							>
+							<div className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${duotoneColors.violet.bg}`}>
 								<EnvelopeOpenIcon className={`size-4.5 ${duotoneColors.violet.icon}`} />
 							</div>
 							<div className="min-w-0 flex-1">
@@ -1724,6 +1762,8 @@ export function AccountSettings({ section = "all" }: { section?: AccountSettings
 
 	// Notification preferences
 	const updateNotifPrefs = useUpdateNotificationPreferences(organizationId);
+	const { data: notifPrefsRaw } = useNotificationPreferences(organizationId);
+	const notifPrefs = notifPrefsRaw as { emailEnabled: boolean; pushEnabled: boolean } | undefined;
 	const [emailNotifications, setEmailNotifications] = useState(true);
 	const [pushNotifications, setPushNotifications] = useState(() => {
 		if (typeof window !== "undefined" && "Notification" in window) {
@@ -1731,6 +1771,17 @@ export function AccountSettings({ section = "all" }: { section?: AccountSettings
 		}
 		return false;
 	});
+
+	// Sync server preferences into local state when loaded
+	useEffect(() => {
+		if (notifPrefs) {
+			setEmailNotifications(notifPrefs.emailEnabled);
+			setPushNotifications(
+				notifPrefs.pushEnabled &&
+					(typeof window !== "undefined" && "Notification" in window ? Notification.permission === "granted" : false)
+			);
+		}
+	}, [notifPrefs]);
 
 	const removePushToken = useRemovePushToken(organizationId);
 	const pushTokens: { token: string; platform: string }[] = [];
@@ -1750,16 +1801,31 @@ export function AccountSettings({ section = "all" }: { section?: AccountSettings
 		} else {
 			if (value) {
 				if (!("Notification" in window)) return;
+				// If previously denied, user must change it in browser settings
+				if (Notification.permission === "denied") {
+					toast.error("Notifications are blocked. Please allow notifications in your browser settings and try again.");
+					setPushNotifications(false);
+					return;
+				}
 				const permission = await Notification.requestPermission();
 				if (permission === "granted") {
 					setPushNotifications(true);
 					updateNotifPrefs.mutate({ pushEnabled: true });
+					// Register Web Push subscription with Service Worker
+					getStreamTokenServer()
+						.then(({ token }) => subscribeToPush(organizationId, token))
+						.catch(() => {});
 				} else {
 					setPushNotifications(false);
+					if (permission === "denied") {
+						toast.error("Notifications blocked by browser. Go to browser settings to allow.");
+					}
 				}
 			} else {
 				setPushNotifications(false);
 				updateNotifPrefs.mutate({ pushEnabled: false });
+				// Unregister Web Push subscription
+				unsubscribeFromPush(organizationId).catch(() => {});
 			}
 		}
 	};
@@ -1987,7 +2053,9 @@ export function AccountSettings({ section = "all" }: { section?: AccountSettings
 										<p className="text-sm font-medium capitalize text-zinc-900 dark:text-white">
 											{token.platform} Device
 										</p>
-										<p className="truncate text-xs text-zinc-500 dark:text-zinc-400">Token: {token.token.slice(0, 16)}...</p>
+										<p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
+											Token: {token.token.slice(0, 16)}...
+										</p>
 									</div>
 									<button
 										type="button"
@@ -2048,7 +2116,7 @@ export function AccountSettings({ section = "all" }: { section?: AccountSettings
 	);
 
 	return (
-		<div className={isDialog ? "space-y-5 px-5 py-5 pb-10 sm:px-6" : "space-y-6 pb-20"}>
+		<div className={isDialog ? "space-y-5 px-5 py-5 pb-10 sm:px-6" : "animate-page-enter space-y-6 pb-20"}>
 			{section === "all" && (
 				<div>
 					<Heading>Account Settings</Heading>

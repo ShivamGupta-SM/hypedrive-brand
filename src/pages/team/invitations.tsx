@@ -53,12 +53,8 @@ export function TeamInvitations() {
 	const pendingInvitations = (invitations as Invitation[]).filter(
 		(inv) => inv.status !== "canceled" && inv.status !== "rejected"
 	);
-	const activeInvitations = pendingInvitations.filter(
-		(inv) => !inv.expiresAt || new Date(inv.expiresAt) > now
-	);
-	const expiredInvitations = pendingInvitations.filter(
-		(inv) => inv.expiresAt && new Date(inv.expiresAt) <= now
-	);
+	const activeInvitations = pendingInvitations.filter((inv) => !inv.expiresAt || new Date(inv.expiresAt) > now);
+	const expiredInvitations = pendingInvitations.filter((inv) => inv.expiresAt && new Date(inv.expiresAt) <= now);
 
 	if (activeInvitations.length === 0 && expiredInvitations.length === 0) {
 		return (
@@ -75,7 +71,7 @@ export function TeamInvitations() {
 	}
 
 	return (
-		<div className="space-y-5">
+		<div className="animate-page-enter space-y-5">
 			{/* Active invitations — card grid */}
 			{activeInvitations.length > 0 && (
 				<div>
@@ -102,9 +98,7 @@ export function TeamInvitations() {
 
 										{/* Info */}
 										<div className="min-w-0 flex-1">
-											<p className="truncate text-sm font-semibold text-zinc-900 dark:text-white">
-												{invitation.email}
-											</p>
+											<p className="truncate text-sm font-semibold text-zinc-900 dark:text-white">{invitation.email}</p>
 											{invitation.createdAt && (
 												<p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
 													Sent {formatSentDate(invitation.createdAt)}

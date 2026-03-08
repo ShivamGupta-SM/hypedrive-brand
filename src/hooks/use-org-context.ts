@@ -21,7 +21,7 @@ const orgSlugRoute = getRouteApi("/_app/$orgSlug");
 
 function resolvePermissions(
 	role: string | undefined,
-	customPermissions: Record<string, string[]> | null,
+	customPermissions: Record<string, string[]> | null
 ): Record<string, readonly string[]> | null {
 	if (!role) return null;
 	const staticPerms = ORG_ROLE_PERMISSIONS[role as OrgRole];
@@ -43,13 +43,20 @@ export function useOrgContext() {
 	const permissions = useMemo(() => resolvePermissions(role, customPermissions ?? null), [role, customPermissions]);
 	const can = useMemo(() => buildCan(permissions), [permissions]);
 
-	return {
-		organization,
-		organizationId: organization.id,
-		orgSlug,
-		activeMember: activeMember ?? null,
-		user: auth.user,
-		userId: auth.user?.id ?? null,
-		can,
-	};
+	const member = activeMember ?? null;
+	const user = auth.user;
+	const userId = user?.id ?? null;
+
+	return useMemo(
+		() => ({
+			organization,
+			organizationId: organization.id,
+			orgSlug,
+			activeMember: member,
+			user,
+			userId,
+			can,
+		}),
+		[organization, orgSlug, member, user, userId, can]
+	);
 }

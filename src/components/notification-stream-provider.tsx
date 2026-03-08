@@ -9,6 +9,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import Client from "@/lib/brand-client";
 import { API_URL } from "@/lib/config";
+import { isPushSupported, subscribeToPush } from "@/lib/push-notifications";
 import { getStreamTokenServer } from "@/server/auth-queries";
 
 // =============================================================================
@@ -33,6 +34,7 @@ interface NotificationStreamValue {
 	markRead: (ids: string[]) => void;
 	markAllRead: () => void;
 	removeItems: (ids: string[]) => void;
+	restoreSnapshot: (snapshot: { items: Notification[]; unreadCount: number }) => void;
 }
 
 const NotificationStreamContext = createContext<NotificationStreamValue | null>(null);
@@ -52,6 +54,7 @@ export function useNotificationStream(): NotificationStreamValue {
 			markRead: () => {},
 			markAllRead: () => {},
 			removeItems: () => {},
+			restoreSnapshot: () => {},
 		};
 	}
 	return ctx;
@@ -84,10 +87,55 @@ export function NotificationStreamProvider({
 
 		async function connect() {
 			try {
-				const { token } = await getStreamTokenServer();
+				let token: string;
+				try {
+					const result = await getStreamTokenServer();
+					token = result.token;
+				} catch {
+					// Token fetch failed — schedule reconnect instead of silently dying
+					if (!cancelled) scheduleReconnect();
+					return;
+				}
 				if (cancelled) return;
 
 				const client = new Client(API_URL, { auth: { authorization: `Bearer ${token}` } });
+
+				// 1. Seed the list from REST API (read + unread, full history)
+				try {
+					const res = await fetch(`${API_URL}/organizations/${organizationId}/notifications?limit=50`, {
+						headers: { Authorization: `Bearer ${token}` },
+					});
+					if (res.ok && !cancelled) {
+						const text = await res.text();
+						if (!text) throw new Error("Empty response body");
+						const data = JSON.parse(text);
+						const list = data?.notifications ?? data?.items ?? (Array.isArray(data) ? data : []);
+						if (list.length > 0) {
+							const mapped = list.map((n: Notification & { notificationType?: string }) => ({
+								id: n.id,
+								type: n.type || n.notificationType,
+								title: n.title,
+								body: n.body,
+								actionUrl: n.actionUrl,
+								imageUrl: n.imageUrl,
+								isRead: n.isRead,
+								createdAt: n.createdAt,
+							}));
+							setItems(mapped);
+							// Seed unread count from REST data before SSE connects
+							const seedUnread =
+								typeof data?.unreadCount === "number"
+									? data.unreadCount
+									: mapped.filter((n: Notification) => !n.isRead).length;
+							setUnreadCount(seedUnread);
+						}
+					}
+				} catch (err) {
+					if (!cancelled) console.warn("[notifications] Initial fetch error:", err);
+				}
+				if (cancelled) return;
+
+				// 2. Connect stream — only delivers NEW notifications + unread count updates
 				const stream = await client.notifications.stream({});
 				if (cancelled) {
 					stream.close();
@@ -117,21 +165,6 @@ export function NotificationStreamProvider({
 							}
 							return [notification, ...prev];
 						});
-
-						// Browser notification when tab is hidden
-						if (
-							typeof window !== "undefined" &&
-							"Notification" in window &&
-							Notification.permission === "granted" &&
-							!notification.isRead &&
-							document.hidden
-						) {
-							new Notification(notification.title || "Hypedrive", {
-								body: notification.body || undefined,
-								icon: "/favicon.svg",
-								tag: notification.id,
-							});
-						}
 					} else if (event.type === "unread_count") {
 						if (typeof event.unreadCount === "number") {
 							setUnreadCount(event.unreadCount);
@@ -171,6 +204,18 @@ export function NotificationStreamProvider({
 		};
 	}, [organizationId]);
 
+	// Auto-register web push subscription when permission is already granted
+	useEffect(() => {
+		if (!organizationId || !isPushSupported()) return;
+		if (typeof window === "undefined") return;
+		if (Notification.permission !== "granted") return;
+
+		// Get auth token and subscribe (fire-and-forget)
+		getStreamTokenServer()
+			.then(({ token }) => subscribeToPush(organizationId, token))
+			.catch(() => {});
+	}, [organizationId]);
+
 	const markRead = useCallback((ids: string[]) => {
 		setItems((prev) => prev.map((n) => (ids.includes(n.id) ? { ...n, isRead: true } : n)));
 		setUnreadCount((prev) => Math.max(0, prev - ids.length));
@@ -189,8 +234,15 @@ export function NotificationStreamProvider({
 		});
 	}, []);
 
+	const restoreSnapshot = useCallback((snapshot: { items: Notification[]; unreadCount: number }) => {
+		setItems(snapshot.items);
+		setUnreadCount(snapshot.unreadCount);
+	}, []);
+
 	return (
-		<NotificationStreamContext.Provider value={{ items, unreadCount, connected, markRead, markAllRead, removeItems }}>
+		<NotificationStreamContext.Provider
+			value={{ items, unreadCount, connected, markRead, markAllRead, removeItems, restoreSnapshot }}
+		>
 			{children}
 		</NotificationStreamContext.Provider>
 	);

@@ -49,6 +49,7 @@ function TriggerButton({
 						? "border border-red-500 hover:border-red-500 dark:border-red-600 dark:hover:border-red-600"
 						: "border border-zinc-950/10 hover:border-zinc-950/20 dark:border-white/10 dark:hover:border-white/20",
 					"bg-transparent dark:bg-white/5",
+					"transition-colors duration-150",
 					"focus:outline-hidden",
 					inputClassName
 				)}

@@ -300,4 +300,3 @@ export const borderColors = {
 	/** Divider line */
 	divider: "divide-zinc-200 dark:divide-zinc-700",
 } as const;
-

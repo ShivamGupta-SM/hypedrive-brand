@@ -39,7 +39,9 @@ export function WalletLayout() {
 		refetch: refetchWallet,
 	} = useWallet(organizationId);
 	const { data: holds, loading: holdsLoading, refetch: refetchHolds } = useWalletHolds(organizationId);
-	const balanceStream = useWalletBalanceStream(organizationId);
+	// Stream silently pushes real-time updates into the wallet query cache via setQueryData,
+	// so useWallet always has the latest values without a dual-source flash.
+	useWalletBalanceStream(organizationId);
 
 	// For tab badge counts — TanStack Query deduplicates these with sub-page calls
 	const { data: transactions } = useInfiniteWalletTransactions(organizationId);
@@ -55,15 +57,14 @@ export function WalletLayout() {
 	const [showDeposit, setShowDeposit] = useState(false);
 
 	const stats = useMemo(() => {
-		// Prefer real-time stream data when connected, fall back to polled wallet data
-		const balance = balanceStream.connected ? balanceStream.balanceDecimal : (wallet?.balanceDecimal || "0");
-		const holdAmount = balanceStream.connected ? balanceStream.pendingDebitDecimal : (wallet?.pendingBalanceDecimal || "0");
-		const available = balanceStream.connected ? balanceStream.availableBalanceDecimal : (wallet?.availableBalanceDecimal || "0");
+		const balance = wallet?.balanceDecimal || "0";
+		const holdAmount = wallet?.pendingBalanceDecimal || "0";
+		const available = wallet?.availableBalanceDecimal || "0";
 		const creditLimit = wallet?.creditLimitDecimal || "0";
 		const creditUtilized = wallet?.creditUtilizedDecimal || "0";
 		const creditAvailable = Math.max(0, parseFloat(creditLimit) - parseFloat(creditUtilized));
 		return { balance, holdAmount, available, creditLimit, creditUtilized, creditAvailable };
-	}, [wallet, balanceStream]);
+	}, [wallet]);
 
 	const isLowBalance = parseFloat(stats.available) < 500; // < ₹500
 
@@ -161,7 +162,7 @@ export function WalletLayout() {
 			/>
 
 			{/* Balance Card */}
-			<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
+			<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800 animate-stagger-item">
 				{/* Hero row — balance + bar side by side on desktop */}
 				<div className="p-4 sm:p-5">
 					<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -184,12 +185,12 @@ export function WalletLayout() {
 							<div className="min-w-0 flex-1 sm:max-w-xs">
 								<div className="flex h-2 gap-0.5 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
 									<div
-										className="bg-emerald-500 dark:bg-emerald-400"
+										className="bg-emerald-500 transition-[width] duration-500 ease-out dark:bg-emerald-400"
 										style={{ width: `${availPercent}%`, minWidth: availPercent > 0 ? "3px" : 0 }}
 									/>
 									{holdNum > 0 && (
 										<div
-											className="bg-amber-400"
+											className="bg-amber-400 transition-[width] duration-500 ease-out"
 											style={{ width: `${holdPercent}%`, minWidth: holdPercent > 0 ? "3px" : 0 }}
 										/>
 									)}
@@ -215,13 +216,19 @@ export function WalletLayout() {
 				<div
 					className={`grid gap-px border-t border-zinc-200 bg-zinc-200 dark:border-zinc-700 dark:bg-zinc-700 ${parseFloat(stats.creditLimit) > 0 ? "grid-cols-3" : "grid-cols-2"}`}
 				>
-					<div className="bg-white px-4 py-3 sm:px-5 dark:bg-zinc-900">
+					<div
+						className="animate-stagger-item bg-white px-4 py-3 sm:px-5 dark:bg-zinc-900"
+						style={{ animationDelay: "50ms" }}
+					>
 						<p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">Available</p>
 						<p className="mt-0.5 truncate text-sm font-semibold tabular-nums text-zinc-900 sm:text-base dark:text-white">
 							{formatCurrency(stats.available)}
 						</p>
 					</div>
-					<div className="bg-white px-4 py-3 sm:px-5 dark:bg-zinc-900">
+					<div
+						className="animate-stagger-item bg-white px-4 py-3 sm:px-5 dark:bg-zinc-900"
+						style={{ animationDelay: "100ms" }}
+					>
 						<p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
 							On Hold{holds.length > 0 ? ` (${holds.length})` : ""}
 						</p>
@@ -230,7 +237,10 @@ export function WalletLayout() {
 						</p>
 					</div>
 					{parseFloat(stats.creditLimit) > 0 && (
-						<div className="bg-white px-4 py-3 sm:px-5 dark:bg-zinc-900">
+						<div
+							className="animate-stagger-item bg-white px-4 py-3 sm:px-5 dark:bg-zinc-900"
+							style={{ animationDelay: "150ms" }}
+						>
 							<p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">Credit</p>
 							<p className="mt-0.5 truncate text-sm font-semibold tabular-nums text-zinc-900 sm:text-base dark:text-white">
 								{formatCurrency(stats.creditAvailable)}

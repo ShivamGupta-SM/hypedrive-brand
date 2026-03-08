@@ -248,11 +248,10 @@ export const passkeyReauthOptionsServer = createServerFn({ method: "POST" })
 		return context.client.auth.passkeyReauthOptions();
 	});
 
-export const passkeyAuthenticateOptionsServer = createServerFn({ method: "POST" })
-	.handler(async () => {
-		const client = new Client(API_URL);
-		return client.auth.passkeyAuthenticateOptions();
-	});
+export const passkeyAuthenticateOptionsServer = createServerFn({ method: "POST" }).handler(async () => {
+	const client = new Client(API_URL);
+	return client.auth.passkeyAuthenticateOptions();
+});
 
 export const passkeyAuthenticateServer = createServerFn({ method: "POST" })
 	.inputValidator((input: { response: unknown; challengeCookie: string }) => input)

@@ -2,12 +2,11 @@
  * Wallet Query Hooks — read-only data access for wallet, transactions, withdrawals, deposits.
  */
 
-import { useEffect, useRef, useState } from "react";
 import { keepPreviousData, useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
-import Client from "@/lib/brand-client";
-
-import { API_URL } from "@/lib/config";
+import { useEffect, useRef, useState } from "react";
 import { queryKeys } from "@/hooks/api-client";
+import Client from "@/lib/brand-client";
+import { API_URL } from "@/lib/config";
 import { getStreamTokenServer } from "@/server/auth-queries";
 import {
 	depositsQueryOptions,
@@ -68,6 +67,7 @@ export function useInfiniteWalletTransactions(
 	params?: {
 		type?: "credit" | "debit";
 		category?: "enrollment_hold" | "deposit" | "payout" | "refund" | "admin_credit";
+		q?: string;
 	}
 ) {
 	const query = useInfiniteQuery({
@@ -121,7 +121,17 @@ export function useWalletHolds(
 export function useWithdrawals(
 	organizationId: string | undefined,
 	params?: {
-		status?: "otp_pending" | "pending" | "approved" | "rejected" | "queued" | "processing" | "completed" | "failed" | "cancelled" | "reversed";
+		status?:
+			| "otp_pending"
+			| "pending"
+			| "approved"
+			| "rejected"
+			| "queued"
+			| "processing"
+			| "completed"
+			| "failed"
+			| "cancelled"
+			| "reversed";
 		sortBy?: "requestedAt" | "amount" | "status";
 		sortOrder?: "asc" | "desc";
 		skip?: number;
@@ -281,7 +291,6 @@ export function useWalletBalanceStream(organizationId: string | undefined) {
 					return;
 				}
 				streamRef.current = stream;
-				setState((prev) => ({ ...prev, connected: true }));
 				retryAttempt = 0;
 
 				for await (const update of stream) {
@@ -299,8 +308,18 @@ export function useWalletBalanceStream(organizationId: string | undefined) {
 						connected: true,
 					});
 
-					// Invalidate the wallet query so other components stay in sync
-					queryClient.invalidateQueries({ queryKey: queryKeys.wallet(organizationId!) });
+					// Update cached wallet data in-place so other components stay in sync
+					// (setQueryData avoids a network refetch unlike invalidateQueries)
+					queryClient.setQueryData(queryKeys.wallet(organizationId!), (old: Record<string, unknown> | undefined) => {
+						if (!old) return old;
+						return {
+							...old,
+							balance: update.balance,
+							balanceDecimal: update.balanceDecimal,
+							pendingBalanceDecimal: update.pendingDebitDecimal,
+							availableBalanceDecimal: update.availableBalanceDecimal,
+						};
+					});
 				}
 
 				// Stream ended cleanly — reconnect

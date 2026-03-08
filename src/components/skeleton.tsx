@@ -3,8 +3,8 @@
  * Wrapper around react-loading-skeleton with Catalyst theme integration
  */
 
-import { useIsDark } from "@/hooks/use-theme";
 import ReactSkeleton, { SkeletonTheme } from "react-loading-skeleton";
+import { useIsDark } from "@/hooks/use-theme";
 import "react-loading-skeleton/dist/skeleton.css";
 import clsx from "clsx";
 

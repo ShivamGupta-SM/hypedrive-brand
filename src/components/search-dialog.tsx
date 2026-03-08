@@ -16,10 +16,11 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Badge } from "@/components/badge";
+import { RelativeTime } from "@/components/shared/relative-time";
 import { Skeleton, SkeletonProvider } from "@/components/skeleton";
 import { useUnifiedSearch } from "@/features/organization/hooks";
 import type { brand } from "@/lib/brand-client";
-import { formatRelativeTime, formatStatus, getStatusColor } from "@/lib/design-tokens";
+import { formatStatus, getStatusColor } from "@/lib/design-tokens";
 import { HighlightText } from "@/lib/highlight-text";
 
 // =============================================================================
@@ -192,11 +193,13 @@ function SearchResultRow({
 	query,
 	onSelect,
 	isFocused,
+	index = 0,
 }: {
 	result: brand.BrandSearchResult;
 	query: string;
 	onSelect: () => void;
 	isFocused: boolean;
+	index?: number;
 }) {
 	const thumbnail = result.listing?.primaryImage ?? null;
 
@@ -221,14 +224,16 @@ function SearchResultRow({
 		<button
 			type="button"
 			onClick={onSelect}
-			className={`group flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left transition-all ${
+			className={`group flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left transition-all animate-slide-up ${
 				isFocused ? "bg-zinc-950/[0.04] dark:bg-white/[0.06]" : "hover:bg-zinc-950/[0.03] dark:hover:bg-white/[0.04]"
 			}`}
+			style={{ animationDelay: `${index * 30}ms` }}
 		>
 			{thumbnail ? (
 				<img
 					src={thumbnail}
 					alt=""
+					loading="lazy"
 					className="size-10 shrink-0 rounded-lg bg-zinc-100 object-contain dark:bg-zinc-800"
 				/>
 			) : (
@@ -266,7 +271,9 @@ function SearchResultRow({
 			</div>
 
 			<div className="flex shrink-0 flex-col items-end gap-1">
-				<p className="text-[11px] text-zinc-500 dark:text-zinc-400">{formatRelativeTime(result.createdAt)}</p>
+				<p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+					<RelativeTime date={result.createdAt} live={false} />
+				</p>
 				<ArrowRightIcon className="size-3 text-zinc-300 opacity-0 transition-opacity group-hover:opacity-100 dark:text-zinc-600" />
 			</div>
 		</button>
@@ -520,7 +527,7 @@ export function SearchDialog({
 					{/* Refetch progress bar */}
 					{hasQuery && isFetching && !loading && (
 						<div className="h-0.5 bg-zinc-200/60 dark:bg-zinc-700/60">
-							<div className="h-full w-1/3 animate-pulse rounded-full bg-zinc-400/50 dark:bg-zinc-500/50" />
+							<div className="h-full w-1/3 skeleton-shimmer rounded-full bg-zinc-400/50 dark:bg-zinc-500/50" />
 						</div>
 					)}
 
@@ -532,7 +539,7 @@ export function SearchDialog({
 									key={tab.key}
 									type="button"
 									onClick={() => setFilter(tab.key)}
-									className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+									className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-all duration-150 ${
 										filter === tab.key
 											? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
 											: "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
@@ -655,7 +662,6 @@ export function SearchDialog({
 									No results for &ldquo;{debouncedQuery}&rdquo;
 									{filter !== "all" && ` in ${filter}`}
 								</p>
-
 							</div>
 						)}
 
@@ -669,13 +675,14 @@ export function SearchDialog({
 												Campaigns
 											</span>
 										</div>
-										{grouped.campaigns.map((result) => (
+										{grouped.campaigns.map((result, i) => (
 											<SearchResultRow
 												key={result.id}
 												result={result}
 												query={debouncedQuery}
 												onSelect={() => handleSelectResult(result)}
 												isFocused={focusedIndex === getResultFlatIndex(result)}
+												index={i}
 											/>
 										))}
 									</>
@@ -687,13 +694,14 @@ export function SearchDialog({
 												Enrollments
 											</span>
 										</div>
-										{grouped.enrollments.map((result) => (
+										{grouped.enrollments.map((result, i) => (
 											<SearchResultRow
 												key={result.id}
 												result={result}
 												query={debouncedQuery}
 												onSelect={() => handleSelectResult(result)}
 												isFocused={focusedIndex === getResultFlatIndex(result)}
+												index={i}
 											/>
 										))}
 									</>
@@ -705,13 +713,14 @@ export function SearchDialog({
 												Listings
 											</span>
 										</div>
-										{grouped.listings.map((result) => (
+										{grouped.listings.map((result, i) => (
 											<SearchResultRow
 												key={result.id}
 												result={result}
 												query={debouncedQuery}
 												onSelect={() => handleSelectResult(result)}
 												isFocused={focusedIndex === getResultFlatIndex(result)}
+												index={i}
 											/>
 										))}
 									</>
@@ -723,13 +732,14 @@ export function SearchDialog({
 												Invoices
 											</span>
 										</div>
-										{grouped.invoices.map((result) => (
+										{grouped.invoices.map((result, i) => (
 											<SearchResultRow
 												key={result.id}
 												result={result}
 												query={debouncedQuery}
 												onSelect={() => handleSelectResult(result)}
 												isFocused={focusedIndex === getResultFlatIndex(result)}
+												index={i}
 											/>
 										))}
 									</>

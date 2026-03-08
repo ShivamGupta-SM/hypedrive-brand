@@ -101,7 +101,7 @@ export function FilterBar({
 								<button
 									type="button"
 									onClick={() => onSearchChange("")}
-									className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-zinc-400 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-300"
+									className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-zinc-400 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-300 transition-colors duration-150"
 								>
 									<XMarkIcon className="size-4" />
 								</button>
@@ -139,7 +139,11 @@ export function FilterBar({
 
 				{/* Clear filters */}
 				{hasActiveFilters && onClearFilters && (
-					<Button plain onClick={onClearFilters} className="text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200">
+					<Button
+						plain
+						onClick={onClearFilters}
+						className="text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+					>
 						<XMarkIcon data-slot="icon" />
 						Clear
 					</Button>
@@ -155,7 +159,7 @@ export function FilterBar({
 							type="button"
 							onClick={() => onViewModeChange("list")}
 							className={clsx(
-								"flex items-center justify-center rounded-l-lg p-2 transition-colors",
+								"flex items-center justify-center rounded-l-lg p-2 transition-colors duration-150",
 								viewMode === "list"
 									? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-white"
 									: "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
@@ -168,7 +172,7 @@ export function FilterBar({
 							type="button"
 							onClick={() => onViewModeChange("grid")}
 							className={clsx(
-								"flex items-center justify-center rounded-r-lg p-2 transition-colors",
+								"flex items-center justify-center rounded-r-lg p-2 transition-colors duration-150",
 								viewMode === "grid"
 									? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-white"
 									: "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
@@ -232,7 +236,7 @@ export function FilterPills({ className, options, value, onChange, allLabel = "A
 				type="button"
 				onClick={() => onChange("")}
 				className={clsx(
-					"rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
+					"rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-150 active:scale-[0.97]",
 					!value
 						? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
 						: "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
@@ -246,7 +250,7 @@ export function FilterPills({ className, options, value, onChange, allLabel = "A
 					type="button"
 					onClick={() => onChange(option.value)}
 					className={clsx(
-						"rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
+						"rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-150 active:scale-[0.97]",
 						value === option.value
 							? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
 							: "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
@@ -294,7 +298,7 @@ export function ActiveFilters({ className, filters, onRemove, onClearAll }: Acti
 					<button
 						type="button"
 						onClick={() => onRemove(filter.field)}
-						className="rounded-full p-0.5 text-zinc-400 hover:bg-zinc-200 hover:text-zinc-600 dark:text-zinc-400 dark:hover:bg-zinc-700 dark:hover:text-zinc-300"
+						className="rounded-full p-0.5 text-zinc-400 transition-colors duration-150 hover:bg-zinc-200 hover:text-zinc-600 dark:text-zinc-400 dark:hover:bg-zinc-700 dark:hover:text-zinc-300"
 					>
 						<XMarkIcon className="size-3.5" />
 					</button>

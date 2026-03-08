@@ -83,11 +83,15 @@ export function PendingApproval({ organization }: { organization: { name: string
 
 					{/* Actions */}
 					<div className="mt-8 flex flex-col gap-3">
-						<Button onClick={handleCheckStatus} disabled={loading} aria-busy={loading} color="dark/zinc" className="w-full">
-							<ArrowPathIcon className={`size-4 ${loading ? "animate-spin" : ""}`} />
-						<output aria-live="polite">
-							{loading ? "Checking…" : "Check Status"}
-						</output>
+						<Button
+							onClick={handleCheckStatus}
+							loading={loading}
+							aria-busy={loading}
+							color="dark/zinc"
+							className="w-full"
+						>
+							<ArrowPathIcon className="size-4" />
+							Check Status
 						</Button>
 
 						<Button onClick={handleSignOut} outline className="w-full">

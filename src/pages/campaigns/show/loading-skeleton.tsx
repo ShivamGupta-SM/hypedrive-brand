@@ -3,9 +3,9 @@ import { Skeleton } from "@/components/skeleton";
 
 export function LoadingSkeleton() {
 	return (
-		<div className="space-y-4 sm:space-y-6 animate-fade-in">
+		<div className="space-y-4 sm:space-y-6">
 			{/* Header Card */}
-			<div className="overflow-hidden rounded-xl bg-white p-4 shadow-sm ring-1 ring-zinc-200 sm:p-6 dark:bg-zinc-900 dark:ring-zinc-800">
+			<div className="overflow-hidden rounded-xl bg-white p-4 shadow-sm ring-1 ring-zinc-200 sm:p-6 animate-fade-in dark:bg-zinc-900 dark:ring-zinc-800">
 				{/* Breadcrumb + Actions row */}
 				<div className="mb-4 flex items-center justify-between gap-4">
 					<div className="flex items-center gap-2">
@@ -36,7 +36,7 @@ export function LoadingSkeleton() {
 			</div>
 
 			{/* Tabs */}
-			<div className="flex gap-1 sm:gap-1.5">
+			<div className="flex gap-1 sm:gap-1.5 animate-fade-in" style={{ animationDelay: "80ms" }}>
 				<Skeleton width={90} height={32} borderRadius={999} />
 				<Skeleton width={100} height={32} borderRadius={999} />
 				<Skeleton width={70} height={32} borderRadius={999} />
@@ -56,7 +56,10 @@ export function LoadingSkeleton() {
 			/>
 
 			{/* Progress Card */}
-			<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
+			<div
+				className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 animate-fade-in dark:bg-zinc-900 dark:ring-zinc-800"
+				style={{ animationDelay: "200ms" }}
+			>
 				<div className="grid sm:grid-cols-2">
 					{[1, 2].map((i) => (
 						<div key={i} className="p-3.5 sm:p-4">
@@ -76,7 +79,7 @@ export function LoadingSkeleton() {
 			</div>
 
 			{/* Content Grid */}
-			<div className="grid gap-4 sm:gap-5 lg:grid-cols-2">
+			<div className="grid gap-4 sm:gap-5 lg:grid-cols-2 animate-fade-in" style={{ animationDelay: "280ms" }}>
 				<div className="space-y-4 sm:space-y-5">
 					<Skeleton width="100%" height={52} borderRadius={12} />
 					<div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
@@ -87,7 +90,10 @@ export function LoadingSkeleton() {
 				</div>
 				<div className="space-y-4 sm:space-y-5">
 					{[1, 2].map((i) => (
-						<div key={i} className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
+						<div
+							key={i}
+							className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800"
+						>
 							<div className="border-b border-zinc-200 px-3.5 py-2.5 sm:px-4 sm:py-3 dark:border-zinc-700">
 								<Skeleton width={100 + i * 20} height={16} />
 							</div>

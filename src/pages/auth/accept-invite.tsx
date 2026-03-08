@@ -1,9 +1,4 @@
-import {
-	CheckCircleIcon,
-	ExclamationTriangleIcon,
-	HomeModernIcon,
-	XCircleIcon,
-} from "@heroicons/react/16/solid";
+import { CheckCircleIcon, ExclamationTriangleIcon, HomeModernIcon, XCircleIcon } from "@heroicons/react/16/solid";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/button";

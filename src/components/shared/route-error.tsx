@@ -21,14 +21,32 @@ export function RouteErrorComponent({ error, reset }: { error: unknown; reset?: 
 
 export function RoutePendingComponent() {
 	return (
-		<div className="space-y-4 p-1">
-			<div className="h-8 w-48 animate-pulse rounded-lg bg-zinc-100 dark:bg-zinc-800" />
+		<div className="space-y-4 p-1 animate-fade-in">
+			{/* Title skeleton */}
+			<div className="h-8 w-48 rounded-lg bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
+
+			{/* Stats row */}
 			<div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
 				{Array.from({ length: 4 }).map((_, i) => (
-					<div key={i} className="h-24 animate-pulse rounded-xl bg-zinc-100 dark:bg-zinc-800" />
+					<div
+						key={i}
+						className="h-24 rounded-xl bg-zinc-100 skeleton-shimmer dark:bg-zinc-800"
+						style={{ animationDelay: `${i * 80}ms` }}
+					/>
 				))}
 			</div>
-			<div className="h-64 animate-pulse rounded-xl bg-zinc-100 dark:bg-zinc-800" />
+
+			{/* Content skeleton */}
+			<div className="space-y-3">
+				<div
+					className="h-10 rounded-xl bg-zinc-100 skeleton-shimmer dark:bg-zinc-800"
+					style={{ animationDelay: "320ms" }}
+				/>
+				<div
+					className="h-64 rounded-xl bg-zinc-100 skeleton-shimmer dark:bg-zinc-800"
+					style={{ animationDelay: "400ms" }}
+				/>
+			</div>
 		</div>
 	);
 }

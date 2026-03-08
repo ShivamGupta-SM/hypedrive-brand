@@ -1,5 +1,4 @@
 import {
-	ArrowPathIcon,
 	CheckCircleIcon,
 	ChevronLeftIcon,
 	ChevronRightIcon,
@@ -39,13 +38,7 @@ export interface EditCampaignModalProps {
 	onSuccess: () => void;
 }
 
-export function EditCampaignModal({
-	isOpen,
-	onClose,
-	organizationId,
-	campaign,
-	onSuccess,
-}: EditCampaignModalProps) {
+export function EditCampaignModal({ isOpen, onClose, organizationId, campaign, onSuccess }: EditCampaignModalProps) {
 	const [step, setStep] = useState(1);
 	const [formData, setFormData] = useState<EditCampaignFormData>({
 		title: "",
@@ -408,18 +401,9 @@ export function EditCampaignModal({
 						<ChevronRightIcon className="size-4" />
 					</Button>
 				) : (
-					<Button color="emerald" onClick={handleSubmit} disabled={updateCampaign.isPending}>
-						{updateCampaign.isPending ? (
-							<>
-								<ArrowPathIcon className="size-4 animate-spin" />
-								Saving...
-							</>
-						) : (
-							<>
-								<CheckCircleIcon className="size-4" />
-								Save Changes
-							</>
-						)}
+					<Button color="emerald" onClick={handleSubmit} loading={updateCampaign.isPending}>
+						<CheckCircleIcon className="size-4" />
+						Save Changes
 					</Button>
 				)}
 			</DialogActions>

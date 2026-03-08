@@ -1,5 +1,4 @@
 import {
-	ArrowPathIcon,
 	EllipsisVerticalIcon,
 	ExclamationTriangleIcon,
 	PencilIcon,
@@ -165,16 +164,20 @@ function RolesContent({ organizationId }: { organizationId: string | undefined }
 		return (
 			<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
 				{[1, 2, 3].map((i) => (
-					<div key={i} className="overflow-hidden rounded-xl bg-white shadow-xs ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
+					<div
+						key={i}
+						className="overflow-hidden rounded-xl bg-white shadow-xs ring-1 ring-zinc-200 animate-fade-in dark:bg-zinc-900 dark:ring-zinc-800"
+						style={{ animationDelay: `${i * 60}ms` }}
+					>
 						<div className="flex items-start gap-3.5 p-4 sm:p-5">
-							<div className="size-12 shrink-0 animate-pulse rounded-full bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+							<div className="size-12 shrink-0 rounded-full bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
 							<div className="flex-1">
-								<div className="h-4 w-20 animate-pulse rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
-								<div className="mt-1.5 h-3 w-36 animate-pulse rounded bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
+								<div className="h-4 w-20 rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+								<div className="mt-1.5 h-3 w-36 rounded bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
 							</div>
 						</div>
 						<div className="flex items-center justify-center border-t border-zinc-200 bg-zinc-50/50 py-2.5 dark:border-zinc-800 dark:bg-zinc-800/30">
-							<div className="h-5 w-20 animate-pulse rounded-full bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
+							<div className="h-5 w-20 rounded-full bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
 						</div>
 					</div>
 				))}
@@ -183,7 +186,7 @@ function RolesContent({ organizationId }: { organizationId: string | undefined }
 	}
 
 	return (
-		<div className="space-y-5">
+		<div className="animate-page-enter space-y-5">
 			{/* Built-in roles */}
 			<div>
 				<p className="mb-2.5 text-xs font-medium text-zinc-500 dark:text-zinc-400">Built-in Roles</p>
@@ -202,9 +205,7 @@ function RolesContent({ organizationId }: { organizationId: string | undefined }
 									)}
 								</div>
 								<div className="min-w-0 flex-1">
-									<p className="text-sm font-semibold text-zinc-900 dark:text-white">
-										{formatRoleName(builtIn.role)}
-									</p>
+									<p className="text-sm font-semibold text-zinc-900 dark:text-white">{formatRoleName(builtIn.role)}</p>
 									<p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">{builtIn.description}</p>
 								</div>
 							</div>
@@ -261,9 +262,7 @@ function RolesContent({ organizationId }: { organizationId: string | undefined }
 
 										{/* Info */}
 										<div className="min-w-0 flex-1">
-											<p className="text-sm font-semibold text-zinc-900 dark:text-white">
-												{formatRoleName(role.role)}
-											</p>
+											<p className="text-sm font-semibold text-zinc-900 dark:text-white">{formatRoleName(role.role)}</p>
 											<p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
 												{permCount > 0
 													? `${totalActions} permission${totalActions !== 1 ? "s" : ""} across ${permCount} resource${permCount !== 1 ? "s" : ""}`
@@ -371,18 +370,14 @@ function RolesContent({ organizationId }: { organizationId: string | undefined }
 					>
 						Cancel
 					</Button>
-					<Button color="emerald" onClick={handleCreateRole} disabled={createRole.isPending || !newRoleName.trim()}>
-						{createRole.isPending ? (
-							<>
-								<ArrowPathIcon className="size-4 animate-spin" />
-								Creating...
-							</>
-						) : (
-							<>
-								<ShieldCheckIcon className="size-4" />
-								Create Role
-							</>
-						)}
+					<Button
+						color="emerald"
+						onClick={handleCreateRole}
+						loading={createRole.isPending}
+						disabled={!newRoleName.trim()}
+					>
+						<ShieldCheckIcon className="size-4" />
+						Create Role
 					</Button>
 				</DialogActions>
 			</Dialog>
@@ -469,15 +464,8 @@ function RolesContent({ organizationId }: { organizationId: string | undefined }
 					<Button plain onClick={() => setEditingRole(null)}>
 						Cancel
 					</Button>
-					<Button color="emerald" onClick={handleSaveRole} disabled={updateRole.isPending}>
-						{updateRole.isPending ? (
-							<>
-								<ArrowPathIcon className="size-4 animate-spin" />
-								Saving...
-							</>
-						) : (
-							"Save Permissions"
-						)}
+					<Button color="emerald" onClick={handleSaveRole} loading={updateRole.isPending}>
+						Save Permissions
 					</Button>
 				</DialogActions>
 			</Dialog>

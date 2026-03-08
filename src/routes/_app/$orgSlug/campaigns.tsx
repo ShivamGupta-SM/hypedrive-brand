@@ -3,7 +3,6 @@ import { z } from "zod";
 
 import { RouteErrorComponent, RoutePendingComponent } from "@/components/shared/route-error";
 import { infiniteCampaignsQueryOptions } from "@/features/campaigns/queries";
-import { CampaignsLayout } from "@/pages/campaigns";
 
 const searchSchema = z.object({
 	q: z.string().optional().catch(undefined),
@@ -20,7 +19,6 @@ export const Route = createFileRoute("/_app/$orgSlug/campaigns")({
 		if (!orgId) return;
 		await context.queryClient.prefetchInfiniteQuery(infiniteCampaignsQueryOptions(orgId, {}));
 	},
-	component: CampaignsLayout,
 	errorComponent: RouteErrorComponent,
 	pendingComponent: RoutePendingComponent,
 });

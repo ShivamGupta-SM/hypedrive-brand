@@ -37,7 +37,7 @@ export const IconButton = forwardRef<HTMLButtonElement | HTMLAnchorElement, Icon
 	ref
 ) {
 	const classes = clsx(
-		"inline-flex h-10 w-10 shrink-0 self-start items-center justify-center rounded-full shadow-sm transition-all hover:shadow-md disabled:opacity-50",
+		"inline-flex h-10 w-10 shrink-0 self-start items-center justify-center rounded-full shadow-sm transition-all duration-150 hover:shadow-md active:scale-[0.95] disabled:opacity-50",
 		colorStyles[color],
 		className
 	);

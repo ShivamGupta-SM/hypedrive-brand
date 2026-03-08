@@ -163,6 +163,7 @@ export function FileDropzone({
 								<img
 									src={file.preview}
 									alt={file.name}
+									loading="lazy"
 									className="size-10 rounded-lg object-contain bg-zinc-100 dark:bg-zinc-800"
 								/>
 							) : (
@@ -275,7 +276,7 @@ export function AvatarUpload({ src, onFileChange, size = 96, error, disabled, cl
 			<input {...getInputProps()} />
 			{src ? (
 				<>
-					<img src={src} alt="Avatar" className="size-full object-cover" />
+					<img src={src} alt="Avatar" loading="lazy" className="size-full object-cover" />
 					<div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
 						<ArrowUpTrayIcon className="size-6 text-white" />
 					</div>

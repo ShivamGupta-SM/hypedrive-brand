@@ -1,17 +1,14 @@
 import {
-	ArrowPathIcon,
 	ArrowTopRightOnSquareIcon,
 	CheckCircleIcon,
 	ClockIcon,
 	CurrencyRupeeIcon,
 	ExclamationTriangleIcon,
-	HashtagIcon,
 	LinkIcon,
 	MegaphoneIcon,
 	PencilSquareIcon,
 	PhotoIcon,
 	ShoppingBagIcon,
-	UserIcon,
 	XCircleIcon,
 } from "@heroicons/react/16/solid";
 import { useParams } from "@tanstack/react-router";
@@ -21,6 +18,7 @@ import LightGallery from "lightgallery/react";
 import { useMemo, useState } from "react";
 import "lightgallery/css/lightgallery.css";
 import "lightgallery/css/lg-zoom.css";
+import "@/styles/lightgallery-theme.css";
 import { Badge } from "@/components/badge";
 import { Button } from "@/components/button";
 import { ContentCard } from "@/components/content-card";
@@ -30,6 +28,8 @@ import { Link } from "@/components/link";
 import { useCan } from "@/components/shared/can";
 import { CopyButton } from "@/components/shared/copy-button";
 import { ErrorState } from "@/components/shared/error-state";
+import { FadeImage } from "@/components/shared/fade-image";
+import { RelativeTime } from "@/components/shared/relative-time";
 import { Skeleton } from "@/components/skeleton";
 import { Textarea } from "@/components/textarea";
 import { useEnrollment } from "@/features/enrollments/hooks";
@@ -42,7 +42,7 @@ import { getAssetUrl } from "@/hooks/api-client";
 import { usePageTitle } from "@/hooks/use-breadcrumb";
 import { useOrgContext } from "@/hooks/use-org-context";
 import type { brand, db } from "@/lib/brand-client";
-import { formatCurrency, formatDateTime, formatRelativeTime, getInitials } from "@/lib/design-tokens";
+import { formatCurrency, formatDateTime, getInitials } from "@/lib/design-tokens";
 import { showToast } from "@/lib/toast";
 
 type EnrollmentStatus = db.EnrollmentStatus;
@@ -190,12 +190,12 @@ function LoadingSkeleton() {
 		<div className="animate-fade-in space-y-5">
 			{/* Hero */}
 			<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-				<div className="p-5 sm:p-6">
-					<div className="flex items-start gap-4">
-						<Skeleton width={52} height={52} borderRadius={14} />
+				<div className="p-4 sm:p-5">
+					<div className="flex items-start gap-3 sm:gap-4">
+						<Skeleton width={80} height={80} borderRadius={12} />
 						<div className="flex-1 space-y-2.5">
 							<Skeleton width={180} height={22} borderRadius={6} />
-							<Skeleton width={140} height={14} borderRadius={6} />
+							<Skeleton width={220} height={14} borderRadius={6} />
 							<div className="flex gap-2">
 								<Skeleton width={90} height={22} borderRadius={10} />
 								<Skeleton width={70} height={22} borderRadius={10} />
@@ -213,76 +213,19 @@ function LoadingSkeleton() {
 				</div>
 			</div>
 
-			{/* Grid */}
-			<div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+			{/* Grid — matches 7/5 layout */}
+			<div className="grid grid-cols-1 gap-5 lg:grid-cols-[7fr_5fr]">
 				<div className="space-y-5">
-					<Skeleton width="100%" height={320} borderRadius={12} />
-					<Skeleton width="100%" height={280} borderRadius={12} />
+					<Skeleton width="100%" height={260} borderRadius={12} />
+					<Skeleton width="100%" height={300} borderRadius={12} />
 				</div>
 				<div className="space-y-5">
-					<Skeleton width="100%" height={120} borderRadius={12} />
 					<Skeleton width="100%" height={180} borderRadius={12} />
-					<Skeleton width="100%" height={200} borderRadius={12} />
+					<Skeleton width="100%" height={220} borderRadius={12} />
 					<Skeleton width="100%" height={200} borderRadius={12} />
 				</div>
 			</div>
 		</div>
-	);
-}
-
-// =============================================================================
-// DETAIL ROW
-// =============================================================================
-
-function DetailRow({
-	label,
-	value,
-	copyValue,
-	mono,
-}: {
-	label: string;
-	value: React.ReactNode;
-	copyValue?: string;
-	mono?: boolean;
-}) {
-	return (
-		<div className="flex items-center justify-between gap-4 py-2.5">
-			<dt className="shrink-0 text-[13px] text-zinc-500 dark:text-zinc-400">{label}</dt>
-			<dd className="flex min-w-0 items-center gap-1.5">
-				{typeof value === "string" ? (
-					<span
-						className={clsx(
-							"truncate text-[13px] font-medium text-zinc-900 dark:text-zinc-100",
-							mono && "font-mono text-xs"
-						)}
-					>
-						{value}
-					</span>
-				) : (
-					value
-				)}
-				{copyValue && <CopyButton value={copyValue} label={label} />}
-			</dd>
-		</div>
-	);
-}
-
-// =============================================================================
-// ZOOMABLE IMAGE
-// =============================================================================
-
-function ZoomableImage({ src, alt, className }: { src: string; alt: string; className?: string }) {
-	return (
-		<LightGallery plugins={[lgZoom]} download={false} backdropDuration={200} elementClassNames="inline">
-			<a href={src}>
-				<img
-					src={src}
-					alt={alt}
-					loading="lazy"
-					className={clsx("cursor-pointer transition-all duration-300 hover:brightness-95", className)}
-				/>
-			</a>
-		</LightGallery>
 	);
 }
 
@@ -383,19 +326,19 @@ function TimelineItem({ item, isLast }: { item: brand.EnrollmentDetail["history"
 			<div className={clsx("min-w-0 flex-1 pt-0.5", !isLast && "pb-5")}>
 				<div className="flex items-start justify-between gap-2">
 					<div className="min-w-0">
-						<p className="text-[13px] font-medium text-zinc-900 dark:text-zinc-100">
+						<p className="text-[13px] font-semibold text-zinc-900 dark:text-zinc-100">
 							{STATUS_LABELS[item.toStatus] || item.toStatus}
 						</p>
 						{item.reason && (
 							<p className="mt-0.5 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">{item.reason}</p>
 						)}
 					</div>
-					<span className="shrink-0 whitespace-nowrap pt-0.5 text-[11px] tabular-nums text-zinc-400 dark:text-zinc-500">
-						{formatRelativeTime(item.changedAt)}
+					<span className="shrink-0 whitespace-nowrap pt-0.5 text-[11px] tabular-nums text-zinc-500 dark:text-zinc-400">
+						<RelativeTime date={item.changedAt} />
 					</span>
 				</div>
 				{item.changedByName && (
-					<p className="mt-0.5 text-[11px] text-zinc-400 dark:text-zinc-500">by {item.changedByName}</p>
+					<p className="mt-0.5 text-[11px] text-zinc-500 dark:text-zinc-400">by {item.changedByName}</p>
 				)}
 			</div>
 		</div>
@@ -421,7 +364,7 @@ function SectionHeader({
 		<div className="flex items-center justify-between gap-2.5 border-b border-zinc-200/80 px-4 py-3 sm:px-5 dark:border-zinc-800">
 			<div className="flex items-center gap-2.5">
 				<Icon className={clsx("size-4", iconColor)} />
-				<h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{title}</h3>
+				<h3 className="text-[13px] font-bold uppercase tracking-wide text-zinc-900 dark:text-zinc-100">{title}</h3>
 			</div>
 			{actions}
 		</div>
@@ -515,18 +458,9 @@ function ApproveDialog({
 				<Button plain onClick={onClose} disabled={approveEnrollment.isPending}>
 					Cancel
 				</Button>
-				<Button color="emerald" onClick={handleSubmit} disabled={approveEnrollment.isPending}>
-					{approveEnrollment.isPending ? (
-						<>
-							<ArrowPathIcon className="size-4 animate-spin" />
-							Processing...
-						</>
-					) : (
-						<>
-							<CheckCircleIcon className="size-4" />
-							Approve & Pay
-						</>
-					)}
+				<Button color="emerald" onClick={handleSubmit} loading={approveEnrollment.isPending}>
+					<CheckCircleIcon className="size-4" />
+					Approve & Pay
 				</Button>
 			</DialogActions>
 		</Dialog>
@@ -599,18 +533,9 @@ function RejectDialog({
 				<Button plain onClick={onClose} disabled={rejectEnrollment.isPending}>
 					Cancel
 				</Button>
-				<Button color="red" onClick={handleSubmit} disabled={rejectEnrollment.isPending || !reason.trim()}>
-					{rejectEnrollment.isPending ? (
-						<>
-							<ArrowPathIcon className="size-4 animate-spin" />
-							Rejecting...
-						</>
-					) : (
-						<>
-							<XCircleIcon className="size-4" />
-							Confirm Rejection
-						</>
-					)}
+				<Button color="red" onClick={handleSubmit} loading={rejectEnrollment.isPending} disabled={!reason.trim()}>
+					<XCircleIcon className="size-4" />
+					Confirm Rejection
 				</Button>
 			</DialogActions>
 		</Dialog>
@@ -683,18 +608,9 @@ function RequestChangesDialog({
 				<Button plain onClick={onClose} disabled={requestChanges.isPending}>
 					Cancel
 				</Button>
-				<Button color="amber" onClick={handleSubmit} disabled={requestChanges.isPending || !comment.trim()}>
-					{requestChanges.isPending ? (
-						<>
-							<ArrowPathIcon className="size-4 animate-spin" />
-							Sending...
-						</>
-					) : (
-						<>
-							<PencilSquareIcon className="size-4" />
-							Send Request
-						</>
-					)}
+				<Button color="amber" onClick={handleSubmit} loading={requestChanges.isPending} disabled={!comment.trim()}>
+					<PencilSquareIcon className="size-4" />
+					Send Request
 				</Button>
 			</DialogActions>
 		</Dialog>
@@ -757,56 +673,69 @@ export function EnrollmentShow() {
 	const taskProgress = totalTasks > 0 ? Math.round((submittedTasks.length / totalTasks) * 100) : 0;
 
 	return (
-		<div className="space-y-5 pb-24 sm:pb-0">
+		<div className="animate-page-enter space-y-5 pb-24 sm:pb-0">
 			{/* ================================================================
-			    HERO CARD
+			    HERO CARD — creator avatar as primary visual anchor
 			    ================================================================ */}
 			<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-				<div className={clsx("relative bg-gradient-to-r p-5 sm:p-6", sc.gradient)}>
-					<div className="flex flex-wrap items-start justify-between gap-4">
-						<div className="flex items-center gap-4">
+				<div className={clsx("relative bg-linear-to-r p-4 sm:p-5", sc.gradient)}>
+					<div className="flex items-start gap-3 sm:gap-4">
+						{/* Thumbnail */}
+						{enrollment.campaign?.listingImage ? (
+							<FadeImage
+								src={getAssetUrl(enrollment.campaign.listingImage)}
+								alt={campaignTitle}
+								className="size-14 shrink-0 rounded-lg bg-zinc-100 object-contain p-1.5 ring-1 ring-zinc-200 sm:size-20 sm:rounded-xl sm:p-2 dark:bg-zinc-800 dark:ring-zinc-700"
+							/>
+						) : (
 							<div
 								className={clsx(
-									"flex size-13 shrink-0 items-center justify-center rounded-xl ring-1 ring-black/5",
-									sc.bg
+									"flex size-14 shrink-0 items-center justify-center rounded-lg text-base font-bold text-white sm:size-20 sm:rounded-xl sm:text-xl",
+									getAvatarColor(creatorName)
 								)}
 							>
-								<StatusIcon className={clsx("size-6", sc.text)} />
+								{getInitials(creatorName)}
 							</div>
-							<div>
-								<div className="flex items-center gap-2.5">
-									<h1 className="text-lg font-semibold text-zinc-900 sm:text-xl dark:text-white">
-										{enrollment.displayId}
-									</h1>
-									<Badge color={sc.color} className="inline-flex items-center gap-1">
-										<span className={clsx("size-1.5 rounded-full", sc.dot)} />
-										{sc.label}
+						)}
+
+						{/* Title + meta */}
+						<div className="min-w-0 flex-1">
+							<div className="flex flex-wrap items-center gap-2">
+								<h1 className="text-lg font-bold tracking-tight text-zinc-900 sm:text-xl dark:text-white">
+									{enrollment.displayId}
+								</h1>
+								<Badge color={sc.color} className="inline-flex items-center gap-1">
+									<StatusIcon className="size-3" />
+									{sc.label}
+								</Badge>
+							</div>
+							<p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[13px] text-zinc-500 dark:text-zinc-400">
+								<span className="font-semibold text-zinc-800 dark:text-zinc-200">{creatorName}</span>
+								<span className="size-1 rounded-full bg-zinc-400 dark:bg-zinc-500" />
+								<span>{campaignTitle}</span>
+								{platformName && (
+									<>
+										<span className="size-1 rounded-full bg-zinc-400 dark:bg-zinc-500" />
+										<span className="inline-flex items-center gap-1">
+											{PlatIcon && <PlatIcon className={clsx("size-3.5", getPlatformColor(platformName))} />}
+											{platformName}
+										</span>
+									</>
+								)}
+							</p>
+							<div className="mt-2 flex flex-wrap items-center gap-1.5">
+								<Badge color="zinc">{enrollment.paymentMode === "prefund" ? "Prefund" : "Post Submission"}</Badge>
+								{enrollment.campaign?.type && (
+									<Badge color="zinc" className="capitalize">
+										{enrollment.campaign.type}
 									</Badge>
-								</div>
-								<p className="mt-1 flex items-center gap-2 text-[13px] text-zinc-500 dark:text-zinc-400">
-									<span>{creatorName}</span>
-									{platformName && (
-										<>
-											<span className="size-1 rounded-full bg-zinc-300 dark:bg-zinc-600" />
-											<span className="inline-flex items-center gap-1">
-												{PlatIcon && <PlatIcon className={clsx("size-3.5", getPlatformColor(platformName))} />}
-												{platformName}
-											</span>
-										</>
-									)}
-								</p>
-								<div className="mt-2 flex flex-wrap items-center gap-1.5">
-									<Badge color="zinc">{enrollment.paymentMode === "prefund" ? "Prefund" : "Post Submission"}</Badge>
-									{enrollment.campaign?.type && (
-										<Badge color="zinc" className="capitalize">
-											{enrollment.campaign.type}
-										</Badge>
-									)}
-								</div>
+								)}
 							</div>
 						</div>
+
+						{/* Review actions — desktop only */}
 						{canReview && (
-							<div className="hidden items-center gap-2 sm:flex">
+							<div className="hidden shrink-0 items-center gap-2 sm:flex">
 								{canRequestChanges && (
 									<Button outline onClick={() => setActiveDialog("changes")}>
 										<PencilSquareIcon className="size-4" />
@@ -835,19 +764,22 @@ export function EnrollmentShow() {
 					{[
 						{ label: "Order Value", value: formatCurrency(enrollment.orderValueDecimal), highlight: true },
 						{ label: "Order ID", value: enrollment.orderId, mono: true, copy: true },
-						{ label: "Enrolled", value: formatRelativeTime(enrollment.createdAt) },
-						{ label: "Expires", value: enrollment.expiresAt ? formatRelativeTime(enrollment.expiresAt) : "No expiry" },
+						{ label: "Enrolled", value: <RelativeTime date={enrollment.createdAt} /> },
+						{
+							label: "Expires",
+							value: enrollment.expiresAt ? <RelativeTime date={enrollment.expiresAt} /> : "No expiry",
+						},
 					].map((stat) => (
 						<div key={stat.label} className="bg-white px-4 py-3 sm:px-5 sm:py-3.5 dark:bg-zinc-900">
-							<dt className="text-[11px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+							<dt className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
 								{stat.label}
 							</dt>
-							<dd className="mt-1 flex items-center gap-1.5">
+							<dd className="mt-1.5 flex items-center gap-1.5">
 								<span
 									className={clsx(
-										"truncate text-sm text-zinc-900 dark:text-zinc-100",
-										stat.highlight && "font-semibold",
-										stat.mono && "max-w-28 font-mono text-xs"
+										"truncate text-sm font-medium text-zinc-900 dark:text-zinc-100",
+										stat.highlight && "text-base font-bold",
+										stat.mono && "text-xs tabular-nums tracking-wide"
 									)}
 								>
 									{stat.value}
@@ -868,12 +800,12 @@ export function EnrollmentShow() {
 						<XCircleIcon className="size-4 text-red-500" />
 					</div>
 					<div className="min-w-0 pt-0.5">
-						<p className="text-[13px] font-semibold text-red-800 dark:text-red-300">Enrollment Rejected</p>
-						<p className="mt-0.5 text-sm leading-relaxed text-red-700/80 dark:text-red-400/80">
+						<p className="text-sm font-bold text-red-800 dark:text-red-300">Enrollment Rejected</p>
+						<p className="mt-1 text-[13px] leading-relaxed text-red-700/80 dark:text-red-400/80">
 							{enrollment.rejection.reason}
 						</p>
 						{enrollment.rejection.lastRejectedAt && (
-							<p className="mt-2 text-[11px] text-red-500/70 dark:text-red-500/60">
+							<p className="mt-2 text-[11px] text-red-600/80 dark:text-red-400/70">
 								{formatDateTime(enrollment.rejection.lastRejectedAt)}
 							</p>
 						)}
@@ -882,44 +814,62 @@ export function EnrollmentShow() {
 			)}
 
 			{/* ================================================================
-			    MAIN GRID — equal columns, balanced content
+			    MAIN GRID — 7/5 asymmetric layout
+			    Left (wider):  Verification + Deliverables (review evidence)
+			    Right (sticky): Billing + Campaign/Creator + Timeline (context)
 			    ================================================================ */}
-			<div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+			<div className="grid grid-cols-1 gap-5 lg:grid-cols-[7fr_5fr]">
 				{/* ============================================================
-				    LEFT COLUMN — Order, Deliverables, OCR
+				    LEFT COLUMN — Evidence (Verification + Deliverables)
 				    ============================================================ */}
 				<div className="space-y-5">
 					{/* Order Details */}
 					<ContentCard padding="none">
-						<SectionHeader
-							title="Order Details"
-							icon={HashtagIcon}
-							iconColor="text-sky-600 dark:text-sky-400"
-						/>
-						<dl className="divide-y divide-zinc-100 px-4 sm:px-5 dark:divide-zinc-800/60">
-							<DetailRow label="Order ID" value={enrollment.orderId} copyValue={enrollment.orderId} mono />
-							<DetailRow label="Display ID" value={enrollment.displayId} copyValue={enrollment.displayId} mono />
-							<DetailRow
-								label="Order Value"
-								value={
-									<span className="text-sm font-semibold text-zinc-900 dark:text-white">
-										{formatCurrency(enrollment.orderValueDecimal)}
+						<div className="flex flex-col sm:flex-row">
+							{/* Screenshot */}
+							{enrollment.ocrData?.screenshotUrl && (
+								<div className="relative shrink-0 overflow-hidden border-b border-zinc-200 bg-zinc-50 sm:w-64 sm:border-r sm:border-b-0 dark:border-zinc-700 dark:bg-zinc-800/50">
+									<LightGallery
+										plugins={[lgZoom]}
+										download={false}
+										backdropDuration={200}
+										elementClassNames="inline size-full"
+									>
+										<a href={getAssetUrl(enrollment.ocrData.screenshotUrl)} className="group block">
+											<FadeImage
+												src={getAssetUrl(enrollment.ocrData.screenshotUrl)}
+												alt="Order screenshot"
+												loading="lazy"
+												className="h-52 w-full cursor-pointer object-contain p-2 transition-all duration-300 hover:scale-105 hover:brightness-90 sm:h-full"
+											/>
+										</a>
+									</LightGallery>
+								</div>
+							)}
+							{/* Details */}
+							<div className="flex flex-1 flex-col justify-center p-4 sm:p-5">
+								<p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
+									Order Details
+								</p>
+								<p className="mt-3 text-3xl font-extrabold tabular-nums tracking-tight text-zinc-900 dark:text-zinc-100">
+									{formatCurrency(enrollment.orderValueDecimal)}
+								</p>
+								<div className="mt-2 flex items-center gap-1.5">
+									<span className="text-[13px] tabular-nums tracking-wide text-zinc-500 dark:text-zinc-400">
+										{enrollment.orderId}
 									</span>
-								}
-							/>
-							<DetailRow label="Currency" value={enrollment.currency} />
-							<DetailRow
-								label="Purchase Date"
-								value={enrollment.purchaseDate ? formatDateTime(enrollment.purchaseDate) : "\u2014"}
-							/>
-							<DetailRow
-								label="Expires"
-								value={enrollment.expiresAt ? formatDateTime(enrollment.expiresAt) : "No expiry"}
-							/>
-						</dl>
+									<CopyButton value={enrollment.orderId} label="Order ID" />
+								</div>
+								{enrollment.purchaseDate && (
+									<p className="mt-3.5 text-xs font-medium text-zinc-500 dark:text-zinc-400">
+										Purchased {formatDateTime(enrollment.purchaseDate)}
+									</p>
+								)}
+							</div>
+						</div>
 					</ContentCard>
 
-					{/* Deliverables / Tasks */}
+					{/* Deliverables / Tasks — grows naturally, no scroll cap */}
 					{enrollment.tasks && enrollment.tasks.length > 0 && (
 						<ContentCard padding="none">
 							<SectionHeader
@@ -962,13 +912,13 @@ export function EnrollmentShow() {
 										const GIcon = getPlatformIcon(pName);
 										return (
 											<div key={pName}>
-												<div className="flex items-center gap-1.5 border-b border-zinc-100 bg-zinc-50/80 px-4 py-1.5 sm:px-5 dark:border-zinc-800/60 dark:bg-zinc-800/30">
+												<div className="flex items-center gap-2 border-b border-zinc-200/80 bg-zinc-50/95 px-4 py-2 sm:px-5 dark:border-zinc-700/60 dark:bg-zinc-800/80">
 													{GIcon ? (
-														<GIcon className={clsx("size-3", getPlatformColor(pName))} />
+														<GIcon className={clsx("size-4", getPlatformColor(pName))} />
 													) : (
 														<span className="size-1.5 rounded-full bg-zinc-400 dark:bg-zinc-500" />
 													)}
-													<span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+													<span className="text-[11px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
 														{pName}
 													</span>
 												</div>
@@ -979,73 +929,80 @@ export function EnrollmentShow() {
 													return (
 														<div
 															key={task.enrollmentTaskId}
-															className="border-b border-zinc-100 px-4 py-2.5 last:border-b-0 sm:px-5 dark:border-zinc-800/60"
+															className={clsx(
+																"border-b border-zinc-200/80 px-4 py-3 last:border-b-0 sm:px-5 dark:border-zinc-700/60",
+																done && "bg-emerald-50/30 dark:bg-emerald-950/10"
+															)}
 														>
-															{/* Row 1: status + name + required + time */}
-															<div className="flex items-center gap-2">
-																{done ? (
-																	<CheckCircleIcon className="size-4 shrink-0 text-emerald-500" />
-																) : (
-																	<div className="size-4 shrink-0 rounded-full ring-1.5 ring-zinc-300 dark:ring-zinc-600" />
-																)}
-																<span className="min-w-0 flex-1 truncate text-[13px] font-medium text-zinc-900 dark:text-zinc-100">
-																	{task.taskName}
-																</span>
-																{task.isRequired && (
-																	<span className="shrink-0 text-[10px] font-medium text-red-500 dark:text-red-400">
-																		Required
-																	</span>
-																)}
-																{done && task.submittedAt && (
-																	<span className="shrink-0 text-[11px] tabular-nums text-zinc-400 dark:text-zinc-500">
-																		{formatRelativeTime(task.submittedAt)}
-																	</span>
-																)}
+															<div className="flex items-start gap-2.5">
+																<div className="mt-0.5">
+																	{done ? (
+																		<CheckCircleIcon className="size-5 shrink-0 text-emerald-500" />
+																	) : (
+																		<div className="size-5 shrink-0 rounded-full border-2 border-zinc-300 dark:border-zinc-600" />
+																	)}
+																</div>
+																<div className="min-w-0 flex-1">
+																	<div className="flex items-start justify-between gap-2">
+																		<span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+																			{task.taskName}
+																		</span>
+																		<div className="flex shrink-0 items-center gap-2">
+																			{task.isRequired && (
+																				<span className="rounded bg-red-50 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-red-500 dark:bg-red-950/20 dark:text-red-400">
+																					Required
+																				</span>
+																			)}
+																			{done && task.submittedAt && (
+																				<span className="text-[11px] tabular-nums text-zinc-500 dark:text-zinc-400">
+																					<RelativeTime date={task.submittedAt} />
+																				</span>
+																			)}
+																		</div>
+																	</div>
+																	{task.taskDescription && (
+																		<p className="mt-1 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
+																			{task.taskDescription}
+																		</p>
+																	)}
+																	{task.feedback && (
+																		<div className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-700 dark:bg-amber-950/20 dark:text-amber-400">
+																			<span className="font-semibold">Feedback:</span> {task.feedback}
+																		</div>
+																	)}
+																	{done && hasProof && (
+																		<div className="mt-2 flex items-center gap-2">
+																			{task.proofLink && (
+																				<a
+																					href={task.proofLink}
+																					target="_blank"
+																					rel="noopener noreferrer"
+																					className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 px-2.5 py-1.5 text-[11px] font-semibold text-blue-600 transition-colors hover:bg-blue-100 dark:bg-blue-950/30 dark:text-blue-400 dark:hover:bg-blue-950/50"
+																				>
+																					<LinkIcon className="size-3.5" />
+																					Proof Link
+																				</a>
+																			)}
+																			{task.proofScreenshot && (
+																				<LightGallery
+																					plugins={[lgZoom]}
+																					download={false}
+																					backdropDuration={200}
+																					elementClassNames="inline"
+																				>
+																					<a
+																						href={getAssetUrl(task.proofScreenshot)}
+																						className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-blue-50 px-2.5 py-1.5 text-[11px] font-semibold text-blue-600 transition-colors hover:bg-blue-100 dark:bg-blue-950/30 dark:text-blue-400 dark:hover:bg-blue-950/50"
+																					>
+																						<PhotoIcon className="size-3.5" />
+																						Screenshot
+																					</a>
+																				</LightGallery>
+																			)}
+																		</div>
+																	)}
+																</div>
 															</div>
-															{/* Row 2: description (compact) */}
-															{task.taskDescription && (
-																<p className="mt-0.5 pl-6 text-xs leading-snug text-zinc-500 dark:text-zinc-400">
-																	{task.taskDescription}
-																</p>
-															)}
-															{/* Row 3: feedback */}
-															{task.feedback && (
-																<div className="mt-1.5 ml-6 rounded bg-amber-50 px-2 py-1 text-[11px] text-amber-700 dark:bg-amber-950/20 dark:text-amber-400">
-																	{task.feedback}
-																</div>
-															)}
-															{/* Row 4: proof inline */}
-															{done && hasProof && (
-																<div className="mt-1.5 flex items-center gap-1.5 pl-6">
-																	{task.proofLink && (
-																		<a
-																			href={task.proofLink}
-																			target="_blank"
-																			rel="noopener noreferrer"
-																			className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-medium text-blue-600 transition-colors hover:bg-blue-100 dark:bg-blue-950/30 dark:text-blue-400 dark:hover:bg-blue-950/50"
-																		>
-																			<LinkIcon className="size-3" />
-																			Proof Link
-																		</a>
-																	)}
-																	{task.proofScreenshot && (
-																		<LightGallery
-																			plugins={[lgZoom]}
-																			download={false}
-																			backdropDuration={200}
-																			elementClassNames="inline"
-																		>
-																			<a
-																				href={getAssetUrl(task.proofScreenshot)}
-																				className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-medium text-blue-600 transition-colors hover:bg-blue-100 dark:bg-blue-950/30 dark:text-blue-400 dark:hover:bg-blue-950/50 cursor-pointer"
-																			>
-																				<PhotoIcon className="size-3" />
-																				Screenshot
-																			</a>
-																		</LightGallery>
-																	)}
-																</div>
-															)}
 														</div>
 													);
 												})}
@@ -1056,107 +1013,26 @@ export function EnrollmentShow() {
 							</div>
 						</ContentCard>
 					)}
-
-					{/* OCR & Screenshot */}
-					{enrollment.ocrData && (
-						<ContentCard padding="none">
-							<SectionHeader
-								title="Order Verification"
-								icon={PhotoIcon}
-								iconColor="text-violet-600 dark:text-violet-400"
-							/>
-							<div className="p-4 sm:p-5">
-								<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-									{enrollment.ocrData.screenshotUrl && (
-										<div className="overflow-hidden rounded-xl ring-1 ring-zinc-200 dark:ring-zinc-700">
-											<ZoomableImage
-												src={getAssetUrl(enrollment.ocrData.screenshotUrl)}
-												alt="Order screenshot"
-												className="h-52 w-full object-cover"
-											/>
-										</div>
-									)}
-									<div className="space-y-2">
-										{[
-											enrollment.ocrData.extractedOrderId && {
-												label: "Order ID",
-												value: <span className="font-mono text-xs">{enrollment.ocrData.extractedOrderId}</span>,
-											},
-											enrollment.ocrData.extractedOrderValue != null && {
-												label: "Value",
-												value: formatCurrency(enrollment.ocrData.extractedOrderValueDecimal ?? "0"),
-											},
-											enrollment.ocrData.extractedPurchaseDate && {
-												label: "Date",
-												value: formatDateTime(enrollment.ocrData.extractedPurchaseDate),
-											},
-											enrollment.ocrData.extractedProductName && {
-												label: "Product",
-												value: <span className="max-w-36 truncate">{enrollment.ocrData.extractedProductName}</span>,
-											},
-										]
-											.filter(Boolean)
-											.map((item) => (
-												<div
-													key={(item as { label: string }).label}
-													className="flex items-center justify-between rounded-lg bg-zinc-50 px-3.5 py-2.5 dark:bg-zinc-800/40"
-												>
-													<span className="text-[11px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-														{(item as { label: string }).label}
-													</span>
-													<span className="text-[13px] font-medium text-zinc-900 dark:text-zinc-100">
-														{(item as { label: string; value: React.ReactNode }).value}
-													</span>
-												</div>
-											))}
-										{enrollment.ocrData.confidence != null && (
-											<div className="flex items-center justify-between rounded-lg bg-zinc-50 px-3.5 py-2.5 dark:bg-zinc-800/40">
-												<span className="text-[11px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-													Confidence
-												</span>
-												<Badge color={enrollment.ocrData.confidence >= 80 ? "lime" : "amber"}>
-													{Math.round(enrollment.ocrData.confidence)}%
-												</Badge>
-											</div>
-										)}
-										{enrollment.ocrData.validationPassed != null && (
-											<div className="flex items-center justify-between rounded-lg bg-zinc-50 px-3.5 py-2.5 dark:bg-zinc-800/40">
-												<span className="text-[11px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-													Validation
-												</span>
-												<Badge color={enrollment.ocrData.validationPassed ? "lime" : "red"}>
-													{enrollment.ocrData.validationPassed ? "Passed" : "Failed"}
-												</Badge>
-											</div>
-										)}
-									</div>
-								</div>
-							</div>
-						</ContentCard>
-					)}
 				</div>
 
 				{/* ============================================================
-				    RIGHT COLUMN — Campaign, Creator, Billing, Timeline
+				    RIGHT COLUMN — Billing + Context + Timeline
+				    Sticky on desktop for reference while reviewing
 				    ============================================================ */}
-				<div className="space-y-5">
-					{/* Campaign */}
+				<div className="space-y-5 lg:sticky lg:top-5 lg:self-start">
+					{/* Campaign & Creator — combined context card */}
 					<ContentCard padding="none">
-						<SectionHeader
-							title="Campaign"
-							icon={MegaphoneIcon}
-							iconColor="text-indigo-600 dark:text-indigo-400"
-						/>
+						<SectionHeader title="Campaign" icon={MegaphoneIcon} iconColor="text-indigo-600 dark:text-indigo-400" />
 						<div className="p-4 sm:p-5">
 							<Link
 								href={`/${orgSlug}/campaigns/${enrollment.campaignId}`}
 								className="group flex items-center gap-3.5 rounded-xl bg-zinc-50 p-3.5 transition-all hover:bg-zinc-100 hover:shadow-sm dark:bg-zinc-800/40 dark:hover:bg-zinc-800/60"
 							>
 								{enrollment.campaign?.listingImage ? (
-									<img
+									<FadeImage
 										src={getAssetUrl(enrollment.campaign.listingImage)}
 										alt={campaignTitle}
-										className="size-11 rounded-lg bg-white object-cover ring-1 ring-zinc-200/80 dark:bg-zinc-800 dark:ring-zinc-700"
+										className="size-11 rounded-lg bg-white object-contain p-1 ring-1 ring-zinc-200/80 dark:bg-zinc-800 dark:ring-zinc-700"
 									/>
 								) : (
 									<div className="flex size-11 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-950/30">
@@ -1164,83 +1040,78 @@ export function EnrollmentShow() {
 									</div>
 								)}
 								<div className="min-w-0 flex-1">
-									<p className="truncate text-sm font-medium text-zinc-900 dark:text-zinc-100">{campaignTitle}</p>
+									<p className="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-100">{campaignTitle}</p>
 									<p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
 										{enrollment.campaign?.type && <span className="capitalize">{enrollment.campaign.type}</span>}
 										{enrollment.campaign?.listingName && <span> · {enrollment.campaign.listingName}</span>}
 									</p>
 								</div>
-								<ArrowTopRightOnSquareIcon className="size-4 shrink-0 text-zinc-300 transition-colors group-hover:text-zinc-500 dark:text-zinc-600 dark:group-hover:text-zinc-400" />
+								<ArrowTopRightOnSquareIcon className="size-4 shrink-0 text-zinc-400 transition-colors group-hover:text-zinc-600 dark:text-zinc-500 dark:group-hover:text-zinc-400" />
 							</Link>
 						</div>
+
+						{/* Creator inline within campaign card */}
+						{enrollment.creator && (
+							<>
+								<div className="border-t border-zinc-200/80 dark:border-zinc-800" />
+								<div className="p-4 sm:p-5">
+									<div className="flex items-center gap-3.5">
+										<div
+											className={clsx(
+												"flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white shadow-sm",
+												getAvatarColor(creatorName)
+											)}
+										>
+											{getInitials(creatorName)}
+										</div>
+										<div className="min-w-0 flex-1">
+											<div className="flex items-center gap-1.5">
+												<span className="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+													{creatorName}
+												</span>
+												{enrollment.creator.approvalRate >= 90 && (
+													<CheckCircleIcon className="size-4 shrink-0 text-emerald-500" />
+												)}
+											</div>
+											<p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+												{enrollment.creator.displayId}
+												{enrollment.creator.city && ` · ${enrollment.creator.city}`}
+											</p>
+										</div>
+										<div className="flex shrink-0 items-center gap-3 text-center">
+											<div>
+												<p className="text-sm font-bold tabular-nums text-zinc-900 dark:text-zinc-100">
+													{enrollment.creator.approvalRate}%
+												</p>
+												<p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+													Approval
+												</p>
+											</div>
+											<div className="h-6 w-px bg-zinc-200 dark:bg-zinc-700" />
+											<div>
+												<p className="text-sm font-bold tabular-nums text-zinc-900 dark:text-zinc-100">
+													{enrollment.creator.previousEnrollments}
+												</p>
+												<p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+													Past
+												</p>
+											</div>
+										</div>
+									</div>
+								</div>
+							</>
+						)}
 					</ContentCard>
 
-					{/* Creator */}
-					{enrollment.creator && (
-						<ContentCard padding="none">
-							<SectionHeader
-								title="Creator"
-								icon={UserIcon}
-								iconColor="text-rose-600 dark:text-rose-400"
-							/>
-							<div className="p-4 sm:p-5">
-								<div className="flex items-center gap-3.5">
-									<div
-										className={clsx(
-											"flex size-11 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white shadow-sm",
-											getAvatarColor(creatorName)
-										)}
-									>
-										{getInitials(creatorName)}
-									</div>
-									<div className="min-w-0 flex-1">
-										<div className="flex items-center gap-1.5">
-											<span className="truncate text-sm font-medium text-zinc-900 dark:text-zinc-100">
-												{creatorName}
-											</span>
-											{enrollment.creator.approvalRate >= 90 && (
-												<CheckCircleIcon className="size-4 shrink-0 text-emerald-500" />
-											)}
-										</div>
-										<p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
-											{enrollment.creator.displayId}
-											{enrollment.creator.city && ` · ${enrollment.creator.city}`}
-										</p>
-									</div>
-								</div>
-
-								<div className="mt-3 flex items-center gap-px overflow-hidden rounded-lg ring-1 ring-zinc-200 dark:ring-zinc-700">
-									<div className="flex-1 bg-zinc-50 px-3 py-2.5 text-center dark:bg-zinc-800/50">
-										<p className="text-sm font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
-											{enrollment.creator.approvalRate}%
-										</p>
-										<p className="mt-0.5 text-[10px] font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-											Approval
-										</p>
-									</div>
-									<div className="h-8 w-px bg-zinc-200 dark:bg-zinc-700" />
-									<div className="flex-1 bg-zinc-50 px-3 py-2.5 text-center dark:bg-zinc-800/50">
-										<p className="text-sm font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
-											{enrollment.creator.previousEnrollments}
-										</p>
-										<p className="mt-0.5 text-[10px] font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-											Past Orders
-										</p>
-									</div>
-								</div>
-							</div>
-						</ContentCard>
-					)}
-
-					{/* Billing Breakdown */}
+					{/* Billing Summary */}
 					{costs && (
 						<ContentCard padding="none">
 							<SectionHeader
-								title="Billing Breakdown"
+								title="Billing Summary"
 								icon={CurrencyRupeeIcon}
 								iconColor="text-emerald-600 dark:text-emerald-400"
 							/>
-							<dl className="divide-y divide-zinc-100 px-4 sm:px-5 dark:divide-zinc-800/60">
+							<dl className="divide-y divide-zinc-200/80 px-4 sm:px-5 dark:divide-zinc-700/60">
 								{[
 									{
 										label: `Bill Amount (${enrollment.lockedBillRate}%)`,
@@ -1251,27 +1122,25 @@ export function EnrollmentShow() {
 								].map((item) => (
 									<div key={item.label} className="flex items-center justify-between py-2.5">
 										<dt className="text-[13px] text-zinc-500 dark:text-zinc-400">{item.label}</dt>
-										<dd className="text-[13px] font-medium tabular-nums text-zinc-900 dark:text-zinc-100">
+										<dd className="text-[13px] font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
 											{formatCurrency(item.value)}
 										</dd>
 									</div>
 								))}
 							</dl>
-							<div className="mx-4 mb-4 flex items-center justify-between rounded-lg bg-zinc-900 px-4 py-2.5 sm:mx-5 sm:mb-5 dark:bg-zinc-800">
-								<span className="text-[13px] font-medium text-zinc-400">Total Cost</span>
-								<span className="text-base font-bold tabular-nums text-white">{formatCurrency(costs.totalCost)}</span>
+							<div className="flex items-center justify-between border-t border-zinc-200 bg-zinc-50/50 px-4 py-3.5 sm:px-5 dark:border-zinc-700 dark:bg-zinc-800/20">
+								<span className="text-sm font-bold text-zinc-900 dark:text-white">Total Cost</span>
+								<span className="text-lg font-extrabold tabular-nums tracking-tight text-emerald-600 dark:text-emerald-400">
+									{formatCurrency(costs.totalCost)}
+								</span>
 							</div>
 						</ContentCard>
 					)}
 
-					{/* Timeline */}
+					{/* Activity Timeline — grows naturally */}
 					{enrollment.history && enrollment.history.length > 0 && (
 						<ContentCard padding="none">
-							<SectionHeader
-								title="Activity Timeline"
-								icon={ClockIcon}
-								iconColor="text-zinc-500 dark:text-zinc-400"
-							/>
+							<SectionHeader title="Activity Timeline" icon={ClockIcon} iconColor="text-zinc-500 dark:text-zinc-400" />
 							<div className="p-4 sm:p-5">
 								{enrollment.history.map((item, index) => (
 									<TimelineItem key={item.id} item={item} isLast={index === enrollment.history.length - 1} />

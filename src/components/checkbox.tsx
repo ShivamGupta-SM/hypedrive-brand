@@ -128,16 +128,22 @@ export function Checkbox({
 			{...props}
 			className={clsx(className, "group inline-flex focus:outline-hidden")}
 		>
-			<span className={clsx([base, colors[color]])}>
+			<span
+				className={clsx([
+					base,
+					colors[color],
+					"transition-transform duration-200 ease-out group-data-checked:animate-[checkbox-pop_0.3s_cubic-bezier(0.16,1,0.3,1)]",
+				])}
+			>
 				<svg
-					className="size-4 stroke-(--checkbox-check) opacity-0 group-data-checked:opacity-100 sm:h-3.5 sm:w-3.5"
+					className="size-4 stroke-(--checkbox-check) opacity-0 transition-opacity duration-150 ease-out group-data-checked:opacity-100 sm:h-3.5 sm:w-3.5"
 					viewBox="0 0 14 14"
 					fill="none"
 					aria-hidden="true"
 				>
 					{/* Checkmark icon */}
 					<path
-						className="opacity-100 group-data-indeterminate:opacity-0"
+						className="opacity-100 group-data-indeterminate:opacity-0 [stroke-dasharray:20] [stroke-dashoffset:20] group-data-checked:[stroke-dashoffset:0] transition-all duration-200 ease-out"
 						d="M3 8L6 11L11 3.5"
 						strokeWidth={2}
 						strokeLinecap="round"

@@ -28,7 +28,12 @@ export function TabNav({ tabs, className }: TabNavProps) {
 	const pathname = useRouterState({ select: (s) => s.location.pathname });
 
 	return (
-		<div className={clsx("-mx-1 overflow-x-auto scrollbar-hide px-1 py-1 sm:mx-0 sm:overflow-visible sm:px-0 sm:py-0", className)}>
+		<div
+			className={clsx(
+				"-mx-1 overflow-x-auto scrollbar-hide px-1 py-1 sm:mx-0 sm:overflow-visible sm:px-0 sm:py-0",
+				className
+			)}
+		>
 			<div className="flex min-w-max gap-1.5 sm:min-w-0 sm:flex-wrap">
 				{tabs.map((tab) => {
 					const isActive = tab.exact ? pathname === tab.to : pathname.startsWith(tab.to);
@@ -38,9 +43,9 @@ export function TabNav({ tabs, className }: TabNavProps) {
 							key={tab.to}
 							to={tab.to}
 							className={clsx(
-								"inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium shadow-sm ring-1 transition-all duration-200 active:scale-95",
+								"inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium shadow-sm ring-1 transition-all duration-200 ease-out active:scale-[0.97]",
 								isActive
-									? "bg-zinc-900 text-white ring-zinc-900 dark:bg-white dark:text-zinc-900 dark:ring-white"
+									? "bg-zinc-900 text-white ring-zinc-900 shadow-md dark:bg-white dark:text-zinc-900 dark:ring-white"
 									: "bg-white text-zinc-600 ring-zinc-200 hover:bg-zinc-50 dark:bg-zinc-900 dark:text-zinc-400 dark:ring-zinc-800 dark:hover:bg-zinc-800"
 							)}
 						>

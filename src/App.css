@@ -84,16 +84,12 @@ input:not(:-webkit-autofill) {
    ========================================================================== */
 
 /* ── Global thin scrollbar ── */
-*,
-*::before,
-*::after {
+* {
 	scrollbar-width: thin;
 	scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
 }
 
-[data-theme="dark"] *,
-[data-theme="dark"] *::before,
-[data-theme="dark"] *::after {
+[data-theme="dark"] * {
 	scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
 }
 
@@ -152,7 +148,6 @@ body {
 	overscroll-behavior: none;
 }
 
-[data-theme="dark"] html,
 html:has([data-theme="dark"]) {
 	background-color: #09090b; /* zinc-950 */
 }
@@ -161,6 +156,19 @@ html:has([data-theme="dark"]) {
    SHIMMER ANIMATION
    Loading skeleton shine effect
    ========================================================================== */
+
+@keyframes pulse-dot {
+	0%,
+	80%,
+	100% {
+		opacity: 0.25;
+		transform: scale(0.8);
+	}
+	40% {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
 
 @keyframes shimmer {
 	0% {
@@ -334,7 +342,13 @@ html:has([data-theme="dark"]) {
 	transform-origin: top center;
 }
 
-/* Fade in animation */
+/* ==========================================================================
+   MICRO-INTERACTION KEYFRAMES
+   Apple-quality entrance, state-change, and feedback animations.
+   Timing: cubic-bezier(0.16, 1, 0.3, 1) = iOS spring-like overshoot
+   ========================================================================== */
+
+/* Fade in — generic content entrance */
 @keyframes fade-in {
 	from {
 		opacity: 0;
@@ -347,357 +361,347 @@ html:has([data-theme="dark"]) {
 }
 
 .animate-fade-in {
-	animation: fade-in 0.3s ease-out;
+	animation: fade-in 0.3s ease-out both;
+}
+
+/* Page enter — full page content entrance with slight scale */
+@keyframes page-enter {
+	from {
+		opacity: 0;
+		transform: translateY(8px) scale(0.995);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
+.animate-page-enter {
+	animation: page-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Stagger item — for list/grid children entrance */
+@keyframes stagger-item {
+	from {
+		opacity: 0;
+		transform: translateY(6px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.animate-stagger-item {
+	animation: stagger-item 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Scale in — for empty states, modals, popovers */
+@keyframes scale-in {
+	from {
+		opacity: 0;
+		transform: scale(0.95);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+.animate-scale-in {
+	animation: scale-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Checkbox pop — satisfying check feedback */
+@keyframes checkbox-pop {
+	0% {
+		transform: scale(1);
+	}
+	40% {
+		transform: scale(0.85);
+	}
+	70% {
+		transform: scale(1.1);
+	}
+	100% {
+		transform: scale(1);
+	}
+}
+
+/* Image reveal — smooth load-in for images */
+@keyframes image-reveal {
+	from {
+		opacity: 0;
+		filter: blur(2px);
+	}
+	to {
+		opacity: 1;
+		filter: blur(0);
+	}
+}
+
+.animate-image-reveal {
+	animation: image-reveal 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Slide up — compact entrance for inline elements */
+@keyframes slide-up {
+	from {
+		opacity: 0;
+		transform: translateY(12px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.animate-slide-up {
+	animation: slide-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Collapse/expand — smooth height animation via grid-rows trick */
+@keyframes collapse-in {
+	from {
+		grid-template-rows: 0fr;
+		opacity: 0;
+	}
+	to {
+		grid-template-rows: 1fr;
+		opacity: 1;
+	}
+}
+
+@keyframes collapse-out {
+	from {
+		grid-template-rows: 1fr;
+		opacity: 1;
+	}
+	to {
+		grid-template-rows: 0fr;
+		opacity: 0;
+	}
+}
+
+/* Loading spinner — smooth rotation */
+@keyframes spinner {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.animate-spinner {
+	animation: spinner 0.75s linear infinite;
 }
 
 /* ==========================================================================
-   SONNER TOAST STYLES
-   Glassmorphic, bottom-center, expand mode.
-   Sonner handles light/dark via theme prop — we override shape + glass + icons.
+   REDUCED MOTION
+   Respect user's motion preferences for accessibility
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}
+
+/* ==========================================================================
+   SONNER TOAST
+   Card style with icon pills. Collapsed stack, expands on hover.
    ========================================================================== */
 
 [data-sonner-toaster] {
-	--width: 356px;
+	--width: 390px;
 }
 
-/* ── Light mode base ── */
+/* ── Base — Light ── */
 [data-sonner-toaster] [data-sonner-toast] {
 	font-family: var(--font-sans);
 	border-radius: 14px;
-	padding: 13px 32px 13px 15px;
-	gap: 11px;
-
-	/* Glassmorphic */
-	background: rgba(255, 255, 255, 0.82);
-	backdrop-filter: blur(20px) saturate(180%);
-	-webkit-backdrop-filter: blur(20px) saturate(180%);
-	border: 1px solid rgba(0, 0, 0, 0.07);
+	padding: 14px 38px 14px 14px;
+	gap: 12px;
+	background: #fff;
+	color: #27272a;
+	border: 1px solid #e4e4e7;
 	box-shadow:
-		0 2px 8px rgba(0, 0, 0, 0.06),
-		0 8px 24px rgba(0, 0, 0, 0.08),
-		inset 0 1px 0 rgba(255, 255, 255, 0.9);
+		0 1px 3px rgba(0, 0, 0, 0.04),
+		0 6px 16px rgba(0, 0, 0, 0.06);
 }
 
-/* ── Dark mode base ── */
+/* ── Base — Dark ── */
 [data-sonner-toaster][data-theme="dark"] [data-sonner-toast] {
-	background: rgba(28, 28, 32, 0.82);
-	backdrop-filter: blur(20px) saturate(160%);
-	-webkit-backdrop-filter: blur(20px) saturate(160%);
-	border: 1px solid rgba(255, 255, 255, 0.08);
+	background: #1c1c1f;
+	color: #e4e4e7;
+	border-color: #2e2e32;
 	box-shadow:
-		0 2px 8px rgba(0, 0, 0, 0.3),
-		0 8px 24px rgba(0, 0, 0, 0.4),
-		inset 0 1px 0 rgba(255, 255, 255, 0.05);
+		0 1px 3px rgba(0, 0, 0, 0.3),
+		0 6px 16px rgba(0, 0, 0, 0.4);
 }
 
 /* ── Title ── */
 [data-sonner-toaster] [data-sonner-toast] [data-title] {
-	font-size: 13px;
-	font-weight: 600;
-	line-height: 1.4;
+	font-size: 13.5px;
+	font-weight: 550;
+	line-height: 1.35;
 	letter-spacing: -0.01em;
 	color: #18181b;
 }
-
 [data-sonner-toaster][data-theme="dark"] [data-sonner-toast] [data-title] {
 	color: #fafafa;
 }
 
 /* ── Description ── */
 [data-sonner-toaster] [data-sonner-toast] [data-description] {
-	font-size: 12px;
-	line-height: 1.5;
+	font-size: 12.5px;
+	font-weight: 400;
 	margin-top: 1px;
+	line-height: 1.4;
 	color: #71717a;
 }
-
 [data-sonner-toaster][data-theme="dark"] [data-sonner-toast] [data-description] {
 	color: #a1a1aa;
 }
 
-/* ── Close button ── */
-[data-sonner-toaster] [data-sonner-toast] [data-close-button] {
-	position: absolute;
-	top: 50%;
-	right: 6px;
-	left: auto;
-	transform: translateY(-50%);
-	border-radius: 6px;
-	width: 24px;
-	height: 24px;
-	border: none;
-	background: transparent;
-	opacity: 0.4;
-	transition:
-		opacity 0.15s ease,
-		background 0.15s ease;
-	color: #71717a;
+/* ── Icon pill — tinted bg circle ── */
+[data-sonner-toaster] [data-sonner-toast] [data-icon] {
+	width: 28px;
+	height: 28px;
+	min-width: 28px;
+	border-radius: 50%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	cursor: pointer;
-	padding: 0;
+	flex-shrink: 0;
+	background: #f4f4f5;
+}
+[data-sonner-toaster] [data-sonner-toast] [data-icon] svg {
+	width: 15px;
+	height: 15px;
+}
+[data-sonner-toaster][data-theme="dark"] [data-sonner-toast] [data-icon] {
+	background: #27272a;
 }
 
-[data-sonner-toaster][data-theme="dark"] [data-sonner-toast] [data-close-button] {
+/* Icon pill — per type — light */
+[data-sonner-toaster] [data-sonner-toast][data-type="success"] [data-icon] {
+	background: #ecfdf5;
+	color: #059669;
+}
+[data-sonner-toaster] [data-sonner-toast][data-type="error"] [data-icon] {
+	background: #fef2f2;
+	color: #dc2626;
+}
+[data-sonner-toaster] [data-sonner-toast][data-type="warning"] [data-icon] {
+	background: #fffbeb;
+	color: #d97706;
+}
+[data-sonner-toaster] [data-sonner-toast][data-type="info"] [data-icon] {
+	background: #eff6ff;
+	color: #2563eb;
+}
+[data-sonner-toaster] [data-sonner-toast][data-type="loading"] [data-icon] {
+	background: #f4f4f5;
 	color: #a1a1aa;
 }
 
+/* Icon pill — per type — dark */
+[data-sonner-toaster][data-theme="dark"] [data-sonner-toast][data-type="success"] [data-icon] {
+	background: rgba(16, 185, 129, 0.12);
+	color: #34d399;
+}
+[data-sonner-toaster][data-theme="dark"] [data-sonner-toast][data-type="error"] [data-icon] {
+	background: rgba(239, 68, 68, 0.12);
+	color: #f87171;
+}
+[data-sonner-toaster][data-theme="dark"] [data-sonner-toast][data-type="warning"] [data-icon] {
+	background: rgba(245, 158, 11, 0.12);
+	color: #fbbf24;
+}
+[data-sonner-toaster][data-theme="dark"] [data-sonner-toast][data-type="info"] [data-icon] {
+	background: rgba(59, 130, 246, 0.12);
+	color: #60a5fa;
+}
+[data-sonner-toaster][data-theme="dark"] [data-sonner-toast][data-type="loading"] [data-icon] {
+	background: #27272a;
+	color: #71717a;
+}
+
+/* ── Close button — top-right, round, subtle ── */
+[data-sonner-toaster] [data-sonner-toast] [data-close-button] {
+	position: absolute;
+	top: 6px;
+	right: 6px;
+	left: auto;
+	transform: none;
+	border-radius: 50%;
+	width: 20px;
+	height: 20px;
+	border: 1px solid #e4e4e7;
+	background: #fff;
+	color: #a1a1aa;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	cursor: pointer;
+	opacity: 0;
+	transition:
+		opacity 0.15s,
+		color 0.15s,
+		border-color 0.15s;
+}
+[data-sonner-toaster] [data-sonner-toast]:hover [data-close-button] {
+	opacity: 1;
+}
+[data-sonner-toaster] [data-sonner-toast] [data-close-button]:hover {
+	color: #ef4444;
+	border-color: #fca5a5;
+}
 [data-sonner-toaster] [data-sonner-toast] [data-close-button] svg {
 	width: 12px;
 	height: 12px;
 }
 
-[data-sonner-toaster] [data-sonner-toast] [data-close-button]:hover {
-	opacity: 1;
-	background: rgba(0, 0, 0, 0.06);
+/* Close — dark */
+[data-sonner-toaster][data-theme="dark"] [data-sonner-toast] [data-close-button] {
+	background: #1c1c1f;
+	border-color: #2e2e32;
+	color: #71717a;
 }
-
 [data-sonner-toaster][data-theme="dark"] [data-sonner-toast] [data-close-button]:hover {
-	background: rgba(255, 255, 255, 0.08);
-}
-
-/* ── Icon pill ── */
-[data-sonner-toaster] [data-sonner-toast] [data-icon] {
-	width: 30px;
-	height: 30px;
-	min-width: 30px;
-	border-radius: 8px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	flex-shrink: 0;
-}
-
-[data-sonner-toaster] [data-sonner-toast] [data-icon] svg {
-	width: 16px;
-	height: 16px;
-}
-
-/* success — emerald */
-[data-sonner-toaster] [data-sonner-toast][data-type="success"] [data-icon] {
-	background: rgba(22, 163, 74, 0.12);
-	color: #16a34a;
-}
-
-[data-sonner-toaster][data-theme="dark"] [data-sonner-toast][data-type="success"] [data-icon] {
-	background: rgba(74, 222, 128, 0.14);
-	color: #4ade80;
-}
-
-/* error — red */
-[data-sonner-toaster] [data-sonner-toast][data-type="error"] [data-icon] {
-	background: rgba(220, 38, 38, 0.1);
-	color: #dc2626;
-}
-
-[data-sonner-toaster][data-theme="dark"] [data-sonner-toast][data-type="error"] [data-icon] {
-	background: rgba(248, 113, 113, 0.14);
 	color: #f87171;
-}
-
-/* warning — amber */
-[data-sonner-toaster] [data-sonner-toast][data-type="warning"] [data-icon] {
-	background: rgba(217, 119, 6, 0.1);
-	color: #d97706;
-}
-
-[data-sonner-toaster][data-theme="dark"] [data-sonner-toast][data-type="warning"] [data-icon] {
-	background: rgba(251, 191, 36, 0.14);
-	color: #fbbf24;
-}
-
-/* info — sky */
-[data-sonner-toaster] [data-sonner-toast][data-type="info"] [data-icon] {
-	background: rgba(2, 132, 199, 0.1);
-	color: #0284c7;
-}
-
-[data-sonner-toaster][data-theme="dark"] [data-sonner-toast][data-type="info"] [data-icon] {
-	background: rgba(56, 189, 248, 0.14);
-	color: #38bdf8;
-}
-
-/* loading */
-[data-sonner-toaster] [data-sonner-toast][data-type="loading"] [data-icon] {
-	background: transparent;
-	opacity: 0.5;
+	border-color: #f87171;
 }
 
 /* ── Action button ── */
 [data-sonner-toaster] [data-sonner-toast] [data-button] {
 	font-size: 12px;
-	font-weight: 500;
-	border-radius: 6px;
-	padding: 5px 11px;
+	font-weight: 600;
+	border-radius: 8px;
+	padding: 6px 14px;
 	height: auto;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   lightgallery overrides — match app zinc/dark theme
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-/* ── Backdrop ── */
-.lg-backdrop {
-	background-color: rgba(9, 9, 11, 0.92);
-	backdrop-filter: blur(12px);
-}
-
-/* ── Container font ── */
-.lg-container {
-	font-family: inherit;
-}
-
-/* ── Image area ── */
-.lg-outer .lg-img-wrap {
-	padding: 56px 24px 24px;
-}
-
-.lg-outer .lg-object {
-	border-radius: 10px;
-	box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-}
-
-/* ── Toolbar ── */
-.lg-toolbar {
-	padding: 10px 10px 0;
-	display: flex;
-	justify-content: flex-end;
-	align-items: center;
-}
-
-.lg-media-overlap .lg-toolbar {
-	background-image: none;
-}
-
-/* ── All icon buttons — Samsung squircle ── */
-.lg-toolbar .lg-icon,
-.lg-icon.lg-zoom-in,
-.lg-icon.lg-zoom-out,
-.lg-icon.lg-actual-size {
-	color: rgba(255, 255, 255, 0.85) !important;
-	font-size: 18px !important;
-	width: 40px !important;
-	height: 40px !important;
-	line-height: 18px !important;
-	padding: 11px 0 !important;
-	border-radius: 13px !important;
-	background-color: rgba(255, 255, 255, 0.1) !important;
-	border: none !important;
-	box-shadow: none !important;
-	transition: all 0.2s ease !important;
-	margin: 0 3px !important;
-	float: none !important;
-	display: inline-flex !important;
-	align-items: center !important;
-	justify-content: center !important;
-}
-
-.lg-toolbar .lg-icon:hover,
-.lg-icon.lg-zoom-in:hover,
-.lg-icon.lg-zoom-out:hover,
-.lg-icon.lg-actual-size:hover {
-	color: #fff !important;
-	background-color: rgba(255, 255, 255, 0.2) !important;
-}
-
-.lg-toolbar .lg-icon:active,
-.lg-icon.lg-zoom-in:active,
-.lg-icon.lg-zoom-out:active,
-.lg-icon.lg-actual-size:active {
-	transform: scale(0.92) !important;
-	background-color: rgba(255, 255, 255, 0.15) !important;
-}
-
-/* ── Zoom out disabled state ── */
-.lg-icon.lg-zoom-out {
-	opacity: 0.3 !important;
-	pointer-events: none !important;
-}
-
-.lg-zoomed .lg-icon.lg-zoom-out {
-	opacity: 1 !important;
-	pointer-events: auto !important;
-}
-
-/* ── Navigation arrows — Samsung squircle ── */
-.lg-next,
-.lg-prev {
-	background-color: rgba(255, 255, 255, 0.1) !important;
-	border: none !important;
-	border-radius: 14px !important;
-	color: rgba(255, 255, 255, 0.85) !important;
-	font-size: 18px !important;
-	width: 44px !important;
-	height: 44px !important;
-	padding: 0 !important;
-	display: flex !important;
-	align-items: center !important;
-	justify-content: center !important;
-	transition: all 0.2s ease !important;
-}
-
-.lg-next:hover:not(.disabled),
-.lg-prev:hover:not(.disabled) {
-	color: #fff !important;
-	background-color: rgba(255, 255, 255, 0.2) !important;
-}
-
-.lg-next:active:not(.disabled),
-.lg-prev:active:not(.disabled) {
-	transform: scale(0.92) !important;
-	background-color: rgba(255, 255, 255, 0.15) !important;
-}
-
-.lg-next {
-	right: 20px !important;
-}
-
-.lg-prev {
-	left: 20px !important;
-}
-
-/* ── Hide counter for single image ── */
-.lg-single-item .lg-counter {
-	display: none;
-}
-
-/* ── Counter ── */
-.lg-counter {
-	color: rgba(161, 161, 170, 0.5);
-	font-size: 12px;
-	font-weight: 500;
-	padding-left: 16px;
-}
-
-/* ── Captions ── */
-.lg-sub-html {
-	color: rgba(228, 228, 231, 0.8);
-	font-size: 13px;
-	padding: 12px 40px;
-}
-
-.lg-media-overlap .lg-sub-html {
-	background-image: none;
-}
-
-/* ── Hide loading spinner bg ── */
-.lg-outer .lg-item:not(.lg-start-end-progress) {
-	background: none;
-}
-
-/* ── Smoother slide transitions ── */
-.lg-css3.lg-slide.lg-use-css3 .lg-item.lg-prev-slide,
-.lg-css3.lg-slide.lg-use-css3 .lg-item.lg-next-slide,
-.lg-css3.lg-slide.lg-use-css3 .lg-item.lg-current {
+	background: #18181b;
+	color: #fff;
+	border: none;
 	transition:
-		transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0s,
-		opacity 0.15s ease 0s;
+		background 0.15s,
+		transform 0.1s;
 }
-
-/* ── Focus ring ── */
-.lg-icon:focus-visible {
-	outline: 2px solid rgba(255, 255, 255, 0.3) !important;
-	outline-offset: 2px !important;
-	border-radius: 10px !important;
+[data-sonner-toaster] [data-sonner-toast] [data-button]:hover {
+	background: #3f3f46;
+}
+[data-sonner-toaster] [data-sonner-toast] [data-button]:active {
+	transform: scale(0.96);
+}
+[data-sonner-toaster][data-theme="dark"] [data-sonner-toast] [data-button] {
+	background: #fafafa;
+	color: #18181b;
+}
+[data-sonner-toaster][data-theme="dark"] [data-sonner-toast] [data-button]:hover {
+	background: #e4e4e7;
 }

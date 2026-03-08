@@ -2,7 +2,7 @@
  * Invoice Hooks — queries + mutations.
  */
 
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import type { db } from "@/lib/brand-client";
 import { infiniteInvoicesQueryOptions, invoiceQueryOptions, invoicesQueryOptions } from "./queries";
 
@@ -49,6 +49,7 @@ export function useInfiniteInvoices(
 	const query = useInfiniteQuery({
 		...infiniteInvoicesQueryOptions(organizationId || "", params),
 		enabled: !!organizationId,
+		placeholderData: keepPreviousData,
 	});
 
 	const data = query.data?.pages.flatMap((page) => page.data) ?? [];

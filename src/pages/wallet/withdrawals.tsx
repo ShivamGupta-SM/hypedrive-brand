@@ -45,7 +45,7 @@ export function WalletWithdrawals() {
 	);
 
 	return (
-		<div className="space-y-4">
+		<div className="animate-page-enter space-y-4">
 			{/* Withdrawal Stats */}
 			{withdrawalStats && (
 				<div className="grid grid-cols-2 gap-3 sm:gap-4">
@@ -74,7 +74,12 @@ export function WalletWithdrawals() {
 						<ArrowUpRightIcon className="size-4 text-rose-500" />
 						<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">Withdrawals</h3>
 					</div>
-					<FilterDropdown label="Status" options={statusFilterOptions} value={statusFilter} onChange={(v) => setStatusFilter(v as StatusFilter)} />
+					<FilterDropdown
+						label="Status"
+						options={statusFilterOptions}
+						value={statusFilter}
+						onChange={(v) => setStatusFilter(v as StatusFilter)}
+					/>
 				</div>
 				{withdrawalsLoading ? (
 					<div className="space-y-2 p-4">
@@ -166,7 +171,9 @@ export function WalletWithdrawals() {
 								<div className="flex items-center gap-3 border-t border-zinc-200 px-4 py-3 dark:border-zinc-800">
 									<HashtagIcon className="size-4 shrink-0 text-zinc-400" />
 									<span className="flex-1 text-sm text-zinc-500 dark:text-zinc-400">ID</span>
-									<span className="max-w-40 truncate font-mono text-xs text-zinc-500 dark:text-zinc-400">{withdrawalDetail.id}</span>
+									<span className="max-w-40 truncate text-xs tabular-nums tracking-wide text-zinc-500 dark:text-zinc-400">
+										{withdrawalDetail.id}
+									</span>
 								</div>
 							</div>
 

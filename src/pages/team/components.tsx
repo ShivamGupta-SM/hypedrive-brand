@@ -23,6 +23,7 @@ import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/di
 import { Dropdown, DropdownButton, DropdownItem, DropdownMenu } from "@/components/dropdown";
 import { Input } from "@/components/input";
 import { EmptyState } from "@/components/shared/empty-state";
+import { FadeImage } from "@/components/shared/fade-image";
 import { SelectionCheckbox, SelectionCheckboxSpacer } from "@/components/shared/selection-checkbox";
 import { Skeleton } from "@/components/skeleton";
 import {
@@ -165,10 +166,11 @@ export function TeamSkeleton() {
 				{[1, 2, 3, 4, 5, 6].map((i) => (
 					<div
 						key={i}
-						className="overflow-hidden rounded-xl bg-white shadow-xs ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800"
+						className="overflow-hidden rounded-xl bg-white shadow-xs ring-1 ring-zinc-200 animate-fade-in dark:bg-zinc-900 dark:ring-zinc-800"
+						style={{ animationDelay: `${i * 60}ms` }}
 					>
 						<div className="flex items-start gap-3.5 p-4 sm:p-5">
-							<div className="size-12 shrink-0 animate-pulse rounded-full bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+							<div className="size-12 shrink-0 rounded-full bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
 							<div className="flex-1">
 								<Skeleton width={80 + i * 8} height={14} borderRadius={6} />
 								<Skeleton width={120 + i * 6} height={12} borderRadius={6} className="mt-1.5" />
@@ -374,10 +376,13 @@ export function MemberAvatar({
 
 	if (image) {
 		return (
-			<img
+			<FadeImage
 				src={image}
 				alt={name || "Member"}
-				className={clsx("shrink-0 rounded-full object-cover ring-1 ring-zinc-200 dark:ring-zinc-700", sizeClasses[size])}
+				className={clsx(
+					"shrink-0 rounded-full object-cover ring-1 ring-zinc-200 dark:ring-zinc-700",
+					sizeClasses[size]
+				)}
 			/>
 		);
 	}
@@ -715,7 +720,7 @@ export function InviteMemberModal({
 					{/* Preview card — shows who you're inviting */}
 					<div className="flex items-center gap-3 rounded-xl bg-zinc-50 p-3.5 dark:bg-zinc-800/50">
 						{matchedUser?.image ? (
-							<img src={matchedUser.image} alt="" className="size-10 shrink-0 rounded-full object-cover" />
+							<FadeImage src={matchedUser.image} alt="" className="size-10 shrink-0 rounded-full object-cover" />
 						) : (
 							<div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
 								{email.includes("@") ? (
@@ -732,7 +737,11 @@ export function InviteMemberModal({
 								{matchedUser?.name || email.trim() || "New team member"}
 							</p>
 							<p className="text-xs text-zinc-500 dark:text-zinc-400">
-								{matchedUser ? matchedUser.email : selectedRoleOption ? `Invited as ${selectedRoleOption.label}` : "Select a role below"}
+								{matchedUser
+									? matchedUser.email
+									: selectedRoleOption
+										? `Invited as ${selectedRoleOption.label}`
+										: "Select a role below"}
 							</p>
 						</div>
 						{selectedRoleOption && <Badge color={getRoleBadgeConfig(role).color}>{selectedRoleOption.label}</Badge>}
@@ -764,12 +773,8 @@ export function InviteMemberModal({
 
 						{/* User suggestions dropdown */}
 						{showSuggestions && (
-							<div
-								className="absolute left-0 right-0 z-50 mt-1 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-lg dark:border-zinc-700 dark:bg-zinc-900"
-							>
-								{isSearching && (
-									<div className="px-3 py-2 text-xs text-zinc-400">Searching...</div>
-								)}
+							<div className="absolute left-0 right-0 z-50 mt-1 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
+								{isSearching && <div className="px-3 py-2 text-xs text-zinc-400">Searching...</div>}
 								{suggestedUsers.map((user) => (
 									<button
 										key={user.id}
@@ -783,11 +788,7 @@ export function InviteMemberModal({
 										}}
 									>
 										{user.image ? (
-											<img
-												src={user.image}
-												alt=""
-												className="size-8 rounded-full object-cover"
-											/>
+											<FadeImage src={user.image} alt="" className="size-8 rounded-full object-cover" />
 										) : (
 											<div className="flex size-8 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
 												<span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
@@ -796,16 +797,10 @@ export function InviteMemberModal({
 											</div>
 										)}
 										<div className="min-w-0 flex-1">
-											<p className="truncate text-sm font-medium text-zinc-900 dark:text-white">
-												{user.name}
-											</p>
-											<p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
-												{user.email}
-											</p>
+											<p className="truncate text-sm font-medium text-zinc-900 dark:text-white">{user.name}</p>
+											<p className="truncate text-xs text-zinc-500 dark:text-zinc-400">{user.email}</p>
 										</div>
-										{user.isMember && (
-											<Badge color="zinc">Member</Badge>
-										)}
+										{user.isMember && <Badge color="zinc">Member</Badge>}
 									</button>
 								))}
 							</div>
@@ -820,10 +815,7 @@ export function InviteMemberModal({
 						{rolesLoading ? (
 							<div className="space-y-2">
 								{[1, 2].map((i) => (
-									<div
-										key={i}
-										className="h-15 animate-pulse rounded-xl bg-zinc-100 skeleton-shimmer dark:bg-zinc-800"
-									/>
+									<div key={i} className="h-15 rounded-xl bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
 								))}
 							</div>
 						) : (
@@ -847,18 +839,9 @@ export function InviteMemberModal({
 				<Button plain onClick={handleClose}>
 					Cancel
 				</Button>
-				<Button color="emerald" onClick={handleSubmit} disabled={inviteMember.isPending || !email.trim()}>
-					{inviteMember.isPending ? (
-						<>
-							<ArrowPathIcon className="size-4 animate-spin" />
-							Sending...
-						</>
-					) : (
-						<>
-							<EnvelopeIcon className="size-4" />
-							Send Invitation
-						</>
-					)}
+				<Button color="emerald" onClick={handleSubmit} loading={inviteMember.isPending} disabled={!email.trim()}>
+					<EnvelopeIcon className="size-4" />
+					Send Invitation
 				</Button>
 			</DialogActions>
 		</Dialog>
@@ -956,7 +939,7 @@ export function ChangeRoleDialog({
 					{rolesLoading ? (
 						<div className="space-y-2">
 							{[1, 2, 3].map((i) => (
-								<div key={i} className="h-15 animate-pulse rounded-xl bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
+								<div key={i} className="h-15 rounded-xl bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
 							))}
 						</div>
 					) : (
@@ -978,15 +961,8 @@ export function ChangeRoleDialog({
 				<Button plain onClick={onClose}>
 					Cancel
 				</Button>
-				<Button color="emerald" onClick={handleSubmit} disabled={updateRole.isPending || isSameRole}>
-					{updateRole.isPending ? (
-						<>
-							<ArrowPathIcon className="size-4 animate-spin" />
-							Saving...
-						</>
-					) : (
-						"Save Changes"
-					)}
+				<Button color="emerald" onClick={handleSubmit} loading={updateRole.isPending} disabled={isSameRole}>
+					Save Changes
 				</Button>
 			</DialogActions>
 		</Dialog>
@@ -1060,18 +1036,9 @@ export function RemoveMemberDialog({
 				<Button plain onClick={onClose}>
 					Cancel
 				</Button>
-				<Button color="red" onClick={handleRemove} disabled={removeMember.isPending}>
-					{removeMember.isPending ? (
-						<>
-							<ArrowPathIcon className="size-4 animate-spin" />
-							Removing...
-						</>
-					) : (
-						<>
-							<TrashIcon className="size-4" />
-							Remove Member
-						</>
-					)}
+				<Button color="red" onClick={handleRemove} loading={removeMember.isPending}>
+					<TrashIcon className="size-4" />
+					Remove Member
 				</Button>
 			</DialogActions>
 		</Dialog>
@@ -1173,18 +1140,22 @@ export function RolesSection({ organizationId }: { organizationId: string | unde
 
 	if (loading) {
 		return (
-			<div className="overflow-hidden rounded-xl bg-white ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
+			<div className="overflow-hidden rounded-xl bg-white ring-1 ring-zinc-200 animate-fade-in dark:bg-zinc-900 dark:ring-zinc-800">
 				<div className="flex items-center justify-between border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
-					<div className="h-5 w-24 animate-pulse rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
-					<div className="h-8 w-24 animate-pulse rounded-lg bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+					<div className="h-5 w-24 rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+					<div className="h-8 w-24 rounded-lg bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
 				</div>
 				<div className="divide-y divide-zinc-200 dark:divide-zinc-800">
 					{[1, 2].map((i) => (
-						<div key={i} className="flex items-center gap-3 px-4 py-3.5">
-							<div className="size-10 animate-pulse rounded-full bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+						<div
+							key={i}
+							className="flex items-center gap-3 px-4 py-3.5 animate-fade-in"
+							style={{ animationDelay: `${i * 60}ms` }}
+						>
+							<div className="size-10 rounded-full bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
 							<div className="flex-1 space-y-1.5">
-								<div className="h-4 w-24 animate-pulse rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
-								<div className="h-3 w-44 animate-pulse rounded bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
+								<div className="h-4 w-24 rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+								<div className="h-3 w-44 rounded bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
 							</div>
 						</div>
 					))}
@@ -1308,18 +1279,14 @@ export function RolesSection({ organizationId }: { organizationId: string | unde
 					>
 						Cancel
 					</Button>
-					<Button color="emerald" onClick={handleCreateRole} disabled={createRole.isPending || !newRoleName.trim()}>
-						{createRole.isPending ? (
-							<>
-								<ArrowPathIcon className="size-4 animate-spin" />
-								Creating...
-							</>
-						) : (
-							<>
-								<ShieldCheckIcon className="size-4" />
-								Create Role
-							</>
-						)}
+					<Button
+						color="emerald"
+						onClick={handleCreateRole}
+						loading={createRole.isPending}
+						disabled={!newRoleName.trim()}
+					>
+						<ShieldCheckIcon className="size-4" />
+						Create Role
 					</Button>
 				</DialogActions>
 			</Dialog>
@@ -1406,15 +1373,8 @@ export function RolesSection({ organizationId }: { organizationId: string | unde
 					<Button plain onClick={() => setEditingRole(null)}>
 						Cancel
 					</Button>
-					<Button color="emerald" onClick={handleSaveRole} disabled={updateRole.isPending}>
-						{updateRole.isPending ? (
-							<>
-								<ArrowPathIcon className="size-4 animate-spin" />
-								Saving...
-							</>
-						) : (
-							"Save Permissions"
-						)}
+					<Button color="emerald" onClick={handleSaveRole} loading={updateRole.isPending}>
+						Save Permissions
 					</Button>
 				</DialogActions>
 			</Dialog>

@@ -1,7 +1,7 @@
 import * as Headless from "@headlessui/react";
 import clsx from "clsx";
 import type React from "react";
-import { forwardRef } from "react";
+import { forwardRef, useState } from "react";
 import { TouchTarget } from "./button";
 import { Link } from "./link";
 
@@ -21,6 +21,9 @@ export function Avatar({
 	className,
 	...props
 }: AvatarProps & React.ComponentPropsWithoutRef<"span">) {
+	const [loaded, setLoaded] = useState(false);
+	const [errored, setErrored] = useState(false);
+
 	return (
 		<span
 			data-slot="avatar"
@@ -36,7 +39,10 @@ export function Avatar({
 		>
 			{initials && (
 				<svg
-					className="size-full fill-current p-[5%] text-[48px] font-medium uppercase select-none"
+					className={clsx(
+						"size-full fill-current p-[5%] text-[48px] font-medium uppercase select-none",
+						src && !errored && loaded && "invisible"
+					)}
 					viewBox="0 0 100 100"
 					aria-hidden={alt ? undefined : "true"}
 					role={alt ? "img" : undefined}
@@ -47,7 +53,16 @@ export function Avatar({
 					</text>
 				</svg>
 			)}
-			{src && <img className="size-full" src={src} alt={alt} />}
+			{src && !errored && (
+				<img
+					className={clsx("size-full transition-opacity duration-300 ease-out", loaded ? "opacity-100" : "opacity-0")}
+					src={src}
+					alt={alt}
+					loading="eager"
+					onLoad={() => setLoaded(true)}
+					onError={() => setErrored(true)}
+				/>
+			)}
 		</span>
 	);
 }

@@ -55,9 +55,15 @@ export function BulkActionsBar({ selectedCount, onClear, children }: BulkActions
 			className="fixed inset-x-0 bottom-0 z-40 flex justify-center px-3 pb-4 sm:px-6 sm:pb-6 lg:left-(--sidebar-width,15rem)"
 			onAnimationEnd={handleAnimationEnd}
 		>
-			<div style={{ borderRadius: 9999 }} className="flex items-stretch gap-1 border border-zinc-950/8 bg-white/90 p-1 shadow-[0_8px_40px_rgba(0,0,0,0.1),0_2px_12px_rgba(0,0,0,0.06)] ring-1 ring-zinc-950/5 backdrop-blur-2xl backdrop-saturate-[1.8] sm:gap-1.5 sm:p-1.5 dark:border-white/10 dark:bg-zinc-900/90 dark:shadow-[0_8px_40px_rgba(0,0,0,0.5)] dark:ring-white/5">
+			<div
+				style={{ borderRadius: 9999 }}
+				className="flex items-stretch gap-1 border border-zinc-950/8 bg-white/90 p-1 shadow-[0_8px_40px_rgba(0,0,0,0.1),0_2px_12px_rgba(0,0,0,0.06)] ring-1 ring-zinc-950/5 backdrop-blur-2xl backdrop-saturate-[1.8] sm:gap-1.5 sm:p-1.5 dark:border-white/10 dark:bg-zinc-900/90 dark:shadow-[0_8px_40px_rgba(0,0,0,0.5)] dark:ring-white/5"
+			>
 				{/* Count pill — indigo accent */}
-				<div style={{ borderRadius: 9999 }} className="flex shrink-0 items-center gap-1.5 bg-indigo-600 px-2.5 text-xs/none font-semibold sm:px-3 dark:bg-indigo-500">
+				<div
+					style={{ borderRadius: 9999 }}
+					className="flex shrink-0 items-center gap-1.5 bg-indigo-600 px-2.5 text-xs/none font-semibold sm:px-3 dark:bg-indigo-500"
+				>
 					<CheckIcon className="hidden size-3 text-indigo-200 sm:block dark:text-indigo-200" />
 					<span
 						className="tabular-nums text-white"
@@ -67,9 +73,7 @@ export function BulkActionsBar({ selectedCount, onClear, children }: BulkActions
 					>
 						{displayCount}
 					</span>
-					<span className="hidden text-indigo-200 sm:block dark:text-indigo-200">
-						selected
-					</span>
+					<span className="hidden text-indigo-200 sm:block dark:text-indigo-200">selected</span>
 				</div>
 
 				{/* Separator */}
@@ -91,6 +95,6 @@ export function BulkActionsBar({ selectedCount, onClear, children }: BulkActions
 				</button>
 			</div>
 		</div>,
-		document.body,
+		document.body
 	);
 }

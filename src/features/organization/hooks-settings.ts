@@ -11,6 +11,7 @@ import {
 	changeOrgPhoneServer,
 	deleteBankAccountServer,
 	enrichPreviewServer,
+	updateBankAccountServer,
 	updateOrganizationSettingsServer,
 	verifyBankAccountServer,
 	verifyGSTPreviewServer,
@@ -105,6 +106,19 @@ export function useAddBankAccount(organizationId: string | undefined) {
 	return useMutation({
 		mutationFn: async (params: brand.AddBankAccountRequest) => {
 			return addBankAccountServer({ data: { organizationId: organizationId as string, ...params } });
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: queryKeys.bankAccount(organizationId || "") });
+		},
+	});
+}
+
+export function useUpdateBankAccount(organizationId: string | undefined) {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: async (params: brand.UpdateBankAccountRequest) => {
+			return updateBankAccountServer({ data: { organizationId: organizationId as string, ...params } });
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.bankAccount(organizationId || "") });

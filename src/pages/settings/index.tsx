@@ -1,4 +1,5 @@
 import {
+	ArrowPathIcon,
 	BanknotesIcon,
 	BuildingOfficeIcon,
 	CalendarDaysIcon,
@@ -7,7 +8,6 @@ import {
 	CreditCardIcon,
 	ExclamationTriangleIcon,
 	GlobeAltIcon,
-	HashtagIcon,
 	HomeModernIcon,
 	IdentificationIcon,
 	MapPinIcon,
@@ -30,6 +30,7 @@ import { Logo } from "@/components/logo";
 import { usePanelNav } from "@/components/settings-dialog";
 import { CopyButton } from "@/components/shared";
 import { useCan } from "@/components/shared/can";
+import { FadeImage } from "@/components/shared/fade-image";
 import { MenuRow, MenuSection, MenuSectionHeader, MenuSeparator } from "@/components/shared/menu-list";
 import { Text } from "@/components/text";
 import { Textarea } from "@/components/textarea";
@@ -42,13 +43,14 @@ import {
 	useDeleteBankAccount,
 	useGSTDetails,
 	useOrganizationSettings,
+	useUpdateBankAccount,
 	useUpdateOrganizationSettings,
 	useVerifyBankAccount,
 	useVerifyGST,
 	useVerifyGSTPreview,
 } from "@/features/organization/hooks-settings";
 import { useFileUpload } from "@/features/storage/hooks";
-import { getFriendlyErrorMessage, getAssetUrl } from "@/hooks/api-client";
+import { getAssetUrl, getFriendlyErrorMessage } from "@/hooks/api-client";
 import { useOrgContext } from "@/hooks/use-org-context";
 import {
 	getAllCountries,
@@ -63,44 +65,112 @@ import { showToast } from "@/lib/toast";
 // SKELETON LOADING
 // =============================================================================
 
-function SettingsSkeleton({ isDialog = false }: { isDialog?: boolean }) {
+function BankAccountSkeleton() {
+	return (
+		<div className="space-y-4">
+			{/* Card skeleton */}
+			<div className="overflow-hidden rounded-2xl ring-1 ring-zinc-200/80 dark:ring-zinc-700/60">
+				{/* Header */}
+				<div className="flex items-center gap-3 bg-zinc-50 px-5 py-4 dark:bg-zinc-800/80">
+					<div className="size-10 rounded-xl bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+					<div className="flex-1">
+						<div className="h-4 w-32 rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+						<div className="mt-1.5 h-3 w-48 rounded bg-zinc-200/70 skeleton-shimmer dark:bg-zinc-700/60" />
+					</div>
+					<div className="h-5 w-16 rounded-full bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+				</div>
+				{/* Details grid */}
+				<div className="grid grid-cols-2 gap-px bg-zinc-200/60 dark:bg-zinc-700/40">
+					{[1, 2, 3, 4].map((i) => (
+						<div key={i} className="bg-white px-4 py-3.5 dark:bg-zinc-900">
+							<div className="h-2.5 w-16 rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+							<div className="mt-2 h-4 w-28 rounded bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
+						</div>
+					))}
+				</div>
+				{/* Footer */}
+				<div className="flex items-center justify-end gap-2 bg-white px-4 py-3 dark:bg-zinc-900">
+					<div className="h-8 w-20 rounded-lg bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
+					<div className="h-8 w-20 rounded-lg bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
+				</div>
+			</div>
+		</div>
+	);
+}
+
+function SettingsSkeleton({ isDialog = false, section }: { isDialog?: boolean; section?: string }) {
+	// Section-specific skeletons for dialog mode
+	if (isDialog && section === "bank") {
+		return (
+			<div className="space-y-5 px-4 py-5 pb-10 sm:px-5">
+				<BankAccountSkeleton />
+			</div>
+		);
+	}
+	if (isDialog && section === "gst") {
+		return (
+			<div className="space-y-5 px-4 py-5 pb-10 sm:px-5">
+				<div className="overflow-hidden rounded-xl ring-1 ring-zinc-200/80 dark:ring-zinc-700/60">
+					{Array.from({ length: 3 }).map((_, i) => (
+						<div
+							key={i}
+							className="flex items-center gap-3 border-b border-zinc-200 px-4 py-3 last:border-b-0 dark:border-zinc-800"
+						>
+							<div className="size-8 shrink-0 rounded-lg bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
+							<div className="flex-1">
+								<div className="h-3 w-20 rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+								<div className="mt-1.5 h-3.5 w-36 rounded bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
+							</div>
+						</div>
+					))}
+				</div>
+			</div>
+		);
+	}
+
 	return (
 		<div className={isDialog ? "space-y-5 px-4 py-5 pb-10 sm:px-5" : "space-y-6 pb-20"}>
 			{!isDialog && (
-				<div>
-					<div className="h-8 w-48 animate-pulse rounded-lg bg-zinc-200 skeleton-shimmer dark:bg-zinc-800" />
-					<div className="mt-2 h-4 w-64 animate-pulse rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-800" />
+				<div className="animate-fade-in">
+					<div className="h-8 w-48 rounded-lg bg-zinc-200 skeleton-shimmer dark:bg-zinc-800" />
+					<div className="mt-2 h-4 w-64 rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-800" />
 				</div>
 			)}
 			{/* Profile card */}
-			<div className="overflow-hidden rounded-2xl bg-zinc-900 dark:bg-zinc-800">
+			<div
+				className="overflow-hidden rounded-2xl bg-zinc-900 animate-fade-in dark:bg-zinc-800"
+				style={{ animationDelay: "60ms" }}
+			>
 				<div className="flex items-center gap-3 px-5 py-4">
-					<div className="size-12 shrink-0 animate-pulse rounded-xl bg-zinc-700 skeleton-shimmer" />
+					<div className="size-12 shrink-0 rounded-xl bg-zinc-700 skeleton-shimmer" />
 					<div className="min-w-0 flex-1">
-						<div className="h-4 w-36 animate-pulse rounded bg-zinc-700 skeleton-shimmer" />
-						<div className="mt-2 h-3 w-20 animate-pulse rounded bg-zinc-700 skeleton-shimmer" />
+						<div className="h-4 w-36 rounded bg-zinc-700 skeleton-shimmer" />
+						<div className="mt-2 h-3 w-20 rounded bg-zinc-700 skeleton-shimmer" />
 					</div>
 				</div>
 				<div className="grid grid-cols-3 divide-x divide-white/8 border-t border-white/8">
 					{[1, 2, 3].map((i) => (
 						<div key={i} className="px-3 py-2.5 text-center">
-							<div className="mx-auto h-4 w-10 animate-pulse rounded bg-zinc-700 skeleton-shimmer" />
-							<div className="mx-auto mt-1.5 h-2.5 w-14 animate-pulse rounded bg-zinc-700/60 skeleton-shimmer" />
+							<div className="mx-auto h-4 w-10 rounded bg-zinc-700 skeleton-shimmer" />
+							<div className="mx-auto mt-1.5 h-2.5 w-14 rounded bg-zinc-700/60 skeleton-shimmer" />
 						</div>
 					))}
 				</div>
 			</div>
 			{/* Details rows */}
-			{[4, 3, 2].map((rows) => (
-				<div key={rows} className="space-y-1.5">
-					<div className="h-3 w-28 animate-pulse rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+			{[4, 3, 2].map((rows, idx) => (
+				<div key={rows} className="space-y-1.5 animate-fade-in" style={{ animationDelay: `${120 + idx * 80}ms` }}>
+					<div className="h-3 w-28 rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
 					<div className="overflow-hidden rounded-xl ring-1 ring-zinc-200/80 dark:ring-zinc-700/60">
 						{Array.from({ length: rows }).map((_, i) => (
-							<div key={i} className="flex items-center gap-3 border-b border-zinc-200 px-4 py-3 last:border-b-0 dark:border-zinc-800">
-								<div className="size-8 shrink-0 animate-pulse rounded-lg bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
+							<div
+								key={i}
+								className="flex items-center gap-3 border-b border-zinc-200 px-4 py-3 last:border-b-0 dark:border-zinc-800"
+							>
+								<div className="size-8 shrink-0 rounded-lg bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
 								<div className="flex-1">
-									<div className="h-3 w-20 animate-pulse rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
-									<div className="mt-1.5 h-3.5 w-36 animate-pulse rounded bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
+									<div className="h-3 w-20 rounded bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+									<div className="mt-1.5 h-3.5 w-36 rounded bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
 								</div>
 							</div>
 						))}
@@ -143,7 +213,7 @@ function OrganizationProfileCard({
 			<div className="flex items-center justify-between px-5 py-4">
 				<div className="flex items-center gap-3.5">
 					<div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-zinc-700 text-base font-bold text-white ring-1 ring-white/10 dark:bg-zinc-600">
-						{logoUrl ? <img src={logoUrl} alt={name} className="size-full object-cover" /> : initials}
+						{logoUrl ? <FadeImage src={logoUrl} alt={name} className="size-full object-cover" /> : initials}
 					</div>
 					<div className="min-w-0">
 						<h2 className="truncate text-[15px] font-semibold text-white">{name}</h2>
@@ -305,7 +375,11 @@ function EditOrganizationPanel({
 					<div className="mt-1.5 flex items-center gap-4">
 						<div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-zinc-100 dark:bg-zinc-800">
 							{logoPreview || formData.logo ? (
-								<img src={logoPreview || getAssetUrl(formData.logo)} alt="Logo" className="size-full object-cover" />
+								<FadeImage
+									src={logoPreview || getAssetUrl(formData.logo)}
+									alt="Logo"
+									className="size-full object-cover"
+								/>
 							) : (
 								<CameraIcon className="size-6 text-zinc-400" />
 							)}
@@ -324,7 +398,9 @@ function EditOrganizationPanel({
 				</Field>
 
 				<Field>
-					<Label>Organization Name <span className="text-red-500">*</span></Label>
+					<Label>
+						Organization Name <span className="text-red-500">*</span>
+					</Label>
 					<Input
 						value={formData.name}
 						onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
@@ -479,7 +555,13 @@ function EditOrganizationPanel({
 // ADD BANK ACCOUNT PANEL
 // =============================================================================
 
-function AddBankAccountPanel({ organizationId }: { organizationId: string | undefined }) {
+function AddBankAccountPanel({
+	organizationId,
+	mode = "add",
+}: {
+	organizationId: string | undefined;
+	mode?: "add" | "update";
+}) {
 	const panelNav = usePanelNav();
 	const pop = () => panelNav?.popPanel();
 
@@ -494,6 +576,9 @@ function AddBankAccountPanel({ organizationId }: { organizationId: string | unde
 
 	const verifyBank = useVerifyBankAccount(organizationId);
 	const addBank = useAddBankAccount(organizationId);
+	const updateBank = useUpdateBankAccount(organizationId);
+
+	const isUpdate = mode === "update";
 
 	const handleVerify = async () => {
 		setError(null);
@@ -519,28 +604,38 @@ function AddBankAccountPanel({ organizationId }: { organizationId: string | unde
 		}
 	};
 
-	const handleAdd = async () => {
+	const handleSave = async () => {
 		setError(null);
+		const payload = {
+			accountNumber: accountNumber.trim(),
+			ifscCode: ifscCode.trim().toUpperCase(),
+			accountHolderName: accountHolderName.trim(),
+			bankName: bankName.trim() || "Unknown",
+			accountType,
+			validationId,
+		};
 		try {
-			await addBank.mutateAsync({
-				accountNumber: accountNumber.trim(),
-				ifscCode: ifscCode.trim().toUpperCase(),
-				accountHolderName: accountHolderName.trim(),
-				bankName: bankName.trim() || "Unknown",
-				accountType,
-				validationId,
-			});
-			showToast.success("Bank account added");
+			if (isUpdate) {
+				await updateBank.mutateAsync(payload);
+				showToast.success("Bank account updated");
+			} else {
+				await addBank.mutateAsync(payload);
+				showToast.success("Bank account added");
+			}
 			pop();
 		} catch (err) {
-			setError(getFriendlyErrorMessage(err, "Failed to add bank account"));
+			setError(getFriendlyErrorMessage(err, isUpdate ? "Failed to update bank account" : "Failed to add bank account"));
 		}
 	};
+
+	const isSaving = isUpdate ? updateBank.isPending : addBank.isPending;
 
 	return (
 		<div className="space-y-4">
 			<p className="text-sm text-zinc-500 dark:text-zinc-400">
-				Add your bank account for withdrawals. We'll verify your account first.
+				{isUpdate
+					? "Verify your new bank account details. The existing account will be replaced."
+					: "Add your bank account for withdrawals. We'll verify your account first."}
 			</p>
 
 			{error && (
@@ -550,7 +645,9 @@ function AddBankAccountPanel({ organizationId }: { organizationId: string | unde
 			)}
 
 			<Field>
-				<Label>Account Number <span className="text-red-500">*</span></Label>
+				<Label>
+					Account Number <span className="text-red-500">*</span>
+				</Label>
 				<Input
 					value={accountNumber}
 					onChange={(e) => {
@@ -562,7 +659,9 @@ function AddBankAccountPanel({ organizationId }: { organizationId: string | unde
 				/>
 			</Field>
 			<Field>
-				<Label>IFSC Code <span className="text-red-500">*</span></Label>
+				<Label>
+					IFSC Code <span className="text-red-500">*</span>
+				</Label>
 				<Input
 					value={ifscCode}
 					onChange={(e) => {
@@ -633,8 +732,8 @@ function AddBankAccountPanel({ organizationId }: { organizationId: string | unde
 						{verifyBank.isPending ? "Verifying..." : "Verify Account"}
 					</Button>
 				) : (
-					<Button color="emerald" onClick={handleAdd} disabled={addBank.isPending}>
-						{addBank.isPending ? "Adding..." : "Add Account"}
+					<Button color="emerald" onClick={handleSave} disabled={isSaving}>
+						{isSaving ? (isUpdate ? "Updating..." : "Adding...") : isUpdate ? "Update Account" : "Add Account"}
 					</Button>
 				)}
 			</div>
@@ -908,6 +1007,33 @@ function VerifyGSTPanel({ organizationId, currentGST }: { organizationId: string
 }
 
 // =============================================================================
+// BANK ICON
+// =============================================================================
+
+function BankIcon({ iconUrl, bankName }: { iconUrl?: string | null; bankName?: string | null }) {
+	const [imgError, setImgError] = useState(false);
+
+	if (imgError || !iconUrl) {
+		return (
+			<div className="flex size-11 items-center justify-center rounded-xl bg-emerald-100 ring-1 ring-emerald-200/60 dark:bg-emerald-900/50 dark:ring-emerald-800/40">
+				<CreditCardIcon className="size-5 text-emerald-600 dark:text-emerald-400" />
+			</div>
+		);
+	}
+
+	return (
+		<div className="flex size-11 items-center justify-center overflow-hidden rounded-xl bg-white p-1.5 ring-1 ring-zinc-200/60 dark:bg-zinc-800 dark:ring-zinc-700/40">
+			<FadeImage
+				src={iconUrl}
+				alt={bankName || "Bank"}
+				className="size-full object-contain"
+				onError={() => setImgError(true)}
+			/>
+		</div>
+	);
+}
+
+// =============================================================================
 // ORGANIZATION SETTINGS PAGE
 // =============================================================================
 
@@ -964,6 +1090,16 @@ export function Settings({ section = "all" }: { section?: OrgSettingsSection } =
 		}
 	};
 
+	const openChangeBank = () => {
+		if (panelNav) {
+			panelNav.pushPanel(
+				"change-bank",
+				"Change Bank Account",
+				<AddBankAccountPanel organizationId={organizationId} mode="update" />
+			);
+		}
+	};
+
 	const openChangePhone = () => {
 		if (panelNav) {
 			panelNav.pushPanel(
@@ -999,7 +1135,7 @@ export function Settings({ section = "all" }: { section?: OrgSettingsSection } =
 	const loading = isLoadingStats;
 
 	if (loading) {
-		return <SettingsSkeleton isDialog={section !== "all"} />;
+		return <SettingsSkeleton isDialog={section !== "all"} section={section} />;
 	}
 
 	const orgData = orgDetails;
@@ -1074,7 +1210,7 @@ export function Settings({ section = "all" }: { section?: OrgSettingsSection } =
 			{!isDialog && <MenuSectionHeader>GST & Compliance</MenuSectionHeader>}
 
 			{isGSTLoading ? (
-				<div className="h-44 animate-pulse rounded-xl bg-zinc-100 dark:bg-zinc-800" />
+				<div className="h-44 skeleton-shimmer rounded-xl bg-zinc-100 dark:bg-zinc-800" />
 			) : !hasGST ? (
 				<div className="overflow-hidden rounded-xl ring-1 ring-zinc-200/80 dark:ring-zinc-700/60">
 					<div className="flex flex-col items-center gap-3 px-6 py-8 text-center">
@@ -1184,76 +1320,99 @@ export function Settings({ section = "all" }: { section?: OrgSettingsSection } =
 		<div>
 			{!isDialog && <MenuSectionHeader>Bank Account</MenuSectionHeader>}
 			{isBankLoading ? (
-				<div className="h-36 animate-pulse rounded-xl bg-zinc-100 dark:bg-zinc-800" />
+				<BankAccountSkeleton />
 			) : bankAccount ? (
-				<MenuSection>
-					<MenuRow
-						icon={CreditCardIcon}
-						iconColor="emerald"
-						label="Account Number"
-						value={`****${bankAccount.accountNumber?.slice(-4) || "****"}`}
-						isFirst
-					/>
-					<MenuSeparator />
-					<MenuRow
-						icon={HashtagIcon}
-						iconColor="sky"
-						label="IFSC Code"
-						value={bankAccount.ifscCode || "—"}
-						suffix={bankAccount.ifscCode ? <CopyButton value={bankAccount.ifscCode} label="IFSC Code" /> : undefined}
-					/>
-					<MenuSeparator />
-					<MenuRow
-						icon={UserCircleIcon}
-						iconColor="zinc"
-						label="Account Holder"
-						value={bankAccount.accountHolderName || "—"}
-						suffix={
-							bankAccount.accountHolderName ? (
-								<CopyButton value={bankAccount.accountHolderName} label="Account Holder" />
-							) : undefined
-						}
-					/>
-					<MenuSeparator />
-					<div className="flex items-center justify-between px-4 py-3">
-						<Badge color="emerald">
-							<CheckCircleIcon className="size-3" />
-							Verified
-						</Badge>
+				<div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-zinc-200/80 dark:bg-zinc-900 dark:ring-zinc-700/60">
+					{/* Header */}
+					<div className="flex items-center gap-3.5 px-5 py-4">
+						<BankIcon iconUrl={bankAccount.iconUrl} bankName={bankAccount.bankName} />
+						<div className="min-w-0 flex-1">
+							<div className="flex items-center gap-2">
+								<p className="truncate text-[15px] font-semibold text-zinc-900 dark:text-white">
+									{bankAccount.bankName || "Bank Account"}
+								</p>
+								<Badge color="emerald" className="shrink-0">
+									<CheckCircleIcon className="size-3" />
+									Verified
+								</Badge>
+							</div>
+							<p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+								{bankAccount.accountType === "savings" ? "Savings" : "Current"} Account
+							</p>
+						</div>
+					</div>
+
+					{/* Account details — list style */}
+					<div className="border-t border-zinc-100 dark:border-zinc-800">
+						<div className="flex items-center justify-between px-5 py-3">
+							<span className="text-[13px] text-zinc-500 dark:text-zinc-400">Account Number</span>
+							<span className="font-mono text-[13px] font-medium tracking-wide text-zinc-900 dark:text-white">
+								****{bankAccount.accountNumber?.slice(-4) || "****"}
+							</span>
+						</div>
+						<div className="mx-5 h-px bg-zinc-100 dark:bg-zinc-800" />
+						<div className="flex items-center justify-between px-5 py-3">
+							<span className="text-[13px] text-zinc-500 dark:text-zinc-400">IFSC Code</span>
+							<span className="font-mono text-[13px] font-medium tracking-wide text-zinc-900 dark:text-white">
+								{bankAccount.ifscCode || "—"}
+							</span>
+						</div>
+						<div className="mx-5 h-px bg-zinc-100 dark:bg-zinc-800" />
+						<div className="flex items-center justify-between px-5 py-3">
+							<span className="text-[13px] text-zinc-500 dark:text-zinc-400">Account Holder</span>
+							<span className="truncate pl-4 text-[13px] font-medium text-zinc-900 dark:text-white">
+								{bankAccount.accountHolderName || "—"}
+							</span>
+						</div>
+					</div>
+
+					{/* Actions footer */}
+					<div className="flex items-center justify-end gap-2 border-t border-zinc-100 bg-zinc-50/60 px-4 py-2.5 dark:border-zinc-800 dark:bg-zinc-800/40">
+						{canCreateBankAccount && (
+							<Button plain onClick={openChangeBank} className="text-xs">
+								<ArrowPathIcon className="size-3.5" />
+								Change Account
+							</Button>
+						)}
 						{canDeleteBankAccount && (
 							<Button
 								plain
 								onClick={handleDeleteBank}
 								disabled={deleteBankAccount.isPending}
-								className="text-red-500 hover:text-red-700"
+								className="text-xs text-red-500 hover:text-red-700"
 							>
-								<TrashIcon className="size-4" />
+								<TrashIcon className="size-3.5" />
 								{deleteBankAccount.isPending ? "Removing..." : "Remove"}
 							</Button>
 						)}
 					</div>
-				</MenuSection>
+				</div>
 			) : (
-				<div className="flex flex-col items-center gap-3 rounded-xl bg-zinc-50 py-8 ring-1 ring-zinc-200/80 dark:bg-zinc-800/60 dark:ring-zinc-700/60">
-					<div className="flex size-11 items-center justify-center rounded-xl bg-zinc-200/80 dark:bg-zinc-700/60">
-						<BanknotesIcon className="size-5 text-zinc-500 dark:text-zinc-400" />
+				<div className="overflow-hidden rounded-2xl ring-1 ring-zinc-200/80 dark:ring-zinc-700/60">
+					<div className="flex flex-col items-center gap-4 bg-gradient-to-b from-zinc-50 to-white px-6 py-12 dark:from-zinc-800/60 dark:to-zinc-900">
+						<div className="flex size-14 items-center justify-center rounded-2xl bg-zinc-100 ring-1 ring-zinc-200/60 dark:bg-zinc-800 dark:ring-zinc-700/60">
+							<BanknotesIcon className="size-7 text-zinc-400 dark:text-zinc-500" />
+						</div>
+						<div className="text-center">
+							<p className="text-[15px] font-semibold text-zinc-800 dark:text-zinc-200">No bank account linked</p>
+							<p className="mx-auto mt-1.5 max-w-[260px] text-[13px] leading-relaxed text-zinc-500 dark:text-zinc-400">
+								Add and verify a bank account to enable withdrawals from your wallet
+							</p>
+						</div>
+						{canCreateBankAccount && (
+							<Button color="dark/zinc" onClick={openAddBank} className="mt-1">
+								<CreditCardIcon className="size-4" />
+								Link Bank Account
+							</Button>
+						)}
 					</div>
-					<div className="text-center">
-						<p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">No bank account added</p>
-						<p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">Add a bank account to enable withdrawals</p>
-					</div>
-					{canCreateBankAccount && (
-						<Button color="dark/zinc" onClick={openAddBank}>
-							Add Bank Account
-						</Button>
-					)}
 				</div>
 			)}
 		</div>
 	);
 
 	return (
-		<div className={isDialog ? "space-y-5 px-5 py-5 pb-10 sm:px-6" : "space-y-6 pb-20"}>
+		<div className={isDialog ? "space-y-5 px-5 py-5 pb-10 sm:px-6" : "animate-page-enter space-y-6 pb-20"}>
 			{section === "all" && (
 				<div>
 					<Heading>Organization Settings</Heading>

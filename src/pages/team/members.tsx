@@ -111,7 +111,7 @@ export function TeamMembers() {
 	}
 
 	return (
-		<div>
+		<div className="animate-page-enter">
 			{/* Select all bar */}
 			{canManageMembers && selectableMembers.length > 0 && (
 				<div className="mb-3 flex items-center gap-3">
@@ -128,7 +128,7 @@ export function TeamMembers() {
 			)}
 
 			{/* Member card grid */}
-			<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+			<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
 				{filteredMembers.map((member) => {
 					const isCurrentUser = member.userId === currentUserId;
 					const checkable = canManageMembers && isSelectable(member);
@@ -149,7 +149,7 @@ export function TeamMembers() {
 						<div
 							key={member.id}
 							className={clsx(
-								"group/card flex flex-col rounded-xl bg-white shadow-xs ring-1 transition-all hover:shadow-sm dark:bg-zinc-900",
+								"group/card flex h-full flex-col rounded-xl bg-white shadow-xs ring-1 transition-all hover:shadow-sm dark:bg-zinc-900",
 								selected
 									? "ring-sky-300 bg-sky-50/50 dark:ring-sky-700 dark:bg-sky-950/20"
 									: "ring-zinc-200 hover:ring-zinc-300 dark:ring-zinc-800 dark:hover:ring-zinc-700"
@@ -158,11 +158,7 @@ export function TeamMembers() {
 							<div className="relative flex items-start gap-3.5 p-4 sm:p-5">
 								{/* Selection checkbox — overlay, no layout shift */}
 								{checkable && (
-									<SelectionCheckbox
-										variant="overlay"
-										selected={selected}
-										onToggle={() => toggleSelect(member.id)}
-									/>
+									<SelectionCheckbox variant="overlay" selected={selected} onToggle={() => toggleSelect(member.id)} />
 								)}
 
 								{/* Avatar */}
@@ -219,7 +215,10 @@ export function TeamMembers() {
 								</div>
 								<div className="flex flex-col items-center justify-center py-2.5">
 									<span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">Joined</span>
-									<span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300" title={joinedFull || undefined}>
+									<span
+										className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+										title={joinedFull || undefined}
+									>
 										{joinedAgo || "—"}
 									</span>
 								</div>
@@ -228,8 +227,6 @@ export function TeamMembers() {
 					);
 				})}
 			</div>
-
-			{/* Footer count */}
 			<div className="mt-3">
 				<p className="text-xs text-zinc-500 dark:text-zinc-400">
 					{filteredMembers.length === members.length

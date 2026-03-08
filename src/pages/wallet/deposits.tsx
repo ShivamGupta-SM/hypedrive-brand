@@ -1,8 +1,4 @@
-import {
-	ArrowDownLeftIcon,
-	BanknotesIcon,
-	CalendarIcon,
-} from "@heroicons/react/16/solid";
+import { ArrowDownLeftIcon, BanknotesIcon, CalendarIcon } from "@heroicons/react/16/solid";
 import { useState } from "react";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
@@ -33,7 +29,12 @@ export function WalletDeposits() {
 	const [sortBy, setSortBy] = useState<SortValue>("newest");
 	const activeSort = sortMap[sortBy] || sortMap.newest;
 
-	const { data: deposits, loading: depositsLoading, error, refetch } = useDeposits(organizationId, {
+	const {
+		data: deposits,
+		loading: depositsLoading,
+		error,
+		refetch,
+	} = useDeposits(organizationId, {
 		sortBy: activeSort.sortBy,
 		sortOrder: activeSort.sortOrder,
 	});
@@ -43,7 +44,7 @@ export function WalletDeposits() {
 	}
 
 	return (
-		<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
+		<div className="animate-page-enter overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
 			<div className="flex items-center justify-between border-b border-zinc-200 px-3.5 py-2.5 sm:px-4 sm:py-3 dark:border-zinc-700">
 				<div className="flex items-center gap-2.5">
 					<ArrowDownLeftIcon className="size-4 text-emerald-500" />

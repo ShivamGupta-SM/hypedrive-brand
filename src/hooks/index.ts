@@ -12,8 +12,7 @@ export function useInvalidateQueries() {
 		invalidateDashboard: (orgId: string) => queryClient.invalidateQueries({ queryKey: queryKeys.dashboard(orgId) }),
 		invalidateCampaigns: (orgId: string) => queryClient.invalidateQueries({ queryKey: queryKeys.campaigns(orgId) }),
 		invalidateListings: (orgId: string) => queryClient.invalidateQueries({ queryKey: queryKeys.listings(orgId) }),
-		invalidateEnrollments: (orgId: string) =>
-			queryClient.invalidateQueries({ queryKey: queryKeys.enrollments(orgId) }),
+		invalidateEnrollments: (orgId: string) => queryClient.invalidateQueries({ queryKey: queryKeys.enrollments(orgId) }),
 		invalidateWallet: (orgId: string) => queryClient.invalidateQueries({ queryKey: queryKeys.wallet(orgId) }),
 		invalidateInvoices: (orgId: string) => queryClient.invalidateQueries({ queryKey: queryKeys.invoices(orgId) }),
 		invalidateBankAccounts: (orgId: string) =>
@@ -28,8 +27,7 @@ export function useInvalidateQueries() {
 		invalidateNotifications: (orgId: string) =>
 			queryClient.invalidateQueries({ queryKey: queryKeys.notifications(orgId) }),
 		invalidatePasskeys: () => queryClient.invalidateQueries({ queryKey: queryKeys.passkeys() }),
-		invalidateRoles: (orgId: string) =>
-			queryClient.invalidateQueries({ queryKey: queryKeys.organizationRoles(orgId) }),
+		invalidateRoles: (orgId: string) => queryClient.invalidateQueries({ queryKey: queryKeys.organizationRoles(orgId) }),
 		invalidateLinkedAccounts: () => queryClient.invalidateQueries({ queryKey: queryKeys.linkedAccounts() }),
 		invalidateUserInvitations: () => queryClient.invalidateQueries({ queryKey: queryKeys.userInvitations() }),
 		invalidateAll: () => queryClient.invalidateQueries(),

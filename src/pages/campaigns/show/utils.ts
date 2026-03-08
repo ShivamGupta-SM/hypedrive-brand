@@ -1,8 +1,4 @@
-import {
-	ArrowsRightLeftIcon,
-	CurrencyRupeeIcon,
-	SparklesIcon,
-} from "@heroicons/react/16/solid";
+import { ArrowsRightLeftIcon, CurrencyRupeeIcon, SparklesIcon } from "@heroicons/react/16/solid";
 
 export const CAMPAIGN_TYPE_CONFIG: Record<
 	string,

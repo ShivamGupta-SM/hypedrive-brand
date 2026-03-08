@@ -1,12 +1,6 @@
-import {
-	ArrowPathIcon,
-	CheckCircleIcon,
-	ClockIcon,
-	TableCellsIcon,
-	UserGroupIcon,
-	XCircleIcon,
-} from "@heroicons/react/16/solid";
+import { ArrowPathIcon, CheckCircleIcon, ClockIcon, UserGroupIcon, XCircleIcon } from "@heroicons/react/16/solid";
 import clsx from "clsx";
+import { BsTable as TableIcon } from "react-icons/bs";
 import { Button } from "@/components/button";
 import { EnrollmentCardCompact } from "@/components/enrollment-card";
 import { Link } from "@/components/link";
@@ -60,7 +54,8 @@ export function CampaignEnrollments({
 				</div>
 				<div className="flex items-center gap-2">
 					<Button
-						outline
+						color="emerald"
+						loading={exportEnrollments.isPending}
 						onClick={async () => {
 							try {
 								const result = await exportEnrollments.mutateAsync({ campaignId });
@@ -70,12 +65,9 @@ export function CampaignEnrollments({
 								showToast.error(err, "Failed to export enrollments");
 							}
 						}}
-						disabled={exportEnrollments.isPending}
 					>
-						<TableCellsIcon data-slot="icon" className="size-4" />
-						<span className="hidden sm:inline">
-							{exportEnrollments.isPending ? "Exporting..." : "Export Excel"}
-						</span>
+						<TableIcon data-slot="icon" className="size-4" />
+						<span className="hidden sm:inline">Export Excel</span>
 					</Button>
 					<Link
 						href={`/${orgSlug}/enrollments?campaignId=${campaignId}`}
@@ -183,21 +175,22 @@ export function CampaignEnrollments({
 					{[1, 2, 3, 4].map((i) => (
 						<div
 							key={i}
-							className="overflow-hidden rounded-xl bg-white shadow-xs ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800"
+							className="overflow-hidden rounded-xl bg-white shadow-xs ring-1 ring-zinc-200 animate-fade-in dark:bg-zinc-900 dark:ring-zinc-800"
+							style={{ animationDelay: `${i * 60}ms` }}
 						>
 							<div className="flex items-start gap-3 p-3 sm:gap-3.5 sm:p-3.5">
-								<div className="size-10 shrink-0 animate-pulse rounded-full bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+								<div className="size-10 shrink-0 rounded-full bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
 								<div className="min-w-0 flex-1 space-y-2">
-									<div className="h-4 w-2/3 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
-									<div className="h-3 w-1/2 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
+									<div className="h-4 w-2/3 skeleton-shimmer rounded bg-zinc-200 dark:bg-zinc-700" />
+									<div className="h-3 w-1/2 skeleton-shimmer rounded bg-zinc-200 dark:bg-zinc-700" />
 								</div>
 							</div>
 							<div className="h-px bg-zinc-200 dark:bg-zinc-700" />
 							<div className="grid grid-cols-3 divide-x divide-zinc-200 bg-zinc-50/50 dark:divide-zinc-700 dark:bg-zinc-800/30">
 								{[1, 2, 3].map((j) => (
 									<div key={j} className="flex flex-col items-center gap-1 py-2">
-										<div className="h-2.5 w-8 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
-										<div className="h-3 w-12 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
+										<div className="h-2.5 w-8 skeleton-shimmer rounded bg-zinc-200 dark:bg-zinc-700" />
+										<div className="h-3 w-12 skeleton-shimmer rounded bg-zinc-200 dark:bg-zinc-700" />
 									</div>
 								))}
 							</div>
@@ -208,9 +201,7 @@ export function CampaignEnrollments({
 				<EmptyState
 					preset="enrollments"
 					title={
-						enrollmentFilter === "all"
-							? "No enrollments yet"
-							: `No ${enrollmentFilter.replace(/_/g, " ")} enrollments`
+						enrollmentFilter === "all" ? "No enrollments yet" : `No ${enrollmentFilter.replace(/_/g, " ")} enrollments`
 					}
 					description={
 						enrollmentFilter === "all"

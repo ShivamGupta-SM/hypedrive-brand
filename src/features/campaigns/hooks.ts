@@ -127,9 +127,13 @@ export function usePlatforms() {
 	};
 }
 
-export function useTaskTemplates(params?: { category?: string; status?: string; platformId?: string }) {
+export function useTaskTemplates(
+	params?: { category?: string; status?: string; platformId?: string },
+	options?: { enabled?: boolean }
+) {
 	const query = useQuery({
 		...taskTemplatesQueryOptions(params),
+		...(options?.enabled !== undefined && { enabled: options.enabled }),
 	});
 
 	return {

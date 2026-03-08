@@ -7,372 +7,115 @@ import {
 	PlusIcon,
 	XMarkIcon,
 } from "@heroicons/react/16/solid";
-import { HomeModernIcon } from "@heroicons/react/20/solid";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import clsx from "clsx";
 import { useCallback, useState } from "react";
 import type { Organization } from "@/components/app-layout";
-import { Avatar } from "@/components/avatar";
-import { SidebarItem } from "@/components/sidebar";
 import { getInitials } from "@/lib/design-tokens";
 
 // =============================================================================
-// ORG COLORS — vibrant, distinct palette for avatar backgrounds
+// COLORS
 // =============================================================================
 
-const ORG_COLORS = [
-	{ bg: "bg-violet-600", text: "text-violet-50" },
-	{ bg: "bg-sky-600", text: "text-sky-50" },
-	{ bg: "bg-emerald-600", text: "text-emerald-50" },
-	{ bg: "bg-amber-600", text: "text-amber-50" },
-	{ bg: "bg-rose-600", text: "text-rose-50" },
-	{ bg: "bg-indigo-600", text: "text-indigo-50" },
-	{ bg: "bg-teal-600", text: "text-teal-50" },
-	{ bg: "bg-fuchsia-600", text: "text-fuchsia-50" },
-];
+const PALETTE = [
+	["#7c3aed", "#ede9fe"], // violet
+	["#0284c7", "#e0f2fe"], // sky
+	["#059669", "#d1fae5"], // emerald
+	["#d97706", "#fef3c7"], // amber
+	["#e11d48", "#ffe4e6"], // rose
+	["#4f46e5", "#e0e7ff"], // indigo
+	["#0d9488", "#ccfbf1"], // teal
+	["#c026d3", "#fae8ff"], // fuchsia
+] as const;
 
-function getOrgColor(id: string) {
-	const index = id.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-	return ORG_COLORS[index % ORG_COLORS.length];
+function orgColor(id: string) {
+	const i = id.split("").reduce((a, c) => a + c.charCodeAt(0), 0) % PALETTE.length;
+	return { bg: PALETTE[i][0], fg: PALETTE[i][1] };
 }
 
-// =============================================================================
-// STATUS INDICATORS
-// =============================================================================
-
-const STATUS_COLORS: Record<string, string> = {
-	onboarding: "bg-sky-400",
-	suspended: "bg-red-400",
+const STATUS_DOT: Record<string, string> = { onboarding: "bg-sky-400", suspended: "bg-red-400" };
+const STATUS_LABEL: Record<string, { text: string; cls: string }> = {
+	onboarding: { text: "Onboarding", cls: "bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-400" },
+	suspended: { text: "Suspended", cls: "bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-400" },
 };
 
-const STATUS_LABELS: Record<string, { text: string; className: string }> = {
-	onboarding: { text: "Onboarding", className: "bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-400" },
-	suspended: { text: "Suspended", className: "bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-400" },
-};
-
-function StatusDot({ status }: { status?: string }) {
-	const color = status ? STATUS_COLORS[status] : undefined;
-	if (!color) return null;
-	return (
-		<span
-			className={clsx(
-				"absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full ring-2 ring-white dark:ring-zinc-900",
-				color
-			)}
-		/>
-	);
-}
-
 // =============================================================================
-// ORG AVATAR — vibrant colored initials or logo
+// AVATAR — renders inline styles so no parent can override colors
 // =============================================================================
 
-function OrgAvatar({
-	org,
-	size = "sm",
-	selected = false,
-}: {
-	org: Organization;
-	size?: "xs" | "sm" | "md";
-	selected?: boolean;
-}) {
-	const colors = getOrgColor(org.id);
-	const sizeClasses = {
-		xs: "size-6",
-		sm: "size-7 sm:size-6",
-		md: "size-9",
-	};
-	const textSizes = {
-		xs: "text-[9px]",
-		sm: "text-[10px]",
-		md: "text-xs",
-	};
+function OrgAvatar({ org, size = 28 }: { org: Organization; size?: number }) {
+	const { bg, fg } = orgColor(org.id);
+	const dot = org.status ? STATUS_DOT[org.status] : null;
+	const r = Math.round(size * 0.22);
+	const fs = Math.round(size * 0.38);
 
 	return (
-		<span className="relative shrink-0">
+		<span className="relative shrink-0" style={{ width: size, height: size }}>
 			{org.logo ? (
-				<Avatar
-					src={org.logo}
-					square
-					className={clsx(
-						sizeClasses[size],
-						"outline-0!",
-						selected && "ring-2 ring-emerald-500 ring-offset-1 ring-offset-white dark:ring-offset-zinc-900"
-					)}
-				/>
+				<img src={org.logo} alt="" className="size-full object-cover" style={{ borderRadius: r }} />
 			) : (
-				<Avatar
-					initials={getInitials(org.name)}
-					square
+				<span
+					className="flex size-full items-center justify-center font-semibold leading-none select-none"
+					style={{ borderRadius: r, backgroundColor: bg, color: fg, fontSize: fs }}
+				>
+					{getInitials(org.name)}
+				</span>
+			)}
+			{dot && (
+				<span
 					className={clsx(
-						sizeClasses[size],
-						textSizes[size],
-						"outline-0!",
-						colors.bg,
-						colors.text,
-						selected && "ring-2 ring-emerald-500 ring-offset-1 ring-offset-white dark:ring-offset-zinc-900"
+						"absolute -bottom-px -right-px size-2.5 rounded-full ring-2 ring-white dark:ring-zinc-900",
+						dot
 					)}
 				/>
 			)}
-			<StatusDot status={org.status} />
 		</span>
 	);
 }
 
 // =============================================================================
-// ORG LIST — shared between desktop popover and mobile sheet
-// =============================================================================
-
-function OrgList({
-	organizations,
-	currentOrganization,
-	onSelect,
-	onNewOrg,
-	onSettings,
-	variant,
-}: {
-	organizations: Organization[];
-	currentOrganization: Organization | null;
-	onSelect: (org: Organization) => void;
-	onNewOrg: () => void;
-	onSettings: () => void;
-	variant: "desktop" | "mobile";
-}) {
-	const isMobile = variant === "mobile";
-
-	return (
-		<>
-			{/* Org list */}
-			<div className={clsx("overflow-y-auto scrollbar-hide", isMobile ? "max-h-[55vh] px-3 py-2" : "max-h-72 p-1.5")}>
-				{organizations.length === 0 ? (
-					<div className={clsx("text-center", isMobile ? "px-4 py-14" : "px-3 py-8")}>
-						<HomeModernIcon
-							className={clsx("mx-auto text-zinc-400 dark:text-zinc-500", isMobile ? "size-12" : "size-8")}
-						/>
-						<p className={clsx("mt-3 font-medium text-zinc-500 dark:text-zinc-400", isMobile ? "text-base" : "text-sm")}>
-							No organizations yet
-						</p>
-					</div>
-				) : (
-					<div className={clsx(isMobile ? "space-y-1" : "space-y-0.5")}>
-						{organizations.map((org) => {
-							const isCurrent = org.id === currentOrganization?.id;
-							const statusInfo = org.status ? STATUS_LABELS[org.status] : undefined;
-
-							return (
-								<button
-									key={org.id}
-									type="button"
-									onClick={() => onSelect(org)}
-									className={clsx(
-										"group flex w-full items-center text-left transition-all duration-100",
-										isMobile ? "gap-3.5 rounded-xl px-3 py-3" : "gap-2.5 rounded-lg px-2.5 py-2",
-										isCurrent
-											? "bg-zinc-950/5 dark:bg-white/6"
-											: "hover:bg-zinc-950/3 active:bg-zinc-950/5 dark:hover:bg-white/4 dark:active:bg-white/6"
-									)}
-								>
-									<OrgAvatar org={org} size={isMobile ? "md" : "md"} selected={isCurrent} />
-									<div className="min-w-0 flex-1">
-										<span
-											className={clsx(
-												"block truncate",
-												isMobile ? "text-[15px]/5" : "text-sm/5",
-												isCurrent
-													? "font-semibold text-zinc-950 dark:text-white"
-													: "font-medium text-zinc-800 dark:text-zinc-200"
-											)}
-										>
-											{org.name}
-										</span>
-										{statusInfo && (
-											<span
-												className={clsx(
-													"mt-0.5 inline-flex rounded-md px-1.5 py-0.5 text-[10px] font-medium leading-none",
-													statusInfo.className
-												)}
-											>
-												{statusInfo.text}
-											</span>
-										)}
-									</div>
-									{isCurrent && (
-										<CheckIcon className="size-4 shrink-0 text-emerald-500 dark:text-emerald-400" />
-									)}
-								</button>
-							);
-						})}
-					</div>
-				)}
-			</div>
-
-			{/* Footer actions */}
-			<div
-				className={clsx(
-					"border-t border-zinc-950/5 dark:border-white/5",
-					isMobile ? "px-3 py-2 pb-[max(0.75rem,env(safe-area-inset-bottom))]" : "p-1.5"
-				)}
-			>
-				<button
-					type="button"
-					onClick={onNewOrg}
-					className={clsx(
-						"flex w-full items-center transition-colors duration-100",
-						isMobile
-							? "gap-3 rounded-xl px-3 py-2.5 text-[15px] font-medium text-zinc-600 active:bg-zinc-950/3 dark:text-zinc-400 dark:active:bg-white/4"
-							: "gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-500 hover:bg-zinc-950/3 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-white/4 dark:hover:text-zinc-200"
-					)}
-				>
-					<span
-						className={clsx(
-							"flex shrink-0 items-center justify-center rounded-lg bg-zinc-950/5 dark:bg-white/5",
-							isMobile ? "size-9" : "size-7"
-						)}
-					>
-						<PlusIcon className={clsx("text-zinc-500 dark:text-zinc-400", isMobile ? "size-4" : "size-3.5")} />
-					</span>
-					New organization
-				</button>
-				<button
-					type="button"
-					onClick={onSettings}
-					className={clsx(
-						"flex w-full items-center transition-colors duration-100",
-						isMobile
-							? "gap-3 rounded-xl px-3 py-2.5 text-[15px] font-medium text-zinc-600 active:bg-zinc-950/3 dark:text-zinc-400 dark:active:bg-white/4"
-							: "gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-500 hover:bg-zinc-950/3 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-white/4 dark:hover:text-zinc-200"
-					)}
-				>
-					<span
-						className={clsx(
-							"flex shrink-0 items-center justify-center rounded-lg bg-zinc-950/5 dark:bg-white/5",
-							isMobile ? "size-9" : "size-7"
-						)}
-					>
-						<Cog6ToothIcon className={clsx("text-zinc-500 dark:text-zinc-400", isMobile ? "size-4" : "size-3.5")} />
-					</span>
-					Settings
-				</button>
-			</div>
-		</>
-	);
-}
-
-// =============================================================================
-// MOBILE BOTTOM SHEET
-// =============================================================================
-
-function MobileOrgSheet({
-	open,
-	onClose,
-	organizations,
-	currentOrganization,
-	onSelect,
-	onNewOrg,
-	onSettings,
-}: {
-	open: boolean;
-	onClose: () => void;
-	organizations: Organization[];
-	currentOrganization: Organization | null;
-	onSelect: (org: Organization) => void;
-	onNewOrg: () => void;
-	onSettings: () => void;
-}) {
-	return (
-		<Headless.Dialog open={open} onClose={onClose} className="relative z-50">
-			<Headless.DialogBackdrop
-				transition
-				className="fixed inset-0 bg-black/25 backdrop-blur-sm transition data-closed:opacity-0 data-enter:duration-200 data-enter:ease-out data-leave:duration-150 data-leave:ease-in"
-			/>
-
-			<div className="fixed inset-0 flex items-end">
-				<Headless.DialogPanel
-					transition
-					className="max-h-[85vh] w-full overflow-hidden rounded-t-2xl bg-white shadow-2xl ring-1 ring-zinc-950/5 transition duration-300 ease-out data-closed:translate-y-full dark:bg-zinc-900 dark:ring-white/10"
-				>
-					{/* Drag handle */}
-					<div className="flex justify-center pb-1 pt-3">
-						<div className="h-1 w-9 rounded-full bg-zinc-300 dark:bg-zinc-700" />
-					</div>
-
-					{/* Header */}
-					<div className="flex items-center justify-between px-4 pb-3 pt-1">
-						<Headless.DialogTitle className="text-lg font-semibold text-zinc-900 dark:text-white">
-							Switch Organization
-						</Headless.DialogTitle>
-						<button
-							type="button"
-							onClick={onClose}
-							className="flex size-8 items-center justify-center rounded-full bg-zinc-950/5 transition-colors active:bg-zinc-950/10 dark:bg-white/5 dark:active:bg-white/10"
-						>
-							<XMarkIcon className="size-4 text-zinc-500 dark:text-zinc-400" />
-						</button>
-					</div>
-
-					<OrgList
-						organizations={organizations}
-						currentOrganization={currentOrganization}
-						onSelect={onSelect}
-						onNewOrg={onNewOrg}
-						onSettings={onSettings}
-						variant="mobile"
-					/>
-				</Headless.DialogPanel>
-			</div>
-		</Headless.Dialog>
-	);
-}
-
-// =============================================================================
-// SWITCHING LOGIC HOOK
+// HOOK — org switching logic
 // =============================================================================
 
 function useOrgSwitching({
-	organizations,
 	currentOrganization,
 	onOpenOrgSettings,
 }: {
-	organizations: Organization[];
 	currentOrganization: Organization;
 	onOpenOrgSettings: () => void;
 }) {
 	const navigate = useNavigate();
-	const location = useLocation();
+	const { pathname } = useLocation();
 	const [mobileOpen, setMobileOpen] = useState(false);
 
-	const performSwitch = useCallback(
+	const switchTo = useCallback(
 		(org: Organization) => {
-			if (org.id !== currentOrganization.id) {
-				const currentSlug = currentOrganization.slug;
-				if (currentSlug && location.pathname.startsWith(`/${currentSlug}`)) {
-					const subPath = location.pathname.slice(`/${currentSlug}`.length);
-					navigate({ to: `/${org.slug}${subPath || ""}` });
-				} else {
-					navigate({ to: "/$orgSlug", params: { orgSlug: org.slug } });
-				}
+			if (org.id === currentOrganization.id) return;
+			const slug = currentOrganization.slug;
+			if (slug && pathname.startsWith(`/${slug}`)) {
+				navigate({ to: `/${org.slug}${pathname.slice(`/${slug}`.length) || ""}` });
+			} else {
+				navigate({ to: "/$orgSlug", params: { orgSlug: org.slug } });
 			}
 		},
-		[currentOrganization, navigate, location.pathname]
+		[currentOrganization, navigate, pathname]
 	);
 
-	const handleDesktopSelect = useCallback(
+	const desktopSelect = useCallback(
 		(org: Organization, close: () => void) => {
-			performSwitch(org);
+			switchTo(org);
 			close();
 		},
-		[performSwitch]
+		[switchTo]
 	);
-
-	const handleMobileSelect = useCallback(
+	const mobileSelect = useCallback(
 		(org: Organization) => {
-			performSwitch(org);
+			switchTo(org);
 			setMobileOpen(false);
 		},
-		[performSwitch]
+		[switchTo]
 	);
-
-	const handleNewOrg = useCallback(
+	const newOrg = useCallback(
 		(close?: () => void) => {
 			close?.();
 			setMobileOpen(false);
@@ -380,8 +123,7 @@ function useOrgSwitching({
 		},
 		[navigate]
 	);
-
-	const handleSettings = useCallback(
+	const settings = useCallback(
 		(close?: () => void) => {
 			close?.();
 			setMobileOpen(false);
@@ -390,106 +132,250 @@ function useOrgSwitching({
 		[onOpenOrgSettings]
 	);
 
-	return {
-		organizations,
-		currentOrganization,
-		displayOrg: currentOrganization,
-		mobileOpen,
-		setMobileOpen,
-		handleDesktopSelect,
-		handleMobileSelect,
-		handleNewOrg,
-		handleSettings,
-	};
+	return { org: currentOrganization, mobileOpen, setMobileOpen, desktopSelect, mobileSelect, newOrg, settings };
 }
 
 // =============================================================================
-// DESKTOP SIDEBAR SWITCHER (Popover)
+// ORG LIST PANEL — shared between popover & bottom sheet
+// =============================================================================
+
+function OrgPanel({
+	orgs,
+	current,
+	onSelect,
+	onNew,
+	onSettings,
+}: {
+	orgs: Organization[];
+	current: Organization | null;
+	onSelect: (o: Organization) => void;
+	onNew: () => void;
+	onSettings: () => void;
+}) {
+	return (
+		<div className="flex flex-col">
+			{/* List */}
+			<div className="max-h-64 overflow-y-auto p-1 scrollbar-hide">
+				{orgs.length === 0 ? (
+					<p className="px-3 py-6 text-center text-sm text-zinc-400 dark:text-zinc-500">No organizations</p>
+				) : (
+					orgs.map((org) => {
+						const active = org.id === current?.id;
+						const status = org.status ? STATUS_LABEL[org.status] : null;
+
+						return (
+							<button
+								key={org.id}
+								type="button"
+								onClick={() => onSelect(org)}
+								className={clsx(
+									"flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left transition-colors",
+									active
+										? "bg-zinc-100 dark:bg-zinc-800"
+										: "hover:bg-zinc-50 active:bg-zinc-100 dark:hover:bg-zinc-800/60 dark:active:bg-zinc-800"
+								)}
+							>
+								<OrgAvatar org={org} size={32} />
+								<div className="min-w-0 flex-1">
+									<p
+										className={clsx(
+											"truncate text-[13px]/5",
+											active
+												? "font-semibold text-zinc-900 dark:text-white"
+												: "font-medium text-zinc-700 dark:text-zinc-300"
+										)}
+									>
+										{org.name}
+									</p>
+									{status && (
+										<span className={clsx("inline-block rounded px-1 py-px text-[10px]/3 font-medium", status.cls)}>
+											{status.text}
+										</span>
+									)}
+								</div>
+								{active && <CheckIcon className="size-4 shrink-0 text-emerald-500" />}
+							</button>
+						);
+					})
+				)}
+			</div>
+
+			{/* Actions */}
+			<div className="border-t border-zinc-100 p-1 dark:border-zinc-800">
+				<button
+					type="button"
+					onClick={onNew}
+					className="flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-[13px] font-medium text-zinc-500 transition-colors hover:bg-zinc-50 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800/60 dark:hover:text-zinc-200"
+				>
+					<PlusIcon className="size-4" />
+					New organization
+				</button>
+				<button
+					type="button"
+					onClick={onSettings}
+					className="flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-[13px] font-medium text-zinc-500 transition-colors hover:bg-zinc-50 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800/60 dark:hover:text-zinc-200"
+				>
+					<Cog6ToothIcon className="size-4" />
+					Settings
+				</button>
+			</div>
+		</div>
+	);
+}
+
+// =============================================================================
+// MOBILE BOTTOM SHEET
+// =============================================================================
+
+function MobileSheet({
+	open,
+	onClose,
+	orgs,
+	current,
+	onSelect,
+	onNew,
+	onSettings,
+}: {
+	open: boolean;
+	onClose: () => void;
+	orgs: Organization[];
+	current: Organization | null;
+	onSelect: (o: Organization) => void;
+	onNew: () => void;
+	onSettings: () => void;
+}) {
+	return (
+		<Headless.Dialog open={open} onClose={onClose} className="relative z-50">
+			<Headless.DialogBackdrop
+				transition
+				className="fixed inset-0 bg-black/30 backdrop-blur-sm transition data-closed:opacity-0 data-enter:duration-200 data-leave:duration-150"
+			/>
+			<div className="fixed inset-0 flex items-end">
+				<Headless.DialogPanel
+					transition
+					className="max-h-[80vh] w-full overflow-hidden rounded-t-2xl bg-white shadow-2xl ring-1 ring-zinc-950/5 transition duration-300 ease-out data-closed:translate-y-full dark:bg-zinc-900 dark:ring-white/10"
+				>
+					{/* Handle */}
+					<div className="flex justify-center pt-2.5 pb-1">
+						<div className="h-1 w-8 rounded-full bg-zinc-300 dark:bg-zinc-700" />
+					</div>
+
+					{/* Header */}
+					<div className="flex items-center justify-between px-4 pb-2 pt-1">
+						<Headless.DialogTitle className="text-base font-semibold text-zinc-900 dark:text-white">
+							Organizations
+						</Headless.DialogTitle>
+						<button
+							type="button"
+							onClick={onClose}
+							className="flex size-7 items-center justify-center rounded-full text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:text-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+						>
+							<XMarkIcon className="size-4" />
+						</button>
+					</div>
+
+					<div className="px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+						<OrgPanel orgs={orgs} current={current} onSelect={onSelect} onNew={onNew} onSettings={onSettings} />
+					</div>
+				</Headless.DialogPanel>
+			</div>
+		</Headless.Dialog>
+	);
+}
+
+// =============================================================================
+// DESKTOP + MOBILE SIDEBAR SWITCHER
 // =============================================================================
 
 export function OrganizationSwitcher({
 	organizations,
 	currentOrganization,
 	onOpenOrgSettings,
+	collapsed = false,
 }: {
 	organizations: Organization[];
 	currentOrganization: Organization;
 	onOpenOrgSettings: () => void;
+	collapsed?: boolean;
 }) {
-	const {
-		displayOrg,
-		mobileOpen,
-		setMobileOpen,
-		handleDesktopSelect,
-		handleMobileSelect,
-		handleNewOrg,
-		handleSettings,
-	} = useOrgSwitching({ organizations, currentOrganization, onOpenOrgSettings });
+	const { org, mobileOpen, setMobileOpen, desktopSelect, mobileSelect, newOrg, settings } = useOrgSwitching({
+		currentOrganization,
+		onOpenOrgSettings,
+	});
 
 	return (
 		<>
-			{/* Desktop: popover anchored to sidebar trigger */}
+			{/* ── Desktop ── */}
 			<Headless.Popover className="relative hidden lg:block">
 				{({ close }) => (
 					<>
-						<Headless.PopoverButton as={SidebarItem} className="w-full">
-							<OrgAvatar org={displayOrg} size="sm" />
-							<span className="min-w-0 flex-1 truncate text-left">{displayOrg.name || "Select Organization"}</span>
-							<ChevronUpDownIcon />
-						</Headless.PopoverButton>
+						{collapsed ? (
+							<Headless.PopoverButton
+								className="flex size-9 items-center justify-center rounded-lg transition-colors hover:bg-zinc-950/5 focus:outline-none dark:hover:bg-white/5"
+								title={org.name}
+							>
+								<OrgAvatar org={org} size={26} />
+							</Headless.PopoverButton>
+						) : (
+							<Headless.PopoverButton className="group flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-zinc-950/5 focus:outline-none dark:hover:bg-white/5">
+								<OrgAvatar org={org} size={28} />
+								<span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-zinc-700 dark:text-zinc-200">
+									{org.name || "Select Organization"}
+								</span>
+								<ChevronUpDownIcon className="size-4 shrink-0 text-zinc-400 transition-colors group-hover:text-zinc-500 dark:text-zinc-500 dark:group-hover:text-zinc-400" />
+							</Headless.PopoverButton>
+						)}
 
 						<Headless.PopoverPanel
 							transition
 							anchor="bottom start"
 							className={clsx(
-								"z-50 w-72 rounded-xl",
-								"bg-white shadow-lg ring-1 ring-zinc-950/10 dark:bg-zinc-900 dark:ring-white/10",
-								"[--anchor-gap:6px] [--anchor-offset:-8px]",
-								"transition duration-150 ease-out data-closed:scale-95 data-closed:opacity-0"
+								"z-50 w-64 rounded-xl",
+								"bg-white shadow-lg ring-1 ring-black/8 dark:bg-zinc-900 dark:ring-white/10",
+								"[--anchor-gap:4px] [--anchor-offset:-4px]",
+								"origin-top-left transition duration-150 ease-out data-closed:scale-95 data-closed:opacity-0"
 							)}
 						>
-							{/* Header */}
-							<div className="border-b border-zinc-950/5 px-3.5 pb-2.5 pt-3 dark:border-white/5">
-								<p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Switch organization</p>
-							</div>
-
-							<OrgList
-								organizations={organizations}
-								currentOrganization={currentOrganization}
-								onSelect={(org) => handleDesktopSelect(org, close)}
-								onNewOrg={() => handleNewOrg(close)}
-								onSettings={() => handleSettings(close)}
-								variant="desktop"
+							<OrgPanel
+								orgs={organizations}
+								current={currentOrganization}
+								onSelect={(o) => desktopSelect(o, close)}
+								onNew={() => newOrg(close)}
+								onSettings={() => settings(close)}
 							/>
 						</Headless.PopoverPanel>
 					</>
 				)}
 			</Headless.Popover>
 
-			{/* Mobile: button in sidebar that opens bottom sheet */}
-			<span className="lg:hidden">
-				<SidebarItem onClick={() => setMobileOpen(true)}>
-					<OrgAvatar org={displayOrg} size="sm" />
-					<span className="min-w-0 flex-1 truncate text-left">{displayOrg.name || "Select Organization"}</span>
-					<ChevronUpDownIcon />
-				</SidebarItem>
-			</span>
+			{/* ── Mobile sidebar trigger ── */}
+			<button
+				type="button"
+				onClick={() => setMobileOpen(true)}
+				className="flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-zinc-950/5 lg:hidden dark:hover:bg-white/5"
+			>
+				<OrgAvatar org={org} size={28} />
+				<span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-zinc-700 dark:text-zinc-200">
+					{org.name || "Select Organization"}
+				</span>
+				<ChevronUpDownIcon className="size-4 shrink-0 text-zinc-400 dark:text-zinc-500" />
+			</button>
 
-			<MobileOrgSheet
+			<MobileSheet
 				open={mobileOpen}
 				onClose={() => setMobileOpen(false)}
-				organizations={organizations}
-				currentOrganization={currentOrganization}
-				onSelect={handleMobileSelect}
-				onNewOrg={() => handleNewOrg()}
-				onSettings={() => handleSettings()}
+				orgs={organizations}
+				current={currentOrganization}
+				onSelect={mobileSelect}
+				onNew={() => newOrg()}
+				onSettings={() => settings()}
 			/>
 		</>
 	);
 }
 
 // =============================================================================
-// MOBILE HEADER BAR SWITCHER (compact trigger)
+// MOBILE HEADER BAR SWITCHER (compact pill)
 // =============================================================================
 
 export function MobileOrgSwitcher({
@@ -501,8 +387,7 @@ export function MobileOrgSwitcher({
 	currentOrganization: Organization;
 	onOpenOrgSettings: () => void;
 }) {
-	const { displayOrg, mobileOpen, setMobileOpen, handleMobileSelect, handleNewOrg, handleSettings } = useOrgSwitching({
-		organizations,
+	const { org, mobileOpen, setMobileOpen, mobileSelect, newOrg, settings } = useOrgSwitching({
 		currentOrganization,
 		onOpenOrgSettings,
 	});
@@ -512,24 +397,22 @@ export function MobileOrgSwitcher({
 			<button
 				type="button"
 				onClick={() => setMobileOpen(true)}
-				className="flex min-w-0 items-center gap-1.5 rounded-lg px-1.5 py-1 transition-colors hover:bg-zinc-950/5 active:bg-zinc-950/5 dark:hover:bg-white/5 dark:active:bg-white/5"
+				className="flex min-w-0 items-center gap-1.5 rounded-lg px-1.5 py-1 transition-colors hover:bg-zinc-950/5 active:bg-zinc-950/5 dark:hover:bg-white/5"
 				aria-label="Switch organization"
 			>
-				<OrgAvatar org={displayOrg} size="xs" />
-				<span className="truncate text-sm/5 font-semibold text-zinc-900 dark:text-white">
-					{displayOrg.name || "Select"}
-				</span>
-				<ChevronDownIcon className="-ml-0.5 size-3.5 shrink-0 text-zinc-500 dark:text-zinc-400" />
+				<OrgAvatar org={org} size={20} />
+				<span className="truncate text-sm/5 font-semibold text-zinc-900 dark:text-white">{org.name || "Select"}</span>
+				<ChevronDownIcon className="-ml-0.5 size-3.5 shrink-0 text-zinc-400 dark:text-zinc-500" />
 			</button>
 
-			<MobileOrgSheet
+			<MobileSheet
 				open={mobileOpen}
 				onClose={() => setMobileOpen(false)}
-				organizations={organizations}
-				currentOrganization={currentOrganization}
-				onSelect={handleMobileSelect}
-				onNewOrg={() => handleNewOrg()}
-				onSettings={() => handleSettings()}
+				orgs={organizations}
+				current={currentOrganization}
+				onSelect={mobileSelect}
+				onNew={() => newOrg()}
+				onSettings={() => settings()}
 			/>
 		</>
 	);

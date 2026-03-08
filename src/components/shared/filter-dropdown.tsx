@@ -104,9 +104,7 @@ export function FilterDropdown<T extends string = string>(props: FilterDropdownP
 	const filtered = useMemo(() => {
 		if (!query) return options;
 		const q = query.toLowerCase();
-		return options.filter(
-			(o) => o.label.toLowerCase().includes(q) || o.value.toLowerCase().includes(q),
-		);
+		return options.filter((o) => o.label.toLowerCase().includes(q) || o.value.toLowerCase().includes(q));
 	}, [options, query]);
 
 	// Group options if groups are provided
@@ -135,9 +133,7 @@ export function FilterDropdown<T extends string = string>(props: FilterDropdownP
 	const toggle = (value: T, close: () => void) => {
 		if (multiple) {
 			const mp = props as MultiSelectProps<T>;
-			const next = mp.value.includes(value)
-				? mp.value.filter((v) => v !== value)
-				: [...mp.value, value];
+			const next = mp.value.includes(value) ? mp.value.filter((v) => v !== value) : [...mp.value, value];
 			mp.onChange(next);
 		} else {
 			(props as SingleSelectProps<T>).onChange(value);
@@ -190,26 +186,24 @@ export function FilterDropdown<T extends string = string>(props: FilterDropdownP
 						className={clsx(
 							"relative block",
 							"before:absolute before:inset-px before:rounded-[calc(var(--radius-lg)-1px)] before:bg-white before:shadow-sm",
-							"dark:before:hidden",
+							"dark:before:hidden"
 						)}
 					>
 						<PopoverButton
 							className={clsx(
 								"relative inline-flex w-full items-center gap-1 appearance-none rounded-lg",
-								"px-[calc(--spacing(3)-1px)] py-[calc(--spacing(1.5)-1px)]",
-								"text-sm/6",
+								"px-[calc(--spacing(3.5)-1px)] py-[calc(--spacing(2.5)-1px)] sm:px-[calc(--spacing(3)-1px)] sm:py-[calc(--spacing(1.5)-1px)]",
+								"text-base/6 sm:text-sm/6",
 								"border border-zinc-950/10 hover:border-zinc-950/20",
 								"bg-transparent dark:bg-white/5",
 								"dark:border-white/10 dark:hover:border-white/20",
 								"focus:outline-hidden",
-								"transition-colors",
+								"transition-colors"
 							)}
 						>
 							<span className="text-zinc-500 dark:text-zinc-400">{label}</span>
 							{buttonLabel && (
-								<span className="max-w-40 truncate font-medium text-zinc-950 dark:text-white">
-									{buttonLabel}
-								</span>
+								<span className="max-w-40 truncate font-medium text-zinc-950 dark:text-white">{buttonLabel}</span>
 							)}
 
 							{/* Multi-select count pill */}
@@ -225,12 +219,12 @@ export function FilterDropdown<T extends string = string>(props: FilterDropdownP
 									type="button"
 									tabIndex={-1}
 									onClick={handleClear}
-									className="ml-0.5 -mr-0.5 flex size-4 items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-200 hover:text-zinc-600 dark:hover:bg-zinc-600 dark:hover:text-white"
+									className="ml-0.5 -mr-0.5 flex size-4 items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-200 hover:text-zinc-600 dark:hover:bg-zinc-600 dark:hover:text-white transition-colors duration-150"
 								>
 									<XMarkIcon className="size-3" />
 								</button>
 							) : (
-								<ChevronDownIcon className="size-3.5 shrink-0 text-zinc-400 transition-transform ui-open:rotate-180 dark:text-zinc-500" />
+								<ChevronDownIcon className="size-3.5 shrink-0 text-zinc-400 transition-transform duration-200 ui-open:rotate-180 dark:text-zinc-500" />
 							)}
 						</PopoverButton>
 					</span>
@@ -254,7 +248,7 @@ export function FilterDropdown<T extends string = string>(props: FilterDropdownP
 								"bg-white/80 backdrop-blur-xl dark:bg-zinc-800/80",
 								"shadow-lg ring-1 ring-zinc-950/10 dark:ring-white/10 dark:ring-inset",
 								"outline-none",
-								"[--anchor-gap:--spacing(2)] [--anchor-padding:--spacing(1)]",
+								"[--anchor-gap:--spacing(2)] [--anchor-padding:--spacing(1)]"
 							)}
 						>
 							{/* Search */}
@@ -272,7 +266,7 @@ export function FilterDropdown<T extends string = string>(props: FilterDropdownP
 												"w-full rounded-lg border-0 bg-zinc-100 py-1.5 pl-7 pr-2 text-sm",
 												"text-zinc-900 placeholder:text-zinc-400",
 												"focus:outline-none focus:ring-1 focus:ring-zinc-300",
-												"dark:bg-zinc-700/60 dark:text-white dark:placeholder:text-zinc-500 dark:focus:ring-zinc-600",
+												"dark:bg-zinc-700/60 dark:text-white dark:placeholder:text-zinc-500 dark:focus:ring-zinc-600"
 											)}
 										/>
 									</div>
@@ -282,9 +276,7 @@ export function FilterDropdown<T extends string = string>(props: FilterDropdownP
 							{/* Options */}
 							<div className="max-h-64 overflow-y-auto overscroll-contain scrollbar-hide">
 								{filtered.length === 0 ? (
-									<div className="px-3 py-4 text-center text-sm text-zinc-500 dark:text-zinc-400">
-										No results
-									</div>
+									<div className="px-3 py-4 text-center text-sm text-zinc-500 dark:text-zinc-400">No results</div>
 								) : grouped ? (
 									<>
 										{/* Ungrouped first */}
@@ -294,7 +286,6 @@ export function FilterDropdown<T extends string = string>(props: FilterDropdownP
 												option={opt}
 												selected={isSelected(opt.value)}
 												onSelect={() => toggle(opt.value, close)}
-
 											/>
 										))}
 										{/* Grouped */}
@@ -313,7 +304,6 @@ export function FilterDropdown<T extends string = string>(props: FilterDropdownP
 															option={opt}
 															selected={isSelected(opt.value)}
 															onSelect={() => toggle(opt.value, close)}
-			
 														/>
 													))}
 												</Fragment>
@@ -343,7 +333,7 @@ export function FilterDropdown<T extends string = string>(props: FilterDropdownP
 										<button
 											type="button"
 											onClick={() => (props as MultiSelectProps<T>).onChange([])}
-											className="text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+											className="text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors duration-150"
 										>
 											Clear all
 										</button>
@@ -376,11 +366,11 @@ function OptionItem<T extends string>({
 			type="button"
 			onClick={onSelect}
 			className={clsx(
-				"flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm transition-colors",
+				"flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm transition-colors duration-150",
 				"sm:py-1.5",
 				selected
 					? "bg-zinc-900 font-medium text-white dark:bg-white dark:text-zinc-900"
-					: "text-zinc-700 hover:bg-zinc-50 dark:text-zinc-300 dark:hover:bg-white/5",
+					: "text-zinc-700 hover:bg-zinc-50 dark:text-zinc-300 dark:hover:bg-white/5"
 			)}
 		>
 			{/* Icon */}
@@ -388,7 +378,7 @@ function OptionItem<T extends string>({
 				<option.icon
 					className={clsx(
 						"size-4 shrink-0",
-						selected ? "text-white/70 dark:text-zinc-900/60" : (option.iconColor || "text-zinc-500 dark:text-zinc-400"),
+						selected ? "text-white/70 dark:text-zinc-900/60" : option.iconColor || "text-zinc-500 dark:text-zinc-400"
 					)}
 				/>
 			)}
@@ -403,7 +393,7 @@ function OptionItem<T extends string>({
 						"ml-auto rounded-full px-1.5 py-0.5 text-[10px] font-semibold tabular-nums",
 						selected
 							? "bg-white/20 text-white dark:bg-zinc-900/20 dark:text-zinc-900"
-							: "bg-zinc-100 text-zinc-500 dark:bg-zinc-700/50 dark:text-zinc-400",
+							: "bg-zinc-100 text-zinc-500 dark:bg-zinc-700/50 dark:text-zinc-400"
 					)}
 				>
 					{option.count}

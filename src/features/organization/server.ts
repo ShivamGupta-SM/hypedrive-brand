@@ -211,6 +211,14 @@ export const addBankAccountServer = createServerFn({ method: "POST" })
 		return context.client.brand.addBankAccount(organizationId, params);
 	});
 
+export const updateBankAccountServer = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
+	.inputValidator((input: { organizationId: string } & brand.UpdateBankAccountRequest) => input)
+	.handler(async ({ context, data }) => {
+		const { organizationId, ...params } = data;
+		return context.client.brand.updateBankAccount(organizationId, params);
+	});
+
 export const deleteBankAccountServer = createServerFn({ method: "POST" })
 	.middleware([authMiddleware])
 	.inputValidator((input: { organizationId: string }) => input)

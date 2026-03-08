@@ -3,7 +3,6 @@ import { z } from "zod";
 
 import { RouteErrorComponent, RoutePendingComponent } from "@/components/shared/route-error";
 import { invitationsQueryOptions, membersQueryOptions } from "@/features/team/queries";
-import { TeamLayout } from "@/pages/team";
 
 const searchSchema = z.object({
 	q: z.string().optional().catch(undefined),
@@ -22,7 +21,6 @@ export const Route = createFileRoute("/_app/$orgSlug/team")({
 			context.queryClient.ensureQueryData(invitationsQueryOptions(orgId)),
 		]);
 	},
-	component: TeamLayout,
 	errorComponent: RouteErrorComponent,
 	pendingComponent: RoutePendingComponent,
 });

@@ -1,10 +1,10 @@
+import * as Headless from "@headlessui/react";
 import {
 	ArrowRightStartOnRectangleIcon,
 	Cog6ToothIcon,
 	MagnifyingGlassIcon,
 	UserCircleIcon,
 } from "@heroicons/react/20/solid";
-import * as Headless from "@headlessui/react";
 import { useNavigate } from "@tanstack/react-router";
 import { Avatar } from "@/components/avatar";
 import { useLogout } from "@/features/auth/hooks";
@@ -56,12 +56,8 @@ export function ProfileMenu({
 					/>
 				)}
 				<div className="min-w-0 flex-1">
-					<p className="truncate text-sm font-semibold text-zinc-900 dark:text-white">
-						{user?.name || "User"}
-					</p>
-					<p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
-						{user?.email || ""}
-					</p>
+					<p className="truncate text-sm font-semibold text-zinc-900 dark:text-white">{user?.name || "User"}</p>
+					<p className="truncate text-xs text-zinc-500 dark:text-zinc-400">{user?.email || ""}</p>
 				</div>
 				{onOpenSearch && (
 					<Headless.MenuItem>
@@ -92,11 +88,7 @@ export function ProfileMenu({
 
 			{/* ── Sign out ── */}
 			<div className="p-1.5">
-				<MenuItem
-					icon={ArrowRightStartOnRectangleIcon}
-					onClick={handleLogout}
-					destructive
-				>
+				<MenuItem icon={ArrowRightStartOnRectangleIcon} onClick={handleLogout} destructive>
 					Sign out
 				</MenuItem>
 			</div>

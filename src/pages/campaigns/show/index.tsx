@@ -1,6 +1,5 @@
 import {
 	ArchiveBoxIcon,
-	ArrowPathIcon,
 	CalendarIcon,
 	ChartBarIcon,
 	ClipboardDocumentListIcon,
@@ -25,22 +24,14 @@ import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/di
 import { Heading } from "@/components/heading";
 import { useCan } from "@/components/shared/can";
 import { ErrorState } from "@/components/shared/error-state";
+import { FadeImage } from "@/components/shared/fade-image";
+import { useCampaign, useCampaignStats, useCampaignTasks } from "@/features/campaigns/hooks";
 import {
-	useCampaign,
-	useCampaignStats,
-	useCampaignTasks,
-	usePlatforms,
-	useTaskTemplates,
-} from "@/features/campaigns/hooks";
-import {
-	useAddCampaignTask,
 	useArchiveCampaign,
 	useEndCampaign,
 	usePauseCampaign,
-	useRemoveCampaignTask,
 	useResumeCampaign,
 	useSubmitCampaign,
-	useUpdateCampaignTask,
 } from "@/features/campaigns/mutations";
 import { useCampaignEnrollments } from "@/features/enrollments/hooks";
 import { useExportEnrollments } from "@/features/enrollments/mutations";
@@ -69,7 +60,6 @@ export function CampaignShow() {
 	// Permission checks
 	const canUpdateCampaign = useCan("campaign", "update");
 
-
 	const {
 		data: campaign,
 		loading: campaignLoading,
@@ -81,7 +71,7 @@ export function CampaignShow() {
 		data: enrollments,
 		loading: enrollmentsLoading,
 		refetch: refetchEnrollments,
-	} = useCampaignEnrollments(organizationId, campaignId, { take: 10 });
+	} = useCampaignEnrollments(organizationId, campaignId, { take: 5 });
 	const { data: tasks, loading: tasksLoading } = useCampaignTasks(organizationId, campaignId);
 
 	// Set breadcrumb page title
@@ -92,35 +82,17 @@ export function CampaignShow() {
 	const resumeCampaign = useResumeCampaign();
 	const endCampaign = useEndCampaign();
 	const archiveCampaign = useArchiveCampaign();
-	const addTask = useAddCampaignTask(organizationId, campaignId);
-	const updateTask = useUpdateCampaignTask(organizationId, campaignId);
-	const removeTask = useRemoveCampaignTask(organizationId, campaignId);
 	const exportEnrollments = useExportEnrollments(organizationId);
-	const { data: platforms } = usePlatforms();
-	const [addTaskPlatformId, setAddTaskPlatformId] = useState("");
-	const { data: taskTemplates } = useTaskTemplates(addTaskPlatformId ? { platformId: addTaskPlatformId } : undefined);
-
-	// Filter templates: non-social platform templates must match listing's platform
-	const listingPlatformId = campaign?.listing?.platformId;
-	const filteredTemplates = useMemo(() => {
-		return taskTemplates.filter((tpl) => {
-			if (!tpl.platformId) return true; // generic template
-			if (tpl.platformId === listingPlatformId) return true; // same platform
-			const tplPlatform = platforms.find((p) => p.id === tpl.platformId);
-			return tplPlatform?.type === "social"; // social = cross-platform allowed
-		});
-	}, [taskTemplates, listingPlatformId, platforms]);
 
 	const [showEditModal, setShowEditModal] = useState(false);
-	const [showAddTaskPicker, setShowAddTaskPicker] = useState(false);
-	const [addTaskTemplateId, setAddTaskTemplateId] = useState("");
-	const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
-	const [editingTaskInstructions, setEditingTaskInstructions] = useState("");
-	const [editingTaskRequirements, setEditingTaskRequirements] = useState<db.TaskRequirements>({});
-	const [editingTaskCategory, setEditingTaskCategory] = useState<string | undefined>();
-	const [hashtagInput, setHashtagInput] = useState("");
-	const [mentionInput, setMentionInput] = useState("");
 	const [showEndConfirm, setShowEndConfirm] = useState(false);
+
+	const isAnyActionPending =
+		submitCampaign.isPending ||
+		pauseCampaign.isPending ||
+		resumeCampaign.isPending ||
+		endCampaign.isPending ||
+		archiveCampaign.isPending;
 
 	const loading = campaignLoading || statsLoading;
 
@@ -188,8 +160,8 @@ export function CampaignShow() {
 
 	const handleEnrollmentClick = (enrollment: CampaignEnrollment) => {
 		navigate({
-			to: "/$orgSlug/campaigns/$campaignId/enrollments/$id",
-			params: { orgSlug, campaignId, id: enrollment.id },
+			to: "/$orgSlug/enrollments/$id",
+			params: { orgSlug, id: enrollment.id },
 		});
 	};
 
@@ -272,16 +244,21 @@ export function CampaignShow() {
 	];
 
 	return (
-		<div className="space-y-4 sm:space-y-5">
+		<div className="animate-page-enter space-y-4 sm:space-y-5">
 			{/* Header Card */}
 			<header className="relative overflow-hidden rounded-xl bg-white ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-				<div className={clsx("pointer-events-none absolute inset-px top-px h-24 rounded-t-[11px] bg-linear-to-b sm:h-32", statusConfig.gradientClass)} />
+				<div
+					className={clsx(
+						"pointer-events-none absolute inset-px top-px h-24 rounded-t-[11px] bg-linear-to-b sm:h-32",
+						statusConfig.gradientClass
+					)}
+				/>
 				<div className="relative p-4 sm:p-5">
 					{/* Thumbnail + Title row -- always side by side */}
 					<div className="flex items-start gap-3 sm:gap-4">
 						{/* Thumbnail */}
 						{campaign.listing?.listingImages?.[0]?.imageUrl ? (
-							<img
+							<FadeImage
 								src={campaign.listing.listingImages[0].imageUrl}
 								alt={campaign.listing.name}
 								className="size-12 shrink-0 rounded-lg bg-zinc-100 object-contain ring-1 ring-zinc-200 sm:size-20 sm:rounded-xl dark:bg-zinc-800 dark:ring-zinc-700"
@@ -301,7 +278,7 @@ export function CampaignShow() {
 									{statusConfig.label}
 								</Badge>
 								{campaign.displayId && (
-									<Badge color="zinc" className="font-mono text-[11px]">
+									<Badge color="zinc" className="tabular-nums tracking-wide text-[11px]">
 										{campaign.displayId}
 									</Badge>
 								)}
@@ -360,7 +337,7 @@ export function CampaignShow() {
 							<button
 								type="button"
 								onClick={handleSubmit}
-								disabled={submitCampaign.isPending}
+								disabled={isAnyActionPending}
 								className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-emerald-700 hover:shadow-md disabled:opacity-50 dark:bg-emerald-500 dark:hover:bg-emerald-400"
 							>
 								<PaperAirplaneIcon className="size-3.5" />
@@ -371,7 +348,7 @@ export function CampaignShow() {
 							<button
 								type="button"
 								onClick={handlePause}
-								disabled={pauseCampaign.isPending}
+								disabled={isAnyActionPending}
 								className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-amber-600 hover:shadow-md disabled:opacity-50 dark:bg-amber-500 dark:hover:bg-amber-400"
 							>
 								<PauseCircleIcon className="size-3.5" />
@@ -382,7 +359,7 @@ export function CampaignShow() {
 							<button
 								type="button"
 								onClick={handleResume}
-								disabled={resumeCampaign.isPending}
+								disabled={isAnyActionPending}
 								className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-emerald-700 hover:shadow-md disabled:opacity-50 dark:bg-emerald-500 dark:hover:bg-emerald-400"
 							>
 								<PlayCircleIcon className="size-3.5" />
@@ -393,7 +370,7 @@ export function CampaignShow() {
 							<button
 								type="button"
 								onClick={handleArchive}
-								disabled={archiveCampaign.isPending}
+								disabled={isAnyActionPending}
 								className="inline-flex items-center gap-1.5 rounded-lg bg-zinc-700 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-zinc-800 hover:shadow-md disabled:opacity-50 dark:bg-zinc-600 dark:hover:bg-zinc-500"
 							>
 								<ArchiveBoxIcon className="size-3.5" />
@@ -406,7 +383,7 @@ export function CampaignShow() {
 								<button
 									type="button"
 									onClick={() => setShowEndConfirm(true)}
-									disabled={endCampaign.isPending}
+									disabled={isAnyActionPending}
 									className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-red-700 hover:shadow-md disabled:opacity-50 dark:bg-red-500 dark:hover:bg-red-400"
 								>
 									<StopCircleIcon className="size-3.5" />
@@ -538,32 +515,10 @@ export function CampaignShow() {
 			{activeTab === "tasks" && (
 				<CampaignTasks
 					campaign={campaign}
+					organizationId={organizationId}
 					tasks={tasks}
 					tasksLoading={tasksLoading}
-					platforms={platforms}
 					canUpdateCampaign={canUpdateCampaign}
-					showAddTaskPicker={showAddTaskPicker}
-					setShowAddTaskPicker={setShowAddTaskPicker}
-					addTaskPlatformId={addTaskPlatformId}
-					setAddTaskPlatformId={setAddTaskPlatformId}
-					addTaskTemplateId={addTaskTemplateId}
-					setAddTaskTemplateId={setAddTaskTemplateId}
-					filteredTemplates={filteredTemplates}
-					addTask={addTask}
-					editingTaskId={editingTaskId}
-					setEditingTaskId={setEditingTaskId}
-					editingTaskInstructions={editingTaskInstructions}
-					setEditingTaskInstructions={setEditingTaskInstructions}
-					editingTaskRequirements={editingTaskRequirements}
-					setEditingTaskRequirements={setEditingTaskRequirements}
-					editingTaskCategory={editingTaskCategory}
-					setEditingTaskCategory={setEditingTaskCategory}
-					hashtagInput={hashtagInput}
-					setHashtagInput={setHashtagInput}
-					mentionInput={mentionInput}
-					setMentionInput={setMentionInput}
-					updateTask={updateTask}
-					removeTask={removeTask}
 				/>
 			)}
 
@@ -599,18 +554,9 @@ export function CampaignShow() {
 					<Button plain onClick={() => setShowEndConfirm(false)}>
 						Cancel
 					</Button>
-					<Button color="red" onClick={handleEnd} disabled={endCampaign.isPending}>
-						{endCampaign.isPending ? (
-							<>
-								<ArrowPathIcon className="size-4 animate-spin" />
-								Ending...
-							</>
-						) : (
-							<>
-								<StopCircleIcon className="size-4" />
-								End Campaign
-							</>
-						)}
+					<Button color="red" onClick={handleEnd} loading={endCampaign.isPending}>
+						<StopCircleIcon className="size-4" />
+						End Campaign
 					</Button>
 				</DialogActions>
 			</Dialog>

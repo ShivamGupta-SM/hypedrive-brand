@@ -1,5 +1,4 @@
 import * as Headless from "@headlessui/react";
-import { ArrowPathIcon } from "@heroicons/react/16/solid";
 import clsx from "clsx";
 import type React from "react";
 import { forwardRef } from "react";
@@ -194,21 +193,25 @@ type ButtonProps = (
 
 export const Button = forwardRef(function Button(
 	{ color, outline, plain, className, children, size = "default", loading, ...props }: ButtonProps,
-	ref: React.ForwardedRef<HTMLElement>,
+	ref: React.ForwardedRef<HTMLElement>
 ) {
-	const isDisabled = props.disabled || loading;
+	const isDisabled = ("disabled" in props && props.disabled) || loading;
 	const classes = clsx(
 		className,
 		styles.base,
 		sizeStyles[size],
-		outline ? styles.outline : plain ? styles.plain : clsx(styles.solid, styles.colors[color ?? "dark/zinc"]),
+		outline ? styles.outline : plain ? styles.plain : clsx(styles.solid, styles.colors[color ?? "dark/zinc"])
 	);
 
 	const inner = loading ? (
 		<TouchTarget>
-			<span className="flex items-center gap-x-2 opacity-0" aria-hidden="true">{children}</span>
-			<span className="absolute inset-0 flex items-center justify-center">
-				<ArrowPathIcon className="size-4 animate-spin" />
+			<span className="flex items-center gap-x-2 opacity-0" aria-hidden="true">
+				{children}
+			</span>
+			<span className="absolute inset-0 flex items-center justify-center gap-1" aria-hidden="true">
+				<span className="size-1.5 animate-[pulse-dot_1.4s_ease-in-out_infinite] rounded-full bg-current opacity-75" />
+				<span className="size-1.5 animate-[pulse-dot_1.4s_ease-in-out_0.2s_infinite] rounded-full bg-current opacity-75" />
+				<span className="size-1.5 animate-[pulse-dot_1.4s_ease-in-out_0.4s_infinite] rounded-full bg-current opacity-75" />
 			</span>
 		</TouchTarget>
 	) : (

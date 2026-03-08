@@ -126,14 +126,14 @@ export const spacing = {
 
 export const cardStyles = {
 	/** Standard card with subtle border */
-	default: "rounded-xl bg-white ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800",
+	default: "rounded-xl bg-white ring-1 ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10",
 
 	/** Elevated card with shadow */
-	elevated: "rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800",
+	elevated: "rounded-xl bg-white shadow-sm ring-1 ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10",
 
 	/** Interactive card with hover state */
 	interactive:
-		"rounded-xl bg-white ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800 hover:ring-zinc-300 dark:hover:ring-zinc-700 transition-all",
+		"rounded-xl bg-white ring-1 ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10 hover:ring-zinc-300 dark:hover:ring-zinc-700 transition-all",
 
 	/** Hero card (Balance card style) */
 	hero: "rounded-2xl bg-emerald-600 p-5 dark:bg-emerald-700",
@@ -487,4 +487,3 @@ export function formatRelativeTime(dateStr: string): string {
 
 	return formatDate(dateStr);
 }
-

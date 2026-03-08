@@ -6,9 +6,10 @@
  * - Emerald brand accents, zinc neutrals, full dark mode
  */
 
-import { ArrowRightIcon } from "@heroicons/react/16/solid";
+import { ArrowRightIcon, HomeIcon } from "@heroicons/react/16/solid";
 import clsx from "clsx";
 import { Button } from "@/components/button";
+import { FadeImage } from "@/components/shared/fade-image";
 
 interface NotFoundPageProps {
 	/** Image URL for the postcard */
@@ -31,7 +32,7 @@ export function NotFoundPage({
 	postcardAlt = "India Gate, New Delhi",
 	curvedTextTop = "Hypedrive",
 	curvedTextBottom = "Brand Dashboard",
-	heading = "(404) Looks like the page you were looking for took a wrong turn.",
+	heading = "Looks like this page took a wrong turn.",
 	subtext = "But hey, even the best explorers get lost sometimes. Let's get you back on track.",
 	backButtonLabel = "Back to Home",
 	backButtonHref = "/",
@@ -46,7 +47,18 @@ export function NotFoundPage({
 				className
 			)}
 		>
-			<div className="flex flex-col items-center">
+			{/* Subtle background dot pattern */}
+			<div className="pointer-events-none fixed inset-0 opacity-[0.03] dark:opacity-[0.04]" aria-hidden="true">
+				<svg width="100%" height="100%" role="img" aria-hidden="true">
+					<title>Background pattern</title>
+					<pattern id="dots-404" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+						<circle cx="1.5" cy="1.5" r="1" fill="currentColor" />
+					</pattern>
+					<rect width="100%" height="100%" fill="url(#dots-404)" />
+				</svg>
+			</div>
+
+			<div className="relative flex flex-col items-center animate-page-enter">
 				{/* Postcard + Stamp */}
 				<div className="relative mb-14">
 					{/* Rotating circular stamp */}
@@ -72,12 +84,12 @@ export function NotFoundPage({
 					<div className="relative z-10">
 						<div
 							className={clsx(
-								"relative rotate-[4deg] bg-white p-2.5 shadow-2xl transition-transform duration-300 hover:rotate-0",
+								"relative rotate-[4deg] bg-white p-2.5 shadow-2xl transition-transform duration-500 ease-out hover:rotate-0 hover:scale-[1.02]",
 								"dark:bg-zinc-800"
 							)}
 						>
 							<div className="relative overflow-hidden">
-								<img
+								<FadeImage
 									src={postcardImage}
 									alt={postcardAlt}
 									className="h-[200px] w-[320px] object-cover sm:h-[220px] sm:w-[360px]"
@@ -121,18 +133,41 @@ export function NotFoundPage({
 				</div>
 
 				{/* Text content */}
-				<div className="max-w-2xl text-center">
-					{/* Heading — (404) inline, Geist sans bold for clean modern feel */}
-					<h1 className="text-balance text-4xl font-semibold leading-tight tracking-tight text-zinc-900 md:text-5xl dark:text-white">
+				<div className="max-w-lg text-center">
+					{/* 404 badge */}
+					<div className="mb-4 animate-slide-up">
+						<span className="inline-flex items-center gap-1.5 rounded-full bg-zinc-100 px-3 py-1 text-xs font-semibold text-zinc-500 ring-1 ring-zinc-200/80 dark:bg-zinc-800/80 dark:text-zinc-400 dark:ring-zinc-700/50">
+							<span className="size-1.5 rounded-full bg-amber-400" />
+							Page not found
+						</span>
+					</div>
+
+					{/* Heading */}
+					<h1
+						className="text-balance text-3xl font-semibold leading-tight tracking-tight text-zinc-900 animate-slide-up md:text-4xl dark:text-white"
+						style={{ animationDelay: "50ms" }}
+					>
 						{heading}
 					</h1>
 
-					{/* Subtext — slightly larger, generous spacing */}
-					<p className="mt-6 text-base leading-relaxed text-zinc-500 md:text-lg dark:text-zinc-400">{subtext}</p>
+					{/* Subtext */}
+					<p
+						className="mt-4 text-base leading-relaxed text-zinc-500 animate-slide-up dark:text-zinc-400"
+						style={{ animationDelay: "100ms" }}
+					>
+						{subtext}
+					</p>
 
-					<div className="mt-10">
+					<div
+						className="mt-8 flex items-center justify-center gap-3 animate-slide-up"
+						style={{ animationDelay: "150ms" }}
+					>
 						<Button href={backButtonHref} color="dark/zinc">
+							<HomeIcon />
 							{backButtonLabel}
+						</Button>
+						<Button href={backButtonHref} outline>
+							Go Back
 							<ArrowRightIcon />
 						</Button>
 					</div>

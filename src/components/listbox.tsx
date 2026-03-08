@@ -41,7 +41,9 @@ export function Listbox<T>({
 				<Headless.ListboxSelectedOption
 					as="span"
 					options={options}
-					placeholder={placeholder && <span className="block truncate text-zinc-500 dark:text-zinc-400">{placeholder}</span>}
+					placeholder={
+						placeholder && <span className="block truncate text-zinc-500 dark:text-zinc-400">{placeholder}</span>
+					}
 					className={clsx([
 						// Basic layout
 						"relative block w-full appearance-none rounded-lg py-[calc(--spacing(2.5)-1px)] sm:py-[calc(--spacing(1.5)-1px)]",
@@ -90,7 +92,7 @@ export function Listbox<T>({
 					// Shadows
 					"shadow-lg ring-1 ring-zinc-950/10 dark:ring-white/10 dark:ring-inset",
 					// Transitions
-					"transition-opacity duration-100 ease-in data-closed:data-leave:opacity-0 data-transition:pointer-events-none"
+					"transition duration-100 ease-in data-enter:duration-150 data-enter:ease-out data-closed:opacity-0 data-closed:data-enter:scale-95 data-transition:pointer-events-none"
 				)}
 			>
 				{options}

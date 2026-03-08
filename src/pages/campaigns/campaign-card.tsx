@@ -8,13 +8,15 @@ import {
 	UsersIcon,
 } from "@heroicons/react/16/solid";
 import clsx from "clsx";
+import { memo } from "react";
 import { Dropdown, DropdownButton, DropdownItem, DropdownMenu } from "@/components/dropdown";
 import { getPlatformColor, getPlatformIcon } from "@/components/icons/platform-icons";
 import { Link } from "@/components/link";
+import { FadeImage } from "@/components/shared/fade-image";
 import { Skeleton } from "@/components/skeleton";
 import type { brand } from "@/lib/brand-client";
 import { formatDateCompact, formatPrice } from "@/lib/design-tokens";
-import { type StatusColor, getStatusConfig } from "./utils";
+import { getStatusConfig, type StatusColor } from "./utils";
 
 type Campaign = brand.CampaignWithStats;
 
@@ -114,7 +116,7 @@ export interface CampaignCardProps {
 	canCreate?: boolean;
 }
 
-export function CampaignCard({
+export const CampaignCard = memo(function CampaignCard({
 	campaign,
 	orgSlug,
 	onPause,
@@ -178,7 +180,7 @@ export function CampaignCard({
 	return (
 		<Link
 			href={`/${orgSlug}/campaigns/${campaign.id}`}
-			className="group flex h-full flex-col overflow-hidden rounded-xl bg-white shadow-xs ring-1 ring-zinc-200 transition-all hover:shadow-md hover:ring-zinc-300 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:ring-zinc-700"
+			className="group flex h-full flex-col overflow-hidden rounded-xl bg-white shadow-xs ring-1 ring-zinc-200 transition-all duration-200 hover:shadow-md hover:ring-zinc-300 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:ring-zinc-700"
 		>
 			{/* Header: product image + title + meta */}
 			<div className="flex flex-1 flex-col">
@@ -187,7 +189,11 @@ export function CampaignCard({
 					<div className="relative shrink-0">
 						<div className="size-14 overflow-hidden rounded-xl bg-zinc-100 ring-1 ring-zinc-200/80 sm:size-20 dark:bg-zinc-800 dark:ring-zinc-700">
 							{productImage ? (
-								<img src={productImage} alt={listingName ?? "Product"} className="size-full object-contain p-1 sm:p-1.5" />
+								<FadeImage
+									src={productImage}
+									alt={listingName ?? "Product"}
+									className="size-full object-contain p-1 sm:p-1.5"
+								/>
 							) : (
 								<div className="flex size-full items-center justify-center">
 									<MegaphoneIcon className="size-6 text-zinc-400 sm:size-7 dark:text-zinc-600" />
@@ -207,7 +213,9 @@ export function CampaignCard({
 							<h3 className="line-clamp-2 text-sm/5 font-semibold text-zinc-900 dark:text-white">{campaign.title}</h3>
 							{dropdownMenu}
 						</div>
-						{listingName && <p className="mt-0.5 line-clamp-1 text-xs text-zinc-500 dark:text-zinc-400">{listingName}</p>}
+						{listingName && (
+							<p className="mt-0.5 line-clamp-1 text-xs text-zinc-500 dark:text-zinc-400">{listingName}</p>
+						)}
 
 						{/* Chips row */}
 						<div className="mt-2 flex flex-wrap items-center gap-1.5">
@@ -278,7 +286,9 @@ export function CampaignCard({
 						<span className="mt-0.5 text-xs font-semibold tabular-nums text-zinc-900 sm:text-sm dark:text-white">
 							{campaign.currentEnrollments}
 							{hasCap && (
-								<span className="text-[10px] font-normal text-zinc-500 sm:text-xs dark:text-zinc-400">/{campaign.maxEnrollments}</span>
+								<span className="text-[10px] font-normal text-zinc-500 sm:text-xs dark:text-zinc-400">
+									/{campaign.maxEnrollments}
+								</span>
 							)}
 						</span>
 					</div>
@@ -312,7 +322,7 @@ export function CampaignCard({
 			</div>
 		</Link>
 	);
-}
+});
 
 // =============================================================================
 // CAMPAIGN CARD SKELETON
@@ -322,7 +332,7 @@ export function CampaignCardSkeleton() {
 	return (
 		<div className="overflow-hidden rounded-xl bg-white shadow-xs ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
 			<div className="flex items-start gap-3 p-3 sm:gap-4 sm:p-4">
-				<div className="size-14 shrink-0 animate-pulse rounded-xl bg-zinc-200 skeleton-shimmer sm:size-20 dark:bg-zinc-700" />
+				<div className="size-14 shrink-0 rounded-xl bg-zinc-200 skeleton-shimmer sm:size-20 dark:bg-zinc-700" />
 				<div className="min-w-0 flex-1">
 					<Skeleton width="80%" height={18} borderRadius={4} />
 					<Skeleton width="55%" height={14} borderRadius={3} className="mt-1" />

@@ -4,7 +4,6 @@ import { z } from "zod";
 import { RouteErrorComponent, RoutePendingComponent } from "@/components/shared/route-error";
 import { campaignsLookupQueryOptions } from "@/features/campaigns/queries";
 import { infiniteEnrollmentsQueryOptions } from "@/features/enrollments/queries";
-import { EnrollmentsLayout } from "@/pages/enrollments";
 
 const searchSchema = z.object({
 	q: z.string().optional().catch(undefined),
@@ -23,7 +22,6 @@ export const Route = createFileRoute("/_app/$orgSlug/enrollments")({
 			context.queryClient.ensureQueryData(campaignsLookupQueryOptions(orgId)),
 		]);
 	},
-	component: EnrollmentsLayout,
 	errorComponent: RouteErrorComponent,
 	pendingComponent: RoutePendingComponent,
 });

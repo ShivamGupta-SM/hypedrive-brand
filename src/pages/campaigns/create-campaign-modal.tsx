@@ -1,5 +1,4 @@
 import {
-	ArrowPathIcon,
 	ArrowsRightLeftIcon,
 	CalendarIcon,
 	CheckCircleIcon,
@@ -854,6 +853,7 @@ export function CreateCampaignModal({
 														<img
 															src={getAssetUrl(listing.listingImages[0].imageUrl)}
 															alt={listing.name}
+															loading="lazy"
 															className="size-11 rounded-lg bg-zinc-100 object-contain dark:bg-zinc-800"
 														/>
 													) : (
@@ -863,7 +863,9 @@ export function CreateCampaignModal({
 													)}
 													<div className="min-w-0 flex-1">
 														<p className="truncate text-sm font-medium text-zinc-900 dark:text-white">{listing.name}</p>
-														<p className="text-xs text-zinc-500 dark:text-zinc-400">{formatCurrency(listing.priceDecimal)}</p>
+														<p className="text-xs text-zinc-500 dark:text-zinc-400">
+															{formatCurrency(listing.priceDecimal)}
+														</p>
 													</div>
 													{selected && <CheckCircleIcon className="size-5 shrink-0 text-emerald-500" />}
 												</button>
@@ -1287,6 +1289,7 @@ export function CreateCampaignModal({
 										<img
 											src={getAssetUrl(selectedListing.listingImages[0].imageUrl)}
 											alt={selectedListing.name}
+											loading="lazy"
 											className="size-10 rounded-lg bg-zinc-100 object-contain dark:bg-zinc-800"
 										/>
 									) : (
@@ -1414,13 +1417,19 @@ export function CreateCampaignModal({
 							<ChevronRightIcon />
 						</Button>
 					) : tasks.length > 0 ? (
-						<Button type="button" color="emerald" onClick={handleSubmit(onSubmitAndPublish)} disabled={isPending}>
-							{createAndSubmit.isPending ? <ArrowPathIcon className="size-4 animate-spin" /> : <RocketLaunchIcon />}
+						<Button
+							type="button"
+							color="emerald"
+							onClick={handleSubmit(onSubmitAndPublish)}
+							loading={createAndSubmit.isPending}
+							disabled={isPending}
+						>
+							<RocketLaunchIcon />
 							Submit for Approval
 						</Button>
 					) : (
-						<Button type="submit" color="emerald" disabled={isPending}>
-							{createCampaign.isPending ? <ArrowPathIcon className="size-4 animate-spin" /> : <PlusIcon />}
+						<Button type="submit" color="emerald" loading={createCampaign.isPending} disabled={isPending}>
+							<PlusIcon />
 							Save as Draft
 						</Button>
 					)}

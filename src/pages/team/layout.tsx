@@ -7,7 +7,7 @@ import {
 	XMarkIcon,
 } from "@heroicons/react/16/solid";
 import { Outlet } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/button";
 import { Input, InputGroup } from "@/components/input";
 import { PageHeader } from "@/components/page-header";
@@ -16,6 +16,7 @@ import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-
 import { IconButton } from "@/components/shared/icon-button";
 import { TabNav, type TabNavItem } from "@/components/shared/tab-nav";
 import { useInvitations, useMembers } from "@/features/team/hooks";
+import { useDebounce } from "@/hooks/use-debounce";
 import { useOrgContext } from "@/hooks/use-org-context";
 import { useOrgPath } from "@/hooks/use-org-slug";
 import { Route } from "@/routes/_app/$orgSlug/team";
@@ -26,6 +27,17 @@ export function TeamLayout() {
 	const orgPath = useOrgPath();
 	const navigate = Route.useNavigate();
 	const { q } = Route.useSearch();
+
+	// Debounced search
+	const [searchInput, setSearchInput] = useState(q ?? "");
+	const debouncedSearch = useDebounce(searchInput, 300);
+	useEffect(() => {
+		navigate({ search: (prev) => ({ ...prev, q: debouncedSearch || undefined }) });
+	}, [debouncedSearch, navigate]);
+	useEffect(() => {
+		setSearchInput(q ?? "");
+	}, [q]);
+
 	const canInviteMembers = useCan("member", "create");
 
 	const { data: members, loading: membersLoading } = useMembers(organizationId);
@@ -64,9 +76,7 @@ export function TeamLayout() {
 		},
 	];
 
-	const setSearchQuery = (value: string) => {
-		navigate({ search: (prev) => ({ ...prev, q: value || undefined }) });
-	};
+	const setSearchQuery = (value: string) => setSearchInput(value);
 
 	return (
 		<div className="space-y-5">
@@ -111,12 +121,12 @@ export function TeamLayout() {
 						<MagnifyingGlassIcon data-slot="icon" />
 						<Input
 							type="search"
-							value={q ?? ""}
+							value={searchInput}
 							onChange={(e) => setSearchQuery(e.target.value)}
 							placeholder="Search members..."
 							aria-label="Search team"
 						/>
-						{q && (
+						{searchInput && (
 							<button
 								type="button"
 								onClick={() => setSearchQuery("")}

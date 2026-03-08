@@ -42,7 +42,7 @@ export function DropdownMenu({
 				// Define grid at the menu level if subgrid is supported
 				"supports-[grid-template-columns:subgrid]:grid supports-[grid-template-columns:subgrid]:grid-cols-[auto_1fr_1.5rem_0.5rem_auto]",
 				// Transitions
-				"transition data-leave:duration-100 data-leave:ease-in data-closed:data-leave:opacity-0"
+				"transition data-enter:duration-150 data-enter:ease-out data-leave:duration-100 data-leave:ease-in data-closed:opacity-0 data-closed:data-enter:scale-95"
 			)}
 		/>
 	);

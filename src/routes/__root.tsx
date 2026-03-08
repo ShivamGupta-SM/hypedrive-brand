@@ -1,11 +1,11 @@
 import { isCancelledError, type QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRootRouteWithContext, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
-import { useTheme } from "@/hooks/use-theme";
 import { SkeletonTheme } from "react-loading-skeleton";
 import { Toaster } from "sonner";
 import type { Organization } from "@/components/app-layout";
 import { NotFoundPage } from "@/components/shared/not-found-page";
 import { CACHE } from "@/hooks/api-client";
+import { useTheme } from "@/hooks/use-theme";
 import type { types } from "@/lib/brand-client";
 import { getServerAuthWithOrgs } from "@/server/auth-queries";
 
@@ -66,7 +66,10 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 			{ name: "twitter:card", content: "summary_large_image" },
 			{ name: "twitter:image", content: "/api/og" },
 		],
-		links: [{ rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }],
+		links: [
+			{ rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+			{ rel: "manifest", href: "/manifest.webmanifest" },
+		],
 	}),
 	component: RootComponent,
 	errorComponent: RootErrorComponent,
@@ -104,6 +107,59 @@ function RootErrorComponent({ error }: { error: unknown }) {
 	);
 }
 
+const toastIcons = {
+	success: (
+		<svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+			<path
+				fillRule="evenodd"
+				d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14Zm3.354-8.646a.5.5 0 0 0-.708-.708L7 9.293 5.354 7.646a.5.5 0 1 0-.708.708l2 2a.5.5 0 0 0 .708 0l4-4Z"
+				clipRule="evenodd"
+			/>
+		</svg>
+	),
+	error: (
+		<svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+			<path
+				fillRule="evenodd"
+				d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14ZM5.854 5.146a.5.5 0 1 0-.708.708L7.293 8l-2.147 2.146a.5.5 0 0 0 .708.708L8 8.707l2.146 2.147a.5.5 0 0 0 .708-.708L8.707 8l2.147-2.146a.5.5 0 0 0-.708-.708L8 7.293 5.854 5.146Z"
+				clipRule="evenodd"
+			/>
+		</svg>
+	),
+	warning: (
+		<svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+			<path
+				fillRule="evenodd"
+				d="M7.134 1.496a1 1 0 0 1 1.732 0l6.25 10.834A1 1 0 0 1 14.25 14H1.75a1 1 0 0 1-.866-1.5l.116-.17L7.134 1.496ZM8 5a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0v-3A.5.5 0 0 1 8 5Zm.5 6.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0Z"
+				clipRule="evenodd"
+			/>
+		</svg>
+	),
+	info: (
+		<svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+			<path
+				fillRule="evenodd"
+				d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14Zm.5-10.5a.5.5 0 0 0-1 0v4a.5.5 0 0 0 1 0v-4ZM8 12.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z"
+				clipRule="evenodd"
+			/>
+		</svg>
+	),
+	close: (
+		<svg
+			aria-hidden="true"
+			width="12"
+			height="12"
+			viewBox="0 0 12 12"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth="1.75"
+			strokeLinecap="round"
+		>
+			<path d="M9 3 3 9M3 3l6 6" />
+		</svg>
+	),
+};
+
 function AppToaster() {
 	const theme = useTheme();
 	return (
@@ -111,9 +167,9 @@ function AppToaster() {
 			theme={theme}
 			position="bottom-right"
 			closeButton
+			icons={toastIcons}
 			duration={4000}
-			gap={10}
-			richColors={false}
+			gap={8}
 			visibleToasts={3}
 		/>
 	);

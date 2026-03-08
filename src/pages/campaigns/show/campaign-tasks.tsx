@@ -1,12 +1,11 @@
 import {
-	ArrowPathIcon,
 	ClipboardDocumentListIcon,
 	PencilIcon,
 	PencilSquareIcon,
 	PlusIcon,
 	TrashIcon,
 } from "@heroicons/react/16/solid";
-import type { Dispatch, SetStateAction } from "react";
+import { useMemo, useState } from "react";
 import { Badge } from "@/components/badge";
 import { Button } from "@/components/button";
 import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/dialog";
@@ -20,79 +19,55 @@ import { FilterChip } from "@/components/shared/filter-chip";
 import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
 import { Switch } from "@/components/switch";
 import { Textarea } from "@/components/textarea";
-import type { brand, catalog, db } from "@/lib/brand-client";
+import { usePlatforms, useTaskTemplates } from "@/features/campaigns/hooks";
+import { useAddCampaignTask, useRemoveCampaignTask, useUpdateCampaignTask } from "@/features/campaigns/mutations";
+import type { brand, db } from "@/lib/brand-client";
 import { showToast } from "@/lib/toast";
 
 interface CampaignTasksProps {
 	campaign: brand.CampaignWithStats;
+	organizationId: string;
 	tasks: brand.CampaignTaskResponse[];
 	tasksLoading: boolean;
-	platforms: catalog.Platform[];
 	canUpdateCampaign: boolean;
-	// Add task state & handlers
-	showAddTaskPicker: boolean;
-	setShowAddTaskPicker: (v: boolean) => void;
-	addTaskPlatformId: string;
-	setAddTaskPlatformId: (v: string) => void;
-	addTaskTemplateId: string;
-	setAddTaskTemplateId: (v: string) => void;
-	filteredTemplates: catalog.TaskTemplateResponse[];
-	addTask: {
-		mutate: (params: { taskTemplateId: string; isRequired: boolean }, options?: { onSuccess?: () => void; onError?: (err: unknown) => void }) => void;
-		isPending: boolean;
-	};
-	// Edit task state & handlers
-	editingTaskId: string | null;
-	setEditingTaskId: (v: string | null) => void;
-	editingTaskInstructions: string;
-	setEditingTaskInstructions: (v: string) => void;
-	editingTaskRequirements: db.TaskRequirements;
-	setEditingTaskRequirements: Dispatch<SetStateAction<db.TaskRequirements>>;
-	editingTaskCategory: string | undefined;
-	setEditingTaskCategory: (v: string | undefined) => void;
-	hashtagInput: string;
-	setHashtagInput: (v: string) => void;
-	mentionInput: string;
-	setMentionInput: (v: string) => void;
-	updateTask: {
-		mutate: (params: { taskId: string; instructions?: string; requirements?: db.TaskRequirements }, options?: { onSuccess?: () => void; onError?: (err: unknown) => void }) => void;
-		isPending: boolean;
-	};
-	removeTask: {
-		mutate: (taskId: string, options?: { onSuccess?: () => void; onError?: (err: unknown) => void }) => void;
-		isPending: boolean;
-	};
 }
 
 export function CampaignTasks({
 	campaign,
+	organizationId,
 	tasks,
 	tasksLoading,
-	platforms,
 	canUpdateCampaign,
-	showAddTaskPicker,
-	setShowAddTaskPicker,
-	addTaskPlatformId,
-	setAddTaskPlatformId,
-	addTaskTemplateId,
-	setAddTaskTemplateId,
-	filteredTemplates,
-	addTask,
-	editingTaskId,
-	setEditingTaskId,
-	editingTaskInstructions,
-	setEditingTaskInstructions,
-	editingTaskRequirements,
-	setEditingTaskRequirements,
-	editingTaskCategory,
-	setEditingTaskCategory,
-	hashtagInput,
-	setHashtagInput,
-	mentionInput,
-	setMentionInput,
-	updateTask,
-	removeTask,
 }: CampaignTasksProps) {
+	// Own all task-related state
+	const [showAddTaskPicker, setShowAddTaskPicker] = useState(false);
+	const [addTaskPlatformId, setAddTaskPlatformId] = useState("");
+	const [addTaskTemplateId, setAddTaskTemplateId] = useState("");
+	const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+	const [editingTaskInstructions, setEditingTaskInstructions] = useState("");
+	const [editingTaskRequirements, setEditingTaskRequirements] = useState<db.TaskRequirements>({});
+	const [editingTaskCategory, setEditingTaskCategory] = useState<string | undefined>();
+	const [hashtagInput, setHashtagInput] = useState("");
+	const [mentionInput, setMentionInput] = useState("");
+
+	// Own hooks
+	const addTask = useAddCampaignTask(organizationId, campaign.id);
+	const updateTask = useUpdateCampaignTask(organizationId, campaign.id);
+	const removeTask = useRemoveCampaignTask(organizationId, campaign.id);
+	const { data: platforms } = usePlatforms();
+	const { data: taskTemplates } = useTaskTemplates(addTaskPlatformId ? { platformId: addTaskPlatformId } : undefined, {
+		enabled: !!addTaskPlatformId,
+	});
+
+	const listingPlatformId = campaign.listing?.platformId;
+	const filteredTemplates = useMemo(() => {
+		return taskTemplates.filter((tpl) => {
+			if (!tpl.platformId) return true;
+			if (tpl.platformId === listingPlatformId) return true;
+			const tplPlatform = platforms.find((p) => p.id === tpl.platformId);
+			return tplPlatform?.type === "social";
+		});
+	}, [taskTemplates, listingPlatformId, platforms]);
 	return (
 		<>
 			<div className="space-y-4">
@@ -126,7 +101,7 @@ export function CampaignTasks({
 							value: new Set(
 								tasks
 									.map((t) => t.taskTemplate?.platformName || extractPlatformFromText(t.taskTemplate?.name || ""))
-									.filter(Boolean),
+									.filter(Boolean)
 							).size,
 						},
 					]}
@@ -139,13 +114,14 @@ export function CampaignTasks({
 						{[1, 2].map((i) => (
 							<div
 								key={i}
-								className="overflow-hidden rounded-xl bg-white shadow-xs ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800"
+								className="overflow-hidden rounded-xl bg-white shadow-xs ring-1 ring-zinc-200 animate-fade-in dark:bg-zinc-900 dark:ring-zinc-800"
+								style={{ animationDelay: `${i * 60}ms` }}
 							>
 								<div className="flex items-start gap-3 p-3.5 sm:p-4">
-									<div className="size-9 shrink-0 animate-pulse rounded-full bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+									<div className="size-9 shrink-0 rounded-full bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
 									<div className="min-w-0 flex-1 space-y-2">
-										<div className="h-4 w-2/3 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
-										<div className="h-3 w-full animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
+										<div className="h-4 w-2/3 skeleton-shimmer rounded bg-zinc-200 dark:bg-zinc-700" />
+										<div className="h-3 w-full skeleton-shimmer rounded bg-zinc-200 dark:bg-zinc-700" />
 									</div>
 								</div>
 							</div>
@@ -603,7 +579,7 @@ export function CampaignTasks({
 					</Button>
 					<Button
 						color="emerald"
-						disabled={updateTask.isPending}
+						loading={updateTask.isPending}
 						onClick={() => {
 							if (!editingTaskId) return;
 							// Build clean requirements object
@@ -641,14 +617,7 @@ export function CampaignTasks({
 							);
 						}}
 					>
-						{updateTask.isPending ? (
-							<>
-								<ArrowPathIcon className="size-4 animate-spin" />
-								Saving...
-							</>
-						) : (
-							"Save Changes"
-						)}
+						Save Changes
 					</Button>
 				</DialogActions>
 			</Dialog>
@@ -729,7 +698,8 @@ export function CampaignTasks({
 					</Button>
 					<Button
 						color="emerald"
-						disabled={!addTaskTemplateId || addTask.isPending}
+						loading={addTask.isPending}
+						disabled={!addTaskTemplateId}
 						onClick={() => {
 							addTask.mutate(
 								{ taskTemplateId: addTaskTemplateId, isRequired: false },
@@ -745,17 +715,8 @@ export function CampaignTasks({
 							);
 						}}
 					>
-						{addTask.isPending ? (
-							<>
-								<ArrowPathIcon className="size-4 animate-spin" />
-								Adding...
-							</>
-						) : (
-							<>
-								<PlusIcon className="size-4" />
-								Add Task
-							</>
-						)}
+						<PlusIcon className="size-4" />
+						Add Task
 					</Button>
 				</DialogActions>
 			</Dialog>

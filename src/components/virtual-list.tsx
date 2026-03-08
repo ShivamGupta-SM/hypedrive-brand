@@ -5,7 +5,7 @@
 
 import { useVirtualizer } from "@tanstack/react-virtual";
 import clsx from "clsx";
-import { type ReactNode, useRef } from "react";
+import { type ReactNode, useCallback, useEffect, useRef } from "react";
 
 // =============================================================================
 // VIRTUAL LIST
@@ -34,6 +34,16 @@ export interface VirtualListProps<T> {
 	getItemKey?: (item: T, index: number) => string | number;
 	/** Custom scroll element */
 	scrollElement?: HTMLElement | null;
+	/** Callback when scroll reaches near the end */
+	onEndReached?: () => void;
+	/** Whether more data is being loaded */
+	isLoadingMore?: boolean;
+	/** Whether there is more data to load */
+	hasMore?: boolean;
+	/** Distance from end (in px) to trigger onEndReached */
+	endReachedThreshold?: number;
+	/** Footer content (e.g. loading spinner) rendered below virtualized items */
+	footer?: ReactNode;
 }
 
 export function VirtualList<T>({
@@ -48,6 +58,11 @@ export function VirtualList<T>({
 	horizontal = false,
 	getItemKey,
 	scrollElement,
+	onEndReached,
+	isLoadingMore,
+	hasMore,
+	endReachedThreshold = 200,
+	footer,
 }: VirtualListProps<T>) {
 	const parentRef = useRef<HTMLDivElement>(null);
 
@@ -62,6 +77,24 @@ export function VirtualList<T>({
 	});
 
 	const virtualItems = virtualizer.getVirtualItems();
+
+	// Infinite scroll: trigger onEndReached when near the bottom
+	const handleScroll = useCallback(() => {
+		if (!onEndReached || !hasMore || isLoadingMore) return;
+		const el = scrollElement ?? parentRef.current;
+		if (!el) return;
+		const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+		if (distanceFromBottom < endReachedThreshold) {
+			onEndReached();
+		}
+	}, [onEndReached, hasMore, isLoadingMore, scrollElement, endReachedThreshold]);
+
+	useEffect(() => {
+		const el = scrollElement ?? parentRef.current;
+		if (!el || !onEndReached) return;
+		el.addEventListener("scroll", handleScroll, { passive: true });
+		return () => el.removeEventListener("scroll", handleScroll);
+	}, [handleScroll, scrollElement, onEndReached]);
 
 	return (
 		<div
@@ -93,6 +126,7 @@ export function VirtualList<T>({
 					</div>
 				))}
 			</div>
+			{footer}
 		</div>
 	);
 }
@@ -122,6 +156,16 @@ export interface VirtualGridProps<T> {
 	overscan?: number;
 	/** Get unique key for item */
 	getItemKey?: (item: T, index: number) => string | number;
+	/** Callback when scroll reaches near the end */
+	onEndReached?: () => void;
+	/** Whether more data is being loaded */
+	isLoadingMore?: boolean;
+	/** Whether there is more data to load */
+	hasMore?: boolean;
+	/** Distance from end (in px) to trigger onEndReached */
+	endReachedThreshold?: number;
+	/** Footer content (e.g. loading spinner) rendered below virtualized items */
+	footer?: ReactNode;
 }
 
 export function VirtualGrid<T>({
@@ -135,6 +179,11 @@ export function VirtualGrid<T>({
 	gap = 0,
 	overscan = 5,
 	getItemKey,
+	onEndReached,
+	isLoadingMore,
+	hasMore,
+	endReachedThreshold = 200,
+	footer,
 }: VirtualGridProps<T>) {
 	const parentRef = useRef<HTMLDivElement>(null);
 	const rowCount = Math.ceil(items.length / columns);
@@ -147,6 +196,24 @@ export function VirtualGrid<T>({
 	});
 
 	const virtualRows = rowVirtualizer.getVirtualItems();
+
+	// Infinite scroll: trigger onEndReached when near the bottom
+	const handleScroll = useCallback(() => {
+		if (!onEndReached || !hasMore || isLoadingMore) return;
+		const el = parentRef.current;
+		if (!el) return;
+		const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+		if (distanceFromBottom < endReachedThreshold) {
+			onEndReached();
+		}
+	}, [onEndReached, hasMore, isLoadingMore, endReachedThreshold]);
+
+	useEffect(() => {
+		const el = parentRef.current;
+		if (!el || !onEndReached) return;
+		el.addEventListener("scroll", handleScroll, { passive: true });
+		return () => el.removeEventListener("scroll", handleScroll);
+	}, [handleScroll, onEndReached]);
 
 	return (
 		<div
@@ -192,6 +259,7 @@ export function VirtualGrid<T>({
 					);
 				})}
 			</div>
+			{footer}
 		</div>
 	);
 }
@@ -230,6 +298,16 @@ export interface VirtualTableProps<T> {
 	getItemKey?: (item: T, index: number) => string | number;
 	/** Row click handler */
 	onRowClick?: (item: T, index: number) => void;
+	/** Callback when scroll reaches near the end */
+	onEndReached?: () => void;
+	/** Whether more data is being loaded */
+	isLoadingMore?: boolean;
+	/** Whether there is more data to load */
+	hasMore?: boolean;
+	/** Distance from end (in px) to trigger onEndReached */
+	endReachedThreshold?: number;
+	/** Footer content rendered below virtualized rows */
+	footer?: ReactNode;
 }
 
 export function VirtualTable<T>({
@@ -243,6 +321,11 @@ export function VirtualTable<T>({
 	overscan = 10,
 	getItemKey,
 	onRowClick,
+	onEndReached,
+	isLoadingMore,
+	hasMore,
+	endReachedThreshold = 200,
+	footer,
 }: VirtualTableProps<T>) {
 	const parentRef = useRef<HTMLDivElement>(null);
 
@@ -262,6 +345,24 @@ export function VirtualTable<T>({
 		}
 		return rowClassName;
 	};
+
+	// Infinite scroll: trigger onEndReached when near the bottom
+	const handleScroll = useCallback(() => {
+		if (!onEndReached || !hasMore || isLoadingMore) return;
+		const el = parentRef.current;
+		if (!el) return;
+		const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+		if (distanceFromBottom < endReachedThreshold) {
+			onEndReached();
+		}
+	}, [onEndReached, hasMore, isLoadingMore, endReachedThreshold]);
+
+	useEffect(() => {
+		const el = parentRef.current;
+		if (!el || !onEndReached) return;
+		el.addEventListener("scroll", handleScroll, { passive: true });
+		return () => el.removeEventListener("scroll", handleScroll);
+	}, [handleScroll, onEndReached]);
 
 	return (
 		<div className={clsx("overflow-hidden rounded-lg shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800", className)}>
@@ -340,6 +441,7 @@ export function VirtualTable<T>({
 						);
 					})}
 				</div>
+				{footer}
 			</div>
 		</div>
 	);

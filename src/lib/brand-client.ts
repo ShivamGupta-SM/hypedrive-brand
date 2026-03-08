@@ -10563,6 +10563,7 @@ export namespace brand {
 
         createdAt: string
         updatedAt: string
+        iconUrl?: string
     }
 
     export interface OrganizationWalletResponse {
@@ -10779,6 +10780,18 @@ export namespace brand {
         billAmount?: number
 
         billAmountDecimal?: string
+    }
+
+    export interface UpdateBankAccountRequest {
+        accountHolderName: string
+        accountNumber: string
+        bankName: string
+        ifscCode: string
+        accountType: "current" | "savings"
+        /**
+         * Validation ID from verify endpoint - proves new account was verified via penny drop
+         */
+        validationId: string
     }
 
     export interface UpdateListingRequest {
@@ -11009,6 +11022,7 @@ export namespace brand {
             this.streamSetupProgress = this.streamSetupProgress.bind(this)
             this.streamWalletBalance = this.streamWalletBalance.bind(this)
             this.unifiedSearch = this.unifiedSearch.bind(this)
+            this.updateBankAccount = this.updateBankAccount.bind(this)
             this.updateCampaign = this.updateCampaign.bind(this)
             this.updateCampaignState = this.updateCampaignState.bind(this)
             this.updateCampaignTask = this.updateCampaignTask.bind(this)
@@ -11433,12 +11447,16 @@ export namespace brand {
          * Generate invoice PDF
          */
         public async generateInvoicePDF(organizationId: string, id: string): Promise<{
-    pdfUrl: string
+    data: string
+    filename: string
+    contentType: "application/pdf"
 }> {
             // Now make the actual call to the API
             const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/invoices/${encodeURIComponent(id)}/pdf`)
             return await resp.json() as {
-    pdfUrl: string
+    data: string
+    filename: string
+    contentType: "application/pdf"
 }
         }
 
@@ -11696,6 +11714,10 @@ export namespace brand {
 
     sortBy?: "createdAt" | "amount"
     sortOrder?: "asc" | "desc"
+    /**
+     * Search by reference, description, enrollment ID, or enrollment display ID (ENR-XXXXX)
+     */
+    q?: string
 }): Promise<{
     data: WalletTransaction[]
     total: number
@@ -11716,6 +11738,7 @@ export namespace brand {
                 dateFrom:  params.dateFrom,
                 dateTo:    params.dateTo,
                 limit:     params.limit === undefined ? undefined : String(params.limit),
+                q:         params.q,
                 skip:      params.skip === undefined ? undefined : String(params.skip),
                 sortBy:    params.sortBy === undefined ? undefined : String(params.sortBy),
                 sortOrder: params.sortOrder === undefined ? undefined : String(params.sortOrder),
@@ -12361,6 +12384,18 @@ export namespace brand {
             // Now make the actual call to the API
             const resp = await this.baseClient.callTypedAPI("GET", `/organizations/${encodeURIComponent(organizationId)}/search`, undefined, {query})
             return await resp.json() as BrandUnifiedSearchResponse
+        }
+
+        /**
+         * =============================================================================
+         * UPDATE: Change bank account in-place (verify → update atomically)
+         * Requires: no pending/processing withdrawals using the current account
+         * =============================================================================
+         */
+        public async updateBankAccount(organizationId: string, params: UpdateBankAccountRequest): Promise<OrganizationBankAccount> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI("PUT", `/organizations/${encodeURIComponent(organizationId)}/bank-accounts`, JSON.stringify(params))
+            return await resp.json() as OrganizationBankAccount
         }
 
         /**

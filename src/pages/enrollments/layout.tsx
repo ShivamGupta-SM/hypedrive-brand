@@ -7,13 +7,14 @@ import {
 	XMarkIcon,
 } from "@heroicons/react/16/solid";
 import { Outlet } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { isEnrollmentOverdue } from "@/components/enrollment-card";
 import { Input, InputGroup } from "@/components/input";
 import { AlertBanner, PageHeader } from "@/components/page-header";
 import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
 import { TabNav, type TabNavItem } from "@/components/shared/tab-nav";
 import { useInfiniteEnrollments } from "@/features/enrollments/hooks";
+import { useDebounce } from "@/hooks/use-debounce";
 import { useOrgContext } from "@/hooks/use-org-context";
 import { useOrgPath } from "@/hooks/use-org-slug";
 
@@ -27,10 +28,10 @@ function EnrollmentsLayoutSkeleton() {
 	return (
 		<div className="space-y-5">
 			{/* Header skeleton */}
-			<div className="flex items-start justify-between gap-4">
+			<div className="flex items-start justify-between gap-4 animate-fade-in">
 				<div>
-					<div className="h-8 w-36 animate-pulse rounded-lg bg-zinc-200 skeleton-shimmer dark:bg-zinc-800" />
-					<div className="mt-2 h-4 w-48 animate-pulse rounded bg-zinc-200 skeleton-shimmer sm:w-56 dark:bg-zinc-800" />
+					<div className="h-8 w-36 rounded-lg bg-zinc-200 skeleton-shimmer dark:bg-zinc-800" />
+					<div className="mt-2 h-4 w-48 rounded bg-zinc-200 skeleton-shimmer sm:w-56 dark:bg-zinc-800" />
 				</div>
 			</div>
 
@@ -47,14 +48,17 @@ function EnrollmentsLayoutSkeleton() {
 			/>
 
 			{/* Search + Tabs skeleton */}
-			<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-				<div className="h-10 w-full animate-pulse rounded-lg bg-zinc-200 skeleton-shimmer sm:w-64 dark:bg-zinc-800" />
+			<div
+				className="flex flex-col gap-3 sm:flex-row sm:items-center animate-fade-in"
+				style={{ animationDelay: "120ms" }}
+			>
+				<div className="h-10 w-full rounded-lg bg-zinc-200 skeleton-shimmer sm:w-64 dark:bg-zinc-800" />
 				<div className="flex gap-1.5 overflow-x-auto scrollbar-hide">
 					{[80, 110, 80, 75].map((w, i) => (
 						<div
 							key={i}
 							style={{ width: w }}
-							className="h-9 shrink-0 animate-pulse rounded-full bg-zinc-200 skeleton-shimmer dark:bg-zinc-800"
+							className="h-9 shrink-0 rounded-full bg-zinc-200 skeleton-shimmer dark:bg-zinc-800"
 						/>
 					))}
 				</div>
@@ -65,22 +69,23 @@ function EnrollmentsLayoutSkeleton() {
 				{[1, 2, 3, 4].map((i) => (
 					<div
 						key={i}
-						className="overflow-hidden rounded-xl bg-white shadow-xs ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800"
+						className="overflow-hidden rounded-xl bg-white shadow-xs ring-1 ring-zinc-200 animate-fade-in dark:bg-zinc-900 dark:ring-zinc-800"
+						style={{ animationDelay: `${180 + i * 60}ms` }}
 					>
 						<div className="flex items-start gap-3.5 p-3.5 sm:gap-4 sm:p-4">
-							<div className="size-12 shrink-0 animate-pulse rounded-full bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
+							<div className="size-12 shrink-0 rounded-full bg-zinc-200 skeleton-shimmer dark:bg-zinc-700" />
 							<div className="min-w-0 flex-1 space-y-2">
-								<div className="h-4 w-2/3 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
-								<div className="h-3 w-1/2 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
-								<div className="h-3 w-3/4 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
+								<div className="h-4 w-2/3 skeleton-shimmer rounded bg-zinc-200 dark:bg-zinc-700" />
+								<div className="h-3 w-1/2 skeleton-shimmer rounded bg-zinc-200 dark:bg-zinc-700" />
+								<div className="h-3 w-3/4 skeleton-shimmer rounded bg-zinc-200 dark:bg-zinc-700" />
 							</div>
 						</div>
 						<div className="h-px bg-zinc-200 dark:bg-zinc-700" />
 						<div className="grid grid-cols-3 divide-x divide-zinc-200 bg-zinc-50/50 dark:divide-zinc-700 dark:bg-zinc-800/30">
 							{[1, 2, 3].map((j) => (
 								<div key={j} className="flex flex-col items-center gap-1 py-2.5 sm:py-3">
-									<div className="h-2.5 w-10 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
-									<div className="h-3.5 w-14 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
+									<div className="h-2.5 w-10 skeleton-shimmer rounded bg-zinc-200 dark:bg-zinc-700" />
+									<div className="h-3.5 w-14 skeleton-shimmer rounded bg-zinc-200 dark:bg-zinc-700" />
 								</div>
 							))}
 						</div>
@@ -101,15 +106,24 @@ export function EnrollmentsLayout() {
 	const navigate = Route.useNavigate();
 	const { q } = Route.useSearch();
 
+	// Debounced search — local state for responsive input, URL updates after 300ms
+	const [searchInput, setSearchInput] = useState(q ?? "");
+	const debouncedSearch = useDebounce(searchInput, 300);
+	useEffect(() => {
+		navigate({ search: (prev) => ({ ...prev, q: debouncedSearch || undefined }) });
+	}, [debouncedSearch, navigate]);
+	useEffect(() => {
+		setSearchInput(q ?? "");
+	}, [q]);
+
 	// All enrollments for stats + tab counts
 	const { data: enrollments, loading, total } = useInfiniteEnrollments(organizationId, {});
 
 	// Count overdue enrollments
 	const overdueCount = useMemo(() => {
 		const referenceTime = new Date();
-		return enrollments.filter(
-			(e) => e.status === "awaiting_review" && isEnrollmentOverdue(e.createdAt, referenceTime),
-		).length;
+		return enrollments.filter((e) => e.status === "awaiting_review" && isEnrollmentOverdue(e.createdAt, referenceTime))
+			.length;
 	}, [enrollments]);
 
 	if (loading) return <EnrollmentsLayoutSkeleton />;
@@ -153,9 +167,7 @@ export function EnrollmentsLayout() {
 		},
 	];
 
-	const setSearchQuery = (value: string) => {
-		navigate({ search: (prev) => ({ ...prev, q: value || undefined }) });
-	};
+	const setSearchQuery = (value: string) => setSearchInput(value);
 
 	return (
 		<div className="space-y-5">
@@ -191,12 +203,12 @@ export function EnrollmentsLayout() {
 						<MagnifyingGlassIcon data-slot="icon" />
 						<Input
 							type="text"
-							value={q ?? ""}
+							value={searchInput}
 							onChange={(e) => setSearchQuery(e.target.value)}
 							placeholder="Search by shopper, campaign..."
 							aria-label="Search enrollments"
 						/>
-						{q && (
+						{searchInput && (
 							<button
 								type="button"
 								onClick={() => setSearchQuery("")}

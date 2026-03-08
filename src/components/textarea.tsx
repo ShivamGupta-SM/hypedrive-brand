@@ -40,6 +40,8 @@ export const Textarea = forwardRef(function Textarea(
 					"border border-zinc-950/10 data-hover:border-zinc-950/20 dark:border-white/10 dark:data-hover:border-white/20",
 					// Background color
 					"bg-transparent dark:bg-white/5",
+					// Transitions
+					"transition-colors duration-150 ease-out",
 					// Hide default focus styles
 					"focus:outline-hidden",
 					// Invalid state

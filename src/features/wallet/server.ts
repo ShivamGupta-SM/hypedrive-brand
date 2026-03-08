@@ -45,7 +45,17 @@ export const listWithdrawalsServer = createServerFn({ method: "GET" })
 		(input: {
 			orgId: string;
 			params: {
-				status?: "otp_pending" | "pending" | "approved" | "rejected" | "queued" | "processing" | "completed" | "failed" | "cancelled" | "reversed";
+				status?:
+					| "otp_pending"
+					| "pending"
+					| "approved"
+					| "rejected"
+					| "queued"
+					| "processing"
+					| "completed"
+					| "failed"
+					| "cancelled"
+					| "reversed";
 				requestedFrom?: string;
 				requestedTo?: string;
 				amountMin?: number;
@@ -107,6 +117,7 @@ export const getWalletTransactionsServer = createServerFn({ method: "GET" })
 				limit?: number;
 				sortBy?: "createdAt" | "amount";
 				sortOrder?: "asc" | "desc";
+				q?: string;
 			};
 		}) => input
 	)

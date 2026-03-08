@@ -1,5 +1,4 @@
 import {
-	ArrowPathIcon,
 	ArrowsUpDownIcon,
 	ArrowUpRightIcon,
 	CalendarIcon,
@@ -11,9 +10,9 @@ import {
 	TrashIcon,
 	XMarkIcon,
 } from "@heroicons/react/16/solid";
-import clsx from "clsx";
 import { getRouteApi, useNavigate } from "@tanstack/react-router";
-import { useCallback, useMemo, useRef, useState } from "react";
+import clsx from "clsx";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/button";
 import { Dropdown, DropdownButton, DropdownItem, DropdownMenu } from "@/components/dropdown";
@@ -21,13 +20,14 @@ import { Input, InputGroup } from "@/components/input";
 import { Link } from "@/components/link";
 import { PageHeader } from "@/components/page-header";
 import { BulkActionsBar } from "@/components/shared/bulk-actions-bar";
-import { SelectionCheckbox } from "@/components/shared/selection-checkbox";
 import { useCan } from "@/components/shared/can";
 import { EmptyState } from "@/components/shared/empty-state";
-import { FilterDropdown } from "@/components/shared/filter-dropdown";
 import { ErrorState } from "@/components/shared/error-state";
+import { FadeImage } from "@/components/shared/fade-image";
+import { FilterDropdown } from "@/components/shared/filter-dropdown";
 import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
 import { IconButton } from "@/components/shared/icon-button";
+import { SelectionCheckbox } from "@/components/shared/selection-checkbox";
 import { useInfiniteListings } from "@/features/listings/hooks";
 import { useBatchListings } from "@/features/listings/mutations";
 import { getAssetUrl } from "@/hooks/api-client";
@@ -44,7 +44,7 @@ type Listing = brand.ListingWithStats;
 // =============================================================================
 
 function Shimmer({ className, style }: { className?: string; style?: React.CSSProperties }) {
-	return <div className={clsx("animate-pulse rounded-md bg-zinc-200 dark:bg-zinc-700", className)} style={style} />;
+	return <div className={clsx("skeleton-shimmer rounded-md bg-zinc-200 dark:bg-zinc-700", className)} style={style} />;
 }
 
 // =============================================================================
@@ -83,7 +83,7 @@ interface ListingCardProps {
 	selected?: boolean;
 }
 
-function ListingCard({ listing, orgSlug, canEdit, selected }: ListingCardProps) {
+const ListingCard = memo(function ListingCard({ listing, orgSlug, canEdit, selected }: ListingCardProps) {
 	const imageUrl = listing.listingImages?.[0] ? getAssetUrl(listing.listingImages[0].imageUrl) : null;
 
 	return (
@@ -99,7 +99,7 @@ function ListingCard({ listing, orgSlug, canEdit, selected }: ListingCardProps) 
 			{/* Product Image */}
 			<div className="relative aspect-4/3 w-full overflow-hidden bg-zinc-100 dark:bg-zinc-800">
 				{imageUrl ? (
-					<img
+					<FadeImage
 						src={imageUrl}
 						alt={listing.name}
 						className="h-full w-full object-contain p-3 transition-transform duration-300 group-hover/card:scale-105"
@@ -118,7 +118,11 @@ function ListingCard({ listing, orgSlug, canEdit, selected }: ListingCardProps) 
 				{listing.link && (
 					<button
 						type="button"
-						onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (listing.link) window.open(listing.link, "_blank"); }}
+						onClick={(e) => {
+							e.preventDefault();
+							e.stopPropagation();
+							if (listing.link) window.open(listing.link, "_blank");
+						}}
 						className="absolute bottom-2 right-2 flex items-center justify-center rounded-md bg-black/60 p-1 text-white backdrop-blur-sm transition-colors hover:bg-black/80"
 					>
 						<ArrowUpRightIcon className="size-3" />
@@ -131,13 +135,9 @@ function ListingCard({ listing, orgSlug, canEdit, selected }: ListingCardProps) 
 				<h3 className="line-clamp-2 text-sm font-semibold leading-snug text-zinc-900 dark:text-white">
 					{listing.name}
 				</h3>
-				<p className="mt-1 text-[11px] text-zinc-500 dark:text-zinc-400">
-					{listing.identifier}
-				</p>
+				<p className="mt-1 text-[11px] text-zinc-500 dark:text-zinc-400">{listing.identifier}</p>
 				<div className="mt-auto flex items-end justify-between pt-2">
-					<p className="text-base font-bold text-zinc-900 dark:text-white">
-						{formatCurrency(listing.priceDecimal)}
-					</p>
+					<p className="text-base font-bold text-zinc-900 dark:text-white">{formatCurrency(listing.priceDecimal)}</p>
 					{canEdit && (
 						<Dropdown>
 							<DropdownButton
@@ -163,7 +163,7 @@ function ListingCard({ listing, orgSlug, canEdit, selected }: ListingCardProps) 
 			</div>
 		</Link>
 	);
-}
+});
 
 // =============================================================================
 // LISTING CARD SKELETON
@@ -195,7 +195,7 @@ function ListingsListSkeleton() {
 	return (
 		<div className="space-y-5">
 			{/* Header */}
-			<div className="flex items-start justify-between gap-4">
+			<div className="flex items-start justify-between gap-4 animate-fade-in">
 				<div>
 					<Shimmer className="h-8 w-32" />
 					<Shimmer className="mt-2 h-4 w-48 sm:w-64" />
@@ -214,7 +214,10 @@ function ListingsListSkeleton() {
 			/>
 
 			{/* Search + Sort pills */}
-			<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+			<div
+				className="flex flex-col gap-3 sm:flex-row sm:items-center animate-fade-in"
+				style={{ animationDelay: "120ms" }}
+			>
 				<Shimmer className="h-10 w-full rounded-lg sm:w-64" />
 				<div className="flex gap-1.5 overflow-x-auto scrollbar-hide">
 					{[75, 80, 65, 95].map((w, i) => (
@@ -226,7 +229,9 @@ function ListingsListSkeleton() {
 			{/* Cards Grid */}
 			<div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
 				{[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-					<ListingCardSkeleton key={i} />
+					<div key={i} className="animate-fade-in" style={{ animationDelay: `${180 + i * 40}ms` }}>
+						<ListingCardSkeleton />
+					</div>
 				))}
 			</div>
 		</div>
@@ -262,7 +267,8 @@ export function ListingsList() {
 	const toggleSelect = useCallback((id: string) => {
 		setSelectedIds((prev) => {
 			const next = new Set(prev);
-			if (next.has(id)) next.delete(id); else next.add(id);
+			if (next.has(id)) next.delete(id);
+			else next.add(id);
 			return next;
 		});
 	}, []);
@@ -322,7 +328,10 @@ export function ListingsList() {
 			filters.push({
 				key: "search",
 				label: `"${searchQuery}"`,
-				onRemove: () => { setLocalSearch(""); navigate({ search: ((prev: Record<string, unknown>) => ({ ...prev, q: undefined })) as never }); },
+				onRemove: () => {
+					setLocalSearch("");
+					navigate({ search: ((prev: Record<string, unknown>) => ({ ...prev, q: undefined })) as never });
+				},
 			});
 		}
 		return filters;
@@ -333,24 +342,44 @@ export function ListingsList() {
 		navigate({ search: {} as never });
 	};
 
-	const handleBatchAction = useCallback(async (action: "delete") => {
-		if (!organizationId || selectedIds.size === 0) return;
-		setIsBatchLoading(true);
-		try {
-			await batchListings.mutateAsync({
-				organizationId,
-				action,
-				listingIds: Array.from(selectedIds),
-			});
-			showToast.success(`${selectedIds.size} listing${selectedIds.size > 1 ? "s" : ""} deleted`);
-			setSelectedIds(new Set());
-			refetch();
-		} catch (err) {
-			showToast.error(err, `Failed to ${action} listings`);
-		} finally {
-			setIsBatchLoading(false);
-		}
-	}, [organizationId, selectedIds, batchListings, refetch]);
+	const handleBatchAction = useCallback(
+		async (action: "delete") => {
+			if (!organizationId || selectedIds.size === 0) return;
+			setIsBatchLoading(true);
+			try {
+				await batchListings.mutateAsync({
+					organizationId,
+					action,
+					listingIds: Array.from(selectedIds),
+				});
+				showToast.success(`${selectedIds.size} listing${selectedIds.size > 1 ? "s" : ""} deleted`);
+				setSelectedIds(new Set());
+				refetch();
+			} catch (err) {
+				showToast.error(err, `Failed to ${action} listings`);
+			} finally {
+				setIsBatchLoading(false);
+			}
+		},
+		[organizationId, selectedIds, batchListings, refetch]
+	);
+
+	const loadMoreRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		const el = loadMoreRef.current;
+		if (!el || !hasMore) return;
+		const observer = new IntersectionObserver(
+			(entries) => {
+				if (entries[0].isIntersecting && !isFetchingNextPage) {
+					fetchNextPage();
+				}
+			},
+			{ threshold: 0, rootMargin: "200px" }
+		);
+		observer.observe(el);
+		return () => observer.disconnect();
+	}, [hasMore, isFetchingNextPage, fetchNextPage]);
 
 	const hasActiveFilters = !!searchQuery;
 
@@ -359,7 +388,7 @@ export function ListingsList() {
 	}
 
 	return (
-		<div className="space-y-5">
+		<div className="animate-page-enter space-y-5">
 			{/* Header */}
 			<PageHeader
 				title="Listings"
@@ -416,7 +445,14 @@ export function ListingsList() {
 						{ value: "views", label: "Most Viewed", icon: EyeIcon, iconColor: "text-amber-500" },
 					]}
 					value={sortBy}
-					onChange={(value) => navigate({ search: ((prev: Record<string, unknown>) => ({ ...prev, sort: value === "date" ? undefined : value })) as never })}
+					onChange={(value) =>
+						navigate({
+							search: ((prev: Record<string, unknown>) => ({
+								...prev,
+								sort: value === "date" ? undefined : value,
+							})) as never,
+						})
+					}
 				/>
 			</div>
 
@@ -446,26 +482,25 @@ export function ListingsList() {
 							<div key={listing.id} className="group relative rounded-xl">
 								<SelectionCheckbox
 									selected={selectedIds.has(listing.id)}
-									onToggle={(e) => { e.preventDefault(); toggleSelect(listing.id); }}
+									onToggle={(e) => {
+										e.preventDefault();
+										toggleSelect(listing.id);
+									}}
 								/>
-								<ListingCard listing={listing} orgSlug={orgSlug} canEdit={canUpdateListing} selected={selectedIds.has(listing.id)} />
+								<ListingCard
+									listing={listing}
+									orgSlug={orgSlug}
+									canEdit={canUpdateListing}
+									selected={selectedIds.has(listing.id)}
+								/>
 							</div>
 						))}
 					</div>
-
-					{/* Load More */}
 					{hasMore && (
-						<div className="flex justify-center">
-							<Button outline onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
-								{isFetchingNextPage ? (
-									<>
-										<ArrowPathIcon className="size-4 animate-spin" />
-										Loading...
-									</>
-								) : (
-									"Load More"
-								)}
-							</Button>
+						<div ref={loadMoreRef} className="flex justify-center py-6">
+							{isFetchingNextPage && (
+								<div className="size-5 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900 dark:border-zinc-600 dark:border-t-white" />
+							)}
 						</div>
 					)}
 				</>

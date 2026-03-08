@@ -64,13 +64,7 @@ export const deleteListingServer = createServerFn({ method: "POST" })
 
 export const batchListingsServer = createServerFn({ method: "POST" })
 	.middleware([authMiddleware])
-	.inputValidator(
-		(input: {
-			orgId: string;
-			action: "delete";
-			listingIds: string[];
-		}) => input
-	)
+	.inputValidator((input: { orgId: string; action: "delete"; listingIds: string[] }) => input)
 	.handler(async ({ context, data }) => {
 		return context.client.brand.batchListings(data.orgId, {
 			action: data.action,

@@ -3,7 +3,6 @@
  * Provides chart components with Catalyst theme integration
  */
 
-import { useIsDark } from "@/hooks/use-theme";
 import clsx from "clsx";
 import {
 	Area,
@@ -22,6 +21,7 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts";
+import { useIsDark } from "@/hooks/use-theme";
 
 // =============================================================================
 // THEME COLORS

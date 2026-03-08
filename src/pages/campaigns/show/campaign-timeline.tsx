@@ -113,7 +113,9 @@ export function CampaignTimeline({ campaign }: { campaign: brand.CampaignWithSta
 						</div>
 						<div className="min-w-0 flex-1 pt-0.5">
 							<p className="text-sm font-medium text-zinc-900 dark:text-white">{event.label}</p>
-							{event.description && <p className="mt-0.5 line-clamp-2 text-xs text-zinc-500 dark:text-zinc-400">{event.description}</p>}
+							{event.description && (
+								<p className="mt-0.5 line-clamp-2 text-xs text-zinc-500 dark:text-zinc-400">{event.description}</p>
+							)}
 							<p className="mt-1 text-[10px] text-zinc-500 dark:text-zinc-400">{formatDateTime(event.date)}</p>
 						</div>
 					</div>

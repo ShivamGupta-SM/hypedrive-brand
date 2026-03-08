@@ -1,12 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-	CACHE,
-	DEFAULT_PAGE_SIZE,
-	getAssetUrl,
-	getFriendlyErrorMessage,
-	isAPIError,
-	queryKeys,
-} from "./api-client";
+import { CACHE, DEFAULT_PAGE_SIZE, getAssetUrl, getFriendlyErrorMessage, isAPIError, queryKeys } from "./api-client";
 
 // =============================================================================
 // isAPIError
@@ -64,23 +57,19 @@ describe("getFriendlyErrorMessage", () => {
 
 	it("maps known error codes to friendly messages", () => {
 		const err = { message: "raw", details: { code: "INSUFFICIENT_BALANCE" } };
-		expect(getFriendlyErrorMessage(err, "fallback")).toBe(
-			"Insufficient wallet balance for this operation.",
-		);
+		expect(getFriendlyErrorMessage(err, "fallback")).toBe("Insufficient wallet balance for this operation.");
 	});
 
 	it("maps WALLET_FROZEN code", () => {
 		const err = { message: "raw", details: { code: "WALLET_FROZEN" } };
 		expect(getFriendlyErrorMessage(err, "fallback")).toBe(
-			"Your wallet is currently frozen. Contact support for assistance.",
+			"Your wallet is currently frozen. Contact support for assistance."
 		);
 	});
 
 	it("maps RATE_LIMITED code", () => {
 		const err = { message: "raw", details: { code: "RATE_LIMITED" } };
-		expect(getFriendlyErrorMessage(err, "fallback")).toBe(
-			"Too many requests. Please wait a moment and try again.",
-		);
+		expect(getFriendlyErrorMessage(err, "fallback")).toBe("Too many requests. Please wait a moment and try again.");
 	});
 
 	it("falls back to message for unknown error codes", () => {
@@ -90,9 +79,7 @@ describe("getFriendlyErrorMessage", () => {
 
 	it("uses top-level code when no details.code", () => {
 		const err = { code: "CAMPAIGN_FULL", message: "raw" };
-		expect(getFriendlyErrorMessage(err, "fallback")).toBe(
-			"This campaign has reached its maximum enrollment limit.",
-		);
+		expect(getFriendlyErrorMessage(err, "fallback")).toBe("This campaign has reached its maximum enrollment limit.");
 	});
 });
 

@@ -1,5 +1,4 @@
 import {
-	ArrowPathIcon,
 	ArrowUpRightIcon,
 	CheckCircleIcon,
 	ChevronLeftIcon,
@@ -19,7 +18,6 @@ import {
 import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import clsx from "clsx";
 import { useCallback, useEffect, useState } from "react";
-
 import { Badge } from "@/components/badge";
 import { Button } from "@/components/button";
 import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/dialog";
@@ -29,13 +27,19 @@ import { CopyButton } from "@/components/shared";
 import { useCan } from "@/components/shared/can";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
+import { FadeImage } from "@/components/shared/fade-image";
 import { FinancialStatsGridBordered } from "@/components/shared/financial-stats-grid";
 import { Skeleton } from "@/components/skeleton";
 import { useCampaigns } from "@/features/campaigns/hooks";
-import { useCancelCampaign, useDuplicateCampaign, usePauseCampaign, useResumeCampaign } from "@/features/campaigns/mutations";
+import {
+	useCancelCampaign,
+	useDuplicateCampaign,
+	usePauseCampaign,
+	useResumeCampaign,
+} from "@/features/campaigns/mutations";
 import { useListing } from "@/features/listings/hooks";
 import { useDeleteListing, useUpdateListing } from "@/features/listings/mutations";
-import { getFriendlyErrorMessage, getAssetUrl } from "@/hooks/api-client";
+import { getAssetUrl, getFriendlyErrorMessage } from "@/hooks/api-client";
 import { usePageTitle } from "@/hooks/use-breadcrumb";
 import { useOrgContext } from "@/hooks/use-org-context";
 import type { brand } from "@/lib/brand-client";
@@ -162,7 +166,7 @@ function ImageGallery({ images }: { images: string[] }) {
 										: "ring-zinc-200 hover:ring-zinc-300 dark:ring-zinc-700 dark:hover:ring-zinc-500"
 								)}
 							>
-								<img
+								<FadeImage
 									src={getAssetUrl(imgUrl)}
 									alt={`Listing ${i + 1}`}
 									className="h-full w-full object-contain p-0.5"
@@ -174,7 +178,7 @@ function ImageGallery({ images }: { images: string[] }) {
 
 				{/* Main image */}
 				<div className="aspect-square w-full overflow-hidden rounded-xl bg-white ring-1 ring-zinc-200 dark:bg-zinc-800/50 dark:ring-zinc-700">
-					<img
+					<FadeImage
 						src={getAssetUrl(images[activeIndex])}
 						alt="Listing"
 						className="h-full w-full object-contain p-3 sm:p-4"
@@ -197,7 +201,11 @@ function ImageGallery({ images }: { images: string[] }) {
 									: "ring-zinc-200 hover:ring-zinc-300 dark:ring-zinc-700"
 							)}
 						>
-							<img src={getAssetUrl(imgUrl)} alt={`Listing ${i + 1}`} className="h-full w-full object-contain p-0.5" />
+							<FadeImage
+								src={getAssetUrl(imgUrl)}
+								alt={`Listing ${i + 1}`}
+								className="h-full w-full object-contain p-0.5"
+							/>
 						</button>
 					))}
 				</div>
@@ -578,7 +586,7 @@ function EditListingModal({
 												key={imgUrl}
 												className="flex items-center gap-3 rounded-xl bg-zinc-50 p-2 dark:bg-zinc-800/50"
 											>
-												<img
+												<FadeImage
 													src={getAssetUrl(imgUrl)}
 													alt={`Listing ${idx + 1}`}
 													className="size-12 rounded-lg bg-zinc-100 object-contain dark:bg-zinc-800"
@@ -647,18 +655,9 @@ function EditListingModal({
 						<ChevronRightIcon className="size-4" />
 					</Button>
 				) : (
-					<Button type="button" onClick={handleSubmit} color="emerald" disabled={updateListing.isPending}>
-						{updateListing.isPending ? (
-							<>
-								<ArrowPathIcon className="size-4 animate-spin" />
-								Saving...
-							</>
-						) : (
-							<>
-								<CheckCircleIcon className="size-4" />
-								Save Changes
-							</>
-						)}
+					<Button type="button" onClick={handleSubmit} color="emerald" loading={updateListing.isPending}>
+						<CheckCircleIcon className="size-4" />
+						Save Changes
 					</Button>
 				)}
 			</DialogActions>
@@ -696,10 +695,7 @@ export function ListingShow() {
 	usePageTitle(listing?.name ?? null);
 
 	// Campaigns for this listing
-	const {
-		data: campaigns,
-		loading: campaignsLoading,
-	} = useCampaigns(organizationId, { listingId, take: 6 });
+	const { data: campaigns, loading: campaignsLoading } = useCampaigns(organizationId, { listingId, take: 6 });
 
 	const pauseCampaign = usePauseCampaign();
 	const resumeCampaign = useResumeCampaign();
@@ -711,45 +707,57 @@ export function ListingShow() {
 	const canDeleteCampaign = useCan("campaign", "delete");
 	const canCreateCampaign = useCan("campaign", "create");
 
-	const handlePauseCampaign = useCallback(async (id: string) => {
-		if (!organizationId) return;
-		try {
-			await pauseCampaign.mutateAsync({ organizationId, campaignId: id });
-			showToast.success("Campaign paused");
-		} catch (err) {
-			showToast.error(err, "Failed to pause campaign");
-		}
-	}, [organizationId, pauseCampaign]);
+	const handlePauseCampaign = useCallback(
+		async (id: string) => {
+			if (!organizationId) return;
+			try {
+				await pauseCampaign.mutateAsync({ organizationId, campaignId: id });
+				showToast.success("Campaign paused");
+			} catch (err) {
+				showToast.error(err, "Failed to pause campaign");
+			}
+		},
+		[organizationId, pauseCampaign]
+	);
 
-	const handleResumeCampaign = useCallback(async (id: string) => {
-		if (!organizationId) return;
-		try {
-			await resumeCampaign.mutateAsync({ organizationId, campaignId: id });
-			showToast.success("Campaign resumed");
-		} catch (err) {
-			showToast.error(err, "Failed to resume campaign");
-		}
-	}, [organizationId, resumeCampaign]);
+	const handleResumeCampaign = useCallback(
+		async (id: string) => {
+			if (!organizationId) return;
+			try {
+				await resumeCampaign.mutateAsync({ organizationId, campaignId: id });
+				showToast.success("Campaign resumed");
+			} catch (err) {
+				showToast.error(err, "Failed to resume campaign");
+			}
+		},
+		[organizationId, resumeCampaign]
+	);
 
-	const handleCancelCampaign = useCallback(async (id: string) => {
-		if (!organizationId) return;
-		try {
-			await cancelCampaign.mutateAsync({ organizationId, campaignId: id });
-			showToast.success("Campaign cancelled");
-		} catch (err) {
-			showToast.error(err, "Failed to cancel campaign");
-		}
-	}, [organizationId, cancelCampaign]);
+	const handleCancelCampaign = useCallback(
+		async (id: string) => {
+			if (!organizationId) return;
+			try {
+				await cancelCampaign.mutateAsync({ organizationId, campaignId: id });
+				showToast.success("Campaign cancelled");
+			} catch (err) {
+				showToast.error(err, "Failed to cancel campaign");
+			}
+		},
+		[organizationId, cancelCampaign]
+	);
 
-	const handleDuplicateCampaign = useCallback(async (id: string) => {
-		if (!organizationId) return;
-		try {
-			await duplicateCampaign.mutateAsync({ organizationId, campaignId: id });
-			showToast.success("Campaign duplicated");
-		} catch (err) {
-			showToast.error(err, "Failed to duplicate campaign");
-		}
-	}, [organizationId, duplicateCampaign]);
+	const handleDuplicateCampaign = useCallback(
+		async (id: string) => {
+			if (!organizationId) return;
+			try {
+				await duplicateCampaign.mutateAsync({ organizationId, campaignId: id });
+				showToast.success("Campaign duplicated");
+			} catch (err) {
+				showToast.error(err, "Failed to duplicate campaign");
+			}
+		},
+		[organizationId, duplicateCampaign]
+	);
 
 	const handleDelete = useCallback(async () => {
 		if (!listingId) return;
@@ -777,10 +785,17 @@ export function ListingShow() {
 	const images = listing.listingImages?.map((img) => img.imageUrl) || [];
 
 	return (
-		<div className="space-y-4 sm:space-y-5">
+		<div className="animate-page-enter space-y-4 sm:space-y-5">
 			{/* Product Hero Card */}
 			<div className="relative overflow-hidden rounded-xl bg-white ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-				<div className={clsx("pointer-events-none absolute inset-px top-px h-24 rounded-t-[11px] bg-linear-to-b sm:h-32", listing.isActive ? "from-emerald-500/20 via-emerald-500/5 to-transparent dark:from-emerald-500/15 dark:via-emerald-500/5" : "from-zinc-500/15 via-zinc-500/5 to-transparent dark:from-zinc-500/10 dark:via-zinc-500/5")} />
+				<div
+					className={clsx(
+						"pointer-events-none absolute inset-px top-px h-24 rounded-t-[11px] bg-linear-to-b sm:h-32",
+						listing.isActive
+							? "from-emerald-500/20 via-emerald-500/5 to-transparent dark:from-emerald-500/15 dark:via-emerald-500/5"
+							: "from-zinc-500/15 via-zinc-500/5 to-transparent dark:from-zinc-500/10 dark:via-zinc-500/5"
+					)}
+				/>
 				<div className="relative flex flex-col lg:flex-row">
 					{/* Image gallery */}
 					<div className="shrink-0 border-b border-zinc-200 bg-zinc-50/50 p-3 sm:p-4 lg:w-80 lg:border-b-0 lg:border-r lg:p-5 xl:w-96 dark:border-zinc-800 dark:bg-zinc-800/20">
@@ -804,7 +819,7 @@ export function ListingShow() {
 									{listing.isActive ? "Active" : "Inactive"}
 								</Badge>
 								{listing.identifier && (
-									<Badge color="zinc" className="font-mono text-[11px]">
+									<Badge color="zinc" className="tabular-nums tracking-wide text-[11px]">
 										{listing.identifier}
 									</Badge>
 								)}
@@ -833,7 +848,9 @@ export function ListingShow() {
 										SKU
 									</dt>
 									<dd className="mt-0.5 flex items-center gap-1">
-										<span className="font-mono text-sm text-zinc-900 dark:text-white">{listing.identifier}</span>
+										<span className="text-sm tabular-nums tracking-wide text-zinc-900 dark:text-white">
+											{listing.identifier}
+										</span>
 										<CopyButton value={listing.identifier ?? ""} label="SKU" />
 									</dd>
 								</div>
@@ -1020,18 +1037,9 @@ export function ListingShow() {
 					<Button plain onClick={() => setShowDeleteConfirm(false)}>
 						Cancel
 					</Button>
-					<Button color="red" onClick={handleDelete} disabled={deleteListing.isPending}>
-						{deleteListing.isPending ? (
-							<>
-								<ArrowPathIcon className="size-4 animate-spin" />
-								Deleting...
-							</>
-						) : (
-							<>
-								<TrashIcon className="size-4" />
-								Delete
-							</>
-						)}
+					<Button color="red" onClick={handleDelete} loading={deleteListing.isPending}>
+						<TrashIcon className="size-4" />
+						Delete
 					</Button>
 				</DialogActions>
 			</Dialog>

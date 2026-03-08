@@ -153,12 +153,12 @@ export function EmptyState({
 	className,
 }: EmptyStateProps) {
 	return (
-		<div className={clsx("group w-full px-4 py-10", className)}>
+		<div className={clsx("group w-full px-4 py-10 animate-scale-in", className)}>
 			{/* Collage cards */}
 			<CollageCards preset={preset} />
 
 			{/* Text content */}
-			<div className="mt-6 text-center">
+			<div className="mt-6 text-center animate-slide-up" style={{ animationDelay: "100ms" }}>
 				<h3 className="text-base font-semibold text-zinc-900 dark:text-white">{title}</h3>
 				<p className="mx-auto mt-1.5 max-w-64 text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">
 					{description}
@@ -167,7 +167,10 @@ export function EmptyState({
 
 			{/* Action buttons */}
 			{(action || secondaryAction) && (
-				<div className="mt-5 flex items-center justify-center gap-2.5">
+				<div
+					className="mt-5 flex items-center justify-center gap-2.5 animate-slide-up"
+					style={{ animationDelay: "200ms" }}
+				>
 					{action && (
 						<Button outline href={action.href} onClick={action.onClick}>
 							{action.label}

@@ -7,12 +7,15 @@ import {
 	XCircleIcon,
 } from "@heroicons/react/16/solid";
 import clsx from "clsx";
+import { memo } from "react";
 import { Badge } from "@/components/badge";
 import { getPlatformColor, getPlatformIcon } from "@/components/icons/platform-icons";
 import { Link } from "@/components/link";
+import { FadeImage } from "@/components/shared/fade-image";
+import { RelativeTime } from "@/components/shared/relative-time";
+import { SelectionCheckbox } from "@/components/shared/selection-checkbox";
 import type { brand, db } from "@/lib/brand-client";
 import { formatCurrency, formatDateCompact } from "@/lib/design-tokens";
-import { SelectionCheckbox } from "@/components/shared/selection-checkbox";
 
 // =============================================================================
 // TYPES
@@ -87,7 +90,7 @@ interface CardVariantProps {
 	campaignName?: string;
 }
 
-function EnrollmentCardFull({
+const EnrollmentCardFull = memo(function EnrollmentCardFull({
 	enrollment,
 	orgSlug,
 	isSelected = false,
@@ -114,21 +117,18 @@ function EnrollmentCardFull({
 	return (
 		<div
 			className={clsx(
-				"group relative flex flex-col rounded-xl bg-white shadow-xs ring-1 transition-all dark:bg-zinc-900",
+				"group relative flex flex-col rounded-xl bg-white shadow-xs ring-1 transition-all duration-200 dark:bg-zinc-900",
 				isSelected
 					? "ring-sky-300 bg-sky-50/50 dark:ring-sky-700 dark:bg-sky-950/20"
 					: "ring-zinc-200 hover:ring-zinc-300 hover:shadow-md dark:ring-zinc-800 dark:hover:ring-zinc-700"
 			)}
 		>
-			<Link
-				href={`/${orgSlug}/campaigns/${enrollment.campaignId}/enrollments/${enrollment.id}`}
-				className="flex flex-1 flex-col"
-			>
+			<Link href={`/${orgSlug}/enrollments/${enrollment.id}`} className="flex flex-1 flex-col">
 				{/* Top section: avatar + info */}
 				<div className="flex items-start gap-3.5 p-3.5 sm:gap-4 sm:p-4">
 					{/* Avatar — bigger with platform overlay */}
 					<div className="relative shrink-0">
-						<img
+						<FadeImage
 							src={getAvatarUrl(avatarSeed, creatorGender)}
 							alt={creatorName}
 							className="size-12 rounded-full bg-zinc-100 ring-1 ring-zinc-200 dark:bg-zinc-800 dark:ring-zinc-700"
@@ -159,7 +159,7 @@ function EnrollmentCardFull({
 
 						{/* Row 3: ID + date + city + overdue */}
 						<div className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] text-zinc-500 dark:text-zinc-400">
-							<span className="font-mono">{enrollment.displayId}</span>
+							<span className="tabular-nums tracking-wide">{enrollment.displayId}</span>
 							<span>·</span>
 							<span>{formatDateCompact(enrollment.createdAt)}</span>
 							{enrollment.creator?.city && (
@@ -204,15 +204,10 @@ function EnrollmentCardFull({
 			</Link>
 
 			{/* Selection checkbox — overlaid top-left, outside the Link */}
-			{onSelect && (
-				<SelectionCheckbox
-					selected={isSelected}
-					onToggle={handleCheckboxClick}
-				/>
-			)}
+			{onSelect && <SelectionCheckbox selected={isSelected} onToggle={handleCheckboxClick} />}
 		</div>
 	);
-}
+});
 
 // =============================================================================
 // COMPACT VARIANT — Mini card for campaign detail, dialogs (same shape as Full)
@@ -239,7 +234,7 @@ function EnrollmentCardCompact({ enrollment, onClick }: CompactVariantProps) {
 		<Wrapper
 			{...(onClick ? { type: "button" as const, onClick } : {})}
 			className={clsx(
-				"group relative flex w-full flex-col overflow-hidden rounded-xl bg-white text-left shadow-xs ring-1 transition-all dark:bg-zinc-900",
+				"group relative flex w-full flex-col overflow-hidden rounded-xl bg-white text-left shadow-xs ring-1 transition-all duration-200 dark:bg-zinc-900",
 				onClick
 					? "ring-zinc-200 hover:ring-zinc-300 hover:shadow-md dark:ring-zinc-800 dark:hover:ring-zinc-700 cursor-pointer"
 					: "ring-zinc-200 dark:ring-zinc-800"
@@ -249,7 +244,7 @@ function EnrollmentCardCompact({ enrollment, onClick }: CompactVariantProps) {
 			<div className="flex items-start gap-3 p-3 sm:gap-3.5 sm:p-3.5">
 				{/* Avatar with platform overlay */}
 				<div className="relative shrink-0">
-					<img
+					<FadeImage
 						src={getAvatarUrl(avatarSeed, creatorGender)}
 						alt={creatorName}
 						className="size-10 rounded-full bg-zinc-100 ring-1 ring-zinc-200 dark:bg-zinc-800 dark:ring-zinc-700"
@@ -274,7 +269,7 @@ function EnrollmentCardCompact({ enrollment, onClick }: CompactVariantProps) {
 
 					{/* Row 2: ID + date + platform */}
 					<div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] text-zinc-500 dark:text-zinc-400">
-						<span className="font-mono">{enrollment.displayId}</span>
+						<span className="tabular-nums tracking-wide">{enrollment.displayId}</span>
 						<span>·</span>
 						<span>{formatDateCompact(enrollment.createdAt)}</span>
 						{enrollment.creator?.city && (
@@ -328,10 +323,9 @@ interface InlineVariantProps {
 		creator: { id: string; name: string; gender?: "male" | "female" | "other" };
 	};
 	orgSlug: string;
-	formatRelativeTime: (date: string) => string;
 }
 
-function EnrollmentCardInline({ enrollment, orgSlug, formatRelativeTime }: InlineVariantProps) {
+function EnrollmentCardInline({ enrollment, orgSlug }: InlineVariantProps) {
 	return (
 		<Link
 			href={`/${orgSlug}/enrollments/${enrollment.id}`}
@@ -339,16 +333,14 @@ function EnrollmentCardInline({ enrollment, orgSlug, formatRelativeTime }: Inlin
 		>
 			{/* Top section: avatar + info */}
 			<div className="flex items-start gap-3 p-3">
-				<img
+				<FadeImage
 					src={getAvatarUrl(enrollment.creator.id, enrollment.creator.gender)}
 					alt={enrollment.creator.name}
 					className="size-10 shrink-0 rounded-full bg-zinc-100 ring-1 ring-zinc-200 dark:bg-zinc-800 dark:ring-zinc-700"
 				/>
 				<div className="min-w-0 flex-1">
 					<div className="flex items-center justify-between gap-2">
-						<h3 className="truncate text-sm font-semibold text-zinc-900 dark:text-white">
-							{enrollment.creator.name}
-						</h3>
+						<h3 className="truncate text-sm font-semibold text-zinc-900 dark:text-white">{enrollment.creator.name}</h3>
 						<Badge color="amber" className="inline-flex shrink-0 items-center gap-0.5 text-[10px]!">
 							<ClockIcon className="size-2.5" />
 							Pending
@@ -372,7 +364,7 @@ function EnrollmentCardInline({ enrollment, orgSlug, formatRelativeTime }: Inlin
 				<div className="flex flex-col items-center justify-center py-2">
 					<span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">Submitted</span>
 					<span className="mt-0.5 text-xs font-semibold tabular-nums text-zinc-700 dark:text-zinc-300">
-						{formatRelativeTime(enrollment.createdAt)}
+						<RelativeTime date={enrollment.createdAt} live={false} />
 					</span>
 				</div>
 			</div>

@@ -16,13 +16,15 @@ export function WalletHolds() {
 	}
 
 	return (
-		<div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
+		<div className="animate-page-enter overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
 			<div className="flex items-center justify-between border-b border-zinc-200 px-3.5 py-2.5 sm:px-4 sm:py-3 dark:border-zinc-700">
 				<div className="flex items-center gap-2.5">
 					<LockClosedIcon className="size-4 text-amber-500" />
 					<h3 className="text-sm font-semibold text-zinc-900 dark:text-white">
 						Active Holds
-						{holds.length > 0 && <span className="ml-2 text-xs font-normal text-zinc-500 dark:text-zinc-400">{holds.length}</span>}
+						{holds.length > 0 && (
+							<span className="ml-2 text-xs font-normal text-zinc-500 dark:text-zinc-400">{holds.length}</span>
+						)}
 					</h3>
 				</div>
 			</div>

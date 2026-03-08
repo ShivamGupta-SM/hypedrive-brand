@@ -56,6 +56,6 @@ export const infiniteInvoicesQueryOptions = (
 		queryFn: ({ pageParam }) =>
 			listInvoicesServer({ data: { orgId, params: { ...params, cursor: pageParam, limit: DEFAULT_PAGE_SIZE } } }),
 		initialPageParam: undefined as string | undefined,
-		getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+		getNextPageParam: (lastPage) => lastPage?.nextCursor ?? undefined,
 		staleTime: CACHE.list,
 	});

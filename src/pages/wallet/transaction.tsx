@@ -11,11 +11,12 @@ import { useState } from "react";
 import { Badge } from "@/components/badge";
 import { CopyButton } from "@/components/shared/copy-button";
 import { ErrorState } from "@/components/shared/error-state";
+import { RelativeTime } from "@/components/shared/relative-time";
 import { Skeleton } from "@/components/skeleton";
 import { useWalletTransaction } from "@/features/wallet/hooks";
 import { usePageTitle } from "@/hooks/use-breadcrumb";
 import { useOrgContext } from "@/hooks/use-org-context";
-import { formatCurrency, formatRelativeTime } from "@/lib/design-tokens";
+import { formatCurrency } from "@/lib/design-tokens";
 
 const routeApi = getRouteApi("/_app/$orgSlug/wallet_/transactions_/$id");
 
@@ -30,7 +31,7 @@ const TYPE_CONFIG = {
 
 const CATEGORY_LABELS: Record<string, string> = {
 	deposit: "Deposit",
-	enrollment_hold: "Campaign Payment",
+	enrollment_hold: "Enrollment Payout",
 	payout: "Payout",
 	refund: "Refund",
 	admin_credit: "Credit Adjustment",
@@ -47,22 +48,14 @@ const STATUS_CONFIG: Record<string, { label: string; color: "emerald" | "amber" 
 // DETAIL ROW
 // =============================================================================
 
-function DetailRow({
-	label,
-	children,
-	muted = false,
-}: {
-	label: string;
-	children: React.ReactNode;
-	muted?: boolean;
-}) {
+function DetailRow({ label, children, muted = false }: { label: string; children: React.ReactNode; muted?: boolean }) {
 	return (
 		<div className="flex items-baseline justify-between gap-4 py-2.5 sm:py-3">
 			<dt className="shrink-0 text-xs text-zinc-500 sm:text-sm dark:text-zinc-400">{label}</dt>
 			<dd
 				className={clsx(
 					"min-w-0 text-right text-xs font-medium sm:text-sm",
-					muted ? "text-zinc-500 dark:text-zinc-400" : "text-zinc-900 dark:text-white",
+					muted ? "text-zinc-500 dark:text-zinc-400" : "text-zinc-900 dark:text-white"
 				)}
 			>
 				{children}
@@ -135,7 +128,7 @@ export function TransactionShow() {
 	const createdDate = new Date(transaction.createdAt);
 
 	return (
-		<div className="mx-auto max-w-2xl">
+		<div className="animate-page-enter mx-auto max-w-2xl">
 			<div className="overflow-hidden rounded-xl bg-white ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
 				{/* Header */}
 				<div className="space-y-3 p-5 sm:p-6">
@@ -178,21 +171,19 @@ export function TransactionShow() {
 
 					{/* Short ID */}
 					<div className="flex items-center gap-1.5">
-						<span className="inline-flex items-center gap-0.5 rounded-md bg-zinc-100 px-1.5 py-0.5 font-mono text-[10px] font-medium text-zinc-600 sm:text-[11px] dark:bg-zinc-800 dark:text-zinc-400">
+						<span className="inline-flex items-center gap-0.5 rounded-md bg-zinc-100 px-1.5 py-0.5 tabular-nums tracking-wide text-[10px] font-medium text-zinc-600 sm:text-[11px] dark:bg-zinc-800 dark:text-zinc-400">
 							#{transaction.id.slice(-8).toUpperCase()}
 						</span>
 						<CopyButton value={transaction.id} label="Transaction ID" />
 						<span className="text-[10px] text-zinc-400 sm:text-[11px] dark:text-zinc-500">
-							{formatRelativeTime(transaction.createdAt)}
+							<RelativeTime date={transaction.createdAt} />
 						</span>
 					</div>
 				</div>
 
 				{/* Details */}
 				<div className="divide-y divide-zinc-100 border-t border-zinc-200 px-5 sm:px-6 dark:divide-zinc-800/60 dark:border-zinc-800">
-					{transaction.description && (
-						<DetailRow label="Description">{transaction.description}</DetailRow>
-					)}
+					{transaction.description && <DetailRow label="Description">{transaction.description}</DetailRow>}
 
 					<DetailRow label="Type">
 						<span className="inline-flex items-center gap-1">
@@ -203,7 +194,17 @@ export function TransactionShow() {
 
 					{categoryLabel && (
 						<DetailRow label="Category">
-							<Badge color={transaction.category === "deposit" || transaction.category === "refund" ? "emerald" : transaction.category === "enrollment_hold" ? "amber" : transaction.category === "payout" || transaction.category === "admin_credit" ? "sky" : "zinc"}>
+							<Badge
+								color={
+									transaction.category === "deposit" || transaction.category === "refund"
+										? "emerald"
+										: transaction.category === "enrollment_hold"
+											? "amber"
+											: transaction.category === "payout" || transaction.category === "admin_credit"
+												? "sky"
+												: "zinc"
+								}
+							>
 								{categoryLabel}
 							</Badge>
 						</DetailRow>
@@ -228,7 +229,9 @@ export function TransactionShow() {
 					{transaction.reference && (
 						<DetailRow label="Reference">
 							<span className="inline-flex items-center gap-1">
-								<span className="max-w-40 truncate font-mono text-[11px] sm:max-w-56">{transaction.reference}</span>
+								<span className="max-w-40 truncate text-[11px] tabular-nums tracking-wide sm:max-w-56">
+									{transaction.reference}
+								</span>
 								<CopyButton value={transaction.reference} label="Reference" />
 							</span>
 						</DetailRow>
@@ -257,20 +260,28 @@ export function TransactionShow() {
 								{transaction.breakdown.billAmount != null && (
 									<div className="flex items-center justify-between text-sm">
 										<span className="text-zinc-600 dark:text-zinc-400">Brand Commission</span>
-										<span className="font-medium tabular-nums text-zinc-900 dark:text-white">{formatCurrency(transaction.breakdown.billAmountDecimal!)}</span>
+										<span className="font-medium tabular-nums text-zinc-900 dark:text-white">
+											{formatCurrency(transaction.breakdown.billAmountDecimal!)}
+										</span>
 									</div>
 								)}
 								<div className="flex items-center justify-between text-sm">
 									<span className="text-zinc-600 dark:text-zinc-400">Platform Fee</span>
-									<span className="font-medium tabular-nums text-zinc-900 dark:text-white">{formatCurrency(transaction.breakdown.platformFeeDecimal)}</span>
+									<span className="font-medium tabular-nums text-zinc-900 dark:text-white">
+										{formatCurrency(transaction.breakdown.platformFeeDecimal)}
+									</span>
 								</div>
 								<div className="flex items-center justify-between text-sm">
 									<span className="text-zinc-600 dark:text-zinc-400">GST</span>
-									<span className="font-medium tabular-nums text-zinc-900 dark:text-white">{formatCurrency(transaction.breakdown.gstAmountDecimal)}</span>
+									<span className="font-medium tabular-nums text-zinc-900 dark:text-white">
+										{formatCurrency(transaction.breakdown.gstAmountDecimal)}
+									</span>
 								</div>
 								<div className="mt-1 flex items-center justify-between border-t border-zinc-200 pt-2 text-sm dark:border-zinc-700">
 									<span className="font-medium text-zinc-700 dark:text-zinc-300">Total Charged</span>
-									<span className="font-semibold tabular-nums text-zinc-900 dark:text-white">{formatCurrency(transaction.breakdown.totalHoldDecimal)}</span>
+									<span className="font-semibold tabular-nums text-zinc-900 dark:text-white">
+										{formatCurrency(transaction.breakdown.totalHoldDecimal)}
+									</span>
 								</div>
 							</div>
 						</div>

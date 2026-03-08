@@ -5,7 +5,6 @@
 
 import {
 	ArrowDownLeftIcon,
-	ArrowPathIcon,
 	ArrowTopRightOnSquareIcon,
 	ArrowUpRightIcon,
 	BuildingLibraryIcon,
@@ -22,7 +21,7 @@ import {
 import { startAuthentication } from "@simplewebauthn/browser";
 import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
-import { useState } from "react";
+import { memo, useState } from "react";
 import { Badge } from "@/components/badge";
 import { Button } from "@/components/button";
 import { Dialog, DialogActions, DialogBody, DialogHeader } from "@/components/dialog";
@@ -37,6 +36,7 @@ import { useCancelWithdrawal, useCreateWithdrawal } from "@/features/wallet/muta
 import { getFriendlyErrorMessage } from "@/hooks/api-client";
 import type { brand } from "@/lib/brand-client";
 import { formatCurrency, formatDateTime } from "@/lib/design-tokens";
+import { HighlightText } from "@/lib/highlight-text";
 import { showToast } from "@/lib/toast";
 
 type WalletTransaction = brand.WalletTransaction;
@@ -166,7 +166,7 @@ export function DepositAccountDialog({
 										<p
 											className={clsx(
 												"mt-0.5 truncate text-sm font-medium text-zinc-900 dark:text-white",
-												detail.mono && "font-mono tracking-wide"
+												detail.mono && "tabular-nums tracking-wide"
 											)}
 										>
 											{detail.value}
@@ -209,7 +209,7 @@ export function DepositAccountDialog({
 
 const CATEGORY_LABELS: Record<string, string> = {
 	deposit: "Deposit",
-	enrollment_hold: "Campaign Payment",
+	enrollment_hold: "Enrollment Payout",
 	payout: "Payout",
 	refund: "Refund",
 	admin_credit: "Credit Adjustment",
@@ -225,17 +225,20 @@ function getTransactionLabel(transaction: WalletTransaction): string {
 	return transaction.type === "credit" ? "Deposit" : "Debit";
 }
 
-export function TransactionRow({
+export const TransactionRow = memo(function TransactionRow({
 	transaction,
 	orgSlug,
 	onClick,
+	searchQuery,
 }: {
 	transaction: WalletTransaction;
 	orgSlug: string;
 	onClick?: (transaction: WalletTransaction) => void;
+	searchQuery?: string;
 }) {
 	const isCredit = transaction.type === "credit";
 	const label = getTransactionLabel(transaction);
+	const q = searchQuery ?? "";
 
 	const content = (
 		<>
@@ -253,14 +256,19 @@ export function TransactionRow({
 			<div className="min-w-0 flex-1">
 				<div className="flex items-center gap-1.5">
 					<p className="truncate text-sm font-medium text-zinc-900 dark:text-white">
-						{label}
+						<HighlightText text={label} query={q} />
 					</p>
-					<span className="shrink-0 rounded bg-zinc-100 px-1 py-px font-mono text-[10px] font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
-						#{transaction.id.slice(-8).toUpperCase()}
+					<span className="shrink-0 rounded bg-zinc-100 px-1 py-px tabular-nums tracking-wide text-[10px] font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+						#<HighlightText text={transaction.id.slice(-8).toUpperCase()} query={q} />
 					</span>
 				</div>
 				<p className="text-xs text-zinc-500 dark:text-zinc-400">
 					{formatDateTime(transaction.createdAt)}
+					{transaction.description && q && (
+						<span className="ml-1.5">
+							· <HighlightText text={transaction.description} query={q} />
+						</span>
+					)}
 				</p>
 			</div>
 			<p
@@ -295,13 +303,13 @@ export function TransactionRow({
 			{content}
 		</Link>
 	);
-}
+});
 
 // =============================================================================
 // HOLD ROW
 // =============================================================================
 
-export function HoldRow({ hold }: { hold: ActiveHold }) {
+export const HoldRow = memo(function HoldRow({ hold }: { hold: ActiveHold }) {
 	return (
 		<div className="flex items-center gap-3 px-4 py-3">
 			<div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-900/30">
@@ -326,7 +334,7 @@ export function HoldRow({ hold }: { hold: ActiveHold }) {
 			</div>
 		</div>
 	);
-}
+});
 
 // =============================================================================
 // WITHDRAW DIALOG
@@ -450,18 +458,9 @@ export function WithdrawDialog({
 				<Button plain onClick={onClose} disabled={isPending}>
 					Cancel
 				</Button>
-				<Button color="emerald" onClick={handleSubmit} disabled={isPending || !amount}>
-					{isPending ? (
-						<>
-							<ArrowPathIcon className="size-4 animate-spin" />
-							{passkeyReauth.isPending ? "Verifying..." : "Submitting..."}
-						</>
-					) : (
-						<>
-							<ArrowUpRightIcon className="size-4" />
-							Request Withdrawal
-						</>
-					)}
+				<Button color="emerald" onClick={handleSubmit} loading={isPending} disabled={!amount}>
+					<ArrowUpRightIcon className="size-4" />
+					Request Withdrawal
 				</Button>
 			</DialogActions>
 		</Dialog>
@@ -472,7 +471,7 @@ export function WithdrawDialog({
 // WITHDRAWAL ROW
 // =============================================================================
 
-export function WithdrawalRow({
+export const WithdrawalRow = memo(function WithdrawalRow({
 	withdrawal,
 	organizationId,
 	onClick,
@@ -518,7 +517,7 @@ export function WithdrawalRow({
 		<>
 			<button
 				type="button"
-				className={`flex w-full items-center gap-3 px-4 py-3 text-left ${onClick ? "transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50" : ""}`}
+				className={`flex w-full items-center gap-3 px-4 py-3 text-left transition-colors ${onClick ? "hover:bg-zinc-50 dark:hover:bg-zinc-800/50 cursor-pointer" : ""}`}
 				onClick={onClick}
 			>
 				<div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
@@ -531,7 +530,9 @@ export function WithdrawalRow({
 					</div>
 					<p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
 						{formatDateTime(withdrawal.requestedAt)}
-						<span className="ml-1.5 font-mono text-zinc-500 dark:text-zinc-400">#{withdrawal.id.slice(-8)}</span>
+						<span className="ml-1.5 tabular-nums tracking-wide text-zinc-500 dark:text-zinc-400">
+							#{withdrawal.id.slice(-8)}
+						</span>
 					</p>
 				</div>
 				<div className="flex shrink-0 items-center gap-2">
@@ -572,21 +573,14 @@ export function WithdrawalRow({
 					<Button plain onClick={() => setShowCancelConfirm(false)} disabled={cancelWithdrawal.isPending}>
 						Go Back
 					</Button>
-					<Button color="red" onClick={handleConfirmCancel} disabled={cancelWithdrawal.isPending}>
-						{cancelWithdrawal.isPending ? (
-							<>
-								<ArrowPathIcon className="size-4 animate-spin" />
-								Cancelling...
-							</>
-						) : (
-							"Cancel Withdrawal"
-						)}
+					<Button color="red" onClick={handleConfirmCancel} loading={cancelWithdrawal.isPending}>
+						Cancel Withdrawal
 					</Button>
 				</DialogActions>
 			</Dialog>
 		</>
 	);
-}
+});
 
 // =============================================================================
 // TRANSACTION DETAIL DIALOG
@@ -668,7 +662,8 @@ export function TransactionDetailDialog({
 								"text-zinc-900 dark:text-white": !isCredit && !isDebit,
 							})}
 						>
-							{sign}{formatCurrency(tx.amountDecimal)}
+							{sign}
+							{formatCurrency(tx.amountDecimal)}
 						</span>
 						<Badge color={statusConfig.color}>{statusConfig.label}</Badge>
 					</div>
@@ -689,9 +684,7 @@ export function TransactionDetailDialog({
 
 							{categoryLabel && (
 								<DetailRow label="Category">
-									<Badge color={CATEGORY_BADGE_COLORS[tx.category ?? "other"] ?? "zinc"}>
-										{categoryLabel}
-									</Badge>
+									<Badge color={CATEGORY_BADGE_COLORS[tx.category ?? "other"] ?? "zinc"}>{categoryLabel}</Badge>
 								</DetailRow>
 							)}
 
@@ -714,7 +707,9 @@ export function TransactionDetailDialog({
 							{tx.reference && (
 								<DetailRow label="Reference">
 									<span className="inline-flex items-center gap-1">
-										<span className="max-w-36 truncate font-mono text-xs text-zinc-700 sm:max-w-48 dark:text-zinc-300">{tx.reference}</span>
+										<span className="max-w-36 truncate text-xs tabular-nums tracking-wide text-zinc-700 sm:max-w-48 dark:text-zinc-300">
+											{tx.reference}
+										</span>
 										<CopyButton value={tx.reference} label="Reference" />
 									</span>
 								</DetailRow>
@@ -728,7 +723,7 @@ export function TransactionDetailDialog({
 										className="inline-flex items-center gap-1.5 text-sky-600 hover:text-sky-700 dark:text-sky-400 dark:hover:text-sky-300"
 										onClick={onClose}
 									>
-										<span className="rounded bg-sky-50 px-1 py-px font-mono text-[10px] font-medium text-sky-600 dark:bg-sky-950/30 dark:text-sky-400">
+										<span className="rounded bg-sky-50 px-1 py-px tabular-nums tracking-wide text-[10px] font-medium text-sky-600 dark:bg-sky-950/30 dark:text-sky-400">
 											#{tx.enrollmentId.slice(-6).toUpperCase()}
 										</span>
 										View
@@ -746,20 +741,28 @@ export function TransactionDetailDialog({
 									{tx.breakdown.billAmount != null && (
 										<div className="flex items-center justify-between text-sm">
 											<span className="text-zinc-600 dark:text-zinc-400">Brand Commission</span>
-											<span className="font-medium tabular-nums text-zinc-900 dark:text-white">{formatCurrency(tx.breakdown.billAmountDecimal!)}</span>
+											<span className="font-medium tabular-nums text-zinc-900 dark:text-white">
+												{formatCurrency(tx.breakdown.billAmountDecimal!)}
+											</span>
 										</div>
 									)}
 									<div className="flex items-center justify-between text-sm">
 										<span className="text-zinc-600 dark:text-zinc-400">Platform Fee</span>
-										<span className="font-medium tabular-nums text-zinc-900 dark:text-white">{formatCurrency(tx.breakdown.platformFeeDecimal)}</span>
+										<span className="font-medium tabular-nums text-zinc-900 dark:text-white">
+											{formatCurrency(tx.breakdown.platformFeeDecimal)}
+										</span>
 									</div>
 									<div className="flex items-center justify-between text-sm">
 										<span className="text-zinc-600 dark:text-zinc-400">GST</span>
-										<span className="font-medium tabular-nums text-zinc-900 dark:text-white">{formatCurrency(tx.breakdown.gstAmountDecimal)}</span>
+										<span className="font-medium tabular-nums text-zinc-900 dark:text-white">
+											{formatCurrency(tx.breakdown.gstAmountDecimal)}
+										</span>
 									</div>
 									<div className="mt-1 flex items-center justify-between border-t border-zinc-200 pt-1.5 text-sm dark:border-zinc-700">
 										<span className="font-medium text-zinc-700 dark:text-zinc-300">Total Charged</span>
-										<span className="font-semibold tabular-nums text-zinc-900 dark:text-white">{formatCurrency(tx.breakdown.totalHoldDecimal)}</span>
+										<span className="font-semibold tabular-nums text-zinc-900 dark:text-white">
+											{formatCurrency(tx.breakdown.totalHoldDecimal)}
+										</span>
 									</div>
 								</div>
 							</div>
@@ -800,7 +803,9 @@ export function TransactionDetailDialog({
 					</DialogBody>
 
 					<DialogActions>
-						<Button plain onClick={onClose}>Close</Button>
+						<Button plain onClick={onClose}>
+							Close
+						</Button>
 					</DialogActions>
 				</>
 			)}
@@ -812,7 +817,7 @@ export function TransactionDetailDialog({
 // DEPOSIT ROW
 // =============================================================================
 
-export function DepositRow({ deposit }: { deposit: brand.DepositTransaction }) {
+export const DepositRow = memo(function DepositRow({ deposit }: { deposit: brand.DepositTransaction }) {
 	return (
 		<div className="flex items-center gap-3 px-4 py-3">
 			<div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-950/30">
@@ -825,7 +830,9 @@ export function DepositRow({ deposit }: { deposit: brand.DepositTransaction }) {
 				</div>
 				<p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
 					{formatDateTime(deposit.createdAt)}
-					<span className="ml-1.5 font-mono text-zinc-500 dark:text-zinc-400">#{deposit.id.slice(-8)}</span>
+					<span className="ml-1.5 tabular-nums tracking-wide text-zinc-500 dark:text-zinc-400">
+						#{deposit.id.slice(-8)}
+					</span>
 				</p>
 			</div>
 			<p className="shrink-0 text-sm font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">
@@ -833,4 +840,4 @@ export function DepositRow({ deposit }: { deposit: brand.DepositTransaction }) {
 			</p>
 		</div>
 	);
-}
+});

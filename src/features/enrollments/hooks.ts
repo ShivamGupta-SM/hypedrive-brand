@@ -61,6 +61,7 @@ export function useInfiniteEnrollments(
 		total,
 		hasMore: query.hasNextPage ?? false,
 		loading: query.isPending && !query.data,
+		isFetching: query.isFetching,
 		isFetchingNextPage: query.isFetchingNextPage,
 		error: query.error,
 		refetch: query.refetch,

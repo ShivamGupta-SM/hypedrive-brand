@@ -15,12 +15,19 @@ interface SelectionCheckboxProps {
 	className?: string;
 }
 
-const BASE = "flex size-5 shrink-0 items-center justify-center rounded-md border transition-all";
-const FILLED = "border-zinc-900 bg-zinc-900 dark:border-white dark:bg-white";
+const BASE = "flex size-5 shrink-0 items-center justify-center rounded-md border transition-all duration-150 ease-out";
+const FILLED =
+	"border-zinc-900 bg-zinc-900 dark:border-white dark:bg-white animate-[checkbox-pop_0.3s_cubic-bezier(0.16,1,0.3,1)]";
 const EMPTY = "border-zinc-300 bg-white dark:border-zinc-600 dark:bg-zinc-800";
 const ICON = "size-3 text-white dark:text-zinc-900";
 
-export function SelectionCheckbox({ selected, onToggle, variant = "overlay", indeterminate, className }: SelectionCheckboxProps) {
+export function SelectionCheckbox({
+	selected,
+	onToggle,
+	variant = "overlay",
+	indeterminate,
+	className,
+}: SelectionCheckboxProps) {
 	const isFilled = selected || indeterminate;
 
 	return (
@@ -30,7 +37,14 @@ export function SelectionCheckbox({ selected, onToggle, variant = "overlay", ind
 			className={clsx(
 				BASE,
 				variant === "overlay" && "absolute left-2 top-2 z-10",
-				isFilled ? FILLED : [EMPTY, variant === "overlay" && "opacity-0 group-hover:opacity-100 group-hover/card:opacity-100 group-hover/row:opacity-100", className],
+				isFilled
+					? FILLED
+					: [
+							EMPTY,
+							variant === "overlay" &&
+								"opacity-0 group-hover:opacity-100 group-hover/card:opacity-100 group-hover/row:opacity-100",
+							className,
+						]
 			)}
 		>
 			{selected && <CheckIcon className={ICON} />}

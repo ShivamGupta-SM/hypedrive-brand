@@ -1,8 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { RouteErrorComponent, RoutePendingComponent } from "@/components/shared/route-error";
-import { walletHoldsQueryOptions, walletQueryOptions } from "@/features/wallet/queries";
-import { WalletLayout } from "@/pages/wallet";
+import {
+	infiniteWalletTransactionsQueryOptions,
+	walletHoldsQueryOptions,
+	walletQueryOptions,
+} from "@/features/wallet/queries";
 
 export const Route = createFileRoute("/_app/$orgSlug/wallet")({
 	loader: async ({ context }) => {
@@ -11,12 +14,12 @@ export const Route = createFileRoute("/_app/$orgSlug/wallet")({
 		await Promise.all([
 			context.queryClient.ensureQueryData(walletQueryOptions(orgId)),
 			context.queryClient.ensureQueryData(walletHoldsQueryOptions(orgId)),
+			context.queryClient.prefetchInfiniteQuery(infiniteWalletTransactionsQueryOptions(orgId, {})),
 		]);
 	},
 	head: () => ({
 		meta: [{ title: "Wallet | Hypedrive" }],
 	}),
-	component: WalletLayout,
 	errorComponent: RouteErrorComponent,
 	pendingComponent: RoutePendingComponent,
 });

@@ -48,7 +48,17 @@ export const walletHoldsQueryOptions = (
 export const withdrawalsQueryOptions = (
 	orgId: string,
 	params?: {
-		status?: "otp_pending" | "pending" | "approved" | "rejected" | "queued" | "processing" | "completed" | "failed" | "cancelled" | "reversed";
+		status?:
+			| "otp_pending"
+			| "pending"
+			| "approved"
+			| "rejected"
+			| "queued"
+			| "processing"
+			| "completed"
+			| "failed"
+			| "cancelled"
+			| "reversed";
 		requestedFrom?: string;
 		requestedTo?: string;
 		amountMin?: number;
@@ -135,6 +145,7 @@ export const infiniteWalletTransactionsQueryOptions = (
 	params?: {
 		type?: "credit" | "debit";
 		category?: "enrollment_hold" | "deposit" | "payout" | "refund" | "admin_credit";
+		q?: string;
 	}
 ) =>
 	infiniteQueryOptions({
@@ -144,6 +155,6 @@ export const infiniteWalletTransactionsQueryOptions = (
 				data: { orgId, params: { ...params, cursor: pageParam, limit: DEFAULT_PAGE_SIZE } },
 			}),
 		initialPageParam: undefined as string | undefined,
-		getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+		getNextPageParam: (lastPage) => lastPage?.nextCursor ?? undefined,
 		staleTime: CACHE.list,
 	});

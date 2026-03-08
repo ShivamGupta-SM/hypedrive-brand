@@ -4,7 +4,12 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/hooks/api-client";
-import { notificationsQueryOptions, notificationUnreadCountQueryOptions, pushTokensQueryOptions } from "./queries";
+import {
+	notificationPreferencesQueryOptions,
+	notificationsQueryOptions,
+	notificationUnreadCountQueryOptions,
+	pushTokensQueryOptions,
+} from "./queries";
 import {
 	archiveNotificationsServer,
 	deleteAllNotificationsServer,
@@ -17,6 +22,15 @@ import {
 } from "./server";
 
 // -- Notification Preferences -------------------------------------------------
+
+export function useNotificationPreferences(organizationId: string | undefined) {
+	const query = useQuery({
+		...notificationPreferencesQueryOptions(organizationId || ""),
+		enabled: !!organizationId,
+	});
+
+	return { data: query.data, loading: query.isPending && !query.data, error: query.error, refetch: query.refetch };
+}
 
 export function useUpdateNotificationPreferences(organizationId: string | undefined) {
 	const queryClient = useQueryClient();
@@ -67,6 +81,7 @@ export function useMarkNotificationRead(organizationId: string | undefined) {
 			queryClient.invalidateQueries({ queryKey: queryKeys.notifications(organizationId || "") });
 			queryClient.invalidateQueries({ queryKey: queryKeys.notificationUnreadCount(organizationId || "") });
 		},
+		retry: 1,
 	});
 }
 

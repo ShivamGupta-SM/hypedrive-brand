@@ -1,8 +1,11 @@
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import react from "@vitejs/plugin-react-swc";
+import { visualizer } from "rollup-plugin-visualizer";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
+
+const analyze = process.env.ANALYZE === "true";
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -16,6 +19,13 @@ export default defineConfig({
 		}),
 		react(),
 		tailwindcss(),
+		analyze &&
+			visualizer({
+				filename: "stats.html",
+				template: "treemap",
+				open: true,
+				gzipSize: true,
+			}),
 	],
 	optimizeDeps: {
 		include: [

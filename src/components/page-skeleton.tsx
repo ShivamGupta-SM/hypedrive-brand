@@ -33,9 +33,9 @@ export function PageSkeleton({
 	const statKeys = generateKeys(`${id}-stat`, statsCount);
 
 	return (
-		<div className="animate-fade-in space-y-6">
+		<div className="space-y-6">
 			{/* Header skeleton */}
-			<div className="flex items-center justify-between">
+			<div className="flex items-center justify-between animate-fade-in">
 				<div className="space-y-2">
 					<div className="h-8 w-48 rounded-lg bg-zinc-200 skeleton-shimmer dark:bg-zinc-800" />
 					<div className="h-4 w-64 rounded-lg bg-zinc-100 skeleton-shimmer dark:bg-zinc-800/50" />
@@ -49,22 +49,33 @@ export function PageSkeleton({
 			{/* Stats skeleton */}
 			{showStats && (
 				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-					{statKeys.map((key) => (
-						<div key={key} className="h-28 rounded-xl bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
+					{statKeys.map((key, i) => (
+						<div
+							key={key}
+							className="h-28 rounded-xl bg-zinc-100 skeleton-shimmer animate-fade-in dark:bg-zinc-800"
+							style={{ animationDelay: `${(i + 1) * 60}ms` }}
+						/>
 					))}
 				</div>
 			)}
 
 			{/* Filters skeleton */}
 			{showFilters && (
-				<div className="flex items-center gap-3">
+				<div
+					className="flex items-center gap-3 animate-fade-in"
+					style={{ animationDelay: `${showStats ? 320 : 80}ms` }}
+				>
 					<div className="h-10 w-64 rounded-lg bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
 					<div className="h-10 w-32 rounded-lg bg-zinc-100 skeleton-shimmer dark:bg-zinc-800" />
 				</div>
 			)}
 
 			{/* Table skeleton */}
-			{showTable && <TableSkeleton rows={tableRows} />}
+			{showTable && (
+				<div className="animate-fade-in" style={{ animationDelay: `${showStats ? 400 : 160}ms` }}>
+					<TableSkeleton rows={tableRows} />
+				</div>
+			)}
 		</div>
 	);
 }

@@ -39,12 +39,16 @@ const cardPaddingStyles = {
 };
 
 const cardVariantStyles = {
-	default: "bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800",
-	bordered: "bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800",
-	elevated: "bg-white shadow-md ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800",
-	subtle: "bg-zinc-50 ring-1 ring-zinc-200/80 dark:bg-zinc-800/50 dark:ring-zinc-800",
+	default:
+		"bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800 transition-shadow duration-200 ease-out",
+	bordered:
+		"bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800 transition-shadow duration-200 ease-out",
+	elevated:
+		"bg-white shadow-md ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800 transition-shadow duration-200 ease-out",
+	subtle:
+		"bg-zinc-50 ring-1 ring-zinc-200/80 dark:bg-zinc-800/50 dark:ring-zinc-800 transition-shadow duration-200 ease-out",
 	interactive:
-		"bg-white ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800 hover:ring-zinc-300 dark:hover:ring-zinc-700 transition-all cursor-pointer",
+		"bg-white ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800 hover:ring-zinc-300 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm dark:hover:ring-zinc-700 transition-all duration-200 ease-out cursor-pointer",
 	hero: "bg-emerald-600 dark:bg-emerald-700",
 };
 
@@ -66,7 +70,8 @@ export function ContentCard({
 		variant === "hero" ? "rounded-2xl" : "rounded-xl",
 		cardVariantStyles[variant],
 		cardPaddingStyles[padding],
-		hover && "transition-all hover:shadow-md hover:ring-zinc-300 dark:hover:ring-zinc-700",
+		hover &&
+			"transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-0.5 hover:ring-zinc-300 dark:hover:ring-zinc-700",
 		onClick && "cursor-pointer",
 		className
 	);

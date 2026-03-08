@@ -194,7 +194,7 @@ export function Support() {
 	const [openFAQ, setOpenFAQ] = useState<number | null>(null);
 
 	return (
-		<div className="space-y-6 pb-20">
+		<div className="animate-page-enter space-y-6 pb-20">
 			{/* Header */}
 			<PageHeader title="Help & Support" description="Get help with Hypedrive or contact our support team" />
 
@@ -227,12 +227,7 @@ export function Support() {
 						isFirst
 					/>
 					<MenuSeparator />
-					<MenuRow
-						icon={ChatBubbleLeftRightIcon}
-						iconColor="emerald"
-						label="Live Chat"
-						value="Coming soon"
-					/>
+					<MenuRow icon={ChatBubbleLeftRightIcon} iconColor="emerald" label="Live Chat" value="Coming soon" />
 					<MenuSeparator />
 					<MenuRow
 						icon={PhoneIcon}
